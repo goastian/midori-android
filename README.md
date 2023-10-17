@@ -22,8 +22,9 @@ Midori is a lightweight yet powerful web browser which runs just as well on litt
 
 **Privacy out of the box**
 
+* Tabs Browser.
 * Private browsing.
-* Support extensions
+* Support extensions.
 
 **Productivity features**
 
