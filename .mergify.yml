@@ -1,0 +1,26 @@
+queue_rules:
+  - name: default
+    conditions:
+      - status-success=pr-complete
+pull_request_rules:
+  - name: MickeyMoz - Auto Merge
+    conditions:
+      - author=MickeyMoz
+      - status-success=pr-complete
+      - files=buildSrc/src/main/java/AndroidComponents.kt
+    actions:
+      review:
+        type: APPROVE
+        message: MickeyMoz 💪
+      queue:
+        method: rebase
+        name: default
+  - name: Needs landing - Merge
+    conditions:
+      - status-success=pr-complete
+      - label=needs landing
+      - "#approved-reviews-by>=1"
+    actions:
+      queue:
+        method: rebase
+        name: default

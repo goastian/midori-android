@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:mozac="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".BrowserActivity">
+
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/compose_view"
+        android:layout_width="match_parent"
+        android:layout_gravity="top"
+        android:background="#ffffcc00"
+        android:layout_marginBottom="@dimen/browser_toolbar_height"
+        android:layout_height="@dimen/browser_toolbar_height"
+        android:visibility="gone" />
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <mozilla.components.concept.engine.EngineView
+            android:id="@+id/engineView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <org.mozilla.reference.browser.search.AwesomeBarWrapper
+        android:id="@+id/awesomeBar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="4dp"
+        android:visibility="gone" />
+
+    <mozilla.components.feature.findinpage.view.FindInPageBar
+        android:id="@+id/findInPageBar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_gravity="bottom"
+        android:background="#000000"
+        mozac:findInPageQueryTextColor="#ffffff"
+        mozac:findInPageQueryHintTextColor="#dddddd"
+        mozac:findInPageResultCountTextColor="#ff88ff"
+        mozac:findInPageButtonsTint="#ff88ff"
+        android:visibility="gone"
+        app:layout_behavior="org.mozilla.reference.browser.browser.FindInPageBarBehavior" />
+
+    <mozilla.components.browser.toolbar.BrowserToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/browser_toolbar_height"
+        android:layout_gravity="bottom"
+        android:background="@color/toolbarBackgroundColor"
+        mozac:browserToolbarTrackingProtectionAndSecurityIndicatorSeparatorColor="@color/photonWhite"
+        mozac:browserToolbarSuggestionForegroundColor="@color/toolbarSuggestionForeground"
+        mozac:browserToolbarSuggestionBackgroundColor="@color/toolbarSuggestionBackground" />
+
+    <mozilla.components.feature.readerview.view.ReaderViewControlsBar
+        android:id="@+id/readerViewBar"
+        android:background="#FFFFFFFF"
+        android:elevation="10dp"
+        android:visibility="gone"
+        android:layout_gravity="bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/readerViewAppearanceButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:src="@drawable/mozac_ic_font"
+        android:visibility="gone"
+        android:layout_marginRight="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginBottom="16dp"
+        app:layout_behavior="org.mozilla.reference.browser.browser.ReaderViewAppearanceButtonBehavior" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

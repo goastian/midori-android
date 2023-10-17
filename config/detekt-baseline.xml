@@ -1,0 +1,27 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>MaxLineLength:Dependencies.kt$Deps$const val androidx_constraintlayout = "androidx.constraintlayout:constraintlayout:${Versions.AndroidX.constraintlayout}"</ID>
+    <ID>MaxLineLength:Dependencies.kt$Deps$const val androidx_swiperefreshlayout = "androidx.swiperefreshlayout:swiperefreshlayout:${Versions.AndroidX.swiperefreshlayout}"</ID>
+    <ID>MaxLineLength:Dependencies.kt$Deps$const val espresso_idling_resources = "androidx.test.espresso:espresso-idling-resource:${Versions.Testing.androidx_espresso}"</ID>
+    <ID>MaxLineLength:Dependencies.kt$Deps$const val mozilla_browser_session_storage = "org.mozilla.components:browser-session-storage:${AndroidComponents.VERSION}"</ID>
+    <ID>MaxLineLength:Dependencies.kt$Deps$const val mozilla_feature_accounts_push = "org.mozilla.components:feature-accounts-push:${AndroidComponents.VERSION}"</ID>
+    <ID>MaxLineLength:Dependencies.kt$Deps$const val mozilla_feature_sitepermissions = "org.mozilla.components:feature-sitepermissions:${AndroidComponents.VERSION}"</ID>
+    <ID>MaxLineLength:Dependencies.kt$Deps$const val mozilla_feature_webnotifications = "org.mozilla.components:feature-webnotifications:${AndroidComponents.VERSION}"</ID>
+    <ID>MaxLineLength:Dependencies.kt$Deps$const val mozilla_service_firefox_accounts = "org.mozilla.components:service-firefox-accounts:${AndroidComponents.VERSION}"</ID>
+    <ID>MaxLineLength:Dependencies.kt$Deps$const val mozilla_support_webextensions = "org.mozilla.components:support-webextensions:${AndroidComponents.VERSION}"</ID>
+    <ID>UndocumentedPublicClass:AndroidComponents.kt$AndroidComponents</ID>
+    <ID>UndocumentedPublicClass:Config.kt$Config</ID>
+    <ID>UndocumentedPublicClass:Dependencies.kt$Deps</ID>
+    <ID>UndocumentedPublicClass:Dependencies.kt$Versions</ID>
+    <ID>UndocumentedPublicClass:Dependencies.kt$Versions$AndroidX</ID>
+    <ID>UndocumentedPublicClass:Dependencies.kt$Versions$Google</ID>
+    <ID>UndocumentedPublicClass:Dependencies.kt$Versions$Gradle</ID>
+    <ID>UndocumentedPublicClass:Dependencies.kt$Versions$Kotlin</ID>
+    <ID>UndocumentedPublicClass:Dependencies.kt$Versions$Testing</ID>
+    <ID>UndocumentedPublicClass:Dependencies.kt$Versions$ThirdParty</ID>
+    <ID>UndocumentedPublicFunction:Config.kt$Config$@JvmStatic fun generateDebugVersionName(): String</ID>
+    <ID>UndocumentedPublicFunction:Config.kt$Config$@JvmStatic fun releaseVersionName(project: Project): String</ID>
+  </CurrentIssues>
+</SmellBaseline>

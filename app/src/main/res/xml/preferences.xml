@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <androidx.preference.Preference
+            android:key="@string/pref_key_sign_in"
+            android:title="@string/sign_in"
+            android:summary="@string/preferences_sign_in_summary"/>
+
+    <androidx.preference.Preference
+        android:key="@string/pref_key_pair_sign_in"
+        android:title="@string/pair_sign_in"
+        android:summary="@string/preferences_pair_sign_in_summary"/>
+
+    <androidx.preference.Preference
+        android:key="@string/pref_key_firefox_account"
+        android:title="@string/firefox_account" />
+
+    <androidx.preference.Preference
+        android:key="@string/pref_key_privacy"
+        android:title="@string/privacy"
+        android:summary="@string/preferences_privacy_summary"/>
+
+    <androidx.preference.SwitchPreferenceCompat
+        android:key="@string/pref_key_launch_external_app"
+        android:defaultValue="false"
+        android:title="@string/open_links_in_apps" />
+
+    <androidx.preference.Preference
+            android:key="@string/pref_key_make_default_browser"
+            android:title="@string/preferences_make_default_browser"/>
+
+    <org.mozilla.reference.browser.autofill.AutofillPreference
+        android:key="@string/pref_key_autofill"
+        android:title="@string/preferences_autofill"
+        android:summary="@string/preferences_autofill_summary" />
+
+    <androidx.preference.SwitchPreferenceCompat
+        android:key="@string/pref_key_compose_ui"
+        android:defaultValue="false"
+        android:title="@string/preferences_compose_ui"/>
+
+    <PreferenceCategory
+        android:title="@string/developer_tools_category">
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="@string/pref_key_remote_debugging"
+            android:defaultValue="false"
+            android:title="@string/preferences_remote_debugging" />
+
+        <androidx.preference.Preference
+            android:key="@string/pref_key_override_amo_collection"
+            android:title="@string/preferences_customize_amo_collection"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/mozilla_category">
+
+        <androidx.preference.Preference
+            android:key="@string/pref_key_about_page"
+            android:title="@string/preferences_about_page" />
+
+    </PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>

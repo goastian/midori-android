@@ -1,0 +1,25 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+---
+loader: taskgraph.loader.transform:loader
+
+transforms:
+    - taskgraph.transforms.fetch:transforms
+    - taskgraph.transforms.job:transforms
+    - taskgraph.transforms.task:transforms
+
+task-defaults:
+    docker-image: {in-tree: base}
+
+tasks:
+    android-sdk:
+        description: Android SDK
+        fetch:
+            type: static-url
+            url: https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+            artifact-name: sdk-tools-linux.zip
+            sha256: bd1aa17c7ef10066949c88dc6c9c8d536be27f992a1f3b5a584f9bd2ba5646a0
+            size: 133507477
+        artifact-prefix: mobile/android-sdk
+        fetch-alias: android-sdk
