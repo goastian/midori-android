@@ -1,75 +1,44 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.midorinext.android.gradle.tasks.GithubDetailsTask
 
 buildscript {
+    // This logic is duplicated in the allprojects block: I don't know how to fix that.
     repositories {
-        if (project.hasProperty("googleRepo")) {
-            maven {
-                name "Google"
-                url project.property("googleRepo")
-                allowInsecureProtocol true // Local Nexus in CI uses HTTP
-            }
-        } else {
-            google()
-        }
-
-        if (project.hasProperty("centralRepo")) {
-            maven {
-                name "MavenCentral"
-                url project.property("centralRepo")
-                allowInsecureProtocol true // Local Nexus in CI uses HTTP
-            }
-        } else {
-            mavenCentral()
-        }
-    }
-
-    dependencies {
-        classpath Deps.tools_androidgradle
-        classpath Deps.tools_kotlingradle
-    }
-
-    // Variables in plugins {} aren't directly supported. Hack around it by setting an
-    // intermediate variable which can pull from Dependencies.kt and be used later.
-    ext {
-        detekt_version = Versions.detekt_version
-    }
-}
-
-plugins {
-    id "io.gitlab.arturbosch.detekt" version "$detekt_version"
-}
-
-allprojects {
-    repositories {
-        if (project.hasProperty("googleRepo")) {
-            maven {
-                name "Google"
-                url project.property("googleRepo")
-                allowInsecureProtocol true // Local Nexus in CI uses HTTP
-            }
-        } else {
-            google()
-        }
-
         maven {
             name "Mozilla Nightly"
             url "https://nightly.maven.mozilla.org/maven2"
-
             content {
-                // Always fetch components from the snapshots repository
-                includeGroup "org.mozilla.components"
+                // Improve performance: only check moz maven for mozilla deps.
+                includeGroupByRegex RepoMatching.mozilla
             }
         }
 
         maven {
             name "Mozilla"
             url "https://maven.mozilla.org/maven2"
-
             content {
-                // Never fetch components from here. We always want to use snapshots.
-                excludeGroup "org.mozilla.components"
+                // Improve performance: only check moz maven for mozilla deps.
+                includeGroupByRegex RepoMatching.mozilla
+            }
+        }
+
+        if (project.hasProperty("googleRepo")) {
+            maven {
+                name "Google"
+                allowInsecureProtocol true // Local Nexus in CI uses HTTP
+                url project.property("googleRepo")
+            }
+        } else {
+            google() {
+                content {
+                    // Improve performance: only check google maven for google deps.
+                    includeGroupByRegex RepoMatching.androidx
+                    includeGroupByRegex RepoMatching.comGoogleAndroid
+                    includeGroupByRegex RepoMatching.comGoogleFirebase
+                    includeGroupByRegex RepoMatching.comGoogleTesting
+                    includeGroupByRegex RepoMatching.comAndroid
+                }
             }
         }
 
@@ -80,98 +49,142 @@ allprojects {
                 allowInsecureProtocol true // Local Nexus in CI uses HTTP
             }
         } else {
-            mavenCentral()
+            mavenCentral() {
+                content {
+                    // Improve security: don't search deps with known repos.
+                    excludeGroupByRegex RepoMatching.mozilla
+                    excludeGroupByRegex RepoMatching.androidx
+                    excludeGroupByRegex RepoMatching.comGoogleAndroid
+                    excludeGroupByRegex RepoMatching.comGoogleFirebase
+                    excludeGroupByRegex RepoMatching.comAndroid
+                }
+            }
         }
     }
 
-    tasks.withType(KotlinCompile).configureEach {
+    dependencies {
+        classpath Deps.tools_androidgradle
+        classpath Deps.tools_kotlingradle
+        classpath Deps.tools_benchmarkgradle
+        classpath Deps.androidx_safeargs
+        classpath Deps.osslicenses_plugin
+
+        // TODO: [Midori] remove Glean
+        classpath "org.mozilla.telemetry:glean-gradle-plugin:${Versions.mozilla_glean}"
+    }
+}
+
+plugins {
+    id("io.gitlab.arturbosch.detekt").version("1.19.0")
+}
+
+allprojects {
+    // This logic is duplicated in the buildscript block: I don't know how to fix that.
+    repositories {
+        maven {
+            name "Mozilla Nightly"
+            url "https://nightly.maven.mozilla.org/maven2"
+            content {
+                // Improve performance: only check moz maven for mozilla deps.
+                includeGroupByRegex RepoMatching.mozilla
+            }
+        }
+
+        maven {
+            name "Mozilla"
+            url "https://maven.mozilla.org/maven2"
+            content {
+                // Improve performance: only check moz maven for mozilla deps.
+                includeGroupByRegex RepoMatching.mozilla
+            }
+        }
+
+        if (project.hasProperty("googleRepo")) {
+            maven {
+                name "Google"
+                url project.property("googleRepo")
+                allowInsecureProtocol true // Local Nexus in CI uses HTTP
+            }
+        } else {
+            google() {
+                content {
+                    // Improve performance: only check google maven for google deps.
+                    includeGroupByRegex RepoMatching.androidx
+                    includeGroupByRegex RepoMatching.comGoogleAndroid
+                    includeGroupByRegex RepoMatching.comGoogleFirebase
+                    includeGroupByRegex RepoMatching.comAndroid
+                }
+            }
+        }
+
+        if (project.hasProperty("centralRepo")) {
+            maven {
+                name "MavenCentral"
+                url project.property("centralRepo")
+                allowInsecureProtocol true // Local Nexus in CI uses HTTP
+            }
+        } else {
+            mavenCentral() {
+                content {
+                    // Improve security: don't search deps with known repos.
+                    excludeGroupByRegex RepoMatching.mozilla
+                    excludeGroupByRegex RepoMatching.androidx
+                    excludeGroupByRegex RepoMatching.comGoogleAndroid
+                    excludeGroupByRegex RepoMatching.comGoogleFirebase
+                    excludeGroupByRegex RepoMatching.comAndroid
+                }
+            }
+        }
+    }
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+        kotlinOptions.jvmTarget = "17"
+        kotlinOptions.allWarningsAsErrors = false
         kotlinOptions.freeCompilerArgs += [
-                "-opt-in=kotlin.RequiresOptIn"
+            "-opt-in=kotlin.RequiresOptIn", "-Xjvm-default=all"
         ]
     }
 }
-
-subprojects {
-    apply plugin: 'jacoco'
-
-    afterEvaluate {
-        if (it.hasProperty('android')) {
-            jacoco {
-                toolVersion = Versions.jacoco_version
-            }
-
-            android {
-                testOptions {
-                    unitTests {
-                        includeAndroidResources = true
-                    }
-                }
-
-                lintOptions {
-                    warningsAsErrors true
-                    abortOnError true
-                }
-            }
-
-            if (project.hasProperty("coverage") && project.name != "support-test") {
-                tasks.withType(Test).configureEach {
-                    jacoco.includeNoLocationClasses = true
-                    doLast { jacocoTestReport.execute() }
-                }
-
-                tasks.register('jacocoTestReport', JacocoReport) {
-                    reports {
-                        xml.required = true
-                        html.required = true
-                    }
-
-                    def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*',
-                                      '**/*Test*.*', 'android/**/*.*', '**/*$[0-9].*']
-                    def kotlinDebugTree = fileTree(dir: "$project.buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
-                    def javaDebugTree = fileTree(dir: "$project.buildDir/intermediates/classes/debug", excludes: fileFilter)
-                    def mainSrc = "$project.projectDir/src/main/java"
-
-                    sourceDirectories = files([mainSrc])
-                    classDirectories = files([kotlinDebugTree, javaDebugTree])
-                    executionData = fileTree(dir: project.buildDir, includes: [
-                            'jacoco/testDebugUnitTest.exec', 'outputs/code-coverage/connected/*coverage.ec'
-                    ])
-                }
-
-                android {
-                    buildTypes {
-                        debug {
-                            testCoverageEnabled true
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 
 tasks.register('clean', Delete) {
     delete rootProject.buildDir
 }
 
 detekt {
-    source.setFrom(files("$projectDir/components", "$projectDir/buildSrc", "$projectDir/samples"))
-    config.setFrom("$projectDir/config/detekt.yml")
-    baseline = file("$projectDir/config/detekt-baseline.xml")
+    input = files("$projectDir/app/src")
+    config = files("$projectDir/config/detekt.yml")
 
     reports {
         html {
-            required = true
-            outputLocation.set(file("$projectDir/build/reports/detekt.html"))
+            enabled = true
+            destination = file("$projectDir/build/reports/detekt.html")
         }
         xml {
-            required = false
+            enabled = false
         }
         txt {
-            required = false
+            enabled = false
         }
     }
+}
+
+tasks.withType(io.gitlab.arturbosch.detekt.Detekt).configureEach() {
+    autoCorrect = true
+
+    exclude "**/test/**"
+    exclude "**/androidTest/**"
+    exclude "**/build/**"
+    exclude "**/resources/**"
+    exclude "**/tmp/**"
+}
+
+// Apply same path exclusions as for the main task
+tasks.withType(io.gitlab.arturbosch.detekt.DetektCreateBaselineTask).configureEach() {
+    exclude "**/test/**"
+    exclude "**/androidTest/**"
+    exclude "**/build/**"
+    exclude "**/resources/**"
+    exclude "**/tmp/**"
 }
 
 configurations {
@@ -179,30 +192,51 @@ configurations {
 }
 
 dependencies {
-    ktlint("com.pinterest:ktlint:${Versions.ktlint_version}") {
+    ktlint("com.pinterest:ktlint:0.47.0") {
         attributes {
             attribute(Bundling.BUNDLING_ATTRIBUTE, getObjects().named(Bundling, Bundling.EXTERNAL))
         }
     }
+
+    detekt project(":mozilla-detekt-rules")
+    detekt "io.gitlab.arturbosch.detekt:detekt-cli:${Versions.detekt}"
 }
 
 tasks.register('ktlint', JavaExec) {
+    group = "verification"
     description = "Check Kotlin code style."
     classpath = configurations.ktlint
-    mainClass.set("com.pinterest.ktlint.Main")
-    args "app/src/**/*.kt", "!**/build/**/*.kt"
+    main = "com.pinterest.ktlint.Main"
+    args "app/src/**/*.kt", "!**/build/**/*.kt", "--baseline=ktlint-baseline.xml"
 }
 
-tasks.register('ktlintFormat', JavaExec) {
+task ktlintFormat(type: JavaExec, group: "formatting") {
     description = "Fix Kotlin code style deviations."
     classpath = configurations.ktlint
     mainClass.set("com.pinterest.ktlint.Main")
-    args "-F", "app/src/**/*.kt", "!**/build/**/*.kt"
+    args "-F", "app/src/**/*.kt", "!**/build/**/*.kt", "--baseline=ktlint-baseline.xml"
 }
 
-tasks.register('listRepositories') {
+tasks.withType(io.gitlab.arturbosch.detekt.Detekt.class).configureEach {
+    exclude("**/resources/**")
+    exclude("**/tmp/**")
+}
+
+tasks.register("listRepositories") {
     doLast {
         println "Repositories:"
         project.repositories.each { println "Name: " + it.name + "; url: " + it.url }
     }
+}
+
+tasks.register("githubTestDetails", GithubDetailsTask) {
+    text = "### [Unit Test Results]({reportsUrl}/test/testDebugUnitTest/index.html)"
+}
+
+tasks.register("githubLintDetektDetails", GithubDetailsTask) {
+    text = "### [Detekt Results]({reportsUrl}/detekt.html)"
+}
+
+tasks.register("githubLintAndroidDetails", GithubDetailsTask) {
+    text = "### [Android Lint Results]({reportsUrl}/lint-results-debug.html)"
 }
