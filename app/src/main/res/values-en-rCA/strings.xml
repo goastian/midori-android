@@ -1,8 +1,5 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<!-- This Source Code Form is subject to the terms of the Mozilla-Public
-   - License, v. 2.0. If a copy of the MPL was not distributed with this
-   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
-<resources xmlns:tools="http://schemas.android.com/tools"  xmlns:moz="http://mozac.org/tools">
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" xmlns:moz="http://mozac.org/tools">
     <!-- App name for private browsing mode. The first parameter is the name of the app defined in app_name (for example: Midori)-->
     <string name="app_name_private_5">Private %s</string>
     <!-- App name for private browsing mode. The first parameter is the name of the app defined in app_name (for example: Midori)-->
@@ -13,6 +10,7 @@
     <string name="content_description_menu">More options</string>
     <!-- Content description (not visible, for screen readers etc.): "Private Browsing" menu button. -->
     <string name="content_description_private_browsing_button">Enable private browsing</string>
+
     <!-- Content description (not visible, for screen readers etc.): "Private Browsing" menu button. -->
     <string name="content_description_disable_private_browsing_button">Disable private browsing</string>
     <!-- Placeholder text shown in the search bar before a user enters text -->
@@ -21,8 +19,10 @@
     <string name="application_search_hint">Enter search terms</string>
     <!-- No Open Tabs Message Description -->
     <string name="no_open_tabs_description">Your open tabs will be shown here.</string>
+
     <!-- No Private Tabs Message Description -->
     <string name="no_private_tabs_description">Your private tabs will be shown here.</string>
+
     <!-- Tab tray multi select title in app bar. The first parameter is the number of tabs selected -->
     <string name="tab_tray_multi_select_title">%1$d selected</string>
     <!-- Label of button in create collection dialog for creating a new collection  -->
@@ -43,17 +43,17 @@
     <string name="recently_saved_title">Recently saved</string>
     <!-- Content description for the button which navigates the user to show all of their saved bookmarks. -->
     <string name="recently_saved_show_all_content_description_2">Show all saved bookmarks</string>
+
     <!-- Text for the menu button to remove a recently saved bookmark from the user's home screen -->
     <string name="recently_saved_menu_item_remove">Remove</string>
 
     <!-- About content. The first parameter is the name of the application. (For example: Midori) -->
-    <string name="about_content">%1$s is made by Astian, Inc</string>
+    <string name="about_content">%1$s is developed by Astian, Inc.</string>
 
     <!-- Private Browsing -->
     <!-- Explanation for private browsing displayed to users on home view when they first enable private mode
         The first parameter is the name of the app defined in app_name (for example: Midori) -->
-    <string name="private_browsing_placeholder_description_2">
-        %1$s clears your search and browsing history from private tabs when you close them or quit the app. While this doesn’t make you anonymous to websites or your internet service provider, it makes it easier to keep what you do online private from anyone else who uses this device.</string>
+    <string name="private_browsing_placeholder_description_2">%1$s clears your search and browsing history from private tabs when you close them or quit the app. While this doesn’t make you anonymous to websites or your internet service provider, it makes it easier to keep what you do online private from anyone else who uses this device.</string>
     <string name="private_browsing_common_myths">
        Common myths about private browsing
     </string>
@@ -74,9 +74,6 @@
     <!-- Text for the negative action button -->
     <string name="open_in_app_cfr_negative_button_text">Dismiss</string>
 
-    <!-- Content description for close button used in "contextual feature recommendation" (CFR) popups -->
-    <string name="cfr_dismiss_button_default_content_description">Dismiss</string>
-
     <!-- Total cookie protection "contextual feature recommendation" (CFR) -->
     <!-- Text for the message displayed in the contextual feature recommendation popup promoting the total cookie protection feature. -->
     <string name="tcp_cfr_message">Our most powerful privacy feature yet isolates cross-site trackers.</string>
@@ -96,10 +93,12 @@
     <string name="tab_tray_close_tabs_banner_positive_button_text">View options</string>
     <!-- Text for the negative action button to dismiss the Close Tabs Banner. -->
     <string name="tab_tray_close_tabs_banner_negative_button_text">Dismiss</string>
+
     <!-- Text for the banner message to tell users about our inactive tabs feature. -->
     <string name="tab_tray_inactive_onboarding_message">Tabs you haven’t viewed for two weeks get moved here.</string>
     <!-- Text for the action link to go to Settings for inactive tabs. -->
     <string name="tab_tray_inactive_onboarding_button_text">Turn off in settings</string>
+
     <!-- Text for title for the auto-close dialog of the inactive tabs. -->
     <string name="tab_tray_inactive_auto_close_title">Auto-close after one month?</string>
     <!-- Text for the body for the auto-close dialog of the inactive tabs.
@@ -107,6 +106,7 @@
     <string name="tab_tray_inactive_auto_close_body_2">%1$s can close tabs you haven’t viewed over the past month.</string>
     <!-- Content description for close button in the auto-close dialog of the inactive tabs. -->
     <string name="tab_tray_inactive_auto_close_button_content_description">Close</string>
+
 
     <!-- Text for turn on auto close tabs button in the auto-close dialog of the inactive tabs. -->
     <string name="tab_tray_inactive_turn_on_auto_close_button_2">Turn on auto-close</string>
@@ -123,14 +123,17 @@
     <string name="recent_tabs_header">Jump back in</string>
     <!-- Button text for showing all the tabs in the tabs tray -->
     <string name="recent_tabs_show_all">Show all</string>
+
     <!-- Content description for the button which navigates the user to show all recent tabs in the tabs tray. -->
     <string name="recent_tabs_show_all_content_description_2">Show all recent tabs button</string>
     <!-- Title for showing a group item in the 'Jump back in' section of the new tab
         The first parameter is the search term that the user used. (for example: your search for "cat")-->
-    <string name="recent_tabs_search_term" moz:RemovedIn="105" tools:ignore="UnusedResources">Your search for \"%1$s\"</string>
+    <string name="recent_tabs_search_term">Your search for \&quot;%1$s\&quot;</string>
+
     <!-- Text for the number of tabs in a group in the 'Jump back in' section of the new tab
         %d is a placeholder for the number of sites in the group. This number will always be more than one. -->
-    <string name="recent_tabs_search_term_count_2" moz:RemovedIn="105" tools:ignore="UnusedResources">%d sites</string>
+    <string name="recent_tabs_search_term_count_2">%d sites</string>
+
     <!-- Text for button in synced tab card that opens synced tabs tray -->
     <string name="recent_tabs_see_all_synced_tabs_button_text">See all synced tabs</string>
     <!-- Accessibility description for device icon used for recent synced tab -->
@@ -148,6 +151,7 @@
     <!-- Text for the menu button to remove a grouped highlight from the user's browsing history
          in the Recently visited section -->
     <string name="recently_visited_menu_item_remove">Remove</string>
+
     <!-- Content description for the button which navigates the user to show all of their history. -->
     <string name="past_explorations_show_all_content_description_2">Show all past explorations</string>
 
@@ -199,12 +203,14 @@
     <string name="browser_menu_read_close">Close reader view</string>
     <!-- Browser menu button to open the current page in an external app -->
     <string name="browser_menu_open_app_link">Open in app</string>
+
     <!-- Browser menu button to show reader view appearance controls e.g. the used font type and size -->
     <string name="browser_menu_customize_reader_view">Customize reader view</string>
     <!-- Browser menu label for adding a bookmark -->
     <string name="browser_menu_add">Add</string>
     <!-- Browser menu label for editing a bookmark -->
     <string name="browser_menu_edit">Edit</string>
+
     <!-- Button shown on the home page that opens the Customize home settings -->
     <string name="browser_menu_customize_home_1">Customize homepage</string>
     <!-- Browser Toolbar -->
@@ -236,10 +242,12 @@
     <string name="search_suggestions_onboarding_title">Allow search suggestions in private sessions?</string>
     <!-- Search suggestion onboarding hint description text, first parameter is the name of the app defined in app_name (for example: Midori)-->
     <string name="search_suggestions_onboarding_text">%s will share everything you type in the address bar with your default search engine.</string>
+
     <!-- Search engine suggestion title text. The first parameter is the name of teh suggested engine-->
     <string name="search_engine_suggestions_title">Search %s</string>
     <!-- Search engine suggestion description text -->
     <string name="search_engine_suggestions_description">Search directly from the address bar</string>
+
     <!-- Menu option in the search selector menu to open the search settings -->
     <string name="search_settings_menu_item">Search settings</string>
 
@@ -247,11 +255,11 @@
     <!-- Onboarding home screen dialog description text. -->
     <string name="onboarding_home_screen_description_2">It’s now easier to pick back up where you left off.</string>
     <!-- Onboarding home screen dialog description text for the home section. -->
-    <string name="onboarding_home_screen_section_home_description_2">Jump to your open tabs, bookmarks, and browsing history.</string>
+    <string name="onboarding_home_screen_section_home_description_2">Jump to your open tabs, bookmarks and browsing history.</string>
     <!-- Onboarding home screen dialog description text for the tab tray section. -->
     <string name="onboarding_home_screen_section_cleaner_tab_tray_title_2">Clean, organized tabs</string>
     <!-- Onboarding home screen dialog description text for the tab tray section. -->
-    <string name="onboarding_home_screen_section_cleaner_tab_tray_description_2">Clear away tab clutter with improved layout and auto-closing tabs. </string>
+    <string name="onboarding_home_screen_section_cleaner_tab_tray_description_2">Clear away tab clutter with improved layout and auto-closing tabs.</string>
     <!-- Onboarding home screen dialog description text for the history section. -->
     <string name="onboarding_home_screen_section_useful_history_title_2">Recent searches</string>
     <!-- Onboarding home screen dialog description text for the history section. -->
@@ -263,7 +271,7 @@
     <!-- Home onboarding dialog welcome screen description text. -->
     <string name="onboarding_home_welcome_description">More colors. Better privacy. Same commitment to people over profits.</string>
     <!-- Home onboarding dialog sign into sync screen title text. -->
-    <string name="onboarding_home_sync_title_3">Hop from phone to laptop and back</string>
+    <string name="onboarding_home_sync_title_3">op from phone to laptop and back</string>
     <!-- Home onboarding dialog sign into sync screen description text. -->
     <string name="onboarding_home_sync_description">Pick up where you left off with tabs from other devices now on your homepage.</string>
     <!-- Text for the button to continue the onboarding on the home onboarding dialog. -->
@@ -282,6 +290,7 @@
     <string name="search_widget_text_short">Search</string>
     <!-- Text preview for larger sized widgets -->
     <string name="search_widget_text_long">Search the web</string>
+
     <!-- Content description (not visible, for screen readers etc.): Voice search -->
     <string name="search_widget_voice">Voice search</string>
 
@@ -343,12 +352,12 @@
     <string name="errorpage_httpsonly_message_summary">However, it’s also possible that an attacker is involved. If you continue to the website, you should not enter any sensitive info. If you continue, HTTPS-Only mode will be turned off temporarily for the site.</string>
     <!-- Preference for accessibility -->
     <string name="preferences_accessibility">Accessibility</string>
-    <!-- Preference to override the Astian Account server -->
-    <string name="preferences_override_fxa_server">Custom Astian Account server</string>
+    <!-- Preference to override the Midori Account server -->
+    <string name="preferences_override_fxa_server">Custom Midori Account server</string>
     <!-- Preference to override the Sync token server -->
     <string name="preferences_override_sync_tokenserver">Custom Sync server</string>
     <!-- Toast shown after updating the FxA/Sync server override preferences -->
-    <string name="toast_override_fxa_sync_server_done">Astian Account/Sync server modified. Quitting the application to apply changes…</string>
+    <string name="toast_override_fxa_sync_server_done">Midori Account/Sync server modified. Quitting the application to apply changes…</string>
     <!-- Preference category for account information -->
     <string name="preferences_category_account">Account</string>
     <!-- Preference for changing where the toolbar is positioned -->
@@ -362,7 +371,7 @@
     <!-- Preference for settings related to visual options -->
     <string name="preferences_customize">Customize</string>
     <!-- Preference description for banner about signing in -->
-    <string name="preferences_sign_in_description" moz:RemovedIn="104" tools:ignore="UnusedResources">Sync bookmarks, history, and more with your Astian Account</string>
+    <string moz:RemovedIn="104" name="preferences_sign_in_description" tools:ignore="UnusedResources">Sync bookmarks, history, and more with your Midori Account</string>
     <!-- Preference description for banner about signing in -->
     <string name="preferences_sign_in_description_2">Sign in to sync tabs, bookmarks, passwords, and more.</string>
     <!-- Preference shown instead of account display name while account profile information isn't available yet. -->
@@ -395,10 +404,12 @@
     <string name="preferences_enable_autocomplete_urls">Autocomplete URLs</string>
     <!-- Preference for open links in third party apps -->
     <string name="preferences_open_links_in_apps">Open links in apps</string>
+
     <!-- Preference for open download with an external download manager app -->
     <string name="preferences_external_download_manager">External download manager</string>
     <!-- Preference for add_ons -->
     <string name="preferences_addons">Add-ons</string>
+
     <!-- Preference for notifications -->
     <string name="preferences_notifications">Notifications</string>
 
@@ -424,6 +435,7 @@
     <!-- Title for the customize home screen section with recently visited. Recently visited is
     a section where users see a list of tabs that they have visited in the past few days -->
     <string name="customize_toggle_recently_visited">Recently visited</string>
+
     <!-- Title for the opening wallpaper settings screen -->
     <string name="customize_wallpapers">Wallpapers</string>
     <!-- Title for the customize home screen section with sponsored shortcuts. -->
@@ -437,7 +449,7 @@
     <!-- Snackbar label for action to view selected wallpaper -->
     <string name="wallpaper_updated_snackbar_action">View</string>
     <!-- Label for switch which toggles the "tap-to-switch" behavior on home screen logo -->
-    <string name="wallpaper_tap_to_change_switch_label_1">Change wallpaper by tapping Astian homepage logo</string>
+    <string name="wallpaper_tap_to_change_switch_label_1">Change wallpaper by tapping Midori homepage logo</string>
     <!-- This is the accessibility content description for the wallpapers functionality. Users are
     able to tap on the app logo in the home screen and can switch to different wallpapers by tapping. -->
     <string name="wallpaper_logo_content_description">Midori logo - change the wallpaper, button</string>
@@ -477,10 +489,12 @@
     <string name="sync_last_synced_summary">Last synced: %s</string>
     <!-- Label summary showing never synced -->
     <string name="sync_never_synced_summary">Last synced: never</string>
+
     <!-- Text for displaying the default device name.
         The first parameter is the application name, the second is the device manufacturer name
         and the third is the device model. -->
     <string name="default_device_name_2">%1$s on %2$s %3$s</string>
+
     <!-- Preference for syncing credit cards -->
     <string name="preferences_sync_credit_cards">Credit cards</string>
     <!-- Preference for syncing addresses -->
@@ -508,7 +522,7 @@
 
     <!-- Turn On Sync Preferences -->
     <!-- Header of the Turn on Sync preference view -->
-    <string name="preferences_sync" moz:RemovedIn="104" tools:ignore="UnusedResources">Turn on Sync</string>
+    <string moz:RemovedIn="104" name="preferences_sync" tools:ignore="UnusedResources">Turn on Sync</string>
     <!-- Header of the Sync and save your data preference view -->
     <string name="preferences_sync_2">Sync and save your data</string>
     <!-- Preference for reconnecting to FxA sync -->
@@ -600,13 +614,14 @@
     <!-- Title of preference that allows a user to auto close tabs after a specified amount of time -->
     <string name="preferences_close_tabs">Close tabs</string>
     <!-- Option for auto closing tabs that will never auto close tabs, always allows user to manually close tabs -->
-    <string name="close_tabs_manually">Never</string>
+    <string name="close_tabs_manually">Manually</string>
     <!-- Option for auto closing tabs that will auto close tabs after one day -->
     <string name="close_tabs_after_one_day">After one day</string>
     <!-- Option for auto closing tabs that will auto close tabs after one week -->
     <string name="close_tabs_after_one_week">After one week</string>
     <!-- Option for auto closing tabs that will auto close tabs after one month -->
     <string name="close_tabs_after_one_month">After one month</string>
+
     <!-- Title of preference that allows a user to specify the auto-close settings for open tabs -->
     <string name="preference_auto_close_tabs" tools:ignore="UnusedResources">Auto-close open tabs</string>
 
@@ -687,18 +702,21 @@
     <string name="collection_rename">Rename collection</string>
     <!-- Text for the button to open tabs of the selected collection -->
     <string name="collection_open_tabs">Open tabs</string>
+
     <!-- Hint for adding name of a collection -->
     <string name="collection_name_hint">Collection name</string>
-	<!-- Text for the menu button to rename a top site -->
+    <!-- Text for the menu button to rename a top site -->
 	<string name="rename_top_site">Rename</string>
 	<!-- Text for the menu button to remove a top site -->
 	<string name="remove_top_site">Remove</string>
+
     <!-- Text for the menu button to delete a top site from history -->
     <string name="delete_from_history">Delete from history</string>
     <!-- Postfix for private WebApp titles, placeholder is replaced with app name -->
     <string name="pwa_site_controls_title_private">%1$s (Private Mode)</string>
+
     <!-- Title text for the normal tabs header in the tabs tray which are not part of any tab grouping. -->
-    <string name="tab_tray_header_title_1" moz:removedIn="104" tools:ignore="UnusedResources">Other tabs</string>
+    <string moz:removedIn="104" name="tab_tray_header_title_1" tools:ignore="UnusedResources">Other tabs</string>
 
     <!-- History -->
     <!-- Text for the button to search all history -->
@@ -737,6 +755,8 @@
     <!-- History multi select title in app bar
     The first parameter is the number of downloads selected -->
     <string name="download_multi_select_title">%1$d selected</string>
+
+
     <!-- Text for the button to remove a single download item -->
     <string name="download_delete_item_1">Remove</string>
 
@@ -812,6 +832,7 @@
     <string name="bookmark_deletion_multiple_snackbar_message_3">Deleting selected folders</string>
     <!-- Bookmark undo button for deletion snackbar action -->
     <string name="bookmark_undo_deletion">UNDO</string>
+
     <!-- Text for the button to search all bookmarks -->
     <string name="bookmark_search">Enter search terms</string>
 
@@ -888,6 +909,7 @@
     <string name="delete_browsing_data_quit_on">On</string>
     <!-- Summary of delete browsing data on quit preference if it is set to off -->
     <string name="delete_browsing_data_quit_off">Off</string>
+
     <!-- Summary of HTTPS only preference if it is set to on -->
     <string name="https_only_on">On</string>
     <!-- Summary of HTTPS only preference if it is set to off -->
@@ -909,9 +931,9 @@
     <!-- Button to add new collection for the "select collection" step of the collection creator -->
     <string name="create_collection_add_new_collection">Add new collection</string>
     <!-- Button to select all tabs in the "select tabs" step of the collection creator -->
-    <string name="create_collection_select_all">Select all</string>
+    <string name="create_collection_select_all">Select All</string>
     <!-- Button to deselect all tabs in the "select tabs" step of the collection creator -->
-    <string name="create_collection_deselect_all">Deselect all</string>
+    <string name="create_collection_deselect_all">Deselect All</string>
     <!-- Text to prompt users to select the tabs to save in the "select tabs" step of the collection creator -->
     <string name="create_collection_save_to_collection_empty">Select tabs to save</string>
     <!-- Text to show users how many tabs they have selected in the "select tabs" step of the collection creator.
@@ -930,8 +952,10 @@
     <string name="create_collection_close">Close</string>
     <!-- Button to save currently selected tabs in the "select tabs" step of the collection creator-->
     <string name="create_collection_save">Save</string>
+
     <!-- Snackbar action to view the collection the user just created or updated -->
     <string name="create_collection_view">View</string>
+
     <!-- Text for the OK button from collection dialogs -->
     <string name="create_collection_positive">OK</string>
     <!-- Text for the cancel button from collection dialogs -->
@@ -1079,23 +1103,12 @@
     <!-- Title for the Delete browsing data on quit preference -->
     <string name="preferences_delete_browsing_data_on_quit">Delete browsing data on quit</string>
     <!-- Summary for the Delete browsing data on quit preference. "Quit" translation should match delete_browsing_data_on_quit_action translation. -->
-    <string name="preference_summary_delete_browsing_data_on_quit_2">Automatically deletes browsing data when you select \"Quit\" from the main menu</string>
+    <string name="preference_summary_delete_browsing_data_on_quit_2">Automatically deletes browsing data when you select \&quot;Quit\&quot; from the main menu</string>
     <!-- Action item in menu for the Delete browsing data on quit feature -->
     <string name="delete_browsing_data_on_quit_action">Quit</string>
 
     <!-- Dialog message to the user asking to delete browsing data. -->
-    <string moz:removedIn="104" name="delete_browsing_data_prompt_message" tools:ignore="UnusedResources">This will delete all of your browsing data.</string>
-    <!-- Title text of a delete browsing data dialog. -->
-    <string name="delete_history_prompt_title">Time range to delete</string>
-    <!-- Body text of a delete browsing data dialog. -->
-    <string name="delete_history_prompt_body">Removes history (including history synced from other devices), cookies and other browsing data.</string>
-    <!-- Radio button in the delete browsing data dialog to delete history items for the last hour. -->
-    <string name="delete_history_prompt_button_last_hour">Last hour</string>
-    <!-- Radio button in the delete browsing data dialog to delete history items for today and yesterday. -->
-    <string name="delete_history_prompt_button_today_and_yesterday">Today and yesterday</string>
-    <!-- Radio button in the delete browsing data dialog to delete all history. -->
-    <string name="delete_history_prompt_button_everything">Everything</string>
-
+    <string name="delete_browsing_data_prompt_message">This will delete all of your browsing data.</string>
     <!-- Dialog message to the user asking to delete browsing data. Parameter will be replaced by app name. -->
     <string name="delete_browsing_data_prompt_message_3">%s will delete the selected browsing data.</string>
     <!-- Text for the cancel button for the data deletion dialog -->
@@ -1105,10 +1118,10 @@
     <!-- Text for the snackbar confirmation that the data was deleted -->
     <string name="preferences_delete_browsing_data_snackbar">Browsing data deleted</string>
     <!-- Text for the snackbar to show the user that the deletion of browsing data is in progress -->
-    <string name="deleting_browsing_data_in_progress">Deleting browsing data&#8230;</string>
+    <string name="deleting_browsing_data_in_progress">Deleting browsing data…</string>
 
-    <!-- Dialog message to the user asking to delete all history items inside the opened group. Parameter will be replaced by a history group name. -->
-    <string name="delete_all_history_group_prompt_message">Delete all sites in “%s”</string>
+    <!-- Dialog message to the user asking to delete all history items inside the opened group. -->
+    <string name="delete_history_group_prompt_message">This will delete all items.</string>
     <!-- Text for the cancel button for the history group deletion dialog -->
     <string name="delete_history_group_prompt_cancel">Cancel</string>
     <!-- Text for the allow button for the history group dialog -->
@@ -1117,22 +1130,21 @@
     <string name="delete_history_group_snackbar">Group deleted</string>
 
     <!-- Onboarding -->
-    <!-- Text for onboarding welcome header. -->
-    <string name="onboarding_header_2">Welcome to a lighter and more private web</string>
-    <!-- Text for the onboarding welcome message. -->
-    <string name="onboarding_message">The perfect browser for you.</string>
-    <!-- Text for the Midori account onboarding sign in card header. -->
-    <string name="onboarding_account_sign_in_header">Pick up where you left off</string>
-    <!-- Text for the button to learn more about signing in to your Midori account. -->
-    <string name="onboarding_manual_sign_in_description">Sync tabs and passwords across devices for seamless screen-switching.</string>
-    <!-- Text for the button to manually sign into Midori account. -->
-    <string name="onboarding_midori_account_sign_in">Sign in</string>
+    <!-- Text for onboarding welcome message
+    The first parameter is the name of the app (e.g. Midori Preview) -->
+    <string name="onboarding_header">Welcome to %s!</string>
+    <!-- text for the Midori account onboarding sign in card header. The word "Midori" should not be translated -->
+    <string name="onboarding_account_sign_in_header_1">Sync Midori between devices</string>
+    <!-- Text for the button to learn more about signing in to your Midori account. The first parameter is the name of the application.-->
+    <string name="onboarding_manual_sign_in_description_2">Bring bookmarks, history, and passwords to %1$s on this device.</string>
+    <!-- text for the button to manually sign into Midori account. -->
+    <string name="onboarding_midori_account_sign_in_1">Sign up</string>
     <!-- text to display in the snackbar once account is signed-in -->
     <string name="onboarding_midori_account_sync_is_on">Sync is on</string>
-    <!-- Text for the tracking protection onboarding card header -->
-    <string name="onboarding_tracking_protection_header">Privacy protection by default</string>
-    <!-- Text for the tracking protection card description. -->
-    <string name="onboarding_tracking_protection_description">Featuring Total Cookie Protection to stop trackers from using cookies to stalk you across sites.</string>
+    <!-- text for the tracking protection onboarding card header -->
+    <string name="onboarding_tracking_protection_header_3">Always-on privacy</string>
+    <!-- text for the tracking protection card description. The first parameter is the name of the application.-->
+    <string name="onboarding_tracking_protection_description_4">%1$s automatically stops companies from secretly following you around the web.</string>
     <!-- text for tracking protection radio button option for standard level of blocking -->
     <string name="onboarding_tracking_protection_standard_button_2">Standard (default)</string>
     <!-- text for standard blocking option button description -->
@@ -1140,19 +1152,19 @@
     <!-- text for tracking protection radio button option for strict level of blocking -->
     <string name="onboarding_tracking_protection_strict_option">Strict</string>
     <!-- text for strict blocking option button description -->
-    <string name="onboarding_tracking_protection_strict_button_description_3">Blocks more trackers so pages load faster, but some on-page functionality may break.</string>
+    <string name="onboarding_tracking_protection_strict_button_description_3">Blocks more trackers so pages load faster, but some on-page functionally may break.</string>
     <!-- text for the toolbar position card header  -->
     <string name="onboarding_toolbar_placement_header_1">Pick your toolbar placement</string>
-    <!-- Text for the toolbar position card description -->
-    <string name="onboarding_toolbar_placement_description">Keep it on the bottom, or move it to the top.</string>
-    <!-- Text for the privacy notice onboarding card header -->
-    <string name="onboarding_privacy_notice_header_1">You control your data</string>
-    <!-- Text for the privacy notice onboarding card description. -->
-    <string name="onboarding_privacy_notice_description">Midori doesn\'t collect any telemetry and gives you control over your data.</string>
+    <!-- text for the toolbar position card description -->
+    <string name="onboarding_toolbar_placement_description_1">Put the toolbar within easy reach. Keep it on the bottom, or move it to the top.</string>
+    <!-- text for the privacy notice onboarding card header -->
+    <string name="onboarding_privacy_notice_header">Your privacy</string>
+    <!-- text for the privacy notice onboarding card description
+    The first parameter is the name of the app (e.g. Midori Preview) Substitute %s for long browser name. -->
+    <string name="onboarding_privacy_notice_description2">We’ve designed %s to give you control over what you share online and what you share with us.</string>
     <!-- Text for the button to read the privacy notice -->
     <string name="onboarding_privacy_notice_read_button">Read our privacy notice</string>
-    <!-- Text for the conclusion onboarding message -->
-    <string name="onboarding_conclusion_header">Ready to open up an amazing internet?</string>
+
     <!-- text for the button to finish onboarding -->
     <string name="onboarding_finish">Start browsing</string>
 
@@ -1181,7 +1193,7 @@
     <!-- Title of QR Pairing Fragment -->
     <string name="sync_scan_code">Scan the code</string>
     <!-- Instructions on how to access pairing -->
-    <string name="sign_in_instructions"><![CDATA[Midori relies on a Mozilla account to sync data between mobile and desktop.<br> On your computer open Midori and go to <b>https://firefox.com/pair</b><br><i>Mozilla are in no way affiliated with Waterfox.</i>]]></string>
+    <string name="sign_in_instructions"><![CDATA[[Midori relies on a Mozilla account to sync data between mobile and desktop. On your computer open Midori and go to <b>https://firefox.com/pair</b>]]></string>
     <!-- Text shown for sign in pairing when ready -->
     <string name="sign_in_ready_for_scan">Ready to scan</string>
     <!-- Text shown for settings option for sign with pairing -->
@@ -1213,7 +1225,7 @@
     <!-- Preference for enhanced tracking protection for the standard protection settings -->
     <string name="preference_enhanced_tracking_protection_standard_default_1">Standard (default)</string>
     <!-- Preference description for enhanced tracking protection for the standard protection settings -->
-    <string name="preference_enhanced_tracking_protection_standard_description_4">Balanced for privacy and performance. Pages load normally.</string>
+    <string name="preference_enhanced_tracking_protection_standard_description_4">balanced for privacy and performance. Pages load normally.</string>
     <!--  Accessibility text for the Standard protection information icon  -->
     <string name="preference_enhanced_tracking_protection_standard_info_button">What’s blocked by standard tracking protection</string>
     <!-- Preference for enhanced tracking protection for the strict protection settings -->
@@ -1293,10 +1305,12 @@
     <!-- Open source licenses page title
     The first parameter is the app name -->
     <string name="open_source_licenses_title">%s | OSS Libraries</string>
+
     <!-- Category of trackers (redirect trackers) that can be blocked by Enhanced Tracking Protection -->
     <string name="etp_redirect_trackers_title">Redirect Trackers</string>
     <!-- Description of redirect tracker cookies that can be blocked by Enhanced Tracking Protection -->
     <string name="etp_redirect_trackers_description">Clears cookies set by redirects to known tracking websites.</string>
+
     <!-- Description of the SmartBlock Enhanced Tracking Protection feature. The * symbol is intentionally hardcoded here,
          as we use it on the UI to indicate which trackers have been partially unblocked.  -->
     <string name="preference_etp_smartblock_description">Some trackers marked below have been partially unblocked on this page because you interacted with them *.</string>
@@ -1315,6 +1329,7 @@
     <string name="about_licensing_information">Licensing information</string>
     <!-- About page link text to open a screen with libraries that are used -->
     <string name="about_other_open_source_libraries">Libraries that we use</string>
+
     <!-- Toast shown to the user when they are activating the secret dev menu
         The first parameter is number of long clicks left to enable the menu -->
     <string name="about_debug_menu_toast_progress">Debug menu: %1$d click(s) left to enable</string>
@@ -1340,6 +1355,7 @@
     <string name="add_to_homescreen_continue">Continue to website</string>
     <!-- Placeholder text for the TextView in the Add to Homescreen dialog -->
     <string name="add_to_homescreen_text_placeholder">Shortcut name</string>
+
     <!-- Describes the add to homescreen functionality -->
     <string name="add_to_homescreen_description_2">You can easily add this website to your device’s Home screen to have instant access and browse faster with an app-like experience.</string>
 
@@ -1359,6 +1375,7 @@
     <string name="preferences_android_autofill">Autofill in other apps</string>
     <!-- Description for the preference for autofilling logins from Midori in other apps (e.g. autofilling the Twitter app) -->
     <string name="preferences_android_autofill_description">Fill usernames and passwords in other apps on your device.</string>
+
     <!-- Preference option for adding a login -->
     <string name="preferences_logins_add_login">Add login</string>
 
@@ -1424,6 +1441,7 @@
     <string name="preference_accessibility_force_enable_zoom">Zoom on all websites</string>
     <!-- Summary for Accessibility Force Enable Zoom Preference -->
     <string name="preference_accessibility_force_enable_zoom_summary">Enable to allow pinch and zoom, even on websites that prevent this gesture.</string>
+
     <!-- Saved logins sorting strategy menu item -by name- (if selected, it will sort saved logins alphabetically) -->
     <string name="saved_logins_sort_strategy_alphabetically">Name (A-Z)</string>
     <!-- Saved logins sorting strategy menu item -by last used- (if selected, it will sort saved logins by last used) -->
@@ -1448,12 +1466,14 @@
     <string name="preferences_credit_cards_sync_cards">Sync cards</string>
     <!-- Preference option for adding a credit card -->
     <string name="preferences_credit_cards_add_credit_card">Add credit card</string>
+
     <!-- Preference option for managing saved credit cards -->
     <string name="preferences_credit_cards_manage_saved_cards">Manage saved cards</string>
     <!-- Preference option for adding an address -->
     <string name="preferences_addresses_add_address">Add address</string>
     <!-- Preference option for managing saved addresses -->
     <string name="preferences_addresses_manage_addresses">Manage addresses</string>
+
     <!-- Preference for saving and autofilling addresses -->
     <string name="preferences_addresses_save_and_autofill_addresses">Save and autofill addresses</string>
     <!-- Preference summary for saving and autofilling address data -->
@@ -1487,10 +1507,13 @@
     <string name="credit_cards_save_button">Save</string>
     <!-- The text for the "Cancel" button for cancelling adding, updating or deleting a credit card -->
     <string name="credit_cards_cancel_button">Cancel</string>
+
     <!-- Title of the "Saved cards" screen -->
     <string name="credit_cards_saved_cards">Saved cards</string>
+
     <!-- Error message for credit card number validation -->
     <string name="credit_cards_number_validation_error_message">Please enter a valid credit card number</string>
+
     <!-- Error message for credit card name on card validation -->
     <string name="credit_cards_name_on_card_validation_error_message">Please fill out this field</string>
     <!-- Message displayed in biometric prompt displayed for authentication before allowing users to view their saved credit cards -->
@@ -1507,12 +1530,15 @@
     <string name="credit_cards_biometric_prompt_message_pin">Unlock your device</string>
     <!-- Message displayed in biometric prompt for authentication, before allowing users to use their stored credit card information -->
     <string name="credit_cards_biometric_prompt_unlock_message">Unlock to use stored credit card information</string>
+
     <!-- Title of the "Add address" screen -->
     <string name="addresses_add_address">Add address</string>
     <!-- Title of the "Edit address" screen -->
     <string name="addresses_edit_address">Edit address</string>
     <!-- Title of the "Manage addresses" screen -->
     <string name="addresses_manage_addresses">Manage addresses</string>
+    <!-- The header for the full name of an address -->
+    <string moz:removedIn="102" name="addresses_full_name" tools:ignore="UnusedResources">Full Name</string>
     <!-- The header for the first name of an address -->
     <string name="addresses_first_name">First Name</string>
     <!-- The header for the middle name of an address -->
@@ -1541,6 +1567,7 @@
     <string name="addresses_cancel_button">Cancel</string>
     <!-- The text for the "Delete address" button for deleting an address -->
     <string name="addressess_delete_address_button">Delete address</string>
+
     <!-- The title for the "Delete address" confirmation dialog -->
     <string name="addressess_confirm_dialog_message">Are you sure you want to delete this address?</string>
     <!-- The text for the positive button on "Delete address" dialog -->
@@ -1572,7 +1599,8 @@
     <!-- Placeholder text shown in the Search String TextField before a user enters text -->
     <string name="search_add_custom_engine_search_string_hint">Search string to use</string>
     <!-- Description text for the Search String TextField. The %s is part of the string -->
-    <string name="search_add_custom_engine_search_string_example" formatted="false">Replace query with “%s”. Example:\nhttps://www.google.com/search?q=%s</string>
+    <string formatted="false" name="search_add_custom_engine_search_string_example">Replace query with “%s”. Example:\nhttps://www.google.com/search?q=%s</string>
+
     <!-- Accessibility description for the form in which details about the custom search engine are entered -->
     <string name="search_add_custom_engine_form_description">Custom search engine details</string>
 
@@ -1659,12 +1687,14 @@
     <string name="voice_search_content_description">Voice search</string>
     <!-- Voice search prompt description displayed after the user presses the voice search button -->
     <string name="voice_search_explainer">Speak now</string>
+
     <!--  The error message in edit login view when a duplicate username exists. -->
     <string name="saved_login_duplicate">A login with that username already exists</string>
+
     <!-- This is the hint text that is shown inline on the hostname field of the create new login page. 'https://www.example.com' intentionally hardcoded here -->
     <string name="add_login_hostname_hint_text">https://www.example.com</string>
     <!-- This is an error message shown below the hostname field of the add login page when a hostname does not contain http or https. -->
-    <string name="add_login_hostname_invalid_text_3">Web address must contain "https://" or "http://"</string>
+    <string name="add_login_hostname_invalid_text_3">Web address must contain &quot;https://&quot; or &quot;http://&quot;</string>
     <!-- This is an error message shown below the hostname field of the add login page when a hostname is invalid. -->
     <string name="add_login_hostname_invalid_text_2">Valid hostname required</string>
 
@@ -1681,8 +1711,10 @@
     <string name="synced_tabs_sign_in_message">View a list of tabs from your other devices.</string>
     <!-- Text displayed on a button in the synced tabs screen to link users to sign in when a user is not signed in to Midori Sync -->
     <string name="synced_tabs_sign_in_button">Sign in to sync</string>
+
     <!-- The text displayed when a synced device has no tabs to show in the list of Synced Tabs. -->
     <string name="synced_tabs_no_open_tabs">No open tabs</string>
+
     <!-- Content description for expanding a group of synced tabs. -->
     <string name="synced_tabs_expand_group">Expand group of synced tabs</string>
     <!-- Content description for collapsing a group of synced tabs. -->
@@ -1695,6 +1727,7 @@
     <string name="shortcut_max_limit_content">To add a new shortcut, remove one. Touch and hold the site and select remove.</string>
     <!-- Confirmation dialog button text when top sites limit is reached. -->
     <string name="top_sites_max_limit_confirmation_button">OK, Got It</string>
+
     <!-- Label for the preference to show the shortcuts for the most visited top sites on the homepage -->
     <string name="top_sites_toggle_top_recent_sites_4">Shortcuts</string>
 	<!-- Title text displayed in the rename top site dialog. -->
@@ -1705,6 +1738,7 @@
 	<string name="top_sites_rename_dialog_ok">OK</string>
 	<!-- Dialog button text for canceling the rename top site prompt. -->
 	<string name="top_sites_rename_dialog_cancel">Cancel</string>
+
     <!-- Text for the menu button to open the homepage settings. -->
     <string name="top_sites_menu_settings">Settings</string>
     <!-- Text for the menu button to navigate to sponsors and privacy support articles. '&amp;' is replaced with the ampersand symbol: & -->
@@ -1717,6 +1751,7 @@
     <string name="inactive_tabs_title">Inactive tabs</string>
     <!-- Content description for closing all inactive tabs -->
     <string name="inactive_tabs_delete_all">Close all inactive tabs</string>
+
     <!-- Content description for expanding the inactive tabs section. -->
     <string name="inactive_tabs_expand_content_description">Expand inactive tabs</string>
     <!-- Content description for collapsing the inactive tabs section. -->
@@ -1729,6 +1764,7 @@
     <string name="inactive_tabs_auto_close_message_description" tools:ignore="UnusedResources">Midori can close tabs you haven’t viewed over the past month.</string>
     <!-- A call to action below the description to allow the user to turn on the auto closing of inactive tabs. -->
     <string name="inactive_tabs_auto_close_message_action" tools:ignore="UnusedResources">TURN ON AUTO CLOSE</string>
+
     <!-- Text for the snackbar to confirm auto-close is enabled for inactive tabs -->
     <string name="inactive_tabs_auto_close_message_snackbar">Auto-close enabled</string>
 
