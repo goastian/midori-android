@@ -47,7 +47,7 @@ android {
         // This should be the "public" base URL of AMO.
         buildConfigField "String", "AMO_BASE_URL", "\"https://addons.mozilla.org\""
         buildConfigField "String", "AMO_COLLECTION_NAME", "\"Midori-Android\""
-        buildConfigField "String", "AMO_COLLECTION_USER", "\"17224042\""
+        buildConfigField "String", "AMO_COLLECTION_USER", "\"17520570\""
         // This should be the base URL used to call the AMO API.
         buildConfigField "String", "AMO_SERVER_URL", "\"https://services.addons.mozilla.org\""
         def deepLinkSchemeValue = "midori-dev"
