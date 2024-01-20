@@ -253,7 +253,7 @@ object Deps {
     const val junitParams = "org.junit.jupiter:junit-jupiter-params:${Versions.junit}"
     const val junitEngine = "org.junit.jupiter:junit-jupiter-engine:${Versions.junit}"
 
-    // TODO: [Waterfox] remove Glean dependency
+    // TODO: [Midori] remove Glean dependency
     const val mozilla_service_glean = "org.mozilla.components:service-glean:${Versions.mozilla_android_components}"
 }
 

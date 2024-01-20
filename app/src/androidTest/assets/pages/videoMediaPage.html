@@ -1,13 +1,14 @@
 <html>
 <head>
     <title>Video_Test_Page</title>
+    <meta name="viewport" content="width=device-width">
 </head>
 <body>
 <p id="testContent">Page content: video player</p>
-<video width="320" height="240" controls loop>
-    <source src="../resources/mov_bbb.mp4" type="video/mp4">
-    Your browser does not support HTML video.
-</video>
-
+<div id="video-container">
+    <video id="videoSample" width="320" height="240" controls loop>
+        <source src="../resources/clip.mp4">
+    </video>
+</div>
 </body>
 </html>

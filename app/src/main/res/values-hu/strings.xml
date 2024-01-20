@@ -1693,7 +1693,7 @@
     <string name="inactive_tabs_auto_close_message_snackbar">Automatikus zárás engedélyezve</string>
 
     
-    <string name="default_browser_experiment_card_text">Weboldalak, e-mailek és üzenetek linkjeinek beállítása, hogy automatikusan megnyíljanak a Waterfoxban.</string>
+    <string name="default_browser_experiment_card_text">Weboldalak, e-mailek és üzenetek linkjeinek beállítása, hogy automatikusan megnyíljanak a Midoriban.</string>
 
     
     <string name="remove_home_collection_placeholder_content_description">Távolítsa el a</string>

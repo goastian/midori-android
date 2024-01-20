@@ -1,0 +1,11 @@
+{
+  "default": {
+    "searchDefault": "DuckDuckGo",
+    "searchOrder": ["Bing", "Startpage", "Google", "DuckDuckGo"],
+    "visibleDefaultEngines": [
+      "bing", "ddg", "google", "startpage"
+    ]
+  },
+  "regionOverrides": {},
+  "locales": {}
+}

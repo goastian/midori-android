@@ -1,0 +1,259 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+package org.midorinext.android.ui
+
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.UiDevice
+import okhttp3.mockwebserver.MockWebServer
+import org.midorinext.android.R
+import org.midorinext.android.customannotations.SmokeTest
+import org.midorinext.android.helpers.AndroidAssetDispatcher
+import org.midorinext.android.helpers.FeatureSettingsHelper
+import org.midorinext.android.helpers.HomeActivityIntentTestRule
+import org.midorinext.android.helpers.RetryTestRule
+import org.midorinext.android.helpers.TestAssetHelper.getGenericAsset
+import org.midorinext.android.helpers.TestHelper.generateRandomString
+import org.midorinext.android.helpers.TestHelper.getStringResource
+import org.midorinext.android.ui.robots.browserScreen
+import org.midorinext.android.ui.robots.homeScreen
+import org.midorinext.android.ui.robots.navigationToolbar
+import org.junit.*
+
+/**
+ * Tests Top Sites functionality
+ *
+ * - Verifies 'Add to Midori Home' UI functionality
+ * - Verifies 'Top Sites' context menu UI functionality
+ * - Verifies 'Top Site' usage UI functionality
+ * - Verifies existence of default top sites available on the home-screen
+ */
+
+class TopSitesTest {
+    private lateinit var mDevice: UiDevice
+    private lateinit var mockWebServer: MockWebServer
+    private val featureSettingsHelper = FeatureSettingsHelper()
+
+    @get:Rule
+    val activityIntentTestRule = HomeActivityIntentTestRule(skipOnboarding = true)
+
+    @get:Rule
+    val retryTestRule = RetryTestRule(3)
+
+    @Before
+    fun setUp() {
+        mDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        mockWebServer = MockWebServer().apply {
+            dispatcher = AndroidAssetDispatcher()
+            start()
+        }
+
+        featureSettingsHelper.setJumpBackCFREnabled(false)
+        featureSettingsHelper.setTCPCFREnabled(false)
+    }
+
+    @After
+    fun tearDown() {
+        mockWebServer.shutdown()
+        featureSettingsHelper.resetAllFeatureFlags()
+    }
+
+    @SmokeTest
+    @Test
+    fun verifyAddToMidoriHome() {
+        val defaultWebPage = getGenericAsset(mockWebServer, 1)
+
+        navigationToolbar {
+        }.enterURLAndEnterToBrowser(defaultWebPage.url) {
+        }.openThreeDotMenu {
+            expandMenu()
+            verifyAddToTopSitesButton()
+        }.addToMidoriHome {
+            verifySnackBarText(getStringResource(R.string.snackbar_added_to_shortcuts))
+        }.goToHomescreen {
+            verifyExistingTopSitesList()
+            verifyExistingTopSitesTabs(defaultWebPage.title)
+        }
+    }
+
+    @Test
+    fun verifyOpenTopSiteNormalTab() {
+        val defaultWebPage = getGenericAsset(mockWebServer, 1)
+
+        navigationToolbar {
+        }.enterURLAndEnterToBrowser(defaultWebPage.url) {
+        }.openThreeDotMenu {
+            expandMenu()
+            verifyAddToTopSitesButton()
+        }.addToMidoriHome {
+            verifySnackBarText(getStringResource(R.string.snackbar_added_to_shortcuts))
+        }.goToHomescreen {
+            verifyExistingTopSitesList()
+            verifyExistingTopSitesTabs(defaultWebPage.title)
+        }.openTopSiteTabWithTitle(title = defaultWebPage.title) {
+            verifyUrl(defaultWebPage.url.toString().replace("http://", ""))
+        }.goToHomescreen {
+            verifyExistingTopSitesList()
+            verifyExistingTopSitesTabs(defaultWebPage.title)
+        }.openContextMenuOnTopSitesWithTitle(defaultWebPage.title) {
+            verifyTopSiteContextMenuItems()
+        }
+
+        // Dismiss context menu popup
+        mDevice.pressBack()
+    }
+
+    @Test
+    fun verifyOpenTopSitePrivateTab() {
+        val defaultWebPage = getGenericAsset(mockWebServer, 1)
+
+        navigationToolbar {
+        }.enterURLAndEnterToBrowser(defaultWebPage.url) {
+        }.openThreeDotMenu {
+            expandMenu()
+            verifyAddToTopSitesButton()
+        }.addToMidoriHome {
+            verifySnackBarText(getStringResource(R.string.snackbar_added_to_shortcuts))
+        }.goToHomescreen {
+            verifyExistingTopSitesList()
+            verifyExistingTopSitesTabs(defaultWebPage.title)
+        }.openContextMenuOnTopSitesWithTitle(defaultWebPage.title) {
+            verifyTopSiteContextMenuItems()
+        }.openTopSiteInPrivateTab {
+            verifyCurrentPrivateSession(activityIntentTestRule.activity.applicationContext)
+        }
+    }
+
+    @Test
+    fun verifyRenameTopSite() {
+        val defaultWebPage = getGenericAsset(mockWebServer, 1)
+        val newPageTitle = generateRandomString(5)
+
+        navigationToolbar {
+        }.enterURLAndEnterToBrowser(defaultWebPage.url) {
+            waitForPageToLoad()
+        }.openThreeDotMenu {
+            expandMenu()
+            verifyAddToTopSitesButton()
+        }.addToMidoriHome {
+            verifySnackBarText(getStringResource(R.string.snackbar_added_to_shortcuts))
+        }.goToHomescreen {
+            verifyExistingTopSitesList()
+            verifyExistingTopSitesTabs(defaultWebPage.title)
+        }.openContextMenuOnTopSitesWithTitle(defaultWebPage.title) {
+            verifyTopSiteContextMenuItems()
+        }.renameTopSite(newPageTitle) {
+            verifyExistingTopSitesList()
+            verifyExistingTopSitesTabs(newPageTitle)
+        }
+    }
+
+    @Test
+    fun verifyRemoveTopSite() {
+        val defaultWebPage = getGenericAsset(mockWebServer, 1)
+
+        navigationToolbar {
+        }.enterURLAndEnterToBrowser(defaultWebPage.url) {
+        }.openThreeDotMenu {
+            expandMenu()
+            verifyAddToTopSitesButton()
+        }.addToMidoriHome {
+            verifySnackBarText(getStringResource(R.string.snackbar_added_to_shortcuts))
+        }.goToHomescreen {
+            verifyExistingTopSitesList()
+            verifyExistingTopSitesTabs(defaultWebPage.title)
+        }.openContextMenuOnTopSitesWithTitle(defaultWebPage.title) {
+            verifyTopSiteContextMenuItems()
+        }.removeTopSite {
+            verifyNotExistingTopSitesList(defaultWebPage.title)
+        }
+    }
+
+    @Test
+    fun verifyRemoveTopSiteFromMainMenu() {
+        val defaultWebPage = getGenericAsset(mockWebServer, 1)
+
+        navigationToolbar {
+        }.enterURLAndEnterToBrowser(defaultWebPage.url) {
+        }.openThreeDotMenu {
+            expandMenu()
+            verifyAddToTopSitesButton()
+        }.addToMidoriHome {
+            verifySnackBarText(getStringResource(R.string.snackbar_added_to_shortcuts))
+        }.goToHomescreen {
+            verifyExistingTopSitesList()
+            verifyExistingTopSitesTabs(defaultWebPage.title)
+        }.openTopSiteTabWithTitle(defaultWebPage.title) {
+        }.openThreeDotMenu {
+            verifyRemoveFromShortcutsButton()
+        }.clickRemoveFromShortcuts {
+        }.goToHomescreen {
+            verifyNotExistingTopSitesList(defaultWebPage.title)
+        }
+    }
+
+    @Test
+    fun verifyDefaultTopSitesLocale_EN() {
+        // en-US defaults
+        val defaultTopSites = arrayOf(
+            "Top Articles",
+            "Wikipedia",
+            "Google"
+        )
+
+        homeScreen { }.dismissOnboarding()
+
+        homeScreen {
+            verifyExistingTopSitesList()
+            defaultTopSites.forEach { item ->
+                verifyExistingTopSitesTabs(item)
+            }
+        }
+    }
+
+    @SmokeTest
+    @Test
+    fun addAndRemoveMostViewedTopSiteTest() {
+        val defaultWebPage = getGenericAsset(mockWebServer, 1)
+
+        for (i in 0..1) {
+            navigationToolbar {
+            }.enterURLAndEnterToBrowser(defaultWebPage.url) {
+                waitForPageToLoad()
+            }
+        }
+
+        browserScreen {
+        }.goToHomescreen {
+            verifyExistingTopSitesList()
+            verifyExistingTopSitesTabs(defaultWebPage.title)
+        }.openContextMenuOnTopSitesWithTitle(defaultWebPage.title) {
+        }.deleteTopSiteFromHistory {
+        }.openThreeDotMenu {
+        }.openHistory {
+            // TODO: [Midori] fix this
+//            verifyEmptyHistoryView()
+        }
+    }
+
+    @Ignore("Failing after updates to Top Sites UI. See: https://github.com/mozilla-mobile/fenix/issues/26698")
+    @SmokeTest
+    @Test
+    fun verifySponsoredShortcutsListTest() {
+        homeScreen {
+        }.openThreeDotMenu {
+        }.openCustomizeHome {
+            verifySponsoredShortcutsCheckBox(true)
+        }.goBack {
+            verifyExistingSponsoredTopSitesTabs(2)
+            verifyExistingSponsoredTopSitesTabs(3)
+        }.openThreeDotMenu {
+        }.openCustomizeHome {
+            clickSponsoredShortcuts()
+            verifySponsoredShortcutsCheckBox(false)
+        }.goBack {
+            verifyNotExistingSponsoredTopSitesList()
+        }
+    }
+}

@@ -75,7 +75,7 @@ object Config {
      *
      * There is a discrepancy between the epoch date used here (20141228)
      * and the epoch used in Fennec (20150801) for historical reasons. We keep
-     * this discrepancy to avoid having Waterfox version codes decrease.
+     * this discrepancy to avoid having Midori version codes decrease.
      * Note that the original Fennec implementation also had an inconsistency in
      * the documented epoch date (20150901) and the effective epoch date (20150801).
      */
