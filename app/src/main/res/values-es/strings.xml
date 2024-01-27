@@ -1046,7 +1046,7 @@
     
     <string name="preference_summary_delete_browsing_data_on_quit_2">Elimina automáticamente los datos de navegación al seleccionar "Salir" en el menú principal.</string>
     
-    <string name="delete_browsing_data_on_quit_action">Deje de</string>
+    <string name="delete_browsing_data_on_quit_action">Salir</string>
 
     
     <string moz:removedIn="104" name="delete_browsing_data_prompt_message" tools:ignore="UnusedResources">Esto borrará todos tus datos de navegación.</string>
