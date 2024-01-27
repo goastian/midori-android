@@ -739,7 +739,7 @@ abstract class BaseBrowserFragment :
             view = view
         )
 
-        // This component feature only works on Waterfox when built on Mozilla infrastructure.
+        // This component feature only works on Midori when built on Mozilla infrastructure.
         if (BuildConfig.MOZILLA_OFFICIAL) {
             webAuthnFeature.set(
                 feature = WebAuthnFeature(

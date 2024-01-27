@@ -20,6 +20,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.midorinext.android.HomeActivity
 import org.midorinext.android.MidoriApplication
 import org.midorinext.android.components.Core
 import org.midorinext.android.ext.application
@@ -102,5 +103,24 @@ class HomeFragmentTest {
         homeFragment.onConfigurationChanged(mockk(relaxed = true))
 
         verify(exactly = 1) { menuButton.dismissMenu() }
+    }
+    @Test
+    fun `GIVEN the user is in normal mode WHEN checking if should enable wallpaper THEN return true`() {
+        val activity: HomeActivity = mockk {
+            every { themeManager.currentTheme.isPrivate } returns false
+        }
+        every { homeFragment.activity } returns activity
+
+        assertTrue(homeFragment.shouldEnableWallpaper())
+    }
+
+    @Test
+    fun `GIVEN the user is in private mode WHEN checking if should enable wallpaper THEN return false`() {
+        val activity: HomeActivity = mockk {
+            every { themeManager.currentTheme.isPrivate } returns true
+        }
+        every { homeFragment.activity } returns activity
+
+        assertFalse(homeFragment.shouldEnableWallpaper())
     }
 }

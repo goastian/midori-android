@@ -118,7 +118,7 @@ open class MidoriApplication : LocaleAwareApplication(), Provider {
                 components.core.engine.warmUp()
             }
 
-            // WATERFOX: initialize the store before enabling the strict mode
+            // MIDORI: initialize the store before enabling the strict mode
             // the fenix does so by calling initializeGlean but we don't have metrics
             @Suppress("UNUSED_VARIABLE")
             val store = components.core.store

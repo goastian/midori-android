@@ -257,11 +257,11 @@ private fun TextLinePlaceHolder() {
 @Composable
 private fun LoadedRecentSyncedTab() {
     val tab = RecentSyncedTab(
-        deviceDisplayName = "Waterfox on MacBook",
+        deviceDisplayName = "Midori on MacBook",
         deviceType = DeviceType.DESKTOP,
         title = "This is a long site title",
-        url = "https://waterfox.net",
-        previewImageUrl = "https://waterfox.net",
+        url = "https://astian.org",
+        previewImageUrl = "https://astian.org",
     )
     MidoriTheme(theme = Theme.getTheme()) {
         RecentSyncedTab(

@@ -28,6 +28,8 @@
     <!-- Needed to post notifications on devices with Android 13 and later-->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+
     <application
         android:name=".MidoriApplication"
         android:allowBackup="false"
@@ -297,6 +299,7 @@
 
         <service
             android:name=".downloads.DownloadService"
+            android:foregroundServiceType="dataSync"
             android:exported="false" />
 
         <receiver

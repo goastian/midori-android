@@ -93,6 +93,7 @@ import org.midorinext.android.home.sessioncontrol.viewholders.CollectionHeaderVi
 import org.midorinext.android.home.topsites.DefaultTopSitesView
 import org.midorinext.android.onboarding.MidoriOnboarding
 import org.midorinext.android.perf.MarkersFragmentLifecycleCallbacks
+import org.midorinext.android.perf.runBlockingIncrement
 import org.midorinext.android.tabstray.TabsTrayAccessPoint
 import org.midorinext.android.utils.Settings.Companion.TOP_SITES_PROVIDER_MAX_THRESHOLD
 import org.midorinext.android.utils.ToolbarPopupWindow
@@ -145,7 +146,7 @@ class HomeFragment : Fragment() {
     private var sessionControlView: SessionControlView? = null
     private var appBarLayout: AppBarLayout? = null
     private lateinit var currentMode: CurrentMode
-
+    private var lastAppliedWallpaperName: String = Wallpaper.Default.name
     private val topSitesFeature = ViewBoundFeatureWrapper<TopSitesFeature>()
     private val recentTabsListFeature = ViewBoundFeatureWrapper<RecentTabsListFeature>()
     private val recentSyncedTabFeature = ViewBoundFeatureWrapper<RecentSyncedTabFeature>()
@@ -181,6 +182,9 @@ class HomeFragment : Fragment() {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val activity = activity as HomeActivity
         val components = requireComponents
+
+        val currentWallpaperName = requireContext().settings().currentWallpaper
+        applyWallpaper(wallpaperName = currentWallpaperName, orientationChange = false)
 
         currentMode = CurrentMode(
             requireContext(),
@@ -319,8 +323,6 @@ class HomeFragment : Fragment() {
 
         activity.themeManager.applyStatusBarTheme(activity)
 
-        displayWallpaperIfEnabled()
-
         // DO NOT MOVE ANYTHING BELOW THIS addMarker CALL!
         requireComponents.core.engine.profiler?.addMarker(
             MarkersFragmentLifecycleCallbacks.MARKER_NAME, profilerStartTime, "HomeFragment.onCreateView",
@@ -332,6 +334,8 @@ class HomeFragment : Fragment() {
         super.onConfigurationChanged(newConfig)
 
         getMenuButton()?.dismissMenu()
+        val currentWallpaperName = requireContext().settings().currentWallpaper
+        applyWallpaper(wallpaperName = currentWallpaperName, orientationChange = true)
     }
 
     /**
@@ -424,6 +428,7 @@ class HomeFragment : Fragment() {
 
         observeSearchEngineChanges()
         observeSearchEngineNameChanges()
+        observeWallpaperUpdates()
 
         HomeMenuBuilder(
             view = view,
@@ -872,30 +877,6 @@ class HomeFragment : Fragment() {
             ?.isVisible = tabCount > 0
     }
 
-    private fun displayWallpaperIfEnabled() {
-        if (shouldEnableWallpaper()) {
-            requireComponents.appStore.flow()
-                .distinctUntilChangedBy { state -> state.wallpaperState.currentWallpaper }
-                .onEach { state ->
-                    // We only want to update the wallpaper when it's different from the default one
-                    // as the default is applied already on xml by default.
-                    when (val currentWallpaper = state.wallpaperState.currentWallpaper) {
-                        is Wallpaper.Default -> {
-                            binding.wallpaperImageView.visibility = View.GONE
-                        }
-                        else -> {
-                            with(requireComponents.wallpaperManager) {
-                                val bitmap = currentWallpaper.load(requireContext()) ?: return@onEach
-                                bitmap.scaleBitmapToBottomOfView(binding.wallpaperImageView)
-                            }
-                            binding.wallpaperImageView.visibility = View.VISIBLE
-                        }
-                    }
-                }
-                .launchIn(viewLifecycleOwner.lifecycleScope)
-        }
-    }
-
     // We want to show the animation in a time when the user less distracted
     // The Heuristics are:
     // 1) The animation hasn't shown before.
@@ -912,8 +893,43 @@ class HomeFragment : Fragment() {
             settings.numberOfAppLaunches >= 3
     }
 
-    private fun shouldEnableWallpaper() =
+    @VisibleForTesting
+    internal fun shouldEnableWallpaper() =
         (activity as? HomeActivity)?.themeManager?.currentTheme?.isPrivate?.not() ?: false
+
+    private fun applyWallpaper(wallpaperName: String, orientationChange: Boolean) {
+        when {
+            !shouldEnableWallpaper() ||
+                    (wallpaperName == lastAppliedWallpaperName && !orientationChange) -> return
+
+            wallpaperName == Wallpaper.Default.name -> {
+                binding.wallpaperImageView.isVisible = false
+                lastAppliedWallpaperName = wallpaperName
+            }
+
+            else -> {
+                runBlockingIncrement {
+                    with(requireComponents.wallpaperManager) {
+                        val bitmap = currentWallpaper.load(requireContext())
+                            ?: return@runBlockingIncrement
+                        bitmap.scaleBitmapToBottomOfView(binding.wallpaperImageView)
+                    }
+                    binding.wallpaperImageView.isVisible = true
+                    lastAppliedWallpaperName = wallpaperName
+
+                }
+            }
+        }
+    }
+
+    private fun observeWallpaperUpdates() {
+        consumeFrom(requireComponents.appStore) {
+            val currentWallpaper = it.wallpaperState.currentWallpaper
+            if (currentWallpaper.name != lastAppliedWallpaperName) {
+                applyWallpaper(wallpaperName = currentWallpaper.name, orientationChange = false)
+            }
+        }
+    }
 
     companion object {
         const val ALL_NORMAL_TABS = "all_normal"
