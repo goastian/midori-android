@@ -140,19 +140,23 @@ class DefaultBrowserToolbarMenuController(
                 }
             }
             is ToolbarMenu.Item.Quit -> {
-                // We need to show the snackbar while the browsing data is deleting (if "Delete
-                // browsing data on quit" is activated). After the deletion is over, the snackbar
-                // is dismissed.
-                val snackbar: MidoriSnackbar? = activity.getRootView()?.let { v ->
-                    MidoriSnackbar.make(
-                        view = v,
-                        duration = Snackbar.LENGTH_LONG,
-                        isDisplayedWithBrowserToolbar = true
-                    )
-                        .setText(v.context.getString(R.string.deleting_browsing_data_in_progress))
-                }
+                if (activity.settings().shouldDeleteBrowsingDataOnQuit) {
+                    // We need to show the snackbar while the browsing data is deleting (if "Delete
+                    // browsing data on quit" is activated). After the deletion is over, the snackbar
+                    // is dismissed.
+                    val snackbar: MidoriSnackbar? = activity.getRootView()?.let { v ->
+                        MidoriSnackbar.make(
+                            view = v,
+                            duration = Snackbar.LENGTH_LONG,
+                            isDisplayedWithBrowserToolbar = true
+                        )
+                            .setText(v.context.getString(R.string.deleting_browsing_data_in_progress))
+                    }
 
-                deleteAndQuit(activity, scope, snackbar)
+                    deleteAndQuit(activity, scope, snackbar)
+                } else {
+                    activity.finishAndRemoveTask()
+                }
             }
             is ToolbarMenu.Item.CustomizeReaderView -> {
                 readerModeController.showControls()
