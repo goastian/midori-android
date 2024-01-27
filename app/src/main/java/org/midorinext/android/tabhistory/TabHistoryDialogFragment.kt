@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import mozilla.components.browser.state.selector.findCustomTabOrSelectedTab
 import mozilla.components.lib.state.ext.flowScoped
 import mozilla.components.support.ktx.android.content.getColorFromAttr
-import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifChanged
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.midorinext.android.R
 import org.midorinext.android.databinding.FragmentTabHistoryDialogBinding
 import org.midorinext.android.ext.requireComponents
@@ -53,7 +53,7 @@ class TabHistoryDialogFragment : BottomSheetDialogFragment() {
 
         requireComponents.core.store.flowScoped(viewLifecycleOwner) { flow ->
             flow.mapNotNull { state -> state.findCustomTabOrSelectedTab(customTabSessionId)?.content?.history }
-                .ifChanged()
+                .distinctUntilChanged()
                 .collect { historyState ->
                     tabHistoryView.updateState(historyState)
                 }

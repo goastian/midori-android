@@ -20,7 +20,7 @@ import org.midorinext.android.helpers.MidoriRobolectricTestRunner
 class OnSharedPreferenceChangeListenerTest {
 
     private lateinit var sharedPrefs: SharedPreferences
-    private lateinit var listener: (SharedPreferences, String) -> Unit
+    private lateinit var listener: (SharedPreferences, String?) -> Unit
     private lateinit var owner: LifecycleOwner
     private lateinit var lifecycleRegistry: LifecycleRegistry
 

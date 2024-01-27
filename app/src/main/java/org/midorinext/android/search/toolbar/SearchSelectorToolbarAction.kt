@@ -20,7 +20,7 @@ import mozilla.components.concept.toolbar.Toolbar
 import mozilla.components.lib.state.ext.flow
 import mozilla.components.support.ktx.android.content.res.resolveAttribute
 import mozilla.components.support.ktx.android.view.toScope
-import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifChanged
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.midorinext.android.R
 import org.midorinext.android.ext.settings
 import org.midorinext.android.search.SearchDialogFragmentStore
@@ -66,7 +66,7 @@ class SearchSelectorToolbarAction(
                 store.flow()
                     .map { state -> state.searchEngineSource.searchEngine }
                     .filterNotNull()
-                    .ifChanged()
+                    .distinctUntilChanged()
                     .collect { searchEngine ->
                         view.setIcon(
                             icon = searchEngine.getScaledIcon(view.context),

@@ -11,6 +11,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
+import android.os.StrictMode
 import android.provider.Settings
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -36,11 +37,19 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.withContext
 import mozilla.appservices.places.BookmarkRoot
 import mozilla.appservices.places.uniffi.PlacesApiException
 import mozilla.components.browser.state.action.ContentAction
-import mozilla.components.browser.state.selector.*
+import mozilla.components.browser.state.selector.findCustomTab
+import mozilla.components.browser.state.selector.findCustomTabOrSelectedTab
+import mozilla.components.browser.state.selector.findTab
+import mozilla.components.browser.state.selector.findTabOrCustomTab
+import mozilla.components.browser.state.selector.findTabOrCustomTabOrSelectedTab
+import mozilla.components.browser.state.selector.getNormalOrPrivateTabs
+import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.CustomTabSessionState
 import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.state.TabSessionState
@@ -68,7 +77,11 @@ import mozilla.components.feature.prompts.login.LoginDelegate
 import mozilla.components.feature.prompts.share.ShareDelegate
 import mozilla.components.feature.readerview.ReaderViewFeature
 import mozilla.components.feature.search.SearchFeature
-import mozilla.components.feature.session.*
+import mozilla.components.feature.session.FullScreenFeature
+import mozilla.components.feature.session.PictureInPictureFeature
+import mozilla.components.feature.session.ScreenOrientationFeature
+import mozilla.components.feature.session.SessionFeature
+import mozilla.components.feature.session.SwipeRefreshFeature
 import mozilla.components.feature.session.behavior.EngineViewBrowserToolbarBehavior
 import mozilla.components.feature.sitepermissions.SitePermissionsFeature
 import mozilla.components.feature.webauthn.WebAuthnFeature
@@ -80,28 +93,44 @@ import mozilla.components.support.base.feature.ActivityResultHandler
 import mozilla.components.support.base.feature.PermissionsFeature
 import mozilla.components.support.base.feature.UserInteractionHandler
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
-import mozilla.components.support.ktx.android.view.enterToImmersiveMode
 import mozilla.components.support.ktx.android.view.exitImmersiveMode
 import mozilla.components.support.ktx.android.view.hideKeyboard
 import mozilla.components.support.ktx.kotlin.getOrigin
 import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifAnyChanged
-import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifChanged
-import org.midorinext.android.*
 import org.midorinext.android.BuildConfig
+import org.midorinext.android.HomeActivity
+import org.midorinext.android.IntentReceiverActivity
+import org.midorinext.android.NavGraphDirections
+import org.midorinext.android.OnBackLongPressedListener
 import org.midorinext.android.R
 import org.midorinext.android.browser.browsingmode.BrowsingMode
 import org.midorinext.android.browser.readermode.DefaultReaderModeController
 import org.midorinext.android.components.FindInPageIntegration
 import org.midorinext.android.components.StoreProvider
 import org.midorinext.android.components.MidoriSnackbar
-import org.midorinext.android.components.toolbar.*
+import org.midorinext.android.components.toolbar.BrowserFragmentState
+import org.midorinext.android.components.toolbar.BrowserFragmentStore
+import org.midorinext.android.components.toolbar.BrowserToolbarView
+import org.midorinext.android.components.toolbar.DefaultBrowserToolbarController
+import org.midorinext.android.components.toolbar.DefaultBrowserToolbarMenuController
+import org.midorinext.android.components.toolbar.ToolbarIntegration
 import org.midorinext.android.components.toolbar.interactor.BrowserToolbarInteractor
 import org.midorinext.android.components.toolbar.interactor.DefaultBrowserToolbarInteractor
 import org.midorinext.android.crashes.CrashContentIntegration
 import org.midorinext.android.databinding.FragmentBrowserBinding
 import org.midorinext.android.downloads.DownloadService
 import org.midorinext.android.downloads.DynamicDownloadDialog
-import org.midorinext.android.ext.*
+import org.midorinext.android.ext.accessibilityManager
+import org.midorinext.android.ext.breadcrumb
+import org.midorinext.android.ext.components
+import org.midorinext.android.ext.enterToImmersiveMode
+import org.midorinext.android.ext.getPreferenceKey
+import org.midorinext.android.ext.hideToolbar
+import org.midorinext.android.ext.nav
+import org.midorinext.android.ext.requireComponents
+import org.midorinext.android.ext.runIfFragmentIsAttached
+import org.midorinext.android.ext.secure
+import org.midorinext.android.ext.settings
 import org.midorinext.android.home.HomeScreenViewModel
 import org.midorinext.android.home.SharedViewModel
 import org.midorinext.android.onboarding.MidoriOnboarding
@@ -554,6 +583,7 @@ abstract class BaseBrowserFragment :
                 store = store,
                 customTabId = customTabSessionId,
                 fragmentManager = parentFragmentManager,
+                tabsUseCases = requireComponents.useCases.tabsUseCases,
                 creditCardValidationDelegate = DefaultCreditCardValidationDelegate(
                     context.components.core.lazyAutofillStorage
                 ),
@@ -709,7 +739,7 @@ abstract class BaseBrowserFragment :
             view = view
         )
 
-        // This component feature only works on Midori when built on Mozilla infrastructure.
+        // This component feature only works on Waterfox when built on Mozilla infrastructure.
         if (BuildConfig.MOZILLA_OFFICIAL) {
             webAuthnFeature.set(
                 feature = WebAuthnFeature(
@@ -755,7 +785,7 @@ abstract class BaseBrowserFragment :
 
         store.flowScoped(viewLifecycleOwner) { flow ->
             flow.mapNotNull { state -> state.findTabOrCustomTabOrSelectedTab(customTabSessionId) }
-                .ifChanged { tab -> tab.content.pictureInPictureEnabled }
+                .distinctUntilChangedBy { tab -> tab.content.pictureInPictureEnabled }
                 .collect { tab -> pipModeChanged(tab) }
         }
 
@@ -860,7 +890,7 @@ abstract class BaseBrowserFragment :
                 state.findCustomTabOrSelectedTab(customTabSessionId)
             }
                 .ifAnyChanged {
-                    tab ->
+                        tab ->
                     arrayOf(tab.content.url, tab.content.loadRequest)
                 }
                 .collect {
@@ -989,7 +1019,7 @@ abstract class BaseBrowserFragment :
         val activity = activity as HomeActivity
         consumeFlow(store) { flow ->
             flow.map { state -> state.restoreComplete }
-                .ifChanged()
+                .distinctUntilChanged()
                 .collect { restored ->
                     if (restored) {
                         // Once tab restoration is complete, if there are no tabs to show in the browser, go home
@@ -1008,7 +1038,7 @@ abstract class BaseBrowserFragment :
     @VisibleForTesting
     internal fun observeTabSelection(store: BrowserStore) {
         consumeFlow(store) { flow ->
-            flow.ifChanged {
+            flow.distinctUntilChangedBy {
                 it.selectedTabId
             }
                 .mapNotNull {
@@ -1096,10 +1126,10 @@ abstract class BaseBrowserFragment :
     @CallSuper
     override fun onBackPressed(): Boolean {
         return findInPageIntegration.onBackPressed() ||
-            fullScreenFeature.onBackPressed() ||
-            promptsFeature.onBackPressed() ||
-            sessionFeature.onBackPressed() ||
-            removeSessionIfNeeded()
+                fullScreenFeature.onBackPressed() ||
+                promptsFeature.onBackPressed() ||
+                sessionFeature.onBackPressed() ||
+                removeSessionIfNeeded()
     }
 
     override fun onBackLongPressed(): Boolean {
@@ -1227,7 +1257,11 @@ abstract class BaseBrowserFragment :
     @VisibleForTesting
     internal fun updateThemeForSession(session: SessionState) {
         val sessionMode = BrowsingMode.fromBoolean(session.content.private)
-        (activity as HomeActivity).browsingModeManager.mode = sessionMode
+        requireComponents.strictMode.resetAfter(StrictMode.allowThreadDiskReads()) {
+            requireComponents.strictMode.resetAfter(StrictMode.allowThreadDiskReads()) {
+                (activity as HomeActivity).browsingModeManager.mode = sessionMode
+            }
+        }
     }
 
     @VisibleForTesting

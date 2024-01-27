@@ -94,4 +94,20 @@ sealed class AppAction : Action {
          */
         data class UpdateAvailableWallpapers(val wallpapers: List<Wallpaper>) : WallpaperAction()
     }
+
+    /**
+     * [AppAction] implementations related to the application lifecycle.
+     */
+    sealed class AppLifecycleAction : AppAction() {
+
+        /**
+         * The application has received an ON_RESUME event.
+         */
+        object ResumeAction : AppLifecycleAction()
+
+        /**
+         * The application has received an ON_PAUSE event.
+         */
+        object PauseAction : AppLifecycleAction()
+    }
 }

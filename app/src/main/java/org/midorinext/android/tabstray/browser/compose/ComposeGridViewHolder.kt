@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.flow.MutableStateFlow
 import mozilla.components.browser.state.state.TabSessionState
@@ -16,11 +17,13 @@ import mozilla.components.browser.tabstray.TabsTray
 import mozilla.components.browser.tabstray.TabsTrayStyling
 import mozilla.components.lib.state.ext.observeAsComposableState
 import org.midorinext.android.compose.tabstray.TabGridItem
+import org.midorinext.android.components.components
 import org.midorinext.android.selection.SelectionHolder
 import org.midorinext.android.tabstray.TabsTrayState
 import org.midorinext.android.tabstray.TabsTrayStore
 import org.midorinext.android.tabstray.browser.BrowserTrayInteractor
-
+import kotlin.math.max
+import org.midorinext.android.R
 /**
  * A Compose ViewHolder implementation for "tab" items with grid layout.
  *
@@ -88,8 +91,15 @@ class ComposeGridViewHolder(
         val isSelectedTab by isSelectedTabState.collectAsState()
         val isMultiSelectionSelected by isMultiSelectionSelectedState.collectAsState()
 
+        val tabThumbnailSize = max(
+            LocalContext.current.resources.getDimensionPixelSize(R.dimen.tab_tray_grid_item_thumbnail_height),
+            LocalContext.current.resources.getDimensionPixelSize(R.dimen.tab_tray_grid_item_thumbnail_width),
+        )
+
         TabGridItem(
             tab = tab,
+            thumbnailSize = 108,
+            storage = components.core.thumbnailStorage,
             isSelected = isSelectedTab,
             multiSelectionEnabled = multiSelectionEnabled,
             multiSelectionSelected = isMultiSelectionSelected,

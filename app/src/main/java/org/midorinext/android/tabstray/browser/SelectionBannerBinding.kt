@@ -13,7 +13,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import mozilla.components.lib.state.helpers.AbstractBinding
-import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifChanged
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.midorinext.android.R
 import org.midorinext.android.databinding.ComponentTabstray2Binding
 import org.midorinext.android.databinding.TabstrayMultiselectItemsBinding
@@ -65,7 +65,7 @@ class SelectionBannerBinding(
 
     override suspend fun onState(flow: Flow<TabsTrayState>) {
         flow.map { it.mode }
-            .ifChanged()
+            .distinctUntilChanged()
             .collect { mode ->
                 val isSelectMode = mode is Select
 

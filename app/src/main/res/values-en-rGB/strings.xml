@@ -1446,6 +1446,8 @@
     <string name="logins_biometric_prompt_message">Unlock to view your saved logins</string>
     <!-- Title of warning dialog if users have no device authentication set up -->
     <string name="logins_warning_dialog_title">Secure your logins and passwords</string>
+
+    <string moz:removedIn="102" name="addresses_full_name" tools:ignore="UnusedResources">Full Name</string>
     <!-- Message of warning dialog if users have no device authentication set up -->
     <string name="logins_warning_dialog_message">Set up a device lock pattern, PIN, or password to protect your saved logins and passwords from being accessed if someone else has your device.</string>
     <!-- Negative button to ignore warning dialog if users have no device authentication set up -->

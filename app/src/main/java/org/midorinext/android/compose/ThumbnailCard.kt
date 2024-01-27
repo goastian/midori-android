@@ -20,6 +20,9 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
+import mozilla.components.concept.base.images.ImageLoadRequest
 import mozilla.components.browser.icons.compose.Loader
 import mozilla.components.browser.icons.compose.Placeholder
 import mozilla.components.browser.icons.compose.WithIcon
@@ -36,10 +39,10 @@ private const val FALLBACK_ICON_SIZE = 36
  * will be displayed until the thumbnail is loaded.
  *
  * @param url Url to display thumbnail for.
- * @param key Key used to remember the thumbnail for future compositions.
- * @param size [Dp] size of the thumbnail.
- * @param backgroundColor [Color] used for the background of the favicon.
+ * @param request [ImageLoadRequest] used to fetch the thumbnail bitmap.
+ * @param storage [ThumbnailStorage] to obtain tab thumbnail bitmaps from.
  * @param modifier [Modifier] used to draw the image content.
+ * @param backgroundColor [Color] used for the background of the favicon.
  * @param contentDescription Text used by accessibility services
  * to describe what this image represents.
  * @param contentScale [ContentScale] used to draw image content.
@@ -48,21 +51,21 @@ private const val FALLBACK_ICON_SIZE = 36
 @Composable
 fun ThumbnailCard(
     url: String,
-    key: String,
-    size: Dp = THUMBNAIL_SIZE.dp,
-    backgroundColor: Color = colorResource(id = R.color.photonGrey20),
+    request: ImageLoadRequest,
+    storage: ThumbnailStorage,
     modifier: Modifier = Modifier,
+    backgroundColor: Color = MidoriTheme.colors.layer2,
     contentDescription: String? = null,
     contentScale: ContentScale = ContentScale.FillWidth,
-    alignment: Alignment = Alignment.TopCenter
+    alignment: Alignment = Alignment.TopCenter,
 ) {
     Card(
         modifier = modifier,
-        backgroundColor = backgroundColor
+        backgroundColor = backgroundColor,
     ) {
         ThumbnailImage(
-            key = key,
-            size = size,
+            request = request,
+            storage = storage,
             modifier = modifier,
             contentScale = contentScale,
             alignment = alignment,
@@ -75,7 +78,7 @@ fun ThumbnailCard(
                 WithIcon { icon ->
                     Box(
                         modifier = Modifier.size(FALLBACK_ICON_SIZE.dp),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.Center,
                     ) {
                         Image(
                             painter = icon.painter,
@@ -83,7 +86,7 @@ fun ThumbnailCard(
                             modifier = Modifier
                                 .size(FALLBACK_ICON_SIZE.dp)
                                 .clip(RoundedCornerShape(8.dp)),
-                            contentScale = contentScale
+                            contentScale = contentScale,
                         )
                     }
                 }
@@ -98,10 +101,11 @@ private fun ThumbnailCardPreview() {
     MidoriTheme(theme = Theme.getTheme()) {
         ThumbnailCard(
             url = "https://mozilla.com",
-            key = "123",
+            request = ImageLoadRequest("123", THUMBNAIL_SIZE, false),
+            storage = ThumbnailStorage(LocalContext.current),
             modifier = Modifier
                 .size(THUMBNAIL_SIZE.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(8.dp)),
         )
     }
 }

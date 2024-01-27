@@ -17,7 +17,7 @@ import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.lib.state.helpers.AbstractBinding
-import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifChanged
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.midorinext.android.R
 import org.midorinext.android.browser.infobanner.InfoBanner
 import org.midorinext.android.utils.Settings
@@ -36,7 +36,7 @@ class TabsTrayInfoBannerBinding(
 
     override suspend fun onState(flow: Flow<BrowserState>) {
         flow.map { state -> max(state.normalTabs.size, state.privateTabs.size) }
-            .ifChanged()
+            .distinctUntilChanged()
             .collect { tabCount ->
                 if (tabCount >= TAB_COUNT_SHOW_CFR) {
                     displayInfoBannerIfNeeded(settings)

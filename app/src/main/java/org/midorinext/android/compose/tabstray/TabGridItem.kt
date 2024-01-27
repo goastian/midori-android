@@ -35,7 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.text.BidiFormatter
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.createTab
+import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 import org.midorinext.android.R
 import org.midorinext.android.compose.Divider
 import org.midorinext.android.compose.HorizontalFadingEdgeBox
@@ -74,6 +75,8 @@ import org.midorinext.android.theme.MidoriTheme
 @Suppress("MagicNumber", "LongParameterList", "LongMethod")
 fun TabGridItem(
     tab: TabSessionState,
+    storage: ThumbnailStorage,
+    thumbnailSize: Int,
     isSelected: Boolean = false,
     multiSelectionEnabled: Boolean = false,
     multiSelectionSelected: Boolean = false,
@@ -156,7 +159,7 @@ fun TabGridItem(
                     }
 
                     Icon(
-                        painter = painterResource(id = R.drawable.mozac_ic_close),
+                        painter = painterResource(id = R.drawable.mozac_ic_cross_20),
                         contentDescription = stringResource(id = R.string.close_tab),
                         tint = MidoriTheme.colors.iconPrimary,
                         modifier = Modifier
@@ -171,6 +174,8 @@ fun TabGridItem(
 
                 Thumbnail(
                     tab = tab,
+                    size = thumbnailSize,
+                    storage = storage,
                     multiSelectionSelected = multiSelectionSelected,
                 )
             }
@@ -196,6 +201,8 @@ fun TabGridItem(
 @Composable
 private fun Thumbnail(
     tab: TabSessionState,
+    size: Int,
+    storage: ThumbnailStorage,
     multiSelectionSelected: Boolean,
 ) {
     Box(
@@ -205,7 +212,8 @@ private fun Thumbnail(
     ) {
         TabThumbnail(
             tab = tab,
-            size = LocalConfiguration.current.screenWidthDp.dp,
+            size = size,
+            storage = storage,
             backgroundColor = MidoriTheme.colors.layer2,
             modifier = Modifier.fillMaxSize()
         )
@@ -225,7 +233,7 @@ private fun Thumbnail(
                 backgroundColor = MidoriTheme.colors.layerAccent,
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.mozac_ic_check),
+                    painter = painterResource(id = R.drawable.mozac_ic_checkmark_24),
                     modifier = Modifier
                         .matchParentSize()
                         .padding(all = 8.dp),
@@ -247,6 +255,8 @@ private fun TabGridItemPreview() {
                 url = "www.mozilla.com",
                 title = "Mozilla Domain"
             ),
+            thumbnailSize = 108,
+            storage = ThumbnailStorage(LocalContext.current),
             onCloseClick = {},
             onMediaClick = {},
             onClick = {},
@@ -262,6 +272,8 @@ private fun TabGridItemSelectedPreview() {
     MidoriTheme {
         TabGridItem(
             tab = createTab(url = "www.mozilla.com", title = "Mozilla"),
+            thumbnailSize = 108,
+            storage = ThumbnailStorage(LocalContext.current),
             isSelected = true,
             onCloseClick = {},
             onMediaClick = {},
@@ -278,6 +290,8 @@ private fun TabGridItemMultiSelectedPreview() {
     MidoriTheme {
         TabGridItem(
             tab = createTab(url = "www.mozilla.com", title = "Mozilla"),
+            thumbnailSize = 108,
+            storage = ThumbnailStorage(LocalContext.current),
             multiSelectionEnabled = true,
             multiSelectionSelected = true,
             onCloseClick = {},

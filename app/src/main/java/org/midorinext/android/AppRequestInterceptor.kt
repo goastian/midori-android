@@ -17,7 +17,7 @@ import org.midorinext.android.ext.isOnline
 import java.lang.ref.WeakReference
 
 class AppRequestInterceptor(
-    private val context: Context
+    private val context: Context,
 ) : RequestInterceptor {
 
     private var navController: WeakReference<NavController>? = null
@@ -34,12 +34,8 @@ class AppRequestInterceptor(
         isSameDomain: Boolean,
         isRedirect: Boolean,
         isDirectNavigation: Boolean,
-        isSubframeRequest: Boolean
+        isSubframeRequest: Boolean,
     ): RequestInterceptor.InterceptionResponse? {
-
-        interceptAmoRequest(uri, isSameDomain, hasUserGesture)?.let { response ->
-            return response
-        }
 
         return context.components.services.appLinksInterceptor
             .onLoadRequest(
@@ -50,7 +46,7 @@ class AppRequestInterceptor(
                 isSameDomain,
                 isRedirect,
                 isDirectNavigation,
-                isSubframeRequest
+                isSubframeRequest,
             )
     }
 
@@ -68,46 +64,10 @@ class AppRequestInterceptor(
             uri = uri,
             htmlResource = riskLevel.htmlRes,
             titleOverride = { type -> getErrorPageTitle(context, type) },
-            descriptionOverride = { type -> getErrorPageDescription(context, type) }
+            descriptionOverride = { type -> getErrorPageDescription(context, type) },
         )
 
         return RequestInterceptor.ErrorResponse(errorPageUri)
-    }
-
-    /**
-     * Checks if the provided [uri] is a request to install an add-on from addons.mozilla.org and
-     * redirects to Add-ons Manager to trigger installation if needed.
-     *
-     * @return [RequestInterceptor.InterceptionResponse.Deny] when installation was triggered and
-     * the original request can be skipped, otherwise null to continue loading the page.
-     */
-    private fun interceptAmoRequest(
-        uri: String,
-        isSameDomain: Boolean,
-        hasUserGesture: Boolean
-    ): RequestInterceptor.InterceptionResponse? {
-        // First we execute a quick check to see if this is a request we're interested in i.e. a
-        // request triggered by the user and coming from AMO.
-        if (hasUserGesture && isSameDomain && uri.startsWith(AMO_BASE_URL)) {
-
-            // Check if this is a request to install an add-on.
-            val matchResult = AMO_INSTALL_URL_REGEX.toRegex().find(uri)
-            if (matchResult != null) {
-
-                // Navigate and trigger add-on installation.
-                matchResult.groupValues.getOrNull(1)?.let { addonId ->
-                    navController?.get()?.navigate(
-                        NavGraphDirections.actionGlobalAddonsManagementFragment(addonId)
-                    )
-
-                    // We've redirected to the add-ons management fragment, skip original request.
-                    return RequestInterceptor.InterceptionResponse.Deny
-                }
-            }
-        }
-
-        // In all other case we let the original request proceed.
-        return null
     }
 
     /**
@@ -149,16 +109,19 @@ class AppRequestInterceptor(
         ErrorType.ERROR_NO_INTERNET,
         ErrorType.ERROR_HTTPS_ONLY,
         ErrorType.ERROR_BAD_HSTS_CERT,
-        ErrorType.ERROR_UNKNOWN_PROTOCOL -> RiskLevel.Low
+        ErrorType.ERROR_UNKNOWN_PROTOCOL,
+        -> RiskLevel.Low
 
         ErrorType.ERROR_SECURITY_BAD_CERT,
         ErrorType.ERROR_SECURITY_SSL,
-        ErrorType.ERROR_PORT_BLOCKED -> RiskLevel.Medium
+        ErrorType.ERROR_PORT_BLOCKED
+        -> RiskLevel.Medium
 
         ErrorType.ERROR_SAFEBROWSING_HARMFUL_URI,
         ErrorType.ERROR_SAFEBROWSING_MALWARE_URI,
         ErrorType.ERROR_SAFEBROWSING_PHISHING_URI,
-        ErrorType.ERROR_SAFEBROWSING_UNWANTED_URI -> RiskLevel.High
+        ErrorType.ERROR_SAFEBROWSING_UNWANTED_URI
+        -> RiskLevel.High
     }
 
     private fun getErrorPageTitle(context: Context, type: ErrorType): String? {
@@ -189,7 +152,5 @@ class AppRequestInterceptor(
     companion object {
         internal const val LOW_AND_MEDIUM_RISK_ERROR_PAGES = "low_and_medium_risk_error_pages.html"
         internal const val HIGH_RISK_ERROR_PAGES = "high_risk_error_pages.html"
-        internal const val AMO_BASE_URL = BuildConfig.AMO_BASE_URL
-        internal const val AMO_INSTALL_URL_REGEX = "$AMO_BASE_URL/android/downloads/file/([^\\s]+)/([^\\s]+\\.xpi)"
     }
 }

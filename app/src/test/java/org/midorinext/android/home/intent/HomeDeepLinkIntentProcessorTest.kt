@@ -25,6 +25,7 @@ import org.midorinext.android.BuildConfig.DEEP_LINK_SCHEME
 import org.midorinext.android.HomeActivity
 import org.midorinext.android.NavGraphDirections
 import org.midorinext.android.browser.browsingmode.BrowsingMode
+import org.midorinext.android.components.accounts.MidoriFxAEntryPoint
 import org.midorinext.android.helpers.MidoriRobolectricTestRunner
 import org.midorinext.android.settings.SupportUtils
 import org.robolectric.annotation.Config
@@ -118,7 +119,9 @@ class HomeDeepLinkIntentProcessorTest {
         assertTrue(processorHome.process(testIntent("turn_on_sync"), navController, out))
 
         verify { activity wasNot Called }
-        verify { navController.navigate(NavGraphDirections.actionGlobalTurnOnSync()) }
+        verify { navController.navigate(NavGraphDirections.actionGlobalTurnOnSync(
+            entrypoint = MidoriFxAEntryPoint.DeepLink,
+        )) }
         verify { out wasNot Called }
     }
 

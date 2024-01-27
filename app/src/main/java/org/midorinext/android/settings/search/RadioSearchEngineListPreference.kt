@@ -29,7 +29,7 @@ import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.lib.state.ext.flow
 import mozilla.components.support.ktx.android.view.toScope
-import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifChanged
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.midorinext.android.R
 import org.midorinext.android.databinding.SearchEngineRadioButtonBinding
 import org.midorinext.android.ext.components
@@ -61,7 +61,7 @@ class RadioSearchEngineListPreference @JvmOverloads constructor(
     private fun subscribeToSearchEngineUpdates(store: BrowserStore, view: View) = view.toScope().launch {
         store.flow()
             .map { state -> state.search }
-            .ifChanged()
+            .distinctUntilChanged()
             .collect { state -> refreshSearchEngineViews(view, state) }
     }
 

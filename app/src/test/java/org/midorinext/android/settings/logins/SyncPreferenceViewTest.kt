@@ -30,6 +30,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.midorinext.android.R
+import org.midorinext.android.components.accounts.MidoriFxAEntryPoint
 import org.midorinext.android.settings.SyncPreference
 import org.midorinext.android.settings.SyncPreferenceView
 import org.midorinext.android.settings.logins.fragment.SavedLoginsAuthFragmentDirections
@@ -94,7 +95,9 @@ class SyncPreferenceViewTest {
         assertFalse(preferenceChangeListener.captured.onPreferenceChange(syncPreference, any()))
         verify {
             navController.navigate(
-                SavedLoginsAuthFragmentDirections.actionGlobalAccountProblemFragment()
+                SavedLoginsAuthFragmentDirections.actionGlobalAccountProblemFragment(
+                    entrypoint = MidoriFxAEntryPoint.SavedLogins,
+                )
             )
         }
     }
@@ -111,7 +114,9 @@ class SyncPreferenceViewTest {
         assertFalse(preferenceChangeListener.captured.onPreferenceChange(syncPreference, any()))
         verify {
             navController.navigate(
-                SavedLoginsAuthFragmentDirections.actionGlobalAccountProblemFragment()
+                SavedLoginsAuthFragmentDirections.actionGlobalAccountProblemFragment(
+                    entrypoint = MidoriFxAEntryPoint.SavedLogins,
+                )
             )
         }
     }
@@ -128,7 +133,9 @@ class SyncPreferenceViewTest {
         assertFalse(preferenceChangeListener.captured.onPreferenceChange(syncPreference, any()))
         verify {
             navController.navigate(
-                SavedLoginsAuthFragmentDirections.actionSavedLoginsAuthFragmentToTurnOnSyncFragment()
+                SavedLoginsAuthFragmentDirections.actionSavedLoginsAuthFragmentToTurnOnSyncFragment(
+                    entrypoint = MidoriFxAEntryPoint.SavedLogins,
+                )
             )
         }
     }
@@ -180,12 +187,16 @@ class SyncPreferenceViewTest {
         loggedInTitle = loggedInTitle,
         onSignInToSyncClicked = {
             val directions =
-                SavedLoginsAuthFragmentDirections.actionSavedLoginsAuthFragmentToTurnOnSyncFragment()
+                SavedLoginsAuthFragmentDirections.actionSavedLoginsAuthFragmentToTurnOnSyncFragment(
+                    entrypoint = MidoriFxAEntryPoint.SavedLogins,
+                )
             navController.navigate(directions)
         },
         onReconnectClicked = {
             val directions =
-                SavedLoginsAuthFragmentDirections.actionGlobalAccountProblemFragment()
+                SavedLoginsAuthFragmentDirections.actionSavedLoginsAuthFragmentToTurnOnSyncFragment(
+                    entrypoint = MidoriFxAEntryPoint.SavedLogins,
+                )
             navController.navigate(directions)
         }
     )

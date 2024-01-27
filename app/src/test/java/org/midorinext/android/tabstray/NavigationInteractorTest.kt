@@ -34,6 +34,7 @@ import org.midorinext.android.HomeActivity
 import org.midorinext.android.collections.CollectionsDialog
 import org.midorinext.android.collections.show
 import org.midorinext.android.components.TabCollectionStorage
+import org.midorinext.android.components.accounts.MidoriFxAEntryPoint
 import org.midorinext.android.components.bookmarks.BookmarksUseCase
 import org.midorinext.android.helpers.MidoriRobolectricTestRunner
 import mozilla.components.browser.state.state.createTab as createStateTab
@@ -90,7 +91,9 @@ class NavigationInteractorTest {
 
         createInteractor().onAccountSettingsClicked()
 
-        verify(exactly = 1) { navController.navigate(TabsTrayFragmentDirections.actionGlobalTurnOnSync()) }
+        verify(exactly = 1) { navController.navigate(TabsTrayFragmentDirections.actionGlobalTurnOnSync(
+            entrypoint = MidoriFxAEntryPoint.NavigationInteraction,
+        )) }
     }
 
     @Test

@@ -41,6 +41,7 @@ import org.midorinext.android.wallpapers.WallpaperState
  * Also serves as an in memory cache of all stories mapped by category allowing for quick stories filtering.
  */
 data class AppState(
+    val isForeground: Boolean = true,
     val inactiveTabsExpanded: Boolean = false,
     val firstFrameDrawn: Boolean = false,
     val nonFatalCrashes: List<NativeCodeCrash> = emptyList(),

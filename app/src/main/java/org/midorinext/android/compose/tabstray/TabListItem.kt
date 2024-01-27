@@ -28,8 +28,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.createTab
+import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 import org.midorinext.android.R
 import org.midorinext.android.compose.TabThumbnail
 import org.midorinext.android.ext.toShortUrl
@@ -56,6 +58,8 @@ import org.midorinext.android.theme.Theme
 @Suppress("MagicNumber")
 fun TabListItem(
     tab: TabSessionState,
+    storage: ThumbnailStorage,
+    thumbnailSize: Int,
     isSelected: Boolean = false,
     multiSelectionEnabled: Boolean = false,
     multiSelectionSelected: Boolean = false,
@@ -83,6 +87,8 @@ fun TabListItem(
     ) {
         Thumbnail(
             tab = tab,
+            size = thumbnailSize,
+            storage = storage,
             multiSelectionEnabled = multiSelectionEnabled,
             isSelected = multiSelectionSelected,
             onMediaIconClicked = { onMediaClick(it) }
@@ -113,7 +119,7 @@ fun TabListItem(
                 modifier = Modifier.size(size = 24.dp),
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.mozac_ic_close),
+                    painter = painterResource(id = R.drawable.mozac_ic_cross_20),
                     contentDescription = stringResource(
                         id = R.string.close_tab_title,
                         tab.content.title
@@ -128,6 +134,8 @@ fun TabListItem(
 @Composable
 private fun Thumbnail(
     tab: TabSessionState,
+    size: Int,
+    storage: ThumbnailStorage,
     multiSelectionEnabled: Boolean,
     isSelected: Boolean,
     onMediaIconClicked: ((TabSessionState) -> Unit)
@@ -135,6 +143,8 @@ private fun Thumbnail(
     Box {
         TabThumbnail(
             tab = tab,
+            size = size,
+            storage = storage,
             modifier = Modifier.size(width = 92.dp, height = 72.dp),
             contentDescription = stringResource(id = R.string.mozac_browser_tabstray_open_tab),
         )
@@ -148,7 +158,7 @@ private fun Thumbnail(
                 backgroundColor = MidoriTheme.colors.layerAccent,
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.mozac_ic_check),
+                    painter = painterResource(id = R.drawable.mozac_ic_checkmark_24),
                     modifier = Modifier
                         .matchParentSize()
                         .padding(all = 8.dp),
@@ -175,6 +185,8 @@ private fun TabListItemPreview() {
     MidoriTheme(theme = Theme.getTheme()) {
         TabListItem(
             tab = createTab(url = "www.mozilla.com", title = "Mozilla"),
+            thumbnailSize = 108,
+            storage = ThumbnailStorage(LocalContext.current),
             onCloseClick = {},
             onMediaClick = {},
             onClick = {},
@@ -190,6 +202,8 @@ private fun SelectedTabListItemPreview() {
     MidoriTheme(theme = Theme.getTheme()) {
         TabListItem(
             tab = createTab(url = "www.mozilla.com", title = "Mozilla"),
+            thumbnailSize = 108,
+            storage = ThumbnailStorage(LocalContext.current),
             onCloseClick = {},
             onMediaClick = {},
             onClick = {},

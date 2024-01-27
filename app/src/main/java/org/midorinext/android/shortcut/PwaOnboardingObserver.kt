@@ -14,7 +14,7 @@ import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.pwa.WebAppUseCases
 import mozilla.components.lib.state.ext.flowScoped
-import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import org.midorinext.android.R
 import org.midorinext.android.browser.BrowserFragmentDirections
 import org.midorinext.android.ext.nav
@@ -38,7 +38,7 @@ class PwaOnboardingObserver(
             flow.mapNotNull { state ->
                 state.selectedTab
             }
-                .ifChanged {
+                .distinctUntilChangedBy {
                     it.content.webAppManifest
                 }
                 .collect {

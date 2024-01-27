@@ -18,6 +18,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.midorinext.android.components.accounts.MidoriFxAEntryPoint
 import org.midorinext.android.databinding.OnboardingManualSigninBinding
 import org.midorinext.android.ext.components
 import org.midorinext.android.helpers.MidoriRobolectricTestRunner
@@ -52,6 +53,8 @@ class OnboardingManualSignInViewHolderTest {
         OnboardingManualSignInViewHolder(binding.root)
         binding.fxaSignInButton.performClick()
 
-        verify { navController.navigate(HomeFragmentDirections.actionGlobalTurnOnSync()) }
+        verify { navController.navigate(HomeFragmentDirections.actionGlobalTurnOnSync(
+            entrypoint = MidoriFxAEntryPoint.HomeMenu,
+        )) }
     }
 }

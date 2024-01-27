@@ -13,7 +13,7 @@ import mozilla.components.browser.state.selector.privateTabs
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.lib.state.helpers.AbstractBinding
-import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 
 /**
  * A binding that closes the tabs tray when the last tab is closed.
@@ -28,7 +28,7 @@ class CloseOnLastTabBinding(
         flow.map { it }
             // Ignore the initial state; we don't want to close immediately.
             .drop(1)
-            .ifChanged { it.tabs }
+            .distinctUntilChangedBy { it.tabs }
             .collect { state ->
                 val selectedPage = tabsTrayStore.state.selectedPage
                 val tabs = when (selectedPage) {

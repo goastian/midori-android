@@ -78,7 +78,6 @@ class ModeTest {
     fun `get current onboarding mode when signed out`() {
         every { onboarding.userHasBeenOnboarded() } returns false
         every { accountManager.authenticatedAccount() } returns null
-        every { accountManager.shareableAccounts(context) } returns emptyList()
 
         assertEquals(Mode.Onboarding(OnboardingState.SignedOutNoAutoSignIn), currentMode.getCurrentMode())
     }

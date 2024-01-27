@@ -24,6 +24,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.midorinext.android.R
+import org.midorinext.android.components.Components
+import org.midorinext.android.ext.settings
 import org.midorinext.android.helpers.MidoriRobolectricTestRunner
 import org.midorinext.android.search.SearchEngineSource
 import org.midorinext.android.search.SearchEventSource
@@ -154,12 +156,17 @@ class ToolbarViewTest {
         verify { editToolbar.setIcon(any(), "Search Engine") }
     }
 
-    private fun buildToolbarView(isPrivate: Boolean) = ToolbarView(
-        context,
-        Settings(context),
-        interactor,
+    private fun buildToolbarView(
+        isPrivate: Boolean,
+        settings: Settings = context.settings(),
+        components: Components = mockk(relaxed = true),
+    ) = ToolbarView(
+        context = context,
+        settings = settings,
+        components = components,
+        interactor = interactor,
         isPrivate = isPrivate,
         view = toolbar,
-        fromHomeFragment = false
+        fromHomeFragment = false,
     )
 }

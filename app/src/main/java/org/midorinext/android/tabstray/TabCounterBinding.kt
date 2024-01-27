@@ -11,7 +11,7 @@ import mozilla.components.browser.state.selector.normalTabs
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.lib.state.helpers.AbstractBinding
-import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifChanged
+import kotlinx.coroutines.flow.distinctUntilChanged
 import mozilla.components.ui.tabcounter.TabCounter
 
 /**
@@ -25,7 +25,7 @@ class TabCounterBinding(
 
     override suspend fun onState(flow: Flow<BrowserState>) {
         flow.map { it.normalTabs }
-            .ifChanged()
+            .distinctUntilChanged()
             .collect {
                 counter.setCount(it.size)
             }

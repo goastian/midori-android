@@ -23,7 +23,7 @@ import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.lib.state.helpers.AbstractBinding
 import mozilla.components.support.ktx.android.util.dpToPx
-import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifChanged
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.midorinext.android.R
 import org.midorinext.android.browser.infobanner.InfoBanner
 import org.midorinext.android.databinding.ComponentTabstray2Binding
@@ -47,7 +47,7 @@ class TabsTrayInactiveTabsOnboardingBinding(
 
     override suspend fun onState(flow: Flow<BrowserState>) {
         flow.map { state -> state.normalTabs.size }
-            .ifChanged()
+            .distinctUntilChanged()
             .collect {
                 val inactiveTabsList =
                     if (settings.inactiveTabsAreEnabled) { store.state.potentialInactiveTabs } else emptyList()
