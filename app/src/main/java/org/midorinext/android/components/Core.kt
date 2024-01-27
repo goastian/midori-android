@@ -411,6 +411,20 @@ class Core(
                     )
                 )
 
+                defaultTopSites.add(
+                    Pair(
+                        context.getString(R.string.default_top_site_eneba),
+                        SupportUtils.ENEBA_URL,
+                    )
+                )
+
+                defaultTopSites.add(
+                    Pair(
+                        context.getString(R.string.default_top_site_hotels),
+                        SupportUtils.HOTELS_URL,
+                    )
+                )
+
                 context.settings().defaultTopSitesAdded = true
             }
         }
