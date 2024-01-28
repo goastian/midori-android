@@ -438,7 +438,7 @@
     
     <string name="preferences_sync_category">Valitse synkronoitavat tiedot</string>
     
-    <string name="preferences_sync_history">Historia</string>
+    <string name="preferences_sync_history">Historial</string>
     
     <string name="preferences_sync_bookmarks">Kirjanmerkit</string>
     
@@ -542,7 +542,7 @@
     
     <string name="library_desktop_bookmarks_unfiled">Muut kirjanmerkit</string>
     
-    <string name="library_history">Historia</string>
+    <string name="library_history">Historial</string>
     
     <string name="library_new_tab">Uusi välilehti</string>
     
@@ -558,7 +558,7 @@
     
     <string name="library_recently_closed_tabs">Äskettäin suljetut välilehdet</string>
     
-    <string name="recently_closed_show_full_history">Näytä koko historia</string>
+    <string name="recently_closed_show_full_history">Näytä koko historial</string>
     
     <string name="recently_closed_tabs">%d välilehdet</string>
     

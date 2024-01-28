@@ -438,7 +438,7 @@
     
     <string name="preferences_sync_category">Elige qué sincronizar</string>
     
-    <string name="preferences_sync_history">Historia</string>
+    <string name="preferences_sync_history">Historial</string>
     
     <string name="preferences_sync_bookmarks">Marcadores</string>
     
@@ -542,7 +542,7 @@
     
     <string name="library_desktop_bookmarks_unfiled">Otros marcadores</string>
     
-    <string name="library_history">Historia</string>
+    <string name="library_history">Historial</string>
     
     <string name="library_new_tab">Nueva pestaña</string>
     
@@ -702,7 +702,7 @@
     
     <string name="history_older">Más antiguos</string>
     
-    <string name="history_empty_message">Aquí no hay historia</string>
+    <string name="history_empty_message">Aquí no hay historial</string>
 
     
     
