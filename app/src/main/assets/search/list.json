@@ -1,6 +1,6 @@
 {
   "default": {
-    "searchDefault": "DuckDuckGo",
+    "searchDefault": "Bing",
     "searchOrder": ["Bing", "Startpage", "Google", "DuckDuckGo"],
     "visibleDefaultEngines": [
       "bing", "ddg", "google", "startpage"
