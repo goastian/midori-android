@@ -13,11 +13,13 @@ import mozilla.components.lib.state.State
 import mozilla.components.lib.state.Store
 import mozilla.components.support.ktx.kotlin.tryGetHostFromUrl
 import org.midorinext.android.selection.SelectionHolder
+import java.util.UUID
 
 /**
  * Class representing a history entry.
  */
 sealed class History : Parcelable {
+    val id: String = UUID.randomUUID().toString()
     abstract val position: Int
     abstract val title: String
     abstract val visitedAt: Long
