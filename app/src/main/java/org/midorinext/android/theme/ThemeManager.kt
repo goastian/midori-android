@@ -15,14 +15,17 @@ import android.util.TypedValue
 import android.view.Window
 import androidx.annotation.StyleRes
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import mozilla.components.support.ktx.android.content.getColorFromAttr
 import mozilla.components.support.ktx.android.view.createWindowInsetsController
+import mozilla.components.ui.colors.PhotonColors
 import org.midorinext.android.HomeActivity
 import org.midorinext.android.R
 import org.midorinext.android.browser.browsingmode.BrowsingMode
 import org.midorinext.android.customtabs.ExternalAppBrowserActivity
+import org.midorinext.android.ext.settings
 
 abstract class ThemeManager {
 
@@ -31,11 +34,13 @@ abstract class ThemeManager {
     /**
      * Returns the style resource corresponding to the [currentTheme].
      */
-    @get:StyleRes
-    val currentThemeResource get() = when (currentTheme) {
-        BrowsingMode.Normal -> R.style.NormalTheme
+    @StyleRes
+    fun getCurrentThemeResource(context: Context) = when (currentTheme) {
+        BrowsingMode.Normal -> getMidoriColorScheme(context).resourceId
         BrowsingMode.Private -> R.style.PrivateTheme
     }
+
+    fun getColorSchemes(): List<MidoriThemeColorScheme> = COLOR_SCHEMES
 
     /**
      * Handles status bar theme change since the window does not dynamically recreate
@@ -63,7 +68,7 @@ abstract class ThemeManager {
     }
 
     fun setActivityTheme(activity: Activity) {
-        activity.setTheme(currentThemeResource)
+        activity.setTheme(getCurrentThemeResource(activity))
     }
 
     companion object {
@@ -135,3 +140,63 @@ class DefaultThemeManager(
             }
         }
 }
+
+fun getMidoriColorScheme(context: Context): MidoriThemeColorScheme {
+    val colorScheme = context.settings().themeColorScheme
+    return COLOR_SCHEMES.find { it.id == colorScheme }!!
+}
+
+val COLOR_SCHEMES = listOf(
+    MidoriThemeColorScheme(
+        id = -1,
+        lightColors = lightColorPalette,
+        darkColors = darkColorPalette,
+        resourceId = R.style.NormalTheme,
+        lightPrimaryColor = lightColorPalette.layer1,
+        darkPrimaryColor = darkColorPalette.layer1,
+    ),
+    MidoriThemeColorScheme(
+        id = 0,
+        lightColors = lightRedColorPalette,
+        darkColors = darkRedColorPalette,
+        resourceId = R.style.MidoriThemeRed,
+        lightPrimaryColor = PhotonColors.Red50,
+        darkPrimaryColor = PhotonColors.Red50,
+        brush = Brush.radialGradient(
+            colors = listOf(
+                PhotonColors.Red50,
+                PhotonColors.Red70,
+            )
+        ),
+    ),
+    MidoriThemeColorScheme(
+        id = 1,
+        lightColors = lightGreenColorPalette,
+        darkColors = darkGreenColorPalette,
+        resourceId = R.style.MidoriThemeGreen,
+        lightPrimaryColor = PhotonColors.Green70,
+        darkPrimaryColor = PhotonColors.Green70,
+        brush = Brush.radialGradient(
+            colors = listOf(
+                PhotonColors.Green70,
+                PhotonColors.Green80,
+            )
+        ),
+    ),
+    MidoriThemeColorScheme(
+        id = 2,
+        lightColors = lightBlueColorPalette,
+        darkColors = darkBlueColorPalette,
+        resourceId = R.style.MidoriThemeBlue,
+        lightPrimaryColor = PhotonColors.Blue30,
+        darkPrimaryColor = PhotonColors.Blue30,
+    ),
+    MidoriThemeColorScheme(
+        id = 3,
+        lightColors = lightYellowColorPalette,
+        darkColors = darkYellowColorPalette,
+        resourceId = R.style.MidoriThemeYellow,
+        lightPrimaryColor = PhotonColors.Yellow70,
+        darkPrimaryColor = PhotonColors.Yellow70,
+    ),
+)

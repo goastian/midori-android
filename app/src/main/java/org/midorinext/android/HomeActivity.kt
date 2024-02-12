@@ -64,7 +64,7 @@ import mozilla.components.support.webextensions.WebExtensionPopupObserver
 import org.midorinext.android.addons.AddonDetailsFragmentDirections
 import org.midorinext.android.addons.AddonPermissionsDetailsFragmentDirections
 import org.midorinext.android.addons.AddonsManagementFragmentDirections
-import org.midorinext.android.addons.ExtensionsProcessDisabledController
+import org.midorinext.android.addons.ExtensionsProcessDisabledForegroundController
 import org.midorinext.android.browser.browsingmode.BrowsingMode
 import org.midorinext.android.browser.browsingmode.BrowsingModeManager
 import org.midorinext.android.browser.browsingmode.DefaultBrowsingModeManager
@@ -103,6 +103,7 @@ import org.midorinext.android.utils.BrowsersCache
 import org.midorinext.android.utils.ManufacturerCodes
 import org.midorinext.android.utils.Settings
 import java.lang.ref.WeakReference
+import org.midorinext.android.addons.ExtensionsProcessDisabledBackgroundController
 
 /**
  * The main activity of the application. The application is primarily a single Activity (this one)
@@ -133,8 +134,15 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             fragmentManager = supportFragmentManager,
         )
     }
-    private val extensionsProcessDisabledPromptObserver by lazy {
-        ExtensionsProcessDisabledController(this@HomeActivity)
+    private val extensionsProcessDisabledForegroundController by lazy {
+        ExtensionsProcessDisabledForegroundController(this@HomeActivity)
+    }
+
+    private val extensionsProcessDisabledBackgroundController by lazy {
+        ExtensionsProcessDisabledBackgroundController(
+            browserStore = components.core.store,
+            appStore = components.appStore,
+        )
     }
 
     private val serviceWorkerSupport by lazy {
@@ -237,7 +245,8 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
         lifecycle.addObservers(
             webExtensionPopupObserver,
-            extensionsProcessDisabledPromptObserver,
+            extensionsProcessDisabledForegroundController,
+            extensionsProcessDisabledBackgroundController,
             webExtensionPromptFeature,
             serviceWorkerSupport,
         )

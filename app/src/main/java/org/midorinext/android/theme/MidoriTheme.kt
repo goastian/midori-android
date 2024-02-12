@@ -65,8 +65,17 @@ fun MidoriTheme(
     content: @Composable () -> Unit
 ) {
     val colors = when (theme) {
-        Theme.Light -> lightColorPalette
-        Theme.Dark -> darkColorPalette
+        Theme.Light -> if (!inComposePreview) {
+            getMidoriColorScheme(LocalContext.current).lightColors
+        } else {
+            lightColorPalette
+        }
+
+        Theme.Dark -> if (!inComposePreview) {
+            getMidoriColorScheme(LocalContext.current).darkColors
+        } else {
+            darkColorPalette
+        }
         Theme.Private -> privateColorPalette
     }
 
@@ -152,7 +161,7 @@ private val privateColorPalette = MidoriColors(
     borderWarning = PhotonColors.Red40
 )
 
-private val darkColorPalette = MidoriColors(
+val darkColorPalette = MidoriColors(
     layer1 = PhotonColors.DarkGrey60,
     layer2 = PhotonColors.DarkGrey30,
     layer3 = PhotonColors.DarkGrey80,
@@ -218,7 +227,7 @@ private val darkColorPalette = MidoriColors(
     borderWarning = PhotonColors.Red40
 )
 
-private val lightColorPalette = MidoriColors(
+val lightColorPalette = MidoriColors(
     layer1 = PhotonColors.LightGrey10,
     layer2 = PhotonColors.White,
     layer3 = PhotonColors.LightGrey20,

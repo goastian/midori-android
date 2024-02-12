@@ -19,6 +19,7 @@ import org.midorinext.android.compose.preference.PreferenceCategory
 import org.midorinext.android.compose.preference.RadioGroupItem
 import org.midorinext.android.compose.preference.RadioGroupPreference
 import org.midorinext.android.compose.preference.SwitchPreference
+import org.midorinext.android.compose.preference.TextOnlyPreference
 import org.midorinext.android.theme.MidoriTheme
 
 class CustomizationComposeView @JvmOverloads constructor(
@@ -27,10 +28,7 @@ class CustomizationComposeView @JvmOverloads constructor(
     defStyleAttr: Int = 0,
 ) : AbstractComposeView(context, attrs, defStyleAttr) {
 
-    var onLightThemeClick by mutableStateOf({})
-    var onDarkThemeClick by mutableStateOf({})
-    var onSetByBatterySaverClick by mutableStateOf({})
-    var onFollowDeviceThemeClick by mutableStateOf({})
+    var onSelectThemeClick by mutableStateOf({})
 
     @Composable
     override fun Content() {
@@ -40,35 +38,10 @@ class CustomizationComposeView @JvmOverloads constructor(
                     title = stringResource(R.string.preferences_theme),
                     allowDividerAbove = false,
                 ) {
-                    RadioGroupPreference(
-                        items = listOf(
-                            RadioGroupItem(
-                                title = stringResource(R.string.preference_light_theme),
-                                key = stringResource(R.string.pref_key_light_theme),
-                                defaultValue = booleanResource(R.bool.underAPI28),
-                                onClick = onLightThemeClick,
-                            ),
-                            RadioGroupItem(
-                                title = stringResource(R.string.preference_dark_theme),
-                                key = stringResource(R.string.pref_key_dark_theme),
-                                defaultValue = false,
-                                onClick = onDarkThemeClick,
-                            ),
-                            RadioGroupItem(
-                                title = stringResource(R.string.preference_auto_battery_theme),
-                                key = stringResource(R.string.pref_key_auto_battery_theme),
-                                defaultValue = false,
-                                visible = booleanResource(R.bool.underAPI28),
-                                onClick = onSetByBatterySaverClick,
-                            ),
-                            RadioGroupItem(
-                                title = stringResource(R.string.preference_follow_device_theme),
-                                key = stringResource(R.string.pref_key_follow_device_theme),
-                                defaultValue = booleanResource(R.bool.API28),
-                                visible = booleanResource(R.bool.API28),
-                                onClick = onFollowDeviceThemeClick,
-                            ),
-                        ),
+                    TextOnlyPreference(
+                        title = stringResource(id = R.string.preferences_select_theme),
+                        key = stringResource(id = R.string.pref_key_select_theme),
+                        onClick = onSelectThemeClick,
                     )
                 }
 

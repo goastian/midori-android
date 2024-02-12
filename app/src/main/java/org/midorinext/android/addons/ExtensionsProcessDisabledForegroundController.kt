@@ -5,8 +5,6 @@
 package org.midorinext.android.addons
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.TextView
@@ -20,7 +18,6 @@ import mozilla.components.support.webextensions.ExtensionsProcessDisabledPromptO
 import org.midorinext.android.R
 import org.midorinext.android.components.AppStore
 import org.midorinext.android.ext.components
-import kotlin.system.exitProcess
 
 /**
  * Controller for handling extensions process spawning disabled events. When the app is in
@@ -35,20 +32,18 @@ import kotlin.system.exitProcess
  * @param appName to be added to the message. Optional and mainly relevant for testing
  * @param onKillApp called when the app is backgrounded and extensions process is disabled
  */
-class ExtensionsProcessDisabledController(
+class ExtensionsProcessDisabledForegroundController(
     @UiContext context: Context,
     browserStore: BrowserStore = context.components.core.store,
     appStore: AppStore = context.components.appStore,
     builder: AlertDialog.Builder = AlertDialog.Builder(context),
     appName: String = context.appName,
-    onKillApp: () -> Unit = { killApp() },
 ) : ExtensionsProcessDisabledPromptObserver(
-    browserStore,
+    store = browserStore,
+    shouldCancelOnStop = true,
     {
         if (appStore.state.isForeground) {
             presentDialog(context, browserStore, builder, appName)
-        } else {
-            onKillApp.invoke()
         }
     },
 ) {
@@ -60,16 +55,6 @@ class ExtensionsProcessDisabledController(
 
     companion object {
         private var shouldCreateDialog: Boolean = true
-
-        /**
-         * When a dialog can't be shown because the app is in the background, instead the app will
-         * be killed to prevent leaking network data without extensions enabled.
-         */
-        private fun killApp() {
-            Handler(Looper.getMainLooper()).post {
-                exitProcess(0)
-            }
-        }
 
         /**
          * Present a dialog to the user notifying of extensions process spawning disabled and also asking

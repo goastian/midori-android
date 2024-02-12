@@ -83,7 +83,7 @@ class Analytics(
 private fun isSentryEnabled() = !BuildConfig.SENTRY_TOKEN.isNullOrEmpty()
 
 private fun getSentryProjectUrl() =
-    if (Config.channel == ReleaseChannel.Release) "https://sentry.io/organizations/Astian, Inc/issues/?project=4506062841839616"
+    if (Config.channel == ReleaseChannel.Release) "https://astian.sentry.io/projects/midori-android/?project=4506062841839616"
     else null
 
 object NoOpCrashReporterService : CrashReporterService {
