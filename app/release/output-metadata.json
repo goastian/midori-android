@@ -12,13 +12,13 @@
       "filters": [
         {
           "filterType": "ABI",
-          "value": "x86_64"
+          "value": "armeabi-v7a"
         }
       ],
       "attributes": [],
-      "versionCode": 2016002343,
-      "versionName": "3.5.1",
-      "outputFile": "app-x86_64-release.apk"
+      "versionCode": 2016004753,
+      "versionName": "3.5.3",
+      "outputFile": "app-armeabi-v7a-release.apk"
     },
     {
       "type": "ONE_OF_MANY",
@@ -29,8 +29,8 @@
         }
       ],
       "attributes": [],
-      "versionCode": 2016002341,
-      "versionName": "3.5.1",
+      "versionCode": 2016004757,
+      "versionName": "3.5.3",
       "outputFile": "app-x86-release.apk"
     },
     {
@@ -38,13 +38,13 @@
       "filters": [
         {
           "filterType": "ABI",
-          "value": "armeabi-v7a"
+          "value": "x86_64"
         }
       ],
       "attributes": [],
-      "versionCode": 2016002337,
-      "versionName": "3.5.1",
-      "outputFile": "app-armeabi-v7a-release.apk"
+      "versionCode": 2016004759,
+      "versionName": "3.5.3",
+      "outputFile": "app-x86_64-release.apk"
     },
     {
       "type": "ONE_OF_MANY",
@@ -55,8 +55,8 @@
         }
       ],
       "attributes": [],
-      "versionCode": 2016002339,
-      "versionName": "3.5.1",
+      "versionCode": 2016004755,
+      "versionName": "3.5.3",
       "outputFile": "app-arm64-v8a-release.apk"
     }
   ],
