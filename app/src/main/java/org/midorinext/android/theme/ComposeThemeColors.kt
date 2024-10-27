@@ -1,11 +1,12 @@
-package org.midorinext.android.theme
-
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+package net.waterfox.android.theme
+
 import androidx.compose.ui.graphics.Color
 import mozilla.components.ui.colors.PhotonColors
+import org.midorinext.android.theme.MidoriColors
 
 /* Red theme colors */
 val lightRedColorPalette = MidoriColors(
@@ -38,8 +39,8 @@ val lightRedColorPalette = MidoriColors(
     textDisabled = PhotonColors.DarkGrey90A40,
     textWarning = PhotonColors.Red70,
     textWarningButton = PhotonColors.Red70,
-    textAccent = PhotonColors.Violet70,
-    textAccentDisabled = PhotonColors.Violet70A80,
+    textAccent = PhotonColors.Red50,
+    textAccentDisabled = PhotonColors.Red50.copy(alpha = 0.4f),
     textOnColorPrimary = PhotonColors.LightGrey05,
     textOnColorSecondary = PhotonColors.LightGrey40,
     textActionPrimary = PhotonColors.LightGrey05,
@@ -104,8 +105,8 @@ val darkRedColorPalette = MidoriColors(
     textDisabled = PhotonColors.LightGrey05A40,
     textWarning = PhotonColors.Red20,
     textWarningButton = PhotonColors.Red50,
-    textAccent = PhotonColors.Violet20,
-    textAccentDisabled = PhotonColors.Violet20A60,
+    textAccent = PhotonColors.Red50,
+    textAccentDisabled = PhotonColors.Red50.copy(alpha = 0.4f),
     textOnColorPrimary = PhotonColors.LightGrey05,
     textOnColorSecondary = PhotonColors.LightGrey40,
     textActionPrimary = PhotonColors.LightGrey05,
@@ -173,8 +174,8 @@ val lightGreenColorPalette = MidoriColors(
     textDisabled = PhotonColors.DarkGrey90A40,
     textWarning = PhotonColors.Red70,
     textWarningButton = PhotonColors.Red70,
-    textAccent = PhotonColors.Violet70,
-    textAccentDisabled = PhotonColors.Violet70A80,
+    textAccent = PhotonColors.Green70,
+    textAccentDisabled = PhotonColors.Green70.copy(alpha = 0.4f),
     textOnColorPrimary = PhotonColors.LightGrey05,
     textOnColorSecondary = PhotonColors.LightGrey40,
     textActionPrimary = PhotonColors.LightGrey05,
@@ -239,8 +240,8 @@ val darkGreenColorPalette = MidoriColors(
     textDisabled = PhotonColors.LightGrey05A40,
     textWarning = PhotonColors.Red20,
     textWarningButton = PhotonColors.Red70,
-    textAccent = PhotonColors.Violet20,
-    textAccentDisabled = PhotonColors.Violet20A60,
+    textAccent = PhotonColors.Green70,
+    textAccentDisabled = PhotonColors.Green70.copy(alpha = 0.4f),
     textOnColorPrimary = PhotonColors.LightGrey05,
     textOnColorSecondary = PhotonColors.LightGrey40,
     textActionPrimary = PhotonColors.LightGrey05,
@@ -306,8 +307,8 @@ val lightBlueColorPalette = MidoriColors(
     textDisabled = PhotonColors.DarkGrey90A40,
     textWarning = PhotonColors.Red70,
     textWarningButton = PhotonColors.Red70,
-    textAccent = PhotonColors.Violet70,
-    textAccentDisabled = PhotonColors.Violet70A80,
+    textAccent = PhotonColors.Blue30,
+    textAccentDisabled = PhotonColors.Blue30.copy(alpha = 0.4f),
     textOnColorPrimary = PhotonColors.LightGrey05,
     textOnColorSecondary = PhotonColors.LightGrey40,
     textActionPrimary = PhotonColors.LightGrey05,
@@ -372,8 +373,8 @@ val darkBlueColorPalette = MidoriColors(
     textDisabled = PhotonColors.LightGrey05A40,
     textWarning = PhotonColors.Red20,
     textWarningButton = PhotonColors.Red70,
-    textAccent = PhotonColors.Violet20,
-    textAccentDisabled = PhotonColors.Violet20A60,
+    textAccent = PhotonColors.Blue30,
+    textAccentDisabled = PhotonColors.Blue30.copy(alpha = 0.4f),
     textOnColorPrimary = PhotonColors.LightGrey05,
     textOnColorSecondary = PhotonColors.LightGrey40,
     textActionPrimary = PhotonColors.LightGrey05,
@@ -439,8 +440,8 @@ val lightYellowColorPalette = MidoriColors(
     textDisabled = PhotonColors.DarkGrey90A40,
     textWarning = PhotonColors.Red70,
     textWarningButton = PhotonColors.Red70,
-    textAccent = PhotonColors.Violet70,
-    textAccentDisabled = PhotonColors.Violet70A80,
+    textAccent = PhotonColors.Yellow70,
+    textAccentDisabled = PhotonColors.Yellow70.copy(alpha = 0.4f),
     textOnColorPrimary = PhotonColors.LightGrey05,
     textOnColorSecondary = PhotonColors.LightGrey40,
     textActionPrimary = PhotonColors.LightGrey05,
@@ -505,8 +506,8 @@ val darkYellowColorPalette = MidoriColors(
     textDisabled = PhotonColors.LightGrey05A40,
     textWarning = PhotonColors.Red20,
     textWarningButton = PhotonColors.Red70,
-    textAccent = PhotonColors.Violet20,
-    textAccentDisabled = PhotonColors.Violet20A60,
+    textAccent = PhotonColors.Yellow70,
+    textAccentDisabled = PhotonColors.Yellow70.copy(alpha = 0.4f),
     textOnColorPrimary = PhotonColors.LightGrey05,
     textOnColorSecondary = PhotonColors.LightGrey40,
     textActionPrimary = PhotonColors.LightGrey05,
