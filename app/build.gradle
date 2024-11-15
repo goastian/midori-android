@@ -22,7 +22,6 @@ import static org.gradle.api.tasks.testing.TestResult.ResultType
 apply from: 'benchmark.gradle'
 
 android {
-    compileSdkVersion Config.compileSdkVersion
 
     project.maybeConfigForJetpackBenchmark(it)
     if (project.hasProperty("testBuildType")) {

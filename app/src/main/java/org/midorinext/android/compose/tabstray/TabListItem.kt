@@ -28,7 +28,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.rememberDismissState
-import androidx.compose.material.ripple
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -114,7 +114,7 @@ fun TabListItem(
         Modifier.clickable(
             enabled = shouldClickListen,
             interactionSource = interactionSource,
-            indication = ripple(
+            indication = rememberRipple(
                 color = clickableColor(),
             ),
             onClick = { onClick(tab) },
@@ -123,7 +123,7 @@ fun TabListItem(
         Modifier.combinedClickable(
             enabled = shouldClickListen,
             interactionSource = interactionSource,
-            indication = ripple(
+            indication = rememberRipple(
                 color = clickableColor(),
             ),
             onLongClick = { onLongClick(tab) },

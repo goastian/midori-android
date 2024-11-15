@@ -187,7 +187,7 @@ fun TabsTray(
             HorizontalPager(
                 modifier = Modifier.fillMaxSize(),
                 state = pagerState,
-                beyondViewportPageCount = 2,
+                beyondBoundsPageCount = 2,
                 userScrollEnabled = false,
             ) { position ->
                 when (Page.positionToPage(position)) {

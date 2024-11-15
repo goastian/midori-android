@@ -14,15 +14,14 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.LocalRippleConfiguration
-import androidx.compose.material.RippleConfiguration
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
+import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleAlpha
+import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -42,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import mozilla.components.browser.state.state.ContentState
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.lib.state.ext.observeAsComposableState
+import mozilla.components.ui.tabcounter.TabCounter
 import org.midorinext.android.R
 import org.midorinext.android.compose.Banner
 import org.midorinext.android.compose.BottomSheetHandle
@@ -177,7 +177,6 @@ fun TabsTrayBanner(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Suppress("LongMethod")
 @Composable
 private fun SingleSelectBanner(
@@ -209,7 +208,7 @@ private fun SingleSelectBanner(
                 .height(80.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            CompositionLocalProvider(LocalRippleConfiguration provides DisabledRippleConfiguration) {
+            CompositionLocalProvider(LocalRippleTheme provides DisabledRippleTheme) {
                 TabRow(
                     selectedTabIndex = selectedPage.ordinal,
                     modifier = Modifier.fillMaxWidth(MAX_WIDTH_TAB_ROW_PERCENT),
@@ -468,12 +467,13 @@ private fun TabsTrayBannerPreviewRoot(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
-private val DisabledRippleConfiguration =
-    RippleConfiguration(
-        color = Color.Unspecified,
-        rippleAlpha = RippleAlpha(0.0f, 0.0f, 0.0f, 0.0f),
-    )
+private object DisabledRippleTheme : RippleTheme {
+    @Composable
+    override fun defaultColor() = Color.Unspecified
+
+    @Composable
+    override fun rippleAlpha(): RippleAlpha = RippleAlpha(0.0f, 0.0f, 0.0f, 0.0f)
+}
 
 private fun generateFakeTabsList(tabCount: Int = 10, isPrivate: Boolean = false): List<TabSessionState> =
     List(tabCount) { index ->
