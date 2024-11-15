@@ -1,9 +1,9 @@
 {
   "default": {
-    "searchDefault": "Bing",
-    "searchOrder": ["Bing", "Startpage", "Google", "DuckDuckGo"],
+    "searchDefault": "AstianGO",
+    "searchOrder": ["Bing", "AstianGO", "Google", "DuckDuckGo"],
     "visibleDefaultEngines": [
-      "bing", "ddg", "google", "startpage"
+      "bing", "ddg", "google", "astiango"
     ]
   },
   "regionOverrides": {},
