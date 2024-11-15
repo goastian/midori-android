@@ -162,9 +162,9 @@ private val privateColorPalette = MidoriColors(
 )
 
 val darkColorPalette = MidoriColors(
-    layer1 = PhotonColors.DarkGrey60,
-    layer2 = PhotonColors.DarkGrey30,
-    layer3 = PhotonColors.DarkGrey80,
+    layer1 = PhotonColors.DarkGrey70,
+    layer2 = PhotonColors.DarkGrey80,
+    layer3 = PhotonColors.DarkGrey90,
     layer4Start = PhotonColors.Purple70,
     layer4Center = PhotonColors.Violet80,
     layer4End = PhotonColors.Ink05,

@@ -2,11 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-package net.waterfox.android.theme
+package org.midorinext.android.theme
 
 import androidx.compose.ui.graphics.Color
 import mozilla.components.ui.colors.PhotonColors
-import org.midorinext.android.theme.MidoriColors
 
 /* Red theme colors */
 val lightRedColorPalette = MidoriColors(
@@ -417,21 +416,21 @@ val lightYellowColorPalette = MidoriColors(
     layer4Start = PhotonColors.Purple70,
     layer4Center = PhotonColors.Violet80,
     layer4End = PhotonColors.Ink05,
-    layerAccent = PhotonColors.Yellow70,
+    layerAccent = PhotonColors.Yellow50,
     layerAccentNonOpaque = PhotonColors.Violet70A12,
     layerAccentOpaque = Color(0xFFEAE4F9),
     scrim = PhotonColors.DarkGrey30A95,
     gradientStart = PhotonColors.Violet70,
     gradientEnd = PhotonColors.Violet40,
-    actionPrimary = PhotonColors.Yellow70,
+    actionPrimary = PhotonColors.Yellow50,
     actionSecondary = PhotonColors.LightGrey30,
     actionTertiary = PhotonColors.LightGrey40,
     actionQuarternary = PhotonColors.LightGrey10,
     formDefault = PhotonColors.DarkGrey90,
-    formSelected = PhotonColors.Yellow70,
+    formSelected = PhotonColors.Yellow50,
     formSurface = PhotonColors.LightGrey50,
     formDisabled = PhotonColors.LightGrey50,
-    formOn = PhotonColors.Yellow70,
+    formOn = PhotonColors.Yellow50,
     formOff = PhotonColors.LightGrey05,
     indicatorActive = PhotonColors.LightGrey50,
     indicatorInactive = PhotonColors.LightGrey30,
@@ -440,8 +439,8 @@ val lightYellowColorPalette = MidoriColors(
     textDisabled = PhotonColors.DarkGrey90A40,
     textWarning = PhotonColors.Red70,
     textWarningButton = PhotonColors.Red70,
-    textAccent = PhotonColors.Yellow70,
-    textAccentDisabled = PhotonColors.Yellow70.copy(alpha = 0.4f),
+    textAccent = PhotonColors.Yellow50,
+    textAccentDisabled = PhotonColors.Yellow50.copy(alpha = 0.4f),
     textOnColorPrimary = PhotonColors.LightGrey05,
     textOnColorSecondary = PhotonColors.LightGrey40,
     textActionPrimary = PhotonColors.LightGrey05,
@@ -451,11 +450,11 @@ val lightYellowColorPalette = MidoriColors(
     iconPrimary = PhotonColors.DarkGrey90,
     iconPrimaryInactive = PhotonColors.DarkGrey90A60,
     iconSecondary = PhotonColors.DarkGrey05,
-    iconActive = PhotonColors.Yellow70,
+    iconActive = PhotonColors.Yellow50,
     iconDisabled = PhotonColors.DarkGrey90A40,
     iconOnColor = PhotonColors.LightGrey05,
     iconNotice = PhotonColors.Blue30,
-    iconButton = PhotonColors.Yellow70,
+    iconButton = PhotonColors.Yellow50,
     iconWarning = PhotonColors.Red70,
     iconWarningButton = PhotonColors.Red70,
     iconAccentViolet = PhotonColors.Violet60,
@@ -471,7 +470,7 @@ val lightYellowColorPalette = MidoriColors(
     borderPrimary = PhotonColors.LightGrey30,
     borderInverted = PhotonColors.DarkGrey05,
     borderFormDefault = PhotonColors.DarkGrey90,
-    borderAccent = PhotonColors.Yellow70,
+    borderAccent = PhotonColors.Yellow50,
     borderDisabled = PhotonColors.DarkGrey90A40,
     borderWarning = PhotonColors.Red70
 )
@@ -506,8 +505,8 @@ val darkYellowColorPalette = MidoriColors(
     textDisabled = PhotonColors.LightGrey05A40,
     textWarning = PhotonColors.Red20,
     textWarningButton = PhotonColors.Red70,
-    textAccent = PhotonColors.Yellow70,
-    textAccentDisabled = PhotonColors.Yellow70.copy(alpha = 0.4f),
+    textAccent = PhotonColors.Yellow40,
+    textAccentDisabled = PhotonColors.Yellow40.copy(alpha = 0.4f),
     textOnColorPrimary = PhotonColors.LightGrey05,
     textOnColorSecondary = PhotonColors.LightGrey40,
     textActionPrimary = PhotonColors.LightGrey05,
@@ -517,7 +516,7 @@ val darkYellowColorPalette = MidoriColors(
     iconPrimary = PhotonColors.LightGrey05,
     iconPrimaryInactive = PhotonColors.LightGrey05A60,
     iconSecondary = PhotonColors.LightGrey40,
-    iconActive = PhotonColors.Yellow70,
+    iconActive = PhotonColors.Yellow40,
     iconDisabled = PhotonColors.LightGrey05A40,
     iconOnColor = PhotonColors.LightGrey05,
     iconNotice = PhotonColors.Blue30,
