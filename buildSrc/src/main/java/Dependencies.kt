@@ -17,7 +17,7 @@ object Versions {
     const val detekt = "1.23.4"
     const val jna = "5.12.1"
 
-    const val androidx_compose = "1.5.4"
+    const val androidx_compose = "1.7.1"
     const val androidx_compose_paging = "1.0.0-alpha20"
     const val androidx_compose_compiler = "1.5.8"
     const val androidx_appcompat = "1.6.1"
@@ -28,7 +28,7 @@ object Versions {
     const val androidx_preference = "1.1.1"
     const val androidx_legacy = "1.0.0"
     const val androidx_annotation = "1.5.0"
-    const val androidx_lifecycle = "2.7.0"
+    const val androidx_lifecycle = "2.8.3"
     const val androidx_fragment = "1.6.2"
     const val androidx_navigation = "2.5.3"
     const val androidx_recyclerview = "1.3.2"
