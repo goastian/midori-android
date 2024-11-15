@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.distinctUntilChangedBy
 class CloseOnLastTabBinding(
     browserStore: BrowserStore,
     private val tabsTrayStore: TabsTrayStore,
-    private val navigationInteractor: NavigationInteractor
+    private val navigationInteractor: NavigationInteractor,
 ) : AbstractBinding<BrowserState>(browserStore) {
     override suspend fun onState(flow: Flow<BrowserState>) {
         flow.map { it }

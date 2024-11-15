@@ -11,7 +11,7 @@ import org.midorinext.android.tabstray.TabsTrayFragment.Companion.ELEVATION
 
 internal fun MidoriSnackbar.collectionMessage(
     tabSize: Int,
-    isNewCollection: Boolean = false
+    isNewCollection: Boolean = false,
 ): MidoriSnackbar {
     val stringRes = when {
         isNewCollection -> {
@@ -29,7 +29,7 @@ internal fun MidoriSnackbar.collectionMessage(
 }
 
 internal fun MidoriSnackbar.bookmarkMessage(
-    tabSize: Int
+    tabSize: Int,
 ): MidoriSnackbar {
     val stringRes = when {
         tabSize > 1 -> {
@@ -45,7 +45,7 @@ internal fun MidoriSnackbar.bookmarkMessage(
 
 internal inline fun MidoriSnackbar.anchorWithAction(
     anchor: View?,
-    crossinline action: () -> Unit
+    crossinline action: () -> Unit,
 ): MidoriSnackbar {
     anchorView = anchor
     view.elevation = ELEVATION
@@ -60,5 +60,5 @@ internal inline fun MidoriSnackbar.anchorWithAction(
 internal fun MidoriSnackbar.Companion.make(view: View) = make(
     duration = LENGTH_LONG,
     isDisplayedWithBrowserToolbar = true,
-    view = view
+    view = view,
 )

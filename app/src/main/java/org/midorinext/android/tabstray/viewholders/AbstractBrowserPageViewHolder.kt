@@ -42,13 +42,13 @@ abstract class AbstractBrowserPageViewHolder(
      */
     abstract fun scrollToTab(
         adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>,
-        layoutManager: RecyclerView.LayoutManager
+        layoutManager: RecyclerView.LayoutManager,
     )
 
     @CallSuper
     protected fun bind(
         adapter: RecyclerView.Adapter<out RecyclerView.ViewHolder>,
-        layoutManager: RecyclerView.LayoutManager
+        layoutManager: RecyclerView.LayoutManager,
     ) {
         adapterRef = adapter
 

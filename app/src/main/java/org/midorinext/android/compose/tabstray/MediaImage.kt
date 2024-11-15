@@ -4,25 +4,24 @@
 
 package org.midorinext.android.compose.tabstray
 
-import android.content.res.Configuration
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.createTab
 import mozilla.components.concept.engine.mediasession.MediaSession.PlaybackState
 import org.midorinext.android.R
+import org.midorinext.android.compose.annotation.LightDarkPreview
 import org.midorinext.android.theme.MidoriTheme
-import org.midorinext.android.theme.Theme
 
 /**
  * Controller buttons for the media (play/pause) state for the given [tab].
@@ -30,13 +29,16 @@ import org.midorinext.android.theme.Theme
  * @param tab [TabSessionState] which the image should be shown.
  * @param onMediaIconClicked handles the click event when tab has media session like play/pause.
  * @param modifier [Modifier] to be applied to the layout.
+ * @param interactionSource [MutableInteractionSource] used to propagate the ripple effect on click.
+ *
  */
 @Composable
 fun MediaImage(
     tab: TabSessionState,
     onMediaIconClicked: ((TabSessionState) -> Unit),
     modifier: Modifier,
-) {
+    interactionSource: MutableInteractionSource = MutableInteractionSource(),
+    ) {
     val (icon, contentDescription) = when (tab.mediaSessionState?.playbackState) {
         PlaybackState.PAUSED -> {
             R.drawable.media_state_play to R.string.mozac_feature_media_notification_action_play
@@ -51,21 +53,23 @@ fun MediaImage(
     Image(
         painter = rememberDrawablePainter(drawable = drawable),
         contentDescription = stringResource(contentDescription),
-        modifier = modifier.clickable { onMediaIconClicked(tab) },
+        modifier = modifier.clickable(
+            interactionSource = interactionSource,
+            indication = null,
+        ) { onMediaIconClicked(tab) },
     )
 }
 
 @Composable
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@LightDarkPreview
 private fun ImagePreview() {
-    MidoriTheme(theme = Theme.getTheme()) {
+    MidoriTheme{
         MediaImage(
             tab = createTab(url = "https://mozilla.com"),
             onMediaIconClicked = {},
             modifier = Modifier
                 .height(100.dp)
-                .width(200.dp)
+                .width(200.dp),
         )
     }
 }

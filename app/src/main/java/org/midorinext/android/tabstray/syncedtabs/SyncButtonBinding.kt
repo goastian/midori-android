@@ -6,10 +6,10 @@ package org.midorinext.android.tabstray.syncedtabs
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import mozilla.components.feature.syncedtabs.view.SyncedTabsView
 import mozilla.components.lib.state.helpers.AbstractBinding
-import kotlinx.coroutines.flow.distinctUntilChanged
 import org.midorinext.android.tabstray.TabsTrayState
 import org.midorinext.android.tabstray.TabsTrayStore
 
@@ -22,7 +22,7 @@ import org.midorinext.android.tabstray.TabsTrayStore
 @OptIn(ExperimentalCoroutinesApi::class)
 class SyncButtonBinding(
     tabsTrayStore: TabsTrayStore,
-    private val onSyncNow: () -> Unit
+    private val onSyncNow: () -> Unit,
 ) : AbstractBinding<TabsTrayState>(tabsTrayStore) {
     override suspend fun onState(flow: Flow<TabsTrayState>) {
         flow.map { it.syncing }

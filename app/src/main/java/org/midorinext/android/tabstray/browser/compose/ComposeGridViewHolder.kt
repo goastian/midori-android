@@ -18,27 +18,24 @@ import mozilla.components.browser.tabstray.TabsTrayStyling
 import mozilla.components.lib.state.ext.observeAsComposableState
 import org.midorinext.android.compose.tabstray.TabGridItem
 import org.midorinext.android.components.components
-import org.midorinext.android.selection.SelectionHolder
+import org.midorinext.android.tabstray.TabsTrayInteractor
 import org.midorinext.android.tabstray.TabsTrayState
 import org.midorinext.android.tabstray.TabsTrayStore
-import org.midorinext.android.tabstray.browser.BrowserTrayInteractor
 import kotlin.math.max
 import org.midorinext.android.R
 /**
  * A Compose ViewHolder implementation for "tab" items with grid layout.
  *
- * @param interactor [BrowserTrayInteractor] handling tabs interactions in a tab tray.
+ * @param interactor [TabsTrayInteractor] handling tabs interactions in a tab tray.
  * @param store [TabsTrayStore] containing the complete state of tabs tray and methods to update that.
- * @param selectionHolder [SelectionHolder]<[TabSessionState]> for helping with selecting
- * any number of displayed [TabSessionState]s.
  * @param composeItemView that displays a "tab".
  * @param viewLifecycleOwner [LifecycleOwner] to which this Composable will be tied to.
  */
 class ComposeGridViewHolder(
-    private val interactor: BrowserTrayInteractor,
+    private val interactor: TabsTrayInteractor,
     private val store: TabsTrayStore,
-    private val selectionHolder: SelectionHolder<TabSessionState>? = null,
     composeItemView: ComposeView,
+    private val featureName: String,
     viewLifecycleOwner: LifecycleOwner,
 ) : ComposeAbstractTabViewHolder(composeItemView, viewLifecycleOwner) {
 
@@ -50,7 +47,7 @@ class ComposeGridViewHolder(
         tab: TabSessionState,
         isSelected: Boolean,
         styling: TabsTrayStyling,
-        delegate: TabsTray.Delegate
+        delegate: TabsTray.Delegate,
     ) {
         this.tab = tab
         isSelectedTabState.value = isSelected
@@ -66,21 +63,11 @@ class ComposeGridViewHolder(
     }
 
     private fun onCloseClicked(tab: TabSessionState) {
-        interactor.onTabClosed(tab)
+        interactor.onTabClosed(tab, featureName)
     }
 
     private fun onClick(tab: TabSessionState) {
-        val holder = selectionHolder
-        if (holder != null) {
-            interactor.onMultiSelectClicked(tab, holder, null)
-        } else {
-            interactor.onTabSelected(tab)
-        }
-    }
-
-    private fun onLongClick(tab: TabSessionState) {
-        val holder = selectionHolder ?: return
-        interactor.onLongClicked(tab, holder)
+        interactor.onTabSelected(tab, featureName)
     }
 
     @Composable
@@ -106,7 +93,6 @@ class ComposeGridViewHolder(
             onCloseClick = ::onCloseClicked,
             onMediaClick = interactor::onMediaClicked,
             onClick = ::onClick,
-            onLongClick = ::onLongClick,
         )
     }
 

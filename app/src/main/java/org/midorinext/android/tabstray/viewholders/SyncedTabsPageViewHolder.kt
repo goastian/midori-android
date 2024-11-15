@@ -8,8 +8,7 @@ import android.view.View
 import androidx.compose.ui.platform.ComposeView
 import androidx.recyclerview.widget.RecyclerView
 import mozilla.components.lib.state.ext.observeAsComposableState
-import org.midorinext.android.ext.settings
-import org.midorinext.android.tabstray.NavigationInteractor
+import org.midorinext.android.tabstray.SyncedTabsInteractor
 import org.midorinext.android.tabstray.TabsTrayState
 import org.midorinext.android.tabstray.TabsTrayStore
 import org.midorinext.android.tabstray.syncedtabs.SyncedTabsList
@@ -26,7 +25,7 @@ import org.midorinext.android.theme.Theme
 class SyncedTabsPageViewHolder(
     private val composeView: ComposeView,
     private val tabsTrayStore: TabsTrayStore,
-    private val navigationInteractor: NavigationInteractor,
+    private val interactor: SyncedTabsInteractor,
 ) : AbstractPageViewHolder(composeView) {
 
     fun bind() {
@@ -35,8 +34,7 @@ class SyncedTabsPageViewHolder(
             MidoriTheme(theme = Theme.getTheme(allowPrivateTheme = false)) {
                 SyncedTabsList(
                     syncedTabs = tabs ?: emptyList(),
-                    taskContinuityEnabled = composeView.context.settings().enableTaskContinuityEnhancements,
-                    onTabClick = navigationInteractor::onSyncedTabClicked,
+                    onTabClick = interactor::onSyncedTabClicked,
                 )
             }
         }

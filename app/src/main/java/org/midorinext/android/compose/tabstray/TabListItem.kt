@@ -4,37 +4,55 @@
 
 package org.midorinext.android.compose.tabstray
 
-import android.content.res.Configuration
+import org.midorinext.android.compose.SwipeToDismiss
+import org.midorinext.android.tabstray.TabsTrayTestTag
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.DismissValue
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
+import androidx.compose.material.rememberDismissState
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalContext
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.state.createTab
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
+import mozilla.components.support.ktx.kotlin.MAX_URI_LENGTH
+import mozilla.components.ui.colors.PhotonColors
 import org.midorinext.android.R
 import org.midorinext.android.compose.TabThumbnail
+import org.midorinext.android.compose.annotation.LightDarkPreview
 import org.midorinext.android.ext.toShortUrl
+import org.midorinext.android.tabstray.ext.toDisplayTitle
 import org.midorinext.android.theme.MidoriTheme
 import org.midorinext.android.theme.Theme
 
@@ -42,20 +60,23 @@ import org.midorinext.android.theme.Theme
  * List item used to display a tab that supports clicks,
  * long clicks, multiselection, and media controls.
  *
- * @param tab The given tab to be render as view a list item.
+ * @param tab The given tab to be render as view a grid item.
+ * @param storage [ThumbnailStorage] to obtain tab thumbnail bitmaps from.
+ * @param thumbnailSize Size of tab's thumbnail.
  * @param isSelected Indicates if the item should be render as selected.
  * @param multiSelectionEnabled Indicates if the item should be render with multi selection options,
  * enabled.
  * @param multiSelectionSelected Indicates if the item should be render as multi selection selected
  * option.
+ * @param shouldClickListen Whether or not the item should stop listening to click events.
  * @param onCloseClick Callback to handle the click event of the close button.
  * @param onMediaClick Callback to handle when the media item is clicked.
  * @param onClick Callback to handle when item is clicked.
- * @param onLongClick Callback to handle when item is long clicked.
+ * @param onLongClick Optional callback to handle when item is long clicked.
  */
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
-@Suppress("MagicNumber")
+@Suppress("MagicNumber", "LongMethod")
 fun TabListItem(
     tab: TabSessionState,
     storage: ThumbnailStorage,
@@ -63,72 +84,129 @@ fun TabListItem(
     isSelected: Boolean = false,
     multiSelectionEnabled: Boolean = false,
     multiSelectionSelected: Boolean = false,
+    shouldClickListen: Boolean = true,
     onCloseClick: (tab: TabSessionState) -> Unit,
     onMediaClick: (tab: TabSessionState) -> Unit,
     onClick: (tab: TabSessionState) -> Unit,
-    onLongClick: (tab: TabSessionState) -> Unit,
+    onLongClick: ((tab: TabSessionState) -> Unit)? = null,
 ) {
-
     val contentBackgroundColor = if (isSelected) {
         MidoriTheme.colors.layerAccentNonOpaque
     } else {
         MidoriTheme.colors.layer1
     }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(contentBackgroundColor)
-            .combinedClickable(
-                onLongClick = { onLongClick(tab) },
-                onClick = { onClick(tab) }
-            )
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Thumbnail(
-            tab = tab,
-            size = thumbnailSize,
-            storage = storage,
-            multiSelectionEnabled = multiSelectionEnabled,
-            isSelected = multiSelectionSelected,
-            onMediaIconClicked = { onMediaClick(it) }
+
+    val dismissState = rememberDismissState(
+        confirmStateChange = { dismissValue ->
+            if (dismissValue == DismissValue.DismissedToEnd || dismissValue == DismissValue.DismissedToStart) {
+                onCloseClick(tab)
+                true
+            } else {
+                false
+            }
+        },
+    )
+
+    // Used to propagate the ripple effect to the whole tab
+    val interactionSource = remember { MutableInteractionSource() }
+
+    val clickableModifier = if (onLongClick == null) {
+        Modifier.clickable(
+            enabled = shouldClickListen,
+            interactionSource = interactionSource,
+            indication = rememberRipple(
+                color = clickableColor(),
+            ),
+            onClick = { onClick(tab) },
         )
+    } else {
+        Modifier.combinedClickable(
+            enabled = shouldClickListen,
+            interactionSource = interactionSource,
+            indication = rememberRipple(
+                color = clickableColor(),
+            ),
+            onLongClick = { onLongClick(tab) },
+            onClick = { onClick(tab) },
+        )
+    }
 
-        Column(
+    SwipeToDismiss(
+        state = dismissState,
+        enabled = !multiSelectionEnabled,
+        backgroundContent = {
+            DismissedTabBackground(dismissState.dismissDirection, RoundedCornerShape(0.dp))
+        },
+    ) {
+        Row(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .weight(weight = 1f)
+                .fillMaxWidth()
+                .background(MidoriTheme.colors.layer3)
+                .background(contentBackgroundColor)
+                .then(clickableModifier)
+                .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
+                .testTag(TabsTrayTestTag.tabItemRoot),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = tab.content.title,
-                fontSize = 16.sp,
-                maxLines = 2,
-                color = MidoriTheme.colors.textPrimary,
+            Thumbnail(
+                tab = tab,
+                size = thumbnailSize,
+                storage = storage,
+                multiSelectionEnabled = multiSelectionEnabled,
+                isSelected = multiSelectionSelected,
+                onMediaIconClicked = { onMediaClick(it) },
+                interactionSource = interactionSource,
             )
 
-            Text(
-                text = tab.content.url.toShortUrl(),
-                fontSize = 12.sp,
-                color = MidoriTheme.colors.textSecondary,
-            )
-        }
-
-        if (!multiSelectionEnabled) {
-            IconButton(
-                onClick = { onCloseClick(tab) },
-                modifier = Modifier.size(size = 24.dp),
+            Column(
+                modifier = Modifier
+                    .padding(start = 12.dp)
+                    .weight(weight = 1f),
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.mozac_ic_cross_20),
-                    contentDescription = stringResource(
-                        id = R.string.close_tab_title,
-                        tab.content.title
-                    ),
-                    tint = MidoriTheme.colors.iconPrimary
+                Text(
+                    text = tab.toDisplayTitle().take(MAX_URI_LENGTH),
+                    color = MidoriTheme.colors.textPrimary,
+                    style = MidoriTheme.typography.body1,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 2,
                 )
+
+                Text(
+                    text = tab.content.url.toShortUrl(),
+                    color = MidoriTheme.colors.textSecondary,
+                    style = MidoriTheme.typography.body2,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                )
+            }
+
+            if (!multiSelectionEnabled) {
+                IconButton(
+                    onClick = { onCloseClick(tab) },
+                    modifier = Modifier
+                        .size(size = 48.dp)
+                        .testTag(TabsTrayTestTag.tabItemClose),
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.mozac_ic_cross_24),
+                        contentDescription = stringResource(
+                            id = R.string.close_tab_title,
+                            tab.content.title,
+                        ),
+                        tint = MidoriTheme.colors.iconPrimary,
+                    )
+                }
+            } else {
+                Spacer(modifier = Modifier.size(48.dp))
             }
         }
     }
+}
+
+@Composable
+private fun clickableColor() = when (isSystemInDarkTheme()) {
+    true -> PhotonColors.White
+    false -> PhotonColors.Black
 }
 
 @Composable
@@ -138,18 +216,30 @@ private fun Thumbnail(
     storage: ThumbnailStorage,
     multiSelectionEnabled: Boolean,
     isSelected: Boolean,
-    onMediaIconClicked: ((TabSessionState) -> Unit)
+    onMediaIconClicked: ((TabSessionState) -> Unit),
+    interactionSource: MutableInteractionSource,
 ) {
     Box {
         TabThumbnail(
             tab = tab,
             size = size,
             storage = storage,
-            modifier = Modifier.size(width = 92.dp, height = 72.dp),
+            modifier = Modifier
+                .size(width = 92.dp, height = 72.dp)
+                .semantics(mergeDescendants = true) {
+                    testTag = TabsTrayTestTag.tabItemThumbnail
+                },
             contentDescription = stringResource(id = R.string.mozac_browser_tabstray_open_tab),
         )
 
         if (isSelected) {
+            Box(
+                modifier = Modifier
+                    .size(width = 92.dp, height = 72.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(MidoriTheme.colors.layerAccentNonOpaque),
+            )
+
             Card(
                 modifier = Modifier
                     .size(size = 40.dp)
@@ -163,7 +253,7 @@ private fun Thumbnail(
                         .matchParentSize()
                         .padding(all = 8.dp),
                     contentDescription = null,
-                    tint = colorResource(id = R.color.mozac_ui_icons_fill)
+                    tint = colorResource(id = R.color.mozac_ui_icons_fill),
                 )
             }
         }
@@ -172,17 +262,17 @@ private fun Thumbnail(
             MediaImage(
                 tab = tab,
                 onMediaIconClicked = onMediaIconClicked,
-                modifier = Modifier.align(Alignment.TopEnd)
+                modifier = Modifier.align(Alignment.TopEnd),
+                interactionSource = interactionSource,
             )
         }
     }
 }
 
 @Composable
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@LightDarkPreview
 private fun TabListItemPreview() {
-    MidoriTheme(theme = Theme.getTheme()) {
+    MidoriTheme {
         TabListItem(
             tab = createTab(url = "www.mozilla.com", title = "Mozilla"),
             thumbnailSize = 108,
@@ -190,16 +280,14 @@ private fun TabListItemPreview() {
             onCloseClick = {},
             onMediaClick = {},
             onClick = {},
-            onLongClick = {},
         )
     }
 }
 
 @Composable
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@LightDarkPreview
 private fun SelectedTabListItemPreview() {
-    MidoriTheme(theme = Theme.getTheme()) {
+    MidoriTheme {
         TabListItem(
             tab = createTab(url = "www.mozilla.com", title = "Mozilla"),
             thumbnailSize = 108,
@@ -207,7 +295,6 @@ private fun SelectedTabListItemPreview() {
             onCloseClick = {},
             onMediaClick = {},
             onClick = {},
-            onLongClick = {},
             multiSelectionEnabled = true,
             multiSelectionSelected = true,
         )
