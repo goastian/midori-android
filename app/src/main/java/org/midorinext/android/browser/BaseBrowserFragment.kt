@@ -659,11 +659,12 @@ abstract class BaseBrowserFragment :
             feature = SessionFeature(
                 requireComponents.core.store,
                 requireComponents.useCases.sessionUseCases.goBack,
+                requireComponents.useCases.sessionUseCases.goForward,
                 binding.engineView,
-                customTabSessionId
+                customTabSessionId,
             ),
             owner = this,
-            view = view
+            view = view,
         )
 
         crashContentIntegration.set(
@@ -745,10 +746,12 @@ abstract class BaseBrowserFragment :
             webAuthnFeature.set(
                 feature = WebAuthnFeature(
                     engine = requireComponents.core.engine,
-                    activity = requireActivity()
+                    activity = requireActivity(),
+                    exitFullScreen = requireComponents.useCases.sessionUseCases.exitFullscreen::invoke,
+                    currentTab = { store.state.selectedTabId },
                 ),
                 owner = this,
-                view = view
+                view = view,
             )
         }
 

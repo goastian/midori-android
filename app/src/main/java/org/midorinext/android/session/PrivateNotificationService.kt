@@ -13,7 +13,9 @@ import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.privatemode.notification.AbstractPrivateNotificationService
 import mozilla.components.support.base.android.NotificationsDelegate
 import org.midorinext.android.HomeActivity
+import org.midorinext.android.IntentReceiverActivity
 import org.midorinext.android.R
+import org.midorinext.android.customtabs.ExternalAppBrowserActivity
 import org.midorinext.android.ext.components
 import java.util.Locale
 
@@ -88,4 +90,9 @@ class PrivateNotificationService : AbstractPrivateNotificationService() {
             startActivity(homeScreenIntent)
         }
     }
+    override fun ignoreTaskComponentClasses(): List<String> = listOf(
+        ExternalAppBrowserActivity::class.qualifiedName!!,
+        IntentReceiverActivity::class.qualifiedName!!,
+    )
+    override fun ignoreTaskActions(): List<String> = listOf()
 }
