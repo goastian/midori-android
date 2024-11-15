@@ -20,7 +20,6 @@ import org.midorinext.android.R
 import org.midorinext.android.compose.list.IconListItem
 import org.midorinext.android.compose.list.TextListItem
 import org.midorinext.android.settings.address.ext.getAddressLabel
-import org.midorinext.android.settings.address.ext.getFullName
 import org.midorinext.android.theme.MidoriTheme
 import org.midorinext.android.theme.Theme
 
@@ -40,7 +39,7 @@ fun AddressList(
     LazyColumn {
         items(addresses) { address ->
             TextListItem(
-                label = address.getFullName(),
+                label = address.name,
                 modifier = Modifier.padding(start = 56.dp),
                 description = address.getAddressLabel(),
                 maxDescriptionLines = 2,
@@ -67,9 +66,7 @@ private fun AddressListPreview() {
                 addresses = listOf(
                     Address(
                         guid = "1",
-                        givenName = "Banana",
-                        additionalName = "",
-                        familyName = "Apple",
+                        name = "Banana Apple",
                         organization = "Mozilla",
                         streetAddress = "123 Sesame Street",
                         addressLevel3 = "",
