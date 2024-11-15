@@ -35,6 +35,7 @@ import mozilla.components.support.utils.RunWhenReadyQueue
 import org.midorinext.android.Config
 import org.midorinext.android.R
 import org.midorinext.android.ext.components
+import org.midorinext.android.ext.maxActiveTime
 import org.midorinext.android.perf.StrictModeManager
 import org.midorinext.android.perf.lazyMonitored
 import org.midorinext.android.sync.SyncedTabsIntegration
@@ -128,7 +129,7 @@ class BackgroundServices(
     }
 
     val syncedTabsStorage by lazyMonitored {
-        SyncedTabsStorage(accountManager, context.components.core.store, remoteTabsStorage.value)
+        SyncedTabsStorage(accountManager, context.components.core.store, remoteTabsStorage.value, maxActiveTime)
     }
     val syncedTabsAutocompleteProvider by lazyMonitored {
         SyncedTabsAutocompleteProvider(syncedTabsStorage)
