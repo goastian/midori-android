@@ -20,14 +20,13 @@ import java.util.Locale
 
 object SupportUtils {
     const val RATE_APP_URL = "market://details?id=" + BuildConfig.APPLICATION_ID
-    const val WIKIPEDIA_URL = "https://www.wikipedia.org/"
     const val MIDORI_PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
     const val GOOGLE_URL = "https://www.google.com/"
     const val EXPEDIA_URL = "https://expedia.com/affiliate/WyybenA"
     const val AMAZON_URL = "https://www.amazon.com/?&_encoding=UTF8&tag=astian-20&linkCode=ur2&linkId=62378ad479147f7dc4e1be82192e6d10&camp=1789&creative=9325"
+    const val STAKEUS_URL = "https://stake.us/?c=L0OhuV83"
+    const val STAKECOM_URL = "https://stake.com/?offer=mori200bon&c=L0OhuV83"
     const val EBAY_URL = "https://ebay.us/mcNp23"
-    const val ENEBA_URL = "https://www.eneba.com/latam/?af_id=Astian"
-    const val HOTELS_URL = "https://www.hotels.com/affiliate/Ya3mgrV"
     const val ALIEXPRESS_URL = "https://s.click.aliexpress.com/e/_DCpnkVX"
     const val GOOGLE_US_URL = "https://www.google.com/webhp?client=midori-b-1-m&channel=ts"
     const val GOOGLE_XX_URL = "https://www.google.com/webhp?client=midori-b-m&channel=ts"

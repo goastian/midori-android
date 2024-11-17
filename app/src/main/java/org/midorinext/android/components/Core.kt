@@ -420,15 +420,15 @@ class Core(
 
                 defaultTopSites.add(
                     Pair(
-                        context.getString(R.string.default_top_site_eneba),
-                        SupportUtils.ENEBA_URL,
+                        context.getString(R.string.default_top_site_stakeus),
+                        SupportUtils.STAKEUS_URL,
                     )
                 )
 
                 defaultTopSites.add(
                     Pair(
-                        context.getString(R.string.default_top_site_hotels),
-                        SupportUtils.HOTELS_URL,
+                        context.getString(R.string.default_top_site_stakecom),
+                        SupportUtils.STAKECOM_URL,
                     )
                 )
 

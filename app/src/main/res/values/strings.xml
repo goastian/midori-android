@@ -1768,4 +1768,6 @@
     <string name="midori_suggest_header">Midori Suggest</string>
     <string name="default_top_site_eneba">Eneba</string>
     <string name="default_top_site_hotels">Hotels</string>
+    <string name="default_top_site_stakeus">Stake US</string>
+    <string name="default_top_site_stakecom">Stake.com</string>
 </resources>
