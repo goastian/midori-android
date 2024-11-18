@@ -61,7 +61,7 @@ class AddonDetailsBindingDelegate(
     private fun bindRating(addon: Addon) {
         addon.rating?.let { rating ->
             val resources = binding.root.resources
-            val ratingContentDescription = resources.getString(R.string.mozac_feature_addons_rating_content_description_2)
+            val ratingContentDescription = resources.getString(R.string.mozac_feature_addons_rating_content_description)
             binding.ratingView.contentDescription = String.format(ratingContentDescription, rating.average)
             binding.ratingView.rating = rating.average
 

@@ -5,34 +5,26 @@
 package org.midorinext.android.customtabs
 
 import android.app.Activity
-import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
-import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.browser.toolbar.BrowserToolbar
 import mozilla.components.browser.toolbar.display.DisplayToolbar
 import mozilla.components.feature.customtabs.CustomTabsToolbarFeature
-import mozilla.components.feature.customtabs.CustomTabsToolbarListeners
 import mozilla.components.feature.tabs.CustomTabsUseCases
 import mozilla.components.support.base.feature.LifecycleAwareFeature
 import mozilla.components.support.base.feature.UserInteractionHandler
 import org.midorinext.android.R
 import org.midorinext.android.components.toolbar.ToolbarMenu
-import org.midorinext.android.components.toolbar.interactor.BrowserToolbarInteractor
-import org.midorinext.android.ext.settings
-import org.midorinext.android.utils.Settings
 
 class CustomTabsIntegration(
     store: BrowserStore,
     useCases: CustomTabsUseCases,
     toolbar: BrowserToolbar,
     sessionId: String,
-    private val activity: Activity,
-    private val interactor: BrowserToolbarInteractor,
+    activity: Activity,
     onItemTapped: (ToolbarMenu.Item) -> Unit = {},
     shouldReverseItems: Boolean,
-    isPrivate: Boolean,
+    isPrivate: Boolean
 ) : LifecycleAwareFeature, UserInteractionHandler {
 
     init {
@@ -62,37 +54,18 @@ class CustomTabsIntegration(
     }
 
     private val feature = CustomTabsToolbarFeature(
-        store = store,
-        toolbar = toolbar,
-        sessionId = sessionId,
-        useCases = useCases,
+        store,
+        toolbar,
+        sessionId,
+        useCases,
         menuBuilder = customTabToolbarMenu.menuBuilder,
         menuItemIndex = START_OF_MENU_ITEMS_INDEX,
         window = activity.window,
-        customTabsToolbarListeners = CustomTabsToolbarListeners(
-            shareListener = { interactor.onBrowserToolbarMenuItemTapped(ToolbarMenu.Item.Share) },
-            refreshListener = {
-                interactor.onBrowserToolbarMenuItemTapped(
-                    ToolbarMenu.Item.Reload(
-                        bypassCache = false,
-                    ),
-                )
-            },
-        ),
+        shareListener = { onItemTapped.invoke(ToolbarMenu.Item.Share) },
         closeListener = { activity.finishAndRemoveTask() },
-        appNightMode = activity.settings().getAppNightMode(),
-        forceActionButtonTinting = isPrivate,
+        updateTheme = !isPrivate,
+        forceActionButtonTinting = isPrivate
     )
-
-    private fun Settings.getAppNightMode() = if (shouldFollowDeviceTheme) {
-        MODE_NIGHT_FOLLOW_SYSTEM
-    } else {
-        if (shouldUseLightTheme) {
-            MODE_NIGHT_NO
-        } else {
-            MODE_NIGHT_YES
-        }
-    }
 
     override fun start() = feature.start()
     override fun stop() = feature.stop()

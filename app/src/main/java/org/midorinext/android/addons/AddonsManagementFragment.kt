@@ -127,7 +127,7 @@ class AddonsManagementFragment : Fragment(R.layout.fragment_add_ons_management) 
                         binding?.let {
                             showSnackBar(
                                 it.root,
-                                getString(R.string.mozac_feature_addons_failed_to_query_extensions),
+                                getString(R.string.mozac_feature_addons_failed_to_query_add_ons),
                             )
                         }
                         binding?.addOnsProgressBar?.isVisible = false

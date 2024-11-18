@@ -524,7 +524,6 @@ class TabsTrayFragment : AppCompatDialogFragment() {
                 context = requireContext(),
                 navController = findNavController(),
                 storage = requireComponents.backgroundServices.syncedTabsStorage,
-                commands = requireComponents.backgroundServices.syncedTabsCommands,
                 accountManager = requireComponents.backgroundServices.accountManager,
                 lifecycleOwner = this,
             ),
