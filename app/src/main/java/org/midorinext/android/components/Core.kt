@@ -87,7 +87,6 @@ import org.midorinext.android.perf.lazyMonitored
 import org.midorinext.android.settings.SupportUtils
 import org.midorinext.android.utils.getUndoDelay
 import org.mozilla.geckoview.GeckoRuntime
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -341,7 +340,7 @@ class Core(
     /**
      * The storage component to sync and persist tabs in a Midori Sync account.
      */
-    val lazyRemoteTabsStorage = lazyMonitored { RemoteTabsStorage(context) }
+    val lazyRemoteTabsStorage = lazyMonitored { RemoteTabsStorage(context, crashReporter) }
 
     val recentlyClosedTabsStorage =
         lazyMonitored { RecentlyClosedTabsStorage(context, engine, crashReporter) }
