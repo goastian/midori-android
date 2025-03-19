@@ -44,6 +44,7 @@ import mozilla.components.concept.storage.BookmarkNode
 import mozilla.components.concept.storage.BookmarkNodeType
 import mozilla.components.concept.storage.HistoryMetadataKey
 import mozilla.components.feature.contextmenu.DefaultSelectionActionDelegate
+import mozilla.components.feature.customtabs.isCustomTabIntent
 import mozilla.components.feature.media.ext.findActiveMediaTab
 import mozilla.components.feature.privatemode.notification.PrivateNotificationFeature
 import mozilla.components.feature.search.BrowserStoreSearchAdapter
@@ -87,6 +88,7 @@ import org.midorinext.android.search.SearchDialogFragmentDirections
 import org.midorinext.android.session.PrivateNotificationService
 import org.midorinext.android.settings.HttpsOnlyFragmentDirections
 import org.midorinext.android.settings.SettingsFragmentDirections
+import org.midorinext.android.settings.SupportUtils
 import org.midorinext.android.settings.TrackingProtectionFragmentDirections
 import org.midorinext.android.settings.about.AboutFragmentDirections
 import org.midorinext.android.settings.logins.fragment.LoginDetailFragmentDirections
@@ -132,6 +134,22 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             store = components.core.store,
             context = this@HomeActivity,
             fragmentManager = supportFragmentManager,
+            onLinkClicked = { url, shouldOpenInBrowser ->
+                if (shouldOpenInBrowser) {
+                    openToBrowserAndLoad(
+                        searchTermOrURL = url,
+                        newTab = true,
+                        from = BrowserDirection.FromGlobal,
+                        )
+                } else {
+                    startActivity(
+                        SupportUtils.createCustomTabIntent(
+                            context = this,
+                            url = url,
+                            ),
+                        )
+                }
+            },
         )
     }
     private val extensionsProcessDisabledForegroundController by lazy {
@@ -247,9 +265,12 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
             webExtensionPopupObserver,
             extensionsProcessDisabledForegroundController,
             extensionsProcessDisabledBackgroundController,
-            webExtensionPromptFeature,
             serviceWorkerSupport,
         )
+
+        if (!isCustomTabIntent(intent)) {
+            lifecycle.addObserver(webExtensionPromptFeature)
+        }
 
         if (shouldAddToRecentsScreen(intent)) {
             intent.removeExtra(START_IN_RECENTS_SCREEN)
@@ -891,7 +912,6 @@ open class HomeActivity : LocaleAwareAppCompatActivity(), NavHostActivity {
 
     internal fun handleRequestDesktopMode(tabId: String) {
         components.useCases.sessionUseCases.requestDesktopSite(true, tabId)
-        components.core.store.dispatch(ContentAction.UpdateDesktopModeAction(tabId, true))
 
         // Reset preference value after opening the tab in desktop mode
         settings().openNextTabInDesktopMode = false
