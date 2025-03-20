@@ -1766,6 +1766,8 @@
     <string name="privacy_content_close_button_content_description">Close</string>
 
     <string name="midori_suggest_header">Midori Suggest</string>
+    <string name="mozac_tab_counter_open_tab_tray_single">1 open tab. Tap to switch tabs.</string>
+    <string name="mozac_tab_counter_open_tab_tray_plural">%1$s open tabs. Tap to switch tabs.</string>
     <string name="default_top_site_eneba">Eneba</string>
     <string name="default_top_site_hotels">Hotels</string>
     <string name="default_top_site_stakeus">Stake US</string>
