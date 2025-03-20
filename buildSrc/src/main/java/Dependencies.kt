@@ -127,8 +127,8 @@ object Deps {
     const val mozilla_feature_webnotifications = "org.mozilla.components:feature-webnotifications:${Versions.mozilla_android_components}"
     const val mozilla_feature_webcompat_reporter = "org.mozilla.components:feature-webcompat-reporter:${Versions.mozilla_android_components}"
 
-    const val mozilla_service_contile =
-        "org.mozilla.components:service-contile:${Versions.mozilla_android_components}"
+    const val mozilla_service_mars =
+        "org.mozilla.components:service-mars:${Versions.mozilla_android_components}"
     const val mozilla_service_digitalassetlinks =
         "org.mozilla.components:service-digitalassetlinks:${Versions.mozilla_android_components}"
     const val mozilla_service_sync_autofill =
