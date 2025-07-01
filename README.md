@@ -37,3 +37,7 @@ Midori is a lightweight yet powerful web browser which runs just as well on litt
 * and much more.
 
 ![Midori Screenshot](https://astian.org/wp-content/uploads/2023/09/midori-devices.webp)
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=goastian/midori-android&type=Date)](https://www.star-history.com/#goastian/midori-android&Date)
