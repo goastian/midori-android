@@ -20,6 +20,12 @@ Midori is a lightweight yet powerful web browser which runs just as well on litt
      alt="Get it on Google Play"
      height="80">](https://play.google.com/store/apps/details?id=org.midorinext.android)
 
+
+
+[Midori Android](https://ads.fund/token/0xadff14b59f07c283470dbd50695b0df84e30471a) project is supported by ADS.FUND
+
+
+
 **Privacy out of the box**
 
 * Tabs Browser.
