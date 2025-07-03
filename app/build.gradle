@@ -127,7 +127,14 @@ android {
         animationsDisabled = true
     }
 
-    flavorDimensions "engine"
+    flavorDimensions.add("product")
+
+    productFlavors {
+
+        midori {
+            dimension "product"
+        }
+    }
 
     sourceSets {
         androidTest {
