@@ -27,6 +27,7 @@ object SupportUtils {
     const val STAKEUS_URL = "https://stake.us/?c=L0OhuV83"
     const val STAKECOM_URL = "https://stake.com/?offer=mori200bon&c=L0OhuV83"
     const val EBAY_URL = "https://ebay.us/mcNp23"
+    const val ADAMANT_URL= "https://adamant.im/"
     const val ALIEXPRESS_URL = "https://s.click.aliexpress.com/e/_DCpnkVX"
     const val GOOGLE_US_URL = "https://www.google.com/webhp?client=midori-b-1-m&channel=ts"
     const val GOOGLE_XX_URL = "https://www.google.com/webhp?client=midori-b-m&channel=ts"
@@ -45,7 +46,7 @@ object SupportUtils {
         QR_CAMERA_ACCESS("qr-camera-access"),
         SMARTBLOCK("smartblock-enhanced-tracking-protection"),
         SPONSOR_PRIVACY("sponsor-privacy"),
-        HTTPS_ONLY_MODE("https-only-mode-midori-android"),
+        HTTPS_ONLY_MODE("https-only-mode-waterfox-android"),
         UNSIGNED_ADDONS("unsigned-addons"),
         EXTENSION_PERMISSIONS("extension-permissions"),
     }
@@ -79,7 +80,7 @@ object SupportUtils {
         return "https://astian.org/docs/$osTarget/$escapedTopic"
     }
 
-    fun getMidoriAccountSumoUrl(): String {
+    fun getWaterfoxAccountSumoUrl(): String {
         return "https://support.mozilla.org/kb/access-mozilla-services-firefox-account"
     }
 

@@ -46,8 +46,8 @@
     <!-- Text for the menu button to remove a recently saved bookmark from the user's home screen -->
     <string name="recently_saved_menu_item_remove">Remove</string>
 
-    <!-- About content. The first parameter is the name of the application. (For example: Midori) -->
-    <string name="about_content">%1$s is made by Astian, Inc</string>
+    <!-- About content. The first parameter is the name of the application. (For example: Waterfox) -->
+    <string name="about_content">%1$s is made by Astian Inc.</string>
 
     <!-- Private Browsing -->
     <!-- Explanation for private browsing displayed to users on home view when they first enable private mode
@@ -186,7 +186,7 @@
     <string name="browser_menu_share">Share</string>
     <!-- Browser menu button shown in custom tabs that opens the current tab in Midori
         The first parameter is the name of the app defined in app_name (for example: Midori) -->
-    <string name="browser_menu_open_in_midori">Open in %1$s</string>
+    <string name="browser_menu_open_in_waterfox">Open in %1$s</string>
     <!-- Browser menu text shown in custom tabs to indicate this is a Midori tab
         The first parameter is the name of the app defined in app_name (for example: Midori) -->
     <string name="browser_menu_powered_by">POWERED BY %1$s</string>
@@ -345,8 +345,8 @@
     <string name="errorpage_httpsonly_message_summary">However, it’s also possible that an attacker is involved. If you continue to the website, you should not enter any sensitive info. If you continue, HTTPS-Only mode will be turned off temporarily for the site.</string>
     <!-- Preference for accessibility -->
     <string name="preferences_accessibility">Accessibility</string>
-    <!-- Preference to override the Astian Account server -->
-    <string name="preferences_override_fxa_server">Custom Astian Account server</string>
+    <!-- Preference to override the Midori Account server -->
+    <string name="preferences_override_fxa_server">Custom Astian Account</string>
     <!-- Preference to override the Sync token server -->
     <string name="preferences_override_sync_tokenserver">Custom Sync server</string>
     <!-- Toast shown after updating the FxA/Sync server override preferences -->
@@ -441,10 +441,20 @@
     <!-- Snackbar label for action to view selected wallpaper -->
     <string name="wallpaper_updated_snackbar_action">View</string>
     <!-- Label for switch which toggles the "tap-to-switch" behavior on home screen logo -->
-    <string name="wallpaper_tap_to_change_switch_label_1">Change wallpaper by tapping Astian homepage logo</string>
+    <string name="wallpaper_tap_to_change_switch_label_1">Change wallpaper by tapping Midori homepage logo</string>
     <!-- This is the accessibility content description for the wallpapers functionality. Users are
     able to tap on the app logo in the home screen and can switch to different wallpapers by tapping. -->
     <string name="wallpaper_logo_content_description">Midori logo - change the wallpaper, button</string>
+    <!-- Label for the button that opens system picker to select custom wallpaper image for portrait orientation -->
+    <string name="wallpaper_select_portrait">Select portrait</string>
+    <!-- Label for the button that opens system picker to select custom wallpaper image for landscape orientation -->
+    <string name="wallpaper_select_landscape">Select landscape</string>
+    <!-- Label for the button that saves the custom wallpaper -->
+    <string name="wallpaper_save_custom">Save</string>
+    <!-- Label for the switch that toggles using single image for both orientations -->
+    <string name="wallpaper_use_single_image">Use single image</string>
+    <!-- Content description for a wallpaper image -->
+    <string name="wallpaper_image_content_description">Wallpaper image</string>
 
     <!-- Add-on Installation from AMO-->
     <!-- Error displayed when user attempts to install an add-on from AMO (addons.mozilla.org) that is not supported -->
@@ -763,7 +773,7 @@
     <!-- Title text displayed on the tab crash page. This first parameter is the name of the application (For example: Midori) -->
     <string name="tab_crash_title_2">Sorry. %1$s can’t load that page.</string>
     <!-- Send crash report checkbox text on the tab crash page -->
-    <string name="tab_crash_send_report">Send crash report to Astian, Inc</string>
+    <string name="tab_crash_send_report">Send crash report to Astian Inc</string>
     <!-- Close tab button text on the tab crash page -->
     <string name="tab_crash_close">Close tab</string>
     <!-- Restore tab button text on the tab crash page -->
@@ -1136,17 +1146,17 @@
 
     <!-- Onboarding -->
     <!-- Text for onboarding welcome header. -->
-    <string name="onboarding_header_2">Welcome to a lighter and more private web</string>
+    <string name="onboarding_header_2">Welcome to a more private web</string>
     <!-- Text for the onboarding welcome message. -->
-    <string name="onboarding_message">The perfect browser for you.</string>
+    <string name="onboarding_message">A grassroots, independent browser.</string>
     <!-- Text for the Midori account onboarding sign in card header. -->
     <string name="onboarding_account_sign_in_header">Pick up where you left off</string>
     <!-- Text for the button to learn more about signing in to your Midori account. -->
     <string name="onboarding_manual_sign_in_description">Sync tabs and passwords across devices for seamless screen-switching.</string>
     <!-- Text for the button to manually sign into Midori account. -->
-    <string name="onboarding_midori_account_sign_in">Sign in</string>
+    <string name="onboarding_waterfox_account_sign_in">Sign in</string>
     <!-- text to display in the snackbar once account is signed-in -->
-    <string name="onboarding_midori_account_sync_is_on">Sync is on</string>
+    <string name="onboarding_waterfox_account_sync_is_on">Sync is on</string>
     <!-- Text for the tracking protection onboarding card header -->
     <string name="onboarding_tracking_protection_header">Privacy protection by default</string>
     <!-- Text for the tracking protection card description. -->
@@ -1199,7 +1209,7 @@
     <!-- Title of QR Pairing Fragment -->
     <string name="sync_scan_code">Scan the code</string>
     <!-- Instructions on how to access pairing -->
-    <string name="sign_in_instructions"><![CDATA[Midori relies on a Mozilla account to sync data between mobile and desktop.<br> On your computer open Midori and go to <b>https://firefox.com/pair</b><br><i>Mozilla are in no way affiliated with Astian, Inc or Midori.</i>]]></string>
+    <string name="sign_in_instructions"><![CDATA[Midori relies on a Mozilla account to sync data between mobile and desktop.<br> On your computer open Midori and go to <b>https://firefox.com/pair</b><br><i>Mozilla are in no way affiliated with Midori.</i>]]></string>
     <!-- Text shown for sign in pairing when ready -->
     <string name="sign_in_ready_for_scan">Ready to scan</string>
     <!-- Text shown for settings option for sign with pairing -->
@@ -1765,11 +1775,15 @@
     <!-- Content description for privacy content close button -->
     <string name="privacy_content_close_button_content_description">Close</string>
 
-    <string name="midori_suggest_header">Midori Suggest</string>
+    <string name="waterfox_suggest_header">Midori Suggest</string>
     <string name="mozac_tab_counter_open_tab_tray_single">1 open tab. Tap to switch tabs.</string>
     <string name="mozac_tab_counter_open_tab_tray_plural">%1$s open tabs. Tap to switch tabs.</string>
-    <string name="default_top_site_eneba">Eneba</string>
-    <string name="default_top_site_hotels">Hotels</string>
-    <string name="default_top_site_stakeus">Stake US</string>
     <string name="default_top_site_stakecom">Stake.com</string>
+    <string name="default_top_site_stakeus">Stake.US</string>
+    <string name="default_top_site_aliexpress">AliExpress</string>
+    <string name="default_top_site_amazon">Amazon</string>
+    <string name="default_top_site_ebay">Ebay</string>
+    <string name="default_top_site_expedia">Expedia</string>
+    <string name="default_top_site_adamant">Adamant</string>
+
 </resources>

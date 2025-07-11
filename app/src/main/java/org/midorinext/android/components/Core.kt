@@ -431,6 +431,13 @@ class Core(
                     )
                 )
 
+                defaultTopSites.add(
+                    Pair(
+                        context.getString(R.string.default_top_site_adamant),
+                        SupportUtils.ADAMANT_URL,
+                    )
+                )
+
                 context.settings().defaultTopSitesAdded = true
             }
         }
