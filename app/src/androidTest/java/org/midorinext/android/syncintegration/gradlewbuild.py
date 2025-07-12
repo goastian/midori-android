@@ -36,7 +36,7 @@ class GradlewBuild(object):
             raise
         finally:
             # Set the path correctly
-            testsPath = "app/src/androidTest/java/org/midorinext/android/syncintegration/"
+            testsPath = "app/src/androidTest/java/net/midorinext/android/syncintegration/"
             os.chdir(testsPath)
 
             with open(self.log, 'w') as f:

@@ -8,14 +8,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 buildscript {
     // This logic is duplicated in the allprojects block: I don't know how to fix that.
     repositories {
-        maven {
-            name "Mozilla Nightly"
-            url "https://nightly.maven.mozilla.org/maven2"
-            content {
-                // Improve performance: only check moz maven for mozilla deps.
-                includeGroupByRegex RepoMatching.mozilla
-            }
-        }
 
         maven {
             name "Mozilla"
@@ -59,32 +51,28 @@ buildscript {
                 }
             }
         }
+
     }
 
     dependencies {
-        classpath Deps.tools_androidgradle
-        classpath Deps.tools_kotlingradle
-        classpath Deps.tools_benchmarkgradle
-        classpath Deps.androidx_safeargs
-        classpath Deps.osslicenses_plugin
+        classpath(Deps.osslicenses_plugin)
     }
+
 }
 
 plugins {
     id("io.gitlab.arturbosch.detekt").version("1.19.0")
+    alias libs.plugins.android.application apply false
+    alias libs.plugins.kotlin.android apply false
+    alias libs.plugins.androidx.benchmark apply false
+    alias libs.plugins.androidx.safeargs apply false
+    alias libs.plugins.kotlin.parcelize apply false
+    alias libs.plugins.compose.compiler apply false
 }
 
 allprojects {
     // This logic is duplicated in the buildscript block: I don't know how to fix that.
     repositories {
-        maven {
-            name "Mozilla Nightly"
-            url "https://nightly.maven.mozilla.org/maven2"
-            content {
-                // Improve performance: only check moz maven for mozilla deps.
-                includeGroupByRegex RepoMatching.mozilla
-            }
-        }
 
         maven {
             name "Mozilla"
