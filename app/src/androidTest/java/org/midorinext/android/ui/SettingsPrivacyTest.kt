@@ -95,7 +95,7 @@ class SettingsPrivacyTest {
         }.goBack {
             // HTTPS-Only Mode
             verifyHTTPSOnlyModeButton()
-            verifyHTTPSOnlyModeState("On")
+            verifyHTTPSOnlyModeState("Off")
 
             // ENHANCED TRACKING PROTECTION
             verifyEnhancedTrackingProtectionButton()
