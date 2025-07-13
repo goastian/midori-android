@@ -1154,7 +1154,7 @@
     <!-- Text for the button to learn more about signing in to your Midori account. -->
     <string name="onboarding_manual_sign_in_description">Sync tabs and passwords across devices for seamless screen-switching.</string>
     <!-- Text for the button to manually sign into Midori account. -->
-    <string name="onboarding_waterfox_account_sign_in">Sign in</string>
+    <string name="onboarding_midori_account_sign_in">Sign in</string>
     <!-- text to display in the snackbar once account is signed-in -->
     <string name="onboarding_waterfox_account_sync_is_on">Sync is on</string>
     <!-- Text for the tracking protection onboarding card header -->
@@ -1775,7 +1775,7 @@
     <!-- Content description for privacy content close button -->
     <string name="privacy_content_close_button_content_description">Close</string>
 
-    <string name="waterfox_suggest_header">Midori Suggest</string>
+    <string name="midori_suggest_header">Midori Suggest</string>
     <string name="mozac_tab_counter_open_tab_tray_single">1 open tab. Tap to switch tabs.</string>
     <string name="mozac_tab_counter_open_tab_tray_plural">%1$s open tabs. Tap to switch tabs.</string>
     <string name="default_top_site_stakecom">Stake.com</string>

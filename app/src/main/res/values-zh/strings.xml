@@ -47,7 +47,7 @@
     <string name="recently_saved_menu_item_remove">移除</string>
 
     
-    <string name="about_content">%1$s 由 Astian, Inc 制作</string>
+    <string name="about_content">%1$s 由 Astian Inc 制作</string>
 
     
     
@@ -175,7 +175,7 @@
     
     <string name="browser_menu_share">分享</string>
     
-    <string name="browser_menu_open_in_midori">在 %1$s 中打开</string>
+    <string name="browser_menu_open_in_waterfox">在 %1$s 中打开</string>
     
     <string name="browser_menu_powered_by">由 %1$s 供电</string>
     
@@ -330,11 +330,11 @@
     
     <string name="preferences_accessibility">无障碍环境</string>
     
-    <string name="preferences_override_fxa_server">自定义 Astian 账户服务器</string>
+    <string name="preferences_override_fxa_server">自定义 Midori 账户服务器</string>
     
     <string name="preferences_override_sync_tokenserver">自定义同步服务器</string>
     
-    <string name="toast_override_fxa_sync_server_done">修改了 Astian 帐户/同步服务器。退出应用程序以应用更改...</string>
+    <string name="toast_override_fxa_sync_server_done">修改了 Midori 帐户/同步服务器。退出应用程序以应用更改...</string>
     
     <string name="preferences_category_account">账户</string>
     
@@ -348,7 +348,7 @@
     
     <string name="preferences_customize">定制</string>
     
-    <string name="preferences_sign_in_description" moz:RemovedIn="104" tools:ignore="UnusedResources">与 Astian 账户同步书签、历史记录等内容</string>
+    <string name="preferences_sign_in_description" moz:RemovedIn="104" tools:ignore="UnusedResources">与 Midori 账户同步书签、历史记录等内容</string>
     
     <string name="preferences_sign_in_description_2">登录以同步标签页、书签、密码等。</string>
     
@@ -422,7 +422,7 @@
     
     <string name="wallpaper_updated_snackbar_action">查看</string>
     
-    <string name="wallpaper_tap_to_change_switch_label_1">点击 Astian 主页徽标更换壁纸</string>
+    <string name="wallpaper_tap_to_change_switch_label_1">点击 Midori 主页徽标更换壁纸</string>
     
     <string name="wallpaper_logo_content_description">Midori 徽标 - 更改壁纸、按钮</string>
 
@@ -721,7 +721,7 @@
     
     <string name="tab_crash_title_2">对不起。%1$s 无法加载该页面。</string>
     
-    <string name="tab_crash_send_report">向 Astian, Inc 发送崩溃报告</string>
+    <string name="tab_crash_send_report">向 Astian Inc 发送崩溃报告</string>
     
     <string name="tab_crash_close">关闭选项卡</string>
     
@@ -1093,7 +1093,7 @@
     
     <string name="onboarding_midori_account_sign_in">登录</string>
     
-    <string name="onboarding_midori_account_sync_is_on">同步已开启</string>
+    <string name="onboarding_waterfox_account_sync_is_on">同步已开启</string>
     
     <string name="onboarding_tracking_protection_header">默认情况下的隐私保护</string>
     
@@ -1146,7 +1146,7 @@
     
     <string name="sync_scan_code">扫描代码</string>
     
-    <string name="sign_in_instructions">&lt;br&gt;在电脑上打开 Midori，然后访问 &lt;b&gt;https://firefox.com/pair&lt;/b&gt;&lt;br&gt;&lt;i&gt;Mozilla 与 Midori 没有任何关联。</string>
+    <string name="sign_in_instructions">&lt;br&gt;在电脑上打开 Midori，然后访问 &lt;b&gt;https://firefox.com/pair&lt;/b&gt;&lt;br&gt;&lt;i&gt;Astian Inc 与 Midori 没有任何关联。</string>
     
     <string name="sign_in_ready_for_scan">准备扫描</string>
     
@@ -1154,7 +1154,7 @@
     
     <string name="sign_in_with_email">改用电子邮件</string>
     
-    <string name="sign_in_create_account_text">没有账户？&lt;u&gt;创建一个&lt;/u&gt;在设备间同步 Astian。</string>
+    <string name="sign_in_create_account_text">没有账户？&lt;u&gt;创建一个&lt;/u&gt;在设备间同步 Midori。</string>
     
     <string name="sign_out_confirmation_message_2">%s 将停止与您的帐户同步，但不会删除您在该设备上的任何浏览数据。</string>
     
@@ -1707,5 +1707,16 @@
     
     <string name="privacy_content_close_button_content_description">关闭</string>
 
-    <string name="midori_suggest_header">绿建议</string>
+    <string name="midori_suggest_header">水狐建议</string>
+
+    <!-- Add-on process crash dialog to user -->
+    <!-- Title of a dialog shown to the user when enough errors have occurred with addons and they need to be temporarily disabled -->
+    <string name="addon_process_crash_dialog_title" tools:ignore="UnusedResources">附加组件已暂时被禁用</string>
+    <!-- The first parameter is the application name. This is a message shown to the user when too many errors have occurred with the addons process and they have been disabled. The user can decide if they would like to continue trying to start add-ons or if they'd rather continue without them. -->
+    <string name="addon_process_crash_dialog_message" tools:ignore="UnusedResources">一个或多个附加组件已停止运行，影响系统稳定。%1$s 曾尝试重启附加组件，但未能起效。\n\n当前会话中将不会再重启附加组件。\n\n移除或禁用附加组件也许可以解决此问题。</string>
+    <!-- This will cause the add-ons to try restarting but the dialog will reappear if it is unsuccessful again -->
+    <string name="addon_process_crash_dialog_retry_button_text" tools:ignore="UnusedResources">尝试重启附加组件</string>
+    <!-- The user will continue with all add-ons disabled -->
+    <string name="addon_process_crash_dialog_disable_addons_button_text" tools:ignore="UnusedResources">禁用附加组件并继续</string>
+
 </resources>
