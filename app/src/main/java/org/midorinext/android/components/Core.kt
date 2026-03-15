@@ -14,6 +14,7 @@ import mozilla.components.browser.session.storage.SessionStorage
 import mozilla.components.browser.state.engine.EngineMiddleware
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.store.BrowserStore
+import mozilla.components.browser.storage.sync.PlacesBookmarksStorage
 import mozilla.components.browser.storage.sync.PlacesHistoryStorage
 import mozilla.components.browser.storage.sync.RemoteTabsStorage
 import mozilla.components.browser.thumbnails.ThumbnailsMiddleware
@@ -85,6 +86,9 @@ class Core(
                 context.getPreferenceKey(R.string.pref_key_global_privacy_control),
                 false,
             ),
+            // --- Performance optimizations ---
+            suspendMediaWhenInactive = true,
+            loginAutofillEnabled = true,
         )
         EngineProvider.createEngine(context, defaultSettings)
     }
@@ -161,6 +165,16 @@ class Core(
      * A convenience accessor to the [PlacesHistoryStorage].
      */
     val historyStorage by lazy { lazyHistoryStorage.value }
+
+    /**
+     * The storage component to persist bookmarks.
+     */
+    val lazyBookmarksStorage = lazy { PlacesBookmarksStorage(context) }
+
+    /**
+     * A convenience accessor to the [PlacesBookmarksStorage].
+     */
+    val bookmarksStorage by lazy { lazyBookmarksStorage.value }
 
     /**
      * The storage component to persist logins data (username/password) for websites.

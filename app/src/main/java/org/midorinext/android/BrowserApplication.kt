@@ -21,8 +21,11 @@ import mozilla.components.support.ktx.android.content.isMainProcess
 import mozilla.components.support.ktx.android.content.runOnlyInMainProcess
 import mozilla.components.support.rusthttp.RustHttpConfig
 import mozilla.components.support.webextensions.WebExtensionSupport
+import androidx.preference.PreferenceManager
 import org.midorinext.android.push.PushFxaIntegration
 import org.midorinext.android.push.WebPushEngineIntegration
+import org.midorinext.android.search.AstianGoSearchEngine
+import org.midorinext.android.settings.CustomizeSettingsFragment
 import java.util.concurrent.TimeUnit
 import mozilla.components.support.AppServicesInitializer.Config as AppServicesConfig
 
@@ -33,6 +36,11 @@ open class BrowserApplication : Application() {
         super.onCreate()
 
         setupCrashReporting(this)
+
+        // Apply saved theme preference
+        val themeValue = PreferenceManager.getDefaultSharedPreferences(this)
+            .getString(getString(R.string.pref_key_theme), "system") ?: "system"
+        CustomizeSettingsFragment.applyTheme(themeValue)
 
         AppServicesInitializer.init(
             AppServicesConfig(components.analytics.crashReporter),
@@ -49,61 +57,64 @@ open class BrowserApplication : Application() {
             return
         }
 
+        // Engine warmUp must run on main thread (GeckoRuntime requires UI thread)
         components.core.engine.warmUp()
 
         restoreBrowserState()
 
-        GlobalAddonDependencyProvider.initialize(
-            components.core.addonManager,
-            components.core.addonUpdater,
-        )
-        WebExtensionSupport.initialize(
-            runtime = components.core.engine,
-            store = components.core.store,
-            onNewTabOverride = { _, engineSession, url ->
-                val tabId = components.useCases.tabsUseCases.addTab(
-                    url = url,
-                    selectTab = true,
-                    engineSession = engineSession,
-                )
-                tabId
-            },
-            onCloseTabOverride = { _, sessionId ->
-                components.useCases.tabsUseCases.removeTab(sessionId)
-            },
-            onSelectTabOverride = { _, sessionId ->
-                components.useCases.tabsUseCases.selectTab(sessionId)
-            },
-            onExtensionsLoaded = { extensions ->
-                components.core.addonUpdater.registerForFutureUpdates(extensions)
+        // Defer addon/push/search init to next main loop iteration so Activity renders faster
+        @OptIn(DelicateCoroutinesApi::class)
+        GlobalScope.launch(Dispatchers.Main) {
+            // Install AstianGo as default search engine
+            AstianGoSearchEngine.install(this@BrowserApplication, components.core.store)
 
-                val checker = components.core.supportedAddonsChecker
-                val hasUnsupportedAddons = extensions.any { it.isUnsupported() }
-                if (hasUnsupportedAddons) {
-                    checker.registerForChecks()
-                } else {
-                    // As checks are a persistent subscriptions, we have to make sure
-                    // we remove any previous subscriptions.
-                    checker.unregisterForChecks()
-                }
-            },
-            onUpdatePermissionRequest = components.core.addonUpdater::onUpdatePermissionRequest,
-        )
+            GlobalAddonDependencyProvider.initialize(
+                components.core.addonManager,
+                components.core.addonUpdater,
+            )
+            WebExtensionSupport.initialize(
+                runtime = components.core.engine,
+                store = components.core.store,
+                onNewTabOverride = { _, engineSession, url ->
+                    val tabId = components.useCases.tabsUseCases.addTab(
+                        url = url,
+                        selectTab = true,
+                        engineSession = engineSession,
+                    )
+                    tabId
+                },
+                onCloseTabOverride = { _, sessionId ->
+                    components.useCases.tabsUseCases.removeTab(sessionId)
+                },
+                onSelectTabOverride = { _, sessionId ->
+                    components.useCases.tabsUseCases.selectTab(sessionId)
+                },
+                onExtensionsLoaded = { extensions ->
+                    components.core.addonUpdater.registerForFutureUpdates(extensions)
 
-        components.push.feature?.let {
-            Logger.info("AutoPushFeature is configured, initializing it...")
+                    val checker = components.core.supportedAddonsChecker
+                    val hasUnsupportedAddons = extensions.any { it.isUnsupported() }
+                    if (hasUnsupportedAddons) {
+                        checker.registerForChecks()
+                    } else {
+                        checker.unregisterForChecks()
+                    }
+                },
+                onUpdatePermissionRequest = components.core.addonUpdater::onUpdatePermissionRequest,
+            )
 
-            PushProcessor.install(it)
+            components.push.feature?.let {
+                Logger.info("AutoPushFeature is configured, initializing it...")
 
-            // WebPush integration to observe and deliver push messages to engine.
-            WebPushEngineIntegration(components.core.engine, it).start()
+                PushProcessor.install(it)
 
-            // Perform a one-time initialization of the account manager if a message is received.
-            PushFxaIntegration(it, lazy { components.backgroundServices.accountManager }).launch()
-
-            // Initialize the push feature and service.
-            it.initialize()
+                WebPushEngineIntegration(components.core.engine, it).start()
+                PushFxaIntegration(it, lazy { components.backgroundServices.accountManager }).launch()
+                it.initialize()
+            }
         }
+
+        // Clean uploads directory on background thread
         @OptIn(DelicateCoroutinesApi::class)
         GlobalScope.launch(Dispatchers.IO) {
             components.core.fileUploadsDirCleaner.cleanUploadsDirectory()
