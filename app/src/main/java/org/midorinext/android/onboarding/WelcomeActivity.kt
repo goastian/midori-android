@@ -6,7 +6,6 @@ package org.midorinext.android.onboarding
 
 import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -27,7 +26,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -35,10 +34,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -236,42 +237,36 @@ fun LinkText(
     textColor: androidx.compose.ui.graphics.Color,
     linkColor: androidx.compose.ui.graphics.Color,
 ) {
-    val context = LocalContext.current
     val startIndex = fullText.indexOf(linkText)
     if (startIndex == -1) {
         Text(text = fullText, color = textColor, fontSize = 13.sp, lineHeight = 18.sp)
         return
     }
 
+    val uriHandler = LocalUriHandler.current
     val annotatedString = buildAnnotatedString {
         withStyle(SpanStyle(color = textColor, fontSize = 13.sp)) {
             append(fullText.substring(0, startIndex))
         }
-        pushStringAnnotation(tag = "URL", annotation = linkUrl)
-        withStyle(
-            SpanStyle(
+        val linkStyles = TextLinkStyles(
+            style = SpanStyle(
                 color = linkColor,
                 fontSize = 13.sp,
                 textDecoration = TextDecoration.Underline,
             ),
-        ) {
-            append(linkText)
-        }
+        )
+        pushLink(LinkAnnotation.Clickable(tag = "link", styles = linkStyles) {
+            uriHandler.openUri(linkUrl)
+        })
+        append(linkText)
         pop()
         withStyle(SpanStyle(color = textColor, fontSize = 13.sp)) {
             append(fullText.substring(startIndex + linkText.length))
         }
     }
 
-    ClickableText(
+    BasicText(
         text = annotatedString,
         style = TextStyle(lineHeight = 18.sp),
-        onClick = { offset ->
-            annotatedString.getStringAnnotations("URL", offset, offset)
-                .firstOrNull()?.let { annotation ->
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(annotation.item))
-                    context.startActivity(intent)
-                }
-        },
     )
 }
