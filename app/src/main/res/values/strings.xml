@@ -206,6 +206,26 @@
     <string name="welcome_data">To help improve the browser, Midori sends diagnostic and interaction data to Astian. <a href="https://astian.org/midori-browser/privacy">Manage settings</a>.</string>
     <string name="welcome_continue">Continue</string>
 
+    <!-- Onboarding - Address Bar Position -->
+    <string name="onboarding_toolbar_title">Choose your address bar</string>
+    <string name="onboarding_toolbar_top">Top</string>
+    <string name="onboarding_toolbar_bottom">Bottom</string>
+
+    <!-- Onboarding - Search Widget -->
+    <string name="onboarding_widget_title">Make every search more private</string>
+    <string name="onboarding_widget_description">Start every search from your phone\'s home screen and know Midori\'s automatic protections have your back.</string>
+    <string name="onboarding_widget_add">Add Midori widget</string>
+    <string name="onboarding_widget_skip">Not now</string>
+
+    <!-- Onboarding - Default Browser -->
+    <string name="onboarding_default_title">Make Midori your default browser</string>
+    <string name="onboarding_default_description">Open all links automatically, block ads and trackers, and browse hassle free.</string>
+    <string name="onboarding_default_set">Set Midori as Default</string>
+    <string name="onboarding_default_skip">Maybe later</string>
+
+    <!-- Search Widget -->
+    <string name="search_widget_text">Search with Midori</string>
+
     <!-- Toolbar position -->
     <string name="preferences_toolbar_position">Toolbar position</string>
     <string name="preferences_toolbar_top">Top</string>
