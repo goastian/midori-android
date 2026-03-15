@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Search widget layout for home screen -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/widgetContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_search_background"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp">
+
+    <ImageView
+        android:id="@+id/widgetLogo"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:src="@drawable/ic_midori_welcome_logo"
+        android:contentDescription="@string/app_name"
+        tools:ignore="ContentDescription" />
+
+    <TextView
+        android:id="@+id/widgetSearchText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:text="@string/search_widget_text"
+        android:textColor="#99FFFFFF"
+        android:textSize="14sp"
+        android:singleLine="true" />
+
+    <ImageView
+        android:id="@+id/widgetSearchIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_search"
+        android:tint="#CCFFFFFF"
+        android:contentDescription="@string/search_widget_text"
+        tools:ignore="ContentDescription" />
+
+</LinearLayout>

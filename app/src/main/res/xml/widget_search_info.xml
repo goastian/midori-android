@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- AppWidget configuration for Midori search widget -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:initialLayout="@layout/widget_search"
+    android:minWidth="250dp"
+    android:minHeight="40dp"
+    android:minResizeWidth="180dp"
+    android:minResizeHeight="40dp"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:previewImage="@drawable/ic_midori_welcome_logo"
+    android:description="@string/search_widget_text"
+    android:updatePeriodMillis="0" />
