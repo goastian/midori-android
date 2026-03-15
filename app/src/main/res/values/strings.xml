@@ -223,6 +223,7 @@
     <string name="menu_synced_tabs">Synced Tabs</string>
     <string name="menu_report_issue">Report issue</string>
     <string name="menu_new_tab">New Tab</string>
+    <string name="menu_open_in_browser">Open in Browser</string>
 
     <!-- Navigation bar content descriptions -->
     <string name="nav_back">Navigate back</string>
