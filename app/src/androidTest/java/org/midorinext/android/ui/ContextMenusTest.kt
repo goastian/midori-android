@@ -4,282 +4,166 @@
 
 package org.midorinext.android.ui
 
-import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.uiautomator.UiDevice
-import okhttp3.mockwebserver.MockWebServer
+import android.os.Build
+import mockwebserver3.MockWebServer
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
-import org.midorinext.android.customannotations.SmokeTest
-import org.midorinext.android.ext.settings
 import org.midorinext.android.helpers.AndroidAssetDispatcher
-import org.midorinext.android.helpers.FeatureSettingsHelper
-import org.midorinext.android.helpers.HomeActivityIntentTestRule
+import org.midorinext.android.helpers.BrowserActivityTestRule
 import org.midorinext.android.helpers.RetryTestRule
 import org.midorinext.android.helpers.TestAssetHelper
-import org.midorinext.android.ui.robots.downloadRobot
-import org.midorinext.android.ui.robots.homeScreen
+import org.midorinext.android.helpers.TestHelper.allowOrPreventSystemUIFromReadingTheClipboard
+import org.midorinext.android.ui.robots.browser
 import org.midorinext.android.ui.robots.navigationToolbar
 
-/**
- *  Tests for verifying basic functionality of content context menus
- *
- *  - Verifies long click "Open link in new tab" UI and functionality
- *  - Verifies long click "Open link in new Private tab" UI and functionality
- *  - Verifies long click "Copy Link" UI and functionality
- *  - Verifies long click "Share Link" UI and functionality
- *  - Verifies long click "Open image in new tab" UI and functionality
- *  - Verifies long click "Save Image" UI and functionality
- *  - Verifies long click "Copy image location" UI and functionality
- *  - Verifies long click items of mixed hypertext items
- *
- */
-
 class ContextMenusTest {
-    private lateinit var mDevice: UiDevice
     private lateinit var mockWebServer: MockWebServer
 
     @get:Rule
-    val activityIntentTestRule = HomeActivityIntentTestRule()
+    val activityTestRule = BrowserActivityTestRule()
 
     @Rule
     @JvmField
     val retryTestRule = RetryTestRule(3)
 
-    private val featureSettingsHelper = FeatureSettingsHelper()
-
     @Before
     fun setUp() {
-        activityIntentTestRule.activity.applicationContext.settings().shouldShowJumpBackInCFR = false
-        mDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         mockWebServer = MockWebServer().apply {
             dispatcher = AndroidAssetDispatcher()
             start()
         }
 
-        featureSettingsHelper.setTCPCFREnabled(false)
+        // Prevent the System UI from reading the clipboard content
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            allowOrPreventSystemUIFromReadingTheClipboard(allowToReadClipboard = false)
+        }
     }
 
     @After
     fun tearDown() {
-        mockWebServer.shutdown()
-        featureSettingsHelper.resetAllFeatureFlags()
+        runCatching { mockWebServer.close() }
+
+        // Allow the System UI from reading the clipboard content
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            allowOrPreventSystemUIFromReadingTheClipboard(allowToReadClipboard = true)
+        }
     }
 
-    @SmokeTest
     @Test
-    @Ignore("Failing after compose migration. See: https://github.com/mozilla-mobile/fenix/issues/26087")
-    fun verifyContextOpenLinkNewTab() {
-        val pageLinks =
-            TestAssetHelper.getGenericAsset(mockWebServer, 4)
-        val genericURL =
-            TestAssetHelper.getGenericAsset(mockWebServer, 1)
+    fun verifyLinkContextMenuItems() {
+        val pageLinks = TestAssetHelper.getGenericAsset(mockWebServer, 4)
 
         navigationToolbar {
-        }.enterURLAndEnterToBrowser(pageLinks.url) {
-            mDevice.waitForIdle()
+        }.enterUrlAndEnterToBrowser(pageLinks.url) {
             longClickMatchingText("Link 1")
-            verifyLinkContextMenuItems(genericURL.url)
+            verifyLinkContextMenuItems()
+        }
+    }
+
+    @Test
+    fun openLinkInNewTabTest() {
+        val pageLinks = TestAssetHelper.getGenericAsset(mockWebServer, 4)
+        val genericURL = TestAssetHelper.getGenericAsset(mockWebServer, 1)
+
+        navigationToolbar {
+        }.enterUrlAndEnterToBrowser(pageLinks.url) {
+            longClickMatchingText("Link 1")
             clickContextOpenLinkInNewTab()
-            verifySnackBarText("New tab opened")
-            snackBarButtonClick()
-            verifyUrl(genericURL.url.toString())
-        }.openTabDrawer {
-            verifyNormalModeSelected()
-            verifyExistingOpenTabs("Test_Page_1")
-            verifyExistingOpenTabs("Test_Page_4")
+            clickSnackbarSwitchButton()
+        }
+        navigationToolbar {
+        }.openTabTrayMenu {
+            verifyRegularBrowsingTab()
+            verifyExistingOpenTabs(pageLinks.title)
+            verifyExistingOpenTabs(genericURL.title)
         }
     }
 
-    @SmokeTest
     @Test
-    @Ignore("Failing after compose migration. See: https://github.com/mozilla-mobile/fenix/issues/26087")
-    fun verifyContextOpenLinkPrivateTab() {
-        val pageLinks =
-            TestAssetHelper.getGenericAsset(mockWebServer, 4)
-        val genericURL =
-            TestAssetHelper.getGenericAsset(mockWebServer, 2)
+    fun openLinkInPrivateTabTest() {
+        val pageLinks = TestAssetHelper.getGenericAsset(mockWebServer, 4)
+        val genericURL = TestAssetHelper.getGenericAsset(mockWebServer, 1)
 
         navigationToolbar {
-        }.enterURLAndEnterToBrowser(pageLinks.url) {
-            mDevice.waitForIdle()
-            longClickMatchingText("Link 2")
-            verifyLinkContextMenuItems(genericURL.url)
+        }.enterUrlAndEnterToBrowser(pageLinks.url) {
+            longClickMatchingText("Link 1")
             clickContextOpenLinkInPrivateTab()
-            verifySnackBarText("New private tab opened")
-            snackBarButtonClick()
-            verifyUrl(genericURL.url.toString())
-        }.openTabDrawer {
-            verifyPrivateModeSelected()
-            verifyExistingOpenTabs("Test_Page_2")
+            clickSnackbarSwitchButton()
+        }
+        navigationToolbar {
+        }.openTabTrayMenu {
+            openPrivateBrowsing()
+            verifyPrivateBrowsingTab()
+            verifyExistingOpenTabs(genericURL.title)
         }
     }
 
     @Test
-    fun verifyContextCopyLink() {
-        val pageLinks =
-            TestAssetHelper.getGenericAsset(mockWebServer, 4)
-        val genericURL =
-            TestAssetHelper.getGenericAsset(mockWebServer, 3)
+    fun contextCopyLinkTest() {
+        val pageLinks = TestAssetHelper.getGenericAsset(mockWebServer, 4)
+        val genericURL = TestAssetHelper.getGenericAsset(mockWebServer, 1)
 
         navigationToolbar {
-        }.enterURLAndEnterToBrowser(pageLinks.url) {
-            mDevice.waitForIdle()
-            longClickMatchingText("Link 3")
-            verifyLinkContextMenuItems(genericURL.url)
+        }.enterUrlAndEnterToBrowser(pageLinks.url) {
+            longClickMatchingText("Link 1")
             clickContextCopyLink()
-            verifySnackBarText("Link copied to clipboard")
-        }.openNavigationToolbar {
-        }.visitLinkFromClipboard {
+            waitUntilCopyLinkSnackbarIsGone()
+        }
+        navigationToolbar {
+        }.clickToolbar {
+            pasteAndLoadCopiedLink()
+        }
+
+        browser {
             verifyUrl(genericURL.url.toString())
         }
     }
 
     @Test
-    fun verifyContextShareLink() {
-        val pageLinks =
-            TestAssetHelper.getGenericAsset(mockWebServer, 4)
-        val genericURL =
-            TestAssetHelper.getGenericAsset(mockWebServer, 1)
+    fun contextShareLinkTest() {
+        val pageLinks = TestAssetHelper.getGenericAsset(mockWebServer, 4)
 
         navigationToolbar {
-        }.enterURLAndEnterToBrowser(pageLinks.url) {
-            mDevice.waitForIdle()
+        }.enterUrlAndEnterToBrowser(pageLinks.url) {
             longClickMatchingText("Link 1")
-            verifyLinkContextMenuItems(genericURL.url)
-            clickContextShareLink(genericURL.url) // verify share intent is matched with associated URL
+        }.clickContextShareLink {
+            verifyShareContentPanel()
         }
     }
 
     @Test
-    fun verifyContextOpenImageNewTab() {
-        val pageLinks =
-            TestAssetHelper.getGenericAsset(mockWebServer, 4)
-        val imageResource =
-            TestAssetHelper.getImageAsset(mockWebServer)
-
-        navigationToolbar {
-        }.enterURLAndEnterToBrowser(pageLinks.url) {
-            mDevice.waitForIdle()
-            longClickMatchingText("test_link_image")
-            verifyLinkImageContextMenuItems(imageResource.url)
-            clickContextOpenImageNewTab()
-            verifySnackBarText("New tab opened")
-            snackBarButtonClick()
-            verifyUrl(imageResource.url.toString())
-        }
-    }
-
-    @Test
-    fun verifyContextCopyImageLocation() {
-        val pageLinks =
-            TestAssetHelper.getGenericAsset(mockWebServer, 4)
-        val imageResource =
-            TestAssetHelper.getImageAsset(mockWebServer)
-
-        navigationToolbar {
-        }.enterURLAndEnterToBrowser(pageLinks.url) {
-            mDevice.waitForIdle()
-            longClickMatchingText("test_link_image")
-            verifyLinkImageContextMenuItems(imageResource.url)
-            clickContextCopyImageLocation()
-            verifySnackBarText("Link copied to clipboard")
-        }.openNavigationToolbar {
-        }.visitLinkFromClipboard {
-            verifyUrl(imageResource.url.toString())
-        }
-    }
-
-    @Test
-    fun verifyContextSaveImage() {
-        val pageLinks =
-            TestAssetHelper.getGenericAsset(mockWebServer, 4)
-        val imageResource =
-            TestAssetHelper.getImageAsset(mockWebServer)
-
-        navigationToolbar {
-        }.enterURLAndEnterToBrowser(pageLinks.url) {
-            mDevice.waitForIdle()
-            longClickMatchingText("test_link_image")
-            verifyLinkImageContextMenuItems(imageResource.url)
-            clickContextSaveImage()
-        }
-
-        downloadRobot {
-            verifyDownloadNotificationPopup()
-        }.clickOpen("image/jpeg") {} // verify open intent is matched with associated data type
-        downloadRobot {
-            verifyPhotosAppOpens()
-        }
-    }
-
-    @Ignore("Failing with frequent ANR: https://bugzilla.mozilla.org/show_bug.cgi?id=1764605")
-    @Test
-    fun verifyContextMixedVariations() {
-        val pageLinks =
-            TestAssetHelper.getGenericAsset(mockWebServer, 4)
-        val genericURL =
-            TestAssetHelper.getGenericAsset(mockWebServer, 1)
-        val imageResource =
-            TestAssetHelper.getImageAsset(mockWebServer)
-
-        navigationToolbar {
-        }.enterURLAndEnterToBrowser(pageLinks.url) {
-            mDevice.waitForIdle()
-            longClickMatchingText("Link 1")
-            verifyLinkContextMenuItems(genericURL.url)
-            dismissContentContextMenu(genericURL.url)
-            longClickMatchingText("test_link_image")
-            verifyLinkImageContextMenuItems(imageResource.url)
-            dismissContentContextMenu(imageResource.url)
-            longClickMatchingText("test_no_link_image")
-            verifyNoLinkImageContextMenuItems(imageResource.url)
-        }
-    }
-
-    @SmokeTest
-    @Test
-    fun shareSelectedTextTest() {
+    fun copyTextTest() {
         val genericURL = TestAssetHelper.getGenericAsset(mockWebServer, 1)
 
         navigationToolbar {
-        }.enterURLAndEnterToBrowser(genericURL.url) {
-            longClickMatchingText(genericURL.content)
-        }.clickShareSelectedText {
-            verifyAndroidShareLayout()
+        }.enterUrlAndEnterToBrowser(genericURL.url) {
+            longClickAndCopyText("content")
+        }
+        navigationToolbar {
+        }.clickToolbar {
+            clickClearToolbarButton()
+            longClickToolbar()
+            clickPasteText()
+            verifyPastedToolbarText("content")
         }
     }
 
-    @SmokeTest
     @Test
-    fun selectAndSearchTextTest() {
+    fun selectAllAndCopyTextTest() {
         val genericURL = TestAssetHelper.getGenericAsset(mockWebServer, 1)
 
         navigationToolbar {
-        }.enterURLAndEnterToBrowser(genericURL.url) {
-            longClickAndSearchText("Search", "content")
-            mDevice.waitForIdle()
-            verifyTabCounter("2")
-            verifyUrl("google")
+        }.enterUrlAndEnterToBrowser(genericURL.url) {
+            longClickAndCopyText("content", true)
         }
-    }
-
-    @SmokeTest
-    @Test
-    fun privateSelectAndSearchTextTest() {
-        val genericURL = TestAssetHelper.getGenericAsset(mockWebServer, 1)
-
-        homeScreen {
-        }.togglePrivateBrowsingMode()
-
         navigationToolbar {
-        }.enterURLAndEnterToBrowser(genericURL.url) {
-            longClickAndSearchText("Private Search", "content")
-            mDevice.waitForIdle()
-            verifyTabCounter("2")
-            verifyUrl("google")
+        }.clickToolbar {
+            clickClearToolbarButton()
+            longClickToolbar()
+            clickPasteText()
+            verifyPastedToolbarText("Page content: 1")
         }
     }
 }

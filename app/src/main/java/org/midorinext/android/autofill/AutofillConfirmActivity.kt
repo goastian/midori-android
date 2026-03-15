@@ -4,16 +4,10 @@
 
 package org.midorinext.android.autofill
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import mozilla.components.feature.autofill.AutofillConfiguration
 import mozilla.components.feature.autofill.ui.AbstractAutofillConfirmActivity
 import org.midorinext.android.ext.components
 
-/**
- * Activity responsible for asking the user to confirm before auto-filling a third-party app.
- */
-@RequiresApi(Build.VERSION_CODES.O)
 class AutofillConfirmActivity : AbstractAutofillConfirmActivity() {
     override val configuration: AutofillConfiguration by lazy { components.autofillConfiguration }
 }

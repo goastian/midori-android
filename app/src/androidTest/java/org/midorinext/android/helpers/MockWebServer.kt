@@ -7,11 +7,10 @@ package org.midorinext.android.helpers
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
-import androidx.test.platform.app.InstrumentationRegistry
-import okhttp3.mockwebserver.Dispatcher
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-import okhttp3.mockwebserver.RecordedRequest
+import mockwebserver3.Dispatcher
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
+import mockwebserver3.RecordedRequest
 import okio.Buffer
 import okio.source
 import org.midorinext.android.helpers.ext.toUri
@@ -19,44 +18,25 @@ import java.io.IOException
 import java.io.InputStream
 
 object MockWebServerHelper {
-
     fun initMockWebServerAndReturnEndpoints(vararg messages: String): List<Uri> {
         val mockServer = MockWebServer()
         var uniquePath = 0
         val uris = mutableListOf<Uri>()
+
         messages.forEach { message ->
-            val response = MockResponse().setBody("<html><body>$message</body></html>")
+            val response = MockResponse(body = "<html><body>$message</body></html>")
             mockServer.enqueue(response)
+
             val endpoint = mockServer.url(uniquePath++.toString()).toString().toUri()!!
             uris += endpoint
         }
-        return uris
-    }
 
-    /**
-     * Create a mock webserver that accepts all requests and replies with "OK".
-     * @return a [MockWebServer] instance
-     */
-    fun createAlwaysOkMockWebServer(): MockWebServer {
-        return MockWebServer().apply {
-            val dispatcher = object : Dispatcher() {
-                @Throws(InterruptedException::class)
-                override fun dispatch(request: RecordedRequest): MockResponse {
-                    return MockResponse().setBody("OK")
-                }
-            }
-            this.dispatcher = dispatcher
-        }
+        return uris
     }
 }
 
 /**
  * A [MockWebServer] [Dispatcher] that will return Android assets in the body of requests.
- *
- * If the dispatcher is unable to read a requested asset, it will fail the test by throwing an
- * Exception on the main thread.
- *
- * @sample [org.midorinext.android.ui.NavigationToolbarTest.visitURLTest]
  */
 const val HTTP_OK = 200
 const val HTTP_NOT_FOUND = 404
@@ -65,27 +45,35 @@ class AndroidAssetDispatcher : Dispatcher() {
     private val mainThreadHandler = Handler(Looper.getMainLooper())
 
     override fun dispatch(request: RecordedRequest): MockResponse {
-        val assetManager = InstrumentationRegistry.getInstrumentation().context.assets
-        try {
-            val pathWithoutQueryParams = Uri.parse(request.path!!.drop(1)).path
-            assetManager.open(pathWithoutQueryParams!!).use { inputStream ->
-                return fileToResponse(pathWithoutQueryParams, inputStream)
+        val assetManager = androidx.test.platform.app.InstrumentationRegistry
+            .getInstrumentation()
+            .context.assets
+
+        return try {
+            val assetPath = request.url.encodedPath.removePrefix("/")
+            val normalizedPath = Uri.parse(assetPath).path ?: assetPath
+
+            assetManager.open(normalizedPath).use { inputStream ->
+                fileToResponse(normalizedPath, inputStream)
             }
-        } catch (e: IOException) { // e.g. file not found.
-            // We're on a background thread so we need to forward the exception to the main thread.
+        } catch (e: IOException) {
             mainThreadHandler.postAtFrontOfQueue { throw e }
-            return MockResponse().setResponseCode(HTTP_NOT_FOUND)
+            MockResponse(code = HTTP_NOT_FOUND)
         }
     }
 }
 
 @Throws(IOException::class)
-private fun fileToResponse(path: String, file: InputStream): MockResponse {
-    return MockResponse()
-        .setResponseCode(HTTP_OK)
-        .setBody(fileToBytes(file)!!)
+private fun fileToResponse(
+    path: String,
+    file: InputStream,
+): MockResponse =
+    MockResponse
+        .Builder()
+        .code(HTTP_OK)
+        .body(fileToBytes(file)!!)
         .addHeader("content-type: " + contentType(path))
-}
+        .build()
 
 @Throws(IOException::class)
 private fun fileToBytes(file: InputStream): Buffer? {
@@ -94,8 +82,8 @@ private fun fileToBytes(file: InputStream): Buffer? {
     return result
 }
 
-private fun contentType(path: String): String? {
-    return when {
+private fun contentType(path: String): String? =
+    when {
         path.endsWith(".png") -> "image/png"
         path.endsWith(".jpg") -> "image/jpeg"
         path.endsWith(".jpeg") -> "image/jpeg"
@@ -105,4 +93,3 @@ private fun contentType(path: String): String? {
         path.endsWith(".txt") -> "text/plain; charset=utf-8"
         else -> "application/octet-stream"
     }
-}

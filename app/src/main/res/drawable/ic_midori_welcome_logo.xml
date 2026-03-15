@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Midori Browser Welcome Logo - Stylized bird/leaf shape -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp"
+    android:height="160dp"
+    android:viewportWidth="160"
+    android:viewportHeight="160">
+
+    <!-- Outer glow circle -->
+    <path
+        android:fillColor="#2600897B"
+        android:pathData="M80,80m-75,0a75,75 0,1 1,150 0a75,75 0,1 1,-150 0" />
+
+    <!-- Inner circle background -->
+    <path
+        android:fillColor="#FF2D2248"
+        android:pathData="M80,80m-55,0a55,55 0,1 1,110 0a55,55 0,1 1,-110 0" />
+
+    <!-- Midori leaf/bird shape - main body -->
+    <path
+        android:fillColor="#FF4DB6AC"
+        android:pathData="M80,35 C60,35 45,50 45,70 C45,85 55,100 70,110 C75,113 78,115 80,118 C82,115 85,113 90,110 C105,100 115,85 115,70 C115,50 100,35 80,35Z" />
+
+    <!-- Inner detail - lighter accent -->
+    <path
+        android:fillColor="#FF80CBC4"
+        android:pathData="M80,45 C67,45 55,55 55,70 C55,82 62,93 73,101 C76,103 78,105 80,108 C82,105 84,103 87,101 C98,93 105,82 105,70 C105,55 93,45 80,45Z" />
+
+    <!-- Eye -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M72,65 m-4,0 a4,4 0,1 1,8 0 a4,4 0,1 1,-8 0" />
+    <path
+        android:fillColor="#FF1B1033"
+        android:pathData="M73,65 m-2,0 a2,2 0,1 1,4 0 a2,2 0,1 1,-4 0" />
+
+    <!-- Beak -->
+    <path
+        android:fillColor="#FFFFAB40"
+        android:pathData="M65,73 L60,78 L68,76Z" />
+
+    <!-- Wing detail -->
+    <path
+        android:fillColor="#FF00897B"
+        android:pathData="M85,55 C90,60 95,68 95,75 C95,80 92,85 88,90 C95,83 98,74 95,65 C93,59 89,55 85,55Z" />
+
+</vector>

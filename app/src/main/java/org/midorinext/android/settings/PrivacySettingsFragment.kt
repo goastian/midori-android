@@ -1,0 +1,69 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+package org.midorinext.android.settings
+
+import android.os.Bundle
+import androidx.preference.Preference.OnPreferenceChangeListener
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreferenceCompat
+import mozilla.components.concept.engine.EngineSession.TrackingProtectionPolicy
+import org.midorinext.android.R
+import org.midorinext.android.ext.getPreferenceKey
+import org.midorinext.android.ext.requireComponents
+
+class PrivacySettingsFragment : PreferenceFragmentCompat() {
+    override fun onCreatePreferences(
+        savedInstanceState: Bundle?,
+        rootKey: String?,
+    ) {
+        setPreferencesFromResource(R.xml.privacy_preferences, rootKey)
+
+        val context = requireContext()
+        val telemetryKey = context.getPreferenceKey(R.string.pref_key_telemetry)
+        val trackingProtectionNormalKey = context.getPreferenceKey(R.string.pref_key_tracking_protection_normal)
+        val trackingProtectionPrivateKey = context.getPreferenceKey(R.string.pref_key_tracking_protection_private)
+        val globalPrivacyControlKey = context.getPreferenceKey(R.string.pref_key_global_privacy_control)
+
+        val prefTelemetry = findPreference<SwitchPreferenceCompat>(telemetryKey)
+        val prefTrackingProtectionNormal = findPreference<SwitchPreferenceCompat>(trackingProtectionNormalKey)
+        val prefTrackingProtectionPrivate = findPreference<SwitchPreferenceCompat>(trackingProtectionPrivateKey)
+        val globalPrivacyControl = findPreference<SwitchPreferenceCompat>(globalPrivacyControlKey)
+
+        prefTelemetry?.onPreferenceChangeListener = getChangeListenerForTelemetry()
+        prefTrackingProtectionNormal?.onPreferenceChangeListener = getChangeListenerForTrackingProtection { enabled ->
+            requireComponents.core.createTrackingProtectionPolicy(normalMode = enabled)
+        }
+        prefTrackingProtectionPrivate?.onPreferenceChangeListener = getChangeListenerForTrackingProtection { enabled ->
+            requireComponents.core.createTrackingProtectionPolicy(privateMode = enabled)
+        }
+
+        globalPrivacyControl?.onPreferenceChangeListener = getChangeListenerForGPC { enabled ->
+            requireComponents.core.engine.settings.globalPrivacyControlEnabled = enabled
+            requireComponents.useCases.sessionUseCases.reload
+                .invoke()
+        }
+    }
+
+    private fun getChangeListenerForTelemetry(): OnPreferenceChangeListener =
+        OnPreferenceChangeListener { _, _ ->
+            true
+        }
+
+    private fun getChangeListenerForTrackingProtection(
+        createTrackingProtectionPolicy: (Boolean) -> TrackingProtectionPolicy,
+    ): OnPreferenceChangeListener =
+        OnPreferenceChangeListener { _, value ->
+            val policy = createTrackingProtectionPolicy(value as Boolean)
+            requireComponents.useCases.settingsUseCases.updateTrackingProtection
+                .invoke(policy)
+            true
+        }
+
+    private fun getChangeListenerForGPC(action: (Boolean) -> Unit): OnPreferenceChangeListener =
+        OnPreferenceChangeListener { _, enabled ->
+            action.invoke(enabled as Boolean)
+            true
+        }
+}

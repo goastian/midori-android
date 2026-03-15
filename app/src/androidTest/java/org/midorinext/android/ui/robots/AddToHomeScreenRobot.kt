@@ -5,132 +5,53 @@
 package org.midorinext.android.ui.robots
 
 import android.os.Build
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.clearText
-import androidx.test.espresso.action.ViewActions.typeText
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
-import androidx.test.uiautomator.By
-import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
-import androidx.test.uiautomator.Until
-import org.hamcrest.CoreMatchers.allOf
-import org.junit.Assert.assertTrue
-import org.midorinext.android.R
 import org.midorinext.android.helpers.TestAssetHelper.waitingTime
-import org.midorinext.android.helpers.TestHelper.mDevice
-import org.midorinext.android.helpers.click
-import org.midorinext.android.helpers.ext.waitNotNull
-import java.util.regex.Pattern
+import org.midorinext.android.helpers.TestAssetHelper.waitingTimeShort
 
 /**
  * Implementation of Robot Pattern for the Add to homescreen feature.
  */
 class AddToHomeScreenRobot {
-
-    fun verifyAddPrivateBrowsingShortcutButton() = assertAddPrivateBrowsingShortcutButton()
-
-    fun verifyNoThanksPrivateBrowsingShortcutButton() = assertNoThanksPrivateBrowsingShortcutButton()
-
-    fun clickAddPrivateBrowsingShortcutButton() = addPrivateBrowsingShortcutButton().click()
-
-    fun addShortcutName(title: String) {
-        mDevice.waitNotNull(Until.findObject(By.text("Add to Home screen")), waitingTime)
-        shortcutNameField()
-            .perform(clearText())
-            .perform(typeText(title))
+    fun clickCancelAddToHomeScreenButton() {
+        cancelAddToHomeScreenButton().waitForExists(waitingTime)
+        cancelAddToHomeScreenButton().click()
     }
 
-    fun verifyShortcutNameField(expectedText: String) = assertShortcutNameField(expectedText)
+    fun clickSystemHomeScreenShortcutAddButton() {
+        when (Build.VERSION.SDK_INT) {
+            // For Android Oreo(API 26) to Android 11(API 30), click the "Add Automatically" button
+            in Build.VERSION_CODES.O..Build.VERSION_CODES.R -> clickAddAutomaticallyButton()
 
-    fun clickAddShortcutButton() = addButton().click()
-
-    fun clickCancelShortcutButton() = cancelAddToHomeScreenButton().click()
-
-    fun clickAddAutomaticallyButton() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            mDevice.wait(
-                Until.findObject(
-                    By.text(
-                        Pattern.compile("Add Automatically", Pattern.CASE_INSENSITIVE)
-                    )
-                ),
-                waitingTime
-            )
-            addAutomaticallyButton().click()
+            // For Android 12(API 31) to Vanilla Ice Cream(API 35), click the "Add to Home Screen" button
+            in Build.VERSION_CODES.S..Build.VERSION_CODES.VANILLA_ICE_CREAM -> clickAddToHomeScreenButton()
         }
     }
 
-    fun verifyShortcutAdded(shortcutTitle: String) {
-        assertTrue(
-            mDevice.findObject(UiSelector().text(shortcutTitle))
-                .waitForExists(waitingTime)
-        )
+    fun clickAddAutomaticallyButton() {
+        addAutomaticallyToHomeScreenButton().click()
+    }
+
+    fun clickAddToHomeScreenButton() {
+        mDevice.findObject(UiSelector().textContains("Add to home screen")).waitForExists(waitingTime)
+        mDevice.findObject(UiSelector().textContains("Add to home screen")).clickAndWaitForNewWindow(waitingTimeShort)
     }
 
     class Transition {
-        fun openHomeScreenShortcut(title: String, interact: BrowserRobot.() -> Unit): BrowserRobot.Transition {
-            mDevice.wait(
-                Until.findObject(By.text(title)),
-                waitingTime
-            )
-            mDevice.findObject((UiSelector().text(title))).clickAndWaitForNewWindow(waitingTime)
-
-            BrowserRobot().interact()
-            return BrowserRobot.Transition()
-        }
-
-        fun searchAndOpenHomeScreenShortcut(title: String, interact: BrowserRobot.() -> Unit): BrowserRobot.Transition {
-            mDevice.pressHome()
-
-            fun homeScreenView() = UiScrollable(UiSelector().scrollable(true))
-            homeScreenView().waitForExists(waitingTime)
-
-            fun shortcut() =
-                homeScreenView()
-                    .setAsHorizontalList()
-                    .getChildByText(UiSelector().textContains(title), title, true)
-            shortcut().clickAndWaitForNewWindow()
+        fun openHomeScreenShortcut(
+            title: String,
+            interact: BrowserRobot.() -> Unit,
+        ): BrowserRobot.Transition {
+            mDevice.findObject(UiSelector().textContains(title)).waitForExists(waitingTime)
+            mDevice.findObject((UiSelector().textContains(title))).clickAndWaitForNewWindow(waitingTime)
 
             BrowserRobot().interact()
             return BrowserRobot.Transition()
         }
     }
+
+    private fun cancelAddToHomeScreenButton() = mDevice.findObject(UiSelector().textContains("CANCEL"))
+
+    private fun addAutomaticallyToHomeScreenButton() =
+        mDevice.findObject(UiSelector().textContains("ADD AUTOMATICALLY"))
 }
-
-fun addToHomeScreen(interact: AddToHomeScreenRobot.() -> Unit): AddToHomeScreenRobot.Transition {
-    AddToHomeScreenRobot().interact()
-    return AddToHomeScreenRobot.Transition()
-}
-
-private fun shortcutNameField() = onView(withId(R.id.shortcut_text))
-
-private fun assertShortcutNameField(expectedText: String) {
-    onView(
-        allOf(
-            withId(R.id.shortcut_text),
-            withText(expectedText)
-        )
-    )
-        .check(matches(isCompletelyDisplayed()))
-}
-
-private fun addButton() = onView((withText("ADD")))
-
-private fun cancelAddToHomeScreenButton() = onView((withText("CANCEL")))
-
-private fun addAutomaticallyButton() =
-    mDevice.findObject(UiSelector().textContains("add automatically"))
-
-private fun addPrivateBrowsingShortcutButton() = onView(withId(R.id.cfr_pos_button))
-
-private fun assertAddPrivateBrowsingShortcutButton() = addPrivateBrowsingShortcutButton()
-    .check(matches(ViewMatchers.withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)))
-
-private fun noThanksPrivateBrowsingShortcutButton() = onView(withId(R.id.cfr_neg_button))
-
-private fun assertNoThanksPrivateBrowsingShortcutButton() = noThanksPrivateBrowsingShortcutButton()
-    .check(matches(ViewMatchers.withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)))

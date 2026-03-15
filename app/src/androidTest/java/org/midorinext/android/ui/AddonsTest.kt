@@ -1,0 +1,112 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+package org.midorinext.android.ui
+
+import mockwebserver3.MockWebServer
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.midorinext.android.helpers.AndroidAssetDispatcher
+import org.midorinext.android.helpers.BrowserActivityTestRule
+import org.midorinext.android.helpers.RetryTestRule
+import org.midorinext.android.ui.robots.navigationToolbar
+
+class AddonsTest {
+    private lateinit var mockWebServer: MockWebServer
+
+    @get:Rule
+    val activityTestRule = BrowserActivityTestRule()
+
+    @Rule
+    @JvmField
+    val retryTestRule = RetryTestRule(3)
+
+    @Before
+    fun setUp() {
+        mockWebServer = MockWebServer().apply {
+            dispatcher = AndroidAssetDispatcher()
+            start()
+        }
+    }
+
+    @After
+    fun tearDown() {
+        runCatching { mockWebServer.close() }
+    }
+
+    @Test
+    fun addonsListingPageTest() {
+        navigationToolbar {
+        }.openThreeDotMenu {
+        }.openAddonsManager {
+            verifyAddonsRecommendedView()
+        }
+    }
+
+    @Test
+    fun cancelAddonInstallTest() {
+        val addonName = "uBlock Origin"
+
+        navigationToolbar {
+        }.openThreeDotMenu {
+        }.openAddonsManager {
+            clickInstallAddonButton(addonName)
+            verifyInstallAddonPrompt(addonName)
+            clickCancelInstallButton()
+            verifyAddonsRecommendedView()
+        }
+    }
+
+    @Test
+    fun installAddonTest() {
+        val addonName = "uBlock Origin"
+
+        navigationToolbar {
+        }.openThreeDotMenu {
+        }.openAddonsManager {
+            clickInstallAddonButton(addonName)
+            verifyInstallAddonPrompt(addonName)
+            clickAllowInstallAddonButton()
+            waitForAddonDownloadComplete()
+            verifyAddonDownloadCompletedPrompt(addonName)
+        }
+    }
+
+    @Test
+    fun verifyAddonElementsTest() {
+        val addonName = "uBlock Origin"
+
+        navigationToolbar {
+        }.openThreeDotMenu {
+        }.openAddonsManager {
+            verifyAddonsRecommendedView()
+            clickInstallAddonButton(addonName)
+            clickAllowInstallAddonButton()
+            waitForAddonDownloadComplete()
+            dismissAddonDownloadCompletedPrompt(addonName)
+            openAddon(addonName)
+            verifyAddonElementsView(addonName)
+        }
+    }
+
+    @Test
+    fun removeAddonTest() {
+        val addonName = "uBlock Origin"
+
+        navigationToolbar {
+        }.openThreeDotMenu {
+        }.openAddonsManager {
+            verifyAddonsRecommendedView()
+            clickInstallAddonButton(addonName)
+            clickAllowInstallAddonButton()
+            waitForAddonDownloadComplete()
+            dismissAddonDownloadCompletedPrompt(addonName)
+            openAddon(addonName)
+            clickRemoveAddonButton()
+            verifyAddonsRecommendedView()
+        }
+    }
+}

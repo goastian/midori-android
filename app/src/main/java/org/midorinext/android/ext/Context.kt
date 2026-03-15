@@ -4,28 +4,25 @@
 
 package org.midorinext.android.ext
 
-import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import android.provider.Settings
-import android.view.ContextThemeWrapper
-import android.view.View
-import android.view.ViewGroup
-import android.view.accessibility.AccessibilityManager
+import android.content.Intent.ACTION_SEND
+import android.content.Intent.EXTRA_SUBJECT
+import android.content.Intent.EXTRA_TEXT
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import androidx.annotation.StringRes
-import mozilla.components.support.locale.LocaleManager
-import org.midorinext.android.MidoriApplication
-import org.midorinext.android.components.Components
-import org.midorinext.android.settings.advanced.getSelectedLocale
-import java.lang.String.format
-import java.util.*
+import mozilla.components.support.base.log.Log
+import mozilla.components.support.base.log.Log.Priority.WARN
+import org.midorinext.android.BrowserApplication
+import org.midorinext.android.Components
+import org.midorinext.android.R
 
 /**
  * Get the BrowserApplication object from a context.
  */
-val Context.application: MidoriApplication
-    get() = applicationContext as MidoriApplication
+val Context.application: BrowserApplication
+    get() = applicationContext as BrowserApplication
 
 /**
  * Get the requireComponents of this application.
@@ -33,78 +30,36 @@ val Context.application: MidoriApplication
 val Context.components: Components
     get() = application.components
 
-fun Context.asActivity() = (this as? ContextThemeWrapper)?.baseContext as? Activity
-    ?: this as? Activity
-
-fun Context.getPreferenceKey(@StringRes resourceId: Int): String =
-    resources.getString(resourceId)
-
-fun Context.readBooleanPreference(key: String, defaultValue: Boolean) =
-    settings().preferences.getBoolean(key, defaultValue)
-
-fun Context.writeBooleanPreference(key: String, value: Boolean) =
-    settings().preferences.edit().putBoolean(key, value).apply()
-
-fun Context.readFloatPreference(key: String, defaultValue: Float) =
-    settings().preferences.getFloat(key, defaultValue)
-
-fun Context.writeFloatPreference(key: String, value: Float) =
-    settings().preferences.edit().putFloat(key, value).apply()
+fun Context.getPreferenceKey(
+    @StringRes resourceId: Int,
+): String = resources.getString(resourceId)
 
 /**
- * Gets the Root View with an activity context
+ *  Shares content via [ACTION_SEND] intent.
  *
- * @return ViewGroup? if it is able to get a root view from the context
+ * @param text the data to be shared  [EXTRA_TEXT]
+ * @param subject of the intent [EXTRA_TEXT]
+ * @return true it is able to share false otherwise.
  */
-fun Context.getRootView(): View? =
-    asActivity()?.window?.decorView?.findViewById<View>(android.R.id.content) as? ViewGroup
-
-fun Context.settings() = components.settings
-
-/**
- * Used to catch IllegalArgumentException that is thrown when
- * a string's placeholder is incorrectly formatted in a translation
- *
- * @return the formatted string in locale language or English as a fallback
- */
-fun Context.getStringWithArgSafe(@StringRes resId: Int, formatArg: String): String {
-    return try {
-        format(getString(resId), formatArg)
-    } catch (e: IllegalArgumentException) {
-        // fallback to <en> string
-        logDebug(
-            "L10n",
-            "String: " + resources.getResourceEntryName(resId) +
-                " not properly formatted in: " + LocaleManager.getSelectedLocale(this).language
-        )
-        val config = resources.configuration
-        config.setLocale(Locale("en"))
-        val localizedContext: Context = this.createConfigurationContext(config)
-        return format(localizedContext.getString(resId), formatArg)
-    }
-}
-
-/**
- * Used to obtain a reference to an AccessibilityManager
- * @return accessibilityManager
- */
-val Context.accessibilityManager: AccessibilityManager get() =
-    getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
-
-/**
- * Used to navigate to system notifications settings for app
- */
-fun Context.navigateToNotificationsSettings() {
-    val intent = Intent()
-    intent.let {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            it.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
-            it.putExtra(Settings.EXTRA_APP_PACKAGE, this.packageName)
-        } else {
-            it.action = "android.settings.APP_NOTIFICATION_SETTINGS"
-            it.putExtra("app_package", this.packageName)
-            it.putExtra("app_uid", this.applicationInfo.uid)
+fun Context.share(
+    text: String,
+    subject: String = "",
+): Boolean =
+    try {
+        val intent = Intent(ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(EXTRA_SUBJECT, subject)
+            putExtra(EXTRA_TEXT, text)
+            flags = FLAG_ACTIVITY_NEW_TASK
         }
+
+        val shareIntent = Intent.createChooser(intent, getString(R.string.menu_share_with)).apply {
+            flags = FLAG_ACTIVITY_NEW_TASK
+        }
+
+        startActivity(shareIntent)
+        true
+    } catch (e: ActivityNotFoundException) {
+        Log.log(WARN, message = "No activity to share to found", throwable = e, tag = "Reference-Browser")
+        false
     }
-    startActivity(intent)
-}

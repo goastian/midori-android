@@ -4,385 +4,178 @@
 
 package org.midorinext.android.browser
 
-import android.content.Context
-import android.os.StrictMode
+import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
-import androidx.annotation.VisibleForTesting
-import androidx.appcompat.content.res.AppCompatResources
-import androidx.lifecycle.Observer
-import androidx.navigation.fragment.findNavController
-import com.google.android.material.snackbar.Snackbar
-import mozilla.components.browser.state.selector.findTab
-import mozilla.components.browser.state.state.SessionState
-import mozilla.components.browser.state.state.TabSessionState
+import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.browser.toolbar.BrowserToolbar
-import mozilla.components.concept.engine.permission.SitePermissions
-import mozilla.components.feature.app.links.AppLinksUseCases
-import mozilla.components.feature.contextmenu.ContextMenuCandidate
-import mozilla.components.feature.readerview.ReaderViewFeature
-import mozilla.components.feature.tab.collections.TabCollection
+import mozilla.components.concept.awesomebar.AwesomeBar.Suggestion
+import mozilla.components.concept.engine.EngineView
+import mozilla.components.feature.awesomebar.AwesomeBarFeature
+import mozilla.components.feature.awesomebar.provider.SearchSuggestionProvider
+import mozilla.components.feature.readerview.view.ReaderViewControlsBar
+import mozilla.components.feature.syncedtabs.SyncedTabsStorageSuggestionProvider
 import mozilla.components.feature.tabs.WindowFeature
+import mozilla.components.feature.tabs.toolbar.TabsToolbarFeature
+import mozilla.components.feature.toolbar.WebExtensionToolbarFeature
 import mozilla.components.support.base.feature.UserInteractionHandler
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import org.midorinext.android.R
-import org.midorinext.android.components.TabCollectionStorage
-import org.midorinext.android.components.MidoriSnackbar
-import org.midorinext.android.components.toolbar.ToolbarMenu
-import org.midorinext.android.ext.*
-import org.midorinext.android.shortcut.PwaOnboardingObserver
-import org.midorinext.android.theme.ThemeManager
+import org.midorinext.android.ext.components
+import org.midorinext.android.ext.requireComponents
+import org.midorinext.android.search.AwesomeBarWrapper
+import org.midorinext.android.tabs.TabsTrayFragment
 
 /**
  * Fragment used for browsing the web within the main app.
  */
-@Suppress("TooManyFunctions", "LargeClass")
-class BrowserFragment : BaseBrowserFragment(), UserInteractionHandler {
-
+class BrowserFragment :
+    BaseBrowserFragment(),
+    UserInteractionHandler {
+    private val thumbnailsFeature = ViewBoundFeatureWrapper<BrowserThumbnails>()
+    private val readerViewFeature = ViewBoundFeatureWrapper<ReaderViewIntegration>()
+    private val webExtToolbarFeature = ViewBoundFeatureWrapper<WebExtensionToolbarFeature>()
     private val windowFeature = ViewBoundFeatureWrapper<WindowFeature>()
-    private val openInAppOnboardingObserver = ViewBoundFeatureWrapper<OpenInAppOnboardingObserver>()
 
-    private var readerModeAvailable = false
-    private var pwaOnboardingObserver: PwaOnboardingObserver? = null
+    private val awesomeBar: AwesomeBarWrapper
+        get() = requireView().findViewById(R.id.awesomeBar)
+    private val toolbar: BrowserToolbar
+        get() = requireView().findViewById(R.id.toolbar)
+    private val engineView: EngineView
+        get() = requireView().findViewById<View>(R.id.engineView) as EngineView
+    private val readerViewBar: ReaderViewControlsBar
+        get() = requireView().findViewById(R.id.readerViewBar)
+    private val readerViewAppearanceButton: FloatingActionButton
+        get() = requireView().findViewById(R.id.readerViewAppearanceButton)
 
-    @Suppress("LongMethod")
-    override fun initializeUI(view: View, tab: SessionState) {
-        super.initializeUI(view, tab)
-
-        val context = requireContext()
-        val components = context.components
-
-        if (context.settings().isSwipeToolbarToSwitchTabsEnabled) {
-            binding.gestureLayout.addGestureListener(
-                ToolbarGestureHandler(
-                    activity = requireActivity(),
-                    contentLayout = binding.browserLayout,
-                    tabPreview = binding.tabPreview,
-                    toolbarLayout = browserToolbarView.view,
-                    store = components.core.store,
-                    selectTabUseCase = components.useCases.tabsUseCases.selectTab
-                )
-            )
-        }
-
-        val homeAction = BrowserToolbar.Button(
-            imageDrawable = AppCompatResources.getDrawable(
-                context,
-                R.drawable.mozac_ic_home_24
-            )!!,
-            contentDescription = context.getString(R.string.browser_toolbar_home),
-            iconTintColorResource = ThemeManager.resolveAttribute(R.attr.textPrimary, context),
-            listener = browserToolbarInteractor::onHomeButtonClicked
+    override val shouldUseComposeUI: Boolean
+        get() = PreferenceManager.getDefaultSharedPreferences(requireContext()).getBoolean(
+            getString(R.string.pref_key_compose_ui),
+            false,
         )
 
-        browserToolbarView.view.addNavigationAction(homeAction)
+    @Suppress("LongMethod")
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
+        super.onViewCreated(view, savedInstanceState)
 
-        if (resources.getBoolean(R.bool.tablet)) {
-            val enableTint = ThemeManager.resolveAttribute(R.attr.textPrimary, context)
-            val disableTint = ThemeManager.resolveAttribute(R.attr.textDisabled, context)
-            val backAction = BrowserToolbar.TwoStateButton(
-                primaryImage = AppCompatResources.getDrawable(
-                    context,
-                    R.drawable.mozac_ic_back_24
-                )!!,
-                primaryContentDescription = context.getString(R.string.browser_menu_back),
-                primaryImageTintResource = enableTint,
-                isInPrimaryState = { getCurrentTab()?.content?.canGoBack ?: false },
-                secondaryImageTintResource = disableTint,
-                disableInSecondaryState = true,
-                longClickListener = {
-                    browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
-                        ToolbarMenu.Item.Back(viewHistory = true)
-                    )
-                },
-                listener = {
-                    browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
-                        ToolbarMenu.Item.Back(viewHistory = false)
-                    )
-                }
-            )
-            browserToolbarView.view.addNavigationAction(backAction)
-            val forwardAction = BrowserToolbar.TwoStateButton(
-                primaryImage = AppCompatResources.getDrawable(
-                    context,
-                    R.drawable.mozac_ic_forward_24
-                )!!,
-                primaryContentDescription = context.getString(R.string.browser_menu_forward),
-                primaryImageTintResource = enableTint,
-                isInPrimaryState = { getCurrentTab()?.content?.canGoForward ?: false },
-                secondaryImageTintResource = disableTint,
-                disableInSecondaryState = true,
-                longClickListener = {
-                    browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
-                        ToolbarMenu.Item.Forward(viewHistory = true)
-                    )
-                },
-                listener = {
-                    browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
-                        ToolbarMenu.Item.Forward(viewHistory = false)
-                    )
-                }
-            )
-            browserToolbarView.view.addNavigationAction(forwardAction)
-            val refreshAction = BrowserToolbar.TwoStateButton(
-                primaryImage = AppCompatResources.getDrawable(
-                    context,
-                    R.drawable.mozac_ic_arrow_clockwise_24
-                )!!,
-                primaryContentDescription = context.getString(R.string.browser_menu_refresh),
-                primaryImageTintResource = enableTint,
-                isInPrimaryState = {
-                    getCurrentTab()?.content?.loading == false
-                },
-                secondaryImage = AppCompatResources.getDrawable(
-                    context,
-                    R.drawable.mozac_ic_stop
-                )!!,
-                secondaryContentDescription = context.getString(R.string.browser_menu_stop),
-                disableInSecondaryState = false,
-                longClickListener = {
-                    browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
-                        ToolbarMenu.Item.Reload(bypassCache = true)
-                    )
-                },
-                listener = {
-                    if (getCurrentTab()?.content?.loading == true) {
-                        browserToolbarInteractor.onBrowserToolbarMenuItemTapped(ToolbarMenu.Item.Stop)
-                    } else {
-                        browserToolbarInteractor.onBrowserToolbarMenuItemTapped(
-                            ToolbarMenu.Item.Reload(bypassCache = false)
-                        )
-                    }
-                }
-            )
-            browserToolbarView.view.addNavigationAction(refreshAction)
+        AwesomeBarFeature(awesomeBar, toolbar, engineView)
+            .addSearchProvider(
+                requireComponents.core.store,
+                requireComponents.useCases.searchUseCases.defaultSearch,
+                fetchClient = requireComponents.core.client,
+                mode = SearchSuggestionProvider.Mode.MULTIPLE_SUGGESTIONS,
+                engine = requireComponents.core.engine,
+                limit = 5,
+                filterExactMatch = true,
+            ).addSessionProvider(
+                resources,
+                requireComponents.core.store,
+                requireComponents.useCases.tabsUseCases.selectTab,
+            ).addHistoryProvider(
+                requireComponents.core.historyStorage,
+                requireComponents.useCases.sessionUseCases.loadUrl,
+            ).addClipboardProvider(requireContext(), requireComponents.useCases.sessionUseCases.loadUrl)
+
+        // We cannot really add a `addSyncedTabsProvider` to `AwesomeBarFeature` coz that would create
+        // a dependency on feature-syncedtabs (which depends on Sync).
+        awesomeBar.addProviders(
+            SyncedTabsStorageSuggestionProvider(
+                requireComponents.backgroundServices.syncedTabsStorage,
+                requireComponents.useCases.tabsUseCases.addTab,
+                requireComponents.core.icons,
+            ),
+        )
+        awesomeBar.setOnRemoveSuggestionButtonClicked {
+            awesomeBar.addHiddenSuggestion(it)
+            (it.suggestion as? Suggestion)?.let { s -> deleteHistorySuggestion(s) }
         }
 
-        val readerModeAction =
-            BrowserToolbar.ToggleButton(
-                image = AppCompatResources.getDrawable(
-                    context,
-                    R.drawable.ic_readermode
-                )!!,
-                imageSelected =
-                AppCompatResources.getDrawable(
-                    context,
-                    R.drawable.ic_readermode_selected
-                )!!,
-                contentDescription = context.getString(R.string.browser_menu_read),
-                contentDescriptionSelected = context.getString(R.string.browser_menu_read_close),
-                visible = {
-                    readerModeAvailable
-                },
-                selected = getCurrentTab()?.let {
-                    activity?.components?.core?.store?.state?.findTab(it.id)?.readerState?.active
-                } ?: false,
-                listener = browserToolbarInteractor::onReaderModePressed
-            )
-
-        browserToolbarView.view.addPageAction(readerModeAction)
+        TabsToolbarFeature(
+            toolbar = toolbar,
+            sessionId = sessionId,
+            store = requireComponents.core.store,
+            showTabs = ::showTabs,
+            lifecycleOwner = this,
+        )
 
         thumbnailsFeature.set(
-            feature = BrowserThumbnails(context, binding.engineView, components.core.store),
+            feature = BrowserThumbnails(
+                requireContext(),
+                engineView,
+                requireComponents.core.store,
+            ),
             owner = this,
-            view = view
+            view = view,
         )
 
         readerViewFeature.set(
-            feature = components.strictMode.resetAfter(StrictMode.allowThreadDiskReads()) {
-                ReaderViewFeature(
-                    context,
-                    components.core.engine,
-                    components.core.store,
-                    binding.readerViewControlsBar
-                ) { available, active ->
-                    readerModeAvailable = available
-                    readerModeAction.setSelected(active)
-                    safeInvalidateBrowserToolbarView()
-                }
-            },
+            feature = ReaderViewIntegration(
+                requireContext(),
+                requireComponents.core.engine,
+                requireComponents.core.store,
+                toolbar,
+                readerViewBar,
+                readerViewAppearanceButton,
+            ),
             owner = this,
-            view = view
+            view = view,
+        )
+
+        webExtToolbarFeature.set(
+            feature = WebExtensionToolbarFeature(
+                toolbar,
+                requireContext().components.core.store,
+            ),
+            owner = this,
+            view = view,
         )
 
         windowFeature.set(
             feature = WindowFeature(
-                store = components.core.store,
-                tabsUseCases = components.useCases.tabsUseCases
+                store = requireComponents.core.store,
+                tabsUseCases = requireComponents.useCases.tabsUseCases,
             ),
             owner = this,
-            view = view
+            view = view,
         )
 
-        if (context.settings().shouldShowOpenInAppCfr) {
-            openInAppOnboardingObserver.set(
-                feature = OpenInAppOnboardingObserver(
-                    context = context,
-                    store = context.components.core.store,
-                    lifecycleOwner = this,
-                    navController = findNavController(),
-                    settings = context.settings(),
-                    appLinksUseCases = context.components.useCases.appLinksUseCases,
-                    container = binding.browserLayout as ViewGroup,
-                    shouldScrollWithTopToolbar = !context.settings().shouldUseBottomToolbar
-                ),
-                owner = this,
-                view = view
-            )
+        engineView.setDynamicToolbarMaxHeight(resources.getDimensionPixelSize(R.dimen.browser_toolbar_height))
+    }
+
+    private fun showTabs() {
+        // For now we are performing manual fragment transactions here. Once we can use the new
+        // navigation support library we may want to pass navigation graphs around.
+        activity?.supportFragmentManager?.beginTransaction()?.apply {
+            replace(R.id.container, TabsTrayFragment())
+            commit()
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        val context = requireContext()
-        val settings = context.settings()
-
-        if (!settings.userKnowsAboutPwas) {
-            pwaOnboardingObserver = PwaOnboardingObserver(
-                store = context.components.core.store,
-                lifecycleOwner = this,
-                navController = findNavController(),
-                settings = settings,
-                webAppUseCases = context.components.useCases.webAppUseCases
-            ).also {
-                it.start()
-            }
-        }
-
-        subscribeToTabCollections()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        updateLastBrowseActivity()
-        updateHistoryMetadata()
-        pwaOnboardingObserver?.stop()
-    }
-
-    private fun updateHistoryMetadata() {
-        getCurrentTab()?.let { tab ->
-            (tab as? TabSessionState)?.historyMetadata?.let {
-                requireComponents.core.historyMetadataService.updateMetadata(it, tab)
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun deleteHistorySuggestion(suggestion: Suggestion) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            suggestion.description?.let {
+                requireComponents.core.historyStorage.deleteHistoryMetadataForUrl(it)
             }
         }
     }
 
-    private fun subscribeToTabCollections() {
-        Observer<List<TabCollection>> {
-            requireComponents.core.tabCollectionStorage.cachedTabCollections = it
-        }.also { observer ->
-            requireComponents.core.tabCollectionStorage.getCollections()
-                .observe(viewLifecycleOwner, observer)
-        }
-    }
+    override fun onBackPressed(): Boolean = readerViewFeature.onBackPressed() || super.onBackPressed()
 
-    override fun onResume() {
-        super.onResume()
-        requireComponents.core.tabCollectionStorage.register(collectionStorageObserver, this)
-    }
-
-    override fun onBackPressed(): Boolean {
-        return readerViewFeature.onBackPressed() || super.onBackPressed()
-    }
-
-    override fun navToQuickSettingsSheet(tab: SessionState, sitePermissions: SitePermissions?) {
-        requireComponents.useCases.trackingProtectionUseCases.containsException(tab.id) { contains ->
-            runIfFragmentIsAttached {
-                val isTrackingProtectionEnabled = tab.trackingProtection.enabled && !contains
-                val directions =
-                    BrowserFragmentDirections.actionBrowserFragmentToQuickSettingsSheetDialogFragment(
-                        sessionId = tab.id,
-                        url = tab.content.url,
-                        title = tab.content.title,
-                        isSecured = tab.content.securityInfo.secure,
-                        sitePermissions = sitePermissions,
-                        gravity = getAppropriateLayoutGravity(),
-                        certificateName = tab.content.securityInfo.issuer,
-                        permissionHighlights = tab.content.permissionHighlights,
-                        isTrackingProtectionEnabled = isTrackingProtectionEnabled
-                    )
-                nav(R.id.browserFragment, directions)
+    companion object {
+        fun create(sessionId: String? = null) =
+            BrowserFragment().apply {
+            arguments = Bundle().apply {
+                putSessionId(sessionId)
             }
         }
-    }
-
-    private val collectionStorageObserver = object : TabCollectionStorage.Observer {
-        override fun onCollectionCreated(
-            title: String,
-            sessions: List<TabSessionState>,
-            id: Long?
-        ) {
-            showTabSavedToCollectionSnackbar(sessions.size, true)
-        }
-
-        override fun onTabsAdded(tabCollection: TabCollection, sessions: List<TabSessionState>) {
-            showTabSavedToCollectionSnackbar(sessions.size)
-        }
-
-        private fun showTabSavedToCollectionSnackbar(
-            tabSize: Int,
-            isNewCollection: Boolean = false
-        ) {
-            view?.let { view ->
-                val messageStringRes = when {
-                    isNewCollection -> {
-                        R.string.create_collection_tabs_saved_new_collection
-                    }
-                    tabSize > 1 -> {
-                        R.string.create_collection_tabs_saved
-                    }
-                    else -> {
-                        R.string.create_collection_tab_saved
-                    }
-                }
-                MidoriSnackbar.make(
-                    view = binding.browserLayout,
-                    duration = Snackbar.LENGTH_SHORT,
-                    isDisplayedWithBrowserToolbar = true
-                )
-                    .setText(view.context.getString(messageStringRes))
-                    .setAction(requireContext().getString(R.string.create_collection_view)) {
-                        findNavController().navigate(
-                            BrowserFragmentDirections.actionGlobalHome(
-                                focusOnAddressBar = false,
-                                scrollToCollection = true
-                            )
-                        )
-                    }
-                    .show()
-            }
-        }
-    }
-
-    override fun getContextMenuCandidates(
-        context: Context,
-        view: View
-    ): List<ContextMenuCandidate> {
-        val contextMenuCandidateAppLinksUseCases = AppLinksUseCases(
-            requireContext(),
-            { true }
-        )
-
-        return ContextMenuCandidate.defaultCandidates(
-            context,
-            context.components.useCases.tabsUseCases,
-            context.components.useCases.contextMenuUseCases,
-            view,
-            MidoriSnackbarDelegate(view)
-        ) + ContextMenuCandidate.createOpenInExternalAppCandidate(
-            requireContext(),
-            contextMenuCandidateAppLinksUseCases
-        )
-    }
-
-    /**
-     * Updates the last time the user was active on the [BrowserFragment].
-     * This is useful to determine if the user has to start on the [HomeFragment]
-     * or it should go directly to the [BrowserFragment].
-     */
-    @VisibleForTesting
-    internal fun updateLastBrowseActivity() {
-        requireContext().settings().lastBrowseActivity = System.currentTimeMillis()
     }
 }

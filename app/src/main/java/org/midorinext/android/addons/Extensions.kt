@@ -4,21 +4,20 @@
 
 package org.midorinext.android.addons
 
-import android.view.View
-import org.midorinext.android.components.MidoriSnackbar
+import androidx.fragment.app.Fragment
+import java.text.NumberFormat
+import java.util.Locale
+
+internal fun getFormattedAmount(amount: Int): String =
+    NumberFormat.getNumberInstance(Locale.getDefault()).format(amount)
 
 /**
- * Shows the Midori Snackbar in the given view along with the provided text.
+ * Run the [block] only if the [Fragment] is attached.
  *
- * @param view A [View] used to determine a parent for the [MidoriSnackbar].
- * @param text The text to display in the [MidoriSnackbar].
+ * @param block A callback to be executed if the container [Fragment] is attached.
  */
-internal fun showSnackBar(view: View, text: String, duration: Int = MidoriSnackbar.LENGTH_SHORT) {
-    MidoriSnackbar.make(
-        view = view,
-        duration = duration,
-        isDisplayedWithBrowserToolbar = true
-    )
-        .setText(text)
-        .show()
+internal inline fun Fragment.runIfFragmentIsAttached(block: () -> Unit) {
+    context?.let {
+        block()
+    }
 }

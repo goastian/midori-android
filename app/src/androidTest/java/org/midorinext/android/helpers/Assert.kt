@@ -5,11 +5,6 @@
 package org.midorinext.android.helpers
 
 import android.graphics.Bitmap
-
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 import android.graphics.Color
 import org.junit.Assert.assertEquals
 
@@ -18,7 +13,11 @@ import org.junit.Assert.assertEquals
  * pixel data are the same (within the provided delta): this is the same metrics that
  * [Bitmap.sameAs] uses.
  */
-fun assertEqualsWithDelta(expectedB: Bitmap, actualB: Bitmap, delta: Float) {
+fun assertEqualsWithDelta(
+    expectedB: Bitmap,
+    actualB: Bitmap,
+    delta: Float,
+) {
     assertEquals("widths should be equal", expectedB.width, actualB.width)
     assertEquals("heights should be equal", expectedB.height, actualB.height)
     assertEquals("config should be equal", expectedB.config, actualB.config)

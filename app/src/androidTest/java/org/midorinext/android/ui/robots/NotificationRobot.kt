@@ -4,174 +4,79 @@
 
 package org.midorinext.android.ui.robots
 
-import android.app.NotificationManager
-import android.content.Context
-import androidx.test.uiautomator.By.text
 import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
-import androidx.test.uiautomator.Until
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.midorinext.android.helpers.TestAssetHelper.waitingTime
-import org.midorinext.android.helpers.TestHelper
-import org.midorinext.android.helpers.TestHelper.appName
-import org.midorinext.android.helpers.TestHelper.mDevice
-import org.midorinext.android.helpers.ext.waitNotNull
-import java.lang.AssertionError
-import org.midorinext.android.helpers.TestAssetHelper.waitingTimeShort
 
 class NotificationRobot {
+    fun verifySystemMediaNotificationExists(notificationMessage: String) {
+        assertTrue(systemMediaNotificationTitle(notificationMessage).waitForExists(waitingTime))
+    }
 
-    fun verifySystemNotificationExists(notificationMessage: String) {
+    fun clickSystemMediaNotificationControlButton(state: String) {
+        systemMediaNotificationControlButton(state).waitForExists(waitingTime)
+        systemMediaNotificationControlButton(state).click()
+    }
+
+    fun verifySystemMediaNotificationControlButtonState(action: String) {
+        assertTrue(systemMediaNotificationControlButton(action).waitForExists(waitingTime))
+    }
+
+    fun verifyDownloadNotificationExist(
+        notificationMessage: String,
+        fileName: String,
+    ) {
         val notification = UiSelector().text(notificationMessage)
         var notificationFound = mDevice.findObject(notification).waitForExists(waitingTime)
+        val downloadFilename = mDevice.findObject(UiSelector().text(fileName))
 
         while (!notificationFound) {
-            scrollToEnd()
+            notificationTray.swipeUp(2)
             notificationFound = mDevice.findObject(notification).waitForExists(waitingTime)
         }
-
         assertTrue(notificationFound)
+        assertTrue(downloadFilename.exists())
     }
 
-    fun clearNotifications() {
-        if (clearButton.exists()) {
-            clearButton.click()
-        } else {
-            scrollToEnd()
-            if (clearButton.exists()) {
-                clearButton.click()
-            } else if (notificationTray().exists()) {
-                mDevice.pressBack()
-            }
-        }
-    }
+    fun verifyDownloadNotificationDoesNotExist(
+        notificationMessage: String,
+        fileName: String,
+    ) {
+        val notification = UiSelector().text(notificationMessage)
+        val notificationFound = mDevice.findObject(notification).waitForExists(waitingTime)
+        val downloadFilename = mDevice.findObject(UiSelector().text(fileName))
 
-    fun cancelAllShownNotifications() {
-        cancelAll()
-    }
+        notificationTray.swipeUp(2)
 
-    fun verifySystemNotificationGone(notificationMessage: String) {
-        mDevice.waitNotNull(
-            Until.gone(text(notificationMessage)),
-            waitingTime
-        )
-
-        assertFalse(
-            mDevice.findObject(
-                UiSelector().text(notificationMessage)
-            ).exists()
-        )
-    }
-
-    fun verifyPrivateTabsNotification() {
-        verifySystemNotificationExists("$appName (Private)")
-        verifySystemNotificationExists("Close private tabs")
-    }
-
-    fun clickMediaNotificationControlButton(action: String) {
-        mediaSystemNotificationButton(action).waitForExists(waitingTime)
-        mediaSystemNotificationButton(action).click()
-    }
-
-    fun clickDownloadNotificationControlButton(action: String) {
-        try {
-            assertTrue(downloadSystemNotificationButton(action).waitForExists(waitingTimeShort))
-        } catch (e: AssertionError) {
-            notificationTray().flingToEnd(1)
-        }
-
-        downloadSystemNotificationButton(action).click()
-        // API 30 Bug? Sometimes a click doesn't register, try again
-        try {
-            assertTrue(downloadSystemNotificationButton(action).waitUntilGone(waitingTime))
-        } catch (e: AssertionError) {
-            downloadSystemNotificationButton(action).click()
-        }
-    }
-
-    fun verifyMediaSystemNotificationButtonState(action: String) {
-        assertTrue(mediaSystemNotificationButton(action).waitForExists(waitingTime))
-    }
-
-    fun expandNotificationMessage() {
-        while (!notificationHeader.exists()) {
-            scrollToEnd()
-        }
-
-        if (notificationHeader.exists()) {
-            // expand the notification
-            notificationHeader.click()
-
-            // double check if notification actions are viewable by checking for action existence; otherwise scroll again
-            while (!mDevice.findObject(UiSelector().resourceId("android:id/action0")).exists() &&
-                !mDevice.findObject(UiSelector().resourceId("android:id/actions_container")).exists()
-            ) {
-                scrollToEnd()
-            }
-        }
+        assertFalse(notificationFound)
+        assertFalse(downloadFilename.exists())
     }
 
     class Transition {
+        fun closeNotification(interact: BrowserRobot.() -> Unit): BrowserRobot.Transition {
+            mDevice.pressBack()
 
-        fun clickClosePrivateTabsNotification(interact: HomeScreenRobot.() -> Unit): HomeScreenRobot.Transition {
-            try {
-                assertTrue(
-                    closePrivateTabsNotification().exists()
-                )
-            } catch (e: AssertionError) {
-                notificationTray().flingToEnd(1)
-            }
-
-            closePrivateTabsNotification().click()
-
-            HomeScreenRobot().interact()
-            return HomeScreenRobot.Transition()
+            BrowserRobot().interact()
+            return BrowserRobot.Transition()
         }
     }
 }
 
 fun notificationShade(interact: NotificationRobot.() -> Unit): NotificationRobot.Transition {
+    mDevice.waitForIdle()
+    mDevice.openNotification()
+
     NotificationRobot().interact()
     return NotificationRobot.Transition()
 }
 
-private fun closePrivateTabsNotification() =
-    mDevice.findObject(UiSelector().text("Close private tabs"))
+private fun systemMediaNotificationControlButton(state: String) =
+    mDevice.findObject(UiSelector().descriptionContains(state))
 
-private fun downloadSystemNotificationButton(action: String) =
-    mDevice.findObject(
-        UiSelector()
-            .resourceId("android:id/action0")
-            .textContains(action)
-    )
+private fun systemMediaNotificationTitle(title: String) = mDevice.findObject(UiSelector().textContains(title))
 
-private fun mediaSystemNotificationButton(action: String) =
-    mDevice.findObject(
-        UiSelector()
-            .resourceId("com.android.systemui:id/action0")
-            .descriptionContains(action)
-    )
-
-private fun notificationTray() = UiScrollable(
-    UiSelector().resourceId("com.android.systemui:id/notification_stack_scroller")
+private val notificationTray = UiScrollable(
+    UiSelector().resourceId("com.android.systemui:id/notification_stack_scroller"),
 ).setAsVerticalList()
-
-private val notificationHeader =
-    mDevice.findObject(
-        UiSelector()
-            .resourceId("android:id/app_name_text")
-            .text(appName)
-    )
-
-private fun scrollToEnd() {
-    notificationTray().scrollToEnd(1)
-}
-
-private val clearButton = mDevice.findObject(UiSelector().resourceId("com.android.systemui:id/dismiss_text"))
-
-private fun cancelAll() {
-    val notificationManager: NotificationManager =
-        TestHelper.appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    notificationManager.cancelAll()
-}

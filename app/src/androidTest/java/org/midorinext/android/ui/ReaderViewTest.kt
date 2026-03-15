@@ -4,41 +4,22 @@
 
 package org.midorinext.android.ui
 
-import android.view.View
-import androidx.test.espresso.IdlingRegistry
-import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.uiautomator.UiDevice
-import okhttp3.mockwebserver.MockWebServer
+import mockwebserver3.MockWebServer
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.midorinext.android.R
 import org.midorinext.android.helpers.AndroidAssetDispatcher
-import org.midorinext.android.helpers.HomeActivityIntentTestRule
+import org.midorinext.android.helpers.BrowserActivityTestRule
 import org.midorinext.android.helpers.RetryTestRule
 import org.midorinext.android.helpers.TestAssetHelper
-import org.midorinext.android.helpers.ViewVisibilityIdlingResource
-import org.midorinext.android.ui.robots.browserScreen
 import org.midorinext.android.ui.robots.navigationToolbar
-
-/**
- *  Tests for verifying basic functionality of content context menus
- *
- *  - Verifies Reader View entry and detection when available UI and functionality
- *  - Verifies Reader View exit UI and functionality
- *  - Verifies Reader View appearance controls UI and functionality
- *
- */
 
 class ReaderViewTest {
     private lateinit var mockWebServer: MockWebServer
-    private lateinit var mDevice: UiDevice
-    private var readerViewNotification: ViewVisibilityIdlingResource? = null
-    private val estimatedReadingTime = "1 - 2 minutes"
 
     @get:Rule
-    val activityIntentTestRule = HomeActivityIntentTestRule()
+    val activityTestRule = BrowserActivityTestRule()
 
     @Rule
     @JvmField
@@ -46,7 +27,6 @@ class ReaderViewTest {
 
     @Before
     fun setUp() {
-        mDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         mockWebServer = MockWebServer().apply {
             dispatcher = AndroidAssetDispatcher()
             start()
@@ -55,220 +35,94 @@ class ReaderViewTest {
 
     @After
     fun tearDown() {
-        mockWebServer.shutdown()
-        IdlingRegistry.getInstance().unregister(readerViewNotification)
+        runCatching { mockWebServer.close() }
     }
 
-    /**
-     *  Verify that Reader View capable pages
-     *
-     *   - Show the toggle button in the navigation bar
-     *
-     */
     @Test
-    fun verifyReaderViewPageMenuDetection() {
-        val readerViewPage =
-            TestAssetHelper.getLoremIpsumAsset(mockWebServer)
+    fun verifyReaderViewDetectionTest() {
+        val readerViewPage = TestAssetHelper.getLoremIpsumAsset(mockWebServer)
 
         navigationToolbar {
-        }.enterURLAndEnterToBrowser(readerViewPage.url) {
-            mDevice.waitForIdle()
+        }.enterUrlAndEnterToBrowser(readerViewPage.url) {
         }
-
-        readerViewNotification = ViewVisibilityIdlingResource(
-            activityIntentTestRule.activity.findViewById(R.id.mozac_browser_toolbar_page_actions),
-            View.VISIBLE
-        )
-
-        IdlingRegistry.getInstance().register(readerViewNotification)
-
         navigationToolbar {
-            verifyReaderViewDetected(true)
+            verifyReaderViewButton()
+        }.clickReaderViewButton {
+            verifyAppearanceButtonExists()
+            clickAppearanceButton()
+            verifyAppearanceMenuExists()
+        }.dismissAppearanceMenu {
         }
-    }
-
-    /**
-     *  Verify that non Reader View capable pages
-     *
-     *   - Reader View toggle should not be visible in the navigation toolbar
-     *
-     */
-    @Test
-    fun verifyNonReaderViewPageMenuNoDetection() {
-        var genericPage =
-            TestAssetHelper.getGenericAsset(mockWebServer, 1)
-
         navigationToolbar {
-        }.enterURLAndEnterToBrowser(genericPage.url) {
-            mDevice.waitForIdle()
-        }
-
-        navigationToolbar {
-            verifyReaderViewDetected(false)
+        }.clickReaderViewButton {
+            verifyAppearanceButtonDoesntExists()
         }
     }
 
     @Test
-    fun verifyReaderViewToggle() {
-        val readerViewPage =
-            TestAssetHelper.getLoremIpsumAsset(mockWebServer)
+    fun readerViewFontChangeTest() {
+        val readerViewPage = TestAssetHelper.getLoremIpsumAsset(mockWebServer)
 
         navigationToolbar {
-        }.enterURLAndEnterToBrowser(readerViewPage.url) {
-            mDevice.waitForIdle()
+        }.enterUrlAndEnterToBrowser(readerViewPage.url) {
         }
-
-        readerViewNotification = ViewVisibilityIdlingResource(
-            activityIntentTestRule.activity.findViewById(R.id.mozac_browser_toolbar_page_actions),
-            View.VISIBLE
-        )
-
-        IdlingRegistry.getInstance().register(readerViewNotification)
-
         navigationToolbar {
-            verifyReaderViewDetected(true)
-            toggleReaderView()
-            mDevice.waitForIdle()
-        }
-        browserScreen {
-            verifyPageContent(estimatedReadingTime)
-        }.openThreeDotMenu {
-            verifyReaderViewAppearance(true)
-        }.closeBrowserMenuToBrowser { }
-
-        navigationToolbar {
-            verifyCloseReaderViewDetected(true)
-            toggleReaderView()
-            mDevice.waitForIdle()
-            verifyReaderViewDetected(true)
-        }.openThreeDotMenu {
-            verifyReaderViewAppearance(false)
-        }.close { }
-    }
-
-    @Test
-    fun verifyReaderViewAppearanceFontToggle() {
-        val readerViewPage =
-            TestAssetHelper.getLoremIpsumAsset(mockWebServer)
-
-        navigationToolbar {
-        }.enterURLAndEnterToBrowser(readerViewPage.url) {
-            mDevice.waitForIdle()
-        }
-
-        readerViewNotification = ViewVisibilityIdlingResource(
-            activityIntentTestRule.activity.findViewById(R.id.mozac_browser_toolbar_page_actions),
-            View.VISIBLE
-        )
-
-        IdlingRegistry.getInstance().register(readerViewNotification)
-
-        navigationToolbar {
-            verifyReaderViewDetected(true)
-            toggleReaderView()
-            mDevice.waitForIdle()
-        }
-
-        browserScreen {
-            verifyPageContent(estimatedReadingTime)
-        }.openThreeDotMenu {
-            verifyReaderViewAppearance(true)
-        }.openReaderViewAppearance {
-            verifyAppearanceFontGroup(true)
-            verifyAppearanceFontSansSerif(true)
-            verifyAppearanceFontSerif(true)
-            verifyAppearanceFontIncrease(true)
-            verifyAppearanceFontDecrease(true)
-        }.toggleSansSerif {
-            verifyAppearanceFontIsActive("SANSSERIF")
-        }.toggleSerif {
-            verifyAppearanceFontIsActive("SERIF")
+            verifyReaderViewButton()
+        }.clickReaderViewButton {
+            verifyAppearanceButtonExists()
+            clickAppearanceButton()
+            verifyAppearanceMenuExists()
+            verifyFontGroupButtons()
+            clickSansSerifButton()
+            verifyActiveAppearanceFont("SANSSERIF")
+            clickSerifButton()
+            verifyActiveAppearanceFont("SERIF")
         }
     }
 
     @Test
-    fun verifyReaderViewAppearanceFontSizeToggle() {
-        val readerViewPage =
-            TestAssetHelper.getLoremIpsumAsset(mockWebServer)
+    fun readerViewFontSizeChangeTest() {
+        val readerViewPage = TestAssetHelper.getLoremIpsumAsset(mockWebServer)
 
         navigationToolbar {
-        }.enterURLAndEnterToBrowser(readerViewPage.url) {
-            mDevice.waitForIdle()
+        }.enterUrlAndEnterToBrowser(readerViewPage.url) {
         }
-
-        readerViewNotification = ViewVisibilityIdlingResource(
-            activityIntentTestRule.activity.findViewById(R.id.mozac_browser_toolbar_page_actions),
-            View.VISIBLE
-        )
-
-        IdlingRegistry.getInstance().register(readerViewNotification)
-
         navigationToolbar {
-            verifyReaderViewDetected(true)
-            toggleReaderView()
-            mDevice.waitForIdle()
-        }
-
-        browserScreen {
-            verifyPageContent(estimatedReadingTime)
-        }.openThreeDotMenu {
-            verifyReaderViewAppearance(true)
-        }.openReaderViewAppearance {
-            verifyAppearanceFontIncrease(true)
-            verifyAppearanceFontDecrease(true)
+            verifyReaderViewButton()
+        }.clickReaderViewButton {
+            verifyAppearanceButtonExists()
+            clickAppearanceButton()
+            verifyAppearanceMenuExists()
+            verifyIncreaseFontSizeButton()
+            verifyDecreaseFontSizeButton()
             verifyAppearanceFontSize(3)
-        }.toggleFontSizeIncrease {
+            clickIncreaseFontSizeButton()
             verifyAppearanceFontSize(4)
-        }.toggleFontSizeIncrease {
-            verifyAppearanceFontSize(5)
-        }.toggleFontSizeIncrease {
-            verifyAppearanceFontSize(6)
-        }.toggleFontSizeDecrease {
-            verifyAppearanceFontSize(5)
-        }.toggleFontSizeDecrease {
-            verifyAppearanceFontSize(4)
-        }.toggleFontSizeDecrease {
+            clickDecreaseFontSizeButton()
             verifyAppearanceFontSize(3)
         }
     }
 
     @Test
-    fun verifyReaderViewAppearanceColorSchemeChange() {
-        val readerViewPage =
-            TestAssetHelper.getLoremIpsumAsset(mockWebServer)
+    fun readerViewColorSchemeChangeTest() {
+        val readerViewPage = TestAssetHelper.getLoremIpsumAsset(mockWebServer)
 
         navigationToolbar {
-        }.enterURLAndEnterToBrowser(readerViewPage.url) {
-            mDevice.waitForIdle()
+        }.enterUrlAndEnterToBrowser(readerViewPage.url) {
         }
-
-        readerViewNotification = ViewVisibilityIdlingResource(
-            activityIntentTestRule.activity.findViewById(R.id.mozac_browser_toolbar_page_actions),
-            View.VISIBLE
-        )
-
-        IdlingRegistry.getInstance().register(readerViewNotification)
-
         navigationToolbar {
-            verifyReaderViewDetected(true)
-            toggleReaderView()
-            mDevice.waitForIdle()
-        }
-
-        browserScreen {
-            verifyPageContent(estimatedReadingTime)
-        }.openThreeDotMenu {
-            verifyReaderViewAppearance(true)
-        }.openReaderViewAppearance {
-            verifyAppearanceColorDark(true)
-            verifyAppearanceColorLight(true)
-            verifyAppearanceColorSepia(true)
-        }.toggleColorSchemeChangeDark {
-            verifyAppearanceColorSchemeChange("DARK")
-        }.toggleColorSchemeChangeSepia {
-            verifyAppearanceColorSchemeChange("SEPIA")
-        }.toggleColorSchemeChangeLight {
-            verifyAppearanceColorSchemeChange("LIGHT")
+            verifyReaderViewButton()
+        }.clickReaderViewButton {
+            verifyAppearanceButtonExists()
+            clickAppearanceButton()
+            verifyAppearanceMenuExists()
+            verifyColorSchemeGroupButtons()
+            clickSepiaColorButton()
+            verifyAppearanceColorScheme("SEPIA")
+            clickDarkColorButton()
+            verifyAppearanceColorScheme("DARK")
+            clickLightColorButton()
+            verifyAppearanceColorScheme("LIGHT")
         }
     }
 }

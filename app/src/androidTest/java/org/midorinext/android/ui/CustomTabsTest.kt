@@ -1,201 +1,175 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 @file:Suppress("DEPRECATION")
 
 package org.midorinext.android.ui
 
-import androidx.core.net.toUri
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ActivityTestRule
-import androidx.test.uiautomator.UiDevice
-import okhttp3.mockwebserver.MockWebServer
+import mockwebserver3.MockWebServer
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.midorinext.android.IntentReceiverActivity
-import org.midorinext.android.customannotations.SmokeTest
 import org.midorinext.android.helpers.AndroidAssetDispatcher
-import org.midorinext.android.helpers.FeatureSettingsHelper
-import org.midorinext.android.helpers.HomeActivityIntentTestRule
+import org.midorinext.android.helpers.BrowserActivityTestRule
+import org.midorinext.android.helpers.RetryTestRule
 import org.midorinext.android.helpers.TestAssetHelper
 import org.midorinext.android.helpers.TestHelper.createCustomTabIntent
-import org.midorinext.android.helpers.TestHelper.openAppFromExternalLink
-import org.midorinext.android.ui.robots.browserScreen
 import org.midorinext.android.ui.robots.customTabScreen
-import org.midorinext.android.ui.robots.navigationToolbar
-import org.midorinext.android.ui.robots.notificationShade
-import org.midorinext.android.ui.robots.openEditURLView
-import org.midorinext.android.ui.robots.searchScreen
 
 class CustomTabsTest {
-    private lateinit var mDevice: UiDevice
     private lateinit var mockWebServer: MockWebServer
-    private val customMenuItem = "TestMenuItem"
-    /* Updated externalLinks.html to v2.0,
-       changed the hypertext reference to mozilla-mobile.github.io/testapp/downloads for "External link"
-     */
-    private val externalLinksPWAPage = "https://mozilla-mobile.github.io/testapp/v2.0/externalLinks.html"
-    private val loginPage = "https://mozilla-mobile.github.io/testapp/loginForm"
 
     @get:Rule
-    val activityTestRule = HomeActivityIntentTestRule()
+    val activityTestRule = BrowserActivityTestRule()
 
-    @get: Rule
+    @get:Rule
     val intentReceiverActivityTestRule = ActivityTestRule(
-        IntentReceiverActivity::class.java, true, false
+        IntentReceiverActivity::class.java,
+        true,
+        false,
     )
 
-    private val featureSettingsHelper = FeatureSettingsHelper()
+    @Rule
+    @JvmField
+    val retryTestRule = RetryTestRule(3)
 
     @Before
     fun setUp() {
-        mDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         mockWebServer = MockWebServer().apply {
             dispatcher = AndroidAssetDispatcher()
             start()
         }
-
-        featureSettingsHelper.setTCPCFREnabled(false)
     }
 
     @After
     fun tearDown() {
-        mockWebServer.shutdown()
-        featureSettingsHelper.resetAllFeatureFlags()
+        runCatching { mockWebServer.close() }
     }
 
-    @SmokeTest
     @Test
-    fun customTabsOpenExternalLinkTest() {
-        val externalLinkURL = "https://mozilla-mobile.github.io/testapp/downloads"
-
-        intentReceiverActivityTestRule.launchActivity(
-            createCustomTabIntent(
-                externalLinksPWAPage.toUri().toString(),
-                customMenuItem
-            )
-        )
-
-        customTabScreen {
-            waitForPageToLoad()
-            clickLinkMatchingText("External link")
-            waitForPageToLoad()
-            verifyCustomTabToolbarTitle(externalLinkURL)
-        }
-    }
-
-    @SmokeTest
-    @Test
-    fun customTabsSaveLoginTest() {
-
-        intentReceiverActivityTestRule.launchActivity(
-            createCustomTabIntent(
-                loginPage.toUri().toString(),
-                customMenuItem
-            )
-        )
-
-        customTabScreen {
-            waitForPageToLoad()
-            fillAndSubmitLoginCredentials("mozilla", "midori")
-        }
-
-        browserScreen {
-            verifySaveLoginPromptIsDisplayed()
-            saveLoginFromPrompt("Save")
-        }
-
-        openAppFromExternalLink(loginPage)
-
-        browserScreen {
-        }.openThreeDotMenu {
-        }.openSettings {
-        }.openLoginsAndPasswordSubMenu {
-        }.openSavedLogins {
-            verifySecurityPromptForLogins()
-            tapSetupLater()
-            verifySavedLoginFromPrompt("mozilla")
-        }
-    }
-
-    @SmokeTest
-    @Test
-    fun customTabCopyToolbarUrlTest() {
+    fun openCustomTabTest() {
         val customTabPage = TestAssetHelper.getGenericAsset(mockWebServer, 1)
 
         intentReceiverActivityTestRule.launchActivity(
             createCustomTabIntent(
                 customTabPage.url.toString(),
-                customMenuItem
-            )
+            ),
         )
 
         customTabScreen {
-            longCLickAndCopyToolbarUrl()
-        }
-
-        openAppFromExternalLink(customTabPage.url.toString())
-
-        navigationToolbar {
-            openEditURLView()
-        }
-
-        searchScreen {
-            clickClearButton()
-            longClickToolbar()
-            clickPasteText()
-            verifyPastedToolbarText(customTabPage.url.toString())
+            verifyCloseButton()
+            verifyTrackingProtectionIcon()
+            verifySecurityIndicator()
+            verifyPageTitle(customTabPage.title)
+            verifyPageUrl(customTabPage.url.toString())
+            verifyActionButton()
+            verifyMenuButton()
         }
     }
 
-    @SmokeTest
     @Test
-    fun customTabShareTextTest() {
+    fun verifyCustomTabMenuItemsTest() {
         val customTabPage = TestAssetHelper.getGenericAsset(mockWebServer, 1)
 
         intentReceiverActivityTestRule.launchActivity(
             createCustomTabIntent(
                 customTabPage.url.toString(),
-                customMenuItem
-            )
+            ),
         )
 
         customTabScreen {
-            waitForPageToLoad()
-        }
-
-        browserScreen {
-            longClickMatchingText("content")
-        }.clickShareSelectedText {
-            verifyAndroidShareLayout()
+        }.openMainMenu {
+            verifyForwardButton()
+            verifyRefreshButton()
+            verifyStopButton()
+            verifyShareButton()
+            verifyRequestDesktopButton()
+            verifyFindInPageButton()
+            verifyOpenInBrowserButton()
         }
     }
 
-    @SmokeTest
     @Test
-    fun customTabDownloadTest() {
-        val customTabPage = "https://storage.googleapis.com/mobile_test_assets/test_app/downloads.html"
-        val downloadFile = "web_icon.png"
+    fun customTabNavigationTest() {
+        val pageLinks = TestAssetHelper.getGenericAsset(mockWebServer, 4)
+        val genericURL = TestAssetHelper.getGenericAsset(mockWebServer, 1)
 
         intentReceiverActivityTestRule.launchActivity(
             createCustomTabIntent(
-                customTabPage.toUri().toString(),
-                customMenuItem
-            )
+                pageLinks.url.toString(),
+            ),
         )
 
         customTabScreen {
-            waitForPageToLoad()
+            clickGenericLink("Link 1")
+            verifyPageTitle(genericURL.title)
+            verifyPageUrl(genericURL.url.toString())
+        }.goBack {
+            verifyPageTitle(pageLinks.title)
+            verifyPageUrl(pageLinks.url.toString())
+        }.openMainMenu {
+            clickForwardButton()
+            verifyPageTitle(genericURL.title)
+            verifyPageUrl(genericURL.url.toString())
         }
+    }
 
-        browserScreen {
-        }.clickDownloadLink(downloadFile) {
-            verifyDownloadPrompt(downloadFile)
-        }.clickDownload {
-            verifyDownloadNotificationPopup()
+    @Test
+    fun customTabShareTest() {
+        val customTabPage = TestAssetHelper.getGenericAsset(mockWebServer, 1)
+
+        intentReceiverActivityTestRule.launchActivity(
+            createCustomTabIntent(
+                customTabPage.url.toString(),
+            ),
+        )
+
+        customTabScreen {
+        }.openMainMenu {
+        }.clickShareButton {
+            verifyShareContentPanel()
         }
-        mDevice.openNotification()
-        notificationShade {
-            verifySystemNotificationExists("Download completed")
+    }
+
+    @Test
+    fun customTabRequestDesktopSiteTest() {
+        val customTabPage = TestAssetHelper.getGenericAsset(mockWebServer, 1)
+
+        intentReceiverActivityTestRule.launchActivity(
+            createCustomTabIntent(
+                customTabPage.url.toString(),
+            ),
+        )
+
+        customTabScreen {
+        }.openMainMenu {
+            switchRequestDesktopSiteToggle()
+        }.openMainMenu {
+            verifyRequestDesktopSiteIsTurnedOn()
+            switchRequestDesktopSiteToggle()
+        }.openMainMenu {
+            verifyRequestDesktopSiteIsTurnedOff()
+        }
+    }
+
+    @Test
+    fun customTabOpenInBrowserTest() {
+        val customTabPage = TestAssetHelper.getGenericAsset(mockWebServer, 1)
+
+        intentReceiverActivityTestRule.launchActivity(
+            createCustomTabIntent(
+                customTabPage.url.toString(),
+            ),
+        )
+
+        customTabScreen {
+        }.openMainMenu {
+        }.clickOpenInBrowserButton {
+            verifyUrl(customTabPage.url.toString())
         }
     }
 }

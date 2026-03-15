@@ -4,44 +4,52 @@
 
 package org.midorinext.android.components
 
+import android.annotation.SuppressLint
 import android.content.Context
 import mozilla.components.feature.push.AutoPushFeature
 import mozilla.components.feature.push.PushConfig
 import mozilla.components.lib.crash.CrashReporter
 import mozilla.components.support.base.log.logger.Logger
-import org.midorinext.android.R
-import org.midorinext.android.perf.lazyMonitored
-import org.midorinext.android.push.FirebasePushService
+import org.midorinext.android.push.FirebasePush
 
 /**
  * Component group for push services. These components use services that strongly depend on
  * push messaging (e.g. WebPush, SendTab).
  */
-class Push(context: Context, crashReporter: CrashReporter) {
-    val feature by lazyMonitored {
+@SuppressLint("DiscouragedApi")
+class Push(
+    context: Context,
+    crashReporter: CrashReporter,
+) {
+    val feature by lazy {
         pushConfig?.let { config ->
             AutoPushFeature(
                 context = context,
                 service = pushService,
                 config = config,
-                crashReporter = crashReporter
+                crashReporter = crashReporter,
             )
         }
     }
 
-    private val pushConfig: PushConfig? by lazyMonitored {
-        val logger = Logger("PushConfig")
-        val projectIdKey = context.getString(R.string.pref_key_push_project_id)
-        val resId = context.resources.getIdentifier(projectIdKey, "string", context.packageName)
-        if (resId == 0) {
-            logger.warn("No firebase configuration found; cannot support push service.")
-            return@lazyMonitored null
-        }
+    /**
+     * The push configuration data class used to initialize the AutoPushFeature.
+     *
+     * If we have the `project_id` resource, then we know that the Firebase configuration and API
+     * keys are available for the FCM service to be used.
+     */
+    private val pushConfig by lazy {
+        val logger = Logger("AutoPush")
 
-        logger.debug("Creating push configuration for autopush.")
+        val resId = context.resources.getIdentifier("project_id", "string", context.packageName)
+        if (resId == 0) {
+            logger.info("No push keys found. Exiting..")
+            return@lazy null
+        }
+        logger.info("Push keys detected, instantiation beginning..")
         val projectId = context.resources.getString(resId)
         PushConfig(projectId)
     }
 
-    private val pushService by lazyMonitored { FirebasePushService() }
+    private val pushService by lazy { FirebasePush() }
 }

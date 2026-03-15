@@ -1,12 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 package org.midorinext.android.helpers
 
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.IdlingResource
+import androidx.test.platform.app.InstrumentationRegistry
 import mozilla.components.browser.state.selector.selectedTab
-import org.midorinext.android.MidoriApplication
+import org.midorinext.android.BrowserApplication
 
 /**
  * An IdlingResource implementation that waits until the current session is not loading anymore.
@@ -16,23 +17,22 @@ import org.midorinext.android.MidoriApplication
 class SessionLoadedIdlingResource : IdlingResource {
     private var resourceCallback: IdlingResource.ResourceCallback? = null
 
-    override fun getName(): String {
-        return SessionLoadedIdlingResource::class.java.simpleName
-    }
+    override fun getName(): String = SessionLoadedIdlingResource::class.java.simpleName
 
     override fun isIdleNow(): Boolean {
-        val context = ApplicationProvider.getApplicationContext<MidoriApplication>()
-        val selectedTab = context.components.core.store.state.selectedTab
+        val context = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
+            as BrowserApplication
 
-        return if (selectedTab?.content?.loading == true) {
+        val store = context.components.core.store
+
+        return if (store.state.selectedTab
+            ?.content
+            ?.loading == true
+        ) {
             false
         } else {
-            if (selectedTab?.content?.progress == 100) {
-                invokeCallback()
-                true
-            } else {
-                false
-            }
+            invokeCallback()
+            true
         }
     }
 

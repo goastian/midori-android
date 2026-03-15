@@ -16,7 +16,7 @@ import mozilla.components.feature.accounts.push.SendTabFeature
 import mozilla.components.feature.push.AutoPushFeature
 import mozilla.components.feature.push.PushScope
 import mozilla.components.service.fxa.manager.FxaAccountManager
-import mozilla.components.service.fxa.manager.ext.withConstellation
+import mozilla.components.service.fxa.manager.ext.withConstellationIfExists
 import org.midorinext.android.components.BackgroundServices
 import org.midorinext.android.components.Push
 
@@ -55,12 +55,12 @@ import org.midorinext.android.components.Push
  */
 class PushFxaIntegration(
     private val pushFeature: AutoPushFeature,
-    lazyAccountManager: Lazy<FxaAccountManager>
+    lazyAccountManager: Lazy<FxaAccountManager>,
 ) {
     private val observer =
         OneTimePushMessageObserver(
             lazyAccountManager,
-            pushFeature
+            pushFeature,
         )
 
     /**
@@ -79,19 +79,19 @@ class PushFxaIntegration(
  */
 internal class OneTimePushMessageObserver(
     private val lazyAccountManager: Lazy<FxaAccountManager>,
-    private val pushFeature: AutoPushFeature
+    private val pushFeature: AutoPushFeature,
 ) : AutoPushFeature.Observer {
-    override fun onMessageReceived(scope: PushScope, message: ByteArray?) {
-
+    override fun onMessageReceived(
+        scope: PushScope,
+        message: ByteArray?,
+    ) {
         // Ignore empty push messages.
         val rawBytes = message ?: return
 
         // If the push scope has the FxA prefix, we know this is for us.
         if (scope.contains(FxaPushSupportFeature.PUSH_SCOPE_PREFIX)) {
-
             // If we aren't initialized, then we should do the initialization and message delivery.
             if (!lazyAccountManager.isInitialized()) {
-
                 CoroutineScope(Dispatchers.Main).launch {
                     val fxaObserver = OneTimeMessageDeliveryObserver(lazyAccountManager, rawBytes)
 
@@ -115,17 +115,17 @@ internal class OneTimePushMessageObserver(
  */
 internal class OneTimeMessageDeliveryObserver(
     private val lazyAccount: Lazy<FxaAccountManager>,
-    private val message: ByteArray
+    private val message: ByteArray,
 ) : AccountObserver {
     override fun onAuthenticated(
         account: OAuthAccount,
-        authType: AuthType
+        authType: AuthType,
     ) {
-        lazyAccount.value.withConstellation {
-            MainScope().launch { processRawEvent(String(message)) }
-        }
-
         MainScope().launch {
+            lazyAccount.value.withConstellationIfExists {
+                processRawEvent(String(message))
+            }
+
             lazyAccount.value.unregister(this@OneTimeMessageDeliveryObserver)
         }
     }

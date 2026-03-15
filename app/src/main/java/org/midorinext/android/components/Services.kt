@@ -6,42 +6,41 @@ package org.midorinext.android.components
 
 import android.content.Context
 import androidx.preference.PreferenceManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import mozilla.components.feature.accounts.FirefoxAccountsAuthFeature
 import mozilla.components.feature.app.links.AppLinksInterceptor
+import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.service.fxa.manager.FxaAccountManager
 import org.midorinext.android.R
 import org.midorinext.android.ext.getPreferenceKey
-import org.midorinext.android.perf.lazyMonitored
-import org.midorinext.android.settings.SupportUtils
 
 /**
  * Component group which encapsulates foreground-friendly services.
  */
 class Services(
     private val context: Context,
-    private val accountManager: FxaAccountManager
+    private val accountManager: FxaAccountManager,
+    private val tabsUseCases: TabsUseCases,
 ) {
-    val accountsAuthFeature by lazyMonitored {
-        FirefoxAccountsAuthFeature(accountManager, FxaServer.REDIRECT_URL) { context, authUrl ->
-            CoroutineScope(Dispatchers.Main).launch {
-                val intent = SupportUtils.createAuthCustomTabIntent(context, authUrl)
-                context.startActivity(intent)
+    private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+    val accountsAuthFeature by lazy {
+        FirefoxAccountsAuthFeature(
+            accountManager,
+            redirectUrl = BackgroundServices.REDIRECT_URL,
+        ) { _, authUrl ->
+            MainScope().launch {
+                tabsUseCases.addTab.invoke(authUrl)
             }
         }
     }
 
-    val appLinksInterceptor by lazyMonitored {
+    val appLinksInterceptor by lazy {
         AppLinksInterceptor(
             context,
-            interceptLinkClicks = true,
             launchInApp = {
-                PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
-                    context.getPreferenceKey(R.string.pref_key_open_links_in_external_app), false
-                )
-            }
+                prefs.getBoolean(context.getPreferenceKey(R.string.pref_key_launch_external_app), false)
+            },
         )
     }
 }

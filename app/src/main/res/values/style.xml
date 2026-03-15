@@ -1,0 +1,41 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="AppThemeNotActionBar" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+
+        <item name="colorPrimary">@color/dark</item>
+        <item name="colorPrimaryDark">@color/evenDarker</item>
+        <item name="colorAccent">@color/accent</item>
+
+        <item name="android:navigationBarColor">@color/evenDarker</item>
+        <item name="android:windowBackground">@color/dark</item>
+        <item name="android:windowOptOutEdgeToEdgeEnforcement" tools:targetApi="35">true</item>
+    </style>
+
+    <style name="AppTheme" parent="Theme.Material3.Dark">
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+
+        <item name="colorPrimary">@color/dark</item>
+        <item name="colorPrimaryDark">@color/evenDarker</item>
+        <item name="colorAccent">@color/accent</item>
+
+        <item name="android:navigationBarColor">@color/evenDarker</item>
+        <item name="android:windowBackground">@color/dark</item>
+        <item name="android:windowOptOutEdgeToEdgeEnforcement" tools:targetApi="35">true</item>
+    </style>
+
+    <style name="AddonsActivityTheme" parent="AppTheme">
+        <item name="mozac_primary_text_color">@color/photonDarkGrey90</item>
+        <item name="android:windowOptOutEdgeToEdgeEnforcement" tools:targetApi="35">true</item>
+    </style>
+
+    <style name="WelcomeTheme" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:windowBackground">@color/welcome_background</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowOptOutEdgeToEdgeEnforcement" tools:targetApi="35">true</item>
+    </style>
+</resources>

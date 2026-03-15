@@ -1,8 +1,8 @@
 
 <html>
-<script src="jquery-3.4.1.slim.min.js"></script>
-<script>
-
+    <script src="jquery-1.10.2.js"></script>
+    <script>
+      
     function setCookie(newVal){
 	window.document.cookie = "pageStatus = " + newVal + ";";
     }
@@ -27,19 +27,19 @@
 
         if (currentCookie.localeCompare("REFRESHED") == 0) {
                 setCookie("DEFAULT");
-            return "DEFAULT";
+            return "My little test page - DEFAULT";
         } else {
                 setCookie("REFRESHED");
-            return "REFRESHED";
+            return "My little test page - REFRESHED!";
         }
     }
 
     var textToShow = valSwap();
-    window.addEventListener('DOMContentLoaded', (event) => {
-        document.querySelector('h1').innerHTML = textToShow;
+    $(document).ready(function() {
+        $("h1").html(textToShow);
     });
 </script>
 <body>
-<h1>DEFAULT</h1>
+<h1>My little test page - DEFAULT</h1>
 </body>
 </html>

@@ -5,11 +5,9 @@
 package org.midorinext.android.components
 
 import android.content.Context
+import android.os.Environment
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
-import mozilla.components.concept.storage.BookmarksStorage
-import mozilla.components.concept.storage.HistoryStorage
-import mozilla.components.feature.app.links.AppLinksUseCases
 import mozilla.components.feature.contextmenu.ContextMenuUseCases
 import mozilla.components.feature.downloads.DownloadsUseCases
 import mozilla.components.feature.pwa.WebAppShortcutManager
@@ -17,86 +15,69 @@ import mozilla.components.feature.pwa.WebAppUseCases
 import mozilla.components.feature.search.SearchUseCases
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.session.SettingsUseCases
-import mozilla.components.feature.session.TrackingProtectionUseCases
 import mozilla.components.feature.tabs.CustomTabsUseCases
 import mozilla.components.feature.tabs.TabsUseCases
-import mozilla.components.feature.top.sites.TopSitesStorage
-import mozilla.components.feature.top.sites.TopSitesUseCases
-import mozilla.components.support.locale.LocaleUseCases
-import org.midorinext.android.components.bookmarks.BookmarksUseCase
-import org.midorinext.android.perf.lazyMonitored
+import mozilla.components.support.utils.DefaultDownloadFileUtils
 
 /**
  * Component group for all use cases. Use cases are provided by feature
  * modules and can be triggered by UI interactions.
  */
-@Suppress("LongParameterList")
 class UseCases(
     private val context: Context,
     private val engine: Engine,
     private val store: BrowserStore,
     private val shortcutManager: WebAppShortcutManager,
-    private val topSitesStorage: TopSitesStorage,
-    private val bookmarksStorage: BookmarksStorage,
-    private val historyStorage: HistoryStorage
 ) {
     /**
      * Use cases that provide engine interactions for a given browser session.
      */
-    val sessionUseCases by lazyMonitored { SessionUseCases(store) }
+    val sessionUseCases by lazy { SessionUseCases(store) }
 
     /**
      * Use cases that provide tab management.
      */
-    val tabsUseCases: TabsUseCases by lazyMonitored { TabsUseCases(store) }
-
-    /**
-     * Use cases for managing custom tabs.
-     */
-    val customTabsUseCases: CustomTabsUseCases by lazyMonitored {
-        CustomTabsUseCases(store, sessionUseCases.loadUrl)
-    }
+    val tabsUseCases: TabsUseCases by lazy { TabsUseCases(store) }
 
     /**
      * Use cases that provide search engine integration.
      */
-    val searchUseCases by lazyMonitored {
-        SearchUseCases(
-            store,
-            tabsUseCases,
-            sessionUseCases
-        )
+    val searchUseCases by lazy {
+        SearchUseCases(store, tabsUseCases, sessionUseCases)
     }
 
     /**
      * Use cases that provide settings management.
      */
-    val settingsUseCases by lazyMonitored { SettingsUseCases(engine, store) }
+    val settingsUseCases by lazy { SettingsUseCases(engine, store) }
 
-    val appLinksUseCases by lazyMonitored { AppLinksUseCases(context.applicationContext) }
+    /**
+     * Use cases that provide shortcut and progressive web app management.
+     */
+    val webAppUseCases by lazy { WebAppUseCases(context, store, shortcutManager) }
 
-    val webAppUseCases by lazyMonitored {
-        WebAppUseCases(context, store, shortcutManager)
+    /**
+     * Uses cases that provides context menu
+     */
+    val contextMenuUseCases: ContextMenuUseCases by lazy { ContextMenuUseCases(store) }
+
+    /**
+     * Use cases related to the downloads feature.
+     */
+    val downloadsUseCases: DownloadsUseCases by lazy {
+        DownloadsUseCases(
+            store = store,
+            downloadFileUtils = DefaultDownloadFileUtils(
+                context = context,
+                downloadLocation = {
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+                },
+            ),
+        )
     }
 
-    val downloadUseCases by lazyMonitored { DownloadsUseCases(store) }
-
-    val contextMenuUseCases by lazyMonitored { ContextMenuUseCases(store) }
-
-    val trackingProtectionUseCases by lazyMonitored { TrackingProtectionUseCases(store, engine) }
-
     /**
-     * Use cases that provide top sites management.
+     * Use cases related to Custom Tabs.
      */
-    val topSitesUseCase by lazyMonitored { TopSitesUseCases(topSitesStorage) }
-
-    /**
-     * Use cases that handle locale management.
-     */
-    val localeUseCases by lazyMonitored { LocaleUseCases(store) }
-
-    /**
-     * Use cases that provide bookmark management.
-     */
-    val bookmarksUseCases by lazyMonitored { BookmarksUseCase(bookmarksStorage, historyStorage) }
+    val customTabsUseCases: CustomTabsUseCases by lazy { CustomTabsUseCases(store, sessionUseCases.loadUrl) }
 }

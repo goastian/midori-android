@@ -6,133 +6,58 @@ package org.midorinext.android
 
 import android.app.Activity
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import android.os.StrictMode
-import androidx.annotation.VisibleForTesting
-import mozilla.components.feature.intent.ext.sanitize
-import mozilla.components.feature.intent.processing.IntentProcessor
-import mozilla.components.support.utils.EXTRA_ACTIVITY_REFERRER_CATEGORY
-import mozilla.components.support.utils.EXTRA_ACTIVITY_REFERRER_PACKAGE
-import org.midorinext.android.HomeActivity.Companion.PRIVATE_BROWSING_MODE
-import org.midorinext.android.components.IntentProcessorType
-import org.midorinext.android.components.getType
+import androidx.preference.PreferenceManager
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import org.midorinext.android.ext.components
-import org.midorinext.android.ext.settings
-import org.midorinext.android.perf.MarkersActivityLifecycleCallbacks
-import org.midorinext.android.perf.StartupTimeline
-import org.midorinext.android.shortcut.NewTabShortcutIntentProcessor
+import org.midorinext.android.onboarding.WelcomeActivity
 
-/**
- * Processes incoming intents and sends them to the corresponding activity.
- */
 class IntentReceiverActivity : Activity() {
-
-    @VisibleForTesting
     override fun onCreate(savedInstanceState: Bundle?) {
-        // DO NOT MOVE ANYTHING ABOVE THIS getProfilerTime CALL.
-        val startTimeProfiler = components.core.engine.profiler?.getProfilerTime()
+        super.onCreate(savedInstanceState)
 
-        // StrictMode violation on certain devices such as Samsung
-        components.strictMode.resetAfter(StrictMode.allowThreadDiskReads()) {
-            super.onCreate(savedInstanceState)
-        }
-
-        // The intent property is nullable, but the rest of the code below
-        // assumes it is not. If it's null, then we make a new one and open
-        // the HomeActivity.
-        val intent = intent?.let { Intent(it) } ?: Intent()
-        intent.sanitize().stripUnwantedFlags()
-        processIntent(intent)
-
-        components.core.engine.profiler?.addMarker(
-            MarkersActivityLifecycleCallbacks.MARKER_NAME, startTimeProfiler, "IntentReceiverActivity.onCreate"
+        // Check if onboarding has been completed
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val onboardingCompleted = prefs.getBoolean(
+            getString(R.string.pref_key_onboarding_completed),
+            false,
         )
-        StartupTimeline.onActivityCreateEndIntentReceiver() // DO NOT MOVE ANYTHING BELOW HERE.
-    }
 
-    fun processIntent(intent: Intent) {
-        // Call process for side effects, short on the first that returns true
-        val private = settings().openLinksInAPrivateTab
-        intent.putExtra(PRIVATE_BROWSING_MODE, private)
-
-        addReferrerInformation(intent)
-
-        val processor = getIntentProcessors(private).firstOrNull { it.process(intent) }
-        val intentProcessorType = components.intentProcessors.getType(processor)
-
-        launch(intent, intentProcessorType)
-    }
-
-    @VisibleForTesting
-    internal fun launch(intent: Intent, intentProcessorType: IntentProcessorType) {
-        intent.setClassName(applicationContext, intentProcessorType.activityClassName)
-
-        if (!intent.hasExtra(HomeActivity.OPEN_TO_BROWSER)) {
-            intent.putExtra(
-                HomeActivity.OPEN_TO_BROWSER,
-                intentProcessorType.shouldOpenToBrowser(intent)
-            )
-        }
-        // StrictMode violation on certain devices such as Samsung
-        components.strictMode.resetAfter(StrictMode.allowThreadDiskReads()) {
-            startActivity(intent)
-        }
-        finish() // must finish() after starting the other activity
-    }
-
-    private fun getIntentProcessors(private: Boolean): List<IntentProcessor> {
-        val modeDependentProcessors = if (private) {
-            listOf(
-                components.intentProcessors.privateCustomTabIntentProcessor,
-                components.intentProcessors.privateIntentProcessor
-            )
-        } else {
-            listOf(
-                components.intentProcessors.customTabIntentProcessor,
-                components.intentProcessors.intentProcessor
-            )
-        }
-
-        return components.intentProcessors.externalAppIntentProcessors +
-            components.intentProcessors.fennecPageShortcutIntentProcessor +
-            components.intentProcessors.externalDeepLinkIntentProcessor +
-            components.intentProcessors.webNotificationsIntentProcessor +
-            modeDependentProcessors +
-            NewTabShortcutIntentProcessor()
-    }
-
-    private fun addReferrerInformation(intent: Intent) {
-        // Pass along referrer information when possible.
-        // Referrer is supported for API>=22.
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP_MR1) {
+        if (!onboardingCompleted) {
+            val welcomeIntent = Intent(this, WelcomeActivity::class.java)
+            welcomeIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(welcomeIntent)
+            finish()
             return
         }
-        // NB: referrer can be spoofed by the calling application. Use with caution.
-        val r = referrer ?: return
-        intent.putExtra(EXTRA_ACTIVITY_REFERRER_PACKAGE, r.host)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Category is supported for API>=26.
-            r.host?.let { host ->
-                try {
-                    val category = packageManager.getApplicationInfo(host, 0).category
-                    intent.putExtra(EXTRA_ACTIVITY_REFERRER_CATEGORY, category)
-                } catch (e: PackageManager.NameNotFoundException) {
-                    // At least we tried.
-                }
+
+        val intent = intent?.let { Intent(it) } ?: Intent()
+
+        // Explicitly remove the new task and clear task flags (Our browser activity is a single
+        // task activity and we never want to start a second task here).
+        intent.flags = intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK.inv()
+        intent.flags = intent.flags and Intent.FLAG_ACTIVITY_CLEAR_TASK.inv()
+
+        // LauncherActivity is started with the "excludeFromRecents" flag (set in manifest). We
+        // do not want to propagate this flag from the launcher activity to the browser.
+        intent.flags = intent.flags and Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS.inv()
+
+        val utils = components.utils
+
+        MainScope().launch {
+            val processor = utils.intentProcessors.firstOrNull { it.process(intent) }
+
+            val className = if (processor in utils.externalIntentProcessors) {
+                ExternalAppBrowserActivity::class
+            } else {
+                BrowserActivity::class
             }
+
+            intent.setClassName(applicationContext, className.java.name)
+
+            startActivity(intent)
+            finish()
         }
     }
-}
-
-private fun Intent.stripUnwantedFlags() {
-    // Explicitly remove the new task and clear task flags (Our browser activity is a single
-    // task activity and we never want to start a second task here).
-    flags = flags and Intent.FLAG_ACTIVITY_NEW_TASK.inv()
-    flags = flags and Intent.FLAG_ACTIVITY_CLEAR_TASK.inv()
-
-    // IntentReceiverActivity is started with the "excludeFromRecents" flag (set in manifest). We
-    // do not want to propagate this flag from the intent receiver activity to the browser.
-    flags = flags and Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS.inv()
 }

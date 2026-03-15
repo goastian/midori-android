@@ -4,16 +4,10 @@
 
 package org.midorinext.android.autofill
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import mozilla.components.feature.autofill.AbstractAutofillService
 import mozilla.components.feature.autofill.AutofillConfiguration
 import org.midorinext.android.ext.components
 
-/**
- * Service responsible for implementing Android's Autofill framework.
- */
-@RequiresApi(Build.VERSION_CODES.O)
 class AutofillService : AbstractAutofillService() {
     override val configuration: AutofillConfiguration by lazy { components.autofillConfiguration }
 }

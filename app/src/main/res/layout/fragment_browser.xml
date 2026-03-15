@@ -2,102 +2,193 @@
 <!-- This Source Code Form is subject to the terms of the Mozilla Public
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
-<org.midorinext.android.browser.SwipeGestureLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:mozac="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/gestureLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context=".BrowserActivity">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/browserWindow"
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/compose_view"
+        android:layout_width="match_parent"
+        android:layout_gravity="top"
+        android:background="#ffffcc00"
+        android:layout_marginBottom="@dimen/browser_toolbar_height"
+        android:layout_height="@dimen/browser_toolbar_height"
+        android:visibility="gone" />
+
+    <mozilla.components.ui.widgets.VerticalSwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-        <androidx.coordinatorlayout.widget.CoordinatorLayout
-            android:id="@+id/browserLayout"
+        <mozilla.components.concept.engine.EngineView
+            android:id="@+id/engineView"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toTopOf="@+id/addressSelectBar"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:context="browser.BrowserFragment">
+            android:layout_height="match_parent" />
+    </mozilla.components.ui.widgets.VerticalSwipeRefreshLayout>
 
-            <mozilla.components.ui.widgets.VerticalSwipeRefreshLayout
-                android:id="@+id/swipeRefresh"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <mozilla.components.concept.engine.EngineView
-                    tools:ignore="Instantiatable"
-                    android:id="@+id/engineView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:visibility="gone" />
-            </mozilla.components.ui.widgets.VerticalSwipeRefreshLayout>
-
-            <ViewStub
-                android:id="@+id/stubFindInPage"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_gravity="bottom"
-                android:inflatedId="@+id/findInPageView"
-                android:layout="@layout/stub_find_in_page" />
-
-            <include
-                android:id="@+id/viewDynamicDownloadDialog"
-                layout="@layout/download_dialog_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:visibility="gone" />
-
-            <mozilla.components.feature.readerview.view.ReaderViewControlsBar
-                android:id="@+id/readerViewControlsBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:background="?attr/layer1"
-                android:elevation="24dp"
-                android:visibility="gone" />
-
-            <org.midorinext.android.crashes.CrashContentView
-                android:id="@+id/crash_reporter_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="gone" />
-
-        </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-        <mozilla.components.feature.prompts.address.AddressSelectBar
-            android:visibility="gone"
-            android:id="@+id/addressSelectBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@id/creditCardSelectBar"
-            app:layout_constraintTop_toBottomOf="@id/browserLayout" />
-
-        <mozilla.components.feature.prompts.creditcard.CreditCardSelectBar
-            android:visibility="gone"
-            android:id="@+id/creditCardSelectBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@id/loginSelectBar"
-            app:layout_constraintTop_toBottomOf="@id/addressSelectBar" />
-
-        <mozilla.components.feature.prompts.login.LoginSelectBar
-            android:visibility="gone"
-            android:id="@+id/loginSelectBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/creditCardSelectBar" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <org.midorinext.android.browser.TabPreview
-        android:id="@+id/tabPreview"
+    <org.midorinext.android.search.AwesomeBarWrapper
+        android:id="@+id/awesomeBar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clickable="false"
-        android:focusable="false"
+        android:padding="4dp"
         android:visibility="gone" />
-</org.midorinext.android.browser.SwipeGestureLayout>
+
+    <mozilla.components.feature.findinpage.view.FindInPageBar
+        android:id="@+id/findInPageBar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_gravity="bottom"
+        android:background="#000000"
+        mozac:findInPageQueryTextColor="#ffffff"
+        mozac:findInPageQueryHintTextColor="#dddddd"
+        mozac:findInPageResultCountTextColor="#ff88ff"
+        mozac:findInPageButtonsTint="#ff88ff"
+        android:visibility="gone"
+        app:layout_behavior="org.midorinext.android.browser.FindInPageBarBehavior" />
+
+    <!-- Combined Toolbar Container: URL bar + Navigation bar -->
+    <LinearLayout
+        android:id="@+id/toolbarContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:background="@color/toolbarBackgroundColor">
+
+        <!-- Mozilla BrowserToolbar for URL bar -->
+        <mozilla.components.browser.toolbar.BrowserToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/browser_toolbar_height"
+            android:background="@color/toolbarBackgroundColor" />
+
+        <!-- Thin separator line -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="#33FFFFFF" />
+
+        <!-- Navigation bar with icons: Back, Forward, Home/NewTab, Tabs, Menu -->
+        <LinearLayout
+            android:id="@+id/navigationBar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/nav_bar_height"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@color/toolbarBackgroundColor"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
+
+            <!-- Back button -->
+            <ImageButton
+                android:id="@+id/navButtonBack"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/mozac_ic_back_24"
+                android:contentDescription="@string/nav_back"
+                android:tint="@color/toolbar_icon_color"
+                android:scaleType="center"
+                android:padding="@dimen/nav_bar_icon_padding" />
+
+            <!-- Forward button -->
+            <ImageButton
+                android:id="@+id/navButtonForward"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/mozac_ic_forward_24"
+                android:contentDescription="@string/nav_forward"
+                android:tint="@color/toolbar_icon_disabled"
+                android:scaleType="center"
+                android:padding="@dimen/nav_bar_icon_padding" />
+
+            <!-- New Tab button (center) -->
+            <ImageButton
+                android:id="@+id/navButtonNewTab"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/mozac_ic_tab_new"
+                android:contentDescription="@string/menu_new_tab"
+                android:tint="@color/toolbar_icon_color"
+                android:scaleType="center"
+                android:padding="@dimen/nav_bar_icon_padding" />
+
+            <!-- Tabs button -->
+            <FrameLayout
+                android:id="@+id/navButtonTabsContainer"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/navButtonTabs"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/mozac_ic_tab"
+                    android:contentDescription="@string/nav_tabs"
+                    android:tint="@color/toolbar_icon_color"
+                    android:scaleType="center"
+                    android:padding="@dimen/nav_bar_icon_padding" />
+
+                <!-- Tab count badge -->
+                <TextView
+                    android:id="@+id/navTabCount"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:textColor="@color/toolbar_icon_color"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:text="1"
+                    tools:ignore="HardcodedText" />
+            </FrameLayout>
+
+            <!-- Menu button -->
+            <ImageButton
+                android:id="@+id/navButtonMenu"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_menu_dots"
+                android:contentDescription="@string/nav_menu"
+                android:tint="@color/toolbar_icon_color"
+                android:scaleType="center"
+                android:padding="@dimen/nav_bar_icon_padding" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <mozilla.components.feature.readerview.view.ReaderViewControlsBar
+        android:id="@+id/readerViewBar"
+        android:background="#FFFFFFFF"
+        android:elevation="10dp"
+        android:visibility="gone"
+        android:layout_gravity="bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/readerViewAppearanceButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:src="@drawable/mozac_ic_font"
+        android:contentDescription="@string/reader_view_appearance_button"
+        android:visibility="gone"
+        android:layout_marginRight="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginBottom="16dp"
+        app:layout_behavior="org.midorinext.android.browser.ReaderViewAppearanceButtonBehavior" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
