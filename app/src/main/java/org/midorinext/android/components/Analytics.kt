@@ -28,13 +28,31 @@ class Analytics(
         val services: MutableList<CrashReporterService> = mutableListOf()
 
         if (isSentryEnabled()) {
-            val sentryService = SentryService(
-                context,
-                BuildConfig.SENTRY_TOKEN,
-                mapOf("geckoview" to "$MOZ_APP_VERSION-$MOZ_APP_BUILDID"),
-                sendEventForNativeCrashes = true,
+            services.add(
+                SentryService(
+                    context,
+                    BuildConfig.SENTRY_TOKEN,
+                    mapOf("geckoview" to "$MOZ_APP_VERSION-$MOZ_APP_BUILDID"),
+                    sendEventForNativeCrashes = true,
+                ),
             )
-            services.add(sentryService)
+        }
+
+        // CrashReporter requires at least one service; when no Sentry token is
+        // configured (e.g. debug builds) we still need a valid instance, so we
+        // add a minimal no-op service that simply logs crashes locally.
+        if (services.isEmpty()) {
+            services.add(object : CrashReporterService {
+                override val id: String = "noop"
+                override val name: String = "NoOp"
+                override fun createCrashReportUrl(identifier: String): String? = null
+                override fun report(crash: mozilla.components.lib.crash.Crash.UncaughtExceptionCrash): String? = ""
+                override fun report(crash: mozilla.components.lib.crash.Crash.NativeCodeCrash): String? = ""
+                override fun report(
+                    throwable: Throwable,
+                    breadcrumbs: ArrayList<mozilla.components.concept.base.crash.Breadcrumb>,
+                ): String? = ""
+            })
         }
 
         val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -54,7 +72,7 @@ class Analytics(
             ),
             nonFatalCrashIntent = PendingIntent
                 .getBroadcast(context, 0, Intent(BrowserApplication.NON_FATAL_CRASH_BROADCAST), flags),
-            enabled = true,
+            enabled = isSentryEnabled(),
         )
     }
 }
