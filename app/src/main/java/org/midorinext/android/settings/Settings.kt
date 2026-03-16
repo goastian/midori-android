@@ -10,12 +10,6 @@ import androidx.preference.PreferenceManager
 import org.midorinext.android.R
 
 object Settings {
-    fun isTelemetryEnabled(context: Context): Boolean =
-        PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
-            context.getString(R.string.pref_key_telemetry),
-            true,
-        )
-
     fun getOverrideAmoUser(context: Context): String =
         PreferenceManager.getDefaultSharedPreferences(context).getString(
             context.getString(R.string.pref_key_override_amo_user),

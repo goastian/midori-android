@@ -31,7 +31,6 @@ import org.midorinext.android.R.string.pref_key_pair_sign_in
 import org.midorinext.android.R.string.pref_key_privacy
 import org.midorinext.android.R.string.pref_key_remote_debugging
 import org.midorinext.android.R.string.pref_key_sign_in
-import org.midorinext.android.autofill.AutofillPreference
 import org.midorinext.android.ext.getPreferenceKey
 import org.midorinext.android.ext.requireComponents
 import org.midorinext.android.sync.BrowserFxAEntryPoint
@@ -69,7 +68,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val aboutPageKey = requireContext().getPreferenceKey(pref_key_about_page)
         val privacyKey = requireContext().getPreferenceKey(pref_key_privacy)
         val customAddonsKey = requireContext().getPreferenceKey(pref_key_override_amo_collection)
-        val autofillPreferenceKey = requireContext().getPreferenceKey(R.string.pref_key_autofill)
+        val customizeKey = requireContext().getPreferenceKey(R.string.pref_key_customize)
+        val personalDataKey = requireContext().getPreferenceKey(R.string.pref_key_personal_data)
 
         val preferenceSignIn = findPreference<Preference>(signInKey)
         val preferencePairSignIn = findPreference<Preference>(signInPairKey)
@@ -79,7 +79,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val preferenceAboutPage = findPreference<Preference>(aboutPageKey)
         val preferencePrivacy = findPreference<Preference>(privacyKey)
         val preferenceCustomAddons = findPreference<Preference>(customAddonsKey)
-        val preferenceAutofill = findPreference<AutofillPreference>(autofillPreferenceKey)
+        val preferenceCustomize = findPreference<Preference>(customizeKey)
+        val preferencePersonalData = findPreference<Preference>(personalDataKey)
 
         val accountManager = requireComponents.backgroundServices.accountManager
         if (accountManager.authenticatedAccount() != null) {
@@ -96,17 +97,13 @@ class SettingsFragment : PreferenceFragmentCompat() {
             preferencePairSignIn?.onPreferenceClickListener = getClickListenerForPairingSignIn()
         }
 
-        if (!AutofillPreference.isSupported(requireContext())) {
-            preferenceAutofill?.isVisible = false
-        } else {
-            (preferenceAutofill as AutofillPreference).updateSwitch()
-        }
-
         preferenceMakeDefaultBrowser?.onPreferenceClickListener = getClickListenerForMakeDefaultBrowser()
         preferenceRemoteDebugging?.onPreferenceChangeListener = getChangeListenerForRemoteDebugging()
         preferenceAboutPage?.onPreferenceClickListener = getAboutPageListener()
         preferencePrivacy?.onPreferenceClickListener = getClickListenerForPrivacy()
         preferenceCustomAddons?.onPreferenceClickListener = getClickListenerForCustomAddons()
+        preferenceCustomize?.onPreferenceClickListener = getClickListenerForCustomize()
+        preferencePersonalData?.onPreferenceClickListener = getClickListenerForPersonalData()
     }
 
     private fun getClickListenerForMakeDefaultBrowser(): OnPreferenceClickListener =
@@ -133,6 +130,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
         OnPreferenceClickListener {
             parentFragmentManager
                 .beginTransaction()
+                .setCustomAnimations(
+                    R.anim.slide_in_right, R.anim.slide_out_left,
+                    R.anim.slide_in_left, R.anim.slide_out_right,
+                )
                 .replace(R.id.container, PairSettingsFragment())
                 .addToBackStack(null)
                 .commit()
@@ -146,6 +147,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
         OnPreferenceClickListener {
             parentFragmentManager
                 .beginTransaction()
+                .setCustomAnimations(
+                    R.anim.slide_in_right, R.anim.slide_out_left,
+                    R.anim.slide_in_left, R.anim.slide_out_right,
+                )
                 .replace(R.id.container, AccountSettingsFragment())
                 .addToBackStack(null)
                 .commit()
@@ -159,11 +164,32 @@ class SettingsFragment : PreferenceFragmentCompat() {
         OnPreferenceClickListener {
             parentFragmentManager
                 .beginTransaction()
+                .setCustomAnimations(
+                    R.anim.slide_in_right, R.anim.slide_out_left,
+                    R.anim.slide_in_left, R.anim.slide_out_right,
+                )
                 .replace(R.id.container, PrivacySettingsFragment())
                 .addToBackStack(null)
                 .commit()
             getActionBarUpdater().apply {
                 updateTitle(R.string.privacy_settings)
+            }
+            true
+        }
+
+    private fun getClickListenerForCustomize(): OnPreferenceClickListener =
+        OnPreferenceClickListener {
+            parentFragmentManager
+                .beginTransaction()
+                .setCustomAnimations(
+                    R.anim.slide_in_right, R.anim.slide_out_left,
+                    R.anim.slide_in_left, R.anim.slide_out_right,
+                )
+                .replace(R.id.container, CustomizeSettingsFragment())
+                .addToBackStack(null)
+                .commit()
+            getActionBarUpdater().apply {
+                updateTitle(R.string.customize_category)
             }
             true
         }
@@ -178,9 +204,30 @@ class SettingsFragment : PreferenceFragmentCompat() {
         OnPreferenceClickListener {
             parentFragmentManager
                 .beginTransaction()
+                .setCustomAnimations(
+                    R.anim.slide_in_right, R.anim.slide_out_left,
+                    R.anim.slide_in_left, R.anim.slide_out_right,
+                )
                 .replace(R.id.container, AboutFragment())
                 .addToBackStack(null)
                 .commit()
+            true
+        }
+
+    private fun getClickListenerForPersonalData(): OnPreferenceClickListener =
+        OnPreferenceClickListener {
+            parentFragmentManager
+                .beginTransaction()
+                .setCustomAnimations(
+                    R.anim.slide_in_right, R.anim.slide_out_left,
+                    R.anim.slide_in_left, R.anim.slide_out_right,
+                )
+                .replace(R.id.container, PersonalDataFragment())
+                .addToBackStack(null)
+                .commit()
+            getActionBarUpdater().apply {
+                updateTitle(R.string.personal_data)
+            }
             true
         }
 

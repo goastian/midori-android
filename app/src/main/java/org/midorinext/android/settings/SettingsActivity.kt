@@ -4,6 +4,7 @@
 
 package org.midorinext.android.settings
 
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import android.view.MenuItem
@@ -20,7 +21,15 @@ class SettingsActivity :
     SettingsFragment.ActionBarUpdater {
     override fun onCreate(savedInstanceState: Bundle?) {
         setContentView(R.layout.activity_main)
-        enableEdgeToEdge(SystemBarStyle.dark(Color.TRANSPARENT))
+        val isDarkMode = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        if (isDarkMode) {
+            enableEdgeToEdge(SystemBarStyle.dark(Color.TRANSPARENT))
+        } else {
+            enableEdgeToEdge(
+                statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+                navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+            )
+        }
         super.onCreate(savedInstanceState)
         window.setupPersistentInsets(true)
 
