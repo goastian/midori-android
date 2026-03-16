@@ -70,6 +70,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val customAddonsKey = requireContext().getPreferenceKey(pref_key_override_amo_collection)
         val customizeKey = requireContext().getPreferenceKey(R.string.pref_key_customize)
         val personalDataKey = requireContext().getPreferenceKey(R.string.pref_key_personal_data)
+        val torKey = requireContext().getPreferenceKey(R.string.pref_key_tor_enabled)
 
         val preferenceSignIn = findPreference<Preference>(signInKey)
         val preferencePairSignIn = findPreference<Preference>(signInPairKey)
@@ -81,6 +82,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val preferenceCustomAddons = findPreference<Preference>(customAddonsKey)
         val preferenceCustomize = findPreference<Preference>(customizeKey)
         val preferencePersonalData = findPreference<Preference>(personalDataKey)
+        val preferenceTor = findPreference<Preference>(torKey)
 
         val accountManager = requireComponents.backgroundServices.accountManager
         if (accountManager.authenticatedAccount() != null) {
@@ -104,6 +106,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         preferenceCustomAddons?.onPreferenceClickListener = getClickListenerForCustomAddons()
         preferenceCustomize?.onPreferenceClickListener = getClickListenerForCustomize()
         preferencePersonalData?.onPreferenceClickListener = getClickListenerForPersonalData()
+        preferenceTor?.onPreferenceClickListener = getClickListenerForTor()
     }
 
     private fun getClickListenerForMakeDefaultBrowser(): OnPreferenceClickListener =
@@ -227,6 +230,23 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 .commit()
             getActionBarUpdater().apply {
                 updateTitle(R.string.personal_data)
+            }
+            true
+        }
+
+    private fun getClickListenerForTor(): OnPreferenceClickListener =
+        OnPreferenceClickListener {
+            parentFragmentManager
+                .beginTransaction()
+                .setCustomAnimations(
+                    R.anim.slide_in_right, R.anim.slide_out_left,
+                    R.anim.slide_in_left, R.anim.slide_out_right,
+                )
+                .replace(R.id.container, TorSettingsFragment())
+                .addToBackStack(null)
+                .commit()
+            getActionBarUpdater().apply {
+                updateTitle(R.string.preferences_tor)
             }
             true
         }

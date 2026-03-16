@@ -45,6 +45,8 @@ import org.midorinext.android.ext.components
 import org.midorinext.android.ext.share
 import org.midorinext.android.settings.SettingsActivity
 import org.midorinext.android.tabs.synced.SyncedTabsActivity
+import org.midorinext.android.tor.TorForegroundService
+import org.midorinext.android.tor.TorIntegration
 
 @Suppress("LongParameterList")
 class ToolbarIntegration(
@@ -131,6 +133,17 @@ class ToolbarIntegration(
                 end = CompoundMenuCandidate.ButtonType.SWITCH,
             ) { checked ->
                 sessionUseCases.requestDesktopSite.invoke(checked)
+            },
+            CompoundMenuCandidate(
+                text = context.getString(R.string.preferences_tor),
+                isChecked = TorIntegration.isTorActive,
+                end = CompoundMenuCandidate.ButtonType.SWITCH,
+            ) { checked ->
+                if (checked) {
+                    TorForegroundService.startTor(context)
+                } else {
+                    TorForegroundService.stopTor(context)
+                }
             },
             if (webAppUseCases.isPinningSupported()) {
                 TextMenuCandidate(

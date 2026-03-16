@@ -81,6 +81,16 @@ allprojects {
         } else {
             mavenCentral()
         }
+
+        maven {
+            name = "Guardian Project"
+            url = "https://guardianproject.info/fdroid/repo"
+        }
+
+        maven {
+            name = "JitPack"
+            url = "https://jitpack.io"
+        }
     }
 }
 

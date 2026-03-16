@@ -24,6 +24,12 @@
         android:title="@string/privacy"
         android:summary="@string/preferences_privacy_summary"/>
 
+    <androidx.preference.Preference
+        android:key="@string/pref_key_tor_enabled"
+        android:icon="@drawable/ic_tor"
+        android:title="@string/preferences_tor"
+        android:summary="@string/preferences_tor_summary" />
+
     <androidx.preference.SwitchPreferenceCompat
         android:key="@string/pref_key_launch_external_app"
         android:defaultValue="false"

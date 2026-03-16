@@ -490,4 +490,26 @@
     <string name="customize_addon_collection_user_hint">Collection owner (User ID)</string>
     <!-- Toast shown after confirming the custom add-on collection configuration -->
     <string name="toast_customize_addon_collection_done">Add-on collection modified. Quitting the application to apply changes…</string>
+
+    <!-- Tor -->
+    <string name="tor_notification_title">Midori Tor</string>
+    <string name="tor_stop">Stop Tor</string>
+    <string name="tor_connecting">Connecting to Tor…</string>
+    <string name="tor_connected">Connected via Tor</string>
+    <string name="tor_disconnected">Tor disconnected</string>
+    <string name="tor_new_identity">New Identity</string>
+    <string name="tor_new_identity_summary">Request a new Tor circuit for a different exit IP</string>
+    <string name="tor_new_identity_done">New Tor identity requested</string>
+    <string name="tor_error">Tor connection failed</string>
+    <string name="preferences_tor">Tor Network</string>
+    <string name="preferences_tor_summary">Route traffic through Tor for anonymous browsing</string>
+    <string name="preferences_tor_enabled">Enable Tor</string>
+    <string name="preferences_tor_enabled_summary">Route all browser traffic through the Tor network</string>
+    <string name="preferences_tor_private_only">Private tabs only</string>
+    <string name="preferences_tor_private_only_summary">Only use Tor when browsing in private mode</string>
+    <string name="tor_status_off">Tor is off</string>
+    <string name="tor_status_connecting">Tor: connecting… %1$d%%</string>
+    <string name="tor_status_connected">Tor: connected</string>
+    <string name="tor_toggle_on">Enable Tor</string>
+    <string name="tor_toggle_off">Disable Tor</string>
 </resources>

@@ -45,4 +45,7 @@
     <string name="pref_key_password_autofill" translatable="false">pref_key_password_autofill</string>
     <string name="pref_key_card_autofill" translatable="false">pref_key_card_autofill</string>
     <string name="pref_key_address_autofill" translatable="false">pref_key_address_autofill</string>
+    <string name="pref_key_tor_enabled" translatable="false">pref_key_tor_enabled</string>
+    <string name="pref_key_tor_private_only" translatable="false">pref_key_tor_private_only</string>
+    <string name="pref_key_tor_new_identity" translatable="false">pref_key_tor_new_identity</string>
 </resources>

@@ -302,6 +302,10 @@ dependencies {
     implementation libs.mozilla.lib.publicsuffixlist
     implementation libs.mozilla.lib.state
 
+    implementation libs.tor.android
+    implementation libs.jtorctl
+    implementation libs.iptproxy
+
     implementation libs.mozilla.service.firefox.accounts
     implementation libs.mozilla.service.location
     implementation libs.mozilla.service.sync.autofill

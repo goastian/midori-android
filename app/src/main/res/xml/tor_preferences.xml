@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <SwitchPreferenceCompat
+        android:key="@string/pref_key_tor_enabled"
+        android:title="@string/preferences_tor_enabled"
+        android:summary="@string/preferences_tor_enabled_summary"
+        android:icon="@drawable/ic_tor"
+        android:defaultValue="false" />
+
+    <SwitchPreferenceCompat
+        android:key="@string/pref_key_tor_private_only"
+        android:title="@string/preferences_tor_private_only"
+        android:summary="@string/preferences_tor_private_only_summary"
+        android:defaultValue="true"
+        android:dependency="@string/pref_key_tor_enabled" />
+
+    <Preference
+        android:key="@string/pref_key_tor_new_identity"
+        android:title="@string/tor_new_identity"
+        android:summary="@string/tor_new_identity_summary"
+        android:dependency="@string/pref_key_tor_enabled" />
+
+</PreferenceScreen>

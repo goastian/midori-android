@@ -66,6 +66,14 @@
 -dontwarn io.sentry.**
 
 # --------------------------------------------------------------------------
+# Tor (tor-android, jtorctl, IPtProxy)
+# --------------------------------------------------------------------------
+-keep class org.torproject.jni.** { *; }
+-keep class net.freehaven.tor.control.** { *; }
+-dontwarn IPtProxy.**
+-keep class IPtProxy.** { *; }
+
+# --------------------------------------------------------------------------
 # General optimizations
 # --------------------------------------------------------------------------
 -optimizationpasses 5

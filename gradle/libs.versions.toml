@@ -15,6 +15,11 @@ material = "1.13.0"
 # JNA
 jna = "5.18.1"
 
+# Tor
+tor-android = "0.4.9.5"
+jtorctl = "0.4.5.7"
+iptproxy = "5.2.0"
+
 # AndroidX
 androidx-activity = "1.13.0"
 androidx-annotation = "1.9.1"
@@ -64,6 +69,11 @@ google-material = { group = "com.google.android.material", name = "material", ve
 
 # JNA
 jna = { group = "net.java.dev.jna", name = "jna", version.ref = "jna" }
+
+# Tor
+tor-android = { group = "info.guardianproject", name = "tor-android", version.ref = "tor-android" }
+jtorctl = { group = "info.guardianproject", name = "jtorctl", version.ref = "jtorctl" }
+iptproxy = { group = "com.netzarchitekten", name = "IPtProxy", version.ref = "iptproxy" }
 
 # AndroidX
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "androidx-activity" }
