@@ -15,7 +15,7 @@
         android:id="@+id/widgetLogo"
         android:layout_width="28dp"
         android:layout_height="28dp"
-        android:src="@drawable/ic_midori_welcome_logo"
+        android:src="@mipmap/ic_launcher"
         android:contentDescription="@string/app_name"
         tools:ignore="ContentDescription" />
 
