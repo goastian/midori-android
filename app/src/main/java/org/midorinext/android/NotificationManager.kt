@@ -34,7 +34,7 @@ object NotificationManager {
     private const val RECEIVE_TABS_CHANNEL_ID = "org.midorinext.android.ReceivedTabsChannel"
 
     // Data Reporting
-    private const val PRIVACY_NOTICE_URL = "https://www.mozilla.org/en-US/privacy/firefox/"
+    private const val PRIVACY_NOTICE_URL = "https://astian.org/astian-privacy-policies/"
     private const val DATA_REPORTING_VERSION = 1
     private const val DATA_REPORTING_TAG = "org.midorinext.android.DataReporting"
     private const val DATA_REPORTING_NOTIFICATION_ID = 1
