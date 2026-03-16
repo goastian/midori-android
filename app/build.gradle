@@ -226,6 +226,7 @@ dependencies {
     implementation libs.androidx.recyclerview
     implementation libs.androidx.swiperefreshlayout
     implementation libs.androidx.work.runtime.ktx
+    implementation libs.androidx.core.splashscreen
 
     implementation platform(libs.androidx.compose.bom)
     implementation libs.androidx.compose.foundation
@@ -291,6 +292,7 @@ dependencies {
     implementation libs.mozilla.feature.webauthn
     implementation libs.mozilla.feature.webcompat
     implementation libs.mozilla.feature.webnotifications
+    implementation libs.mozilla.feature.logins
 
     implementation libs.mozilla.lib.crash.base
     implementation libs.mozilla.lib.crash.sentry
@@ -301,6 +303,7 @@ dependencies {
 
     implementation libs.mozilla.service.firefox.accounts
     implementation libs.mozilla.service.location
+    implementation libs.mozilla.service.sync.autofill
     implementation libs.mozilla.service.sync.logins
 
     implementation libs.mozilla.support.appservices
