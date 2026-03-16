@@ -16,8 +16,6 @@ import mozilla.components.concept.sync.DeviceCapability
 import mozilla.components.concept.sync.DeviceCommandQueue
 import mozilla.components.concept.sync.DeviceConfig
 import mozilla.components.concept.sync.DeviceType
-import mozilla.components.feature.accounts.push.FxaPushSupportFeature
-import mozilla.components.feature.accounts.push.SendTabFeature
 import mozilla.components.feature.syncedtabs.commands.SyncedTabsCommands
 import mozilla.components.feature.syncedtabs.commands.SyncedTabsCommandsFlushScheduler
 import mozilla.components.feature.syncedtabs.storage.SyncedTabsStorage
@@ -42,7 +40,6 @@ val maxActiveTime = TimeUnit.DAYS.toMillis(DEFAULT_ACTIVE_DAYS)
  */
 class BackgroundServices(
     context: Context,
-    push: Push,
     placesHistoryStorage: Lazy<PlacesHistoryStorage>,
     remoteTabsStorage: Lazy<RemoteTabsStorage>,
     loginsStorage: Lazy<SyncableLoginsStorage>,
@@ -84,13 +81,6 @@ class BackgroundServices(
             // See https://github.com/mozilla-mobile/android-components/issues/3732
             setOf("https://identity.mozilla.com/apps/oldsync"),
         ).also { accountManager ->
-
-            SendTabFeature(accountManager) { device, tabs ->
-                NotificationManager.showReceivedTabs(context, device, tabs)
-            }
-
-            push.feature?.let { push -> FxaPushSupportFeature(context, accountManager, push) }
-
             SyncedTabsIntegration(context, accountManager).launch()
 
             CoroutineScope(Dispatchers.Main).launch { accountManager.start() }

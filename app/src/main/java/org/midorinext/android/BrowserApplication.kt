@@ -13,7 +13,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import mozilla.components.browser.state.action.SystemAction
 import mozilla.components.concept.engine.webextension.isUnsupported
-import mozilla.components.concept.push.PushProcessor
 import mozilla.components.feature.addons.update.GlobalAddonDependencyProvider
 import mozilla.components.support.AppServicesInitializer
 import mozilla.components.support.base.log.Log
@@ -24,8 +23,6 @@ import mozilla.components.support.ktx.android.content.runOnlyInMainProcess
 import mozilla.components.support.rusthttp.RustHttpConfig
 import mozilla.components.support.webextensions.WebExtensionSupport
 import androidx.preference.PreferenceManager
-import org.midorinext.android.push.PushFxaIntegration
-import org.midorinext.android.push.WebPushEngineIntegration
 import org.midorinext.android.search.AstianGoSearchEngine
 import org.midorinext.android.settings.CustomizeSettingsFragment
 import java.util.concurrent.TimeUnit
@@ -77,10 +74,6 @@ open class BrowserApplication : Application() {
             }
         }, 1500L)
 
-        // Push services — must run immediately so PushProcessor is available
-        // before Firebase triggers onNewToken
-        initPushServices()
-
         // Clean uploads directory on background thread
         @OptIn(DelicateCoroutinesApi::class)
         GlobalScope.launch(Dispatchers.IO) {
@@ -123,18 +116,6 @@ open class BrowserApplication : Application() {
             },
             onUpdatePermissionRequest = components.core.addonUpdater::onUpdatePermissionRequest,
         )
-    }
-
-    private fun initPushServices() {
-        components.push.feature?.let {
-            Logger.info("AutoPushFeature is configured, initializing it...")
-
-            PushProcessor.install(it)
-
-            WebPushEngineIntegration(components.core.engine, it).start()
-            PushFxaIntegration(it, lazy { components.backgroundServices.accountManager }).launch()
-            it.initialize()
-        }
     }
 
     override fun onTrimMemory(level: Int) {

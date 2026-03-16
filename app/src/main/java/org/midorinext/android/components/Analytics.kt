@@ -11,36 +11,21 @@ import android.os.Build
 import mozilla.components.lib.crash.CrashReporter
 import mozilla.components.lib.crash.sentry.SentryService
 import mozilla.components.lib.crash.service.CrashReporterService
-import mozilla.components.lib.crash.service.MozillaSocorroService
 import org.mozilla.geckoview.BuildConfig.MOZ_APP_BUILDID
-import org.mozilla.geckoview.BuildConfig.MOZ_APP_VENDOR
 import org.mozilla.geckoview.BuildConfig.MOZ_APP_VERSION
-import org.mozilla.geckoview.BuildConfig.MOZ_UPDATE_CHANNEL
 import org.midorinext.android.BrowserApplication
 import org.midorinext.android.BuildConfig
 import org.midorinext.android.R
 
 /**
- * Component group for all functionality related to analytics e.g. crash
- * reporting and telemetry.
+ * Component group for all functionality related to analytics e.g. crash reporting.
+ * Only Sentry is used for crash reporting — no Google/Firebase/Socorro services.
  */
 class Analytics(
     private val context: Context,
 ) {
-    /**
-     * A generic crash reporter component configured to use both Sentry and Socorro.
-     */
     val crashReporter: CrashReporter by lazy {
-        val socorroService = MozillaSocorroService(
-            context,
-            appName = "ReferenceBrowser",
-            version = MOZ_APP_VERSION,
-            buildId = MOZ_APP_BUILDID,
-            vendor = MOZ_APP_VENDOR,
-            releaseChannel = MOZ_UPDATE_CHANNEL,
-        )
-
-        val services: MutableList<CrashReporterService> = mutableListOf(socorroService)
+        val services: MutableList<CrashReporterService> = mutableListOf()
 
         if (isSentryEnabled()) {
             val sentryService = SentryService(
@@ -65,7 +50,7 @@ class Analytics(
             shouldPrompt = CrashReporter.Prompt.ALWAYS,
             promptConfiguration = CrashReporter.PromptConfiguration(
                 appName = context.getString(R.string.app_name),
-                organizationName = "Mozilla",
+                organizationName = "Astian",
             ),
             nonFatalCrashIntent = PendingIntent
                 .getBroadcast(context, 0, Intent(BrowserApplication.NON_FATAL_CRASH_BROADCAST), flags),

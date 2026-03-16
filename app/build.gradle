@@ -261,13 +261,11 @@ dependencies {
     implementation libs.mozilla.concept.engine
     implementation libs.mozilla.concept.fetch
     implementation libs.mozilla.concept.menu
-    implementation libs.mozilla.concept.push
     implementation libs.mozilla.concept.storage
     implementation libs.mozilla.concept.sync
     implementation libs.mozilla.concept.toolbar
 
     implementation libs.mozilla.feature.accounts.base
-    implementation libs.mozilla.feature.accounts.push
     implementation libs.mozilla.feature.addons
     implementation libs.mozilla.feature.app.links
     implementation libs.mozilla.feature.awesomebar
@@ -279,7 +277,6 @@ dependencies {
     implementation libs.mozilla.feature.intent
     implementation libs.mozilla.feature.media
     implementation libs.mozilla.feature.prompts
-    implementation libs.mozilla.feature.push
     implementation libs.mozilla.feature.pwa
     implementation libs.mozilla.feature.qr
     implementation libs.mozilla.feature.readerview
@@ -298,7 +295,6 @@ dependencies {
     implementation libs.mozilla.lib.crash.sentry
     implementation libs.mozilla.lib.dataprotect
     implementation libs.mozilla.lib.publicsuffixlist
-    implementation libs.mozilla.lib.push.firebase
     implementation libs.mozilla.lib.state
 
     implementation libs.mozilla.service.firefox.accounts

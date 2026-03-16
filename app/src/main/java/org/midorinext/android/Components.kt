@@ -20,7 +20,6 @@ import org.midorinext.android.autofill.AutofillUnlockActivity
 import org.midorinext.android.components.Analytics
 import org.midorinext.android.components.BackgroundServices
 import org.midorinext.android.components.Core
-import org.midorinext.android.components.Push
 import org.midorinext.android.components.Services
 import org.midorinext.android.components.UseCases
 import org.midorinext.android.components.Utilities
@@ -45,7 +44,6 @@ class Components(
     val backgroundServices by lazy {
         BackgroundServices(
             context,
-            push,
             core.lazyHistoryStorage,
             core.lazyRemoteTabsStorage,
             core.lazyLoginsStorage,
@@ -63,7 +61,6 @@ class Components(
         )
     }
     val services by lazy { Services(context, backgroundServices.accountManager, useCases.tabsUseCases) }
-    val push by lazy { Push(context, analytics.crashReporter) }
 
     @delegate:SuppressLint("NewApi")
     val autofillConfiguration by lazy {
