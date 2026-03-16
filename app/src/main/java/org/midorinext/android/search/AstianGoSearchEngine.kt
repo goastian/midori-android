@@ -48,7 +48,7 @@ object AstianGoSearchEngine {
     }
 
     private fun getSearchIcon(context: Context): Bitmap {
-        val drawable = ContextCompat.getDrawable(context, R.drawable.ic_midori_welcome_logo)
+        val drawable = ContextCompat.getDrawable(context, R.mipmap.ic_launcher)
             ?: return Bitmap.createBitmap(48, 48, Bitmap.Config.ARGB_8888)
 
         val bitmap = Bitmap.createBitmap(48, 48, Bitmap.Config.ARGB_8888)
