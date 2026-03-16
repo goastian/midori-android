@@ -7,6 +7,7 @@ package org.midorinext.android.browser
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.LinearLayout
 import androidx.core.view.isVisible
 import mozilla.components.browser.toolbar.BrowserToolbar
 import mozilla.components.concept.engine.EngineView
@@ -51,6 +52,9 @@ class ExternalAppBrowserFragment :
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Hide navigation bar for custom tabs / PWAs
+        view.findViewById<LinearLayout>(R.id.navigationBar)?.visibility = View.GONE
 
         val manifest = this.manifest
         val sessionId = this.sessionId

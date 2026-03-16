@@ -44,6 +44,8 @@ class TabsToolbar
                         true -> tabsUseCases.removePrivateTabs.invoke()
                         false -> tabsUseCases.removeNormalTabs.invoke()
                     }
+                    tabsUseCases.addTab.invoke("about:blank", selectTab = true)
+                    closeTabsTray?.invoke()
                 }
             }
             true

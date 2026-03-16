@@ -57,6 +57,11 @@ class ToolbarIntegration(
     private val tabsUseCases: TabsUseCases,
     private val webAppUseCases: WebAppUseCases,
     sessionId: String? = null,
+    private val onBookmarkTapped: ((String, String) -> Unit)? = null,
+    private val onShowBookmarks: (() -> Unit)? = null,
+    private val onShowCollections: (() -> Unit)? = null,
+    private val onShowHistory: (() -> Unit)? = null,
+    private val onShowDownloads: (() -> Unit)? = null,
 ) : LifecycleAwareFeature,
     UserInteractionHandler {
     private val shippedDomainsProvider = ShippedDomainsProvider().also {
@@ -69,7 +74,7 @@ class ToolbarIntegration(
         val tint = ContextCompat.getColor(context, R.color.icons)
 
         val forward = SmallMenuCandidate(
-            contentDescription = "Forward",
+            contentDescription = context.getString(R.string.menu_forward),
             icon = DrawableMenuIcon(
                 context,
                 mozilla.components.ui.icons.R.drawable.mozac_ic_forward_24,
@@ -83,7 +88,7 @@ class ToolbarIntegration(
         }
 
         val refresh = SmallMenuCandidate(
-            contentDescription = "Refresh",
+            contentDescription = context.getString(R.string.menu_refresh),
             icon = DrawableMenuIcon(
                 context,
                 mozilla.components.ui.icons.R.drawable.mozac_ic_arrow_clockwise_24,
@@ -94,7 +99,7 @@ class ToolbarIntegration(
         }
 
         val stop = SmallMenuCandidate(
-            contentDescription = "Stop",
+            contentDescription = context.getString(R.string.menu_stop),
             icon = DrawableMenuIcon(
                 context,
                 mozilla.components.ui.icons.R.drawable.mozac_ic_stop,
@@ -110,12 +115,18 @@ class ToolbarIntegration(
     private fun sessionMenuItems(sessionState: SessionState): List<MenuCandidate> =
         listOfNotNull(
             menuToolbar(sessionState),
-            TextMenuCandidate("Share") {
+            TextMenuCandidate(context.getString(R.string.menu_share)) {
                 val url = sessionState.content.url
                 context.share(url)
             },
+            TextMenuCandidate("★ " + context.getString(R.string.bookmark_add_page)) {
+                onBookmarkTapped?.invoke(
+                    sessionState.content.title,
+                    sessionState.content.url,
+                )
+            },
             CompoundMenuCandidate(
-                text = "Request desktop site",
+                text = context.getString(R.string.menu_request_desktop_site),
                 isChecked = sessionState.content.desktopMode,
                 end = CompoundMenuCandidate.ButtonType.SWITCH,
             ) { checked ->
@@ -123,7 +134,7 @@ class ToolbarIntegration(
             },
             if (webAppUseCases.isPinningSupported()) {
                 TextMenuCandidate(
-                    text = "Add to homescreen",
+                    text = context.getString(R.string.menu_add_to_homescreen),
                     containerStyle = ContainerStyle(
                         isVisible = webAppUseCases.isPinningSupported(),
                     ),
@@ -134,7 +145,7 @@ class ToolbarIntegration(
                 null
             },
             TextMenuCandidate(
-                text = "Find in Page",
+                text = context.getString(R.string.menu_find_in_page),
             ) {
                 FindInPageIntegration.launch?.invoke()
             },
@@ -148,22 +159,24 @@ class ToolbarIntegration(
         }
 
         return sessionMenuItems + listOf(
-            TextMenuCandidate(text = "Add-ons") {
+            TextMenuCandidate(text = context.getString(R.string.bookmarks_title)) {
+                onShowBookmarks?.invoke()
+            },
+            TextMenuCandidate(text = context.getString(R.string.collections_title)) {
+                onShowCollections?.invoke()
+            },
+            TextMenuCandidate(text = context.getString(R.string.history_title)) {
+                onShowHistory?.invoke()
+            },
+            TextMenuCandidate(text = context.getString(R.string.downloads_title)) {
+                onShowDownloads?.invoke()
+            },
+            TextMenuCandidate(text = context.getString(R.string.menu_addons)) {
                 val intent = Intent(context, AddonsActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 context.startActivity(intent)
             },
-            TextMenuCandidate(text = "Synced Tabs") {
-                val intent = Intent(context, SyncedTabsActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                context.startActivity(intent)
-            },
-            TextMenuCandidate(text = "Report issue") {
-                tabsUseCases.addTab(
-                    url = "https://github.com/mozilla-mobile/reference-browser/issues/new",
-                )
-            },
-            TextMenuCandidate(text = "Settings") {
+            TextMenuCandidate(text = context.getString(R.string.settings)) {
                 val intent = Intent(context, SettingsActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 context.startActivity(intent)
@@ -182,6 +195,25 @@ class ToolbarIntegration(
             displayIndicatorSeparator = true
             menuController = browserMenuController
             hint = context.getString(R.string.toolbar_hint)
+
+            val iconColor = ContextCompat.getColor(context, R.color.toolbar_icon_color)
+            val hintColor = ContextCompat.getColor(context, R.color.text_tertiary)
+            val textColor = ContextCompat.getColor(context, R.color.text_primary)
+            val separatorColor = ContextCompat.getColor(context, R.color.text_tertiary)
+
+            colors = DisplayToolbar.Colors(
+                siteInfoIconSecure = iconColor,
+                siteInfoIconInsecure = iconColor,
+                siteInfoIconLocalPdf = iconColor,
+                emptyIcon = iconColor,
+                menu = iconColor,
+                hint = hintColor,
+                title = textColor,
+                text = textColor,
+                trackingProtection = iconColor,
+                separator = separatorColor,
+                highlight = iconColor,
+            )
 
             setUrlBackground(
                 ResourcesCompat.getDrawable(context.resources, R.drawable.url_background, context.theme),

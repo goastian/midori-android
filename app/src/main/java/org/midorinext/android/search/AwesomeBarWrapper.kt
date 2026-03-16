@@ -49,7 +49,7 @@ class AwesomeBarWrapper
             text = text.value,
             providers = providers.value,
             hiddenSuggestions = hiddenSuggestions.value,
-            orientation = AwesomeBarOrientation.BOTTOM,
+            orientation = AwesomeBarOrientation.TOP,
             colors = AwesomeBarDefaults.colors(
                 background = Color(0xff222222),
                 title = Color(0xffffffff),

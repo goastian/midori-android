@@ -7,6 +7,7 @@ package org.midorinext.android
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.preference.PreferenceManager
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -14,8 +15,15 @@ import org.midorinext.android.ext.components
 import org.midorinext.android.onboarding.WelcomeActivity
 
 class IntentReceiverActivity : Activity() {
+
+    private var isReady = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+
+        // Keep splash visible while we process the intent
+        splashScreen.setKeepOnScreenCondition { !isReady }
 
         // Check if onboarding has been completed
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
@@ -25,9 +33,12 @@ class IntentReceiverActivity : Activity() {
         )
 
         if (!onboardingCompleted) {
+            isReady = true
             val welcomeIntent = Intent(this, WelcomeActivity::class.java)
             welcomeIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(welcomeIntent)
+            @Suppress("DEPRECATION")
+            overridePendingTransition(R.anim.fade_scale_enter, R.anim.fade_scale_exit)
             finish()
             return
         }
@@ -56,7 +67,10 @@ class IntentReceiverActivity : Activity() {
 
             intent.setClassName(applicationContext, className.java.name)
 
+            isReady = true
             startActivity(intent)
+            @Suppress("DEPRECATION")
+            overridePendingTransition(R.anim.fade_scale_enter, R.anim.fade_scale_exit)
             finish()
         }
     }

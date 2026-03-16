@@ -43,6 +43,11 @@ import mozilla.components.feature.webnotifications.WebNotificationFeature
 import mozilla.components.lib.crash.CrashReporter
 import mozilla.components.lib.dataprotect.SecureAbove22Preferences
 import mozilla.components.service.location.LocationService
+import mozilla.components.browser.engine.gecko.autofill.GeckoAutocompleteStorageDelegate
+import mozilla.components.feature.logins.exceptions.LoginExceptionStorage
+import mozilla.components.service.sync.autofill.AutofillCreditCardsAddressesStorage
+import mozilla.components.service.sync.autofill.GeckoCreditCardsAddressesStorageDelegate
+import mozilla.components.service.sync.logins.GeckoLoginStorageDelegate
 import mozilla.components.service.sync.logins.SyncableLoginsStorage
 import mozilla.components.support.base.worker.Frequency
 import mozilla.components.support.utils.DefaultDownloadFileUtils
@@ -86,8 +91,8 @@ class Core(
                 context.getPreferenceKey(R.string.pref_key_global_privacy_control),
                 false,
             ),
-            // --- Performance optimizations ---
-            suspendMediaWhenInactive = true,
+            // Allow background media playback (YouTube, etc.)
+            suspendMediaWhenInactive = false,
             loginAutofillEnabled = true,
         )
         EngineProvider.createEngine(context, defaultSettings)
@@ -285,6 +290,40 @@ class Core(
             !normalMode && privateMode -> trackingPolicy.forPrivateSessionsOnly()
             else -> TrackingProtectionPolicy.none()
         }
+    }
+
+    /**
+     * The storage component to persist credit cards and addresses.
+     */
+    val lazyAutofillStorage = lazy { AutofillCreditCardsAddressesStorage(context, lazySecurePrefs) }
+
+    /**
+     * A convenience accessor to the [AutofillCreditCardsAddressesStorage].
+     */
+    val autofillStorage by lazy { lazyAutofillStorage.value }
+
+    /**
+     * Storage for login exception sites (sites where user chose not to save login).
+     */
+    val loginExceptionStorage by lazy { LoginExceptionStorage(context) }
+
+    /**
+     * Registers the autocomplete storage delegate on the GeckoRuntime so that
+     * login fetch/save and credit card/address autocomplete work in web forms.
+     */
+    fun registerAutocompleteDelegate() {
+        val runtime = EngineProvider.getOrCreateRuntime(context)
+        runtime.autocompleteStorageDelegate = GeckoAutocompleteStorageDelegate(
+            GeckoCreditCardsAddressesStorageDelegate(
+                storage = lazyAutofillStorage,
+                isCreditCardAutofillEnabled = { true },
+                isAddressAutofillEnabled = { true },
+            ),
+            GeckoLoginStorageDelegate(
+                loginStorage = lazyLoginsStorage,
+                isLoginAutofillEnabled = { true },
+            ),
+        )
     }
 
     private val lazySecurePrefs = lazy { SecureAbove22Preferences(context, KEY_STORAGE_NAME) }

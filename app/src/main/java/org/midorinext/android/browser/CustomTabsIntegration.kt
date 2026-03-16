@@ -65,7 +65,7 @@ class CustomTabsIntegration(
         val tabId = session?.id
 
         val forward = SmallMenuCandidate(
-            contentDescription = "Forward",
+            contentDescription = context.getString(R.string.menu_forward),
             icon = DrawableMenuIcon(
                 context,
                 mozilla.components.ui.icons.R.drawable.mozac_ic_forward_24,
@@ -76,7 +76,7 @@ class CustomTabsIntegration(
         }
 
         val refresh = SmallMenuCandidate(
-            contentDescription = "Refresh",
+            contentDescription = context.getString(R.string.menu_refresh),
             icon = DrawableMenuIcon(
                 context,
                 mozilla.components.ui.icons.R.drawable.mozac_ic_arrow_clockwise_24,
@@ -87,7 +87,7 @@ class CustomTabsIntegration(
         }
 
         val stop = SmallMenuCandidate(
-            contentDescription = "Stop",
+            contentDescription = context.getString(R.string.menu_stop),
             icon = DrawableMenuIcon(
                 context,
                 mozilla.components.ui.icons.R.drawable.mozac_ic_stop,
@@ -103,21 +103,21 @@ class CustomTabsIntegration(
     private fun menuItems(sessionState: SessionState?): List<MenuCandidate> =
         listOf(
             menuToolbar(session),
-            TextMenuCandidate("Share") {
+            TextMenuCandidate(context.getString(R.string.menu_share)) {
                 val url = sessionState?.content?.url.orEmpty()
                 context.share(url)
             },
             CompoundMenuCandidate(
-                text = "Request desktop site",
+                text = context.getString(R.string.menu_request_desktop_site),
                 isChecked = sessionState?.content?.desktopMode == true,
                 end = CompoundMenuCandidate.ButtonType.SWITCH,
             ) { checked ->
                 sessionUseCases.requestDesktopSite.invoke(checked, sessionState?.id)
             },
-            TextMenuCandidate("Find in Page") {
+            TextMenuCandidate(context.getString(R.string.menu_find_in_page)) {
                 FindInPageIntegration.launch?.invoke()
             },
-            TextMenuCandidate("Open in Browser") {
+            TextMenuCandidate(context.getString(R.string.menu_open_in_browser)) {
                 // Release the session from this view so that it can immediately be rendered by a different view
                 engineView.release()
 

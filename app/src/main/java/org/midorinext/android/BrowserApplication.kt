@@ -5,6 +5,8 @@
 package org.midorinext.android
 
 import android.app.Application
+import android.os.Handler
+import android.os.Looper
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -50,74 +52,88 @@ open class BrowserApplication : Application() {
         Log.addSink(AndroidLogSink())
 
         if (!isMainProcess()) {
-            // If this is not the main process then do not continue with the initialization here. Everything that
-            // follows only needs to be done in our app's main process and should not be done in other processes like
-            // a GeckoView child process or the crash handling process. Most importantly we never want to end up in a
-            // situation where we create a GeckoRuntime from the Gecko child process (
             return
         }
 
         // Engine warmUp must run on main thread (GeckoRuntime requires UI thread)
         components.core.engine.warmUp()
 
+        // Register autocomplete storage delegate for login/card/address autofill in web forms
+        components.core.registerAutocompleteDelegate()
+
         restoreBrowserState()
 
-        // Defer addon/push/search init to next main loop iteration so Activity renders faster
+        // Phase 1: Search engine install (immediate, lightweight)
         @OptIn(DelicateCoroutinesApi::class)
         GlobalScope.launch(Dispatchers.Main) {
-            // Install AstianGo as default search engine
             AstianGoSearchEngine.install(this@BrowserApplication, components.core.store)
-
-            GlobalAddonDependencyProvider.initialize(
-                components.core.addonManager,
-                components.core.addonUpdater,
-            )
-            WebExtensionSupport.initialize(
-                runtime = components.core.engine,
-                store = components.core.store,
-                onNewTabOverride = { _, engineSession, url ->
-                    val tabId = components.useCases.tabsUseCases.addTab(
-                        url = url,
-                        selectTab = true,
-                        engineSession = engineSession,
-                    )
-                    tabId
-                },
-                onCloseTabOverride = { _, sessionId ->
-                    components.useCases.tabsUseCases.removeTab(sessionId)
-                },
-                onSelectTabOverride = { _, sessionId ->
-                    components.useCases.tabsUseCases.selectTab(sessionId)
-                },
-                onExtensionsLoaded = { extensions ->
-                    components.core.addonUpdater.registerForFutureUpdates(extensions)
-
-                    val checker = components.core.supportedAddonsChecker
-                    val hasUnsupportedAddons = extensions.any { it.isUnsupported() }
-                    if (hasUnsupportedAddons) {
-                        checker.registerForChecks()
-                    } else {
-                        checker.unregisterForChecks()
-                    }
-                },
-                onUpdatePermissionRequest = components.core.addonUpdater::onUpdatePermissionRequest,
-            )
-
-            components.push.feature?.let {
-                Logger.info("AutoPushFeature is configured, initializing it...")
-
-                PushProcessor.install(it)
-
-                WebPushEngineIntegration(components.core.engine, it).start()
-                PushFxaIntegration(it, lazy { components.backgroundServices.accountManager }).launch()
-                it.initialize()
-            }
         }
+
+        // Phase 2: Addon/extension init — deferred 1.5s to let Activity render first
+        Handler(Looper.getMainLooper()).postDelayed({
+            @OptIn(DelicateCoroutinesApi::class)
+            GlobalScope.launch(Dispatchers.Main) {
+                initAddonsAndExtensions()
+            }
+        }, 1500L)
+
+        // Push services — must run immediately so PushProcessor is available
+        // before Firebase triggers onNewToken
+        initPushServices()
 
         // Clean uploads directory on background thread
         @OptIn(DelicateCoroutinesApi::class)
         GlobalScope.launch(Dispatchers.IO) {
             components.core.fileUploadsDirCleaner.cleanUploadsDirectory()
+        }
+    }
+
+    private fun initAddonsAndExtensions() {
+        GlobalAddonDependencyProvider.initialize(
+            components.core.addonManager,
+            components.core.addonUpdater,
+        )
+        WebExtensionSupport.initialize(
+            runtime = components.core.engine,
+            store = components.core.store,
+            onNewTabOverride = { _, engineSession, url ->
+                val tabId = components.useCases.tabsUseCases.addTab(
+                    url = url,
+                    selectTab = true,
+                    engineSession = engineSession,
+                )
+                tabId
+            },
+            onCloseTabOverride = { _, sessionId ->
+                components.useCases.tabsUseCases.removeTab(sessionId)
+            },
+            onSelectTabOverride = { _, sessionId ->
+                components.useCases.tabsUseCases.selectTab(sessionId)
+            },
+            onExtensionsLoaded = { extensions ->
+                components.core.addonUpdater.registerForFutureUpdates(extensions)
+
+                val checker = components.core.supportedAddonsChecker
+                val hasUnsupportedAddons = extensions.any { it.isUnsupported() }
+                if (hasUnsupportedAddons) {
+                    checker.registerForChecks()
+                } else {
+                    checker.unregisterForChecks()
+                }
+            },
+            onUpdatePermissionRequest = components.core.addonUpdater::onUpdatePermissionRequest,
+        )
+    }
+
+    private fun initPushServices() {
+        components.push.feature?.let {
+            Logger.info("AutoPushFeature is configured, initializing it...")
+
+            PushProcessor.install(it)
+
+            WebPushEngineIntegration(components.core.engine, it).start()
+            PushFxaIntegration(it, lazy { components.backgroundServices.accountManager }).launch()
+            it.initialize()
         }
     }
 
