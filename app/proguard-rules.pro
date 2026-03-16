@@ -25,18 +25,13 @@
 -keep class mozilla.components.support.webextensions.** { *; }
 -keep class mozilla.components.feature.addons.** { *; }
 -keep class mozilla.components.lib.crash.** { *; }
--keep class mozilla.components.feature.push.** { *; }
+-keep class mozilla.components.feature.autofill.** { *; }
+-keep class mozilla.components.service.sync.** { *; }
 
 # --------------------------------------------------------------------------
 # WebExtensions: Keep extension API interfaces
 # --------------------------------------------------------------------------
 -keep class mozilla.components.concept.engine.webextension.** { *; }
-
-# --------------------------------------------------------------------------
-# Firebase / Push
-# --------------------------------------------------------------------------
--keep class com.google.firebase.** { *; }
--dontwarn com.google.firebase.**
 
 # --------------------------------------------------------------------------
 # Kotlin Coroutines
