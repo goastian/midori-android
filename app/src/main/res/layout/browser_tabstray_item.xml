@@ -2,72 +2,94 @@
 <!-- This Source Code Form is subject to the terms of the Mozilla Public
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
-<androidx.constraintlayout.widget.ConstraintLayout
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mozac_browser_tabstray_card"
     android:layout_width="match_parent"
-    android:layout_height="72dp">
+    android:layout_height="wrap_content"
+    android:layout_margin="6dp"
+    app:cardCornerRadius="32dp"
+    app:cardElevation="0dp"
+    app:strokeWidth="0dp"
+    app:cardBackgroundColor="@color/tab_tray_card">
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/mozac_browser_tabstray_card"
-        android:layout_width="100dp"
-        android:layout_height="56dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="8dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:cardBackgroundColor="@color/photonWhite">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipChildren="true"
+        android:clipToPadding="true">
 
+        <!-- Large thumbnail preview -->
         <mozilla.components.browser.tabstray.thumbnail.TabThumbnailView
             android:id="@+id/mozac_browser_tabstray_thumbnail"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@string/mozac_browser_tabstray_open_tab" />
+            android:layout_height="0dp"
+            android:background="@color/tab_tray_thumbnail_placeholder"
+            android:contentDescription="@string/mozac_browser_tabstray_open_tab"
+            android:scaleType="centerCrop"
+            app:layout_constraintDimensionRatio="4:3"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    </androidx.cardview.widget.CardView>
+        <!-- Close button (top-right overlay on thumbnail) -->
+        <FrameLayout
+            android:id="@+id/mozac_browser_tabstray_close_container"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/bg_tab_close_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-        android:id="@+id/mozac_browser_tabstray_title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:ellipsize="end"
-        android:lines="1"
-        android:textSize="16sp"
-        android:paddingTop="16dp"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintEnd_toStartOf="@id/mozac_browser_tabstray_close"
-        app:layout_constraintStart_toEndOf="@id/mozac_browser_tabstray_card"
-        app:layout_constraintTop_toTopOf="parent" />
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/mozac_browser_tabstray_close"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/mozac_browser_tabstray_close_tab"
+                android:padding="5dp"
+                android:scaleType="centerInside"
+                android:tint="@color/tab_tray_text_primary"
+                app:srcCompat="@drawable/mozac_ic_cross_24" />
+        </FrameLayout>
 
-    <TextView
-        android:id="@+id/mozac_browser_tabstray_url"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_alignParentTop="true"
-        android:ellipsize="end"
-        android:lines="1"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintEnd_toStartOf="@id/mozac_browser_tabstray_close"
-        app:layout_constraintStart_toEndOf="@id/mozac_browser_tabstray_card"
-        app:layout_constraintTop_toBottomOf="@id/mozac_browser_tabstray_title" />
+        <!-- Title bar below thumbnail -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/mozac_browser_tabstray_thumbnail">
 
-    <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/mozac_browser_tabstray_close"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:contentDescription="@string/mozac_browser_tabstray_close_tab"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        app:srcCompat="@drawable/mozac_ic_cross_24" />
+            <TextView
+                android:id="@+id/mozac_browser_tabstray_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/tab_tray_text_primary"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                tools:text="Example Page Title" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/mozac_browser_tabstray_url"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/tab_tray_text_url"
+                android:textSize="11sp"
+                tools:text="example.com" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

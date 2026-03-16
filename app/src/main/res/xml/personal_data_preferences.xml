@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/autofill_category">
+
+        <org.midorinext.android.autofill.AutofillPreference
+            android:key="@string/pref_key_autofill"
+            android:title="@string/autofill_title"
+            android:summary="@string/autofill_summary" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/passwords_title">
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="@string/pref_key_password_autofill"
+            android:defaultValue="true"
+            android:icon="@drawable/ic_key"
+            android:title="@string/passwords_autofill"
+            android:summary="@string/passwords_autofill_summary" />
+
+        <androidx.preference.Preference
+            android:key="@string/pref_key_passwords"
+            android:icon="@drawable/ic_password_generate"
+            android:title="@string/passwords_title"
+            android:summary="@string/passwords_empty" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/saved_cards_title">
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="@string/pref_key_card_autofill"
+            android:defaultValue="true"
+            android:icon="@drawable/ic_credit_card"
+            android:title="@string/saved_cards_autofill"
+            android:summary="@string/saved_cards_autofill_summary" />
+
+        <androidx.preference.Preference
+            android:key="@string/pref_key_saved_cards"
+            android:icon="@drawable/ic_credit_card"
+            android:title="@string/saved_cards_title"
+            android:summary="@string/saved_cards_empty" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/saved_addresses_title">
+
+        <androidx.preference.SwitchPreferenceCompat
+            android:key="@string/pref_key_address_autofill"
+            android:defaultValue="true"
+            android:icon="@drawable/ic_location"
+            android:title="@string/saved_addresses_autofill"
+            android:summary="@string/saved_addresses_autofill_summary" />
+
+        <androidx.preference.Preference
+            android:key="@string/pref_key_saved_addresses"
+            android:icon="@drawable/ic_location"
+            android:title="@string/saved_addresses_title"
+            android:summary="@string/saved_addresses_empty" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/contact_info_title">
+
+        <androidx.preference.Preference
+            android:key="@string/pref_key_contact_info"
+            android:icon="@drawable/ic_contact_phone"
+            android:title="@string/contact_info_title"
+            android:summary="@string/contact_info_empty" />
+
+    </PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>

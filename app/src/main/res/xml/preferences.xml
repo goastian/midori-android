@@ -33,29 +33,17 @@
             android:key="@string/pref_key_make_default_browser"
             android:title="@string/preferences_make_default_browser"/>
 
-    <org.midorinext.android.autofill.AutofillPreference
-        android:key="@string/pref_key_autofill"
-        android:title="@string/preferences_autofill"
-        android:summary="@string/preferences_autofill_summary" />
+    <androidx.preference.Preference
+        android:key="@string/pref_key_personal_data"
+        android:icon="@drawable/ic_person_data"
+        android:title="@string/personal_data"
+        android:summary="@string/personal_data_summary" />
 
-    <androidx.preference.SwitchPreferenceCompat
-        android:key="@string/pref_key_compose_ui"
-        android:defaultValue="false"
-        android:title="@string/preferences_compose_ui"/>
+    <androidx.preference.Preference
+        android:key="@string/pref_key_customize"
+        android:title="@string/customize_category"
+        android:summary="@string/preferences_customize_summary" />
 
-    <PreferenceCategory
-        android:title="@string/developer_tools_category">
-
-        <androidx.preference.SwitchPreferenceCompat
-            android:key="@string/pref_key_remote_debugging"
-            android:defaultValue="false"
-            android:title="@string/preferences_remote_debugging" />
-
-        <androidx.preference.Preference
-            android:key="@string/pref_key_override_amo_collection"
-            android:title="@string/preferences_customize_amo_collection"/>
-
-    </PreferenceCategory>
 
     <PreferenceCategory
         android:title="@string/mozilla_category">
