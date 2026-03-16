@@ -29,6 +29,7 @@ object EngineProvider {
             // About config & extensions
             builder.aboutConfigEnabled(true)
             builder.extensionsWebAPIEnabled(true)
+            builder.loginAutofillEnabled(true)
 
             // --- Performance: disable console output in production ---
             builder.consoleOutput(false)
@@ -100,8 +101,13 @@ object EngineProvider {
                 putInt("general.smoothScroll.mouseWheel.durationMaxMS", 200)
                 putInt("general.smoothScroll.mouseWheel.durationMinMS", 100)
 
-                // ===== MEDIA: reduce background overhead =====
-                putBoolean("media.suspend-background-video.enabled", true)
+                // ===== LOGIN / PASSWORD MANAGER =====
+                putBoolean("signon.rememberSignons", true)
+                putBoolean("signon.autofillForms", true)
+                putBoolean("signon.formlessCapture.enabled", true)
+
+                // ===== MEDIA: allow background playback =====
+                putBoolean("media.suspend-background-video.enabled", false)
 
                 // ===== TELEMETRY: disable for faster startup =====
                 putBoolean("toolkit.telemetry.enabled", false)
