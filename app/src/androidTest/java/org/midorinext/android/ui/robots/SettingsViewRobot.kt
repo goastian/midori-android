@@ -190,14 +190,6 @@ private fun openLinksInAppsToggle() =
 
 private fun makeDefaultBrowserButton() = Espresso.onView(withText(R.string.preferences_make_default_browser))
 
-private fun autofillAppsButton() = onView(withText("Autofill apps"))
-
-private fun jetpackComposeButton() = onView(withText("Use experimental Jetpack Compose UI"))
-
-private fun autofillAppsSummary() = onView(withText("Autofill logins and passwords in other apps"))
-
-private fun developerToolsHeading() = Espresso.onView(withText(R.string.developer_tools_category))
-
 private fun remoteDebuggingToggle() =
     Espresso.onView(
     allOf(
