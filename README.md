@@ -14,17 +14,15 @@
 Midori is a lightweight yet powerful web browser which runs just as well on little embedded computers named for delicious pastries as it does on beefy machines with a core temperature exceeding that of planet earth. And it looks good doing that, too. Oh, and of course it's free software. And for Android
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
-     alt="Get it on F-Droid"
-     height="80">](https://f-droid.org/packages/org.midorinext.android/)
+alt="Get it on F-Droid"
+height="80">](https://f-droid.org/packages/org.midorinext.android/)
 [<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png"
-     alt="Get it on Google Play"
-     height="80">](https://play.google.com/store/apps/details?id=org.midorinext.android)
+alt="Get it on Google Play"
+height="80">](https://play.google.com/store/apps/details?id=org.midorinext.android)
 
 
 
 [Midori Android](https://ads.fund/token/0xadff14b59f07c283470dbd50695b0df84e30471a) project is supported by ADS.FUND
-
-
 
 **Privacy out of the box**
 
