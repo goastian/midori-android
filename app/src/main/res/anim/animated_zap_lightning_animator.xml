@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:ordering="sequentially">
+    <objectAnimator android:duration="@integer/zap_highlight_duration_scale_down" >
+        <propertyValuesHolder
+            android:propertyName="scaleX"
+            android:valueFrom="1"
+            android:valueTo="0.85f" />
+        <propertyValuesHolder
+            android:propertyName="scaleY"
+            android:valueFrom="1"
+            android:valueTo="0.85f" />
+    </objectAnimator>
+    <objectAnimator android:duration="@integer/zap_highlight_duration_scale_up" >
+        <propertyValuesHolder
+            android:propertyName="scaleX"
+            android:valueFrom="0.85f"
+            android:valueTo="1.1f" />
+        <propertyValuesHolder
+            android:propertyName="scaleY"
+            android:valueFrom="0.85f"
+            android:valueTo="1.1f" />
+    </objectAnimator>
+    <objectAnimator android:duration="@integer/zap_highlight_duration_scale_back" >
+        <propertyValuesHolder
+            android:propertyName="scaleX"
+            android:valueFrom="1.1f"
+            android:valueTo="1" />
+        <propertyValuesHolder
+            android:propertyName="scaleY"
+            android:valueFrom="1.1f"
+            android:valueTo="1" />
+    </objectAnimator>
+</set>

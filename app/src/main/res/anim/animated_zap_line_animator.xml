@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:ordering="sequentially">
+    <objectAnimator
+        android:duration="@integer/zap_highlight_duration_line_on"
+        android:propertyName="trimPathStart"
+        android:valueFrom="1"
+        android:valueTo="0" />
+    <objectAnimator
+        android:duration="@integer/zap_highlight_duration_line_off"
+        android:propertyName="trimPathEnd"
+        android:valueFrom="1"
+        android:valueTo="0" />
+</set>

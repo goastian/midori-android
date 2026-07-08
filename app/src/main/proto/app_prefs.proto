@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+option java_package = "org.midorinext.android.preferences.app";
+option java_multiple_files = true;
+
+enum ToolbarPosition {
+  TOP = 0;
+  BOTTOM = 1;
+}
+
+enum TabsViewOption {
+  GRID = 0;
+  LIST = 1;
+}
+
+enum Appearance {
+  SYSTEM_SETTINGS = 0;
+  LIGHT = 1;
+  DARK = 2;
+}
+
+enum TrackingProtectionLevel {
+  STANDARD = 0;
+  STRICT = 1;
+  CUSTOM = 2;
+}
+
+enum DoHProvider {
+  DOH_DEFAULT = 0;
+  DOH_INCREASED_PROTECTION = 1;
+  DOH_MAX_PROTECTION = 2;
+  DOH_OFF = 3;
+}
+
+enum HttpsOnlyLevel {
+  OFF = 0;
+  ALL_TABS = 1;
+  PRIVATE_TABS = 2;
+}
+
+enum AppTrackingProtectionMode {
+  BROWSER_FIRST = 0;
+  HYBRID_SYSTEM = 1;
+}
+
+message AppPreferences {
+  bool hide_toolbar_on_scroll = 1;
+  ToolbarPosition toolbar_position = 2;
+  TabsViewOption tabs_view = 3;
+  bool open_links_in_app = 4;
+  bool clear_data_on_quit = 5;
+  bool clear_data_history = 6;
+  bool clear_data_tabs = 7;
+  int32 clear_data_browsingdata = 8;
+  reserved 9;
+  Appearance appearance = 10;
+  bool privacy_global_privacy_control = 11;
+  bool privacy_fingerprinting_protection = 12;
+  bool privacy_cookie_partitioning = 13;
+  bool privacy_strict_tracking_protection = 14;
+  TrackingProtectionLevel tracking_protection_level = 15;
+  DoHProvider doh_provider = 16;
+  HttpsOnlyLevel https_only_level = 17;
+  AppTrackingProtectionMode app_tracking_protection_mode = 18;
+  bool app_tracking_system_enabled = 19;
+  repeated string app_tracking_excluded_packages = 20;
+  bool download_wifi_only = 21;
+}

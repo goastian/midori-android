@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/zap_highlight_dark">
+
+    <target
+        android:name="zap_lightning"
+        android:animation="@anim/animated_zap_lightning_animator"
+    />
+
+    <target
+        android:name="line_top"
+        android:animation="@anim/animated_zap_line_animator">
+    </target>
+    <target
+        android:name="line_top_right"
+        android:animation="@anim/animated_zap_line_animator">
+    </target>
+    <target
+        android:name="line_top_left"
+        android:animation="@anim/animated_zap_line_animator">
+    </target>
+    <target
+        android:name="line_right"
+        android:animation="@anim/animated_zap_line_animator">
+    </target>
+    <target
+        android:name="line_left"
+        android:animation="@anim/animated_zap_line_animator">
+    </target>
+
+</animated-vector>
