@@ -28,7 +28,12 @@ data class PermissionDialogData(
     val host: String,
     val topLevelHost: String
 )
-private data class PermissionsDialogDisplayData(@StringRes val title: Int, @DrawableRes val icon: Int)
+private data class PermissionsDialogDisplayData(
+    @StringRes val title: Int,
+    @DrawableRes val icon: Int,
+    @StringRes val helper: Int? = null,
+    @StringRes val noText: Int = R.string.mozac_feature_sitepermissions_not_allow,
+)
 
 // TODO move junior exception and juniorGeolocBlockedDialog to junior sources
 
@@ -90,6 +95,8 @@ fun PermissionsDialog(
                         is Permission.ContentCrossOriginStorageAccess -> PermissionsDialogDisplayData(
                             R.string.mozac_feature_sitepermissions_storage_access_title,
                             iconsR.drawable.mozac_ic_storage_24,
+                            R.string.mozac_feature_sitepermissions_storage_access_message,
+                            R.string.mozac_feature_sitepermissions_storage_access_not_allow,
                         )
                         else -> throw InvalidParameterException("$permission is not a valid permission.")
                     }
@@ -103,6 +110,7 @@ fun PermissionsDialog(
         } else {
             stringResource(id = displayData.title, requestHost)
         }
+        val helperText = displayData.helper?.let { stringResource(id = it, requestHost) }
 
         YesNoDialog(
             onDismissRequest = { onClose(false, false) },
@@ -111,16 +119,23 @@ fun PermissionsDialog(
             description = description,
             icon = displayData.icon,
             yesText = stringResource(id = R.string.mozac_feature_sitepermissions_allow),
-            noText = stringResource(id = R.string.mozac_feature_sitepermissions_not_allow),
+            noText = stringResource(id = displayData.noText),
             additionalContent = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 16.dp)
-                ) {
-                    Checkbox(
-                        checked = shouldStore,
-                        onCheckedChange = { shouldStore = !shouldStore })
-                    Text(text = stringResource(id = R.string.mozac_feature_sitepermissions_do_not_ask_again_on_this_site2))
+                Column(modifier = Modifier.padding(top = 16.dp)) {
+                    helperText?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = shouldStore,
+                            onCheckedChange = { shouldStore = !shouldStore })
+                        Text(text = stringResource(id = R.string.mozac_feature_sitepermissions_do_not_ask_again_on_this_site2))
+                    }
                 }
             }
         )
