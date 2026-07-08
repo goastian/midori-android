@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/custom_notification_widget_layout"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/widget_background">
+
+    <ImageView
+        android:src="@drawable/qwant_logo"
+        android:layout_width="30dp"
+        android:layout_height="35dp"
+        android:padding="5dp" />
+
+    <TextView
+        android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:text="@string/browser_toolbar_hint"
+        android:textColor="@color/widget_hint"
+        android:textSize="17sp"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="6dp"/>
+
+    <ImageView
+        android:layout_width="28dp"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/icons_search"
+        app:tint="@color/widget_magnifier" />
+</LinearLayout>
