@@ -1,0 +1,21 @@
+{
+  "manifest_version": 2,
+  "name": "qwant-cookies",
+  "version": "3.0",
+  "description": "Qwant extension settings functional cookies on Qwant",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "qwant-cookie-android@qwant.com"
+    }
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "permissions": [
+    "*://*.astian.org/*",
+    "*://*.astiango.com/*",
+    "cookies",
+    "nativeMessaging",
+    "geckoViewAddons"
+  ]
+}

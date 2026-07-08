@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <script>
+    // Detect theme and set data-theme before CSS renders
+    (function(){
+      var m = window.matchMedia('(prefers-color-scheme: dark)');
+      function apply(theme) {
+        if (theme === 'system') theme = m.matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+      }
+      try {
+        chrome.storage.local.get('options', function(res) {
+          var theme = (res && res.options && res.options.theme) || 'system';
+          apply(theme);
+          m.addEventListener('change', function() {
+            chrome.storage.local.get('options', function(res2) {
+              if (!res2 || !res2.options || res2.options.theme === 'system' || !res2.options.theme) {
+                apply('system');
+              }
+            });
+          });
+        });
+      } catch(e) {
+        apply('system');
+      }
+    })();
+  </script>
+  <title>Midori Privacy — Setup</title>
+  <link rel="stylesheet" href="../shared/styles.css">
+  <link rel="stylesheet" href="setup.css">
+</head>
+<body>
+  <div class="setup-container">
+    <!-- Progress bar -->
+    <div class="setup-progress">
+      <div class="progress-track">
+        <div id="progress-fill" class="progress-fill" style="width: 33.3333%"></div>
+      </div>
+      <div class="progress-steps">
+        <div class="progress-step active" data-step="1">1</div>
+        <div class="progress-step" data-step="2">2</div>
+        <div class="progress-step" data-step="3">3</div>
+      </div>
+    </div>
+
+    <!-- ═══ Step 1: Protection Level ═══ -->
+    <div class="setup-step active" id="step-1">
+      <div class="step-icon">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <polyline points="9 12 11 14 15 10"/>
+        </svg>
+      </div>
+      <h1 class="step-title">Choose Your Protection Level</h1>
+      <p class="step-subtitle">Select how aggressively Midori Privacy should block ads, trackers, and other threats.</p>
+
+      <div class="level-cards">
+        <label class="level-card" data-level="basic">
+          <input type="radio" name="protection-level" value="basic">
+          <div class="level-header">
+            <div class="level-shield basic">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="level-name">Basic</div>
+              <div class="level-tag">Minimal blocking</div>
+            </div>
+          </div>
+          <ul class="level-features">
+            <li class="enabled">Block known ad domains</li>
+            <li class="enabled">Block major trackers</li>
+            <li class="disabled">Cookie consent banners</li>
+            <li class="disabled">Social media widgets</li>
+            <li class="disabled">Anti-fingerprinting</li>
+            <li class="disabled">Advanced filter lists</li>
+          </ul>
+          <div class="level-compat">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            Best website compatibility
+          </div>
+        </label>
+
+        <label class="level-card selected" data-level="standard">
+          <input type="radio" name="protection-level" value="standard" checked>
+          <div class="level-header">
+            <div class="level-shield standard">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <polyline points="9 12 11 14 15 10"/>
+              </svg>
+            </div>
+            <div>
+              <div class="level-name">Standard</div>
+              <div class="level-tag recommended-tag">Recommended</div>
+            </div>
+          </div>
+          <ul class="level-features">
+            <li class="enabled">Block known ad domains</li>
+            <li class="enabled">Block major trackers</li>
+            <li class="enabled">Cookie consent banners</li>
+            <li class="enabled">Social media widgets</li>
+            <li class="enabled">Anti-fingerprinting</li>
+            <li class="disabled">Advanced filter lists</li>
+          </ul>
+          <div class="level-compat">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
+            Good balance of protection and compatibility
+          </div>
+        </label>
+
+        <label class="level-card" data-level="strict">
+          <input type="radio" name="protection-level" value="strict">
+          <div class="level-header">
+            <div class="level-shield strict">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <line x1="8" y1="8" x2="16" y2="16"/>
+                <line x1="16" y1="8" x2="8" y2="16"/>
+              </svg>
+            </div>
+            <div>
+              <div class="level-name">Strict</div>
+              <div class="level-tag strict-tag">Maximum protection</div>
+            </div>
+          </div>
+          <ul class="level-features">
+            <li class="enabled">Block known ad domains</li>
+            <li class="enabled">Block major trackers</li>
+            <li class="enabled">Cookie consent banners</li>
+            <li class="enabled">Social media widgets</li>
+            <li class="enabled">Anti-fingerprinting</li>
+            <li class="enabled">Advanced filter lists (AdGuard + regional)</li>
+          </ul>
+          <div class="level-compat">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-warning)" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            May break some websites
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- ═══ Step 2: Privacy Notice ═══ -->
+    <div class="setup-step" id="step-2">
+      <div class="step-icon">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+      <h1 class="step-title">Your Privacy Matters</h1>
+      <p class="step-subtitle">We believe in complete transparency about how your data is handled.</p>
+
+      <div class="privacy-commitments">
+        <div class="privacy-item">
+          <div class="privacy-icon no-collect">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </div>
+          <div>
+            <div class="privacy-title">No Data Collection</div>
+            <div class="privacy-desc">We do not collect, store, or transmit any information about your browsing activity, blocked content, or extension usage.</div>
+          </div>
+        </div>
+
+        <div class="privacy-item">
+          <div class="privacy-icon no-collect">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </div>
+          <div>
+            <div class="privacy-title">No Analytics or Telemetry</div>
+            <div class="privacy-desc">The extension does not include any analytics, telemetry, or tracking code. Zero external connections for data collection.</div>
+          </div>
+        </div>
+
+        <div class="privacy-item">
+          <div class="privacy-icon no-collect">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </div>
+          <div>
+            <div class="privacy-title">No Third-Party Sharing</div>
+            <div class="privacy-desc">Your data is never sold, shared, or transferred to any third party. Period.</div>
+          </div>
+        </div>
+
+        <div class="privacy-item">
+          <div class="privacy-icon local-only">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div>
+            <div class="privacy-title">100% Local Processing</div>
+            <div class="privacy-desc">All blocking decisions, statistics, and settings are processed and stored locally on your device. Nothing leaves your browser.</div>
+          </div>
+        </div>
+
+        <div class="privacy-item">
+          <div class="privacy-icon local-only">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div>
+            <div class="privacy-title">Open Filter Lists</div>
+            <div class="privacy-desc">We use well-known, community-maintained filter lists (EasyList, EasyPrivacy, uBlock). The only network requests are to download these public lists.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ Step 3: All Done ═══ -->
+    <div class="setup-step" id="step-3">
+      <div class="step-icon done-icon">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <polyline points="9 12 11 14 15 10"/>
+        </svg>
+      </div>
+      <h1 class="step-title">You're All Set!</h1>
+      <p class="step-subtitle">Midori Privacy is now configured and protecting your browsing.</p>
+
+      <div class="summary-card">
+        <div class="summary-title">Your Configuration</div>
+        <div class="summary-items">
+          <div class="summary-item">
+            <span class="summary-label">Protection Level</span>
+            <span class="summary-value" id="summary-level">—</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Anti-Fingerprinting</span>
+            <span class="summary-value" id="summary-fp">—</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Filter Lists</span>
+            <span class="summary-value" id="summary-lists">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="final-tips">
+        <div class="tip">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          Click the <strong>Midori Privacy icon</strong> in your toolbar to see real-time blocking stats.
+        </div>
+        <div class="tip">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          Visit <strong>Settings</strong> anytime to adjust your protection level or manage filter lists.
+        </div>
+        <div class="tip">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          If a website breaks, you can <strong>pause protection</strong> for that site from the popup.
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation buttons -->
+    <div class="setup-nav">
+      <button id="btn-back" class="btn btn-outline" style="visibility: hidden;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back
+      </button>
+      <button id="btn-next" class="btn btn-primary btn-lg">
+        Continue
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <div class="setup-footer">
+      <span>Midori Privacy by <a href="https://astian.org" target="_blank" rel="noopener noreferrer">Astian Inc.</a></span>
+    </div>
+  </div>
+
+  <script src="setup.js"></script>
+</body>
+</html>

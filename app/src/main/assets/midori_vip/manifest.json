@@ -1,0 +1,90 @@
+{
+  "manifest_version": 2,
+  "name": "__MSG_extension_name__",
+  "short_name": "Midori Privacy",
+  "description": "__MSG_extension_description__",
+  "version": "2.2.7",
+  "default_locale": "en",
+  "author": "Astian Inc",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "browser_action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png"
+    },
+    "default_title": "Midori Privacy"
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "background": {
+    "scripts": [
+      "background/index.js"
+    ]
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab",
+    "alarms",
+    "nativeMessaging",
+    "geckoViewAddons",
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content/cosmetic.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content/scriptlets.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  "chrome_settings_overrides": {
+    "search_provider": {
+      "name": "AstianGO",
+      "search_url": "https://astiango.com/?q={searchTerms}",
+      "keyword": "@astiango",
+      "favicon_url": "https://astiango.com/favicon.ico",
+      "suggest_url": "https://astiango.com/autocomplete?q={searchTerms}",
+      "is_default": true
+    }
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "midori-protection@astian.org",
+      "strict_min_version": "109.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    }
+  },
+  "web_accessible_resources": [
+    "content/scriptlets.js"
+  ]
+}

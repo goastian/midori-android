@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <script>
+    // Detect theme and set data-theme before CSS renders
+    (function(){
+      var m = window.matchMedia('(prefers-color-scheme: dark)');
+      function apply(theme) {
+        if (theme === 'system') theme = m.matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+      }
+      try {
+        chrome.storage.local.get('options', function(res) {
+          var theme = (res && res.options && res.options.theme) || 'system';
+          apply(theme);
+          m.addEventListener('change', function() {
+            chrome.storage.local.get('options', function(res2) {
+              if (!res2 || !res2.options || res2.options.theme === 'system' || !res2.options.theme) {
+                apply('system');
+              }
+            });
+          });
+        });
+      } catch(e) {
+        apply('system');
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="../shared/styles.css">
+  <link rel="stylesheet" href="options.css">
+  <title>Midori Privacy - Settings</title>
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <nav id="sidebar">
+      <div class="sidebar-header">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="M9 12l2 2 4-4" stroke="var(--color-primary)" stroke-width="2.5"/>
+        </svg>
+        <span class="font-black text-xl tracking-tight">MIDORI</span>
+      </div>
+      <ul class="nav-list">
+        <!-- Protection -->
+        <li class="nav-group-label">Protection</li>
+        <li><a href="#general" class="nav-item active" data-section="general">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          General
+        </a></li>
+        <li><a href="#lists" class="nav-item" data-section="lists">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Filter Lists
+        </a></li>
+        <li><a href="#custom-filters" class="nav-item" data-section="custom-filters">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Custom Filters
+        </a></li>
+        <li><a href="#whitelist" class="nav-item" data-section="whitelist">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Allowed Sites
+        </a></li>
+        <li><a href="#tracker-browser" class="nav-item" data-section="tracker-browser">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Tracker Database
+        </a></li>
+
+        <!-- Performance -->
+        <li class="nav-group-label">Insights</li>
+        <li><a href="#reports" class="nav-item" data-section="reports">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Reports
+        </a></li>
+        <li><a href="#trends" class="nav-item" data-section="trends">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Trends &amp; Alerts
+        </a></li>
+
+        <!-- AI & Difficult Sites -->
+        <li class="nav-group-label">Advanced</li>
+        <li><a href="#difficult-sites" class="nav-item" data-section="difficult-sites">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Difficult Sites
+        </a></li>
+        <li><a href="#vertical-profiles" class="nav-item" data-section="vertical-profiles">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4v8H3z"/><path d="M10 7h4v13h-4z"/><path d="M17 3h4v17h-4z"/></svg>
+          Vertical Profiles
+        </a></li>
+        <li><a href="#about" class="nav-item" data-section="about">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          About
+        </a></li>
+      </ul>
+    </nav>
+
+    <!-- Main content -->
+    <main id="content">
+
+      <!-- General Section -->
+      <section id="section-general" class="section active">
+        <h2 class="section-title">General Settings</h2>
+
+        <div class="option-card">
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold">Block ads</div>
+              <div class="text-sm text-secondary">Remove advertisements from web pages</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="opt-block-ads" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="option-divider"></div>
+
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold">Block trackers</div>
+              <div class="text-sm text-secondary">Prevent tracking scripts from collecting your data</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="opt-block-trackers" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="option-divider"></div>
+
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold">Block cookie banners &amp; annoyances</div>
+              <div class="text-sm text-secondary">Hide cookie consent popups and other annoyances</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="opt-block-annoyances">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="option-divider"></div>
+
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold">Block social widgets</div>
+              <div class="text-sm text-secondary">Remove social media buttons and embeds</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="opt-block-social">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="option-divider"></div>
+
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold">Anti-fingerprinting protection</div>
+              <div class="text-sm text-secondary">Randomize Canvas, WebGL, AudioContext, navigator and screen data to prevent browser fingerprinting</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="opt-anti-fingerprint" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="option-divider"></div>
+
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold">Appearance</div>
+              <div class="text-sm text-secondary">Choose between light, dark, or system theme</div>
+            </div>
+            <select id="opt-theme" class="select-input">
+              <option value="system" selected>System (Default)</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="option-card mt-3">
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold">Update lists every</div>
+              <div class="text-sm text-secondary">How often filter lists are refreshed</div>
+            </div>
+            <select id="opt-update-interval" class="select-input">
+              <option value="1">1 hour</option>
+              <option value="4" selected>4 hours</option>
+              <option value="12">12 hours</option>
+              <option value="24">24 hours</option>
+            </select>
+          </div>
+          <div class="option-divider"></div>
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold">Last updated</div>
+              <div class="text-sm text-secondary" id="last-updated">Never</div>
+            </div>
+            <button class="btn btn-outline btn-sm" id="btn-update-now">Update now</button>
+          </div>
+          <div class="option-divider"></div>
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold">Force update all</div>
+              <div class="text-sm text-secondary">Re-download all filter lists and TrackerDB ignoring cache</div>
+            </div>
+            <button class="btn btn-primary btn-sm" id="btn-force-update">Force Update</button>
+          </div>
+        </div>
+
+        <div class="option-card mt-3">
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold">Local KPI telemetry</div>
+              <div class="text-sm text-secondary">Stores performance and quality metrics locally only. Nothing is sent externally.</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="opt-local-telemetry" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="option-divider"></div>
+          <div class="option-row experiment-master-row">
+            <div class="option-info">
+              <div class="font-semibold">Experiment flags</div>
+              <div class="text-sm text-secondary">Enable or disable upcoming modules locally for staged testing.</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="exp-rollout-transparency" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="option-divider"></div>
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold">Rollout: Entity blocking</div>
+              <div class="text-sm text-secondary">Enable owner-level blocking controls after transparency gate.</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="exp-rollout-entity-blocking">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="option-divider"></div>
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold">Rollout: Vertical profiles</div>
+              <div class="text-sm text-secondary">Enable vertical sensitivity and profile-aware policies.</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="exp-rollout-vertical-profiles">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="option-divider"></div>
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold">Rollout: Cosmetic audit</div>
+              <div class="text-sm text-secondary">Enable cosmetic/scriptlet applied-rules diagnostics collection.</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="exp-rollout-cosmetic-audit">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="option-divider"></div>
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold">TrackerDB assisted</div>
+              <div class="text-sm text-secondary">TrackerDB-assisted classification and blocking signals</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="exp-trackerdb-assisted">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="option-divider"></div>
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold">IA Shield auto-protect</div>
+              <div class="text-sm text-secondary">Automatically enables IA Shield on major AI platforms</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="exp-ia-shield">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="option-divider"></div>
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold">Aggressive vertical rules</div>
+              <div class="text-sm text-secondary">Higher blocking strictness for selected vertical profiles</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="exp-aggressive-vertical-rules">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="option-card mt-3">
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold">Baseline KPI snapshot</div>
+              <div class="text-sm text-secondary">Phase 0 metrics captured locally for performance and quality baselining.</div>
+            </div>
+            <button class="btn btn-outline btn-sm" id="btn-reset-kpis">Reset KPIs</button>
+          </div>
+          <div class="option-divider"></div>
+          <div class="kpi-grid" id="kpi-grid">
+            <div class="kpi-item">
+              <div class="kpi-label">Engine startup latency</div>
+              <div class="kpi-value" id="kpi-startup-latency">-</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-label">Matching response time</div>
+              <div class="kpi-value" id="kpi-matching-latency">-</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-label">Content script cost/page</div>
+              <div class="kpi-value" id="kpi-content-cost">-</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-label">Block rate by category</div>
+              <div class="kpi-value" id="kpi-block-rate">-</div>
+            </div>
+            <div class="kpi-item">
+              <div class="kpi-label">False positive report rate</div>
+              <div class="kpi-value" id="kpi-fp-rate">-</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Filter Lists Section -->
+      <section id="section-lists" class="section">
+        <h2 class="section-title">Filter Lists</h2>
+        <p class="text-sm text-secondary mb-3">Select which filter lists to use. More lists = better blocking, but may cause website issues.</p>
+
+        <div id="filter-lists-container" class="option-card">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="mt-3">
+          <h3 class="font-semibold mb-2">Custom Lists</h3>
+          <div class="option-card">
+            <div id="custom-lists-container">
+              <p class="text-sm text-tertiary p-3">No custom lists added</p>
+            </div>
+            <div class="option-divider"></div>
+            <div class="option-row">
+              <input type="url" id="input-custom-list" class="text-input" placeholder="https://example.com/filters.txt">
+              <button class="btn btn-primary btn-sm" id="btn-add-custom-list">Add list</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Custom Filters Section -->
+      <section id="section-custom-filters" class="section">
+        <h2 class="section-title">Custom Filters</h2>
+        <p class="text-sm text-secondary mb-3">Add your own filter rules using ABP/uBlock syntax. One rule per line. Changes are applied immediately.</p>
+
+        <!-- Quick Add -->
+        <div class="option-card mb-3">
+          <div class="p-3">
+            <h3 class="font-semibold mb-2">Quick Add</h3>
+            <p class="text-sm text-secondary mb-2">Block a domain quickly:</p>
+            <div class="flex gap-2">
+              <input type="text" id="input-quick-filter" class="text-input" placeholder="example.com or ||ads.example.com^">
+              <button class="btn btn-primary btn-sm" id="btn-quick-add">Block</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preset Templates -->
+        <div class="option-card mb-3">
+          <div class="p-3">
+            <h3 class="font-semibold mb-2">Preset Templates</h3>
+            <p class="text-sm text-secondary mb-2">Click to add common anti-adblock and privacy rules:</p>
+            <div class="preset-grid" id="preset-templates">
+              <button class="btn btn-outline btn-sm preset-btn" data-preset="youtube-antiadblock" title="Blocks YouTube ad detection scripts">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                YouTube Anti-Adblock
+              </button>
+              <button class="btn btn-outline btn-sm preset-btn" data-preset="twitch-ads" title="Blocks Twitch pre-roll and mid-roll ads">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2H3v16h5v4l4-4h5l4-4V2z"/></svg>
+                Twitch Ads
+              </button>
+              <button class="btn btn-outline btn-sm preset-btn" data-preset="forbes-adblock" title="Bypasses Forbes adblock detection">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/></svg>
+                Forbes Anti-Adblock
+              </button>
+              <button class="btn btn-outline btn-sm preset-btn" data-preset="anti-adblock-general" title="General anti-adblock killer rules">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Anti-Adblock Killer
+              </button>
+              <button class="btn btn-outline btn-sm preset-btn" data-preset="cookie-annoyances" title="Hide cookie consent popups">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                Cookie Popups
+              </button>
+              <button class="btn btn-outline btn-sm preset-btn" data-preset="social-trackers" title="Block social media tracking widgets">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                Social Trackers
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Editor -->
+        <div class="option-card mb-3">
+          <div class="p-3">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-semibold">Filter Editor</h3>
+              <div class="flex gap-2">
+                <span class="text-xs text-tertiary" id="filter-line-count">0 rules</span>
+                <button class="btn btn-outline btn-sm" id="btn-clear-filters" title="Clear all custom filters">Clear</button>
+              </div>
+            </div>
+            <textarea id="user-filters-editor" class="filter-editor" spellcheck="false" placeholder="! My custom filters
+! Block a domain:
+||ads.example.com^
+
+! Hide an element:
+example.com##.ad-banner
+
+! Scriptlet injection:
+example.com##+js(abort-on-property-read, adBlockDetected)
+
+! Exception (allow):
+@@||trusted-cdn.com^"></textarea>
+            <div class="flex items-center justify-between mt-2">
+              <div class="flex gap-2">
+                <button class="btn btn-primary btn-sm" id="btn-save-filters">Save &amp; Apply</button>
+                <span class="text-sm text-primary hidden" id="filter-save-status">Saved!</span>
+              </div>
+              <div class="flex gap-2">
+                <button class="btn btn-outline btn-sm" id="btn-import-filters" title="Import filters from file">Import</button>
+                <button class="btn btn-outline btn-sm" id="btn-export-filters" title="Export filters to file">Export</button>
+                <input type="file" id="file-import-filters" accept=".txt,.filter" class="hidden">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Syntax Help -->
+        <div class="option-card">
+          <div class="p-3">
+            <h3 class="font-semibold mb-2">Syntax Reference</h3>
+            <div class="syntax-help">
+              <div class="syntax-item">
+                <code class="syntax-code">||domain.com^</code>
+                <span class="text-sm text-secondary">Block all requests to domain</span>
+              </div>
+              <div class="syntax-item">
+                <code class="syntax-code">@@||domain.com^</code>
+                <span class="text-sm text-secondary">Allow (exception rule)</span>
+              </div>
+              <div class="syntax-item">
+                <code class="syntax-code">domain.com##.selector</code>
+                <span class="text-sm text-secondary">Hide element by CSS selector</span>
+              </div>
+              <div class="syntax-item">
+                <code class="syntax-code">domain.com##+js(scriptlet, args)</code>
+                <span class="text-sm text-secondary">Inject scriptlet (anti-adblock)</span>
+              </div>
+              <div class="syntax-item">
+                <code class="syntax-code">! comment</code>
+                <span class="text-sm text-secondary">Comment line (ignored)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Whitelist Section -->
+      <section id="section-whitelist" class="section">
+        <h2 class="section-title">Allowed Sites</h2>
+        <p class="text-sm text-secondary mb-3">Blocking is disabled on these sites. You can also toggle protection per-site from the popup.</p>
+
+        <div class="option-card">
+          <div id="whitelist-container">
+            <p class="text-sm text-tertiary p-3">No sites in the allow list</p>
+          </div>
+          <div class="option-divider"></div>
+          <div class="option-row">
+            <input type="text" id="input-whitelist" class="text-input" placeholder="example.com">
+            <button class="btn btn-primary btn-sm" id="btn-add-whitelist">Add site</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Reports / Privacy Dashboard Section -->
+      <section id="section-reports" class="section">
+        <h2 class="section-title">Privacy Dashboard</h2>
+
+        <div class="report-period flex gap-2 mb-3">
+          <button type="button" class="btn btn-outline btn-sm report-period-btn active" data-days="7">7 days</button>
+          <button type="button" class="btn btn-outline btn-sm report-period-btn" data-days="30">30 days</button>
+          <button type="button" class="btn btn-outline btn-sm report-period-btn" data-days="60">60 days</button>
+        </div>
+
+        <!-- Privacy Summary Card -->
+        <div class="option-card mb-3 dash-summary-card">
+          <div class="p-3 flex items-center gap-4">
+            <div id="dash-grade-badge" class="dash-grade-badge grade-unknown">
+              <span id="dash-grade-letter">?</span>
+            </div>
+            <div class="flex-1">
+              <div class="font-bold text-lg" id="dash-grade-label">Analyzing...</div>
+              <div class="text-sm text-secondary" id="dash-grade-detail">Browse some sites to generate your privacy score</div>
+            </div>
+            <div class="dash-summary-stats">
+              <div class="text-center">
+                <div class="font-bold text-lg" id="dash-sites-count">0</div>
+                <div class="text-xs text-tertiary">sites</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats overview -->
+        <div class="stats-grid mb-3">
+          <div class="stat-card">
+            <div class="stat-number" id="stat-total-blocked">0</div>
+            <div class="stat-label text-sm text-secondary">Total blocked</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number stat-trackers-color" id="stat-trackers">0</div>
+            <div class="stat-label text-sm text-secondary">Trackers</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number stat-ads-color" id="stat-ads">0</div>
+            <div class="stat-label text-sm text-secondary">Ads</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number stat-fp-color" id="stat-fingerprinters">0</div>
+            <div class="stat-label text-sm text-secondary">Fingerprinters</div>
+          </div>
+        </div>
+
+        <!-- Weekly Trend -->
+        <div class="option-card mb-3">
+          <div class="p-3 flex items-center justify-between">
+            <div>
+              <h3 class="font-semibold">Weekly Trend</h3>
+              <div class="text-sm text-secondary">Compared to last week</div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="text-center">
+                <div class="font-bold" id="trend-this-week">0</div>
+                <div class="text-xs text-tertiary">this week</div>
+              </div>
+              <div id="trend-arrow" class="trend-arrow trend-neutral">
+                <span id="trend-change">0%</span>
+              </div>
+              <div class="text-center">
+                <div class="font-bold" id="trend-last-week">0</div>
+                <div class="text-xs text-tertiary">last week</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts row -->
+        <div class="dash-charts-row mb-3">
+          <!-- Blocking Activity Chart -->
+          <div class="option-card dash-chart-main">
+            <div class="p-3">
+              <h3 class="font-semibold mb-2">Blocking Activity</h3>
+              <canvas id="chart-blocking" width="600" height="200"></canvas>
+            </div>
+          </div>
+
+          <!-- Category Distribution -->
+          <div class="option-card dash-chart-side">
+            <div class="p-3">
+              <h3 class="font-semibold mb-2">Categories</h3>
+              <canvas id="chart-categories" width="200" height="200"></canvas>
+              <div id="category-legend" class="cat-legend"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hourly Heatmap -->
+        <div class="option-card mb-3">
+          <div class="p-3">
+            <h3 class="font-semibold mb-2">Activity by Hour</h3>
+            <div class="text-xs text-tertiary mb-2">Darker = more threats blocked at that hour</div>
+            <div id="heatmap-container" class="heatmap-grid"></div>
+          </div>
+        </div>
+
+        <!-- Top tracked sites -->
+        <div class="option-card mb-3">
+          <div class="p-3">
+            <h3 class="font-semibold mb-2">Top Sites with Most Trackers</h3>
+            <div id="top-sites-list">
+              <p class="text-sm text-tertiary">No data yet. Browse some websites to see tracker reports.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Privacy Alerts -->
+        <div class="option-card mb-3">
+          <div class="p-3">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-semibold">Privacy Alerts</h3>
+              <span class="badge badge-danger" id="alerts-count">0</span>
+            </div>
+            <div id="alerts-list">
+              <p class="text-sm text-tertiary">No alerts. Your browsing looks safe.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tracker Database -->
+        <div class="option-card mb-3">
+          <div class="p-3">
+            <h3 class="font-semibold mb-2">Tracker Database</h3>
+            <p class="text-xs text-tertiary mb-2">Known trackers detected on your browsed sites</p>
+            <div id="tracker-db-list">
+              <p class="text-sm text-tertiary">No tracker data yet.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Applied Rules Diagnostics -->
+        <div class="option-card mb-3">
+          <div class="p-3">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-semibold">Applied Rules Diagnostics</h3>
+              <span class="text-xs text-tertiary" id="applied-rules-diag-summary">No data yet</span>
+            </div>
+            <p class="text-xs text-tertiary mb-2">Lightweight sampled view of selectors/scriptlets applied by tab and host.</p>
+            <div id="applied-rules-diag-list">
+              <p class="text-sm text-tertiary">No data yet.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export buttons -->
+        <div class="flex gap-2">
+          <button type="button" class="btn btn-outline" id="btn-export-report">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export JSON
+          </button>
+          <button type="button" class="btn btn-outline" id="btn-export-html">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Export HTML Report
+          </button>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           TRACKER DATABASE BROWSER (5.3)
+           ══════════════════════════════════════════════════ -->
+      <section id="section-tracker-browser" class="section">
+        <h2 class="section-title">Tracker Database</h2>
+        <p class="text-sm text-secondary mb-3">Browse and search the known tracker database. Data is sourced from the Ghostery TrackerDB and your browsing history.</p>
+
+        <!-- Search + filter bar -->
+        <div class="tdb-toolbar option-card mb-3">
+          <div class="tdb-search-wrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="tdb-search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="tdb-search" class="tdb-search-input" placeholder="Search trackers, companies, domains…">
+          </div>
+          <div class="tdb-filters">
+            <select id="tdb-filter-cat" class="select-input select-sm">
+              <option value="">All Categories</option>
+              <option value="Ad Network">Ad Networks</option>
+              <option value="Analytics">Analytics</option>
+              <option value="Social Tracker">Social</option>
+              <option value="Session Recording">Session Recording</option>
+              <option value="Fingerprinting">Fingerprinting</option>
+              <option value="Ad Exchange">Ad Exchange</option>
+              <option value="Ad Retargeting">Retargeting</option>
+            </select>
+            <select id="tdb-filter-company" class="select-input select-sm">
+              <option value="">All Companies</option>
+            </select>
+            <select id="tdb-sort" class="select-input select-sm">
+              <option value="prevalence">By Prevalence</option>
+              <option value="company">By Company</option>
+              <option value="category">By Category</option>
+              <option value="domain">Alphabetical</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Summary chips -->
+        <div class="tdb-summary-row mb-3" id="tdb-summary">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Results table -->
+        <div class="option-card">
+          <div class="tdb-table-wrap">
+            <div class="tdb-table-header">
+              <span>Domain</span>
+              <span>Company</span>
+              <span>Category</span>
+              <span>Country</span>
+              <span class="tdb-col-conf">Confidence</span>
+              <span class="tdb-col-sites">Sites seen</span>
+            </div>
+            <div id="tdb-rows">
+              <div class="tdb-empty"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span>Browse some sites or enable TrackerDB to populate this list.</span></div>
+            </div>
+          </div>
+          <div class="tdb-pagination" id="tdb-pagination"></div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           TRENDS & ALERTS (5.4)
+           ══════════════════════════════════════════════════ -->
+      <section id="section-trends" class="section">
+        <h2 class="section-title">Trends &amp; Alerts</h2>
+
+        <!-- Period selector -->
+        <div class="report-period flex gap-2 mb-3">
+          <button type="button" class="btn btn-outline btn-sm trends-period-btn active" data-days="7">7 days</button>
+          <button type="button" class="btn btn-outline btn-sm trends-period-btn" data-days="30">30 days</button>
+          <button type="button" class="btn btn-outline btn-sm trends-period-btn" data-days="60">60 days</button>
+        </div>
+
+        <!-- Actionable alerts -->
+        <div class="option-card mb-3">
+          <div class="p-3">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h3 class="font-semibold">Actionable Alerts</h3>
+                <div class="text-xs text-tertiary">Recommendations based on your browsing patterns</div>
+              </div>
+              <span class="badge badge-danger" id="ta-alerts-count">0</span>
+            </div>
+            <div id="ta-alerts-list">
+              <p class="text-sm text-tertiary">No alerts — your browsing looks clean.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Site recommendations -->
+        <div class="option-card mb-3">
+          <div class="p-3">
+            <h3 class="font-semibold mb-1">Per-Site Recommendations</h3>
+            <div class="text-xs text-tertiary mb-3">Sites where you might improve protection</div>
+            <div id="ta-site-recs">
+              <p class="text-sm text-tertiary">No data yet. Browse some websites to see recommendations.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category trends -->
+        <div class="option-card mb-3">
+          <div class="p-3">
+            <h3 class="font-semibold mb-1">Category Trends</h3>
+            <div class="text-xs text-tertiary mb-3">Tracker category growth and reduction over the period</div>
+            <div id="ta-cat-trends" class="ta-cat-trends">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Daily volume trend chart -->
+        <div class="option-card mb-3">
+          <div class="p-3">
+            <h3 class="font-semibold mb-2">Blocking Volume Trend</h3>
+            <canvas id="ta-trend-chart" height="180"></canvas>
+          </div>
+        </div>
+
+        <!-- Top threat domains -->
+        <div class="option-card mb-3">
+          <div class="p-3">
+            <h3 class="font-semibold mb-2">Top Threat Domains</h3>
+            <div class="text-xs text-tertiary mb-2">Most-seen tracker domains across all sites</div>
+            <div id="ta-top-domains">
+              <p class="text-sm text-tertiary">No data yet.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           DIFFICULT SITES (replaces vertical rules section)
+           ══════════════════════════════════════════════════ -->
+      <section id="section-difficult-sites" class="section">
+        <h2 class="section-title">Difficult Sites</h2>
+        <p class="text-sm text-secondary mb-3">Fine-tune protection for sites that often require special handling — video platforms, adult sites, anti-adblock portals and AI services.</p>
+
+        <!-- IA Shield card -->
+        <div class="option-card mb-3 diff-module-card">
+          <div class="diff-module-header">
+            <div class="diff-module-icon diff-module-icon--ai">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </div>
+            <div class="diff-module-info">
+              <div class="font-semibold">IA Shield auto-protect</div>
+              <div class="text-xs text-secondary">Automatically enables IA Shield on major AI platforms and user-protected sites</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="ds-ia-shield">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="option-divider"></div>
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold text-sm">Strict mode</div>
+              <div class="text-xs text-tertiary">Block suspicious overlays and show a warning when prompt-injection is detected</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="ds-ia-strict">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="option-divider"></div>
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold text-sm">Local prompt sanitization (paste)</div>
+              <div class="text-xs text-tertiary">Detect hidden instructions and encoded payloads before they are pasted into AI prompts</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="ds-ia-sanitize" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- YouTube card -->
+        <div class="option-card mb-3 diff-module-card">
+          <div class="diff-module-header">
+            <div class="diff-module-icon diff-module-icon--video">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </div>
+            <div class="diff-module-info">
+              <div class="font-semibold">YouTube</div>
+              <div class="text-xs text-secondary">Balanced ad-blocking strategy for YouTube without breaking the player</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="ds-youtube" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="option-divider"></div>
+          <div class="option-row">
+            <div class="option-info">
+              <div class="font-semibold text-sm">Aggressive vertical rules</div>
+              <div class="text-xs text-tertiary">Higher strictness for video ad-tech — may occasionally cause player issues</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="ds-aggressive-vertical">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Anti-adblock portals card -->
+        <div class="option-card mb-3 diff-module-card">
+          <div class="diff-module-header">
+            <div class="diff-module-icon diff-module-icon--shield">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div class="diff-module-info">
+              <div class="font-semibold">Anti-Adblock Portals</div>
+              <div class="text-xs text-secondary">Apply scriptlets to bypass adblock walls on news and media sites</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="ds-anti-adblock" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="option-card mb-3 diff-module-card">
+          <div class="diff-module-header">
+            <div class="diff-module-icon diff-module-icon--search">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <div class="diff-module-info">
+              <div class="font-semibold">SERP Risk Badges</div>
+              <div class="text-xs text-secondary">Show pre-site risk indicator next to Google and Bing results</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="ds-serp-bar">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- TrackerDB assisted card -->
+        <div class="option-card mb-3 diff-module-card">
+          <div class="diff-module-header">
+            <div class="diff-module-icon diff-module-icon--db">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            </div>
+            <div class="diff-module-info">
+              <div class="font-semibold">TrackerDB Assisted Blocking</div>
+              <div class="text-xs text-secondary">Use TrackerDB prevalence data to improve blocking decisions (requires Strict mode)</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" id="ds-trackerdb-assisted">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Functional exceptions -->
+        <div class="option-card mb-3">
+          <div class="p-3">
+            <h3 class="font-semibold mb-1">Functional Exceptions</h3>
+            <div class="text-xs text-tertiary mb-3">Create site-specific exceptions for video/adult compatibility, IA Shield bypass, or extra IA Shield protected sites.</div>
+            <div class="ds-grid-3">
+              <input type="text" id="ds-exception-domain" class="text-input" placeholder="example.com">
+              <select id="ds-exception-mode" class="text-input">
+                <option value="video-balanced">Video safe mode</option>
+                <option value="adult-balanced">Adult safe mode</option>
+                <option value="ia-protect">IA Shield protected site</option>
+                <option value="ia-bypass">IA Shield bypass</option>
+              </select>
+              <button class="btn btn-secondary btn-sm" id="ds-exception-add">Add exception</button>
+            </div>
+            <div id="ds-exception-list" class="ds-exception-list mt-3"></div>
+          </div>
+        </div>
+
+        <div class="option-card mb-3">
+          <div class="p-3">
+            <h3 class="font-semibold mb-1">IA Shield Risk Events (Local)</h3>
+            <div class="text-xs text-tertiary mb-3">Events are stored only on this device for auditing and tuning. No external telemetry is sent.</div>
+            <div id="ds-ia-risk-summary" class="text-sm text-secondary mb-2">No events yet.</div>
+            <div id="ds-ia-risk-list" class="ds-report-list"></div>
+          </div>
+        </div>
+
+        <!-- Per-domain diagnostic -->
+        <div class="option-card">
+          <div class="p-3">
+            <h3 class="font-semibold mb-1">Site Diagnostic</h3>
+            <div class="text-xs text-tertiary mb-3">Enter a domain to see what Midori Privacy detects and blocks on it</div>
+            <div class="flex gap-2">
+              <input type="text" id="ds-diag-domain" class="text-input" placeholder="example.com">
+              <button class="btn btn-primary btn-sm" id="ds-diag-check">Check</button>
+            </div>
+            <div id="ds-diag-result" class="mt-3"></div>
+          </div>
+        </div>
+
+        <!-- Ad issue report + local evidence -->
+        <div class="option-card mt-3">
+          <div class="p-3">
+            <h3 class="font-semibold mb-1">Report: “Ads Still Visible”</h3>
+            <div class="text-xs text-tertiary mb-3">Stores a local-only report with minimal technical evidence for this site to help tune filters and scriptlets.</div>
+            <div class="ds-grid-2 mb-2">
+              <input type="text" id="ds-report-domain" class="text-input" placeholder="example.com">
+              <select id="ds-report-type" class="text-input">
+                <option value="video-ad">Video ad still visible</option>
+                <option value="anti-adblock-wall">Anti-adblock wall appears</option>
+                <option value="popunder">Popunder/new tab</option>
+                <option value="redirect-loop">Redirect loop</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <textarea id="ds-report-note" class="text-input ds-report-note mb-2" placeholder="Optional note (steps to reproduce)"></textarea>
+            <div class="flex gap-2">
+              <button type="button" class="btn btn-primary btn-sm" id="ds-report-submit">Save local report</button>
+              <span id="ds-report-status" class="text-xs text-tertiary"></span>
+            </div>
+            <div id="ds-report-list" class="ds-report-list mt-3"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-vertical-profiles" class="section">
+        <h2 class="section-title">Vertical Profiles</h2>
+        <p class="text-sm text-secondary mb-3">Tune detection sensitivity by site category. Changes apply on the next request and are saved automatically.</p>
+
+        <div id="vertical-profiles-guardrail" class="vp-guardrail hidden"></div>
+        <div id="vertical-profiles-container" class="vp-grid"></div>
+      </section>
+
+      <!-- About Section -->
+      <section id="section-about" class="section">
+        <h2 class="section-title">About</h2>
+        <div class="option-card">
+          <div class="p-4 flex flex-col gap-3">
+            <div class="flex items-center gap-3">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="11" fill="var(--color-primary)" stroke="var(--color-primary-dark)" stroke-width="1"/>
+                <path d="M7 12.5l3 3 7-7" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div>
+                <div class="font-bold text-xl">Midori Privacy</div>
+                <div class="text-sm text-secondary" id="about-version">Version 1.0.0</div>
+              </div>
+            </div>
+            <p class="text-sm text-secondary">
+              Midori Privacy is a lightweight, open-source ad and tracker blocker built by Astian Inc.
+              It uses publicly available filter lists to protect your privacy without sending any data to external servers.
+            </p>
+            <div class="option-divider"></div>
+            <div class="flex flex-col gap-2">
+              <div class="flex justify-between">
+                <span class="text-sm text-secondary">Developer</span>
+                <span class="text-sm font-semibold">Astian Inc</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm text-secondary">License</span>
+                <span class="text-sm font-semibold">MPL-2.0</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-sm text-secondary">Website</span>
+                <a href="https://astian.org" target="_blank" rel="noopener noreferrer" class="text-sm font-semibold">astian.org</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="options-loader.js"></script>
+</body>
+</html>

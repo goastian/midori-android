@@ -1,0 +1,357 @@
+/* Midori Privacy Blocker - Base Styles
+  Design System: Midori Nova-flat */
+
+:root {
+  /* ── Light mode (default) ── */
+  --color-primary: #00A884;
+  --color-primary-light: #17C79E;
+  --color-primary-dark: #008D70;
+  --color-primary-bg: #DDF8EE;
+  --color-primary-soft: #C7F2E3;
+
+  /* Danger / blocked */
+  --color-danger: #FF4B5C;
+  --color-danger-light: #FFF0F1;
+  --color-danger-dark: #E64352;
+
+  /* Warning */
+  --color-warning: #D88600;
+  --color-warning-light: #FFF6DC;
+
+  /* Info */
+  --color-info: #3578E5;
+  --color-info-light: #EAF2FF;
+
+  /* Neutrals tuned to Midori Browser chrome and New Tab islands */
+  --color-bg: #FFFFFF;
+  --color-bg-secondary: #F4FAF7;
+  --color-bg-tertiary: #E8F1ED;
+  --color-surface: #FFFFFF;
+  --color-surface-soft: #F8FCFA;
+  --color-browser-chrome: #CFF5E7;
+  --color-text: #10201A;
+  --color-text-secondary: #415650;
+  --color-text-tertiary: #71847D;
+  --color-border: #DCE8E3;
+  --color-border-light: #EEF5F2;
+  --color-focus-ring: rgba(0, 168, 132, 0.28);
+
+  /* Flat but tactile surfaces */
+  --shadow-sm: 0 1px 2px rgba(16, 32, 26, 0.08);
+  --shadow-md: 0 8px 24px rgba(16, 32, 26, 0.10);
+  --shadow-lg: 0 18px 48px rgba(16, 32, 26, 0.14);
+
+  /* Nova-flat radii: soft, consistent, never bubbly */
+  --radius-sm: 8px;
+  --radius-md: 8px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 100ms ease;
+  --transition-normal: 180ms ease;
+
+  /* Font — Modern system stack */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ── Dark mode — Vibrant Sage palette ── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-primary: #27D9AC;
+    --color-primary-light: #5AE4C1;
+    --color-primary-dark: #00A884;
+    --color-primary-bg: #12392F;
+    --color-primary-soft: #17483C;
+
+    --color-danger: #FF4B5C;
+    --color-danger-light: #2D1417;
+    --color-danger-dark: #FF6B7A;
+
+    --color-warning: #F1B337;
+    --color-warning-light: #352708;
+
+    --color-info: #65A3FF;
+    --color-info-light: #0B243D;
+
+    --color-bg: #101815;
+    --color-bg-secondary: #15231E;
+    --color-bg-tertiary: #20342D;
+    --color-surface: #111C18;
+    --color-surface-soft: #172721;
+    --color-browser-chrome: #16392F;
+    --color-text: #E5F6F0;
+    --color-text-secondary: #ADC5BB;
+    --color-text-tertiary: #789187;
+    --color-border: #28433A;
+    --color-border-light: #20362F;
+    --color-focus-ring: rgba(39, 217, 172, 0.32);
+
+    color-scheme: dark;
+  }
+}
+
+/* JS-driven dark mode */
+:root[data-theme="dark"] {
+  --color-primary: #27D9AC;
+  --color-primary-light: #5AE4C1;
+  --color-primary-dark: #00A884;
+  --color-primary-bg: #12392F;
+  --color-primary-soft: #17483C;
+
+  --color-danger: #FF4B5C;
+  --color-danger-light: #2D1417;
+  --color-danger-dark: #FF6B7A;
+
+  --color-warning: #F1B337;
+  --color-warning-light: #352708;
+
+  --color-info: #65A3FF;
+  --color-info-light: #0B243D;
+
+  --color-bg: #101815;
+  --color-bg-secondary: #15231E;
+  --color-bg-tertiary: #20342D;
+  --color-surface: #111C18;
+  --color-surface-soft: #172721;
+  --color-browser-chrome: #16392F;
+  --color-text: #E5F6F0;
+  --color-text-secondary: #ADC5BB;
+  --color-text-tertiary: #789187;
+  --color-border: #28433A;
+  --color-border-light: #20362F;
+  --color-focus-ring: rgba(39, 217, 172, 0.32);
+
+  color-scheme: dark;
+}
+
+/* Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-family);
+  color: var(--color-text);
+  background: var(--color-bg);
+  line-height: 1.5;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-size: inherit;
+  color: inherit;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+input, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Utility classes */
+.text-sm { font-size: 0.85rem; }
+.text-xs { font-size: 0.75rem; }
+.text-lg { font-size: 1.15rem; }
+.text-xl { font-size: 1.35rem; }
+.text-secondary { color: var(--color-text-secondary); }
+.text-tertiary { color: var(--color-text-tertiary); }
+.text-danger { color: var(--color-danger); }
+.text-primary { color: var(--color-primary); }
+.text-center { text-align: center; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+.font-black { font-weight: 900; }
+.tracking-tight { letter-spacing: 0; }
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-1 { gap: 4px; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+
+.p-2 { padding: 8px; }
+.p-3 { padding: 12px; }
+.p-4 { padding: 16px; }
+.px-3 { padding-left: 12px; padding-right: 12px; }
+.px-4 { padding-left: 16px; padding-right: 16px; }
+.py-2 { padding-top: 8px; padding-bottom: 8px; }
+.py-3 { padding-top: 12px; padding-bottom: 12px; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 12px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+
+.w-full { width: 100%; }
+.hidden { display: none !important; }
+
+/* Components */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+.btn-primary:hover {
+  background: var(--color-primary-light);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-primary);
+  border-color: var(--color-border);
+}
+.btn-outline:hover {
+  background: var(--color-primary-bg);
+  border-color: var(--color-primary);
+}
+
+.btn-danger {
+  background: var(--color-danger);
+  color: #fff;
+}
+.btn-danger:hover {
+  background: var(--color-danger-dark);
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 0.78rem;
+}
+
+.btn-lg {
+  padding: 10px 24px;
+  font-size: 0.95rem;
+}
+
+.card {
+  background: var(--color-surface, var(--color-bg));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.badge-danger {
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.badge-primary {
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+}
+
+.badge-warning {
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+/* Toggle switch — flat */
+.toggle {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--color-border);
+  box-shadow: inset 0 0 0 1px rgba(16, 32, 26, 0.04);
+  border-radius: var(--radius-full);
+  transition: background var(--transition-fast);
+  cursor: pointer;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(16, 32, 26, 0.22);
+  border-radius: 50%;
+  transition: transform var(--transition-fast);
+}
+
+.toggle input:checked + .toggle-slider {
+  background: var(--color-primary);
+}
+
+.toggle input:focus-visible + .toggle-slider {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+.toggle input:checked + .toggle-slider::before {
+  transform: translateX(18px);
+}
