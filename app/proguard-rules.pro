@@ -1,97 +1,48 @@
-# ============================================================================
-# Midori Browser - ProGuard / R8 Rules
-# ============================================================================
-
+# Add project specific ProGuard rules here.
+# You can control the set of applied configuration files using the
+# proguardFiles setting in build.gradle.
+#
 # For more details, see
-#   https://developer.android.com/topic/performance/app-optimization/enable-app-optimization
+#   http://developer.android.com/guide/developing/tools/proguard.html
 
-# --------------------------------------------------------------------------
-# Debug: Preserve line numbers for stack traces
-# --------------------------------------------------------------------------
--keepattributes SourceFile,LineNumberTable
--renamesourcefileattribute SourceFile
+# If your project uses WebView with JS, uncomment the following
+# and specify the fully qualified class name to the JavaScript interface
+# class:
+#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
+#   public *;
+#}
 
-# --------------------------------------------------------------------------
-# GeckoView: Keep all GeckoView classes (loaded via JNI/reflection)
-# --------------------------------------------------------------------------
--keep class org.mozilla.geckoview.** { *; }
--keep class org.mozilla.gecko.** { *; }
+# Uncomment this to preserve the line number information for
+# debugging stack traces.
+#-keepattributes SourceFile,LineNumberTable
 
-# --------------------------------------------------------------------------
-# Mozilla Android Components: Keep public APIs used via reflection
-# --------------------------------------------------------------------------
--keep class mozilla.components.concept.engine.** { *; }
--keep class mozilla.components.browser.engine.gecko.** { *; }
--keep class mozilla.components.support.webextensions.** { *; }
--keep class mozilla.components.feature.addons.** { *; }
--keep class mozilla.components.lib.crash.** { *; }
--keep class mozilla.components.feature.autofill.** { *; }
--keep class mozilla.components.service.sync.** { *; }
+# If you keep the line number information, uncomment this to
+# hide the original source file name.
+#-renamesourcefileattribute SourceFile
 
-# --------------------------------------------------------------------------
-# WebExtensions: Keep extension API interfaces
-# --------------------------------------------------------------------------
--keep class mozilla.components.concept.engine.webextension.** { *; }
+# Nimbus can reference Glean classes that are not bundled in this app build.
+# Suppress those optional telemetry references so shrinking can succeed.
+-dontwarn mozilla.telemetry.glean.Glean
+-dontwarn mozilla.telemetry.glean.GleanInternalAPI
+-dontwarn mozilla.telemetry.glean.internal.CommonMetricData
+-dontwarn mozilla.telemetry.glean.internal.DynamicLabelType
+-dontwarn mozilla.telemetry.glean.internal.Lifetime
+-dontwarn mozilla.telemetry.glean.internal.TimeUnit
+-dontwarn mozilla.telemetry.glean.private.EventExtras
+-dontwarn mozilla.telemetry.glean.private.EventMetricType
+-dontwarn mozilla.telemetry.glean.private.TimingDistributionMetricType
 
-# --------------------------------------------------------------------------
-# Kotlin Coroutines
-# --------------------------------------------------------------------------
--keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
--keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
--keepclassmembers class kotlinx.coroutines.** {
-    volatile <fields>;
+# Protobuf-lite resolves message fields by exact generated field names (e.g. "hideToolbarOnScroll_").
+# Keep member names for generated messages to avoid release-only startup crashes after R8 obfuscation.
+-keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite {
+    <fields>;
 }
 
-# --------------------------------------------------------------------------
-# Kotlin Serialization (if used)
-# --------------------------------------------------------------------------
--keepattributes *Annotation*, InnerClasses
--dontnote kotlinx.serialization.AnnotationsKt
+# Hilt generated application injector can be absent from certain transformed classpaths during R8 analysis.
+-dontwarn org.midorinext.android.MidoriApplication_GeneratedInjector
 
-# --------------------------------------------------------------------------
-# Jetpack Compose
-# --------------------------------------------------------------------------
--dontwarn androidx.compose.**
+# Keep Hilt entry-point service classes and their generated wrappers to avoid
+# release-only injection failures when OEM ROMs restart foreground services.
+-keep class org.midorinext.android.apptracking.MidoriAppTrackingVpnService { *; }
+-keep class org.midorinext.android.apptracking.Hilt_MidoriAppTrackingVpnService { *; }
 
-# --------------------------------------------------------------------------
-# Application Services / Rust components
-# --------------------------------------------------------------------------
--keep class mozilla.appservices.** { *; }
--keep class org.mozilla.appservices.** { *; }
-
-# --------------------------------------------------------------------------
-# Sentry
-# --------------------------------------------------------------------------
--keep class io.sentry.** { *; }
--dontwarn io.sentry.**
-
-# --------------------------------------------------------------------------
-# Tor (tor-android, jtorctl, IPtProxy)
-# --------------------------------------------------------------------------
--keep class org.torproject.jni.** { *; }
--keep class net.freehaven.tor.control.** { *; }
--dontwarn IPtProxy.**
--keep class IPtProxy.** { *; }
-
-# --------------------------------------------------------------------------
-# General optimizations
-# --------------------------------------------------------------------------
--optimizationpasses 5
--allowaccessmodification
--repackageclasses ''
--mergeinterfacesaggressively
-
-# Remove logging in release builds
--assumenosideeffects class android.util.Log {
-    public static int v(...);
-    public static int d(...);
-    public static int i(...);
-}
-
-# Remove Kotlin null checks in release for performance
--assumenosideeffects class kotlin.jvm.internal.Intrinsics {
-    public static void checkNotNull(...);
-    public static void checkNotNullParameter(...);
-    public static void checkParameterIsNotNull(...);
-    public static void checkNotNullExpressionValue(...);
-}
