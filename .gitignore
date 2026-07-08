@@ -12,3 +12,6 @@
 /qwantcompanion/logicom/
 /.kotlin/
 /build/
+upload-keystore.jks
+upload_certificate.pem
+deployment_cert.der
