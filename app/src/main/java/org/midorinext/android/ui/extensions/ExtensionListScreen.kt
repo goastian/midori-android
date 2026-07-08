@@ -5,12 +5,14 @@ import android.net.Uri
 import android.text.Html
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -40,9 +43,22 @@ fun ExtensionListScreen(
     val error by viewModel.error.collectAsState()
     val installingAddonId by viewModel.installingAddonId.collectAsState()
     val lazyListState = rememberLazyListState()
+    val context = LocalContext.current
+    var searchQuery by rememberSaveable { mutableStateOf("") }
 
-    val installedAddons = remember(addons) { addons.filter { it.isInstalled() } }
-    val recommendedAddons = remember(addons) { addons.filter { !it.isInstalled() } }
+    val filteredAddons = remember(addons, searchQuery, context) {
+        val query = searchQuery.trim()
+        if (query.isBlank()) {
+            addons
+        } else {
+            addons.filter { addon ->
+                addon.translateName(context).contains(query, ignoreCase = true) ||
+                    stripHtml(addon.translateSummary(context)).contains(query, ignoreCase = true)
+            }
+        }
+    }
+    val installedAddons = remember(filteredAddons) { filteredAddons.filter { it.isInstalled() } }
+    val recommendedAddons = remember(filteredAddons) { filteredAddons.filter { !it.isInstalled() } }
     val errorText = error?.let { stringResource(it.messageRes) }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -62,6 +78,20 @@ fun ExtensionListScreen(
             ) {
                 Text(text = errorText)
             }
+        }
+
+        if (addons.isNotEmpty() || searchQuery.isNotEmpty()) {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                placeholder = { Text(stringResource(R.string.extensions_search_hint)) },
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            )
         }
 
         Box(
@@ -111,6 +141,20 @@ fun ExtensionListScreen(
                 }
                 else -> {
                     LazyColumn(state = lazyListState) {
+                        if (filteredAddons.isEmpty() && searchQuery.isNotBlank()) {
+                            item(key = "search_empty") {
+                                Text(
+                                    text = stringResource(R.string.extensions_search_empty),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 32.dp, vertical = 32.dp)
+                                )
+                            }
+                        }
+
                         // Installed section
                         if (installedAddons.isNotEmpty()) {
                             item(key = "header_installed") {
