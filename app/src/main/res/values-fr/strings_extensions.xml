@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_title">Extensions</string>
+    <string name="extensions_empty_title">Aucune extension installée</string>
+    <string name="extensions_empty_message">Installez des extensions pour ajouter des fonctionnalités à votre navigateur.</string>
+    <string name="extensions_install">Installer une extension</string>
+    <string name="extensions_install_hint">Saisissez l\'URL d\'un fichier d\'extension (.xpi)</string>
+    <string name="extensions_uninstall">Désinstaller</string>
+    <string name="extensions_uninstall_confirm">Désinstaller « %1$s » ?</string>
+    <string name="extensions_enable">Activer</string>
+    <string name="extensions_disable">Désactiver</string>
+    <string name="extensions_install_error">Impossible d\'installer l\'extension</string>
+    <string name="extensions_manage">Gérer les extensions</string>
+    <string name="extensions_more">Plus d\'extensions</string>
+</resources>
+

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="browser_downloads">Downloads</string>
+
+    <string name="browser_new_tab">Neuer Tab</string>
+    <string name="browser_new_tab_private">Neuer privater Tab</string>
+    <string name="browser_close_all_tabs">Alle Tabs schließen</string>
+    <string name="browser_close_private_tabs">Private Tabs schließen</string>
+    <string name="browser_close_tab">Diesen Tab schließen</string>
+    <string name="browser_go_to_tab">Zum Tab gehen</string>
+    <string name="browser_tab_closed">Tab geschlossen</string>
+    <string name="browser_tabs_closed">Tabs gelöscht</string>
+    <string name="browser_tabs_empty_title">Ihre Tabs werden hier angezeigt</string>
+    <string name="browser_tabs_empty_subtitle">Verwenden Sie Tabs, um mehrere Seiten gleichzeitig zu besuchen.</string>
+    <string name="browser_tabs_empty_title_private">Private Tabs werden hier angezeigt</string>
+    <string name="browser_tabs_empty_subtitle_private">Um im privaten Modus im Internet zu surfen, fügen Sie einen Tab hinzu.</string>
+
+    <string name="browser_site_secure">Sichere Verbindung</string>
+    <string name="browser_site_insecure">Ungesicherte Verbindung</string>
+
+    <string name="browser_toolbar_hint">Adresse suchen oder eingeben</string>
+
+    <string name="browser_suggest_clipboard_text">Kopierter Text</string>
+    <string name="browser_brand_suggest_ad">Anzeigen</string>
+    <string name="browser_brand_suggest_information">Dieser Suchvorschlag ist eine Werbung für %1$s, Sie werden auf die Seite des Werbebetreibenden weitergeleitet: %2$s</string>
+
+    <string name="browser_permission_geoloc_blocked">Midori Kids schützt deine Privatsphäre und verhindert, dass dein genauer Standort automatisch übermittelt wird.</string>
+    <string name="browser_understood">Ich habe verstanden</string>
+</resources>

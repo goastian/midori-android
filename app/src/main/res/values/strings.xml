@@ -3,7 +3,6 @@
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 <resources>
-    <string name="app_name">Midori</string>
 
     <!-- Text shown in the toolbar if it is empty -->
     <string name="toolbar_hint">Search or enter address</string>
@@ -113,7 +112,6 @@
     <string name="data_choices_category">Data Choices</string>
 
     <!-- Menu option on the toolbar that takes you to settings page-->
-    <string name="settings">Settings</string>
 
     <!-- Menu option on the toolbar that takes you to synced tabs page-->
     <string name="synced_tabs">Synced Tabs</string>
@@ -257,9 +255,6 @@
     <string name="menu_refresh">Refresh</string>
     <string name="menu_stop">Stop</string>
     <string name="menu_share">Share</string>
-    <string name="menu_request_desktop_site">Request desktop site</string>
-    <string name="menu_add_to_homescreen">Add to homescreen</string>
-    <string name="menu_find_in_page">Find in Page</string>
     <string name="menu_addons">Add-ons</string>
     <string name="menu_new_tab">New Tab</string>
     <string name="menu_open_in_browser">Open in Browser</string>
@@ -325,8 +320,6 @@
     <string name="history_title">History</string>
     <string name="history_empty">No history yet</string>
     <string name="history_empty_subtitle">Pages you visit will appear here</string>
-    <string name="history_today">Today</string>
-    <string name="history_yesterday">Yesterday</string>
     <string name="history_this_week">This week</string>
     <string name="history_this_month">This month</string>
     <string name="history_older">Older</string>
@@ -512,4 +505,28 @@
     <string name="tor_status_connected">Tor: connected</string>
     <string name="tor_toggle_on">Enable Tor</string>
     <string name="tor_toggle_off">Disable Tor</string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="erase">Delete</string>
+    <string name="share">Share</string>
+    <string name="create">Create</string>
+    <string name="edit">Edit</string>
+    <string name="try_again">Try again</string>
+    <string name="take_me_there">Take me there</string>
+
+    <string name="all_fields_required">All fields are required</string>
+    <string name="permission_permanently_refused">You permanently refused permissions. You need to enable them through system settings now</string>
+
+    <string name="blocked_website">Blocked website</string>
+
+    <!-- Context Menu - Firefox 150+ Feature -->
+    <string name="context_menu_copy_link">Copy link URL</string>
+    <string name="context_menu_copy_link_text">Copy link text</string>
+    <string name="context_menu_copy_link_and_text">Copy link text and URL</string>
+
+    <!-- TODO move to datastore -->
+    <string name="pref_key_zap_highlight" translatable="false">pref_key_zap_highlight</string>
 </resources>

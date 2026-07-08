@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="browser_downloads">Téléchargements</string>
+
+    <string name="browser_new_tab">Nouvel onglet</string>
+    <string name="browser_new_tab_private">Nouvel onglet privé</string>
+    <string name="browser_close_all_tabs">Fermer tous les onglets</string>
+    <string name="browser_close_private_tabs">Fermer les onglets privés</string>
+    <string name="browser_close_tab">Fermer cet onglet</string>
+    <string name="browser_go_to_tab">Aller à l\’onglet</string>
+    <string name="browser_tab_closed">Onglet fermé</string>
+    <string name="browser_tabs_closed">Onglets effacés</string>
+    <string name="browser_tabs_empty_title">Vos onglets s\'afficheront ici</string>
+    <string name="browser_tabs_empty_subtitle">Utilisez les onglets pour consulter plusieurs pages en même temps.</string>
+    <string name="browser_tabs_empty_title_private">Les onglets de navigation privée s\'afficheront ici</string>
+    <string name="browser_tabs_empty_subtitle_private">Pour naviguer sur le Web en mode privé, ajoutez un onglet.</string>
+
+    <string name="browser_site_secure">Connexion sécurisée </string>
+    <string name="browser_site_insecure">Connexion non sécurisée</string>
+
+    <string name="browser_toolbar_hint">Rechercher ou saisir une adresse</string>
+
+    <string name="browser_suggest_clipboard_text">Texte copié</string>
+    <string name="browser_brand_suggest_ad">Annonce</string>
+    <string name="browser_brand_suggest_information">Cette suggestion de recherche est une publicité pour %1$s, vous serez redirigé(e) vers le site de l’annonceur : %2$s</string>
+
+    <string name="browser_permission_geoloc_blocked">Midori Kids protège ta vie privée et empêche le partage de ta position exacte automatiquement.</string>
+    <string name="browser_understood">J\'ai compris</string>
+</resources>

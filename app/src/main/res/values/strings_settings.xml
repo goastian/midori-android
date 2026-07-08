@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- review -->
+    <string name="show_favicon_label">Display site icons</string> <!-- TODO Not adapted in app context -->
+
+    <!-- new -->
+    <string name="toolbar_position_label">Toolbar</string>
+    <string name="available_toolbar_position_top">At the top</string>
+    <string name="available_toolbar_position_bottom">Bottom</string>
+
+    <string name="hide_toolbar_on_scroll_label">Hide toolbar on scroll</string>
+
+    <string name="appearance_label">Appearance</string>
+    <string name="available_appearance_system">Automatic</string>
+
+    <string name="cleardata_storage">Storage</string>
+
+    <!-- OK -->
+    <string name="settings">Settings</string>
+
+    <string name="settings_group_general">General</string>
+    <string name="settings_group_langue">Language</string>
+    <string name="settings_group_privacy">Privacy</string>
+    <string name="settings_group_about">About</string>
+
+    <string name="default_browser_label">Set as default browser</string>
+
+    <string name="tabs_view_label">Tab settings</string>
+    <string name="available_tabs_view_grid">Grid</string>
+    <string name="available_tabs_view_list">List</string>
+
+    <string name="available_appearance_dark">Dark</string>
+    <string name="available_appearance_light">Light</string>
+
+    <string name="custom_page_color_label">Theme</string>
+    <string name="custom_page_color_disabled_description">You can not change the theme color in dark mode</string>
+    <string name="available_custom_page_color_blue">Blue</string>
+    <string name="available_custom_page_color_green">Green</string>
+    <string name="available_custom_page_color_pink">Pink</string>
+    <string name="available_custom_page_color_purple">Purple</string>
+
+    <string name="custom_page_character_label">Characters</string>
+    <string name="available_custom_page_character_none">None</string>
+    <string name="available_custom_page_character_random">Random</string>
+    <string name="available_custom_page_character_doudoune">Doudoune</string>
+    <string name="available_custom_page_character_football">Football</string>
+    <string name="available_custom_page_character_turtleneck">Turtleneck</string>
+    <string name="available_custom_page_character_glasses">Glasses</string>
+    <string name="available_custom_page_character_cat">Cat</string>
+    <string name="available_custom_page_character_balloon">Balloon</string>
+    <string name="available_custom_page_character_pull">Pull</string>
+    <string name="available_custom_page_character_hat">Hat</string>
+    <string name="available_custom_page_character_hands">Hands</string>
+
+    <string name="show_news_label">News on homepage</string>
+
+    <string name="show_sponsor_label">Sponsored shortcuts on Homepage</string>
+
+    <string name="adult_filter_label">Adult content filter</string>
+    <string name="available_adult_filter_none">None</string>
+    <string name="available_adult_filter_moderate">Moderate</string>
+    <string name="available_adult_filter_strict">Strict</string>
+
+    <string name="open_links_in_app_label">Open links in native app</string>
+
+    <string name="open_results_in_new_tab_label">Open results in new tab</string>
+
+    <string name="search_engine_label">Search engine</string>
+    <string name="search_engine_current_midori">AstianGO</string>
+    <string name="search_engine_description">Midori search is built in for this version.</string>
+
+    <string name="interface_language_label">Interface language</string>
+    <string name="available_language_english">English</string>
+    <string name="available_language_french">French</string>
+    <string name="available_language_german">German</string>
+    <string name="available_language_italian">Italian</string>
+    <string name="available_language_spanish">Spanish</string>
+
+    <string name="search_region_label">Search region</string>
+    <string name="available_region_france">France</string>
+    <string name="available_region_great_britain">Great Britain</string>
+    <string name="available_region_germany">Germany</string>
+    <string name="available_region_italy">Italy</string>
+    <string name="available_region_argentina">Argentina</string>
+    <string name="available_region_australia">Australia</string>
+    <string name="available_region_usa">United States</string>
+    <string name="available_region_spain_es">Spanish (es)</string>
+    <string name="available_region_spain_ca">Spanish (ca)</string>
+    <string name="available_region_czech_republic">Czech Republic</string>
+    <string name="available_region_romania">Romania</string>
+    <string name="available_region_greece">Greece</string>
+    <string name="available_region_china">China</string>
+    <string name="available_region_hong_kong">Hong Kong</string>
+    <string name="available_region_new_zealand">New Zealand</string>
+    <string name="available_region_thailand">Thailand</string>
+    <string name="available_region_south_korea">South Korea</string>
+    <string name="available_region_sweden">Sweden</string>
+    <string name="available_region_norway">Norway</string>
+    <string name="available_region_denmark">Denmark</string>
+    <string name="available_region_hungary">Hungary</string>
+    <string name="available_region_estonia">Estonia</string>
+    <string name="available_region_mexico">Mexico</string>
+    <string name="available_region_chile">Chile</string>
+    <string name="available_region_canada_en">Canada (en)</string>
+    <string name="available_region_canada_fr">Canada (fr)</string>
+    <string name="available_region_malaysia">Malaysia</string>
+    <string name="available_region_bulgaria">Bulgaria</string>
+    <string name="available_region_finland">Finland</string>
+    <string name="available_region_poland">Poland</string>
+    <string name="available_region_netherlands">Netherlands</string>
+    <string name="available_region_portugal">Portugal</string>
+    <string name="available_region_switzerland_de">Switzerland (de)</string>
+    <string name="available_region_switzerland_fr">Switzerland (fr)</string>
+    <string name="available_region_switzerland_it">Switzerland (it)</string>
+    <string name="available_region_austria">Austria</string>
+    <string name="available_region_belgium_fr">Belgium (fr)</string>
+    <string name="available_region_belgium_nl">Belgium (nl)</string>
+    <string name="available_region_ireland">Ireland</string>
+
+    <string name="cleardata_settings_label">Browser deletion settings</string>
+    <string name="cleardata_allsites">All sites data</string>
+    <string name="cleardata_cache">Cache</string>
+    <string name="cleardata_cookies">Cookies</string>
+    <string name="cleardata_sessions">Sessions</string>
+    <string name="cleardata_permissions">Permissions</string>
+    <string name="cleardata_failed">Error clearing data</string>
+    <string name="cleardata_tabs">Opened normal tabs</string>
+    <string name="cleardata_tabs_private">Opened private tabs</string>
+    <string name="cleardata_use_now">Delete data</string>
+    <string name="cleardata_confirm_text">This button closes all your tabs and deletes all your browsing data.</string>
+    <string name="cleardata_done">Data deleted</string>
+
+    <string name="permissions_settings_label">Permissions</string>
+
+    <string name="clear_data_on_quit_label">Delete data on quit</string>
+    <string name="clear_data_on_quit_description">Please use the Quit app button to be sure it is applied</string>
+
+
+
+    <string name="privacy_policy_label">Privacy policy</string>
+
+    <string name="rate_us_label">Rate this app</string>
+
+    <string name="privacy_policy_url" translatable="false">https://astian.org/astian-privacy-policies/</string>  <!-- TODO use url from BuildConfig -->
+    <string name="qwant_details_description" translatable="false">%1$s\nBuild %2$s - Gecko %3$s</string>
+    <string name="settings_tests_label" translatable="false">Tests</string>
+    <string name="settings_tests_prompts_label" translatable="false">Prompts</string>
+    <string name="licence_label" translatable="false">Licence MPL 2.0</string>
+    <string name="settings_licence_content" translatable="false"><![CDATA[
+        <h2 id="definitions">1. Definitions</h2><br/>
+        <dl>
+        <dt>1.1. “Contributor”</dt>
+        <dd><p>means each individual or legal entity that creates, contributes to the creation of, or owns Covered Software.</p>
+        </dd><br/>
+        <dt>1.2. “Contributor Version”</dt>
+        <dd><p>means the combination of the Contributions of others (if any) used by a Contributor and that particular Contributor’s Contribution.</p>
+        </dd><br/>
+        <dt>1.3. “Contribution”</dt>
+        <dd><p>means Covered Software of a particular Contributor.</p>
+        </dd><br/>
+        <dt>1.4. “Covered Software”</dt>
+        <dd><p>means Source Code Form to which the initial Contributor has attached the notice in Exhibit A, the Executable Form of such Source Code Form, and Modifications of such Source Code Form, in each case including portions thereof.</p>
+        </dd><br/>
+        <dt>1.5. “Incompatible With Secondary Licenses”</dt>
+        <dd><p>means</p>
+        <ol type="a">
+        <li><p>that the initial Contributor has attached the notice described in Exhibit B to the Covered Software; or</p></li>
+        <li><p>that the Covered Software was made available under the terms of version 1.1 or earlier of the License, but not also under the terms of a Secondary License.</p></li>
+        </ol>
+        </dd><br/>
+        <dt>1.6. “Executable Form”</dt>
+        <dd><p>means any form of the work other than Source Code Form.</p>
+        </dd><br/>
+        <dt>1.7. “Larger Work”</dt>
+        <dd><p>means a work that combines Covered Software with other material, in a separate file or files, that is not Covered Software.</p>
+        </dd><br/>
+        <dt>1.8. “License”</dt>
+        <dd><p>means this document.</p>
+        </dd><br/>
+        <dt>1.9. “Licensable”</dt>
+        <dd><p>means having the right to grant, to the maximum extent possible, whether at the time of the initial grant or subsequently, any and all of the rights conveyed by this License.</p>
+        </dd><br/>
+        <dt>1.10. “Modifications”</dt>
+        <dd><p>means any of the following:</p>
+        <ol type="a"><br/>
+        <li><p>any file in Source Code Form that results from an addition to, deletion from, or modification of the contents of Covered Software; or</p></li>
+        <li><p>any new file in Source Code Form that contains any Covered Software.</p></li>
+        </ol>
+        </dd><br/>
+        <dt>1.11. “Patent Claims” of a Contributor</dt>
+        <dd><p>means any patent claim(s), including without limitation, method, process, and apparatus claims, in any patent Licensable by such Contributor that would be infringed, but for the grant of the License, by the making, using, selling, offering for sale, having made, import, or transfer of either its Contributions or its Contributor Version.</p>
+        </dd><br/>
+        <dt>1.12. “Secondary License”</dt>
+        <dd><p>means either the GNU General Public License, Version 2.0, the GNU Lesser General Public License, Version 2.1, the GNU Affero General Public License, Version 3.0, or any later versions of those licenses.</p>
+        </dd><br/>
+        <dt>1.13. “Source Code Form”</dt>
+        <dd><p>means the form of the work preferred for making modifications.</p>
+        </dd><br/>
+        <dt>1.14. “You” (or “Your”)</dt>
+        <dd><p>means an individual or a legal entity exercising rights under this License. For legal entities, “You” includes any entity that controls, is controlled by, or is under common control with You. For purposes of this definition, “control” means (a) the power, direct or indirect, to cause the direction or management of such entity, whether by contract or otherwise, or (b) ownership of more than fifty percent (50%) of the outstanding shares or beneficial ownership of such entity.</p>
+        </dd><br/>
+        </dl><br/>
+        <h2 id="license-grants-and-conditions">2. License Grants and Conditions</h2><br/>
+        <h3 id="grants">2.1. Grants</h3><br/>
+        <p>Each Contributor hereby grants You a world-wide, royalty-free, non-exclusive license:</p>
+        <ol type="a">
+        <li><p>under intellectual property rights (other than patent or trademark) Licensable by such Contributor to use, reproduce, make available, modify, display, perform, distribute, and otherwise exploit its Contributions, either on an unmodified basis, with Modifications, or as part of a Larger Work; and</p></li>
+        <li><p>under Patent Claims of such Contributor to make, use, sell, offer for sale, have made, import, and otherwise transfer either its Contributions or its Contributor Version.</p></li>
+        </ol><br/>
+        <h3 id="effective-date">2.2. Effective Date</h3><br/>
+        <p>The licenses granted in Section&nbsp;2.1 with respect to any Contribution become effective for each Contribution on the date the Contributor first distributes such Contribution.</p>
+        <br/><h3 id="limitations-on-grant-scope">2.3. Limitations on Grant Scope</h3><br/>
+        <p>The licenses granted in this Section&nbsp;2 are the only rights granted under this License. No additional rights or licenses will be implied from the distribution or licensing of Covered Software under this License. Notwithstanding Section&nbsp;2.1(b) above, no patent license is granted by a Contributor:</p>
+        <ol type="a">
+        <li><p>for any code that a Contributor has removed from Covered Software; or</p></li>
+        <li><p>for infringements caused by: (i) Your and any other third party’s modifications of Covered Software, or (ii) the combination of its Contributions with other software (except as part of its Contributor Version); or</p></li>
+        <li><p>under Patent Claims infringed by Covered Software in the absence of its Contributions.</p></li>
+        </ol>
+        <p>This License does not grant any rights in the trademarks, service marks, or logos of any Contributor (except as may be necessary to comply with the notice requirements in Section&nbsp;3.4).</p>
+        <br/><h3 id="subsequent-licenses">2.4. Subsequent Licenses</h3><br/>
+        <p>No Contributor makes additional grants as a result of Your choice to distribute the Covered Software under a subsequent version of this License (see Section&nbsp;10.2) or under the terms of a Secondary License (if permitted under the terms of Section&nbsp;3.3).</p>
+        <br/><h3 id="representation">2.5. Representation</h3><br/>
+        <p>Each Contributor represents that the Contributor believes its Contributions are its original creation(s) or it has sufficient rights to grant the rights to its Contributions conveyed by this License.</p>
+        <br/><h3 id="fair-use">2.6. Fair Use</h3><br/>
+        <p>This License is not intended to limit any rights You have under applicable copyright doctrines of fair use, fair dealing, or other equivalents.</p>
+        <br/><h3 id="conditions">2.7. Conditions</h3><br/>
+        <p>Sections 3.1, 3.2, 3.3, and 3.4 are conditions of the licenses granted in Section&nbsp;2.1.</p><br/>
+        <h2 id="responsibilities">3. Responsibilities</h2><br/>
+        <h3 id="distribution-of-source-form">3.1. Distribution of Source Form</h3><br/>
+        <p>All distribution of Covered Software in Source Code Form, including any Modifications that You create or to which You contribute, must be under the terms of this License. You must inform recipients that the Source Code Form of the Covered Software is governed by the terms of this License, and how they can obtain a copy of this License. You may not attempt to alter or restrict the recipients’ rights in the Source Code Form.</p>
+        <br/><h3 id="distribution-of-executable-form">3.2. Distribution of Executable Form</h3><br/>
+        <p>If You distribute Covered Software in Executable Form then:</p>
+        <ol type="a">
+        <li><p>such Covered Software must also be made available in Source Code Form, as described in Section&nbsp;3.1, and You must inform recipients of the Executable Form how they can obtain a copy of such Source Code Form by reasonable means in a timely manner, at a charge no more than the cost of distribution to the recipient; and</p></li>
+        <li><p>You may distribute such Executable Form under the terms of this License, or sublicense it under different terms, provided that the license for the Executable Form does not attempt to limit or alter the recipients’ rights in the Source Code Form under this License.</p></li>
+        </ol><br/>
+        <h3 id="distribution-of-a-larger-work">3.3. Distribution of a Larger Work</h3><br/>
+        <p>You may create and distribute a Larger Work under terms of Your choice, provided that You also comply with the requirements of this License for the Covered Software. If the Larger Work is a combination of Covered Software with a work governed by one or more Secondary Licenses, and the Covered Software is not Incompatible With Secondary Licenses, this License permits You to additionally distribute such Covered Software under the terms of such Secondary License(s), so that the recipient of the Larger Work may, at their option, further distribute the Covered Software under the terms of either this License or such Secondary License(s).</p>
+        <br/><h3 id="notices">3.4. Notices</h3><br/>
+        <p>You may not remove or alter the substance of any license notices (including copyright notices, patent notices, disclaimers of warranty, or limitations of liability) contained within the Source Code Form of the Covered Software, except that You may alter any license notices to the extent required to remedy known factual inaccuracies.</p>
+        <br/><h3 id="application-of-additional-terms">3.5. Application of Additional Terms</h3><br/>
+        <p>You may choose to offer, and to charge a fee for, warranty, support, indemnity or liability obligations to one or more recipients of Covered Software. However, You may do so only on Your own behalf, and not on behalf of any Contributor. You must make it absolutely clear that any such warranty, support, indemnity, or liability obligation is offered by You alone, and You hereby agree to indemnify every Contributor for any liability incurred by such Contributor as a result of warranty, support, indemnity or liability terms You offer. You may include additional disclaimers of warranty and limitations of liability specific to any jurisdiction.</p>
+        <br/><h2 id="inability-to-comply-due-to-statute-or-regulation">4. Inability to Comply Due to Statute or Regulation</h2><br/>
+        <p>If it is impossible for You to comply with any of the terms of this License with respect to some or all of the Covered Software due to statute, judicial order, or regulation then You must: (a) comply with the terms of this License to the maximum extent possible; and (b) describe the limitations and the code they affect. Such description must be placed in a text file included with all distributions of the Covered Software under this License. Except to the extent prohibited by statute or regulation, such description must be sufficiently detailed for a recipient of ordinary skill to be able to understand it.</p>
+        <br/><h2 id="termination">5. Termination</h2><br/>
+        <p>5.1. The rights granted under this License will terminate automatically if You fail to comply with any of its terms. However, if You become compliant, then the rights granted under this License from a particular Contributor are reinstated (a) provisionally, unless and until such Contributor explicitly and finally terminates Your grants, and (b) on an ongoing basis, if such Contributor fails to notify You of the non-compliance by some reasonable means prior to 60 days after You have come back into compliance. Moreover, Your grants from a particular Contributor are reinstated on an ongoing basis if such Contributor notifies You of the non-compliance by some reasonable means, this is the first time You have received notice of non-compliance with this License from such Contributor, and You become compliant prior to 30 days after Your receipt of the notice.</p>
+        <br/><p>5.2. If You initiate litigation against any entity by asserting a patent infringement claim (excluding declaratory judgment actions, counter-claims, and cross-claims) alleging that a Contributor Version directly or indirectly infringes any patent, then the rights granted to You by any and all Contributors for the Covered Software under Section&nbsp;2.1 of this License shall terminate.</p>
+        <br/><p>5.3. In the event of termination under Sections&nbsp;5.1 or 5.2 above, all end user license agreements (excluding distributors and resellers) which have been validly granted by You or Your distributors under this License prior to termination shall survive termination.</p>
+        <br/><h2 id="disclaimer-of-warranty">6. Disclaimer of Warranty</h2><br/>
+        <p><em>Covered Software is provided under this License on an “as is” basis, without warranty of any kind, either expressed, implied, or statutory, including, without limitation, warranties that the Covered Software is free of defects, merchantable, fit for a particular purpose or non-infringing. The entire risk as to the quality and performance of the Covered Software is with You. Should any Covered Software prove defective in any respect, You (not any Contributor) assume the cost of any necessary servicing, repair, or correction. This disclaimer of warranty constitutes an essential part of this License. No use of any Covered Software is authorized under this License except under this disclaimer.</em></p>
+        <br/><h2 id="limitation-of-liability">7. Limitation of Liability</h2><br/>
+        <p><em>Under no circumstances and under no legal theory, whether tort (including negligence), contract, or otherwise, shall any Contributor, or anyone who distributes Covered Software as permitted above, be liable to You for any direct, indirect, special, incidental, or consequential damages of any character including, without limitation, damages for lost profits, loss of goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages or losses, even if such party shall have been informed of the possibility of such damages. This limitation of liability shall not apply to liability for death or personal injury resulting from such party’s negligence to the extent applicable law prohibits such limitation. Some jurisdictions do not allow the exclusion or limitation of incidental or consequential damages, so this exclusion and limitation may not apply to You.</em></p>
+        <br/><h2 id="litigation">8. Litigation</h2><br/>
+        <p>Any litigation relating to this License may be brought only in the courts of a jurisdiction where the defendant maintains its principal place of business and such litigation shall be governed by laws of that jurisdiction, without reference to its conflict-of-law provisions. Nothing in this Section shall prevent a party’s ability to bring cross-claims or counter-claims.</p>
+        <br/><h2 id="miscellaneous">9. Miscellaneous</h2><br/>
+        <p>This License represents the complete agreement concerning the subject matter hereof. If any provision of this License is held to be unenforceable, such provision shall be reformed only to the extent necessary to make it enforceable. Any law or regulation which provides that the language of a contract shall be construed against the drafter shall not be used to construe this License against a Contributor.</p>
+        <br/><h2 id="versions-of-the-license">10. Versions of the License</h2><br/>
+        <h3 id="new-versions">10.1. New Versions</h3><br/>
+        <p>Mozilla Foundation is the license steward. Except as provided in Section&nbsp;10.3, no one other than the license steward has the right to modify or publish new versions of this License. Each version will be given a distinguishing version number.</p>
+        <br/><h3 id="effect-of-new-versions">10.2. Effect of New Versions</h3><br/>
+        <p>You may distribute the Covered Software under the terms of the version of the License under which You originally received the Covered Software, or under the terms of any subsequent version published by the license steward.</p>
+        <br/><h3 id="modified-versions">10.3. Modified Versions</h3><br/>
+        <p>If you create software not governed by this License, and you want to create a new license for such software, you may create and use a modified version of this License if you rename the license and remove any references to the name of the license steward (except to note that such modified license differs from this License).</p>
+        <br/><h3 id="distributing-source-code-form-that-is-incompatible-with-secondary-licenses">10.4. Distributing Source Code Form that is Incompatible With Secondary Licenses</h3>
+        <br/><p>If You choose to distribute Source Code Form that is Incompatible With Secondary Licenses under the terms of this version of the License, the notice described in Exhibit B of this License must be attached.</p>
+        <br/><h2 id="exhibit-a---source-code-form-license-notice">Exhibit A - Source Code Form License Notice</h2><br/>
+        <p>This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.</p>
+        <br/>
+        <p>If it is not possible or desirable to put the notice in a particular file, then You may include the notice in a location (such as a LICENSE file in a relevant directory) where a recipient would be likely to look for such a notice.</p>
+        <br/><p>You may add additional accurate notices of copyright ownership.</p><br/>
+        <h2 id="exhibit-b---incompatible-with-secondary-licenses-notice">Exhibit B - “Incompatible With Secondary Licenses” Notice</h2><br/>
+        <p>This Source Code Form is “Incompatible With Secondary Licenses”, as defined by the Mozilla Public License, v. 2.0.</p>
+    ]]></string>
+</resources>

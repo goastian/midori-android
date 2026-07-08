@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bookmarks">Marcadores</string>
+    <string name="bookmarks_folder">carpeta</string> <!-- bookmark_edit_folder without maj -->
+    <string name="bookmarks_bookmark">marcador</string>
+    <string name="bookmarks_folder_title_placeholder">Nombre de la carpeta</string>
+    <string name="bookmarks_move_x_to">Mover %1$s a</string>
+    <string name="bookmarks_empty_default_folder_name">La lista de favoritos</string>
+    <string name="bookmarks_empty_title">%1$s está vacía</string>
+    <string name="bookmarks_empty_message">Añada favoritos mediante el acceso al menú de la página web.</string>
+</resources>

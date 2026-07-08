@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vip_protection_enabled">Protection enabled on this website</string>
+    <string name="vip_protection_enabled_hint">😊 You are protected from trackers</string>
+    <string name="vip_protection_disabled">Protection disabled on this website</string>
+    <string name="vip_protection_disabled_hint">😕 You are not protected from trackers</string>
+    <string name="vip_popup_loading">Syncing blocker data…</string>
+    <string name="vip_popup_hostname_fallback">Current tab</string>
+    <string name="vip_stats_title">Midori Privacy</string>
+    <string name="vip_stats_blocked">Blocked</string>
+    <string name="vip_stats_popups">Popups</string>
+    <string name="vip_stats_saved">Saved</string>
+    <string name="vip_stats_energy">Energy</string>
+    <string name="vip_stats_trackers">Trackers</string>
+    <string name="vip_stats_ads">Ads</string>
+    <string name="vip_stats_other">Other</string>
+    <string name="vip_stats_level">Shield level</string>
+    <string name="vip_stats_antifingerprint">Anti-fingerprinting</string>
+    <string name="vip_stats_popup_guard">Popup guard</string>
+    <string name="vip_module_on">On</string>
+    <string name="vip_module_off">Off</string>
+    <string name="vip_saved_unit_kb">KB saved</string>
+    <string name="vip_saved_unit_mb">MB saved</string>
+    <string name="vip_energy_unit_wh">Wh</string>
+    <string name="vip_energy_unit_kwh">kWh</string>
+    <string name="vip_mode_standard">Standard</string>
+    <string name="vip_mode_strict">Strict</string>
+    <string name="vip_mode_basic">Basic</string>
+    <string name="vip_mode_balanced">Balanced</string>
+    <string name="vip_mode_relaxed">Relaxed</string>
+    <string name="vip_mode_off">Off</string>
+    <string name="vip_about">Find out more</string>
+    <string name="vip_about_link">https://astian.org/</string>
+    <string name="vip_comment">Share a comment</string>
+    <string name="vip_comment_link">https://astian.org/feedback/</string>
+</resources>

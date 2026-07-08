@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vip_protection_enabled">Protection activée sur ce site</string>
+    <string name="vip_protection_enabled_hint">😊 Vous êtes protégé contre les traqueurs</string>
+    <string name="vip_protection_disabled">Protection désactivée sur ce site</string>
+    <string name="vip_protection_disabled_hint">😕 Vous n\'êtes pas protégé contre les traqueurs</string>
+    <string name="vip_about">En savoir plus</string>
+    <string name="vip_about_link">https://astian.org/</string>
+    <string name="vip_comment">Partager un commentaire</string>
+    <string name="vip_comment_link">https://astian.org/feedback/</string>
+</resources>

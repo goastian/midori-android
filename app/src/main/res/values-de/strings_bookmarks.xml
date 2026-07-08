@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bookmarks">Lesezeichen</string>
+    <string name="bookmarks_folder">ordner</string>
+    <string name="bookmarks_bookmark">lesezeichen</string>
+    <string name="bookmarks_folder_title_placeholder">Ordnername</string>
+    <string name="bookmarks_move_x_to">Verschiebe %1$s nach</string>
+    <string name="bookmarks_empty_default_folder_name">Die Liste der Lesezeichen</string>
+    <string name="bookmarks_empty_title">%1$s ist leer</string>
+    <string name="bookmarks_empty_message">Fügen Sie Lesezeichen über das Menü der Webseite hinzu.</string>
+</resources>

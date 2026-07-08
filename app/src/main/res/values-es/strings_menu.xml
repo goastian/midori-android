@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_add_to_homescreen">Añadir a la pantalla principal</string>
+    <string name="menu_request_desktop_site">Solicitar sitio de escritorio</string>
+    <string name="menu_quit_app">Cierra la aplicación</string>
+    <string name="menu_find_in_page">Buscar en la página</string>
+    <string name="menu_account">Cuenta</string>
+    <string name="menu_login">Iniciar sesión</string>
+    <string name="menu_more_options">Más opciones</string>
+    <string name="menu_back_to_main">Acciones principales</string>
+</resources>

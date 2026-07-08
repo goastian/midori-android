@@ -1,0 +1,20 @@
+<resources>
+    <string name="ok">OK</string>
+    <string name="cancel">Abbrechen</string>
+
+    <string name="save">Speichern</string>
+    <string name="delete">Löschen</string>
+    <string name="share">Teilen</string>
+    <string name="erase">Löschen</string>
+
+    <string name="all_fields_required">Alle Felder sind erforderlich</string>
+
+    <!-- confirm texts ? -->
+    <string name="create">Erstellen</string>
+    <string name="edit">Bearbeiten</string>
+    <string name="try_again">Versuch es erneut</string>
+    <string name="permission_permanently_refused">Sie haben die Berechtigung dauerhaft abgelehnt. Sie können sie nun in den Android-Einstellungen aktivieren.</string>
+    <string name="take_me_there">Bring mich dorthin</string>
+
+    <string name="blocked_website">Blockierte Website</string>
+</resources>

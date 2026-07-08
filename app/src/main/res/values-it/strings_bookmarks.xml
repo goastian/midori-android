@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bookmarks">Segnalibri</string>
+    <string name="bookmarks_folder">una cartella</string>
+    <string name="bookmarks_bookmark">un segnalibro</string>
+    <string name="bookmarks_folder_title_placeholder">Nome della cartell</string>
+    <string name="bookmarks_move_x_to">Sposta %1$s in</string>
+    <string name="bookmarks_empty_default_folder_name">L\'elenco dei segnalibri</string>
+    <string name="bookmarks_empty_title">%1$s è vuoto</string>
+    <string name="bookmarks_empty_message">Aggiungi segnalibri utilizzando l\'accesso da menù sulla pagina web.</string>
+</resources>

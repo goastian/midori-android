@@ -1,0 +1,20 @@
+<resources>
+    <string name="ok">Vale</string>
+    <string name="cancel">Cancelar</string>
+
+    <string name="save">Guardar</string>
+    <string name="delete">Eliminar</string>
+    <string name="share">Compartir</string>
+    <string name="erase">Borrar</string>
+
+    <string name="all_fields_required">Todos los campos son obligatorios</string>
+
+    <!-- confirm texts ? -->
+    <string name="create">Crear</string>
+    <string name="edit">Editar</string>
+    <string name="try_again">Inténtalo de nuevo</string>
+    <string name="permission_permanently_refused">"Ha rechazado permanentemente los permisos. Ahora debe habilitarlos a través de la configuración del sistema. "</string>
+    <string name="take_me_there">Llévame allí</string>
+
+    <string name="blocked_website">Sitio web bloqueado</string>
+</resources>

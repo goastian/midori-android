@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Privacy/Security runtime options -->
+    <string name="privacy_setting_app_tracking_protection_label">App tracking protection</string>
+    <string name="privacy_setting_app_tracking_protection_desc">Blocks more trackers across browsing sessions.</string>
+    <string name="privacy_setting_app_tracking_protection_mode_label">App tracking protection mode</string>
+    <string name="privacy_setting_app_tracking_protection_mode_browser_first">Browser-first</string>
+    <string name="privacy_setting_app_tracking_protection_mode_browser_first_desc">Protect this browser with GeckoView tracking prevention now.</string>
+    <string name="privacy_setting_app_tracking_protection_mode_hybrid_system">Hybrid system mode</string>
+    <string name="privacy_setting_app_tracking_protection_mode_hybrid_system_desc">Keeps browser protection on and prepares Midori for a future VPN/proxy layer.</string>
+    <string name="privacy_setting_app_tracking_system_status_label">System protection status</string>
+    <string name="privacy_setting_app_tracking_system_status_running">Running and monitoring system traffic.</string>
+    <string name="privacy_setting_app_tracking_system_status_stopped">Stopped. Turn it on to protect traffic outside the browser.</string>
+    <string name="privacy_setting_app_tracking_system_enabled_label">System-wide app tracking protection</string>
+    <string name="privacy_setting_app_tracking_system_enabled_desc">Uses Android VPN permission to protect traffic beyond Midori.</string>
+    <string name="privacy_setting_app_tracking_exclude_midori_label">Exclude Midori app traffic</string>
+    <string name="privacy_setting_app_tracking_exclude_midori_desc">Add or remove Midori from the system protection exclusion list.</string>
+    <string name="privacy_setting_app_tracking_metrics_total_label">Blocked requests total</string>
+    <string name="privacy_setting_app_tracking_metrics_top_domain_label">Top blocked domain</string>
+    <string name="privacy_setting_app_tracking_metrics_top_app_label">Top blocked app</string>
+    <string name="privacy_setting_app_tracking_metrics_top_company_label">Top tracker company</string>
+    <string name="privacy_setting_app_tracking_recent_label">Recent blocked trackers</string>
+    <string name="privacy_setting_app_tracking_metrics_none">No blocked requests yet.</string>
+    <string name="privacy_setting_app_tracking_open_report_label">Open app tracking report</string>
+    <string name="privacy_setting_app_tracking_open_report_desc">See per-app cards, live timeline, and tracker details.</string>
+
+    <string name="privacy_setting_fingerprinting_label">Fingerprinting protection</string>
+    <string name="privacy_setting_gpc_label">Global Privacy Control (GPC)</string>
+    <string name="privacy_setting_cookie_partitioning_label">Cookie partitioning</string>
+
+    <string name="app_tracking_system_notification_channel_name">App Tracking Protection</string>
+    <string name="app_tracking_system_notification_title">System tracking protection active</string>
+    <string name="app_tracking_system_notification_text">Monitoring network traffic for tracker blocking signals.</string>
+
+    <!-- Dedicated report screen -->
+    <string name="app_tracking_report_title">App Tracking Protection Report</string>
+    <string name="app_tracking_report_signal_board">Signal board</string>
+    <string name="app_tracking_report_state_running">Protection is active across system traffic.</string>
+    <string name="app_tracking_report_state_stopped">Protection is paused. Start system mode to collect report activity.</string>
+    <string name="app_tracking_report_metric_blocked">blocked</string>
+    <string name="app_tracking_report_metric_companies">tracker companies</string>
+    <string name="app_tracking_report_top_apps_title">Top apps snapshot</string>
+    <string name="app_tracking_report_top_protected">Top protected apps</string>
+    <string name="app_tracking_report_top_disabled">Protection disabled</string>
+    <string name="app_tracking_report_per_app_title">Per-app protection cards</string>
+    <string name="app_tracking_report_timeline_title">Live activity timeline</string>
+    <string name="app_tracking_report_tracker_breakdown_title">Tracker breakdown</string>
+    <string name="app_tracking_report_empty">No tracker activity yet.</string>
+
+    <!-- Existing privacy controls used by the privacy screen -->
+    <string name="settings_enhanced_tracking_protection_label">Enhanced Tracking Protection</string>
+    <string name="settings_enhanced_tracking_protection_description">Firefox protects you from many of the most common trackers that follow what you do online.</string>
+    <string name="settings_tracking_protection_standard">Standard (default)</string>
+    <string name="settings_tracking_protection_standard_desc">Pages will load normally, but block fewer trackers.</string>
+    <string name="settings_tracking_protection_strict">Strict</string>
+    <string name="settings_tracking_protection_strict_desc">Stronger tracking protection and faster performance, but some sites may not work properly.</string>
+    <string name="settings_tracking_protection_custom">Custom</string>
+    <string name="settings_tracking_protection_custom_desc">Choose which trackers and scripts to block.</string>
+    <string name="settings_total_cookie_protection">Tell websites not to share &amp; sell data</string>
+
+    <string name="settings_https_only_mode_label">HTTPS-Only Mode</string>
+    <string name="settings_https_only_mode_description">Automatically attempts to connect to sites using HTTPS encryption protocol for increased security.</string>
+    <string name="settings_https_only_off">Off</string>
+    <string name="settings_https_only_off_desc">Use your default DNS resolver</string>
+    <string name="settings_https_only_all_tabs">Enable in all tabs</string>
+    <string name="settings_https_only_private_tabs">Enable only in private tabs</string>
+
+    <string name="settings_dns_over_https_label">DNS over HTTPS</string>
+    <string name="settings_dns_over_https_description">Domain Name System (DNS) over HTTPS sends your request for a domain name through an encrypted connection, providing a secure DNS and making it harder for others to see which website you are about to access.</string>
+    <string name="settings_dns_over_https_default">Default Protection</string>
+    <string name="settings_dns_over_https_default_desc">Firefox decides when to use secure DNS to protect your privacy.</string>
+    <string name="settings_dns_over_https_increased">Increased Protection</string>
+    <string name="settings_dns_over_https_increased_desc">You control when to use secure DNS and choose your provider.</string>
+    <string name="settings_dns_over_https_max">Max Protection</string>
+    <string name="settings_dns_over_https_max_desc">Firefox will always use secure DNS. You will see a security risk warning before we use your system DNS.</string>
+    <string name="settings_dns_over_https_exceptions">Exceptions</string>
+</resources>

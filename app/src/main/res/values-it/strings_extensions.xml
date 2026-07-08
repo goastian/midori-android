@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_title">Estensioni</string>
+    <string name="extensions_empty_title">Nessuna estensione installata</string>
+    <string name="extensions_empty_message">Installa estensioni per aggiungere funzionalità al tuo browser.</string>
+    <string name="extensions_install">Installa estensione</string>
+    <string name="extensions_install_hint">Inserisci l\'URL di un file di estensione (.xpi)</string>
+    <string name="extensions_uninstall">Disinstalla</string>
+    <string name="extensions_uninstall_confirm">Disinstallare \"%1$s\"?</string>
+    <string name="extensions_enable">Attiva</string>
+    <string name="extensions_disable">Disattiva</string>
+    <string name="extensions_install_error">Impossibile installare l\'estensione</string>
+    <string name="extensions_manage">Gestisci estensioni</string>
+    <string name="extensions_more">Altre estensioni</string>
+</resources>
+

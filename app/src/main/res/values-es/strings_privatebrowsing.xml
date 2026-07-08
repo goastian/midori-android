@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="privatebrowsing_title">Navegación privada</string>
+    <string name="privatebrowsing_paragraph_1">Los sitios vistos en pestañas privadas no se muestran en su historial de Midori y sus cookies siempre se eliminan cuando cierra la pestaña. Sin navegación privada, su historial de búsqueda se almacena en su teléfono, pero Midori no lo puede ver (¡respetamos su privacidad!).</string>
+    <string name="privatebrowsing_paragraph_2">Tenga en cuenta que la navegación privada no lo hace invisible en Internet. Las pestañas privadas no impiden que su operador de telefonía móvil o el propietario de la red Wi-Fi rastreen los sitios que visita o su dirección IP pública.</string>
+</resources>

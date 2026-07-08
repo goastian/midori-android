@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="browser_downloads">Download</string>
+
+    <string name="browser_new_tab">Aggiungi nuova scheda</string>
+    <string name="browser_new_tab_private">Aggiungi scheda private</string>
+    <string name="browser_close_all_tabs">Chiudi tutte le schede</string>
+    <string name="browser_close_private_tabs">Chiudi le schede private</string>
+    <string name="browser_close_tab">Chiudi questa scheda</string>
+    <string name="browser_go_to_tab">Vai alla scheda</string>
+    <string name="browser_tab_closed">Scheda chiusa</string>
+    <string name="browser_tabs_closed">Schede eliminate</string>
+    <string name="browser_tabs_empty_title">Le schede appariranno qui</string>
+    <string name="browser_tabs_empty_subtitle">Utilizzare le schede per consultare più pagine contemporaneamente.</string>
+    <string name="browser_tabs_empty_title_private">Qui vengono visualizzate le schede di navigazione privata</string>
+    <string name="browser_tabs_empty_subtitle_private">Per navigare in modalità privata, aggiungere una scheda.</string>
+
+    <string name="browser_site_secure">Connessione sicura</string>
+    <string name="browser_site_insecure">Connessione non sicura</string>
+
+    <string name="browser_toolbar_hint">Cerca o inserisci un indirizzo</string>
+
+    <string name="browser_suggest_clipboard_text">Testo copiato</string>
+    <string name="browser_brand_suggest_ad">Inserzione</string>
+    <string name="browser_brand_suggest_information">Questo suggerimento di ricerca è una pubblicità di %1$s, che ti reindirizzerà verso il sito dell\'inserzionista: %2$s</string>
+
+    <string name="browser_permission_geoloc_blocked">Midori Kids protegge la tua vita privata e impedisce la condivisione della tua posizione esatta automaticamente.</string>
+    <string name="browser_understood">Ho capito</string>
+</resources>

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="toolbar_position_label">Barra de herramientas</string>
+    <string name="available_toolbar_position_top">Volver arriba</string>
+    <string name="available_toolbar_position_bottom">En el fondo</string>
+    <string name="hide_toolbar_on_scroll_label">Ocultar la barra de herramientas al desplazarse.</string>
+    <string name="appearance_label">Aspecto</string>
+    <string name="available_appearance_system">Automática</string>
+    <string name="cleardata_storage">Almacenamiento</string>
+    <string name="settings">Ajustes</string>
+
+    <string name="settings_group_general">General</string>
+    <string name="settings_group_langue">Idioma</string>
+    <string name="settings_group_privacy">Privacidad</string>
+    <string name="settings_group_about">Acerca de</string>
+
+    <string name="default_browser_label">Abra todos sus enlaces en la aplicación Midori</string>
+
+    <string name="tabs_view_label">Configuración de pestañas</string>
+    <string name="available_tabs_view_grid">Red</string>
+    <string name="available_tabs_view_list">Lista</string>
+
+    <string name="available_appearance_dark">Oscuro</string>
+    <string name="available_appearance_light">Claro</string>
+
+    <string name="custom_page_color_label">Tema</string>
+    <string name="custom_page_color_disabled_description">No se puede cambiar el color del tema en modo oscuro</string>
+    <string name="available_custom_page_color_blue">Azul</string>
+    <string name="available_custom_page_color_green">Verde</string>
+    <string name="available_custom_page_color_pink">Rosa</string>
+    <string name="available_custom_page_color_purple">Violeta</string>
+
+    <string name="custom_page_character_label">Personajes</string>
+    <string name="available_custom_page_character_none">No</string>
+    <string name="available_custom_page_character_random">Aleatorio</string>
+    <string name="available_custom_page_character_doudoune">Chaqueta de pluma</string>
+    <string name="available_custom_page_character_football">Fútbol</string>
+    <string name="available_custom_page_character_turtleneck">Cuello alto</string>
+    <string name="available_custom_page_character_glasses">Gafas</string>
+    <string name="available_custom_page_character_cat">Gato</string>
+    <string name="available_custom_page_character_balloon">Globo</string>
+    <string name="available_custom_page_character_pull">Suéter</string>
+    <string name="available_custom_page_character_hat">Sombrero</string>
+    <string name="available_custom_page_character_hands">Manos</string>
+
+    <string name="show_news_label">Noticias en la página de inicio</string>
+
+    <string name="show_sponsor_label">Accesos directos patrocinados en la página de inicio</string>
+    <string name="adult_filter_label">Filtro de contenido para adultos</string>
+    <string name="available_adult_filter_none">Ninguno</string>
+    <string name="available_adult_filter_moderate">Moderado</string>
+    <string name="available_adult_filter_strict">Estricto</string>
+
+    <string name="open_links_in_app_label">Abrir enlaces en la aplicación nativa</string>
+
+    <string name="open_results_in_new_tab_label">Abrir los resultados en una nueva pestaña</string>
+
+    <string name="search_engine_label">Buscador</string>
+    <string name="search_engine_current_midori">AstianGO</string>
+    <string name="search_engine_description">La búsqueda de Midori viene integrada en esta versión.</string>
+
+    <string name="interface_language_label">Idioma de la interfaz</string>
+    <string name="available_language_english">Inglés</string>
+    <string name="available_language_french">Francés</string>
+    <string name="available_language_german">Alemán</string>
+    <string name="available_language_italian">Italiano</string>
+    <string name="available_language_spanish">Español</string>
+
+    <string name="search_region_label">Región de resultados de búsqueda</string>
+    <string name="available_region_france">Francia</string>
+    <string name="available_region_great_britain">Gran Bretaña</string>
+    <string name="available_region_germany">Alemania</string>
+    <string name="available_region_italy">Italia</string>
+    <string name="available_region_argentina">Argentina</string>
+    <string name="available_region_australia">Australia</string>
+    <string name="available_region_usa">Estados Unidos</string>
+    <string name="available_region_spain_es">España (es)</string>
+    <string name="available_region_spain_ca">España (ca)</string>
+    <string name="available_region_czech_republic">República Checa</string>
+    <string name="available_region_romania">Rumania</string>
+    <string name="available_region_greece">Grecia</string>
+    <string name="available_region_china">China</string>
+    <string name="available_region_hong_kong">Hong Kong</string>
+    <string name="available_region_new_zealand">Nueva Zelanda</string>
+    <string name="available_region_thailand">Tailandia</string>
+    <string name="available_region_south_korea">Corea del sur</string>
+    <string name="available_region_sweden">Suecia</string>
+    <string name="available_region_norway">Noruega</string>
+    <string name="available_region_denmark">Dinamarca</string>
+    <string name="available_region_hungary">Hungría</string>
+    <string name="available_region_estonia">Estonia</string>
+    <string name="available_region_mexico">México</string>
+    <string name="available_region_chile">Chile</string>
+    <string name="available_region_canada_en">Canadá (en)</string>
+    <string name="available_region_canada_fr">Canadá (fr)</string>
+    <string name="available_region_malaysia">Malasia</string>
+    <string name="available_region_bulgaria">Bulgaria</string>
+    <string name="available_region_finland">Finlandia</string>
+    <string name="available_region_poland">Polonia</string>
+    <string name="available_region_netherlands">Holanda</string>
+    <string name="available_region_portugal">Portugal</string>
+    <string name="available_region_switzerland_de">Suiza (de)</string>
+    <string name="available_region_switzerland_fr">Suiza (fr)</string>
+    <string name="available_region_switzerland_it">Suiza (it)</string>
+    <string name="available_region_austria">Austria</string>
+    <string name="available_region_belgium_fr">Bélgica (fr)</string>
+    <string name="available_region_belgium_nl">Bélgica (nl)</string>
+    <string name="available_region_ireland">Irlanda</string>
+
+    <string name="show_favicon_label">Mostrar iconos del sitio</string>
+
+    <string name="cleardata_settings_label">Browser deletion settings</string>
+
+    <string name="cleardata_allsites">Datos de todos los sitios</string>
+    <string name="cleardata_cache">Caché</string>
+    <string name="cleardata_cookies">Cookies</string>
+    <string name="cleardata_sessions">Sesión</string>
+    <string name="cleardata_permissions">Permisos</string>
+    <string name="cleardata_failed">Error al borrar los datos</string>
+    <string name="cleardata_tabs">Pestañas normales abiertas</string>
+    <string name="cleardata_tabs_private">Pestañas privadas abiertas</string>
+    <string name="cleardata_use_now">Eliminar datos</string>
+    <string name="cleardata_confirm_text">Este botón cierra todas tus pestañas y borra todos tus datos de navegación.</string>
+    <string name="cleardata_done">Datos eliminados</string>
+
+    <string name="clear_data_on_quit_label">Borrar datos al salir</string>
+    <string name="clear_data_on_quit_description">Utilice el botón Salir de la aplicación para asegurarse de que se aplique</string>
+
+    <string name="privacy_policy_label">Política de privacidad</string>
+
+    <string name="rate_us_label">Califica esta aplicación</string>
+</resources>

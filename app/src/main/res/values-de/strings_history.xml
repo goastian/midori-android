@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history">Verlauf</string>
+
+    <string name="history_today">Heute</string>
+    <string name="history_yesterday">Gestern</string>
+
+    <string name="history_clear_all_confirm_title">Verlauf löschen</string>
+    <string name="history_clear_all_confirm_message">Wollen Sie den gesamten Verlauf wirklich löschen ?</string>
+    <string name="history_clear_all_confirm_ok">Alle löschen</string>
+
+    <string name="history_empty_title">Der Verlauf ist leer</string>
+    <string name="history_empty_message">Besuchte Seiten werden hier angezeigt</string>
+</resources>

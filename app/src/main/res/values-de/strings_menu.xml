@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_add_to_homescreen">Dem Home-Bildschirm hinzufügen</string>
+    <string name="menu_request_desktop_site">Desktop-Website anfordern</string>
+    <string name="menu_quit_app">Die App schließen</string>
+    <string name="menu_find_in_page">Auf der Seite finden</string>
+    <string name="menu_account">Account</string>
+    <string name="menu_login">Login</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="privatebrowsing_title">Navigazione in incognito</string>
+    <string name="privatebrowsing_paragraph_1">I siti visitati nelle schede in incognito non saranno visualizzati nella cronologia di Midori e i loro cookie verranno sempre eliminati dopo aver chiuso la scheda. Senza navigazione in incognito, la tua cronologia di ricerca viene memorizzata sul tuo telefono ma non è visibile a Midori (rispettiamo la tua privacy!).</string>
+    <string name="privatebrowsing_paragraph_2">Tieni presente che la navigazione in incognito non ti rende invisibile su internet. Le schede in incognito non impediscono al tuo operatore di telefonia mobile o al proprietario della rete Wi-Fi di tracciare i siti che visiti o il tuo indirizzo IP pubblico.</string>
+</resources>

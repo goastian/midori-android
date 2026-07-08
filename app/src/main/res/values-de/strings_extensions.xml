@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_title">Erweiterungen</string>
+    <string name="extensions_empty_title">Keine Erweiterungen installiert</string>
+    <string name="extensions_empty_message">Installieren Sie Erweiterungen, um Ihrem Browser zusätzliche Funktionen hinzuzufügen.</string>
+    <string name="extensions_install">Erweiterung installieren</string>
+    <string name="extensions_install_hint">Geben Sie die URL einer Erweiterungsdatei (.xpi) ein</string>
+    <string name="extensions_uninstall">Deinstallieren</string>
+    <string name="extensions_uninstall_confirm">\"%1$s\" deinstallieren?</string>
+    <string name="extensions_enable">Aktivieren</string>
+    <string name="extensions_disable">Deaktivieren</string>
+    <string name="extensions_install_error">Erweiterung konnte nicht installiert werden</string>
+    <string name="extensions_manage">Erweiterungen verwalten</string>
+    <string name="extensions_more">Weitere Erweiterungen</string>
+</resources>
+

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="browser_downloads">Downloads</string>
+
+    <string name="browser_new_tab">New tab</string>
+    <string name="browser_new_tab_private">New private tab</string>
+    <string name="browser_close_all_tabs">Close all tabs</string>
+    <string name="browser_close_private_tabs">Close private tabs</string>
+    <string name="browser_close_tab">Close this tab</string>
+    <string name="browser_go_to_tab">Go to tab</string>
+    <string name="browser_tab_closed">Tab closed</string>
+    <string name="browser_tabs_closed">Tabs deleted</string>
+    <string name="browser_search_tabs_hint">Search tabs</string>
+    <string name="browser_active_tabs">Active tabs</string>
+    <string name="browser_inactive_tabs">Inactive tabs</string>
+    <string name="browser_inactive_tabs_summary">Tabs not used in the last 14 days</string>
+    <string name="browser_tab_group_count">%1$d tabs</string>
+    <string name="browser_reopen_closed_tab">Reopen closed tab</string>
+    <string name="browser_recent_tab_reopened">Tab reopened</string>
+    <string name="browser_close_duplicate_tabs">Close duplicate tabs</string>
+    <string name="browser_duplicate_tabs_closed">%1$d duplicate tabs closed</string>
+    <string name="browser_no_duplicate_tabs">No duplicate tabs found</string>
+    <string name="browser_group_tabs_by_site">Group tabs by site</string>
+    <string name="browser_tabs_grouped">%1$d tabs grouped</string>
+    <string name="browser_no_tabs_grouped">No matching tabs to group</string>
+    <string name="browser_tabs_empty_title">Your tabs will be displayed here</string>
+    <string name="browser_tabs_empty_subtitle">Use the tabs to view several pages at the same time.</string>
+    <string name="browser_tabs_empty_title_private">Private browsing tabs will be displayed here</string>
+    <string name="browser_tabs_empty_subtitle_private">To browse the web in private mode, add a tab.</string>
+
+    <string name="browser_site_secure">Secure connection</string>
+    <string name="browser_site_insecure">Insecure connection</string>
+
+    <string name="browser_toolbar_hint">Search or enter an address</string>
+
+    <string name="browser_suggest_clipboard_text">Copied text</string>
+    <string name="browser_brand_suggest_ad">Ad</string>
+    <string name="browser_brand_suggest_information">This search suggestion is an advertisement for %1$s. You will be redirected to the advertiser\'s website: %2$s</string>
+
+    <string name="browser_permission_geoloc_blocked">Midori Kids protects your privacy and prevents your exact location from being shared automatically.</string>
+    <string name="browser_understood">Got it</string>
+
+    <string name="download_wifi_only">Wi-Fi only downloads</string>
+    <string name="download_wifi_only_summary">Start downloads only when the device is connected to Wi-Fi.</string>
+    <string name="download_wifi_only_waiting">Connect to Wi-Fi to start this download.</string>
+    <string name="downloads_empty_title">No downloads yet</string>
+    <string name="downloads_empty_summary">Files you download will appear here with progress, retry, pause, and resume controls.</string>
+    <string name="download_pause">Pause</string>
+    <string name="download_resume">Resume</string>
+    <string name="download_cancel">Cancel</string>
+    <string name="retry_download">Retry</string>
+    <string name="download_remove">Remove</string>
+    <string name="download_open">Open</string>
+    <string name="download_status_downloading">Downloading</string>
+    <string name="download_status_paused">Paused - %1$s</string>
+    <string name="download_status_failed">Failed</string>
+    <string name="download_status_completed">Completed - %1$s</string>
+    <string name="download_status_cancelled">Cancelled</string>
+    <string name="download_status_pending">Waiting</string>
+    <string name="download_eta">ETA %1$s</string>
+
+    <string name="reading_list_title">Reading Mode</string>
+    <string name="reading_list_search_hint">Search saved reading pages</string>
+    <string name="reading_list_empty_title">No saved pages yet</string>
+    <string name="reading_list_empty_summary">Save pages for Reading Mode from the browser menu.</string>
+    <string name="reading_list_add_current">Save for Reading Mode</string>
+    <string name="reading_list_remove_current">Remove from Reading Mode</string>
+    <string name="reading_list_open">Open</string>
+    <string name="reading_list_mark_read">Mark read</string>
+    <string name="reading_list_mark_unread">Mark unread</string>
+    <string name="reading_list_remove">Remove</string>
+    <string name="reading_list_offline_later">Offline reading can be added in the next phase.</string>
+    <string name="reading_list_offline_available">Available offline</string>
+    <string name="bookmark_add_current">Add bookmark</string>
+    <string name="bookmark_remove_current">Remove bookmark</string>
+</resources>

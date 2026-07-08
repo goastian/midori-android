@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_title">Extensiones</string>
+    <string name="extensions_empty_title">No hay extensiones instaladas</string>
+    <string name="extensions_empty_message">Instala extensiones para añadir funciones adicionales a tu navegador.</string>
+    <string name="extensions_install">Instalar</string>
+    <string name="extensions_install_hint">Introduce la URL de un archivo de extensión (.xpi)</string>
+    <string name="extensions_uninstall">Desinstalar</string>
+    <string name="extensions_uninstall_confirm">¿Desinstalar \"%1$s\"?</string>
+    <string name="extensions_enable">Activar</string>
+    <string name="extensions_disable">Desactivar</string>
+    <string name="extensions_install_error">No se pudo instalar la extensión</string>
+    <string name="extensions_recommended">Extensiones recomendadas</string>
+    <string name="extensions_installed">Extensiones instaladas</string>
+    <string name="extensions_loading">Cargando extensiones…</string>
+    <string name="extensions_detail_title">Detalles de la extensión</string>
+    <string name="extensions_author_by">por %1$s</string>
+    <string name="extensions_ratings">%1$s valoraciones</string>
+    <string name="extensions_users">%1$s usuarios</string>
+    <string name="extensions_version">Versión %1$s</string>
+    <string name="extensions_permissions">Permisos</string>
+    <string name="extensions_no_permissions">Esta extensión no requiere permisos especiales.</string>
+    <string name="extensions_installing">Instalando…</string>
+    <string name="extensions_installed_label">Instalada</string>
+    <string name="extensions_enabled">Activada</string>
+    <string name="extensions_retry">Reintentar</string>
+    <string name="extensions_load_error">No se pudieron cargar las extensiones</string>
+    <string name="extensions_manage">Gestionar extensiones</string>
+    <string name="extensions_more">Más extensiones</string>
+    <string name="extensions_error_load_actionable">No pudimos cargar extensiones. Revisa tu conexión.</string>
+    <string name="extensions_error_action_actionable">No pudimos completar la acción. Inténtalo de nuevo.</string>
+</resources>

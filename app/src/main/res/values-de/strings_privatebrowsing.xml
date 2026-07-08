@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="privatebrowsing_title">Privates Surfen</string>
+    <string name="privatebrowsing_paragraph_1">Websites, die Sie in privaten Tabs besuchen, erscheinen nicht in Ihrem Midori-Verlauf und die zugehörigen Cookies werden immer gelöscht, wenn Sie den Tab schließen. Wenn Sie nicht im privaten Modus surfen, wird Ihr Suchverlauf auf Ihrem Telefon gespeichert, ist aber für Midori nicht sichtbar (wir respektieren Ihre Privatsphäre!).</string>
+    <string name="privatebrowsing_paragraph_2">Bitte beachten Sie, dass Sie beim Surfen im privaten Modus im Internet nicht unsichtbar sind. Private Tabs verhindern nicht, dass Ihr Mobilfunkanbieter oder WLAN-Betreiber die von Ihnen besuchten Seiten oder Ihre öffentliche IP-Adresse nachvollziehen kann.</string>
+</resources>

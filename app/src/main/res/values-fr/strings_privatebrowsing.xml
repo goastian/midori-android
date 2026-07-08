@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="privatebrowsing_title">La navigation privée</string>
+    <string name="privatebrowsing_paragraph_1">Les sites consultés dans des onglets privés ne s\'affichent pas dans votre historique Midori, et leurs cookies sont toujours supprimés lorsque vous fermez l\'onglet. Sans la navigation privée, votre historique est stocké sur votre téléphone et n’est pas visible par Midori (nous respectons votre vie privée !).</string>
+    <string name="privatebrowsing_paragraph_2">Sachez que la navigation privée ne vous rend pas invisible sur Internet. Les onglets privés n\'empêchent pas votre opérateur mobile ou le propriétaire de votre réseau wifi de connaitre les sites que vous consultez ou votre adresse IP publique.</string>
+</resources>

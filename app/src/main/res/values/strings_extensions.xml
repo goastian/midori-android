@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_title">Extensions</string>
+    <string name="extensions_empty_title">No extensions installed</string>
+    <string name="extensions_empty_message">Install extensions to add extra features to your browser.</string>
+    <string name="extensions_install">Install</string>
+    <string name="extensions_install_hint">Enter the URL of an extension file (.xpi)</string>
+    <string name="extensions_uninstall">Uninstall</string>
+    <string name="extensions_uninstall_confirm">Uninstall \"%1$s\"?</string>
+    <string name="extensions_enable">Enable</string>
+    <string name="extensions_disable">Disable</string>
+    <string name="extensions_install_error">Could not install extension</string>
+    <string name="extensions_recommended">Recommended extensions</string>
+    <string name="extensions_installed">Installed extensions</string>
+    <string name="extensions_loading">Loading extensions…</string>
+    <string name="extensions_detail_title">Extension details</string>
+    <string name="extensions_author_by">by %1$s</string>
+    <string name="extensions_ratings">%1$s ratings</string>
+    <string name="extensions_users">%1$s users</string>
+    <string name="extensions_version">Version %1$s</string>
+    <string name="extensions_permissions">Permissions</string>
+    <string name="extensions_no_permissions">This extension does not require any special permissions.</string>
+    <string name="extensions_installing">Installing…</string>
+    <string name="extensions_installed_label">Installed</string>
+    <string name="extensions_enabled">Enabled</string>
+    <string name="extensions_open_popup">Open extension popup</string>
+    <string name="extensions_manage">Manage Extensions</string>
+    <string name="extensions_more">More Extensions</string>
+    <string name="extensions_retry">Retry</string>
+    <string name="extensions_load_error">Could not load extensions</string>
+    <string name="extensions_error_load_actionable">We could not load extensions. Check your connection.</string>
+    <string name="extensions_error_action_actionable">We could not complete the extension action. Try again.</string>
+</resources>

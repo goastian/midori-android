@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="browser_downloads">Descargas</string>
+
+    <string name="browser_new_tab">Añadir nueva pestaña</string>
+    <string name="browser_new_tab_private">Añadir pestaña privada</string>
+    <string name="browser_close_all_tabs">Cerrar todas las pestañas</string>
+    <string name="browser_close_private_tabs">Cerrar pestañas privadas</string>
+    <string name="browser_close_tab">Cerrar esta pestaña</string>
+    <string name="browser_go_to_tab">Ir a la pestaña</string>
+    <string name="browser_tab_closed">Pestaña cerrada</string>
+    <string name="browser_tabs_closed">Pestañas eliminadas</string>
+    <string name="browser_tabs_empty_title">Aquí se mostrarán sus pestañas</string>
+    <string name="browser_tabs_empty_subtitle">Utilice las pestañas para consultar varias páginas al mismo tiempo.</string>
+    <string name="browser_tabs_empty_title_private">Aquí se mostrarán las pestañas de navegación privada</string>
+    <string name="browser_tabs_empty_subtitle_private">Para navegar por la web en modo privado, añada una pestaña.</string>
+
+    <string name="browser_site_secure">Conexión protegida</string>
+    <string name="browser_site_insecure">Conexión sin protección</string>
+
+    <string name="browser_toolbar_hint">Busca o ingresa una dirección</string>
+
+    <string name="browser_suggest_clipboard_text">Texto copiado</string>
+    <string name="browser_brand_suggest_ad">Anuncio</string>
+    <string name="browser_brand_suggest_information">Esta sugerencia de búsqueda es un anuncio de %1$s, usted será redirigido al sitio web del anunciante : %2$s</string>
+
+    <string name="browser_permission_geoloc_blocked">Midori Kids protege su privacidad y evita que su ubicación exacta se comparta automáticamente.</string>
+    <string name="browser_understood">Lo he entendido</string>
+
+    <string name="reading_list_title">Reading Mode</string>
+    <string name="reading_list_search_hint">Buscar páginas guardadas para leer</string>
+    <string name="reading_list_empty_title">Aún no hay páginas guardadas</string>
+    <string name="reading_list_empty_summary">Guarda páginas para Reading Mode desde el menú del navegador.</string>
+    <string name="reading_list_add_current">Guardar para Reading Mode</string>
+    <string name="reading_list_remove_current">Quitar de Reading Mode</string>
+    <string name="reading_list_open">Abrir</string>
+    <string name="reading_list_mark_read">Marcar como leído</string>
+    <string name="reading_list_mark_unread">Marcar como no leído</string>
+    <string name="reading_list_remove">Quitar</string>
+    <string name="reading_list_offline_later">La lectura sin conexión puede añadirse en una próxima fase.</string>
+    <string name="reading_list_offline_available">Disponible sin conexión</string>
+    <string name="bookmark_add_current">Añadir marcador</string>
+    <string name="bookmark_remove_current">Quitar marcador</string>
+</resources>
