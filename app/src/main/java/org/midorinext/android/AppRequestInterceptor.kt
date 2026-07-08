@@ -1,29 +1,56 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-@file:Suppress("ForbiddenComment")
-
 package org.midorinext.android
 
 import android.content.Context
-import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import org.midorinext.android.ext.getMidoriSERPCategory
+import org.midorinext.android.ext.getMidoriSERPSearch
+import org.midorinext.android.ext.isMidoriUrl
+import org.midorinext.android.ext.isMidoriUrlValid
+import org.midorinext.android.preferences.app.AppPreferencesRepository
+import org.midorinext.android.usecases.MidoriUseCases
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import mozilla.components.browser.errorpages.ErrorPages
 import mozilla.components.browser.errorpages.ErrorType
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.request.RequestInterceptor
-import org.midorinext.android.ext.components
-import org.midorinext.android.tabs.PrivatePage
+import mozilla.components.feature.app.links.AppLinksInterceptor
+import org.midorinext.android.ext.isMidoriUrl
+import org.midorinext.android.ext.isMidoriUrlValid
+import java.lang.Exception
+import java.net.URI
+import javax.inject.Inject
+import javax.inject.Singleton
 
-/**
- * NB, and FIXME: this class is consumed by a 'Core' component group, but itself relies on 'firefoxAccountsFeature'
- * component; this creates a circular dependency, since firefoxAccountsFeature relies on tabsUseCases
- * which in turn needs 'core' itself.
- */
-class AppRequestInterceptor(
-    private val context: Context,
+@Singleton
+class AppRequestInterceptor @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val appPreferencesRepository: AppPreferencesRepository,
+    private val MidoriUseCases: MidoriUseCases
 ) : RequestInterceptor {
+    private val coroutineScope = MainScope()
+    private var openLinksInApp = false
+
+    init {
+        coroutineScope.launch {
+            appPreferencesRepository.flow
+                .map { it.openLinksInApp }
+                .distinctUntilChanged()
+                .onEach { openLinksInApp = it }
+                .collect()
+        }
+    }
+
+    private val appLinksInterceptor = AppLinksInterceptor(
+        context = context,
+        launchInApp = { openLinksInApp },
+        launchFromInterceptor = true
+    )
+
     override fun onLoadRequest(
         engineSession: EngineSession,
         uri: String,
@@ -32,53 +59,34 @@ class AppRequestInterceptor(
         isSameDomain: Boolean,
         isRedirect: Boolean,
         isDirectNavigation: Boolean,
-        isSubframeRequest: Boolean,
-    ): RequestInterceptor.InterceptionResponse? =
-        when (uri) {
-            "about:privatebrowsing" -> {
-                val page = PrivatePage.createPrivateBrowsingPage(context, uri)
-                RequestInterceptor.InterceptionResponse.Content(page, encoding = "base64")
-            }
-
-            "about:crashes" -> {
-                val intent = Intent(context, CrashListActivity::class.java)
-                intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
-                context.startActivity(intent)
-
-                RequestInterceptor.InterceptionResponse.Url("about:blank")
-            }
-
-            else -> {
-                context.components.services.accountsAuthFeature.interceptor.onLoadRequest(
-                    engineSession,
-                    uri,
-                    lastUri,
-                    hasUserGesture,
-                    isSameDomain,
-                    isRedirect,
-                    isDirectNavigation,
-                    isSubframeRequest,
-                ) ?: context.components.services.appLinksInterceptor.onLoadRequest(
-                    engineSession,
-                    uri,
-                    lastUri,
-                    hasUserGesture,
-                    isSameDomain,
-                    isRedirect,
-                    isDirectNavigation,
-                    isSubframeRequest,
-                )
+        isSubframeRequest: Boolean
+    ): RequestInterceptor.InterceptionResponse? {
+        if (uri.isMidoriUrl()) {
+            if (!uri.isMidoriUrlValid()) {
+                val path = try {
+                    URI(uri).path
+                } catch (e: Exception) {
+                    null
+                }
+                val redirectUrl = MidoriUseCases.getMidoriUrl(path = path, search = uri.getMidoriSERPSearch(), category = uri.getMidoriSERPCategory())
+                return RequestInterceptor.InterceptionResponse.Url(redirectUrl)
             }
         }
+
+        return appLinksInterceptor.onLoadRequest(
+            engineSession, uri, lastUri, hasUserGesture, isSameDomain, isRedirect, isDirectNavigation,
+            isSubframeRequest
+        )
+    }
 
     override fun onErrorRequest(
         session: EngineSession,
         errorType: ErrorType,
-        uri: String?,
+        uri: String?
     ): RequestInterceptor.ErrorResponse {
         val errorPage = ErrorPages.createUrlEncodedErrorPage(context, errorType, uri)
         return RequestInterceptor.ErrorResponse(errorPage)
     }
 
-    override fun interceptsAppInitiatedRequests() = true
+    override fun interceptsAppInitiatedRequests() = false
 }
