@@ -1,0 +1,25 @@
+{
+  "version": "3.0.0",
+  "manifest_version": 2,
+  "name": "Youtube Restricted Access",
+  "short_name": "Youtube restrict",
+  "author": "Astian",
+  "description": "Force enabled restricted mode on youtube",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "youtube-restricted@astian.org",
+      "strict_min_version": "113.0"
+    }
+  },
+  "permissions": [
+    "declarativeNetRequest",
+    "<all_urls>"
+  ],
+  "declarative_net_request": {
+    "rule_resources": [{
+      "id": "ruleset",
+      "enabled": true,
+      "path": "rules.json"
+    }]
+  }
+}

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bookmarks">Favoris</string>
+    <string name="bookmarks_folder">un dossier</string>
+    <string name="bookmarks_bookmark">un favori</string>
+    <string name="bookmarks_folder_title_placeholder">Nom du dossier</string>
+    <string name="bookmarks_move_x_to">Déplacer %1$s vers</string>
+    <string name="bookmarks_empty_default_folder_name">La liste des favoris</string>
+    <string name="bookmarks_empty_title">%1$s est vide</string>
+    <string name="bookmarks_empty_message">Ajouter un favori en utilisant le menu sur une page web.</string>
+</resources>

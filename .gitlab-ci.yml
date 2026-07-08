@@ -1,0 +1,169 @@
+stages:
+  - build
+  - test
+  - deploy
+  - release
+
+.android:
+  image: "$HARBOR_REGISTRY_SERVER/qwant/mobile/android-dev-env:67bc535a"
+  before_script:
+    - cat /usr/local/etc/ANDROID_SDK_VERSION
+    - export $(grep -v "^#" /usr/local/etc/ANDROID_SDK_VERSION | xargs)
+
+variables:
+  # develop branch name
+  CI_DEVELOP_BRANCH: "dev"
+  CI_BOT: "CI BOT"
+  # Proxy - Not necessary on Gitlab OVH
+  #GRADLE_OPTS: "-Dhttp.proxyHost=10.100.9.1 -Dhttp.proxyPort=2001 -Dhttps.proxyHost=10.100.9.1 -Dhttps.proxyPort=2001"
+  # Fastlane variables
+  LC_ALL: "en_US.UTF-8"
+  LANG: "en_US.UTF-8"
+
+# build project for all features branches (except main and dev) without artifacts to speed up
+build:
+  stage: build
+  extends: .android
+  interruptible: true
+  script:
+    - ./gradlew --console=plain --no-configuration-cache --no-build-cache assembleOriginalPlaystoreDebug
+  rules:
+    - if: '$GITLAB_USER_NAME == "ci-bot-mobile"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH != $CI_DEVELOP_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH'
+      when: always
+  # no artifacts needed
+
+  # build project for all features branches (except main and dev) without artifacts to speed up
+build_junior:
+  stage: build
+  extends: .android
+  interruptible: true
+  script:
+    - ./gradlew --console=plain --no-configuration-cache --no-build-cache assembleJuniorPlaystoreDebug
+  rules:
+    - if: '$GITLAB_USER_NAME == "ci-bot-mobile"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH != $CI_DEVELOP_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH'
+      when: always
+  # no artifacts needed
+
+# Run unit tests on all branches, if any fails, interrupt the pipeline
+unit_test:
+  stage: test
+  extends: .android
+  interruptible: true
+  script:
+    - ./gradlew -Pci --console=plain :app:testOriginalPlaystoreDebug
+  allow_failure: false
+  rules:
+    - if: '$GITLAB_USER_NAME == "ci-bot-mobile"'
+      when: never
+
+bump_version:
+  stage: deploy
+  extends: .android
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - git config --global user.name "ci-bot-mobile"
+    - git config --global user.email "ci-bot-mobile@qwant.com"
+    - git config --global http.sslCAInfo "/workspace/ca/ca.crt"
+
+    - git clone "https://ci-bot-mobile:${CI_BOT_MOBILE_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}"
+    - cd $CI_PROJECT_NAME
+    - git checkout $CI_COMMIT_BRANCH
+
+    - cp -f /usr/local/src/Gemfile* .
+    - cp -rf /usr/local/src/fastlane .
+
+    - bundle exec fastlane bump_version
+  rules:
+    - if: '$GITLAB_USER_NAME == "ci-bot-mobile"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEVELOP_BRANCH'
+      when: always
+
+# build project for dev branch and upload to internal play store
+# see: https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html#bot-users-for-projects
+deploy_internal_app_bundle:
+  stage: deploy
+  extends: .android
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - git config --global user.name "ci-bot-mobile"
+    - git config --global user.email "ci-bot-mobile@qwant.com"
+    - git config --global http.sslCAInfo "/workspace/ca/ca.crt"
+
+    - git clone "https://ci-bot-mobile:${CI_BOT_MOBILE_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}"
+    - cd $CI_PROJECT_NAME
+    - git checkout $CI_COMMIT_BRANCH
+
+    - cp -f /usr/local/src/Gemfile* .
+    - cp -rf /usr/local/src/fastlane .
+
+    # Copy keystore file to the current directory and export path for signing
+    - echo -n "$keystore_playstore" | base64 -d > keystore_playstore.jks
+    - export keystore_playstore_path=$(realpath keystore_playstore.jks)
+
+    # Copy PlayStore json file to the fastlane directory in order to push to PlayStore
+    - echo -n "$playstore_json_base64" | base64 -d > fastlane/playstore.json
+    - bundle exec fastlane upload_to_internal
+  needs:
+    - bump_version
+  rules:
+    - if: '$GITLAB_USER_NAME == "ci-bot-mobile"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == $CI_DEVELOP_BRANCH'
+      when: always
+
+#  build project for dev branch and upload to internal play store
+#  see: https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html#bot-users-for-projects
+# deploy_internal_app_bundle_junior:
+#   stage: deploy
+#   extends: .android
+#   variables:
+#     GIT_STRATEGY: none
+#   script:
+#     - git config --global user.name "ci-bot-mobile"
+#     - git config --global user.email "ci-bot-mobile@qwant.com"
+#     - git config --global http.sslCAInfo "/workspace/ca/ca.crt"
+#
+#     - git clone "https://ci-bot-mobile:${CI_BOT_MOBILE_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}"
+#     - cd $CI_PROJECT_NAME
+#     - git checkout $CI_COMMIT_BRANCH
+#
+#     - cp -f /usr/local/src/Gemfile* .
+#     - cp -rf /usr/local/src/fastlane .
+#
+#     # Copy keystore file to the current directory and export path for signing
+#     - echo -n "$keystore_playstore_junior" | base64 -d > keystore_playstore_junior.jks
+#     - export keystore_playstore_junior_path=$(realpath keystore_playstore_junior.jks)
+#
+#     # Copy PlayStore json file to the fastlane directory in order to push to PlayStore
+#     - echo -n "$playstore_json_base64" | base64 -d > fastlane/playstore.json
+#     - bundle exec fastlane upload_to_internal_junior
+#   needs:
+#     - bump_version
+#   rules:
+#     - if: '$GITLAB_USER_NAME == "ci-bot-mobile"'
+#       when: never
+#     - if: '$CI_COMMIT_BRANCH == $CI_DEVELOP_BRANCH'
+#       when: always
+#
+# # Create a release when a merge happens in main branch
+# release_job:
+#   stage: release
+#   image: registry.gitlab.com/gitlab-org/release-cli:latest
+#   rules:
+#     - if: $CI_COMMIT_TAG
+#       when: never                                  # Do not run this job when a tag is created manually
+#     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH  # Run this job when commits are pushed or merged to the default branch
+#   script:
+#     - echo "running release_job for $TAG"
+#   release:                                         # See https://docs.gitlab.com/ee/ci/yaml/#release for available properties
+#     tag_name: 'v0.$CI_PIPELINE_IID'                # The version is incremented per pipeline.
+#     description: 'v0.$CI_PIPELINE_IID'
+#     ref: '$CI_COMMIT_SHA'
+#

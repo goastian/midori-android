@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="assist_clipboard">Zwischenablage</string>
+    <!-- <string name="assist_qwant_widget_text">Im privaten Modus suchen</string> -->
+</resources>

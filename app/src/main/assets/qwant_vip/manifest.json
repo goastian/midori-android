@@ -1,0 +1,56 @@
+{
+  "name": "Midori Privacy",
+  "short_name": "Midori Privacy",
+  "description": "Midori Privacy",
+  "version": "8.1.2",
+  "manifest_version": 3,
+  "permissions": [
+    "declarativeNetRequest",
+    "webNavigation",
+    "storage",
+    "tabs",
+    "cookies",
+    "nativeMessaging",
+    "geckoViewAddons"
+  ],
+  "host_permissions": [],
+  "background": {
+    "scripts": [
+      "service_worker.js"
+    ]
+  },
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "filter_unblocking_search_ads_and_self_promotion",
+        "enabled": true,
+        "path": "rules/filter_unblocking_search_ads_and_self_promotion.json"
+      },
+      {
+        "id": "easy_privacy_optimized",
+        "enabled": true,
+        "path": "rules/easy_privacy_optimized.json"
+      },
+      {
+        "id": "adblock_warning_removal",
+        "enabled": true,
+        "path": "rules/adblock_warning_removal.json"
+      },
+      {
+        "id": "fanboy_annoyance",
+        "enabled": true,
+        "path": "rules/fanboy_annoyance.json"
+      },
+      {
+        "id": "qwant_whitelist",
+        "enabled": true,
+        "path": "rules/qwant_whitelist.json"
+      }
+    ]
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "qwant-vip-android@qwant.com"
+    }
+  }
+}

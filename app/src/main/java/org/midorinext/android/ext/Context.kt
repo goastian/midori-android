@@ -1,65 +1,86 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 package org.midorinext.android.ext
 
 import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
-import android.content.Intent.ACTION_SEND
-import android.content.Intent.EXTRA_SUBJECT
-import android.content.Intent.EXTRA_TEXT
-import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-import androidx.annotation.StringRes
-import mozilla.components.support.base.log.Log
-import mozilla.components.support.base.log.Log.Priority.WARN
-import org.midorinext.android.BrowserApplication
-import org.midorinext.android.Components
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
+import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+import android.widget.Toast
+import androidx.annotation.RequiresApi
+import org.midorinext.android.MidoriActivity
+import org.midorinext.android.MidoriApplication
 import org.midorinext.android.R
+import org.mozilla.geckoview.BuildConfig
+import java.util.Locale
+import mozilla.components.feature.downloads.R as downloadsR
+
 
 /**
- * Get the BrowserApplication object from a context.
+ * Get the current Activity object from a context.
  */
-val Context.application: BrowserApplication
-    get() = applicationContext as BrowserApplication
-
-/**
- * Get the requireComponents of this application.
- */
-val Context.components: Components
-    get() = application.components
-
-fun Context.getPreferenceKey(
-    @StringRes resourceId: Int,
-): String = resources.getString(resourceId)
-
-/**
- *  Shares content via [ACTION_SEND] intent.
- *
- * @param text the data to be shared  [EXTRA_TEXT]
- * @param subject of the intent [EXTRA_TEXT]
- * @return true it is able to share false otherwise.
- */
-fun Context.share(
-    text: String,
-    subject: String = "",
-): Boolean =
-    try {
-        val intent = Intent(ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(EXTRA_SUBJECT, subject)
-            putExtra(EXTRA_TEXT, text)
-            flags = FLAG_ACTIVITY_NEW_TASK
-        }
-
-        val shareIntent = Intent.createChooser(intent, getString(R.string.menu_share_with)).apply {
-            flags = FLAG_ACTIVITY_NEW_TASK
-        }
-
-        startActivity(shareIntent)
-        true
-    } catch (e: ActivityNotFoundException) {
-        Log.log(WARN, message = "No activity to share to found", throwable = e, tag = "Reference-Browser")
-        false
+val Context.activity: MidoriActivity?
+    get() = when (this) {
+        is MidoriActivity -> this
+        is ContextWrapper -> baseContext.activity
+        else -> null
     }
+
+/**
+ * Get the MidoriApplication object from a context.
+ */
+val Context.application: MidoriApplication
+    get() = applicationContext as MidoriApplication
+
+
+fun Context.openAppSystemSettings() = startActivity(
+    Intent(ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null))
+)
+
+fun Context.openFileInApp(contentUri: Uri, contentType: String?) {
+    try {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(contentUri, contentType)
+            flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_GRANT_READ_URI_PERMISSION
+        }
+        val chooserIntent = Intent.createChooser(
+            intent,
+            this.getString(downloadsR.string.mozac_feature_downloads_third_party_app_chooser_dialog_title),
+        ).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+        }
+        this.startActivity(chooserIntent)
+    } catch (e: ActivityNotFoundException) {
+        Toast.makeText(
+            this,
+            this.getString(downloadsR.string.mozac_feature_downloads_unable_to_open_third_party_app),
+            Toast.LENGTH_LONG
+        ).show()
+    }
+}
+
+fun Context.openAppStorePage() = startActivity(
+    Intent("android.intent.action.VIEW", Uri.parse(getString(R.string.store_url)))
+)
+
+@RequiresApi(Build.VERSION_CODES.N)
+fun Context.openDefaultAppsSystemSettings() {
+    startActivity(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
+}
+
+fun Context.isPackageInstalled(packageToFind: String) = try {
+    this.packageManager.getPackageInfo(packageToFind, 0)
+    true
+} catch (e: PackageManager.NameNotFoundException) {
+    false
+}
+
+fun Context.selectedLocale(): Locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+    this.resources.configuration.locales.get(0)
+} else {
+    @Suppress("DEPRECATION")
+    this.resources.configuration.locale
+}

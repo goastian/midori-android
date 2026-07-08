@@ -1,0 +1,22 @@
+[
+  {
+    "id": 58886,
+    "priority": 1,
+    "action": {
+      "type": "allow"
+    },
+    "condition": {
+      "urlFilter": "||astian.org"
+    }
+  },
+  {
+    "id": 58887,
+    "priority": 1,
+    "action": {
+      "type": "allow"
+    },
+    "condition": {
+      "urlFilter": "||astiango.com"
+    }
+  }
+]

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="zap_highlight_duration_scale_down">150</integer>
+    <integer name="zap_highlight_duration_scale_up">150</integer>
+    <integer name="zap_highlight_duration_scale_back">150</integer>
+    <integer name="zap_highlight_duration_line_on">150</integer>
+    <integer name="zap_highlight_duration_line_off">150</integer>
+</resources>

@@ -1,136 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- This Source Code Form is subject to the terms of the Mozilla Public
-   - License, v. 2.0. If a copy of the MPL was not distributed with this
-   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32"
-        />
-    <uses-permission
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28"
-        />
-
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="false"
-        />
+    <!-- site permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
-    <!-- Needed for uploading media files on devices with Android 13 and later. -->
-    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
+    <queries>
+        <package android:name="org.midorinext.android" />
+    </queries>
 
     <application
+        android:name=".MidoriApplication"
         android:allowBackup="true"
-        android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules"
-        android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher"
+        android:fullBackupContent="@xml/backup_rules"
         android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:usesCleartextTraffic="true"
-        android:theme="@style/AppThemeNotActionBar"
-        android:name=".BrowserApplication"
-        tools:ignore="UnusedAttribute">
-
-        <activity android:name=".BrowserActivity"
-            android:launchMode="singleTask"
+        android:theme="@style/Theme.MidoriBrowserCompose"
+        android:localeConfig="@xml/locales_config"
+        tools:targetApi="34">
+        <activity
+            android:name=".MainActivity"
+            android:launchMode="singleInstance"
             android:resizeableActivity="true"
             android:supportsPictureInPicture="true"
-            android:configChanges="keyboard|keyboardHidden|mcc|mnc|orientation|screenSize|locale|layoutDirection|smallestScreenSize|screenLayout"
-            android:windowSoftInputMode="adjustResize"
-            android:exported="false">
-        </activity>
-
-        <activity android:name=".ExternalAppBrowserActivity"
-            android:configChanges="keyboard|keyboardHidden|mcc|mnc|orientation|screenSize|locale|layoutDirection|smallestScreenSize|screenLayout"
-            android:windowSoftInputMode="adjustResize|stateAlwaysHidden"
-            android:exported="false"
-            android:taskAffinity=""
-            android:persistableMode="persistNever"
-            android:autoRemoveFromRecents="false"
-            />
-
-        <activity
-            android:theme="@style/AddonsActivityTheme"
-            android:name=".addons.AddonsActivity"
-            android:label="@string/mozac_feature_addons_addons"
-            android:exported="false"
-            android:parentActivityName=".BrowserActivity" />
-
-        <activity
-            android:theme="@style/AppTheme"
-            android:name=".addons.AddonDetailsActivity"
-            android:exported="false"
-            android:label="@string/mozac_feature_addons_addons" />
-
-        <activity android:name=".addons.InstalledAddonDetailsActivity"
-            android:label="@string/mozac_feature_addons_addons"
-            android:parentActivityName=".addons.AddonsActivity"
-            android:exported="false"
-            android:theme="@style/AppTheme" />
-
-        <activity
-            android:name=".addons.PermissionsDetailsActivity"
-            android:label="@string/mozac_feature_addons_addons"
-            android:exported="false"
-            android:theme="@style/AppTheme" />
-
-        <activity
-            android:name=".addons.AddonSettingsActivity"
-            android:label="@string/mozac_feature_addons_addons"
-            android:exported="false"
-            android:theme="@style/AppTheme" />
-
-        <activity
-            android:name=".addons.WebExtensionActionPopupActivity"
-            android:label="@string/mozac_feature_addons_addons"
-            android:theme="@style/AppTheme"/>
-
-        <activity
-            android:name=".onboarding.WelcomeActivity"
-            android:theme="@style/WelcomeTheme"
-            android:exported="false" />
-
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
-
-        <activity
-            android:name=".IntentReceiverActivity"
-            android:theme="@style/SplashTheme"
-            android:relinquishTaskIdentity="true"
-            android:taskAffinity=""
+            android:configChanges="keyboard|keyboardHidden|mcc|mnc|orientation|screenSize|locale|layoutDirection|smallestScreenSize|screenLayout|uiMode"
             android:exported="true"
-            android:excludeFromRecents="true" >
-
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.APP_BROWSER" />
             </intent-filter>
+        </activity>
 
+        <activity
+            android:name=".intent.IntentReceiverActivity"
+            android:exported="true">
+
+            <!-- Needed for default browser -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -142,8 +60,8 @@
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="http" />
                 <data android:scheme="https" />
                 <data android:mimeType="text/html"/>
@@ -157,83 +75,93 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
 
+            <!-- <intent-filter>
+                <action android:name="android.intent.action.SEARCH"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter> -->
+
+            <intent-filter>
+                <action android:name="android.intent.action.WEB_SEARCH"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+
             <intent-filter>
                 <action android:name="mozilla.components.feature.pwa.VIEW_PWA" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="mozilla.components.pwa.category.SHORTCUT" />
                 <data android:scheme="https" />
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".customtabs.CustomTabsService"
-            android:exported="true"
-            tools:ignore="ExportedService">
-            <intent-filter>
-                <action android:name="android.support.customtabs.action.CustomTabsService" />
-            </intent-filter>
-        </service>
+        <!-- <activity
+            android:name="org.midorinext.android.legacy.onboarding.OnboardingActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
+            tools:ignore="LockedOrientationActivity" /> -->
 
-        <service
-            android:name=".downloads.DownloadService"
-            android:foregroundServiceType="dataSync" />
-
+        <!-- Widget -->
         <activity
-          android:name=".settings.SettingsActivity"
-          android:label="@string/settings"
-          android:theme="@style/AppTheme"
-          android:parentActivityName=".BrowserActivity" />
-
-        <activity
-            android:name=".tabs.synced.SyncedTabsActivity"
-            android:exported="false"
-            android:label="@string/synced_tabs"
-            android:theme="@style/AppTheme"
-            android:parentActivityName=".BrowserActivity" />
-
-        <activity
-            android:name=".CrashListActivity"
-            android:exported="false" />
-
-        <activity android:name=".autofill.AutofillUnlockActivity"
-            android:exported="false"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
-        <service
-            android:name=".autofill.AutofillService"
-            android:label="@string/app_name"
-            android:permission="android.permission.BIND_AUTOFILL_SERVICE"
+            android:name=".widget.WidgetActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:windowSoftInputMode="stateAlwaysVisible"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
+            android:launchMode="singleTask"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.service.autofill.AutofillService"/>
+                <action android:name="${WIDGET_ACTION}" />
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
-        </service>
-
-        <service android:name=".media.MediaSessionService"
-            android:foregroundServiceType="mediaPlayback"
-            android:exported="false" />
-
-        <!-- Tor -->
-        <service
-            android:name=".tor.TorForegroundService"
-            android:foregroundServiceType="specialUse"
-            android:exported="false" />
-
-        <service
-            android:name="org.torproject.jni.TorService"
-            android:exported="false" />
-
-        <!-- Search Widget -->
+        </activity>
         <receiver
-            android:name=".widget.SearchWidgetProvider"
+            android:name=".widget.WidgetProvider"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/widget_search_info" />
+                android:resource="@xml/widget_config" />
         </receiver>
 
+        <!-- Downloads -->
+        <service
+            android:name=".mozac.downloads.DownloadService"
+            android:foregroundServiceType="dataSync"
+        />
+        <provider android:name=".mozac.downloads.DownloadsFileProvider"
+            android:authorities="${applicationId}.feature.downloads.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/feature_downloads_file_paths" />
+        </provider>
+
+        <!-- File prompts -->
+        <provider android:name=".mozac.prompts.PromptFileProvider"
+            android:authorities="${applicationId}.feature.prompt.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/feature_prompts_file_paths" />
+        </provider>
+
+        <!-- Media feature -->
+        <service android:name=".mozac.media.MediaSessionService"
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="false" />
+
+        <!-- App tracking protection (hybrid system mode) -->
+        <service
+            android:name=".apptracking.MidoriAppTrackingVpnService"
+            android:enabled="true"
+            android:exported="false"
+            android:permission="android.permission.BIND_VPN_SERVICE">
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

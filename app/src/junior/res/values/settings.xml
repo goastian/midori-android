@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Midori Kids</string>
+    <string name="app_client_string" translatable="false">midorikidsbrowser</string>
+    <string name="store_url" translatable="false">https://play.google.com/store/apps/details?id=org.midorikids.mobile</string>
+</resources>

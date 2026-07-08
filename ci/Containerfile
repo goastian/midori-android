@@ -1,0 +1,38 @@
+FROM eclipse-temurin:17-jdk-jammy
+
+ARG ANDROID_BUILD_TOOLS
+ARG ANDROID_COMPILE_SDK
+ARG ANDROID_SDK_TOOLS
+
+# try to not install build-essential but gcc make ...
+RUN apt-get update \
+ && apt-get --assume-yes --no-install-recommends --quiet install \
+        build-essential \
+        ruby-full \
+        unzip \
+        wget \
+ && apt-get clean all
+
+ENV ANDROID_HOME=/android-sdk-root
+WORKDIR /android-sdk-root
+
+RUN wget --no-verbose \
+      --output-document=./cmdline-tools.zip \
+      https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_TOOLS}_latest.zip \
+ && unzip -q -d ./cmdline-tools ./cmdline-tools.zip \
+ && mv -T ./cmdline-tools/cmdline-tools ./cmdline-tools/tools
+
+ENV PATH=$PATH:/android-sdk-root/cmdline-tools/latest/bin:/android-sdk-root/cmdline-tools/tools/bin
+
+RUN sdkmanager --version
+
+RUN yes | sdkmanager --licenses > /dev/null || true
+RUN sdkmanager "platforms;android-${ANDROID_COMPILE_SDK}" \
+ && sdkmanager "platform-tools" \
+ && sdkmanager "build-tools;${ANDROID_BUILD_TOOLS}"
+
+WORKDIR /usr/local/src/MidoriBrowserAndroid
+ADD Gemfile Gemfile.lock .
+
+RUN gem install bundler fastlane \
+ && bundle install

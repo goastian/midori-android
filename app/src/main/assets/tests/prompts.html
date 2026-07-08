@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Inputs</h1>
+
+<label>Date:</label>
+<input type="date" /> <br /><br />
+
+<label>Time:</label>
+<input type="time" /> <br /><br />
+
+<label>Datetime:</label>
+<input type="datetime-local" /> <br /><br />
+
+<label>Month:</label>
+<input type="month" /> <br /><br />
+
+<label>Color:</label>
+<input type="color" /> <br /><br />
+
+<label>Single choice:</label>
+<select>
+    <optgroup label="Theropods">
+        <option>Tyrannosaurus</option>
+        <option>Velociraptor</option>
+        <option disabled>Deinonychus</option>
+    </optgroup>
+    <optgroup label="Sauropods" disabled>
+        <option>Diplodocus</option>
+        <option>Saltasaurus</option>
+        <option>Apatosaurus</option>
+    </optgroup>
+</select><br /><br />
+
+<label>Multiple choice:</label>
+<select multiple="multiple">
+    <optgroup label="Theropods">
+        <option>Tyrannosaurus</option>
+        <option>Velociraptor</option>
+        <option>Deinonychus</option>
+    </optgroup>
+    <optgroup label="Sauropods">
+        <option>Diplodocus</option>
+        <option>Saltasaurus</option>
+        <option>Apatosaurus</option>
+    </optgroup>
+</select><br /><br />
+
+<h3>Files</h3>
+
+<label>All types:</label>
+<input type="file" /> <br /><br />
+
+<label>Video:</label>
+<input type="file" accept="video/*" /> <br />
+<label>Video with back capture:</label>
+<input type="file" accept="video/*" capture="environment" /> <br />
+<label>Video with front capture:</label>
+<input type="file" accept="video/*" capture="user" /> <br /><br />
+
+<label>Image:</label>
+<input type="file" accept="image/*" /> <br />
+<label>Image with back capture:</label>
+<input type="file" accept="image/*" capture="environment" /> <br />
+<label>Image with front capture:</label>
+<input type="file" accept="image/*" capture="user" /> <br /><br />
+
+<label>Audio:</label>
+<input type="file" accept="audio/*" /> <br />
+<label>Audio with back capture:</label>
+<input type="file" accept="audio/*" capture="environment" /> <br />
+<label>Audio with front capture:</label>
+<input type="file" accept="audio/*" capture="user" /> <br /><br />
+
+<label>PDF only:</label>
+<input type="file" accept="application/pdf, .pdf" /> <br /><br />
+
+<label>Multiple files:</label>
+<input type="file" multiple="multiple" /> <br /><br />
+
+<!-- Menu choice ?? same as multiple choice anyway -->
+
+<h1>Popups</h1>
+
+<button type="button" onclick="alert('coucou');">Alert</button><br /><br />
+<button type="button" onclick="for (let i = 0; i < 10; i++) { alert('coucou'); }">Multiple alerts</button><br /><br />
+<button type="button" onclick="prompt('coucou', 'test');">Prompt</button><br /><br />
+<button type="button" onclick="confirm('coucou');">Confirm</button><br /><br />
+<button type="button" onclick="open('https://www.mozilla.org/', 'mozillaWindow', 'popup');">Popup</button><br /><br />
+
+<h1>Others</h1>
+
+<h3>Share</h3>
+
+<button type="button" id="share">Share</button><span id="share-result"></span><br /><br />
+
+<h3>Repost</h3>
+<h3>Authentication</h3>
+
+<script>
+    window.addEventListener("beforeunload", (event) => {
+        event.preventDefault();
+        return (event.returnValue = "");
+    }, { capture: true })
+
+    var shareResult = document.getElementById("share-result")
+    document.getElementById("share").addEventListener("click", async () => {
+        try {
+            await navigator.share({ title: "Example Page", url: "" });
+            shareResult.htmlContent = "Shared successfully";
+        } catch (err) {
+            shareResult.htmlContent = "Error while sharing: ${err}";
+        }
+    });
+</script>
+</body>
+</html>

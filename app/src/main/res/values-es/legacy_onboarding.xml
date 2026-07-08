@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="onboarding_anonymous_title">Bienvenido a Midori querido anónimo</string>
+    <string name="onboarding_anonymous_text_top">Navega por el buscador de Midori con total privacidad :</string>
+    <string name="onboarding_anonymous_bullet_1">Cero seguimiento de tus búsquedas</string>
+    <string name="onboarding_anonymous_bullet_2">Cero seguimiento de publicidad</string>
+    <string name="onboarding_anonymous_bullet_3">Cero venta de tus datos personales</string>
+    <string name="onboarding_anonymous_validate">Siguiente</string>
+    <string name="onboarding_navigation_title">Navega de manera segura en todos los sitios web</string>
+    <string name="onboarding_navigation_bullet_1">¡Menos cookies y no más banners intrusivos!</string>
+    <string name="onboarding_navigation_bullet_2">Menos rastreadores y, ¡por fin libre!</string>
+    <string name="onboarding_navigation_text_bottom">¡Échanos un vistazo y prueba tu primera búsqueda!</string>
+    <string name="onboarding_navigation_validate">¡Empecemos!</string>
+</resources>

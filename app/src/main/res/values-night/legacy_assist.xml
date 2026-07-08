@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="assist_qwant_suggest_background">#131416</color>
+    <color name="assist_qwant_widget_header">#131416</color>
+    <color name="assist_qwant_searchbar_background">#48484a</color>
+    <color name="assist_qwant_searchbar_text">#ffffff</color>
+    <color name="assist_qwant_searchbar_hint">#8cffffff</color>
+    <color name="assist_qwant_suggest_clipboard_text">#a7acb4</color>
+    <color name="assist_qwant_suggest_text_light">#a7acb4</color>
+    <color name="assist_qwant_suggest_text_bold">#ffffff</color>
+    <color name="qwant_suggest_arrow_color">#a7acb4</color>
+</resources>

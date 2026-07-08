@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="assist_clipboard">Clipboard</string>
+    <string name="assist_qwant_widget_text" translatable="false">@string/browser_toolbar_hint</string>
+
+    <dimen name="assist_default_min_width">180dp</dimen>
+
+    <color name="assist_qwant_suggest_background">#ffffff</color>
+    <color name="assist_qwant_widget_header">#5c97ff</color>
+    <color name="assist_qwant_searchbar_background">#ffffff</color>
+    <color name="assist_qwant_searchbar_text">#050506</color>
+    <color name="assist_qwant_searchbar_hint">#a7acb4</color>
+    <color name="assist_qwant_suggest_clipboard_text">#4b5058</color>
+    <color name="assist_qwant_suggest_text_light">#4b5058</color>
+    <color name="assist_qwant_suggest_text_bold">#050506</color>
+    <color name="qwant_suggest_arrow_color">#4b5058</color>
+</resources>

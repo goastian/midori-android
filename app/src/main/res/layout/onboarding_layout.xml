@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/onboarding_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/onboarding_qwant_green_light_v2">
+
+    <ImageView
+        android:id="@+id/onboarding_image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="@dimen/onboarding_image_padding_vertical"
+        android:paddingHorizontal="20dp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:src="@drawable/onboarding_anonyme_2_x" />
+
+    <TextView
+        android:id="@+id/onboarding_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/onboarding_image"
+        android:text="Midori Privacy remplace Adblock Plus"
+        android:textStyle="bold"
+        android:textSize="@dimen/onboarding_title_size"
+        android:lineHeight="@dimen/onboarding_title_line_height"
+        android:textColor="@color/onboarding_qwant_black_v2"
+        android:paddingHorizontal="20dp"
+        android:paddingBottom="24dp"
+        android:paddingTop="@dimen/onboarding_title_padding_top"/>
+
+    <TextView
+        android:id="@+id/onboarding_text_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/onboarding_title"
+        android:paddingHorizontal="20dp"
+        android:paddingBottom="12dp"
+        android:text="Moins de cookies, fini les bandeaux intrusifs !"
+        android:textSize="16sp"
+        android:textColor="@color/onboarding_qwant_black_v2"
+        android:lineHeight="20sp" />
+
+    <TextView
+        android:id="@+id/onboarding_bullet_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/onboarding_text_top"
+        android:paddingHorizontal="20dp"
+        android:paddingBottom="8dp"
+        android:text="Moins de cookies, fini les bandeaux intrusifs !"
+        android:textSize="16sp"
+        android:textColor="@color/onboarding_qwant_black_v2"
+        android:lineHeight="20sp"
+        android:drawablePadding="12dp"
+        app:drawableStartCompat="@drawable/onboarding_icon_check_copy_2" />
+
+    <TextView
+        android:id="@+id/onboarding_bullet_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/onboarding_bullet_1"
+        android:paddingHorizontal="20dp"
+        android:paddingBottom="8dp"
+        android:text="Blocage des traqueurs, enfin libre !"
+        android:textSize="16sp"
+        android:textColor="@color/onboarding_qwant_black_v2"
+        android:lineHeight="20sp"
+        android:drawablePadding="12dp"
+        app:drawableStartCompat="@drawable/onboarding_icon_check_copy_2" />
+
+    <TextView
+        android:id="@+id/onboarding_bullet_3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/onboarding_bullet_2"
+        android:paddingHorizontal="20dp"
+        android:paddingBottom="20dp"
+        android:text="Osef"
+        android:textSize="16sp"
+        android:textColor="@color/onboarding_qwant_black_v2"
+        android:lineHeight="20sp"
+        android:drawablePadding="12dp"
+        app:drawableStartCompat="@drawable/onboarding_icon_check_copy_2" />
+
+    <TextView
+        android:id="@+id/onboarding_text_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/onboarding_bullet_3"
+        android:paddingHorizontal="20dp"
+        android:paddingBottom="8dp"
+        android:text="Moins de cookies, fini les bandeaux intrusifs !"
+        android:textSize="16sp"
+        android:textColor="@color/onboarding_qwant_black_v2"
+        android:lineHeight="20sp"/>
+
+    <Button
+        android:id="@+id/onboarding_validate"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginVertical="12dp"
+        app:layout_constraintBottom_toTopOf="@id/onboarding_more"
+        android:text="Fermer"
+        android:textAllCaps="false"
+        android:textColor="@color/onboarding_true_white"
+        android:background="@drawable/onboarding_button_rounded_black"/>
+
+    <Button
+        android:id="@+id/onboarding_more"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginVertical="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="En savoir plus"
+        android:textAllCaps="false"
+        android:textColor="@color/onboarding_qwant_black_v2"
+        android:background="@android:color/transparent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

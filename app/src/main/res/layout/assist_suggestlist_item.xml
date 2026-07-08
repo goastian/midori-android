@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/suggestlist_item_layout"
+    android:layout_height="40dp"
+    android:layout_width="match_parent"
+    android:paddingStart="20dp"
+    tools:ignore="RtlSymmetry">
+
+    <ImageView
+        android:src="@drawable/assist_search_icon_with_background"
+        android:layout_width="32dp"
+        android:layout_height="match_parent"
+        android:paddingVertical="4dp"
+        android:paddingStart="8dp" />
+
+    <TextView
+        android:id="@+id/suggest_text"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:fontFamily="@font/asap"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:textColor="#4b5058"
+        android:textSize="16sp" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/suggest_arrow"
+        android:src="@drawable/assist_icons_system_arrow_left_up_line"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:paddingVertical="11dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="26dp"
+        app:tint="@color/qwant_suggest_arrow_color"/>
+</LinearLayout>

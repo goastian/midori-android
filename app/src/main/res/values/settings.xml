@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Midori</string>
+    <string name="app_client_string" translatable="false">midoribrowser</string>
+    <string name="user_agent_qwant_ext" translatable="false">MidoriMobile/%1$s</string>
+    <string name="store_url" translatable="false">https://play.google.com/store/apps/details?id=org.midorinext.android</string>
+</resources>

@@ -1,0 +1,25 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "operation": "set",
+          "header": "YouTube-Restrict",
+          "value": "Strict"
+        }
+      ]
+    },
+    "condition": {
+      "initiatorDomains": [
+        "www.youtube.com",
+        "m.youtube.com",
+        "youtubei.googleapis.com",
+        "youtube.googleapis.com",
+        "www.youtube-nocookie.com"
+      ]
+    }
+  }
+]

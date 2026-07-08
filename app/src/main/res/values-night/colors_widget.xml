@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widget_background">#3d4148</color>
+    <color name="widget_border">#535B66</color>
+    <color name="widget_icon_background">#FFFFFF</color>
+    <color name="widget_icon_foreground">#212327</color>
+    <color name="widget_hint">#99FFFFFF</color>
+    <color name="widget_magnifier">#FFFFFF</color>
+</resources>
