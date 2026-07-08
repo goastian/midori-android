@@ -39,7 +39,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import org.midorinext.android.ui.widgets.YesNoDialog
 import org.midorinext.android.R
-import org.midorinext.android.ui.theme.Grey900
+import org.midorinext.android.ui.theme.ScrimDark
 import org.midorinext.android.ui.theme.ZapYellow
 
 @Composable
@@ -115,7 +115,7 @@ internal fun ZapAnimation(
     )
 
     val blackOverlayColor by animateColorAsState(
-        targetValue = if (showBlackOverlay && !exitBlackOverlay) Grey900 else Grey900.copy(0f),
+        targetValue = if (showBlackOverlay && !exitBlackOverlay) ScrimDark else ScrimDark.copy(0f),
         animationSpec = tween(durationMillis = stepDuration, easing = easing),
         label = "ZapBlackOverlayAlpha",
         finishedListener = {

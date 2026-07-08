@@ -27,6 +27,8 @@
     <string name="extensions_load_error">No se pudieron cargar las extensiones</string>
     <string name="extensions_manage">Gestionar extensiones</string>
     <string name="extensions_more">Más extensiones</string>
+    <string name="extensions_search_hint">Buscar extensiones</string>
+    <string name="extensions_search_empty">No hay extensiones para esa búsqueda.</string>
     <string name="extensions_error_load_actionable">No pudimos cargar extensiones. Revisa tu conexión.</string>
     <string name="extensions_error_action_actionable">No pudimos completar la acción. Inténtalo de nuevo.</string>
 </resources>

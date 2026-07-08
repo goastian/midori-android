@@ -26,6 +26,8 @@
     <string name="extensions_open_popup">Open extension popup</string>
     <string name="extensions_manage">Manage Extensions</string>
     <string name="extensions_more">More Extensions</string>
+    <string name="extensions_search_hint">Search extensions</string>
+    <string name="extensions_search_empty">No extensions match your search.</string>
     <string name="extensions_retry">Retry</string>
     <string name="extensions_load_error">Could not load extensions</string>
     <string name="extensions_error_load_actionable">We could not load extensions. Check your connection.</string>

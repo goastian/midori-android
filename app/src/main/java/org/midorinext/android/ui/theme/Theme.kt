@@ -36,54 +36,54 @@ data class MidoriTheme(val dark: Boolean, val private: Boolean, val icons: Midor
 val LocalMidoriTheme = compositionLocalOf { MidoriTheme(dark = false, private = false, icons = lightIcons) }
 
 val lightColorScheme = lightColorScheme(
-    primary = ActionBlue400,
+    primary = ActionPrimaryLight,
     onPrimary = Color.White,
-    tertiary = PrimaryDarkGrey,
-    onTertiary = Color.White,
-    primaryContainer = Color.White,
-    onPrimaryContainer = Grey900,
-    secondaryContainer = BackgroundSecondaryLightGrey,
-    onSecondaryContainer = PrimaryDarkGrey,
-    tertiaryContainer = Color.White,
-    onTertiaryContainer = Grey900,
-    outline = BorderLightGrey,
-    surfaceVariant = Grey100,
-    onSurfaceVariant = Grey900,
-    error = Red
+    tertiary = TextPrimaryLight,
+    onTertiary = BackgroundLight,
+    primaryContainer = SurfaceLight,
+    onPrimaryContainer = TextPrimaryLight,
+    secondaryContainer = SurfaceSecondaryLight,
+    onSecondaryContainer = TextPrimaryLight,
+    tertiaryContainer = SurfaceLight,
+    onTertiaryContainer = TextPrimaryLight,
+    outline = BorderLight,
+    surfaceVariant = SurfaceMutedLight,
+    onSurfaceVariant = TextSecondaryLight,
+    error = ErrorLight
 )
 
 val darkColorScheme = darkColorScheme(
-    primary = ActionBlue200,
-    onPrimary = Grey900,
-    tertiary = Color.White,
-    onTertiary = PrimaryDarkGrey,
-    primaryContainer = Grey750,
-    onPrimaryContainer = Color.White,
-    secondaryContainer = BackgroundSecondaryDarkGrey,
-    onSecondaryContainer = Color.White,
-    tertiaryContainer = Grey700,
-    onTertiaryContainer = Color.White,
-    outline = BorderDarkGrey,
-    surfaceVariant = Grey600,
-    onSurfaceVariant = Color.White,
-    error = RedLight
+    primary = ActionPrimaryDark,
+    onPrimary = TextPrimaryLight,
+    tertiary = TextPrimaryDark,
+    onTertiary = SurfaceDark,
+    primaryContainer = SurfaceDark,
+    onPrimaryContainer = TextPrimaryDark,
+    secondaryContainer = SurfaceSecondaryDark,
+    onSecondaryContainer = TextPrimaryDark,
+    tertiaryContainer = SurfaceRaisedDark,
+    onTertiaryContainer = TextPrimaryDark,
+    outline = BorderDark,
+    surfaceVariant = SurfaceMutedDark,
+    onSurfaceVariant = TextPrimaryDark,
+    error = ErrorDark
 )
 
 private val privateColorScheme = darkColorScheme.copy(
-    primary = Purple200,
-    onPrimary = Grey900,
-    tertiary = Color.White,
-    onTertiary = PrimaryDarkGrey,
-    primaryContainer = Purple700,
-    onPrimaryContainer = Color.White,
-    secondaryContainer = Grey000Alpha16,
-    onSecondaryContainer = Color.White,
-    tertiaryContainer = PurpleTertiary,
-    onTertiaryContainer = Grey900,
-    outline = Grey000Alpha16,
-    surfaceVariant = Grey000Alpha16,
-    onSurfaceVariant = Color.White,
-    error = RedLight
+    primary = PrivateAction,
+    onPrimary = TextPrimaryLight,
+    tertiary = TextPrimaryDark,
+    onTertiary = SurfaceDark,
+    primaryContainer = PrivateSurfaceDark,
+    onPrimaryContainer = TextPrimaryDark,
+    secondaryContainer = OverlayOnDark16,
+    onSecondaryContainer = TextPrimaryDark,
+    tertiaryContainer = PrivateAccent,
+    onTertiaryContainer = TextPrimaryLight,
+    outline = OverlayOnDark16,
+    surfaceVariant = OverlayOnDark16,
+    onSurfaceVariant = TextPrimaryDark,
+    error = ErrorDark
 )
 
 @Composable

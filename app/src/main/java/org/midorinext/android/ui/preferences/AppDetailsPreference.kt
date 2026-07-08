@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.pm.PackageInfoCompat
 import org.midorinext.android.R
 import org.midorinext.android.ui.preferences.widgets.PreferenceRow
-import org.midorinext.android.ui.theme.ActionBlue300
 import org.midorinext.android.ui.widgets.MidoriIconOnBackground
 import org.mozilla.geckoview.BuildConfig
 
