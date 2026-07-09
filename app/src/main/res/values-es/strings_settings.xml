@@ -19,6 +19,9 @@
     <string name="tabs_view_label">Configuración de pestañas</string>
     <string name="available_tabs_view_grid">Red</string>
     <string name="available_tabs_view_list">Lista</string>
+    <string name="show_new_tab_home_label">Usar pantalla New Tab</string>
+    <string name="show_new_tab_home_description">Desactívalo para abrir pestañas nuevas en blanco.</string>
+    <string name="settings_all">Todos los ajustes</string>
 
     <string name="available_appearance_dark">Oscuro</string>
     <string name="available_appearance_light">Claro</string>

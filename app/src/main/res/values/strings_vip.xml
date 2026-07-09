@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="vip_protection_enabled">Protection enabled on this website</string>
-    <string name="vip_protection_enabled_hint">😊 You are protected from trackers</string>
-    <string name="vip_protection_disabled">Protection disabled on this website</string>
-    <string name="vip_protection_disabled_hint">😕 You are not protected from trackers</string>
+    <string name="vip_protection_enabled">Midori Privacy is enabled</string>
+    <string name="vip_protection_enabled_hint">Ads and trackers are filtered on this page.</string>
+    <string name="vip_protection_disabled">Midori Privacy is disabled</string>
+    <string name="vip_protection_disabled_hint">Ads and trackers can load on this page.</string>
     <string name="vip_popup_loading">Syncing blocker data…</string>
     <string name="vip_popup_hostname_fallback">Current tab</string>
     <string name="vip_stats_title">Midori Privacy</string>

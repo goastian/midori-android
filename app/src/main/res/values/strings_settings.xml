@@ -28,6 +28,9 @@
     <string name="tabs_view_label">Tab settings</string>
     <string name="available_tabs_view_grid">Grid</string>
     <string name="available_tabs_view_list">List</string>
+    <string name="show_new_tab_home_label">Use New Tab screen</string>
+    <string name="show_new_tab_home_description">Turn off to open blank new tabs.</string>
+    <string name="settings_all">All settings</string>
 
     <string name="available_appearance_dark">Dark</string>
     <string name="available_appearance_light">Light</string>

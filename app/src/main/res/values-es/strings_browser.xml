@@ -19,6 +19,32 @@
     <string name="browser_site_insecure">Conexión sin protección</string>
 
     <string name="browser_toolbar_hint">Busca o ingresa una dirección</string>
+    <string name="home_subtitle">Privado, rápido y listo</string>
+    <string name="home_privacy_stats">Estadísticas de privacidad</string>
+    <string name="home_shield">Escudo</string>
+    <string name="home_shield_on">Activo</string>
+    <string name="home_shield_off">Inactivo</string>
+    <string name="home_blocked">Bloqueado</string>
+    <string name="home_saved">Ahorrado</string>
+    <string name="home_ads">Anuncios</string>
+    <string name="home_trackers">Rastreadores</string>
+    <string name="home_protected_pages">Páginas</string>
+    <string name="home_last_site">Último sitio</string>
+    <string name="home_level">Nivel</string>
+    <string name="home_pinned_shortcuts">Accesos fijados</string>
+    <string name="home_quick_access">Acceso rápido</string>
+    <string name="home_weather_local">Local</string>
+    <string name="home_weather_morning">Mañana - %1$s</string>
+    <string name="home_weather_afternoon">Tarde - %1$s</string>
+    <string name="home_weather_evening">Noche - %1$s</string>
+    <string name="home_weather_night">Madrugada - %1$s</string>
+    <string name="home_photo_credit">Foto de Fabrizio Conti</string>
+    <string name="home_voice_search">Búsqueda por voz</string>
+    <string name="home_clear_search">Limpiar búsqueda</string>
+    <string name="home_nav_home">Inicio</string>
+    <string name="home_nav_bookmarks">Marcadores</string>
+    <string name="home_nav_search">Buscar</string>
+    <string name="home_nav_more">Más</string>
 
     <string name="browser_suggest_clipboard_text">Texto copiado</string>
     <string name="browser_brand_suggest_ad">Anuncio</string>
