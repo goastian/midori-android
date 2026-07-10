@@ -1,6 +1,7 @@
 package org.midorinext.android
 
 import android.app.Application
+import org.midorinext.android.adblock.MidoriPrivacyFeature
 import org.midorinext.android.migration.MigrationUtility
 import org.midorinext.android.mozac.GeckoPreferences
 import org.midorinext.android.preferences.app.AppPreferences
@@ -8,8 +9,8 @@ import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.AppTrackingProtectionMode
 import org.midorinext.android.apptracking.AppTrackingProtectionController
+import org.midorinext.android.storage.autofill.AutofillPreferenceState
 import org.midorinext.android.usecases.MidoriUseCases
-import org.midorinext.android.vip.MidoriVIPFeature
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.*
 import mozilla.components.browser.session.storage.SessionStorage
@@ -42,10 +43,11 @@ class MidoriApplication : Application() {
     @Inject lateinit var MidoriUseCases: dagger.Lazy<MidoriUseCases>
     @Inject lateinit var migrationUtility: dagger.Lazy<MigrationUtility>
     @Inject lateinit var mediaFeature: dagger.Lazy<MediaSessionFeature>
-    @Inject lateinit var vipFeature: dagger.Lazy<MidoriVIPFeature>
+    @Inject lateinit var adBlockerFeature: dagger.Lazy<MidoriPrivacyFeature>
     @Inject lateinit var appTrackingProtectionController: dagger.Lazy<AppTrackingProtectionController>
     @Inject lateinit var geckoRuntime: dagger.Lazy<GeckoRuntime>
     @Inject lateinit var appPreferencesRepository: dagger.Lazy<AppPreferencesRepository>
+    @Inject lateinit var autofillPreferenceState: dagger.Lazy<AutofillPreferenceState>
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -69,6 +71,7 @@ class MidoriApplication : Application() {
         // Watch for preference changes and apply them without requiring restart
         applicationScope.launch(Dispatchers.IO) {
             appPreferencesRepository.get().flow.collect { prefs ->
+                autofillPreferenceState.get().update(prefs)
                 GeckoPreferences.initialize(geckoRuntime.get(), prefs.toGeckoSettings())
 
                 val shouldRunSystemProtection =
@@ -90,11 +93,11 @@ class MidoriApplication : Application() {
         }
 
         restoreBrowserState().invokeOnCompletion {
-            android.util.Log.d("MIDORI_VIP", "restore tabs done")
+            android.util.Log.d("MidoriPrivacy", "restore tabs done")
             store.get().state.selectedTab?.content?.url?.let {
-                android.util.Log.d("MIDORI_VIP", "selected tab url is $it")
-                vipFeature.get().restoreTabsDone(it)
-            } ?: android.util.Log.d("MIDORI_VIP", "selected tab url is still null after restore")
+                android.util.Log.d("MidoriPrivacy", "selected tab url is $it")
+                adBlockerFeature.get().restoreTabsDone(it)
+            } ?: android.util.Log.d("MidoriPrivacy", "selected tab url is still null after restore")
         }
 
         migrationUtility.get().checkMigrations()
