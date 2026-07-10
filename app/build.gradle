@@ -281,6 +281,7 @@ dependencies {
     implementation libs.androidx.core.ktx
     implementation libs.androidx.lifecycle.runtime.ktx
     implementation libs.androidx.lifecycle.process
+    implementation libs.androidx.biometric
     implementation libs.androidx.datastore
     implementation libs.androidx.paging.runtime.ktx
     implementation libs.androidx.localbroadcastmanager
@@ -336,6 +337,8 @@ dependencies {
     implementation libs.mozac.support.utils
     implementation libs.mozac.support.ktx
     implementation libs.mozac.support.appservices
+    implementation libs.mozac.service.sync.logins
+    implementation libs.mozac.service.sync.autofill
     implementation libs.mozac.support.webextensions
     implementation libs.mozac.feature.addons
     implementation libs.mozac.ui.widgets // SnackbarDelegate
