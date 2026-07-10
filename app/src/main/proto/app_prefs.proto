@@ -43,6 +43,12 @@ enum AppTrackingProtectionMode {
   HYBRID_SYSTEM = 1;
 }
 
+enum HomepageOpeningScreen {
+  HOMEPAGE = 0;
+  LAST_TAB = 1;
+  HOMEPAGE_AFTER_FOUR_HOURS = 2;
+}
+
 message AppPreferences {
   bool hide_toolbar_on_scroll = 1;
   ToolbarPosition toolbar_position = 2;
@@ -65,4 +71,19 @@ message AppPreferences {
   bool app_tracking_system_enabled = 19;
   repeated string app_tracking_excluded_packages = 20;
   bool download_wifi_only = 21;
+  bool open_blank_new_tab = 22;
+  bool homepage_shortcuts_enabled = 23;
+  bool homepage_privacy_stats_enabled = 24;
+  bool homepage_weather_enabled = 25;
+  bool homepage_background_photo_enabled = 26;
+  bool pull_to_refresh_enabled = 27;
+  bool save_passwords_enabled = 28;
+  bool password_autofill_enabled = 29;
+  reserved 30;
+  bool autofill_addresses_enabled = 31;
+  bool autofill_cards_enabled = 32;
+  bool accessibility_automatic_font_sizing = 33;
+  int32 accessibility_font_scale = 34;
+  bool accessibility_force_zoom_enabled = 35;
+  HomepageOpeningScreen homepage_opening_screen = 36;
 }
