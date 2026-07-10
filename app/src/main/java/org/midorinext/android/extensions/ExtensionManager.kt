@@ -19,6 +19,8 @@ private const val TAG = "ExtensionManager"
 
 /** IDs of built-in extensions that should NOT appear in the user-facing list. */
 private val BUILTIN_IDS = setOf(
+    "midori-privacy@astian.org",
+    "easy-adblocker@easybrowser.local",
     "midori-vip-android@astian.org",
     "midori-protection@astian.org",
     "qwant-vip-android@qwant.com",
@@ -157,5 +159,3 @@ private fun Addon.toProto(downloadUrl: String) = InstalledExtensionProto.newBuil
     .setEnabled(true)
     .setInstalledAt(System.currentTimeMillis())
     .build()
-
-

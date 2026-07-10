@@ -1,5 +1,6 @@
 package org.midorinext.android.ui.browser.menu
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,40 +33,45 @@ fun BrowserMenu(
     viewModel: BrowserScreenViewModel,
     applicationViewModel: MidoriApplicationViewModel
 ) {
-    var showMoreOptions by remember { mutableStateOf(false) }
+    var menuPage by remember { mutableStateOf(BrowserMenuPage.Primary) }
     val currentUrl by viewModel.currentUrl.collectAsState()
     val showPageActions = currentUrl.isExternalPage()
 
     LaunchedEffect(expanded) {
         if (!expanded) {
-            showMoreOptions = false
+            menuPage = BrowserMenuPage.Primary
         }
     }
 
     Dropdown(
         expanded = expanded,
-        onDismissRequest = onDismissRequest
+        onDismissRequest = onDismissRequest,
+        modifier = Modifier.animateContentSize()
     ) {
-        if (showMoreOptions) {
-            MoreOptionsMenu(
-                navigateTo = navigateTo,
-                viewModel = viewModel,
-                applicationViewModel = applicationViewModel,
-                showPageActions = showPageActions,
-                onBack = { showMoreOptions = false },
-                onDismissRequest = onDismissRequest
-            )
-        } else {
-            PrimaryMenu(
+        when (menuPage) {
+            BrowserMenuPage.Primary -> PrimaryMenu(
                 navigateTo = navigateTo,
                 viewModel = viewModel,
                 currentUrl = currentUrl,
                 showPageActions = showPageActions,
-                onMoreOptionsClick = { showMoreOptions = true },
+                onMoreOptionsClick = { menuPage = BrowserMenuPage.MoreOptions },
+                onDismissRequest = onDismissRequest
+            )
+            BrowserMenuPage.MoreOptions -> MoreOptionsMenu(
+                navigateTo = navigateTo,
+                viewModel = viewModel,
+                applicationViewModel = applicationViewModel,
+                showPageActions = showPageActions,
+                onBack = { menuPage = BrowserMenuPage.Primary },
                 onDismissRequest = onDismissRequest
             )
         }
     }
+}
+
+private enum class BrowserMenuPage {
+    Primary,
+    MoreOptions
 }
 
 @Composable

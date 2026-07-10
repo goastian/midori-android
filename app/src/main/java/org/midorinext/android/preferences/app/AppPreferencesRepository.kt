@@ -69,6 +69,90 @@ class AppPreferencesRepository @Inject constructor(
         }
     }
 
+    suspend fun updateShowNewTabHome(show: Boolean) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setOpenBlankNewTab(!show).build()
+        }
+    }
+
+    suspend fun updateHomepageShortcutsEnabled(enabled: Boolean) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setHomepageShortcutsEnabled(enabled).build()
+        }
+    }
+
+    suspend fun updateHomepagePrivacyStatsEnabled(enabled: Boolean) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setHomepagePrivacyStatsEnabled(enabled).build()
+        }
+    }
+
+    suspend fun updateHomepageWeatherEnabled(enabled: Boolean) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setHomepageWeatherEnabled(enabled).build()
+        }
+    }
+
+    suspend fun updateHomepageBackgroundPhotoEnabled(enabled: Boolean) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setHomepageBackgroundPhotoEnabled(enabled).build()
+        }
+    }
+
+    suspend fun updateHomepageOpeningScreen(screen: HomepageOpeningScreen) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setHomepageOpeningScreen(screen).build()
+        }
+    }
+
+    suspend fun updatePullToRefreshEnabled(enabled: Boolean) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setPullToRefreshEnabled(enabled).build()
+        }
+    }
+
+    suspend fun updateSavePasswordsEnabled(enabled: Boolean) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setSavePasswordsEnabled(enabled).build()
+        }
+    }
+
+    suspend fun updatePasswordAutofillEnabled(enabled: Boolean) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setPasswordAutofillEnabled(enabled).build()
+        }
+    }
+
+    suspend fun updateAutofillAddressesEnabled(enabled: Boolean) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setAutofillAddressesEnabled(enabled).build()
+        }
+    }
+
+    suspend fun updateAutofillCardsEnabled(enabled: Boolean) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setAutofillCardsEnabled(enabled).build()
+        }
+    }
+
+    suspend fun updateAccessibilityAutomaticFontSizing(enabled: Boolean) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setAccessibilityAutomaticFontSizing(enabled).build()
+        }
+    }
+
+    suspend fun updateAccessibilityFontScale(scale: Int) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setAccessibilityFontScale(scale.coerceIn(80, 150)).build()
+        }
+    }
+
+    suspend fun updateAccessibilityForceZoomEnabled(enabled: Boolean) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setAccessibilityForceZoomEnabled(enabled).build()
+        }
+    }
+
     suspend fun updateClearDataOnQuit(clear: Boolean) {
         datastore.updateData { preferences ->
             preferences.toBuilder().setClearDataOnQuit(clear).build()

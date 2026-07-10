@@ -20,7 +20,14 @@ import org.midorinext.android.ui.extensions.AddonDetailScreen
 import org.midorinext.android.ui.extensions.ExtensionListScreen
 import org.midorinext.android.ui.extensions.ExtensionViewModel
 import org.midorinext.android.ui.history.HistoryScreen
+import org.midorinext.android.ui.preferences.AccessibilitySettingsScreen
+import org.midorinext.android.ui.preferences.AutofillSettingsScreen
+import org.midorinext.android.ui.preferences.CustomizeSettingsScreen
+import org.midorinext.android.ui.preferences.HomepageSettingsScreen
+import org.midorinext.android.ui.preferences.PasswordSettingsScreen
 import org.midorinext.android.ui.preferences.PreferencesScreen
+import org.midorinext.android.ui.preferences.SavedAutofillScreen
+import org.midorinext.android.ui.preferences.SavedPasswordsScreen
 import org.midorinext.android.ui.preferences.AppTrackingProtectionReportScreen
 import org.midorinext.android.ui.preferences.PrivacyScreen
 import org.midorinext.android.ui.readinglist.ReadingListScreen
@@ -131,9 +138,35 @@ fun MidoriNavHost(
         composable(NavDestination.Preferences.match) {
             PreferencesScreen(
                 onClose = onBrowse,
+                navigateTo = { destination -> navController.navigate(destination.route()) },
                 onNavigateToPrivacy = { navController.navigate(NavDestination.Privacy.route()) },
                 applicationViewModel = appViewModel
             )
+        }
+        composable(NavDestination.HomepageSettings.match) {
+            HomepageSettingsScreen()
+        }
+        composable(NavDestination.CustomizeSettings.match) {
+            CustomizeSettingsScreen()
+        }
+        composable(NavDestination.PasswordSettings.match) {
+            PasswordSettingsScreen(
+                navigateTo = { destination -> navController.navigate(destination.route()) },
+            )
+        }
+        composable(NavDestination.AutofillSettings.match) {
+            AutofillSettingsScreen(
+                navigateTo = { destination -> navController.navigate(destination.route()) },
+            )
+        }
+        composable(NavDestination.SavedPasswords.match) {
+            SavedPasswordsScreen()
+        }
+        composable(NavDestination.SavedAutofill.match) {
+            SavedAutofillScreen()
+        }
+        composable(NavDestination.AccessibilitySettings.match) {
+            AccessibilitySettingsScreen()
         }
         composable(NavDestination.Privacy.match) {
             PrivacyScreen(

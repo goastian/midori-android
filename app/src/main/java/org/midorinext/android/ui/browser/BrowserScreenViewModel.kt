@@ -5,13 +5,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import org.midorinext.android.adblock.AdBlockerState
 import org.midorinext.android.contentBlocker.ContentBlockerState
+import org.midorinext.android.preferences.app.AppPreferencesRepository
+import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.storage.bookmarks.BookmarksRepository
 import org.midorinext.android.storage.readinglist.ReadingListRepository
 import org.midorinext.android.ui.browser.toolbar.BrowserToolbarState
 import org.midorinext.android.ui.browser.toolbar.BrowserToolbarStateFactory
 import org.midorinext.android.usecases.MidoriUseCases
-import org.midorinext.android.vip.VIPState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -56,8 +58,9 @@ class BrowserScreenViewModel @Inject constructor(
     val engine: Engine,
     val client: Client,
     val MidoriUseCases: MidoriUseCases,
+    private val appPreferencesRepository: AppPreferencesRepository,
     val contentBlockerState: ContentBlockerState,
-    val vipState: VIPState
+    val adBlockerState: AdBlockerState
 ): ViewModel() {
     data class InstalledMenuExtension(
         val id: String,
@@ -90,6 +93,24 @@ class BrowserScreenViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000L),
             initialValue = null
         )
+
+    val appPreferences = appPreferencesRepository.flow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = AppPreferencesSerializer.defaultValue
+        )
+
+    var openBlankNewTab by mutableStateOf(false)
+        private set
+
+    init {
+        viewModelScope.launch {
+            appPreferencesRepository.flow.collect { prefs ->
+                openBlankNewTab = prefs.openBlankNewTab
+            }
+        }
+    }
 
     val currentEngineSession = store.flow()
         .map { state -> state.selectedTab?.engineState?.engineSession }
@@ -236,6 +257,8 @@ class BrowserScreenViewModel @Inject constructor(
     fun openNewMidoriTab(private: Boolean = false, focusToolbar: Boolean = true) {
         if (private) {
             MidoriUseCases.openPrivatePage()
+        } else if (openBlankNewTab) {
+            tabsUseCases.addTab("", selectTab = true, private = false)
         } else {
             MidoriUseCases.openMidoriPage(private = false)
         }
@@ -250,6 +273,11 @@ class BrowserScreenViewModel @Inject constructor(
     fun goToHomepage() {
         toolbarState.updateFocus(false)
         sessionUseCases.loadUrl(url = MidoriUseCases.getMidoriUrl())
+    }
+
+    fun updateShowNewTabHome(show: Boolean) {
+        openBlankNewTab = !show
+        viewModelScope.launch { appPreferencesRepository.updateShowNewTabHome(show) }
     }
 
     private var safetyTabOpening = false
@@ -279,7 +307,7 @@ class BrowserScreenViewModel @Inject constructor(
         toolbarState.updateFocus(false)
         tabsUseCases.removeTab(selectedTab.id, selectParentIfExists = true)
         if (closingLastTab || closingLastNormalTab) {
-            MidoriUseCases.openMidoriPage()
+            openNewMidoriTab(private = false, focusToolbar = false)
         }
     }
 

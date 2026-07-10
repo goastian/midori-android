@@ -103,6 +103,11 @@ class ExtensionViewModel @Inject constructor(
                     .filterNotNull()
                     .collect { request ->
                         when (request) {
+                            is WebExtensionPromptRequest.InstallationRequested -> {
+                                store.dispatch(
+                                    WebExtensionAction.ConsumePromptRequestWebExtensionAction
+                                )
+                            }
                             is WebExtensionPromptRequest.AfterInstallation.Permissions.Required -> {
                                 request.onConfirm(
                                     PermissionPromptResponse(isPermissionsGranted = true)

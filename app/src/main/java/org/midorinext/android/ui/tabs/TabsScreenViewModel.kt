@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.TabsViewOption
+import org.midorinext.android.usecases.MidoriUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -26,6 +27,7 @@ class TabsScreenViewModel @Inject constructor(
     private val store: BrowserStore,
     private val tabsUseCases: TabsUseCases,
     private val appPreferencesRepository: AppPreferencesRepository,
+    private val midoriUseCases: MidoriUseCases,
     val thumbnailStorage: ThumbnailStorage,
     val browserIcons: BrowserIcons,
     val contentBlockerState: ContentBlockerState
@@ -100,6 +102,14 @@ class TabsScreenViewModel @Inject constructor(
             initialValue = TabsViewOption.UNRECOGNIZED
         )
 
+    private val openBlankNewTab = appPreferencesRepository.flow
+        .map { prefs -> prefs.openBlankNewTab }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = false
+        )
+
     fun updateTabsViewOption(option: TabsViewOption) {
         viewModelScope.launch { appPreferencesRepository.updateTabsView(option) }
     }
@@ -126,6 +136,16 @@ class TabsScreenViewModel @Inject constructor(
 
     fun undoLastClose() {
         tabsUseCases.undo()
+    }
+
+    fun openNewTab(private: Boolean) {
+        if (private) {
+            tabsUseCases.addTab("", selectTab = true, private = true)
+        } else if (openBlankNewTab.value) {
+            tabsUseCases.addTab("", selectTab = true, private = false)
+        } else {
+            midoriUseCases.openMidoriPage(private = false)
+        }
     }
 
     fun reopenRecentlyClosed(): Boolean {

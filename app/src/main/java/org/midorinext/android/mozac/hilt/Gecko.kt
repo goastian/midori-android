@@ -1,8 +1,8 @@
 package org.midorinext.android.mozac.hilt
 
 import android.content.Context
+import org.midorinext.android.adblock.MidoriPrivacyFeature
 import org.midorinext.android.cookies.MidoriCookieFeature
-import org.midorinext.android.vip.MidoriVIPFeature
 import org.midorinext.android.youtubeRestrictedExtension.YoutubeRestrictedFeature
 import dagger.Module
 import dagger.Provides
@@ -18,6 +18,7 @@ import mozilla.components.concept.fetch.Client
 import mozilla.components.feature.sitepermissions.OnDiskSitePermissionsStorage
 import mozilla.components.feature.webcompat.WebCompatFeature
 import mozilla.components.support.ktx.android.content.isMainProcess
+import org.mozilla.geckoview.Autocomplete
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoRuntimeSettings
 import javax.inject.Singleton
@@ -31,10 +32,13 @@ object GeckoHiltModule {
     @Synchronized
     fun provideGeckoRuntime(
         @ApplicationContext context: Context,
-        settings: GeckoRuntimeSettings
+        settings: GeckoRuntimeSettings,
+        autocompleteStorageDelegate: Autocomplete.StorageDelegate,
     ): GeckoRuntime {
         assert(context.isMainProcess())
-        return GeckoRuntime.create(context, settings)
+        return GeckoRuntime.create(context, settings).apply {
+            setAutocompleteStorageDelegate(autocompleteStorageDelegate)
+        }
     }
 
     @Singleton
@@ -44,10 +48,10 @@ object GeckoHiltModule {
         runtime: GeckoRuntime,
         settings: Settings,
         cookieFeature: MidoriCookieFeature,
-        vipFeature: MidoriVIPFeature
+        adBlockerFeature: MidoriPrivacyFeature
     ): Engine {
         return GeckoEngine(context, settings, runtime).also {
-            vipFeature.install(runtime)
+            adBlockerFeature.install(runtime)
             cookieFeature.install(runtime)
             YoutubeRestrictedFeature.install(runtime)
             WebCompatFeature.install(it)

@@ -11,6 +11,7 @@ import mozilla.components.feature.addons.Addon
 import mozilla.components.feature.addons.AddonsProvider
 import org.json.JSONObject
 import java.io.File
+import java.net.URLEncoder
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
@@ -78,6 +79,43 @@ class AMOSearchAddonsProvider(
                 readFromDiskCache(language)?.let { return@withContext it }
             }
             throw e
+        }
+    }
+
+    override suspend fun getAddonByID(
+        id: String,
+        readTimeoutInSeconds: Long?,
+        language: String?,
+    ): Addon? = withContext(ioDispatcher) {
+        val lang = language ?: Locale.getDefault().language
+        val encodedId = URLEncoder.encode(id, Charsets.UTF_8.name())
+        val url = "$serverURL/$API_VERSION/addons/search/" +
+            "?app=android" +
+            "&type=extension" +
+            "&q=$encodedId" +
+            "&page_size=1" +
+            "&lang=$lang"
+
+        try {
+            val response = client.fetch(
+                Request(
+                    url = url,
+                    readTimeout = Pair(
+                        readTimeoutInSeconds ?: DEFAULT_READ_TIMEOUT_IN_SECONDS,
+                        TimeUnit.SECONDS
+                    ),
+                    conservative = true,
+                )
+            )
+
+            response.use { resp ->
+                if (!resp.isSuccess) {
+                    return@withContext null
+                }
+                parseSearchResults(resp.body.string(Charsets.UTF_8), lang).firstOrNull()
+            }
+        } catch (_: Exception) {
+            null
         }
     }
 

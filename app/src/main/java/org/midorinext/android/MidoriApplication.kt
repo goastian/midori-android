@@ -22,6 +22,7 @@ import mozilla.components.concept.fetch.Client
 import mozilla.components.feature.media.MediaSessionFeature
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.tabs.TabsUseCases
+import mozilla.components.support.AppServicesInitializer
 import mozilla.components.support.base.log.Log
 import mozilla.components.support.base.log.sink.AndroidLogSink
 import mozilla.components.support.ktx.android.content.isMainProcess
@@ -55,6 +56,12 @@ class MidoriApplication : Application() {
         super.onCreate()
 
         setupLogging()
+        AppServicesInitializer.init(
+            AppServicesInitializer.Config(
+                crashReporting = null,
+                logLevel = if (BuildConfig.DEBUG) Log.Priority.DEBUG else Log.Priority.INFO,
+            ),
+        )
         RustHttpConfig.setClient(lazy { client.get() })
 
         if (!isMainProcess()) {

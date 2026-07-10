@@ -88,6 +88,62 @@ class PreferencesViewModel @Inject constructor(
         viewModelScope.launch { appPreferencesRepository.updateOpenLinksInApp(openInApp) }
     }
 
+    fun updateShowNewTabHome(show: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateShowNewTabHome(show) }
+    }
+
+    fun updateHomepageShortcutsEnabled(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateHomepageShortcutsEnabled(enabled) }
+    }
+
+    fun updateHomepagePrivacyStatsEnabled(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateHomepagePrivacyStatsEnabled(enabled) }
+    }
+
+    fun updateHomepageWeatherEnabled(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateHomepageWeatherEnabled(enabled) }
+    }
+
+    fun updateHomepageBackgroundPhotoEnabled(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateHomepageBackgroundPhotoEnabled(enabled) }
+    }
+
+    fun updateHomepageOpeningScreen(screen: HomepageOpeningScreen) {
+        viewModelScope.launch { appPreferencesRepository.updateHomepageOpeningScreen(screen) }
+    }
+
+    fun updatePullToRefreshEnabled(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updatePullToRefreshEnabled(enabled) }
+    }
+
+    fun updateSavePasswordsEnabled(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateSavePasswordsEnabled(enabled) }
+    }
+
+    fun updatePasswordAutofillEnabled(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updatePasswordAutofillEnabled(enabled) }
+    }
+
+    fun updateAutofillAddressesEnabled(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateAutofillAddressesEnabled(enabled) }
+    }
+
+    fun updateAutofillCardsEnabled(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateAutofillCardsEnabled(enabled) }
+    }
+
+    fun updateAccessibilityAutomaticFontSizing(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateAccessibilityAutomaticFontSizing(enabled) }
+    }
+
+    fun updateAccessibilityFontScale(scale: Int) {
+        viewModelScope.launch { appPreferencesRepository.updateAccessibilityFontScale(scale) }
+    }
+
+    fun updateAccessibilityForceZoomEnabled(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateAccessibilityForceZoomEnabled(enabled) }
+    }
+
     fun updateClearDataOnQuit(clear: Boolean) {
         viewModelScope.launch { appPreferencesRepository.updateClearDataOnQuit(clear) }
     }

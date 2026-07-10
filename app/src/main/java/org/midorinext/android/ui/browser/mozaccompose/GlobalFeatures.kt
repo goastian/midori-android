@@ -77,16 +77,19 @@ fun GlobalFeatures(
         showSnackbar = { message, action -> appViewModel.showSnackbar(message, action) }
     )
 
+    val appPreferences by viewModel.appPreferences.collectAsState()
     PromptFeature(
         store = viewModel.store,
-        exitFullscreenUseCase = viewModel.sessionUseCases.exitFullscreen
+        exitFullscreenUseCase = viewModel.sessionUseCases.exitFullscreen,
+        appPreferences = appPreferences
     )
 
     ClFeature()
 
     EngineSettingsFeature(
         appViewModel = appViewModel,
-        engine = viewModel.engine
+        engine = viewModel.engine,
+        appPreferences = appPreferences,
     )
 
     val session by viewModel.currentEngineSession.collectAsState()
@@ -100,4 +103,3 @@ fun GlobalFeatures(
         session = session
     )
 }
-

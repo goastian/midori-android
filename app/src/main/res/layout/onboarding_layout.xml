@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/onboarding_image"
-        android:text="Midori Privacy remplace Adblock Plus"
+        android:text="Midori Privacy reemplaza Adblock Plus"
         android:textStyle="bold"
         android:textSize="@dimen/onboarding_title_size"
         android:lineHeight="@dimen/onboarding_title_line_height"

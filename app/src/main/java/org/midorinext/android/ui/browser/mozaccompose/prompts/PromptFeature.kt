@@ -9,7 +9,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.graphics.toColorInt
+import org.midorinext.android.R
 import org.midorinext.android.ext.activity
+import org.midorinext.android.preferences.app.AppPreferences
 import org.midorinext.android.ui.browser.mozaccompose.prompts.dialog.AlertDialog
 import org.midorinext.android.ui.browser.mozaccompose.prompts.dialog.AuthenticationDialog
 import org.midorinext.android.ui.browser.mozaccompose.prompts.dialog.ChoiceDialog
@@ -30,7 +32,6 @@ import mozilla.components.feature.prompts.share.DefaultShareDelegate
 import mozilla.components.feature.prompts.share.ShareDelegate
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.lib.state.ext.observeAsComposableState
-import java.security.InvalidParameterException
 import kotlin.reflect.KClass
 import mozilla.components.feature.prompts.R as mozacR
 
@@ -40,9 +41,11 @@ fun rememberDefaultShareDelegate(): DefaultShareDelegate {
 }
 
 @Composable
+@Suppress("REDUNDANT_ELSE_IN_WHEN")
 fun PromptFeature(
     store: BrowserStore,
     exitFullscreenUseCase: SessionUseCases.ExitFullScreenUseCase,
+    appPreferences: AppPreferences,
     shareDelegate: ShareDelegate = rememberDefaultShareDelegate()
 ) {
     val context = LocalContext.current
@@ -179,6 +182,15 @@ fun PromptFeature(
                 yesText = stringResource(mozacR.string.mozac_feature_prompts_allow),
                 noText = stringResource(mozacR.string.mozac_feature_prompts_deny),
             )
+            is PromptRequest.Redirect -> YesNoDialog(
+                onDismissRequest = { consumeAfter { request.onDismiss() } },
+                onYes = { consumeAfter { request.onAllow() } },
+                onNo = { consumeAfter { request.onDeny() } },
+                title = stringResource(mozacR.string.mozac_feature_prompts_redirect_dialog_title),
+                description = request.targetUri,
+                yesText = stringResource(mozacR.string.mozac_feature_prompts_allow),
+                noText = stringResource(mozacR.string.mozac_feature_prompts_deny),
+            )
             is PromptRequest.Authentication -> AuthenticationDialog(
                 request = request,
                 onConfirm = { login, password ->
@@ -198,20 +210,133 @@ fun PromptFeature(
                         -1, // specify the default port to simplify the UI
                         null // alias - leave null for now to not preselect a certificate
                     )
-                } ?: consumeAfter { request.onComplete(null) }
+                } ?: ConsumePromptEffect(request.uid) {
+                    consumeAfter { request.onComplete(null) }
+                }
             }
 
-            // TODO password, addresses and credit card manager
-            // dismiss and consume immediately as we don't have suggestions yet
-            is PromptRequest.SelectCreditCard -> consumeAfter { request.onDismiss() }
-            is PromptRequest.SaveCreditCard -> consumeAfter { request.onDismiss() }
-            is PromptRequest.SelectLoginPrompt -> consumeAfter { request.onDismiss() }
-            is PromptRequest.SaveLoginPrompt -> consumeAfter { request.onDismiss() }
-            is PromptRequest.SelectAddress -> consumeAfter { request.onDismiss() }
+            is PromptRequest.SaveLoginPrompt -> {
+                val login = request.logins.singleOrNull()
+                if (appPreferences.savePasswordsEnabled && login != null) {
+                    YesNoDialog(
+                        onDismissRequest = { consumeAfter { request.onDismiss() } },
+                        onYes = { consumeAfter { request.onConfirm(login) } },
+                        onNo = { consumeAfter { request.onDismiss() } },
+                        title = stringResource(R.string.prompt_save_login_title),
+                        description = stringResource(
+                            R.string.prompt_save_login_description,
+                            login.username.ifBlank { login.origin }
+                        )
+                    )
+                } else {
+                    ConsumePromptEffect(request.uid) { consumeAfter { request.onDismiss() } }
+                }
+            }
+            is PromptRequest.SelectLoginPrompt -> {
+                val login = request.logins.singleOrNull()
+                if (appPreferences.passwordAutofillEnabled && login != null) {
+                    YesNoDialog(
+                        onDismissRequest = { consumeAfter { request.onDismiss() } },
+                        onYes = { consumeAfter { request.onConfirm(login) } },
+                        onNo = { consumeAfter { request.onDismiss() } },
+                        title = stringResource(R.string.prompt_fill_login_title),
+                        description = stringResource(
+                            R.string.prompt_fill_login_description,
+                            login.username.ifBlank { login.origin }
+                        ),
+                        yesText = stringResource(R.string.prompt_fill)
+                    )
+                } else {
+                    ConsumePromptEffect(request.uid) { consumeAfter { request.onDismiss() } }
+                }
+            }
+            is PromptRequest.SaveCreditCard -> {
+                if (appPreferences.autofillCardsEnabled && request.creditCard.isValid) {
+                    YesNoDialog(
+                        onDismissRequest = { consumeAfter { request.onDismiss() } },
+                        onYes = { consumeAfter { request.onConfirm(request.creditCard) } },
+                        onNo = { consumeAfter { request.onDismiss() } },
+                        title = stringResource(R.string.prompt_save_card_title),
+                        description = stringResource(
+                            R.string.prompt_save_card_description,
+                            request.creditCard.obfuscatedCardNumber
+                        )
+                    )
+                } else {
+                    ConsumePromptEffect(request.uid) { consumeAfter { request.onDismiss() } }
+                }
+            }
+            is PromptRequest.SelectCreditCard -> {
+                val creditCard = request.creditCards.singleOrNull()
+                if (appPreferences.autofillCardsEnabled && creditCard != null) {
+                    YesNoDialog(
+                        onDismissRequest = { consumeAfter { request.onDismiss() } },
+                        onYes = { consumeAfter { request.onConfirm(creditCard) } },
+                        onNo = { consumeAfter { request.onDismiss() } },
+                        title = stringResource(R.string.prompt_fill_card_title),
+                        description = stringResource(
+                            R.string.prompt_fill_card_description,
+                            creditCard.obfuscatedCardNumber
+                        ),
+                        yesText = stringResource(R.string.prompt_fill)
+                    )
+                } else {
+                    ConsumePromptEffect(request.uid) { consumeAfter { request.onDismiss() } }
+                }
+            }
+            is PromptRequest.SelectAddress -> {
+                val address = request.addresses.singleOrNull()
+                if (appPreferences.autofillAddressesEnabled && address != null) {
+                    YesNoDialog(
+                        onDismissRequest = { consumeAfter { request.onDismiss() } },
+                        onYes = { consumeAfter { request.onConfirm(address) } },
+                        onNo = { consumeAfter { request.onDismiss() } },
+                        title = stringResource(R.string.prompt_fill_address_title),
+                        description = stringResource(
+                            R.string.prompt_fill_address_description,
+                            address.addressLabel
+                        ),
+                        yesText = stringResource(R.string.prompt_fill)
+                    )
+                } else {
+                    ConsumePromptEffect(request.uid) { consumeAfter { request.onDismiss() } }
+                }
+            }
+            is PromptRequest.FolderUploadPrompt -> YesNoDialog(
+                onDismissRequest = { consumeAfter { request.onDismiss() } },
+                onYes = { consumeAfter { request.onConfirm() } },
+                onNo = { consumeAfter { request.onDismiss() } },
+                title = request.folderName,
+                description = request.folderName,
+                yesText = stringResource(mozacR.string.mozac_feature_prompts_allow),
+                noText = stringResource(mozacR.string.mozac_feature_prompts_deny),
+            )
+            is PromptRequest.WebAuthnRelatedOriginPrompt -> YesNoDialog(
+                onDismissRequest = { consumeAfter { request.onDismiss() } },
+                onYes = { consumeAfter { request.onConfirm() } },
+                onNo = { consumeAfter { request.onDismiss() } },
+                title = request.rpId,
+                description = request.origin,
+                yesText = stringResource(mozacR.string.mozac_feature_prompts_allow),
+                noText = stringResource(mozacR.string.mozac_feature_prompts_deny),
+            )
+            is PromptRequest.IdentityCredential,
+            is PromptRequest.Folder -> ConsumePromptEffect(request.uid) {
+                consumeAfter { (request as PromptRequest.Dismissible).onDismiss() }
+            }
 
-            else -> throw InvalidParameterException("Not a valid prompt request type $request")
+            // A browser must never terminate because Gecko introduced a prompt that this UI does
+            // not render yet. Consume unknown prompts and dismiss them when the API supports it.
+            else -> ConsumePromptEffect(request.uid) {
+                consumeAfter { (request as? PromptRequest.Dismissible)?.onDismiss?.invoke() }
+            }
         }
     }}
+}
+
+@Composable
+private fun ConsumePromptEffect(uid: String, consume: () -> Unit) {
+    LaunchedEffect(uid) { consume() }
 }
 
 /**
@@ -242,5 +367,3 @@ fun BrowserStore.consumeRequest(sessionId: String, request: PromptRequest, consu
     consume()
     dispatch(ContentAction.ConsumePromptRequestAction(sessionId, request))
 }
-
-

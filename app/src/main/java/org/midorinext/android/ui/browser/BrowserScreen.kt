@@ -19,10 +19,12 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.midorinext.android.R
+import org.midorinext.android.adblock.AdBlockerAction
 import org.midorinext.android.ext.*
 import org.midorinext.android.contentBlocker.ContentBlockerOverlay
 import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.ui.MidoriApplicationViewModel
+import org.midorinext.android.ui.browser.home.HomeScreen
 import org.midorinext.android.ui.browser.home.HomePrivateBrowsing
 import org.midorinext.android.ui.browser.menu.BrowserMenu
 import org.midorinext.android.ui.browser.mozaccompose.*
@@ -37,7 +39,6 @@ import org.midorinext.android.ui.zap.ZapButton
 import kotlinx.coroutines.delay
 import mozilla.components.concept.engine.EngineView
 import org.midorinext.android.BuildConfig
-import org.midorinext.android.vip.VIPAction
 
 enum class TabOpening {
     NONE, NORMAL, PRIVATE
@@ -55,11 +56,12 @@ fun BrowserScreen(
 ) {
     val currentUrl by viewModel.currentUrl.collectAsState()
     val tabCount by viewModel.tabCount.collectAsState()
+    val appPrefs by viewModel.appPreferences.collectAsState()
     val private by appViewModel.isPrivate.collectAsState()
 
     var engineViewHolder: EngineView? by remember { mutableStateOf(null) }
 
-    LaunchedEffect(true) {
+    LaunchedEffect(openNewTab) {
         when (openNewTab) {
             TabOpening.NORMAL -> viewModel.openNewMidoriTab(private = false)
             TabOpening.PRIVATE -> viewModel.openNewMidoriTab(private = true)
@@ -73,10 +75,7 @@ fun BrowserScreen(
     }
 
     LaunchedEffect(currentUrl) {
-        viewModel.vipState.updateSelectedTab(currentUrl)
-        if (!currentUrl.isNullOrBlank() && currentUrl != "about:blank") {
-            viewModel.vipState.requestPopupSnapshot(currentUrl)
-        }
+        viewModel.adBlockerState.updateSelectedTab(currentUrl)
     }
 
     /* val activity = LocalContext.current.activity
@@ -90,6 +89,23 @@ fun BrowserScreen(
 
     KeyboardObserver(toolbarState = viewModel.toolbarState)
 
+    val showHome = currentUrl?.let { it.isMidoriUrl() && !it.isMidoriSERPUrl() } == true
+
+    if (showHome) {
+        HomeScreen(
+            adBlockerState = viewModel.adBlockerState,
+            preferences = appPrefs,
+            tabCount = tabCount,
+            onSearch = { text -> viewModel.commitSearch(text) },
+            onOpenUrl = { url -> viewModel.tabsUseCases.selectOrAddTab(url = url) },
+            onOpenHome = { viewModel.goToHomepage() },
+            onOpenBookmarks = { navigateTo(NavDestination.Bookmarks) },
+            onOpenTabs = { navigateTo(NavDestination.Tabs) },
+            onOpenSettings = { navigateTo(NavDestination.Preferences) }
+        )
+        return
+    }
+
     HideOnScrollToolbar(
         toolbarState = viewModel.toolbarState,
         toolbar = { modifier ->
@@ -98,7 +114,7 @@ fun BrowserScreen(
                 modifier = modifier,
                 toolbarState = viewModel.toolbarState,
                 browserIcons = viewModel.browserIcons,
-                beforeTextField = { VIPAction(viewModel.vipState, openLink = { url -> viewModel.tabsUseCases.addTab(url) }) },
+                beforeTextField = { AdBlockerAction(viewModel.adBlockerState, openLink = { url -> viewModel.tabsUseCases.addTab(url) }) },
                 beforeTextFieldVisible = { !viewModel.toolbarState.hasFocus && currentUrl?.isNotBlank() == true && currentUrl?.isMidoriUrl() == false && currentUrl != "about:blank" },
                 afterTextField = { AfterActions(navigateTo, viewModel, appViewModel) },
                 afterTextFieldVisible = { !viewModel.toolbarState.hasFocus },
@@ -118,6 +134,7 @@ fun BrowserScreen(
                 PullToRefreshBox(
                     onRefresh = { viewModel.reloadUrl() },
                     enabled = {
+                        appPrefs.pullToRefreshEnabled &&
                         engineViewHolder?.canScrollVerticallyUp() == false &&
                         engineViewHolder?.getInputResultDetail()?.let {
                             it.canOverscrollTop() &&

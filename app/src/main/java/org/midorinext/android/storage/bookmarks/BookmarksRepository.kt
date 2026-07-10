@@ -15,6 +15,8 @@ import mozilla.components.concept.storage.BookmarkInfo
 import mozilla.components.concept.storage.BookmarkNode
 import mozilla.components.concept.storage.BookmarkNodeType
 import mozilla.components.concept.storage.BookmarksStorage
+import mozilla.components.concept.storage.bookmarks.InsertableBookmarkTreeNode
+import mozilla.components.concept.storage.bookmarks.InsertableBookmarkTreeRoot
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -107,6 +109,16 @@ class BookmarksRepository @Inject constructor(
         Result.success(guid)
     }
 
+    override suspend fun insertTree(tree: InsertableBookmarkTreeRoot): Result<String> = withContext(Dispatchers.IO) {
+        runCatching {
+            insertTreeNode(
+                node = tree.rootFolder,
+                parentGuid = tree.parentGuid,
+                fallbackPosition = tree.rootFolder.position
+            )
+        }
+    }
+
     override suspend fun deleteNode(guid: String): Result<Boolean> = withContext(Dispatchers.IO) {
          val exists = dao.alreadyExists(guid)
          if (exists) dao.deleteByGuid(guid)
@@ -139,16 +151,16 @@ class BookmarksRepository @Inject constructor(
     }
 
     override suspend fun getTree(guid: String, recursive: Boolean): Result<BookmarkNode?> = withContext(Dispatchers.IO) {
-        val children = dao.getChildren(guid).mapNotNull { child ->
+        val children: List<BookmarkNode> = dao.getChildren(guid).mapNotNull { child ->
             if (recursive) {
-                this@BookmarksRepository.getTree(child.guid, true)
+                this@BookmarksRepository.getTree(child.guid, true).getOrNull()
             } else {
                 child.toMozillaBookmarkNode()
             }
         }
         Result.success(when (guid) {
-            root.guid -> root.copy(children = children as List<BookmarkNode>?)
-            else -> dao.get(guid)?.toMozillaBookmarkNode(children as List<BookmarkNode>?)
+            root.guid -> root.copy(children = children)
+            else -> dao.get(guid)?.toMozillaBookmarkNode(children)
         })
     }
 
@@ -180,6 +192,54 @@ class BookmarksRepository @Inject constructor(
         do {
             guid = UUID.randomUUID().toString()
         } while (dao.alreadyExists(guid))
+        return guid
+    }
+
+    private suspend fun insertTreeNode(
+        node: InsertableBookmarkTreeNode,
+        parentGuid: String,
+        fallbackPosition: UInt?
+    ): String {
+        val guid = getNewGuid()
+        val position = node.position ?: fallbackPosition
+        when (node) {
+            is InsertableBookmarkTreeNode.Folder -> {
+                dao.insert(org.midorinext.android.storage.bookmarks.BookmarkNode(
+                    guid = guid,
+                    type = BookmarkNodeType.FOLDER,
+                    parentGuid = parentGuid,
+                    position = position?.toInt(),
+                    title = node.title,
+                    url = null,
+                    dateAdded = node.dateAddedTimestamp
+                ))
+                node.children.forEachIndexed { index, child ->
+                    insertTreeNode(child, guid, child.position ?: index.toUInt())
+                }
+            }
+            is InsertableBookmarkTreeNode.Item -> {
+                dao.insert(org.midorinext.android.storage.bookmarks.BookmarkNode(
+                    guid = guid,
+                    type = BookmarkNodeType.ITEM,
+                    parentGuid = parentGuid,
+                    position = position?.toInt(),
+                    title = node.title,
+                    url = node.url,
+                    dateAdded = node.dateAddedTimestamp
+                ))
+            }
+            is InsertableBookmarkTreeNode.Separator -> {
+                dao.insert(org.midorinext.android.storage.bookmarks.BookmarkNode(
+                    guid = guid,
+                    type = BookmarkNodeType.SEPARATOR,
+                    parentGuid = parentGuid,
+                    position = position?.toInt(),
+                    title = null,
+                    url = null,
+                    dateAdded = node.dateAddedTimestamp
+                ))
+            }
+        }
         return guid
     }
 

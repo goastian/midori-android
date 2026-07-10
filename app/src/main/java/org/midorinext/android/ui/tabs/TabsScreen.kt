@@ -91,10 +91,14 @@ fun TabsScreen(
                 val privateBeforeClick = private
                 ZapButton(appViewModel, fromScreen = "Tabs") { success ->
                     if (success) {
-                        onClose(if (privateBeforeClick) TabOpening.PRIVATE else TabOpening.NORMAL)
+                        tabsViewModel.openNewTab(privateBeforeClick)
+                        onClose(TabOpening.NONE)
                     }
                 }
-                ToolbarAction(onClick = { onClose(if (private) TabOpening.PRIVATE else TabOpening.NORMAL) }) {
+                ToolbarAction(onClick = {
+                    tabsViewModel.openNewTab(private)
+                    onClose(TabOpening.NONE)
+                }) {
                     Icon(painter = painterResource(id = R.drawable.icons_add_tab), contentDescription = "Add tab")
                 }
                 val tabsClosedString = stringResource(id = R.string.browser_tabs_closed)
@@ -144,7 +148,8 @@ fun TabsScreen(
                         if (private) {
                             appViewModel.setPrivacyMode(PrivacyMode.NORMAL)
                         } else {
-                            onClose(TabOpening.NORMAL)
+                            tabsViewModel.openNewTab(false)
+                            onClose(TabOpening.NONE)
                         }
                     }
                 )
