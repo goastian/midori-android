@@ -45,12 +45,19 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -63,6 +70,8 @@ import java.util.TimeZone
 
 private const val HomePhotoUrl =
     "https://images.unsplash.com/photo-1548679847-1d4ff48016c7?auto=format&fit=crop&crop=entropy&w=1440&h=2560&q=86"
+
+internal const val HomeSearchFieldTestTag = "home_search_field"
 
 private data class HomeShortcut(
     val title: String,
@@ -487,6 +496,10 @@ private fun HomeSearchBar(
     modifier: Modifier = Modifier
 ) {
     var value by remember { mutableStateOf("") }
+    val submit = {
+        value.trim().takeIf(String::isNotEmpty)?.let(onSearch)
+        Unit
+    }
 
     Surface(
         color = Color(0xFFF7F3EA),
@@ -524,13 +537,15 @@ private fun HomeSearchBar(
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                     textAlign = TextAlign.Center
                 ),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = {
-                    val query = value.trim()
-                    if (query.isNotEmpty()) {
-                        onSearch(query)
-                    }
-                }),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Uri,
+                    imeAction = ImeAction.Go
+                ),
+                keyboardActions = KeyboardActions(
+                    onGo = { submit() },
+                    onDone = { submit() },
+                    onSearch = { submit() }
+                ),
                 decorationBox = { innerTextField ->
                     Box(
                         modifier = Modifier
@@ -553,6 +568,16 @@ private fun HomeSearchBar(
                 modifier = Modifier
                     .weight(1f)
                     .focusRequester(focusRequester)
+                    .testTag(HomeSearchFieldTestTag)
+                    .onPreviewKeyEvent { event ->
+                        val isEnter = event.key == Key.Enter || event.key == Key.NumPadEnter
+                        if (isEnter && event.type == KeyEventType.KeyUp) {
+                            submit()
+                            true
+                        } else {
+                            false
+                        }
+                    }
             )
             if (value.isNotBlank()) {
                 Icon(
@@ -578,9 +603,8 @@ private fun HomeSearchBar(
                     .size(40.dp)
                     .clip(CircleShape)
                     .clickable {
-                        val query = value.trim()
-                        if (query.isNotEmpty()) {
-                            onSearch(query)
+                        if (value.isNotBlank()) {
+                            submit()
                         } else {
                             focusRequester.requestFocus()
                         }

@@ -1,0 +1,20 @@
+# Midori startup path. These rules complement dependency-provided Compose profiles and keep
+# browser initialization from being JIT-compiled while the user is trying to interact.
+HSPLorg/midorinext/android/MidoriApplication**->**(**)**
+HSPLorg/midorinext/android/MainActivity**->**(**)**
+HSPLorg/midorinext/android/MidoriActivity**->**(**)**
+HSPLorg/midorinext/android/Hilt_**->**(**)**
+HSPLorg/midorinext/android/DaggerMidoriApplication**->**(**)**
+HSPLorg/midorinext/android/ui/MidoriBrowserAppKt**->**(**)**
+HSPLorg/midorinext/android/ui/nav/**->**(**)**
+HSPLorg/midorinext/android/ui/browser/**->**(**)**
+HSPLorg/midorinext/android/mozac/**->**(**)**
+HSPLorg/midorinext/android/preferences/app/**->**(**)**
+HSPLorg/midorinext/android/storage/**->**(**)**
+HSPLorg/midorinext/android/adblock/**->**(**)**
+HSPLmozilla/components/browser/engine/gecko/**->**(**)**
+HSPLmozilla/components/browser/session/storage/**->**(**)**
+HSPLmozilla/components/browser/state/**->**(**)**
+HSPLmozilla/components/feature/session/**->**(**)**
+HSPLmozilla/components/feature/tabs/**->**(**)**
+HSPLorg/mozilla/geckoview/**->**(**)**

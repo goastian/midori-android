@@ -27,6 +27,18 @@
         android:theme="@style/Theme.MidoriBrowserCompose"
         android:localeConfig="@xml/locales_config"
         tools:targetApi="34">
+        <!-- WorkManager arrives transitively but Midori has no Worker or WorkManager usage. Avoid
+             its provider/database initialization on every browser cold start. -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                tools:node="remove" />
+        </provider>
+
         <activity
             android:name=".MainActivity"
             android:launchMode="singleInstance"

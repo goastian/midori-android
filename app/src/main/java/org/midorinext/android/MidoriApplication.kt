@@ -56,6 +56,13 @@ class MidoriApplication : Application() {
         super.onCreate()
 
         setupLogging()
+
+        if (!isMainProcess()) {
+            // Rust/AppServices and Gecko are owned by the browser process. Initializing them in
+            // Gecko content and crash processes duplicates startup work and competes for CPU.
+            return
+        }
+
         AppServicesInitializer.init(
             AppServicesInitializer.Config(
                 crashReporting = null,
@@ -63,14 +70,6 @@ class MidoriApplication : Application() {
             ),
         )
         RustHttpConfig.setClient(lazy { client.get() })
-
-        if (!isMainProcess()) {
-            // If this is not the main process then do not continue with the initialization here. Everything that
-            // follows only needs to be done in our app's main process and should not be done in other processes like
-            // a GeckoView child process or the crash handling process. Most importantly we never want to end up in a
-            // situation where we create a GeckoRuntime from the Gecko child process (
-            return
-        }
 
         // Apply safe defaults immediately; persisted settings are applied below without blocking startup.
         GeckoPreferences.initialize(geckoRuntime.get(), AppPreferencesSerializer.defaultValue.toGeckoSettings())
