@@ -97,13 +97,19 @@ def configuredPlaystoreVersionCode = resolvePlaystoreVersionCode()
 android {
     // AGP 8.13 can fail preBundle when resource shrinking runs with multi-APK ABI splits.
     // Keep ABI splits for APK builds, but disable them when a bundle task is requested.
-    def isBundleBuild = gradle.startParameter.taskNames.any { it.toLowerCase().contains("bundle") }
-    def isDebugApkBuild = gradle.startParameter.taskNames.any { it.toLowerCase().contains("debug") }
-    // Release artifacts stay mobile-only by default. Debug also emits x86_64 so Android
-    // Studio can run on common emulators without falling back to the huge universal APK.
+    def requestedTasks = gradle.startParameter.taskNames.collect { it.toLowerCase() }
+    def isBundleBuild = requestedTasks.any { it.contains("bundle") }
+    def isDebugApkBuild = requestedTasks.any { it.contains("debug") }
+    def isOriginalPlaystoreApkBuild = requestedTasks.any {
+        it.contains("originalplaystore") && !it.contains("bundle")
+    }
+    // Original Play Store APK builds always publish a space-efficient x86_64 artifact beside
+    // the universal APK. Keep the existing ARM splits so current distribution stays compatible.
     def splitAbis = (project.findProperty("fullAbiBuild") == "true")
             ? ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"]
-            : (isDebugApkBuild ? ["armeabi-v7a", "arm64-v8a", "x86_64"] : ["armeabi-v7a", "arm64-v8a"])
+            : ((isDebugApkBuild || isOriginalPlaystoreApkBuild)
+                ? ["armeabi-v7a", "arm64-v8a", "x86_64"]
+                : ["armeabi-v7a", "arm64-v8a"])
 
     namespace 'org.midorinext.android'
     compileSdk 36
@@ -146,9 +152,9 @@ android {
                 reset()
                 include(*splitAbis)
             }
-            // Keep universal APKs for release/OEM/alt-store builds, but do not emit them for
-            // debug. They are large enough to trigger "not enough space" during local installs.
-            universalApk !isDebugApkBuild
+            // Release/OEM builds keep their universal APK. Original Play Store debug also emits
+            // one so its debug and release artifact sets have the same universal + x86_64 pair.
+            universalApk !isDebugApkBuild || isOriginalPlaystoreApkBuild
         }
     }
 
