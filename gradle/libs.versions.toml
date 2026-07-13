@@ -6,6 +6,7 @@ material = "1.14.0"
 # AndroidX
 core-ktx = "1.18.0"
 lifecycle = "2.10.0"
+biometric = "1.1.0"
 datastore = "1.2.1"
 localbroadcastmanager = "1.1.0"
 paging-runtime-ktx = "3.5.0"
@@ -27,7 +28,7 @@ espresso = "3.7.0"
 # Others
 protobuf = "4.35.0"
 room = "2.8.4"
-mozac = "151.0"
+mozac = "152.0"
 
 # Plugins
 android-gradle-plugin = "8.13.2"
@@ -45,6 +46,7 @@ material = { group = "com.google.android.material", name = "material", version.r
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
 androidx-datastore = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
 androidx-localbroadcastmanager = { group = "androidx.localbroadcastmanager", name = "localbroadcastmanager", version.ref = "localbroadcastmanager" }
 androidx-paging-runtime-ktx = { group = "androidx.paging", name = "paging-runtime-ktx", version.ref = "paging-runtime-ktx" }
@@ -95,6 +97,8 @@ mozac-feature-media = { group = "org.mozilla.components", name = "feature-media"
 mozac-support-utils = { group = "org.mozilla.components", name = "support-utils", version.ref = "mozac" }
 mozac-support-ktx = { group = "org.mozilla.components", name = "support-ktx", version.ref = "mozac" }
 mozac-support-appservices = { group = "org.mozilla.components", name = "support-appservices", version.ref = "mozac" }
+mozac-service-sync-logins = { group = "org.mozilla.components", name = "service-sync-logins", version.ref = "mozac" }
+mozac-service-sync-autofill = { group = "org.mozilla.components", name = "service-sync-autofill", version.ref = "mozac" }
 mozac-support-webextensions = { group = "org.mozilla.components", name = "support-webextensions", version.ref = "mozac" }
 mozac-feature-addons = { group = "org.mozilla.components", name = "feature-addons", version.ref = "mozac" }
 mozac-ui-widgets = { group = "org.mozilla.components", name = "ui-widgets", version.ref = "mozac" }

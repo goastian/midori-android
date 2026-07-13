@@ -118,7 +118,7 @@ android {
         minSdk 26
         targetSdk 36
         versionCode configuredPlaystoreVersionCode
-        versionName "11.8.9"
+        versionName "11.9"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
