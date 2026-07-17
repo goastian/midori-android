@@ -27,8 +27,8 @@
         android:theme="@style/Theme.MidoriBrowserCompose"
         android:localeConfig="@xml/locales_config"
         tools:targetApi="34">
-        <!-- WorkManager arrives transitively but Midori has no Worker or WorkManager usage. Avoid
-             its provider/database initialization on every browser cold start. -->
+        <!-- Add-on updates use WorkManager. Its eager initializer stays disabled because
+             MidoriApplication provides an on-demand configuration instead. -->
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"

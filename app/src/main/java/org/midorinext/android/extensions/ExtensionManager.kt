@@ -8,6 +8,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import mozilla.components.feature.addons.Addon
 import mozilla.components.feature.addons.AddonManager
+import mozilla.components.concept.engine.webextension.InstallationMethod
 import org.midorinext.android.extensions.store.ExtensionRepository
 import org.midorinext.android.extensions.store.InstalledExtensionProto
 import javax.inject.Inject
@@ -58,10 +59,14 @@ class ExtensionManager @Inject constructor(
      * suspend function. On success the extension is persisted to the local
      * DataStore.
      */
-    suspend fun install(url: String) = withContext(Dispatchers.Main) {
+    suspend fun install(
+        url: String,
+        installationMethod: InstallationMethod = InstallationMethod.MANAGER,
+    ) = withContext(Dispatchers.Main) {
         val addon = suspendCancellableCoroutine<Addon> { cont ->
             val operation = addonManager.installAddon(
                 url = url,
+                installationMethod = installationMethod,
                 onSuccess = { installed -> cont.resume(installed) },
                 onError = { throwable -> cont.resumeWithException(throwable) }
             )

@@ -291,6 +291,7 @@ dependencies {
     implementation libs.androidx.datastore
     implementation libs.androidx.paging.runtime.ktx
     implementation libs.androidx.localbroadcastmanager
+    implementation libs.androidx.work.runtime
 
     // Hilt
     implementation libs.hilt.main

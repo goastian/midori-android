@@ -12,6 +12,7 @@ import mozilla.components.concept.fetch.Client
 import mozilla.components.feature.addons.AddonManager
 import mozilla.components.feature.addons.AddonsProvider
 import mozilla.components.feature.addons.update.DefaultAddonUpdater
+import mozilla.components.feature.addons.update.GlobalAddonDependencyProvider
 import mozilla.components.support.base.android.NotificationsDelegate
 import org.midorinext.android.extensions.AMOSearchAddonsProvider
 import javax.inject.Singleton
@@ -53,7 +54,11 @@ object AddonsHiltModule {
         addonsProvider: AddonsProvider,
         addonUpdater: DefaultAddonUpdater
     ): AddonManager {
-        return AddonManager(store, engine, addonsProvider, addonUpdater)
+        return AddonManager(store, engine, addonsProvider, addonUpdater).also { manager ->
+            // AddonUpdaterWorker is created by WorkManager, outside Hilt, and resolves these
+            // dependencies through Mozilla's process-wide provider.
+            GlobalAddonDependencyProvider.initialize(manager, addonUpdater)
+        }
     }
 
     @Singleton
@@ -65,5 +70,3 @@ object AddonsHiltModule {
         return DefaultAddonUpdater(context, notificationsDelegate = notificationsDelegate)
     }
 }
-
-

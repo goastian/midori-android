@@ -145,6 +145,8 @@ class AMOSearchAddonsProvider(
             downloadUrl = getDownloadUrl(),
             version = getCurrentVersion(),
             permissions = getPermissions(),
+            requiredDataCollectionPermissions = getRequiredDataCollectionPermissions(),
+            optionalDataCollectionPermissions = getOptionalDataCollectionPermissions(),
             translatableName = getSafeTranslations("name", language),
             translatableDescription = getSafeTranslations("description", language),
             translatableSummary = summary,
@@ -195,6 +197,22 @@ class AMOSearchAddonsProvider(
         val file = optJSONObject("current_version")?.optJSONObject("file") ?: return emptyList()
         val perms = file.optJSONArray("permissions") ?: return emptyList()
         return (0 until perms.length()).map { perms.getString(it) }
+    }
+
+    private fun JSONObject.getRequiredDataCollectionPermissions(): List<String> {
+        val file = optJSONObject("current_version")?.optJSONObject("file") ?: return emptyList()
+        val permissions = file.optJSONArray("data_collection_permissions") ?: return emptyList()
+        return (0 until permissions.length())
+            .map { permissions.getString(it) }
+            .filterNot { it == "none" }
+    }
+
+    private fun JSONObject.getOptionalDataCollectionPermissions(): List<Addon.Permission> {
+        val file = optJSONObject("current_version")?.optJSONObject("file") ?: return emptyList()
+        val permissions = file.optJSONArray("optional_data_collection_permissions") ?: return emptyList()
+        return (0 until permissions.length()).map {
+            Addon.Permission(name = permissions.getString(it), granted = false)
+        }
     }
 
     private fun JSONObject.getSafeTranslations(key: String, language: String?): Map<String, String> {

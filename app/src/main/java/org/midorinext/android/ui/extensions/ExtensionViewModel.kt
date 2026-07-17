@@ -5,15 +5,19 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import mozilla.components.browser.state.state.WebExtensionState
 import mozilla.components.browser.state.action.WebExtensionAction
 import mozilla.components.browser.state.state.extension.WebExtensionPromptRequest
@@ -27,6 +31,8 @@ import org.midorinext.android.extensions.ExtensionManager
 import javax.inject.Inject
 
 private const val TAG = "ExtensionViewModel"
+private const val INSTALL_TIMEOUT_MS = 120_000L
+private const val TECHNICAL_AND_INTERACTION_PERMISSION = "technicalAndInteraction"
 
 enum class ExtensionUiError(@StringRes val messageRes: Int) {
     LOAD(R.string.extensions_error_load_actionable),
@@ -92,55 +98,59 @@ class ExtensionViewModel @Inject constructor(
         viewModelScope.launch {
             _installingAddonId.value = addon.id
             _error.value = null
+            _installSuccess.value = false
 
             // Watch for GeckoView install prompts and auto-approve them.
             // GeckoView dispatches a WebExtensionPromptRequest to the
             // BrowserStore when permissions need to be confirmed. Without
             // handling this, the install callback never fires.
-            val promptJob = launch {
+            val promptJob = launch(start = CoroutineStart.UNDISPATCHED) {
                 store.flow()
                     .map { it.webExtensionPromptRequest }
                     .filterNotNull()
+                    .distinctUntilChanged()
                     .collect { request ->
                         when (request) {
-                            is WebExtensionPromptRequest.InstallationRequested -> {
-                                store.dispatch(
-                                    WebExtensionAction.ConsumePromptRequestWebExtensionAction
-                                )
-                            }
                             is WebExtensionPromptRequest.AfterInstallation.Permissions.Required -> {
-                                request.onConfirm(
-                                    PermissionPromptResponse(isPermissionsGranted = true)
-                                )
-                                store.dispatch(
-                                    WebExtensionAction.ConsumePromptRequestWebExtensionAction
-                                )
+                                if (request.extension.id == addon.id) {
+                                    request.onConfirm(
+                                        approvedPermissionResponse(request.dataCollectionPermissions)
+                                    )
+                                    consumePromptRequest()
+                                }
                             }
                             is WebExtensionPromptRequest.AfterInstallation.Permissions.Optional -> {
-                                request.onConfirm(true)
-                                store.dispatch(
-                                    WebExtensionAction.ConsumePromptRequestWebExtensionAction
-                                )
+                                // Optional permissions are requested by an already-running add-on
+                                // and must not be silently granted as part of another installation.
                             }
                             is WebExtensionPromptRequest.AfterInstallation.PostInstallation -> {
-                                store.dispatch(
-                                    WebExtensionAction.ConsumePromptRequestWebExtensionAction
-                                )
+                                if (request.extension.id == addon.id) {
+                                    consumePromptRequest()
+                                }
                             }
                             is WebExtensionPromptRequest.BeforeInstallation.InstallationFailed -> {
-                                store.dispatch(
-                                    WebExtensionAction.ConsumePromptRequestWebExtensionAction
-                                )
+                                if (request.extension == null || request.extension?.id == addon.id) {
+                                    consumePromptRequest()
+                                }
+                            }
+                            is WebExtensionPromptRequest.InstallationRequested -> {
+                                // This prompt belongs to website-triggered installations. The
+                                // add-on manager flow has already started the requested install.
                             }
                         }
                     }
             }
 
             try {
-                extensionManager.install(url)
+                withTimeout(INSTALL_TIMEOUT_MS) {
+                    extensionManager.install(url)
+                }
                 _installSuccess.value = true
                 // Refresh the list to update install states
-                loadAddons(allowCache = true)
+                loadAddons(allowCache = false)
+            } catch (e: TimeoutCancellationException) {
+                Log.e(TAG, "Timed out installing add-on ${addon.id}", e)
+                _error.value = ExtensionUiError.ACTION
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to install add-on", e)
                 _error.value = ExtensionUiError.ACTION
@@ -156,10 +166,16 @@ class ExtensionViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
+            _installSuccess.value = false
             try {
-                extensionManager.install(url.trim())
+                withTimeout(INSTALL_TIMEOUT_MS) {
+                    extensionManager.install(url.trim())
+                }
                 _installSuccess.value = true
-                loadAddons(allowCache = true)
+                loadAddons(allowCache = false)
+            } catch (e: TimeoutCancellationException) {
+                Log.e(TAG, "Timed out installing extension from URL", e)
+                _error.value = ExtensionUiError.ACTION
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to install extension from URL", e)
                 _error.value = ExtensionUiError.ACTION
@@ -204,4 +220,17 @@ class ExtensionViewModel @Inject constructor(
             store.state.extensions[addonId]?.browserAction?.onClick?.invoke()
         }
     }
+
+    private fun consumePromptRequest() {
+        store.dispatch(WebExtensionAction.ConsumePromptRequestWebExtensionAction)
+    }
 }
+
+internal fun approvedPermissionResponse(
+    dataCollectionPermissions: List<String>,
+) = PermissionPromptResponse(
+    isPermissionsGranted = true,
+    isPrivateModeGranted = false,
+    isTechnicalAndInteractionDataGranted =
+        TECHNICAL_AND_INTERACTION_PERMISSION in dataCollectionPermissions,
+)

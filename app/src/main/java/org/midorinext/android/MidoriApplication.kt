@@ -1,6 +1,7 @@
 package org.midorinext.android
 
 import android.app.Application
+import androidx.work.Configuration
 import org.midorinext.android.adblock.MidoriPrivacyFeature
 import org.midorinext.android.migration.MigrationUtility
 import org.midorinext.android.mozac.GeckoPreferences
@@ -34,7 +35,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltAndroidApp
-class MidoriApplication : Application() {
+class MidoriApplication : Application(), Configuration.Provider {
     @Inject lateinit var engine: dagger.Lazy<Engine>
     @Inject lateinit var client: dagger.Lazy<Client>
     @Inject lateinit var store: dagger.Lazy<BrowserStore>
@@ -51,6 +52,10 @@ class MidoriApplication : Application() {
     @Inject lateinit var autofillPreferenceState: dagger.Lazy<AutofillPreferenceState>
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    /** Lazily initializes WorkManager when Mozilla's add-on updater first schedules work. */
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder().build()
 
     override fun onCreate() {
         super.onCreate()
