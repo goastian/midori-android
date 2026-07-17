@@ -247,6 +247,7 @@ private fun AddonRow(
             // Addon icon
             AddonIcon(
                 iconUrl = addon.iconUrl,
+                installedIcon = addon.provideIcon(),
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(8.dp)),

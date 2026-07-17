@@ -83,6 +83,7 @@ fun AddonDetailScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 AddonIcon(
                     iconUrl = addon.iconUrl,
+                    installedIcon = addon.provideIcon(),
                     modifier = Modifier.size(64.dp),
                     cornerRadius = 12.dp,
                     fallbackIconSize = 40.dp

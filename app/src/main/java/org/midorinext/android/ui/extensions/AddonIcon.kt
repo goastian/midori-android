@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.extensions
 
+import android.graphics.Bitmap
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -10,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
@@ -20,6 +23,7 @@ import org.midorinext.android.R
 @Composable
 internal fun AddonIcon(
     iconUrl: String?,
+    installedIcon: Bitmap? = null,
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 8.dp,
     fallbackIconSize: Dp = 28.dp,
@@ -31,7 +35,14 @@ internal fun AddonIcon(
         shape = androidx.compose.foundation.shape.RoundedCornerShape(cornerRadius),
         color = MaterialTheme.colorScheme.surfaceVariant,
     ) {
-        if (safeIconUrl != null) {
+        if (installedIcon != null) {
+            Image(
+                bitmap = installedIcon.asImageBitmap(),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+            )
+        } else if (safeIconUrl != null) {
             AsyncImage(
                 model = safeIconUrl,
                 contentDescription = null,
@@ -57,6 +68,5 @@ private fun FallbackAddonIcon(fallbackIconSize: Dp) {
         )
     }
 }
-
 
 
