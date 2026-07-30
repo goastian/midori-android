@@ -8,7 +8,7 @@ if (!sourceRoot || !fs.statSync(sourceRoot).isDirectory()) {
   throw new Error('Expected the extracted Midori Tab source directory');
 }
 
-const ANDROID_COMPATIBILITY_REVISION = 2;
+const ANDROID_COMPATIBILITY_REVISION = 5;
 const packageJson = JSON.parse(fs.readFileSync(sourcePath('package.json'), 'utf8'));
 const sourceVersion = String(packageJson.version || '');
 if (!/^\d+\.\d+\.\d+$/.test(sourceVersion)) {
@@ -28,6 +28,15 @@ function replaceExact(relativePath, before, after, expectedCount = 1) {
     throw new Error(`${relativePath}: expected ${expectedCount} matches, found ${actualCount}`);
   }
   fs.writeFileSync(file, original.split(before).join(after));
+}
+
+function assertExact(relativePath, value, expectedCount = 1) {
+  const file = sourcePath(relativePath);
+  const content = fs.readFileSync(file, 'utf8');
+  const actualCount = content.split(value).length - 1;
+  if (actualCount !== expectedCount) {
+    throw new Error(`${relativePath}: expected ${expectedCount} matches, found ${actualCount}`);
+  }
 }
 
 const firefoxManifestPath = sourcePath('manifest/firefox.json');
@@ -333,9 +342,306 @@ replaceExact(
 );
 
 replaceExact(
-  'src/stores/useWidgetsStore.js',
-  '  privacy: true,',
-  '  privacy: false,',
+  'src/services/privacyStats.js',
+  `  return {
+    totalBlocked,
+    totalRequests,
+    pageBlocked: toCount(data.pageBlocked),`,
+  `  const hasEstimatedDataSavedBytes =
+    data.dataSavedEstimateModel === 'conservative-8kib-per-block-v1' &&
+    Object.prototype.hasOwnProperty.call(data, 'estimatedDataSavedBytes');
+
+  return {
+    totalBlocked,
+    totalRequests,
+    pageBlocked: toCount(data.pageBlocked),`,
 );
+
+replaceExact(
+  'src/services/privacyStats.js',
+  `    pageRequests: toCount(data.pageRequests),
+    blockRate: totalRequests === 0 ? 0 : (totalBlocked / totalRequests) * 100,`,
+  `    pageRequests: toCount(data.pageRequests),
+    estimatedDataSavedBytes: hasEstimatedDataSavedBytes
+      ? toCount(data.estimatedDataSavedBytes)
+      : 0,
+    hasEstimatedDataSavedBytes,
+    blockRate: totalRequests === 0 ? 0 : (totalBlocked / totalRequests) * 100,`,
+);
+
+replaceExact(
+  'src/components/PrivacyWidget.vue',
+  `        <span class="pw-stat-value">{{ formattedPageBlocked }}</span>
+        <span class="pw-stat-label">{{ i18n.$t('privacy.stats.page') }}</span>`,
+  `        <span class="pw-stat-value">{{ fourthMetricValue }}</span>
+        <span class="pw-stat-label">{{ fourthMetricLabel }}</span>`,
+);
+
+replaceExact(
+  'src/components/PrivacyWidget.vue',
+  `      pageBlocked: 0,
+      pageRequests: 0,
+      blockRate: 0,`,
+  `      pageBlocked: 0,
+      pageRequests: 0,
+      estimatedDataSavedBytes: 0,
+      hasEstimatedDataSavedBytes: false,
+      blockRate: 0,`,
+);
+
+replaceExact(
+  'src/components/PrivacyWidget.vue',
+  `    formattedPageBlocked() {
+      return this.formatCompact(this.pageBlocked);
+    },
+
+    statusLabel() {`,
+  `    formattedPageBlocked() {
+      return this.formatCompact(this.pageBlocked);
+    },
+
+    fourthMetricValue() {
+      if (!this.hasEstimatedDataSavedBytes) return this.formattedPageBlocked;
+      return this.formatEstimatedBytes(this.estimatedDataSavedBytes);
+    },
+
+    fourthMetricLabel() {
+      return this.hasEstimatedDataSavedBytes
+        ? this.i18n.$t('privacy.stats.estimatedSaved')
+        : this.i18n.$t('privacy.stats.page');
+    },
+
+    statusLabel() {`,
+);
+
+replaceExact(
+  'src/components/PrivacyWidget.vue',
+  `    formatCompact(value) {
+      const n = Number(value) || 0;
+      if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+      if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K';
+      return String(n);
+    },
+
+    isForeground() {`,
+  `    formatCompact(value) {
+      const n = Number(value) || 0;
+      if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+      if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K';
+      return String(n);
+    },
+
+    formatEstimatedBytes(value) {
+      const bytes = Number(value) || 0;
+      if (bytes <= 0) return '0 KB';
+      const kibibytes = bytes / 1024;
+      if (kibibytes < 1024) return \`≈\${Math.max(1, Math.round(kibibytes))} KB\`;
+      const mebibytes = kibibytes / 1024;
+      if (mebibytes < 1024) {
+        return \`≈\${mebibytes < 10 ? mebibytes.toFixed(1) : Math.round(mebibytes)} MB\`;
+      }
+      const gibibytes = mebibytes / 1024;
+      return \`≈\${gibibytes < 10 ? gibibytes.toFixed(1) : Math.round(gibibytes)} GB\`;
+    },
+
+    isForeground() {`,
+);
+
+replaceExact(
+  'src/components/PrivacyWidget.vue',
+  `      this.pageBlocked = nextStats.pageBlocked;
+      this.pageRequests = nextStats.pageRequests;
+      this.blockRate = nextStats.blockRate;`,
+  `      this.pageBlocked = nextStats.pageBlocked;
+      this.pageRequests = nextStats.pageRequests;
+      this.estimatedDataSavedBytes = nextStats.estimatedDataSavedBytes;
+      this.hasEstimatedDataSavedBytes = nextStats.hasEstimatedDataSavedBytes;
+      this.blockRate = nextStats.blockRate;`,
+);
+
+const estimatedSavedTranslations = {
+  en: 'Estimated saved',
+  es: 'Ahorro estimado',
+  de: 'Geschätzt gespart',
+  fr: 'Économie estimée',
+  it: 'Risparmio stimato',
+  ja: '推定節約量',
+  pt: 'Economia estimada',
+  ru: 'Расчётная экономия',
+  zh: '估算节省',
+};
+const privacyPageTranslations = {
+  en: 'This tab',
+  es: 'Esta pestaña',
+  de: 'Dieser Tab',
+  fr: 'Cet onglet',
+  it: 'Questa scheda',
+  ja: 'このタブ',
+  pt: 'Esta aba',
+  ru: 'Эта вкладка',
+  zh: '当前标签页',
+};
+for (const [locale, translation] of Object.entries(estimatedSavedTranslations)) {
+  const relativePath = `src/i18n/locales/${locale}.js`;
+  const pageLine = fs.readFileSync(sourcePath(relativePath), 'utf8')
+    .split(/\r?\n/)
+    .find((line) => line.trim() === `page: '${privacyPageTranslations[locale]}',`);
+  if (!pageLine) {
+    throw new Error(`${relativePath}: could not find the Privacy page metric translation`);
+  }
+  const indentation = pageLine.match(/^\s*/)[0];
+  replaceExact(
+    relativePath,
+    pageLine,
+    `${pageLine}\n${indentation}estimatedSaved: '${translation}',`,
+  );
+}
+
+assertExact('src/stores/useWidgetsStore.js', '  privacy: true,');
+replaceExact(
+  'src/stores/useWidgetsStore.js',
+  `import { mergeWidgetSubset } from '../utils/widgetLayout.js';`,
+  `import { mergeWidgetSubset } from '../utils/widgetLayout.js';
+import { applyAndroidPrivacyWidgetMigration } from '../utils/androidPrivacyWidgetMigration.js';`,
+);
+const androidPrivacyMigration = `const ANDROID_PRIVACY_WIDGET_MIGRATION_REVISION = 1;
+
+export function applyAndroidPrivacyWidgetMigration(store) {
+  const currentRevision = Number(store?.androidPrivacyMigrationRevision) || 0;
+  if (currentRevision >= ANDROID_PRIVACY_WIDGET_MIGRATION_REVISION) return false;
+
+  store.enabled.privacy = true;
+  store.androidPrivacyMigrationRevision = ANDROID_PRIVACY_WIDGET_MIGRATION_REVISION;
+  return true;
+}
+`;
+const androidPrivacyMigrationPath = sourcePath('src/utils/androidPrivacyWidgetMigration.js');
+if (fs.existsSync(androidPrivacyMigrationPath)) {
+  throw new Error('src/utils/androidPrivacyWidgetMigration.js already exists upstream; review the compatibility patch');
+}
+fs.writeFileSync(androidPrivacyMigrationPath, androidPrivacyMigration);
+replaceExact(
+  'src/stores/useWidgetsStore.js',
+  `    order: [...DEFAULT_ORDER],
+    installedMarketplaceWidgets: {},`,
+  `    order: [...DEFAULT_ORDER],
+    androidPrivacyMigrationRevision: 0,
+    installedMarketplaceWidgets: {},`,
+);
+replaceExact(
+  'src/stores/useWidgetsStore.js',
+  `    enable: true,
+    storage: localStorage,
+    paths: ['enabled', 'order'],
+    afterRestore(ctx) {`,
+  `    storage: localStorage,
+    pick: ['enabled', 'order', 'androidPrivacyMigrationRevision'],
+    afterHydrate(ctx) {`,
+);
+replaceExact(
+  'src/stores/useWidgetsStore.js',
+  `      // Ensure order array contains all widget keys
+      if (Array.isArray(store.order)) {`,
+  `      // Earlier Android bundles persisted the Privacy widget as disabled.
+      // Store the migration revision beside the preference so an older live
+      // tab cannot make the one-shot migration look complete before its state
+      // has actually been persisted. Future user choices remain untouched.
+      applyAndroidPrivacyWidgetMigration(store);
+
+      // Ensure order array contains all widget keys
+      if (Array.isArray(store.order)) {`,
+);
+replaceExact(
+  'src/stores/useWidgetsStore.js',
+  `      store.installedMarketplaceWidgets = {};
+    },`,
+  `      store.installedMarketplaceWidgets = {};
+      store.$persist();
+    },`,
+);
+
+const androidPrivacyTest = `import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import persistedState from 'pinia-plugin-persistedstate';
+import { normalizePrivacyStats } from '../src/services/privacyStats.js';
+import { applyAndroidPrivacyWidgetMigration } from '../src/utils/androidPrivacyWidgetMigration.js';
+
+test('normalizes the Android Midori Privacy savings estimate', () => {
+  const result = normalizePrivacyStats({
+    totalBlocked: 2,
+    totalRequests: 10,
+    pageBlocked: 0,
+    pageRequests: 0,
+    estimatedDataSavedBytes: 16_384,
+    dataSavedEstimateModel: 'conservative-8kib-per-block-v1',
+  });
+  assert.equal(result.estimatedDataSavedBytes, 16_384);
+  assert.equal(result.hasEstimatedDataSavedBytes, true);
+  assert.equal(result.blockRate, 20);
+});
+
+test('keeps the previous page metric available during a partial update', () => {
+  const result = normalizePrivacyStats({ totalBlocked: 3, pageBlocked: 2 });
+  assert.equal(result.estimatedDataSavedBytes, 0);
+  assert.equal(result.hasEstimatedDataSavedBytes, false);
+  assert.equal(result.pageBlocked, 2);
+});
+
+test('enables Privacy exactly once for profiles created by older Android bundles', () => {
+  const store = {
+    enabled: { privacy: false },
+    androidPrivacyMigrationRevision: 0,
+  };
+
+  assert.equal(applyAndroidPrivacyWidgetMigration(store), true);
+  assert.equal(store.enabled.privacy, true);
+  assert.equal(store.androidPrivacyMigrationRevision, 1);
+
+  store.enabled.privacy = false;
+  assert.equal(applyAndroidPrivacyWidgetMigration(store), false);
+  assert.equal(store.enabled.privacy, false);
+});
+
+test('hydrates and persists the Android Privacy migration with the installed Pinia plugin', async t => {
+  const values = new Map([
+    ['widgetsStore', JSON.stringify({ enabled: { privacy: false }, order: ['privacy'] })],
+  ]);
+  globalThis.localStorage = {
+    getItem: key => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, String(value)),
+    removeItem: key => values.delete(key),
+    clear: () => values.clear(),
+    key: index => [...values.keys()][index] ?? null,
+    get length() { return values.size; },
+  };
+  t.after(() => { delete globalThis.localStorage; });
+
+  const { default: useWidgetsStore } = await import('../src/stores/useWidgetsStore.js');
+  const createPersistedPinia = () => {
+    const pinia = createPinia();
+    pinia.use(persistedState);
+    createApp({}).use(pinia);
+    return pinia;
+  };
+
+  const store = useWidgetsStore(createPersistedPinia());
+  assert.equal(store.enabled.privacy, true);
+  assert.equal(store.androidPrivacyMigrationRevision, 1);
+  assert.equal(JSON.parse(values.get('widgetsStore')).enabled.privacy, true);
+
+  store.enabled.privacy = false;
+  store.$persist();
+  const reloadedStore = useWidgetsStore(createPersistedPinia());
+  assert.equal(reloadedStore.enabled.privacy, false);
+  assert.equal(reloadedStore.androidPrivacyMigrationRevision, 1);
+});
+`;
+const androidPrivacyTestPath = sourcePath('tests/privacy-stats-android.test.mjs');
+if (fs.existsSync(androidPrivacyTestPath)) {
+  throw new Error('tests/privacy-stats-android.test.mjs already exists upstream; review the compatibility patch');
+}
+fs.writeFileSync(androidPrivacyTestPath, androidPrivacyTest);
 
 console.log('Applied the Midori Tab Firefox Android compatibility layer.');

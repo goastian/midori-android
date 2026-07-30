@@ -260,6 +260,7 @@ fi
     node --test \
         tests/omni-background-shortcut.test.mjs \
         tests/omni-search-composable.test.mjs \
+        tests/privacy-stats-android.test.mjs \
         tests/semver.test.mjs \
         tests/storage-service.test.mjs
     npm run build:firefox
@@ -317,6 +318,14 @@ fi
 
 if rg -q 'client_id:void 0' "$source_dir/dist"; then
     echo "Midori Tab was built without a usable Unsplash client ID" >&2
+    exit 1
+fi
+
+if ! rg -q 'estimatedDataSavedBytes' "$source_dir/dist" ||
+   ! rg -q 'conservative-8kib-per-block-v1' "$source_dir/dist" ||
+   ! rg -q 'androidPrivacyMigrationRevision' "$source_dir/dist" ||
+   ! rg -Fq 'pick:["enabled","order","androidPrivacyMigrationRevision"],afterHydrate' "$source_dir/dist"; then
+    echo "Midori Tab did not retain the Midori Privacy savings contract" >&2
     exit 1
 fi
 
