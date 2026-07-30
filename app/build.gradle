@@ -301,8 +301,7 @@ tasks.register("verifyMidoriNewTabBundle") {
         def manifest = new JsonSlurper().parse(manifestFile)
         def metadata = new JsonSlurper().parse(metadataFile)
         def expectedPermissions = [
-                "storage", "identity", "tabs", "activeTab", "bookmarks", "history",
-                "browsingData", "search", "https://api.rss2json.com/*",
+                "storage", "tabs", "activeTab", "browsingData", "https://api.rss2json.com/*",
                 "https://api.unsplash.com/*", "https://api.github.com/*",
                 "https://api.open-meteo.com/*", "https://geocoding-api.open-meteo.com/*",
                 "https://ipwho.is/*", "https://nominatim.openstreetmap.org/*",
@@ -312,18 +311,34 @@ tasks.register("verifyMidoriNewTabBundle") {
         ]
         if (manifest.manifest_version != 2 ||
                 manifest.browser_specific_settings?.gecko?.id != "midoritabs@astian.org" ||
-                manifest.chrome_url_overrides?.newtab != "index.html" ||
+                manifest.containsKey("chrome_url_overrides") ||
+                manifest.containsKey("commands") ||
                 manifest.permissions != expectedPermissions) {
             throw new GradleException("Midori New Tab has an incompatible Firefox manifest")
         }
         if (metadata.version != manifest.version ||
+                !(metadata.sourceVersion ==~ /[0-9]+\.[0-9]+\.[0-9]+/) ||
+                metadata.version != "${metadata.sourceVersion}.1" ||
                 metadata.sourceRepository != "https://github.com/goastian/midori-tab" ||
                 !(metadata.sourceCommit ==~ /[0-9a-f]{40}/) ||
-                metadata.sourceRef != metadata.sourceCommit ||
+                !(metadata.sourceRef ==~ /v[0-9]+\.[0-9]+\.[0-9]+/) ||
+                metadata.sourceRef != metadata.release?.tag ||
+                metadata.sourceVersion != metadata.sourceRef.substring(1) ||
                 !(metadata.bundleSha256 ==~ /[0-9a-f]{64}/) ||
                 metadata.buildTarget != "firefox-android" ||
                 metadata.compatibilityPatch != "scripts/patch-midori-tab-firefox-android.mjs" ||
                 !(metadata.compatibilityPatchSha256 ==~ /[0-9a-f]{64}/) ||
+                !(metadata.release?.id instanceof Number) ||
+                metadata.release.id.longValue() <= 0 ||
+                metadata.release.url != "https://github.com/goastian/midori-tab/releases/tag/${metadata.sourceRef}" ||
+                !(metadata.release.publishedAt ==~ /[0-9]{4}-[0-9]{2}-[0-9]{2}T.*/) ||
+                metadata.release.sourceArchiveUrl != "https://api.github.com/repos/goastian/midori-tab/tarball/${metadata.sourceRef}" ||
+                !(metadata.release.sourceArchiveSha256 ==~ /[0-9a-f]{64}/) ||
+                !(metadata.release.firefoxAsset?.id instanceof Number) ||
+                metadata.release.firefoxAsset.id.longValue() <= 0 ||
+                metadata.release.firefoxAsset.name != "midori-tab-${metadata.sourceVersion}-firefox.zip" ||
+                metadata.release.firefoxAsset.url != "https://github.com/goastian/midori-tab/releases/download/${metadata.sourceRef}/midori-tab-${metadata.sourceVersion}-firefox.zip" ||
+                !(metadata.release.firefoxAsset.sha256 ==~ /[0-9a-f]{64}/) ||
                 !(metadata.buildConfig?.unsplashAccessKeySha256 ==~ /[0-9a-f]{64}/) ||
                 metadata.buildConfig?.marketplaceBaseUrl != "https://marketplace.astian.org" ||
                 metadata.buildConfig?.passportServer != "https://accounts.astian.org" ||
