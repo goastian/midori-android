@@ -4,13 +4,15 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 target_dir="$repo_root/app/src/main/assets/extensions/midori_newtab"
 canonical_source_repository="https://github.com/goastian/midori-tab"
-clone_repository="${MIDORI_TAB_REPOSITORY:-${canonical_source_repository}.git}"
-source_ref="${1:-${MIDORI_TAB_REF:-main}}"
-local_source="${MIDORI_TAB_SOURCE:-}"
+release_api_url="https://api.github.com/repos/goastian/midori-tab/releases/latest"
 env_file="${MIDORI_TAB_ENV_FILE:-}"
 work_dir="$(mktemp -d)"
 source_dir="$work_dir/source"
 staging_dir="$work_dir/extension"
+release_json="$work_dir/release.json"
+tag_ref_json="$work_dir/tag-ref.json"
+source_archive="$work_dir/source.tar.gz"
+firefox_archive="$work_dir/release-firefox.zip"
 replacement_dir="${target_dir}.next"
 backup_dir="${target_dir}.previous"
 replace_started=false
@@ -26,26 +28,162 @@ trap cleanup EXIT
 
 mkdir -p "$source_dir" "$staging_dir"
 
-case "$clone_repository" in
-    "$canonical_source_repository"|"${canonical_source_repository}.git") ;;
-    *)
-        echo "Refusing non-canonical Midori Tab repository: $clone_repository" >&2
-        exit 1
-        ;;
-esac
+if [[ "$#" -ne 0 ]]; then
+    echo "Midori Tab refs are no longer accepted; the updater always uses the latest stable GitHub release" >&2
+    exit 1
+fi
 
-if [[ -n "$local_source" ]]; then
-    if [[ ! -d "$local_source/.git" ]]; then
-        echo "MIDORI_TAB_SOURCE is not a Git checkout: $local_source" >&2
+for deprecated_override in MIDORI_TAB_REF MIDORI_TAB_REPOSITORY MIDORI_TAB_SOURCE; do
+    if [[ -n "${!deprecated_override:-}" ]]; then
+        echo "$deprecated_override is no longer supported; the updater always downloads the latest stable release" >&2
         exit 1
     fi
-    source_commit="$(git -C "$local_source" rev-parse "${source_ref}^{commit}")"
-    git -C "$local_source" archive "$source_commit" | tar -x -C "$source_dir"
-else
-    git clone --filter=blob:none --no-checkout "$clone_repository" "$source_dir"
-    git -C "$source_dir" fetch --depth 1 origin "$source_ref"
-    git -C "$source_dir" checkout --detach FETCH_HEAD
-    source_commit="$(git -C "$source_dir" rev-parse HEAD)"
+done
+
+github_curl=(
+    curl --fail --location --silent --show-error
+    --retry 3 --retry-delay 2
+    -H "Accept: application/vnd.github+json"
+    -H "X-GitHub-Api-Version: 2022-11-28"
+)
+if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+    github_curl+=(-H "Authorization: Bearer ${GITHUB_TOKEN}")
+fi
+
+"${github_curl[@]}" -o "$release_json" "$release_api_url"
+readarray -t release_values < <(
+    node -e '
+        const fs = require("fs");
+        const [file, repository] = process.argv.slice(1);
+        const release = JSON.parse(fs.readFileSync(file, "utf8"));
+        if (release.draft || release.prerelease) {
+            throw new Error("GitHub latest release must be stable and published");
+        }
+        const tag = String(release.tag_name || "");
+        if (!/^v\d+\.\d+\.\d+$/.test(tag)) {
+            throw new Error(`Unexpected stable release tag: ${tag}`);
+        }
+        const version = tag.slice(1);
+        const expectedUrl = `${repository}/releases/tag/${tag}`;
+        const expectedTarballUrl = `https://api.github.com/repos/goastian/midori-tab/tarball/${tag}`;
+        const expectedAssetName = `midori-tab-${version}-firefox.zip`;
+        const asset = (release.assets || []).find((candidate) => candidate.name === expectedAssetName);
+        const digest = String(asset?.digest || "").replace(/^sha256:/, "");
+        if (release.html_url !== expectedUrl || release.tarball_url !== expectedTarballUrl) {
+            throw new Error("Latest release does not point to the canonical Midori Tab repository");
+        }
+        if (!asset || !Number.isSafeInteger(asset.id)) {
+            throw new Error(`Latest release is missing ${expectedAssetName}`);
+        }
+        if (asset.browser_download_url !== `${repository}/releases/download/${tag}/${expectedAssetName}`) {
+            throw new Error("Firefox release asset URL is not canonical");
+        }
+        if (!/^[0-9a-f]{64}$/.test(digest)) {
+            throw new Error("Firefox release asset is missing its GitHub SHA-256 digest");
+        }
+        if (!Number.isSafeInteger(release.id) || !/^\d{4}-\d{2}-\d{2}T/.test(release.published_at || "")) {
+            throw new Error("Latest release metadata is incomplete");
+        }
+        console.log(tag);
+        console.log(version);
+        console.log(release.id);
+        console.log(release.html_url);
+        console.log(release.published_at);
+        console.log(release.tarball_url);
+        console.log(asset.name);
+        console.log(asset.browser_download_url);
+        console.log(digest);
+        console.log(asset.id);
+    ' "$release_json" "$canonical_source_repository"
+)
+
+release_tag="${release_values[0]}"
+release_version="${release_values[1]}"
+release_id="${release_values[2]}"
+release_url="${release_values[3]}"
+release_published_at="${release_values[4]}"
+source_archive_url="${release_values[5]}"
+release_asset_name="${release_values[6]}"
+release_asset_url="${release_values[7]}"
+release_asset_sha256="${release_values[8]}"
+release_asset_id="${release_values[9]}"
+
+"${github_curl[@]}" -o "$firefox_archive" "$release_asset_url"
+actual_release_asset_sha256="$(sha256sum "$firefox_archive" | awk '{print $1}')"
+if [[ "$actual_release_asset_sha256" != "$release_asset_sha256" ]]; then
+    echo "Firefox release asset SHA-256 does not match GitHub metadata" >&2
+    exit 1
+fi
+
+readarray -t official_manifest_values < <(
+    unzip -p "$firefox_archive" manifest.json | node -e '
+        let json = "";
+        process.stdin.setEncoding("utf8");
+        process.stdin.on("data", (chunk) => { json += chunk; });
+        process.stdin.on("end", () => {
+            const manifest = JSON.parse(json);
+            console.log(manifest.version ?? "");
+            console.log(manifest.browser_specific_settings?.gecko?.id ?? "");
+        });
+    '
+)
+if [[ "${official_manifest_values[0]}" != "$release_version" ||
+      "${official_manifest_values[1]}" != "midoritabs@astian.org" ]]; then
+    echo "Official Firefox release asset does not match the release tag or extension ID" >&2
+    exit 1
+fi
+
+tag_ref_url="https://api.github.com/repos/goastian/midori-tab/git/ref/tags/${release_tag}"
+"${github_curl[@]}" -o "$tag_ref_json" "$tag_ref_url"
+readarray -t tag_object_values < <(
+    node -e '
+        const ref = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+        console.log(ref.object?.type ?? "");
+        console.log(ref.object?.sha ?? "");
+    ' "$tag_ref_json"
+)
+tag_object_type="${tag_object_values[0]}"
+tag_object_sha="${tag_object_values[1]}"
+if [[ "$tag_object_type" == "tag" ]]; then
+    tag_object_json="$work_dir/tag-object.json"
+    "${github_curl[@]}" -o "$tag_object_json" "https://api.github.com/repos/goastian/midori-tab/git/tags/${tag_object_sha}"
+    readarray -t tag_object_values < <(
+        node -e '
+            const tag = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+            console.log(tag.object?.type ?? "");
+            console.log(tag.object?.sha ?? "");
+        ' "$tag_object_json"
+    )
+    tag_object_type="${tag_object_values[0]}"
+    tag_object_sha="${tag_object_values[1]}"
+fi
+if [[ "$tag_object_type" != "commit" || ! "$tag_object_sha" =~ ^[0-9a-f]{40}$ ]]; then
+    echo "Release tag does not resolve to a canonical Git commit" >&2
+    exit 1
+fi
+source_commit="$tag_object_sha"
+
+"${github_curl[@]}" -o "$source_archive" "$source_archive_url"
+source_archive_sha256="$(sha256sum "$source_archive" | awk '{print $1}')"
+archive_root="$(tar -tzf "$source_archive" | sed -n '1p' | cut -d/ -f1)"
+if [[ "$archive_root" != *-"${source_commit:0:7}" ]]; then
+    echo "Release source archive does not match tag commit $source_commit" >&2
+    exit 1
+fi
+tar -xzf "$source_archive" --strip-components=1 --no-same-owner --no-same-permissions -C "$source_dir"
+unexpected_source_entry="$(find "$source_dir" -mindepth 1 ! -type f ! -type d -print -quit)"
+if [[ -n "$unexpected_source_entry" ]]; then
+    echo "Release source contains a non-regular entry: $unexpected_source_entry" >&2
+    exit 1
+fi
+
+source_version="$(node -e '
+    const manifest = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+    process.stdout.write(String(manifest.version || ""));
+' "$source_dir/package.json")"
+if [[ "$source_version" != "$release_version" ]]; then
+    echo "Release tag $release_tag does not match package version $source_version" >&2
+    exit 1
 fi
 
 if [[ -n "$env_file" ]]; then
@@ -85,14 +223,15 @@ fi
     test_log="$work_dir/test-update.log"
     if ! npm run test:update 2>&1 | tee "$test_log"; then
         not_ok_count="$(awk '/^not ok / { count += 1 } END { print count + 0 }' "$test_log")"
-        if [[ "$source_commit" == "7a9540a490e141f3a66f81aa293253254ca1a138" &&
+        if [[ "$release_tag" == "v1.0.40" &&
+              "$source_commit" == "7a9540a490e141f3a66f81aa293253254ca1a138" &&
               "$not_ok_count" == "1" ]] &&
            rg -q "^not ok 1 - tests/ads-service.test.mjs$" "$test_log" &&
            rg -q "does not provide an export named 'buildCacheKey'" "$test_log" &&
            rg -q "^# tests 22$" "$test_log" &&
            rg -q "^# pass 21$" "$test_log" &&
            rg -q "^# fail 1$" "$test_log"; then
-            echo "Allowing the pinned 7a9540a4 stale-test failure; all other commits fail closed." >&2
+            echo "Allowing the pinned v1.0.40 stale-test failure; every other release fails closed." >&2
         else
             exit 1
         fi
@@ -128,14 +267,18 @@ readarray -t manifest_values < <(
         }
         console.log(manifest.manifest_version ?? "");
         console.log(manifest.browser_specific_settings?.gecko?.id ?? "");
-        console.log(manifest.chrome_url_overrides?.newtab ?? "");
+        console.log(
+            !Object.hasOwn(manifest, "chrome_url_overrides") && !Object.hasOwn(manifest, "commands")
+                ? "android-direct"
+                : "unexpected",
+        );
         console.log(manifest.version ?? "");
-    ' "$manifest_file" '["storage","identity","tabs","activeTab","bookmarks","history","browsingData","search","https://api.rss2json.com/*","https://api.unsplash.com/*","https://api.github.com/*","https://api.open-meteo.com/*","https://geocoding-api.open-meteo.com/*","https://ipwho.is/*","https://nominatim.openstreetmap.org/*","https://duckduckgo.com/*","https://astiango.com/*","https://marketplace.astian.org/*","https://open.er-api.com/*","https://ads.astian.org/*"]'
+    ' "$manifest_file" '["storage","tabs","activeTab","browsingData","https://api.rss2json.com/*","https://api.unsplash.com/*","https://api.github.com/*","https://api.open-meteo.com/*","https://geocoding-api.open-meteo.com/*","https://ipwho.is/*","https://nominatim.openstreetmap.org/*","https://duckduckgo.com/*","https://astiango.com/*","https://marketplace.astian.org/*","https://open.er-api.com/*","https://ads.astian.org/*"]'
 )
 
 if [[ "${manifest_values[0]}" != "2" ||
       "${manifest_values[1]}" != "midoritabs@astian.org" ||
-      "${manifest_values[2]}" != "index.html" ||
+      "${manifest_values[2]}" != "android-direct" ||
       -z "${manifest_values[3]}" ]]; then
     echo "Unexpected Midori Tab Firefox manifest contract" >&2
     exit 1
@@ -172,28 +315,53 @@ if [[ -f "$target_dir/upstream.json" ]]; then
             return 0;
         };
 
-        if (current.bundleSha256 !== nextBundleSha256 && compareVersions(nextVersion, current.version) <= 0) {
+        const changedWithoutVersionIncrease =
+            current.bundleSha256 !== nextBundleSha256 &&
+            compareVersions(nextVersion, current.version) <= 0;
+        const isAdoptingReleaseChannel = !current.release?.tag;
+        if (changedWithoutVersionIncrease && !isAdoptingReleaseChannel) {
             throw new Error(
                 `A changed Midori Tab bundle must raise manifest version above ${current.version}; ` +
-                "GeckoView will not replace a built-in extension at the same or an older version.",
+                "The Midori version-aware installer cannot safely apply a changed bundle at the same or an older version.",
             );
+        }
+        if (changedWithoutVersionIncrease && isAdoptingReleaseChannel) {
+            process.stderr.write("Adopting the stable Midori Tab release channel from legacy non-release metadata.\n");
         }
     ' "$target_dir/upstream.json" "${manifest_values[3]}" "$bundle_sha256"
 fi
 
 node -e '
     const fs = require("fs");
-    const [file, repository, ref, commit, version, bundleSha256, unsplashKeySha256, compatibilityPatchSha256,
-        marketplaceBaseUrl, passportServer, passportDomainServer, adsBaseUrl, adsNewTabPath] = process.argv.slice(1);
+    const [file, repository, releaseTag, commit, sourceVersion, version, bundleSha256,
+        unsplashKeySha256, compatibilityPatchSha256, marketplaceBaseUrl, passportServer,
+        passportDomainServer, adsBaseUrl, adsNewTabPath, releaseId, releaseUrl,
+        releasePublishedAt, sourceArchiveUrl, sourceArchiveSha256, releaseAssetId,
+        releaseAssetName, releaseAssetUrl, releaseAssetSha256] = process.argv.slice(1);
     fs.writeFileSync(file, `${JSON.stringify({
         sourceRepository: repository,
-        sourceRef: ref,
+        sourceRef: releaseTag,
         sourceCommit: commit,
+        sourceVersion,
         version,
         bundleSha256,
         buildTarget: "firefox-android",
         compatibilityPatch: "scripts/patch-midori-tab-firefox-android.mjs",
         compatibilityPatchSha256,
+        release: {
+            id: Number(releaseId),
+            tag: releaseTag,
+            url: releaseUrl,
+            publishedAt: releasePublishedAt,
+            sourceArchiveUrl,
+            sourceArchiveSha256,
+            firefoxAsset: {
+                id: Number(releaseAssetId),
+                name: releaseAssetName,
+                url: releaseAssetUrl,
+                sha256: releaseAssetSha256,
+            },
+        },
         buildConfig: {
             unsplashAccessKeySha256: unsplashKeySha256,
             marketplaceBaseUrl,
@@ -203,9 +371,11 @@ node -e '
             adsNewTabPath,
         },
     }, null, 2)}\n`);
-' "$staging_dir/upstream.json" "$canonical_source_repository" "$source_commit" "$source_commit" "${manifest_values[3]}" "$bundle_sha256" \
+' "$staging_dir/upstream.json" "$canonical_source_repository" "$release_tag" "$source_commit" "$source_version" "${manifest_values[3]}" "$bundle_sha256" \
     "$unsplash_key_sha256" "$compatibility_patch_sha256" "$VITE_MARKETPLACE_API_BASE_URL" "$VITE_PASSPORT_SERVER" \
-    "$VITE_PASSPORT_DOMAIN_SERVER" "$VITE_ADS_API_BASE" "$VITE_ADS_NEWTAB_PATH"
+    "$VITE_PASSPORT_DOMAIN_SERVER" "$VITE_ADS_API_BASE" "$VITE_ADS_NEWTAB_PATH" "$release_id" "$release_url" \
+    "$release_published_at" "$source_archive_url" "$source_archive_sha256" "$release_asset_id" "$release_asset_name" \
+    "$release_asset_url" "$release_asset_sha256"
 
 case "$target_dir" in
     "$repo_root/app/src/main/assets/extensions/midori_newtab") ;;
@@ -227,4 +397,4 @@ mv "$replacement_dir" "$target_dir"
 replace_started=false
 rm -rf "$backup_dir"
 
-echo "Synced Midori Tab ${manifest_values[3]} at $source_commit"
+echo "Synced Midori Tab release $release_tag as Android bundle ${manifest_values[3]} at $source_commit"
