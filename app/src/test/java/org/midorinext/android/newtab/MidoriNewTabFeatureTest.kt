@@ -27,9 +27,31 @@ class MidoriNewTabFeatureTest {
 
         assertEquals(2, manifest.getInt("manifest_version"))
         assertEquals(MidoriNewTabFeature.EXTENSION_ID, gecko.getString("id"))
-        assertEquals("index.html", manifest.getJSONObject("chrome_url_overrides").getString("newtab"))
+        assertTrue(!manifest.has("chrome_url_overrides"))
+        assertTrue(!manifest.has("commands"))
         assertEquals(manifest.getString("version"), metadata.getString("version"))
+        assertTrue(metadata.getInt("compatibilityRevision") > 0)
+        assertEquals(
+            "${metadata.getString("sourceVersion")}.${metadata.getInt("compatibilityRevision")}",
+            metadata.getString("version"),
+        )
         assertEquals("https://github.com/goastian/midori-tab", metadata.getString("sourceRepository"))
+        val release = metadata.getJSONObject("release")
+        assertEquals(release.getString("tag"), metadata.getString("sourceRef"))
+        assertEquals("v${metadata.getString("sourceVersion")}", release.getString("tag"))
+        assertEquals(
+            "https://github.com/goastian/midori-tab/releases/tag/${release.getString("tag")}",
+            release.getString("url"),
+        )
+        assertEquals(
+            "https://api.github.com/repos/goastian/midori-tab/tarball/${metadata.getString("sourceCommit")}",
+            release.getString("sourceArchiveUrl"),
+        )
+        assertEquals(
+            "midori-tab-${metadata.getString("sourceVersion")}-firefox.zip",
+            release.getJSONObject("firefoxAsset").getString("name"),
+        )
+        assertTrue(release.getJSONObject("firefoxAsset").getString("sha256").matches(Regex("[0-9a-f]{64}")))
         assertEquals("firefox-android", metadata.getString("buildTarget"))
         assertEquals(
             "scripts/patch-midori-tab-firefox-android.mjs",
@@ -48,8 +70,18 @@ class MidoriNewTabFeatureTest {
         val background = asset("background.js").readText()
         assertTrue(background.contains("chrome.windows?.onFocusChanged?.addListener"))
         assertTrue(background.contains("chrome.commands?.onCommand?.addListener"))
+        assertTrue(background.contains("ANDROID_UNSUPPORTED_ACTIONS"))
+        assertTrue(background.contains("chrome.history?.search"))
+        assertTrue(background.contains("chrome.bookmarks?.search"))
         assertTrue(background.contains("'https://' + url"))
         assertTrue(asset("LICENSE.upstream").readText().contains("GNU AFFERO GENERAL PUBLIC LICENSE"))
+    }
+
+    @Test
+    fun reinstallsOnlyWhenTheBundledExtensionVersionChanged() {
+        assertTrue(MidoriNewTabFeature.needsReinstall("1.0.40.1", "1.0.40.2"))
+        assertTrue(!MidoriNewTabFeature.needsReinstall("1.0.40.2", "1.0.40.2"))
+        assertTrue(!MidoriNewTabFeature.needsReinstall("1.0.40.1", null))
     }
 
     private fun asset(path: String) = File("src/main/assets/extensions/midori_newtab", path)

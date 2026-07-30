@@ -1,0 +1,125 @@
+{
+  "copyByLocale": {
+    "en": {
+      "label": "Command Menu",
+      "placeholder": "Type a command or search…",
+      "resultsLabel": "Search results",
+      "results": "results",
+      "navigate": "navigate",
+      "select": "select",
+      "openInNewTab": "new tab",
+      "dismiss": "dismiss",
+      "noResults": "No results found"
+    },
+    "es": {
+      "label": "Menú de comandos",
+      "placeholder": "Escribe un comando o busca…",
+      "resultsLabel": "Search results",
+      "results": "resultados",
+      "navigate": "navegar",
+      "select": "seleccionar",
+      "openInNewTab": "nueva pestaña",
+      "dismiss": "cerrar",
+      "noResults": "Sin resultados"
+    },
+    "pt": {
+      "label": "Menu de comandos",
+      "placeholder": "Digite um comando ou pesquise…",
+      "resultsLabel": "Search results",
+      "results": "resultados",
+      "navigate": "navegar",
+      "select": "selecionar",
+      "openInNewTab": "nova aba",
+      "dismiss": "fechar",
+      "noResults": "Sem resultados"
+    },
+    "fr": {
+      "label": "Menu de commandes",
+      "placeholder": "Tapez une commande ou recherchez…",
+      "resultsLabel": "Search results",
+      "results": "résultats",
+      "navigate": "naviguer",
+      "select": "sélectionner",
+      "openInNewTab": "nouvel onglet",
+      "dismiss": "fermer",
+      "noResults": "Aucun résultat"
+    },
+    "de": {
+      "label": "Befehlsmenü",
+      "placeholder": "Befehl oder Suche eingeben…",
+      "resultsLabel": "Search results",
+      "results": "Ergebnisse",
+      "navigate": "navigieren",
+      "select": "auswählen",
+      "openInNewTab": "neuer Tab",
+      "dismiss": "schließen",
+      "noResults": "Keine Ergebnisse"
+    },
+    "ru": {
+      "label": "Меню команд",
+      "placeholder": "Введите команду или поиск…",
+      "resultsLabel": "Search results",
+      "results": "результатов",
+      "navigate": "навигация",
+      "select": "выбрать",
+      "openInNewTab": "новая вкладка",
+      "dismiss": "закрыть",
+      "noResults": "Нет результатов"
+    },
+    "zh": {
+      "label": "命令菜单",
+      "placeholder": "输入命令或搜索…",
+      "resultsLabel": "Search results",
+      "results": "结果",
+      "navigate": "导航",
+      "select": "选择",
+      "openInNewTab": "新标签页",
+      "dismiss": "关闭",
+      "noResults": "无结果"
+    },
+    "ja": {
+      "label": "コマンドメニュー",
+      "placeholder": "コマンドまたは検索を入力…",
+      "resultsLabel": "Search results",
+      "results": "件",
+      "navigate": "移動",
+      "select": "選択",
+      "openInNewTab": "新しいタブ",
+      "dismiss": "閉じる",
+      "noResults": "結果なし"
+    },
+    "it": {
+      "label": "Menu comandi",
+      "placeholder": "Digita un comando o cerca…",
+      "resultsLabel": "Search results",
+      "results": "risultati",
+      "navigate": "naviga",
+      "select": "seleziona",
+      "openInNewTab": "nuova scheda",
+      "dismiss": "chiudi",
+      "noResults": "Nessun risultato"
+    }
+  },
+  "densityPresets": {
+    "cozy": {
+      "dialogMaxHeight": 560,
+      "listMaxHeight": 420,
+      "searchRowHeight": 52,
+      "searchRowPaddingX": 16,
+      "itemPaddingX": 16,
+      "itemPaddingY": 9,
+      "footerPaddingX": 16,
+      "footerPaddingY": 8
+    },
+    "compact": {
+      "dialogMaxHeight": 470,
+      "listMaxHeight": 340,
+      "searchRowHeight": 44,
+      "searchRowPaddingX": 12,
+      "itemPaddingX": 12,
+      "itemPaddingY": 7,
+      "footerPaddingX": 12,
+      "footerPaddingY": 6
+    }
+  }
+}

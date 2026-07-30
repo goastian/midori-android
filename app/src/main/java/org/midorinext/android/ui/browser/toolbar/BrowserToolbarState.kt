@@ -10,6 +10,7 @@ import org.midorinext.android.ext.getMidoriSERPSearch
 import org.midorinext.android.ext.isMidoriUrl
 import org.midorinext.android.ext.toCleanHost
 import org.midorinext.android.ext.urlDecode
+import org.midorinext.android.newtab.MidoriNewTabFeature
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.ToolbarPosition
 import org.midorinext.android.stats.Datahub
@@ -21,6 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
@@ -43,6 +45,7 @@ class BrowserToolbarState @AssistedInject constructor(
     suggestionProviders: @JvmSuppressWildcards List<SuggestionProvider>,
     browserIcons: BrowserIcons,
     datahub: Datahub,
+    private val newTabFeature: MidoriNewTabFeature,
     @Assisted private val coroutineScope: CoroutineScope = MainScope()
 ): ToolbarState(
     browserIcons, datahub, suggestionProviders, coroutineScope
@@ -92,15 +95,18 @@ class BrowserToolbarState @AssistedInject constructor(
             initialValue = null
         )
 
-    val currentUrl = store.flow()
+    private val selectedUrl = store.flow()
         .map { state -> state.selectedTab?.content?.url }
         .distinctUntilChanged()
+
+    val currentUrl = selectedUrl
+        .combine(newTabFeature.pageUrl) { url, _ -> url }
         .onEach {
             if (!hasFocus) {
                 updateTextWithUrl(it ?: "")
                 updateVisibility(true)
             }
-            onMidori = it?.isMidoriUrl() ?: true
+            onMidori = it?.let { url -> url.isMidoriUrl() || newTabFeature.isNewTabUrl(url) } ?: true
         }
         .stateIn(
             scope = coroutineScope,
@@ -118,7 +124,9 @@ class BrowserToolbarState @AssistedInject constructor(
 
     private fun updateTextWithUrl(url: String) {
         coroutineScope.launch {
-            text = if (url.isMidoriUrl()) {
+            text = if (newTabFeature.isNewTabUrl(url)) {
+                TextFieldValue("")
+            } else if (url.isMidoriUrl()) {
                 url.getMidoriSERPSearch()?.let { search ->
                     if (hasFocus) TextFieldValue(search.urlDecode(), selection = TextRange(0, search.length))
                     else TextFieldValue(search.urlDecode())

@@ -76,7 +76,11 @@ fun ToolbarDecorator(
                     text = when (state) {
                         is BrowserToolbarState -> {
                             val currentUrl by state.currentUrl.collectAsState()
-                            if (currentUrl?.isNotBlank() == true && currentUrl?.startsWith("http://") == false && currentUrl?.startsWith("https://") == false) {
+                            if (currentUrl?.isNotBlank() == true &&
+                                currentUrl?.startsWith("http://") == false &&
+                                currentUrl?.startsWith("https://") == false &&
+                                currentUrl?.startsWith("moz-extension://") == false
+                            ) {
                                 currentUrl ?: ""
                             } else stringResource(id = R.string.browser_toolbar_hint)
                         }

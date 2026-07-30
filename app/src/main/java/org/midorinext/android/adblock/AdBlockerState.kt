@@ -27,7 +27,7 @@ class AdBlockerState @Inject constructor() {
         internal set
 
     fun updateSelectedTab(url: String?) {
-        if (url.isNullOrBlank() || url == "about:blank") {
+        if (url.isNullOrBlank() || url.startsWith("about:") || url.startsWith("moz-extension://")) {
             clearSnapshot(keepEnabled = enabled)
             lastProtectedHost = null
             return

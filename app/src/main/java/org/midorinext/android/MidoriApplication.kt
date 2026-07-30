@@ -98,10 +98,7 @@ class MidoriApplication : Application(), Configuration.Provider {
             }
         }
 
-        engine.get().apply {
-            warmUp()
-            speculativeConnect(BuildConfig.QWANT_BASE_URL)
-        }
+        engine.get().warmUp()
 
         restoreBrowserState().invokeOnCompletion {
             android.util.Log.d("MidoriPrivacy", "restore tabs done")

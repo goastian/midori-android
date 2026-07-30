@@ -68,7 +68,11 @@ fun PreferencesScreen(
 
             SettingsNavRow(
                 label = R.string.settings_homepage_title,
-                description = openingScreenDescription(appPrefs.homepageOpeningScreen),
+                description = if (BuildConfig.FLAVOR_version == "original") {
+                    stringResource(R.string.settings_homepage_summary)
+                } else {
+                    openingScreenDescription(appPrefs.homepageOpeningScreen)
+                },
                 onClicked = { navigateTo(NavDestination.HomepageSettings) }
             )
             SettingsNavRow(
@@ -181,55 +185,62 @@ fun HomepageSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
     val appPrefs by viewModel.appPreferences.collectAsState()
     PreferenceScreenScaffold(title = stringResource(R.string.settings_homepage_title)) {
         PreferenceGroupLabel(label = R.string.settings_homepage_sections)
-        PreferenceToggle(
-            label = R.string.show_new_tab_home_label,
-            description = R.string.show_new_tab_home_description,
-            value = !appPrefs.openBlankNewTab,
-            onValueChange = viewModel::updateShowNewTabHome
-        )
-        PreferenceToggle(
-            label = R.string.settings_homepage_shortcuts,
-            value = appPrefs.homepageShortcutsEnabled,
-            onValueChange = viewModel::updateHomepageShortcutsEnabled
-        )
-        PreferenceToggle(
-            label = R.string.settings_homepage_privacy_report,
-            value = appPrefs.homepagePrivacyStatsEnabled,
-            onValueChange = viewModel::updateHomepagePrivacyStatsEnabled
-        )
-        PreferenceToggle(
-            label = R.string.settings_homepage_weather,
-            value = appPrefs.homepageWeatherEnabled,
-            onValueChange = viewModel::updateHomepageWeatherEnabled
-        )
-        PreferenceToggle(
-            label = R.string.settings_homepage_wallpaper,
-            value = appPrefs.homepageBackgroundPhotoEnabled,
-            onValueChange = viewModel::updateHomepageBackgroundPhotoEnabled
-        )
+        if (BuildConfig.FLAVOR_version == "original") {
+            PreferenceRow(
+                label = R.string.settings_homepage_midori_tab,
+                description = stringResource(R.string.settings_homepage_midori_tab_description),
+            )
+        } else {
+            PreferenceToggle(
+                label = R.string.show_new_tab_home_label,
+                description = R.string.show_new_tab_home_description,
+                value = !appPrefs.openBlankNewTab,
+                onValueChange = viewModel::updateShowNewTabHome
+            )
+            PreferenceToggle(
+                label = R.string.settings_homepage_shortcuts,
+                value = appPrefs.homepageShortcutsEnabled,
+                onValueChange = viewModel::updateHomepageShortcutsEnabled
+            )
+            PreferenceToggle(
+                label = R.string.settings_homepage_privacy_report,
+                value = appPrefs.homepagePrivacyStatsEnabled,
+                onValueChange = viewModel::updateHomepagePrivacyStatsEnabled
+            )
+            PreferenceToggle(
+                label = R.string.settings_homepage_weather,
+                value = appPrefs.homepageWeatherEnabled,
+                onValueChange = viewModel::updateHomepageWeatherEnabled
+            )
+            PreferenceToggle(
+                label = R.string.settings_homepage_wallpaper,
+                value = appPrefs.homepageBackgroundPhotoEnabled,
+                onValueChange = viewModel::updateHomepageBackgroundPhotoEnabled
+            )
 
-        PreferenceGroupLabel(label = R.string.settings_homepage_opening_screen)
-        PreferenceRadioSelectionPopupWithDescription(
-            label = R.string.settings_homepage_opening_screen,
-            options = remember {
-                listOf(
-                    RadioButtonOptionWithDescription(
-                        HomepageOpeningScreen.HOMEPAGE,
-                        R.string.settings_homepage_open_homepage,
-                    ),
-                    RadioButtonOptionWithDescription(
-                        HomepageOpeningScreen.LAST_TAB,
-                        R.string.settings_homepage_open_last_tab,
-                    ),
-                    RadioButtonOptionWithDescription(
-                        HomepageOpeningScreen.HOMEPAGE_AFTER_FOUR_HOURS,
-                        R.string.settings_homepage_open_after_four_hours,
+            PreferenceGroupLabel(label = R.string.settings_homepage_opening_screen)
+            PreferenceRadioSelectionPopupWithDescription(
+                label = R.string.settings_homepage_opening_screen,
+                options = remember {
+                    listOf(
+                        RadioButtonOptionWithDescription(
+                            HomepageOpeningScreen.HOMEPAGE,
+                            R.string.settings_homepage_open_homepage,
+                        ),
+                        RadioButtonOptionWithDescription(
+                            HomepageOpeningScreen.LAST_TAB,
+                            R.string.settings_homepage_open_last_tab,
+                        ),
+                        RadioButtonOptionWithDescription(
+                            HomepageOpeningScreen.HOMEPAGE_AFTER_FOUR_HOURS,
+                            R.string.settings_homepage_open_after_four_hours,
+                        )
                     )
-                )
-            },
-            value = appPrefs.homepageOpeningScreen,
-            onValueChange = viewModel::updateHomepageOpeningScreen
-        )
+                },
+                value = appPrefs.homepageOpeningScreen,
+                onValueChange = viewModel::updateHomepageOpeningScreen
+            )
+        }
     }
 }
 

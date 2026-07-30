@@ -30,7 +30,7 @@ class HistoryRepository @Inject constructor(
     val hasHistoryFlow = dao.hasHistoryFlow().flowOn(Dispatchers.IO)
 
     override fun canAddUri(uri: String): Boolean =
-        !uri.isMidoriUrl() && !uri.startsWith("moz-extension://") && uri != "about:blank"
+        !uri.isMidoriUrl() && !uri.startsWith("moz-extension://") && !uri.startsWith("about:blank")
                 && contentBlockerState.status == ContentBlockerState.Status.ALLOWED
 
     override suspend fun recordVisit(uri: String, visit: PageVisit) = withContext(Dispatchers.IO) {

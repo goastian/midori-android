@@ -23,6 +23,7 @@ import org.midorinext.android.adblock.AdBlockerAction
 import org.midorinext.android.ext.*
 import org.midorinext.android.contentBlocker.ContentBlockerOverlay
 import org.midorinext.android.contentBlocker.ContentBlockerState
+import org.midorinext.android.newtab.MidoriNewTabFeature
 import org.midorinext.android.ui.MidoriApplicationViewModel
 import org.midorinext.android.ui.browser.home.HomeScreen
 import org.midorinext.android.ui.browser.home.HomePrivateBrowsing
@@ -55,9 +56,12 @@ fun BrowserScreen(
     openNewTab: TabOpening = TabOpening.NONE
 ) {
     val currentUrl by viewModel.currentUrl.collectAsState()
+    val selectedTabSnapshot by viewModel.selectedTabSnapshot.collectAsState()
     val tabCount by viewModel.tabCount.collectAsState()
+    val restoreComplete by viewModel.restoreComplete.collectAsState()
     val appPrefs by viewModel.appPreferences.collectAsState()
     val private by appViewModel.isPrivate.collectAsState()
+    val newTabState by viewModel.newTabState.collectAsState()
 
     var engineViewHolder: EngineView? by remember { mutableStateOf(null) }
 
@@ -68,14 +72,31 @@ fun BrowserScreen(
             else -> {}
         }
     }
-    LaunchedEffect(true) {
-        if (tabCount == 0) {
+    LaunchedEffect(restoreComplete, tabCount) {
+        if (restoreComplete && tabCount == 0) {
             viewModel.openSafetyTabIfNeeded()
         }
     }
 
+    val showLegacyHome = currentUrl?.let {
+        it.isLegacyMidoriHomeUrl()
+    } == true
+
     LaunchedEffect(currentUrl) {
         viewModel.adBlockerState.updateSelectedTab(currentUrl)
+    }
+
+    LaunchedEffect(selectedTabSnapshot, newTabState) {
+        val selectedTab = selectedTabSnapshot ?: return@LaunchedEffect
+        when {
+            selectedTab.url.isLegacyMidoriHomeUrl() && viewModel.isNewTabEnabled -> {
+                viewModel.replaceTabWithNewTab(selectedTab.id, selectedTab.url)
+            }
+            viewModel.isNewTabLoadingUrl(selectedTab.url) &&
+                newTabState is MidoriNewTabFeature.InstallState.Ready -> {
+                viewModel.replaceTabWithNewTab(selectedTab.id, selectedTab.url)
+            }
+        }
     }
 
     /* val activity = LocalContext.current.activity
@@ -89,15 +110,15 @@ fun BrowserScreen(
 
     KeyboardObserver(toolbarState = viewModel.toolbarState)
 
-    val showHome = currentUrl?.let { it.isMidoriUrl() && !it.isMidoriSERPUrl() } == true
+    val showHomeFallback = showLegacyHome || viewModel.isNewTabLoadingUrl(currentUrl)
 
-    if (showHome) {
+    if (showHomeFallback) {
         HomeScreen(
             adBlockerState = viewModel.adBlockerState,
             preferences = appPrefs,
             tabCount = tabCount,
             onSearch = { text -> viewModel.commitSearch(text) },
-            onOpenUrl = { url -> viewModel.tabsUseCases.selectOrAddTab(url = url) },
+            onOpenUrl = viewModel::openUrlFromHome,
             onOpenHome = { viewModel.goToHomepage() },
             onOpenBookmarks = { navigateTo(NavDestination.Bookmarks) },
             onOpenTabs = { navigateTo(NavDestination.Tabs) },
@@ -115,7 +136,13 @@ fun BrowserScreen(
                 toolbarState = viewModel.toolbarState,
                 browserIcons = viewModel.browserIcons,
                 beforeTextField = { AdBlockerAction(viewModel.adBlockerState, openLink = { url -> viewModel.tabsUseCases.addTab(url) }) },
-                beforeTextFieldVisible = { !viewModel.toolbarState.hasFocus && currentUrl?.isNotBlank() == true && currentUrl?.isMidoriUrl() == false && currentUrl != "about:blank" },
+                beforeTextFieldVisible = {
+                    !viewModel.toolbarState.hasFocus &&
+                        currentUrl?.isNotBlank() == true &&
+                        currentUrl?.isMidoriUrl() == false &&
+                        !viewModel.isNewTabUrl(currentUrl) &&
+                        currentUrl != "about:blank"
+                },
                 afterTextField = { AfterActions(navigateTo, viewModel, appViewModel) },
                 afterTextFieldVisible = { !viewModel.toolbarState.hasFocus },
                 onMidoriIconClicked = { viewModel.goToHomepage() }

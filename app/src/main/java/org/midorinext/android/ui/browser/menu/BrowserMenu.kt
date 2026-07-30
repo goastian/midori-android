@@ -395,7 +395,7 @@ fun PageActions(
 }
 
 private fun String?.isExternalPage(): Boolean {
-    if (isNullOrBlank() || this == "about:blank") {
+    if (isNullOrBlank() || startsWith("about:blank") || startsWith("moz-extension://")) {
         return false
     }
 

@@ -25,6 +25,26 @@ fun String.isMidoriSERPUrl(): Boolean {
             && (this.contains("&q=") || this.contains("?q="))
 }
 
+/** Matches only the URL shape used by the retired remote New Tab implementation. */
+fun String.isLegacyMidoriHomeUrl(): Boolean = runCatching {
+    val candidate = URI(this).normalize()
+    val base = URI(BuildConfig.QWANT_BASE_URL).normalize()
+    val path = candidate.path.orEmpty()
+    val parameters = candidate.rawQuery
+        .orEmpty()
+        .split('&')
+        .filter(String::isNotBlank)
+        .map { parameter -> parameter.substringBefore('=') to parameter.substringAfter('=', "") }
+
+    candidate.scheme.equals(base.scheme, ignoreCase = true) &&
+        candidate.host.equals(base.host, ignoreCase = true) &&
+        candidate.port == base.port &&
+        (path.isEmpty() || path == "/") &&
+        parameters.contains("omnibar" to "1") &&
+        parameters.contains("qbc" to "1") &&
+        parameters.none { (key, _) -> key == "q" }
+}.getOrDefault(false)
+
 fun String.getMidoriSERPSearch(): String? {
     if (this.isMidoriSERPUrl()) {
         return this.split("?q=", "&q=")[1].split("&")[0]
@@ -60,7 +80,8 @@ fun String.toCleanHost(): String {
     // TODO use 'toShortUrl' from mozilla support ktx there
     //  https://github.com/mozilla-mobile/firefox-android/blob/main/android-components/components/support/ktx/src/main/java/mozilla/components/support/ktx/kotlin/String.kt
     return try {
-        URI(this).normalize().host.removePrefix("www.")
+        val uri = URI(this).normalize()
+        if (uri.scheme == "moz-extension") "" else uri.host.orEmpty().removePrefix("www.")
     } catch (e: Exception) {
         Log.w("QB", "Could not normalize url and get the host. Fallback to empty string for security concerns")
         ""

@@ -33,7 +33,7 @@ class NavigationTest {
         assertEquals("settings/passwords/saved", NavDestination.SavedPasswords.route())
         assertEquals("settings/autofill/saved", NavDestination.SavedAutofill.route())
         assertEquals("settings/accessibility", NavDestination.AccessibilitySettings.route())
-        assertEquals("Homepage", context.getString(R.string.settings_homepage_title))
+        assertEquals("New Tab", context.getString(R.string.settings_homepage_title))
         assertEquals("Customize", context.getString(R.string.settings_customize_title))
         assertEquals("Passwords", context.getString(R.string.settings_passwords_title))
         assertEquals("Autofill", context.getString(R.string.settings_autofill_title))
@@ -41,7 +41,7 @@ class NavigationTest {
     }
 
     @Test
-    fun settingsDefaultsMatchHomepageAndCustomizationExperience() {
+    fun settingsDefaultsKeepTheNativeFallbackUsable() {
         val defaults = AppPreferencesSerializer.defaultValue
 
         assertFalse(defaults.openBlankNewTab)
@@ -57,6 +57,29 @@ class NavigationTest {
         assertEquals(100, defaults.accessibilityFontScale)
         assertFalse(defaults.accessibilityForceZoomEnabled)
         assertEquals(HomepageOpeningScreen.HOMEPAGE_AFTER_FOUR_HOURS, defaults.homepageOpeningScreen)
+    }
+
+    @Test
+    fun officialMidoriNewTabBundleIsPackaged() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val manifest = context.assets.open("extensions/midori_newtab/manifest.json")
+            .bufferedReader()
+            .use { it.readText() }
+        val metadata = context.assets.open("extensions/midori_newtab/upstream.json")
+            .bufferedReader()
+            .use { it.readText() }
+        val index = context.assets.open("extensions/midori_newtab/index.html")
+            .bufferedReader()
+            .use { it.readText() }
+
+        assertTrue(manifest.contains("midoritabs@astian.org"))
+        assertFalse(manifest.contains("chrome_url_overrides"))
+        assertFalse(manifest.contains("\"commands\""))
+        assertTrue(metadata.contains("goastian/midori-tab"))
+        assertTrue(metadata.contains("\"sourceVersion\""))
+        assertTrue(metadata.contains("\"release\""))
+        assertTrue(metadata.contains("\"firefoxAsset\""))
+        assertTrue(index.contains("/index.js"))
     }
 
     @Test

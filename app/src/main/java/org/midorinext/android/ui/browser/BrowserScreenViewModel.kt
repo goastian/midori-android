@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import org.midorinext.android.adblock.AdBlockerState
 import org.midorinext.android.contentBlocker.ContentBlockerState
+import org.midorinext.android.ext.isLegacyMidoriHomeUrl
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.storage.bookmarks.BookmarksRepository
@@ -62,6 +63,11 @@ class BrowserScreenViewModel @Inject constructor(
     val contentBlockerState: ContentBlockerState,
     val adBlockerState: AdBlockerState
 ): ViewModel() {
+    data class SelectedTabSnapshot(
+        val id: String,
+        val url: String,
+    )
+
     data class InstalledMenuExtension(
         val id: String,
         val name: String,
@@ -94,6 +100,27 @@ class BrowserScreenViewModel @Inject constructor(
             initialValue = null
         )
 
+    val restoreComplete = store.flow()
+        .map { state -> state.restoreComplete }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = false,
+        )
+
+    val selectedTabSnapshot = store.flow()
+        .map { state ->
+            state.selectedTab?.let { tab ->
+                SelectedTabSnapshot(id = tab.id, url = tab.content.url)
+            }
+        }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = null,
+        )
+
     val appPreferences = appPreferencesRepository.flow
         .stateIn(
             scope = viewModelScope,
@@ -101,8 +128,8 @@ class BrowserScreenViewModel @Inject constructor(
             initialValue = AppPreferencesSerializer.defaultValue
         )
 
-    var openBlankNewTab by mutableStateOf(false)
-        private set
+    private var openBlankNewTab by mutableStateOf(false)
+    private val tabsWithUserNavigationInFlight = mutableSetOf<String>()
 
     init {
         viewModelScope.launch {
@@ -110,7 +137,22 @@ class BrowserScreenViewModel @Inject constructor(
                 openBlankNewTab = prefs.openBlankNewTab
             }
         }
+        viewModelScope.launch {
+            store.flow().collect { state ->
+                val replaceableTabIds = state.tabs
+                    .filter { tab ->
+                        tab.content.url.isLegacyMidoriHomeUrl() ||
+                            MidoriUseCases.isNewTabLoadingUrl(tab.content.url)
+                    }
+                    .mapTo(mutableSetOf()) { tab -> tab.id }
+                tabsWithUserNavigationInFlight.retainAll(replaceableTabIds)
+            }
+        }
     }
+
+    val newTabState = MidoriUseCases.newTabState
+
+    val newTabPageUrl = MidoriUseCases.newTabPageUrl
 
     val currentEngineSession = store.flow()
         .map { state -> state.selectedTab?.engineState?.engineSession }
@@ -247,6 +289,7 @@ class BrowserScreenViewModel @Inject constructor(
         }
 
         toolbarState.updateFocus(false)
+        markSelectedNewTabAsUserNavigation()
         if (trimmedSearch.isUrl()) {
             sessionUseCases.loadUrl(url = trimmedSearch.toNormalizedUrl())
         } else {
@@ -257,7 +300,7 @@ class BrowserScreenViewModel @Inject constructor(
     fun openNewMidoriTab(private: Boolean = false, focusToolbar: Boolean = true) {
         if (private) {
             MidoriUseCases.openPrivatePage()
-        } else if (openBlankNewTab) {
+        } else if (!MidoriUseCases.isNewTabEnabled && openBlankNewTab) {
             tabsUseCases.addTab("", selectTab = true, private = false)
         } else {
             MidoriUseCases.openMidoriPage(private = false)
@@ -272,27 +315,59 @@ class BrowserScreenViewModel @Inject constructor(
 
     fun goToHomepage() {
         toolbarState.updateFocus(false)
-        sessionUseCases.loadUrl(url = MidoriUseCases.getMidoriUrl())
+        store.state.selectedTabId?.let { tabId ->
+            tabsWithUserNavigationInFlight.remove(tabId)
+            MidoriUseCases.loadNewTabPage(tabId)
+        }
     }
 
-    fun updateShowNewTabHome(show: Boolean) {
-        openBlankNewTab = !show
-        viewModelScope.launch { appPreferencesRepository.updateShowNewTabHome(show) }
+    fun openUrlFromHome(url: String) {
+        val protectedTabId = markSelectedNewTabAsUserNavigation()
+        tabsUseCases.selectOrAddTab(url = url)
+        if (protectedTabId != null && store.state.selectedTabId != protectedTabId) {
+            tabsWithUserNavigationInFlight.remove(protectedTabId)
+        }
     }
+
+    fun replaceTabWithNewTab(tabId: String, expectedUrl: String) {
+        if (tabId in tabsWithUserNavigationInFlight) return
+        val actualUrl = store.state.tabs
+            .firstOrNull { tab -> tab.id == tabId }
+            ?.content
+            ?.url
+        if (actualUrl != expectedUrl) return
+        if (!actualUrl.isLegacyMidoriHomeUrl() && !MidoriUseCases.isNewTabLoadingUrl(actualUrl)) return
+
+        MidoriUseCases.loadNewTabPage(tabId, replaceCurrent = true)
+    }
+
+    private fun markSelectedNewTabAsUserNavigation(): String? {
+        val tab = store.state.selectedTab ?: return null
+        val isReplaceable = tab.content.url.isLegacyMidoriHomeUrl() ||
+            MidoriUseCases.isNewTabLoadingUrl(tab.content.url)
+        if (!isReplaceable) return null
+
+        tabsWithUserNavigationInFlight += tab.id
+        return tab.id
+    }
+
+    fun isNewTabUrl(url: String?): Boolean = MidoriUseCases.isNewTabUrl(url)
+
+    fun isNewTabLoadingUrl(url: String?): Boolean = MidoriUseCases.isNewTabLoadingUrl(url)
+
+    val isNewTabEnabled: Boolean get() = MidoriUseCases.isNewTabEnabled
 
     private var safetyTabOpening = false
 
     fun openSafetyTabIfNeeded() {
-        if (store.state.tabs.isNotEmpty() || safetyTabOpening) {
+        if (!store.state.restoreComplete || store.state.tabs.isNotEmpty() || safetyTabOpening) {
             return
         }
 
-        viewModelScope.launch {
-            safetyTabOpening = true
-            delay(500)
-            if (store.state.tabs.isEmpty()) {
-                openNewMidoriTab(focusToolbar = false)
-            }
+        safetyTabOpening = true
+        try {
+            openNewMidoriTab(focusToolbar = false)
+        } finally {
             safetyTabOpening = false
         }
     }

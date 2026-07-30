@@ -5,6 +5,7 @@ import org.midorinext.android.ext.getMidoriSERPCategory
 import org.midorinext.android.ext.getMidoriSERPSearch
 import org.midorinext.android.ext.isMidoriUrl
 import org.midorinext.android.ext.isMidoriUrlValid
+import org.midorinext.android.ext.urlDecode
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.usecases.MidoriUseCases
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -68,7 +69,17 @@ class AppRequestInterceptor @Inject constructor(
                 } catch (e: Exception) {
                     null
                 }
-                val redirectUrl = MidoriUseCases.getMidoriUrl(path = path, search = uri.getMidoriSERPSearch(), category = uri.getMidoriSERPCategory())
+                val search = uri.getMidoriSERPSearch()?.let { encoded ->
+                    runCatching(encoded::urlDecode).getOrDefault(encoded)
+                }
+                val category = uri.getMidoriSERPCategory()?.let { encoded ->
+                    runCatching(encoded::urlDecode).getOrDefault(encoded)
+                }
+                val redirectUrl = MidoriUseCases.getMidoriUrl(
+                    path = path,
+                    search = search,
+                    category = category,
+                )
                 return RequestInterceptor.InterceptionResponse.Url(redirectUrl)
             }
         }

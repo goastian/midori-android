@@ -1,0 +1,36 @@
+{
+  "sourceRepository": "https://github.com/goastian/midori-tab",
+  "sourceRef": "v1.0.40",
+  "sourceCommit": "7a9540a490e141f3a66f81aa293253254ca1a138",
+  "sourceVersion": "1.0.40",
+  "version": "1.0.40.2",
+  "compatibilityRevision": 2,
+  "bundleSha256": "ef45b6a7ca9b988e6473645c20703d430df232464b4cc382d67ca20859a47f75",
+  "buildTarget": "firefox-android",
+  "compatibilityPatch": "scripts/patch-midori-tab-firefox-android.mjs",
+  "compatibilityPatchSha256": "7d8bbcfdf38a471d6c93f2e1d07ac2d5d94dd018fdb6b6095f8bedd8635544ae",
+  "release": {
+    "id": 362241592,
+    "tag": "v1.0.40",
+    "url": "https://github.com/goastian/midori-tab/releases/tag/v1.0.40",
+    "publishedAt": "2026-07-30T07:03:32Z",
+    "immutable": false,
+    "tagArchiveUrl": "https://api.github.com/repos/goastian/midori-tab/tarball/v1.0.40",
+    "sourceArchiveUrl": "https://api.github.com/repos/goastian/midori-tab/tarball/7a9540a490e141f3a66f81aa293253254ca1a138",
+    "sourceArchiveSha256": "b69ea0a561ffd1701d675f8637fe9e59dc4871ccdd2027232159e892967e9837",
+    "firefoxAsset": {
+      "id": 495037400,
+      "name": "midori-tab-1.0.40-firefox.zip",
+      "url": "https://github.com/goastian/midori-tab/releases/download/v1.0.40/midori-tab-1.0.40-firefox.zip",
+      "sha256": "5e1e452b426e9be1b59b03928686c5692d68cad07134290d69a945a8fbecb459"
+    }
+  },
+  "buildConfig": {
+    "unsplashAccessKeySha256": "5d730b4e68141792930fc1968d26b52736d370963e9457c93b1eddd8bf907817",
+    "marketplaceBaseUrl": "https://marketplace.astian.org",
+    "passportServer": "https://accounts.astian.org",
+    "passportDomainServer": "https://vpn.astian.org",
+    "adsBaseUrl": "https://ads.astian.org",
+    "adsNewTabPath": "/api/v1/ads/newtab"
+  }
+}

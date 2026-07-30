@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "requests": {
+    "handshake": "omni-handshake",
+    "open": "open-omni",
+    "config": "get-omni-config",
+    "query": "query-omni",
+    "execute": "execute-omni-item",
+    "data": "get-data",
+    "searchHistory": "search-history",
+    "searchBookmarks": "search-bookmarks"
+  },
+  "resultTypes": [
+    "action",
+    "bookmark",
+    "history",
+    "special",
+    "tab"
+  ],
+  "itemFields": [
+    "id",
+    "title",
+    "desc",
+    "url",
+    "type",
+    "action",
+    "emoji",
+    "emojiChar",
+    "favIconUrl",
+    "keycheck",
+    "keys"
+  ],
+  "responseFields": {
+    "query": ["results"],
+    "execute": ["handled", "localAction", "requiresConfirmation"],
+    "config": ["maxResults", "locale", "densityVariant", "copy", "hints", "density"]
+  }
+}

@@ -141,7 +141,7 @@ class TabsScreenViewModel @Inject constructor(
     fun openNewTab(private: Boolean) {
         if (private) {
             tabsUseCases.addTab("", selectTab = true, private = true)
-        } else if (openBlankNewTab.value) {
+        } else if (!midoriUseCases.isNewTabEnabled && openBlankNewTab.value) {
             tabsUseCases.addTab("", selectTab = true, private = false)
         } else {
             midoriUseCases.openMidoriPage(private = false)

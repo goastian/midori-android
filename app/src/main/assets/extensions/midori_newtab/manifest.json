@@ -1,0 +1,54 @@
+{
+  "manifest_version": 2,
+  "name": "midori-tab",
+  "description": "A beautiful, customizable new tab with smart search, workspaces and bookmarks.",
+  "author": "Astian, Inc",
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab",
+    "browsingData",
+    "https://api.rss2json.com/*",
+    "https://api.unsplash.com/*",
+    "https://api.github.com/*",
+    "https://api.open-meteo.com/*",
+    "https://geocoding-api.open-meteo.com/*",
+    "https://ipwho.is/*",
+    "https://nominatim.openstreetmap.org/*",
+    "https://duckduckgo.com/*",
+    "https://astiango.com/*",
+    "https://marketplace.astian.org/*",
+    "https://open.er-api.com/*",
+    "https://ads.astian.org/*"
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": false
+  },
+  "web_accessible_resources": [
+    "globe.svg",
+    "icons/*"
+  ],
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "browser_action": {
+    "default_icon": {
+      "16": "icons/16.png",
+      "48": "icons/48.png",
+      "128": "icons/128.png"
+    },
+    "default_title": "Open Midori command menu"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "midoritabs@astian.org",
+      "strict_min_version": "109.0"
+    }
+  },
+  "version": "1.0.40.2"
+}
