@@ -1,3 +1,4 @@
+import groovy.json.JsonSlurper
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -272,6 +273,117 @@ android {
 
     applicationVariants.configureEach { variant ->
     }
+}
+
+def midoriNewTabAssets = file("src/main/assets/extensions/midori_newtab")
+
+tasks.register("verifyMidoriNewTabBundle") {
+    group = "verification"
+    description = "Verifies the bundled goastian/midori-tab Firefox artifact."
+    inputs.dir(midoriNewTabAssets)
+
+    doLast {
+        def manifestFile = new File(midoriNewTabAssets, "manifest.json")
+        def metadataFile = new File(midoriNewTabAssets, "upstream.json")
+        def requiredFiles = [
+                manifestFile,
+                metadataFile,
+                new File(midoriNewTabAssets, "index.html"),
+                new File(midoriNewTabAssets, "index.js"),
+                new File(midoriNewTabAssets, "background.js"),
+                new File(midoriNewTabAssets, "LICENSE.upstream"),
+        ]
+        def missing = requiredFiles.findAll { !it.isFile() }
+        if (!missing.isEmpty()) {
+            throw new GradleException("Midori New Tab bundle is incomplete: ${missing*.name.join(', ')}")
+        }
+
+        def manifest = new JsonSlurper().parse(manifestFile)
+        def metadata = new JsonSlurper().parse(metadataFile)
+        def expectedPermissions = [
+                "storage", "identity", "tabs", "activeTab", "bookmarks", "history",
+                "browsingData", "search", "https://api.rss2json.com/*",
+                "https://api.unsplash.com/*", "https://api.github.com/*",
+                "https://api.open-meteo.com/*", "https://geocoding-api.open-meteo.com/*",
+                "https://ipwho.is/*", "https://nominatim.openstreetmap.org/*",
+                "https://duckduckgo.com/*", "https://astiango.com/*",
+                "https://marketplace.astian.org/*", "https://open.er-api.com/*",
+                "https://ads.astian.org/*",
+        ]
+        if (manifest.manifest_version != 2 ||
+                manifest.browser_specific_settings?.gecko?.id != "midoritabs@astian.org" ||
+                manifest.chrome_url_overrides?.newtab != "index.html" ||
+                manifest.permissions != expectedPermissions) {
+            throw new GradleException("Midori New Tab has an incompatible Firefox manifest")
+        }
+        if (metadata.version != manifest.version ||
+                metadata.sourceRepository != "https://github.com/goastian/midori-tab" ||
+                !(metadata.sourceCommit ==~ /[0-9a-f]{40}/) ||
+                metadata.sourceRef != metadata.sourceCommit ||
+                !(metadata.bundleSha256 ==~ /[0-9a-f]{64}/) ||
+                metadata.buildTarget != "firefox-android" ||
+                metadata.compatibilityPatch != "scripts/patch-midori-tab-firefox-android.mjs" ||
+                !(metadata.compatibilityPatchSha256 ==~ /[0-9a-f]{64}/) ||
+                !(metadata.buildConfig?.unsplashAccessKeySha256 ==~ /[0-9a-f]{64}/) ||
+                metadata.buildConfig?.marketplaceBaseUrl != "https://marketplace.astian.org" ||
+                metadata.buildConfig?.passportServer != "https://accounts.astian.org" ||
+                metadata.buildConfig?.passportDomainServer != "https://vpn.astian.org" ||
+                metadata.buildConfig?.adsBaseUrl != "https://ads.astian.org" ||
+                metadata.buildConfig?.adsNewTabPath != "/api/v1/ads/newtab") {
+            throw new GradleException("Midori New Tab upstream metadata does not match its bundle")
+        }
+
+        def bundlePath = midoriNewTabAssets.toPath()
+        def entries = java.nio.file.Files.walk(bundlePath)
+        try {
+            def unexpectedEntry = entries
+                    .filter { path -> path != bundlePath }
+                    .filter { path ->
+                        !java.nio.file.Files.isDirectory(path, java.nio.file.LinkOption.NOFOLLOW_LINKS) &&
+                                !java.nio.file.Files.isRegularFile(path, java.nio.file.LinkOption.NOFOLLOW_LINKS)
+                    }
+                    .findFirst()
+            if (unexpectedEntry.isPresent()) {
+                throw new GradleException("Midori New Tab contains a non-regular entry: ${unexpectedEntry.get()}")
+            }
+        } finally {
+            entries.close()
+        }
+
+        def sha256 = { byte[] content ->
+            java.security.MessageDigest.getInstance("SHA-256")
+                    .digest(content)
+                    .encodeHex()
+                    .toString()
+        }
+        def compatibilityPatch = rootProject.file("scripts/patch-midori-tab-firefox-android.mjs")
+        if (!compatibilityPatch.isFile() || sha256(compatibilityPatch.bytes) != metadata.compatibilityPatchSha256) {
+            throw new GradleException("Midori New Tab compatibility patch does not match upstream.json")
+        }
+        def bundleRecords = fileTree(midoriNewTabAssets)
+                .matching { exclude("upstream.json") }
+                .files
+                .sort { first, second ->
+                    midoriNewTabAssets.toPath().relativize(first.toPath()).toString() <=>
+                            midoriNewTabAssets.toPath().relativize(second.toPath()).toString()
+                }
+                .collect { bundledFile ->
+                    def relativePath = midoriNewTabAssets.toPath()
+                            .relativize(bundledFile.toPath())
+                            .toString()
+                            .replace('\\', '/')
+                    "${sha256(bundledFile.bytes)}  ./${relativePath}\n"
+                }
+                .join("")
+        def actualBundleSha256 = sha256(bundleRecords.getBytes(java.nio.charset.StandardCharsets.UTF_8))
+        if (actualBundleSha256 != metadata.bundleSha256) {
+            throw new GradleException("Midori New Tab bundle checksum does not match upstream.json")
+        }
+    }
+}
+
+tasks.named("preBuild").configure {
+    dependsOn("verifyMidoriNewTabBundle")
 }
 
 
