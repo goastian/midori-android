@@ -8,7 +8,7 @@ if (!sourceRoot || !fs.statSync(sourceRoot).isDirectory()) {
   throw new Error('Expected the extracted Midori Tab source directory');
 }
 
-const ANDROID_COMPATIBILITY_REVISION = 1;
+const ANDROID_COMPATIBILITY_REVISION = 2;
 const packageJson = JSON.parse(fs.readFileSync(sourcePath('package.json'), 'utf8'));
 const sourceVersion = String(packageJson.version || '');
 if (!/^\d+\.\d+\.\d+$/.test(sourceVersion)) {

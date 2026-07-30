@@ -13,6 +13,9 @@ release_json="$work_dir/release.json"
 tag_ref_json="$work_dir/tag-ref.json"
 source_archive="$work_dir/source.tar.gz"
 firefox_archive="$work_dir/release-firefox.zip"
+current_metadata_snapshot="$work_dir/current-upstream.json"
+post_release_json="$work_dir/release-after-build.json"
+post_tag_ref_json="$work_dir/tag-ref-after-build.json"
 replacement_dir="${target_dir}.next"
 backup_dir="${target_dir}.previous"
 replace_started=false
@@ -27,6 +30,10 @@ cleanup() {
 trap cleanup EXIT
 
 mkdir -p "$source_dir" "$staging_dir"
+trusted_patch_sha256="$(sha256sum "$repo_root/scripts/patch-midori-tab-firefox-android.mjs" | awk '{print $1}')"
+if [[ -f "$target_dir/upstream.json" ]]; then
+    cp "$target_dir/upstream.json" "$current_metadata_snapshot"
+fi
 
 if [[ "$#" -ne 0 ]]; then
     echo "Midori Tab refs are no longer accepted; the updater always uses the latest stable GitHub release" >&2
@@ -42,7 +49,7 @@ done
 
 github_curl=(
     curl --fail --location --silent --show-error
-    --retry 3 --retry-delay 2
+    --retry 3 --retry-delay 2 --connect-timeout 15 --max-time 120
     -H "Accept: application/vnd.github+json"
     -H "X-GitHub-Api-Version: 2022-11-28"
 )
@@ -94,6 +101,7 @@ readarray -t release_values < <(
         console.log(asset.browser_download_url);
         console.log(digest);
         console.log(asset.id);
+        console.log(release.immutable === true ? "true" : "false");
     ' "$release_json" "$canonical_source_repository"
 )
 
@@ -102,11 +110,12 @@ release_version="${release_values[1]}"
 release_id="${release_values[2]}"
 release_url="${release_values[3]}"
 release_published_at="${release_values[4]}"
-source_archive_url="${release_values[5]}"
+release_tag_archive_url="${release_values[5]}"
 release_asset_name="${release_values[6]}"
 release_asset_url="${release_values[7]}"
 release_asset_sha256="${release_values[8]}"
 release_asset_id="${release_values[9]}"
+release_immutable="${release_values[10]}"
 
 "${github_curl[@]}" -o "$firefox_archive" "$release_asset_url"
 actual_release_asset_sha256="$(sha256sum "$firefox_archive" | awk '{print $1}')"
@@ -142,8 +151,10 @@ readarray -t tag_object_values < <(
         console.log(ref.object?.sha ?? "");
     ' "$tag_ref_json"
 )
-tag_object_type="${tag_object_values[0]}"
-tag_object_sha="${tag_object_values[1]}"
+tag_ref_object_type="${tag_object_values[0]}"
+tag_ref_object_sha="${tag_object_values[1]}"
+tag_object_type="$tag_ref_object_type"
+tag_object_sha="$tag_ref_object_sha"
 if [[ "$tag_object_type" == "tag" ]]; then
     tag_object_json="$work_dir/tag-object.json"
     "${github_curl[@]}" -o "$tag_object_json" "https://api.github.com/repos/goastian/midori-tab/git/tags/${tag_object_sha}"
@@ -163,6 +174,7 @@ if [[ "$tag_object_type" != "commit" || ! "$tag_object_sha" =~ ^[0-9a-f]{40}$ ]]
 fi
 source_commit="$tag_object_sha"
 
+source_archive_url="https://api.github.com/repos/goastian/midori-tab/tarball/${source_commit}"
 "${github_curl[@]}" -o "$source_archive" "$source_archive_url"
 source_archive_sha256="$(sha256sum "$source_archive" | awk '{print $1}')"
 archive_root="$(tar -tzf "$source_archive" | sed -n '1p' | cut -d/ -f1)"
@@ -216,8 +228,9 @@ if [[ -z "$unsplash_key" ]]; then
 fi
 
 (
+    unset GITHUB_TOKEN
     cd "$source_dir"
-    npm ci --no-audit --no-fund
+    npm ci --ignore-scripts --no-audit --no-fund
     npm run validate:contracts
     npm run test:contracts
     test_log="$work_dir/test-update.log"
@@ -231,14 +244,63 @@ fi
            rg -q "^# tests 22$" "$test_log" &&
            rg -q "^# pass 21$" "$test_log" &&
            rg -q "^# fail 1$" "$test_log"; then
-            echo "Allowing the pinned v1.0.40 stale-test failure; every other release fails closed." >&2
+            echo "Allowing only the pinned v1.0.40 stale-test import failure; every other release fails closed." >&2
         else
             exit 1
         fi
     fi
+    current_patch_sha256="$(sha256sum "$repo_root/scripts/patch-midori-tab-firefox-android.mjs" | awk '{print $1}')"
+    if [[ "$current_patch_sha256" != "$trusted_patch_sha256" ]]; then
+        echo "The trusted Android compatibility patch changed while running upstream code" >&2
+        exit 1
+    fi
     node "$repo_root/scripts/patch-midori-tab-firefox-android.mjs" "$source_dir"
+    node --check public/background.js
+    node --test \
+        tests/omni-background-shortcut.test.mjs \
+        tests/omni-search-composable.test.mjs \
+        tests/semver.test.mjs \
+        tests/storage-service.test.mjs
     npm run build:firefox
 )
+
+# Close the release/tag TOCTOU window after all untrusted source code has run.
+"${github_curl[@]}" -o "$post_release_json" "$release_api_url"
+"${github_curl[@]}" -o "$post_tag_ref_json" "$tag_ref_url"
+node -e '
+    const fs = require("fs");
+    const [beforeFile, afterFile, refFile, expectedTag, expectedRefType, expectedRefSha] = process.argv.slice(1);
+    const before = JSON.parse(fs.readFileSync(beforeFile, "utf8"));
+    const after = JSON.parse(fs.readFileSync(afterFile, "utf8"));
+    const ref = JSON.parse(fs.readFileSync(refFile, "utf8"));
+    const releaseSnapshot = (release) => {
+        const assetName = `midori-tab-${String(release.tag_name || "").replace(/^v/, "")}-firefox.zip`;
+        const asset = (release.assets || []).find((candidate) => candidate.name === assetName);
+        return {
+            id: release.id,
+            tag: release.tag_name,
+            url: release.html_url,
+            publishedAt: release.published_at,
+            tarballUrl: release.tarball_url,
+            immutable: release.immutable === true,
+            draft: release.draft === true,
+            prerelease: release.prerelease === true,
+            asset: asset && {
+                id: asset.id,
+                name: asset.name,
+                url: asset.browser_download_url,
+                digest: asset.digest,
+            },
+        };
+    };
+    if (JSON.stringify(releaseSnapshot(before)) !== JSON.stringify(releaseSnapshot(after))) {
+        throw new Error("Latest Midori Tab release changed while it was being synchronized");
+    }
+    if (ref.ref !== `refs/tags/${expectedTag}` ||
+        ref.object?.type !== expectedRefType || ref.object?.sha !== expectedRefSha) {
+        throw new Error("Latest Midori Tab release tag moved while it was being synchronized");
+    }
+' "$release_json" "$post_release_json" "$post_tag_ref_json" "$release_tag" "$tag_ref_object_type" "$tag_ref_object_sha"
 
 manifest_file="$source_dir/dist/manifest.json"
 if [[ ! -f "$manifest_file" || ! -f "$source_dir/dist/index.html" || ! -f "$source_dir/dist/index.js" ]]; then
@@ -283,6 +345,12 @@ if [[ "${manifest_values[0]}" != "2" ||
     echo "Unexpected Midori Tab Firefox manifest contract" >&2
     exit 1
 fi
+android_version_pattern="^${source_version//./\\.}\\.([1-9][0-9]*)$"
+if [[ ! "${manifest_values[3]}" =~ $android_version_pattern ]]; then
+    echo "Android bundle version must append a positive compatibility revision to $source_version" >&2
+    exit 1
+fi
+compatibility_revision="${BASH_REMATCH[1]}"
 
 cp -a "$source_dir/dist/." "$staging_dir/"
 cp "$source_dir/LICENSE" "$staging_dir/LICENSE.upstream"
@@ -293,8 +361,12 @@ bundle_sha256="$({
 })"
 unsplash_key_sha256="$(printf '%s' "$unsplash_key" | sha256sum | awk '{print $1}')"
 compatibility_patch_sha256="$(sha256sum "$repo_root/scripts/patch-midori-tab-firefox-android.mjs" | awk '{print $1}')"
+if [[ "$compatibility_patch_sha256" != "$trusted_patch_sha256" ]]; then
+    echo "The trusted Android compatibility patch changed before bundle publication" >&2
+    exit 1
+fi
 
-if [[ -f "$target_dir/upstream.json" ]]; then
+if [[ -f "$current_metadata_snapshot" ]]; then
     node -e '
         const fs = require("fs");
         const [metadataFile, nextVersion, nextBundleSha256] = process.argv.slice(1);
@@ -328,7 +400,7 @@ if [[ -f "$target_dir/upstream.json" ]]; then
         if (changedWithoutVersionIncrease && isAdoptingReleaseChannel) {
             process.stderr.write("Adopting the stable Midori Tab release channel from legacy non-release metadata.\n");
         }
-    ' "$target_dir/upstream.json" "${manifest_values[3]}" "$bundle_sha256"
+    ' "$current_metadata_snapshot" "${manifest_values[3]}" "$bundle_sha256"
 fi
 
 node -e '
@@ -337,13 +409,15 @@ node -e '
         unsplashKeySha256, compatibilityPatchSha256, marketplaceBaseUrl, passportServer,
         passportDomainServer, adsBaseUrl, adsNewTabPath, releaseId, releaseUrl,
         releasePublishedAt, sourceArchiveUrl, sourceArchiveSha256, releaseAssetId,
-        releaseAssetName, releaseAssetUrl, releaseAssetSha256] = process.argv.slice(1);
+        releaseAssetName, releaseAssetUrl, releaseAssetSha256, compatibilityRevision,
+        releaseImmutable, releaseTagArchiveUrl] = process.argv.slice(1);
     fs.writeFileSync(file, `${JSON.stringify({
         sourceRepository: repository,
         sourceRef: releaseTag,
         sourceCommit: commit,
         sourceVersion,
         version,
+        compatibilityRevision: Number(compatibilityRevision),
         bundleSha256,
         buildTarget: "firefox-android",
         compatibilityPatch: "scripts/patch-midori-tab-firefox-android.mjs",
@@ -353,6 +427,8 @@ node -e '
             tag: releaseTag,
             url: releaseUrl,
             publishedAt: releasePublishedAt,
+            immutable: releaseImmutable === "true",
+            tagArchiveUrl: releaseTagArchiveUrl,
             sourceArchiveUrl,
             sourceArchiveSha256,
             firefoxAsset: {
@@ -375,7 +451,7 @@ node -e '
     "$unsplash_key_sha256" "$compatibility_patch_sha256" "$VITE_MARKETPLACE_API_BASE_URL" "$VITE_PASSPORT_SERVER" \
     "$VITE_PASSPORT_DOMAIN_SERVER" "$VITE_ADS_API_BASE" "$VITE_ADS_NEWTAB_PATH" "$release_id" "$release_url" \
     "$release_published_at" "$source_archive_url" "$source_archive_sha256" "$release_asset_id" "$release_asset_name" \
-    "$release_asset_url" "$release_asset_sha256"
+    "$release_asset_url" "$release_asset_sha256" "$compatibility_revision" "$release_immutable" "$release_tag_archive_url"
 
 case "$target_dir" in
     "$repo_root/app/src/main/assets/extensions/midori_newtab") ;;
