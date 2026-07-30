@@ -47,15 +47,17 @@ for deprecated_override in MIDORI_TAB_REF MIDORI_TAB_REPOSITORY MIDORI_TAB_SOURC
     fi
 done
 
+# This script executes release source code during npm validation/build. The upstream
+# repository is public, so keep the complete process tree credential-free and use the
+# unauthenticated GitHub API rather than exposing a repository token to child processes.
+unset GITHUB_TOKEN
+
 github_curl=(
     curl --fail --location --silent --show-error
     --retry 3 --retry-delay 2 --connect-timeout 15 --max-time 120
     -H "Accept: application/vnd.github+json"
     -H "X-GitHub-Api-Version: 2022-11-28"
 )
-if [[ -n "${GITHUB_TOKEN:-}" ]]; then
-    github_curl+=(-H "Authorization: Bearer ${GITHUB_TOKEN}")
-fi
 
 "${github_curl[@]}" -o "$release_json" "$release_api_url"
 readarray -t release_values < <(
@@ -228,7 +230,6 @@ if [[ -z "$unsplash_key" ]]; then
 fi
 
 (
-    unset GITHUB_TOKEN
     cd "$source_dir"
     npm ci --ignore-scripts --no-audit --no-fund
     npm run validate:contracts
