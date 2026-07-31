@@ -27,7 +27,6 @@ object AppPreferencesSerializer : Serializer<AppPreferences> {
         .setHttpsOnlyLevel(HttpsOnlyLevel.OFF)
         .setOpenBlankNewTab(false)
         .setHomepageShortcutsEnabled(true)
-        .setHomepagePrivacyStatsEnabled(true)
         .setHomepageWeatherEnabled(true)
         .setHomepageBackgroundPhotoEnabled(true)
         .setPullToRefreshEnabled(true)

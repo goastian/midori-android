@@ -30,7 +30,6 @@
     <string name="settings_homepage_midori_tab">Personaliza tu nueva pestaña</string>
     <string name="settings_homepage_midori_tab_description">Abre una pestaña nueva y usa su botón de Configuración para administrar accesos, widgets, espacios, idioma, tema y fondo. Tus elecciones se guardan en este dispositivo.</string>
     <string name="settings_homepage_shortcuts">Accesos directos</string>
-    <string name="settings_homepage_privacy_report">Reporte de privacidad</string>
     <string name="settings_homepage_weather">Clima</string>
     <string name="settings_homepage_wallpaper">Fondo con foto</string>
     <string name="settings_homepage_opening_screen">Pantalla inicial</string>

@@ -1,0 +1,347 @@
+html {
+    background: rgb(var(--surface-0-rgb));
+}
+
+body {
+    background:
+        radial-gradient(circle at 8% 0%, rgb(var(--primary-50) / 8%), transparent 34rem),
+        rgb(var(--surface-0-rgb));
+    font-family: Metropolis, var(--font-family);
+    min-height: 100dvh;
+}
+
+.aboutPage {
+    box-sizing: border-box;
+    margin: 0 auto;
+    max-width: 1120px;
+    padding: 42px 28px 72px;
+}
+
+.aboutHero {
+    align-items: center;
+    display: grid;
+    gap: 20px;
+    grid-template-columns: 64px minmax(0, 1fr);
+    max-width: 760px;
+}
+
+.aboutHero img {
+    filter: drop-shadow(0 12px 20px rgb(var(--primary-50) / 20%));
+}
+
+.aboutEyebrow,
+.ownershipLabel {
+    color: rgb(var(--primary-50));
+    display: block;
+    font-family: var(--font-family);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.aboutHero h1 {
+    color: var(--ink-1);
+    font-size: clamp(26px, 4vw, 38px);
+    font-weight: 600;
+    letter-spacing: -0.045em;
+    line-height: 1.08;
+    margin: 5px 0 8px;
+}
+
+.aboutHero p,
+.contributorsSection > header p {
+    color: var(--ink-3);
+    font-family: var(--font-family);
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+    max-width: 64ch;
+    text-wrap: pretty;
+}
+
+.aboutLinks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin: 28px 0 20px;
+}
+
+.aboutLinks a,
+.contributorLinks a {
+    align-items: center;
+    background: var(--surface-1);
+    border: 1px solid var(--border-1);
+    border-radius: 9px;
+    color: var(--ink-2);
+    display: inline-flex;
+    font-family: var(--font-family);
+    font-size: 12px;
+    gap: 8px;
+    min-height: 38px;
+    padding: 0 13px;
+    text-decoration: none;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.aboutLinks a:hover,
+.contributorLinks a:hover {
+    background: rgb(var(--primary-50) / 10%);
+    border-color: rgb(var(--primary-50) / 34%);
+    color: rgb(var(--primary-50));
+}
+
+.aboutLinks a:active,
+.contributorLinks a:active {
+    transform: scale(0.98);
+}
+
+.ownershipGrid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ownershipCard {
+    background: var(--surface-1);
+    border: 1px solid var(--border-1);
+    border-radius: 16px;
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 42px minmax(0, 1fr);
+    padding: 22px;
+}
+
+.ownershipIcon {
+    align-items: center;
+    background: rgb(var(--primary-50) / 12%);
+    border-radius: 11px;
+    color: rgb(var(--primary-50));
+    display: inline-flex;
+    fill: rgb(var(--primary-50));
+    font-size: 17px;
+    height: 42px;
+    justify-content: center;
+    width: 42px;
+}
+
+.ownershipCard h2,
+.contributorsSection h2,
+.creditsContent h2 {
+    color: var(--ink-1);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.35;
+    margin: 5px 0 8px;
+    text-wrap: balance;
+}
+
+.ownershipCard p,
+.creditsContent p,
+.dependencyList {
+    color: var(--ink-3);
+    font-family: var(--font-family);
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.ownershipCard p {
+    margin: 0 0 12px;
+}
+
+.ownershipCard a {
+    align-items: center;
+    color: rgb(var(--primary-50));
+    display: inline-flex;
+    font-family: var(--font-family);
+    font-size: 12px;
+    gap: 5px;
+    text-decoration: none;
+}
+
+.ownershipCard a .fa-icon {
+    font-size: 10px;
+}
+
+.contributorsSection {
+    border-top: 1px solid var(--surface-2);
+    margin-top: 28px;
+    padding-top: 26px;
+}
+
+.contributorsSection > header {
+    align-items: end;
+    display: grid;
+    gap: 24px;
+    grid-template-columns: minmax(240px, 0.75fr) minmax(0, 1.25fr);
+}
+
+.contributorsSection h2 {
+    font-size: 20px;
+    margin-bottom: 0;
+}
+
+.contributorLinks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 18px;
+}
+
+.creditsDisclosure {
+    background: var(--surface-1);
+    border: 1px solid var(--border-1);
+    border-radius: 16px;
+    margin-top: 28px;
+    overflow: clip;
+}
+
+.creditsDisclosure > summary {
+    align-items: center;
+    cursor: pointer;
+    display: grid;
+    gap: 14px;
+    grid-template-columns: 38px minmax(0, 1fr) 18px;
+    list-style: none;
+    min-height: 64px;
+    padding: 14px 20px;
+    user-select: none;
+}
+
+.creditsDisclosure > summary::-webkit-details-marker {
+    display: none;
+}
+
+.summaryIcon {
+    align-items: center;
+    background: rgb(var(--primary-50) / 12%);
+    border-radius: 10px;
+    color: rgb(var(--primary-50));
+    display: inline-flex;
+    fill: rgb(var(--primary-50));
+    font-size: 15px;
+    height: 38px;
+    justify-content: center;
+    width: 38px;
+}
+
+.creditsDisclosure > summary strong,
+.creditsDisclosure > summary small {
+    display: block;
+    font-family: var(--font-family);
+}
+
+.creditsDisclosure > summary strong {
+    color: var(--ink-1);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.creditsDisclosure > summary small {
+    color: var(--ink-3);
+    font-size: 11px;
+    margin-top: 3px;
+}
+
+.summaryChevron {
+    color: var(--ink-3);
+    fill: var(--ink-3);
+    transform: rotate(180deg);
+    transition: transform 180ms ease;
+}
+
+.creditsDisclosure[open] .summaryChevron {
+    transform: rotate(0deg);
+}
+
+.creditsContent {
+    border-top: 1px solid var(--surface-2);
+    display: grid;
+    gap: 36px;
+    grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.6fr);
+    padding: 22px 20px 28px;
+}
+
+.creditsContent h2 {
+    margin-top: 0;
+}
+
+.dependencyList {
+    columns: 2;
+    gap: 28px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dependencyList li {
+    break-inside: avoid;
+    margin: 0 0 9px;
+}
+
+.infrastructureCredits {
+    background: var(--surface-2);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.infrastructureCredits p {
+    margin: 0 0 10px;
+}
+
+:focus-visible {
+    outline: 2px solid rgb(var(--primary-50));
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+    }
+}
+
+@media (max-width: 780px) {
+    .aboutPage {
+        padding: 30px 18px 56px;
+    }
+
+    .ownershipGrid,
+    .contributorsSection > header,
+    .creditsContent {
+        grid-template-columns: 1fr;
+    }
+
+    .dependencyList {
+        columns: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .aboutPage {
+        padding-inline: 12px;
+    }
+
+    .aboutHero {
+        align-items: start;
+        grid-template-columns: 48px minmax(0, 1fr);
+    }
+
+    .aboutHero img {
+        height: 48px;
+        width: 48px;
+    }
+
+    .ownershipCard {
+        border-radius: 13px;
+        grid-template-columns: 1fr;
+        padding: 18px;
+    }
+
+    .aboutLinks a,
+    .contributorLinks a {
+        flex: 1 1 100%;
+    }
+}

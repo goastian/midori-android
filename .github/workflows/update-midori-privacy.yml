@@ -1,0 +1,189 @@
+name: Update Midori Privacy
+
+on:
+  schedule:
+    - cron: "41 8 * * *"
+  workflow_dispatch: {}
+  repository_dispatch:
+    types: [midori-privacy-updated]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: update-midori-privacy
+  cancel-in-progress: false
+
+jobs:
+  import-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      version: ${{ steps.metadata.outputs.version }}
+      commit: ${{ steps.metadata.outputs.commit }}
+      short: ${{ steps.metadata.outputs.short }}
+      tag: ${{ steps.metadata.outputs.tag }}
+    steps:
+      - name: Check out Midori Android without credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22.17.1
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Import and patch the verified official Firefox release
+        run: ./scripts/sync-midori-privacy.sh
+
+      - name: Verify only the Play Store release variant
+        run: ./gradlew --no-daemon :app:verifyMidoriPrivacyBundle :app:verifyMidoriNewTabBundle :app:testOriginalPlaystoreReleaseUnitTest :app:mergeOriginalPlaystoreReleaseAssets
+
+      - name: Verify Midori Privacy is merged into Play Store release assets
+        run: |
+          source_dir="app/src/main/assets/extensions/midori_privacy"
+          merged_dir="app/build/intermediates/assets/originalPlaystoreRelease/mergeOriginalPlaystoreReleaseAssets/extensions/midori_privacy"
+          test -f "$merged_dir/manifest.json"
+          test -f "$merged_dir/upstream.json"
+          test -f "$merged_dir/js/midori-stats.js"
+          cmp "$source_dir/manifest.json" "$merged_dir/manifest.json"
+          cmp "$source_dir/upstream.json" "$merged_dir/upstream.json"
+          cmp "$source_dir/js/midori-stats.js" "$merged_dir/js/midori-stats.js"
+
+      - name: Read synchronized metadata
+        id: metadata
+        run: |
+          node -e '
+            const fs = require("fs");
+            const metadata = JSON.parse(fs.readFileSync("app/src/main/assets/extensions/midori_privacy/upstream.json", "utf8"));
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=${metadata.sourceVersion}\ntag=${metadata.release.tag}\ncommit=${metadata.sourceCommit}\nshort=${metadata.sourceCommit.slice(0, 12)}\n`);
+          '
+
+      - name: Upload only the verified regular bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: midori-privacy-${{ steps.metadata.outputs.commit }}
+          path: app/src/main/assets/extensions/midori_privacy
+          if-no-files-found: error
+          retention-days: 3
+
+  open-update-pr:
+    needs: import-and-verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Check out a fresh trusted tree
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22.17.1
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Download the verified bundle
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: midori-privacy-${{ needs.import-and-verify.outputs.commit }}
+          path: ${{ runner.temp }}/midori-privacy
+
+      - name: Enforce monotonic update against the trusted tree
+        env:
+          ARTIFACT_DIR: ${{ runner.temp }}/midori-privacy
+        run: |
+          current="app/src/main/assets/extensions/midori_privacy/upstream.json"
+          candidate="$ARTIFACT_DIR/upstream.json"
+          test -f "$candidate"
+          if [ -f "$current" ]; then
+            node scripts/verify-midori-privacy-update.mjs "$current" "$candidate"
+          fi
+
+      - name: Import only regular bundle files
+        env:
+          ARTIFACT_DIR: ${{ runner.temp }}/midori-privacy
+        run: |
+          unexpected_entry="$(find "$ARTIFACT_DIR" -mindepth 1 ! -type f ! -type d -print -quit)"
+          if [ -n "$unexpected_entry" ]; then
+            echo "Refusing non-regular artifact entry: $unexpected_entry" >&2
+            exit 1
+          fi
+          test -f "$ARTIFACT_DIR/manifest.json"
+          test -f "$ARTIFACT_DIR/upstream.json"
+          test -f "$ARTIFACT_DIR/js/midori-stats.js"
+          target="app/src/main/assets/extensions/midori_privacy"
+          rm -rf "$target"
+          mkdir -p "$target"
+          cp -a "$ARTIFACT_DIR/." "$target/"
+
+      - name: Re-verify only the Play Store release variant without upstream execution
+        run: ./gradlew --no-daemon :app:verifyMidoriPrivacyBundle :app:verifyMidoriNewTabBundle :app:testOriginalPlaystoreReleaseUnitTest :app:mergeOriginalPlaystoreReleaseAssets
+
+      - name: Verify imported release assets and latest release again
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          source_dir="app/src/main/assets/extensions/midori_privacy"
+          merged_dir="app/build/intermediates/assets/originalPlaystoreRelease/mergeOriginalPlaystoreReleaseAssets/extensions/midori_privacy"
+          cmp "$source_dir/manifest.json" "$merged_dir/manifest.json"
+          cmp "$source_dir/upstream.json" "$merged_dir/upstream.json"
+          cmp "$source_dir/js/midori-stats.js" "$merged_dir/js/midori-stats.js"
+          node scripts/verify-midori-privacy-latest-release.mjs "$source_dir/upstream.json"
+
+      - name: Open or refresh the update pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.import-and-verify.outputs.version }}
+          RELEASE_TAG: ${{ needs.import-and-verify.outputs.tag }}
+          SOURCE_COMMIT: ${{ needs.import-and-verify.outputs.commit }}
+          SHORT_COMMIT: ${{ needs.import-and-verify.outputs.short }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          target="app/src/main/assets/extensions/midori_privacy"
+          if [ -z "$(git status --porcelain -- "$target")" ]; then
+            echo "Midori Privacy is already current."
+            exit 0
+          fi
+
+          branch="automation/midori-privacy-${SHORT_COMMIT}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          gh auth setup-git
+          git switch -C "$branch" "origin/$DEFAULT_BRANCH"
+          git add "$target"
+          git commit -m "Update Midori Privacy to ${VERSION}"
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+            git fetch origin "refs/heads/$branch:refs/remotes/origin/$branch"
+          fi
+          git push --force-with-lease origin "HEAD:${branch}"
+
+          body="Synchronizes the latest stable goastian/midori-privacy release ${RELEASE_TAG} at commit ${SOURCE_COMMIT}. The official Firefox ZIP and its GitHub digest were verified before the Android-only compatibility patch was applied. The bundle hash, source provenance, restricted Midori Tab statistics bridge, and originalPlaystoreRelease gates passed again before this PR was created. This PR is intentionally not auto-merged."
+          existing_pr="$(gh pr list --state open --head "$branch" --json number --jq '.[0].number // empty')"
+          if [ -n "$existing_pr" ]; then
+            gh pr edit "$existing_pr" --title "Update Midori Privacy to ${VERSION}" --body "$body"
+          else
+            gh pr create \
+              --base "$DEFAULT_BRANCH" \
+              --head "$branch" \
+              --title "Update Midori Privacy to ${VERSION}" \
+              --body "$body"
+          fi

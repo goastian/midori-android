@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.midorinext.android.R
 import org.midorinext.android.adblock.AdBlockerAction
+import org.midorinext.android.adblock.MidoriPrivacyFeature
 import org.midorinext.android.ext.*
 import org.midorinext.android.contentBlocker.ContentBlockerOverlay
 import org.midorinext.android.contentBlocker.ContentBlockerState
@@ -62,6 +63,7 @@ fun BrowserScreen(
     val appPrefs by viewModel.appPreferences.collectAsState()
     val private by appViewModel.isPrivate.collectAsState()
     val newTabState by viewModel.newTabState.collectAsState()
+    val isMidoriPrivacyActionAvailable by viewModel.isMidoriPrivacyActionAvailable.collectAsState()
 
     var engineViewHolder: EngineView? by remember { mutableStateOf(null) }
 
@@ -81,10 +83,6 @@ fun BrowserScreen(
     val showLegacyHome = currentUrl?.let {
         it.isLegacyMidoriHomeUrl()
     } == true
-
-    LaunchedEffect(currentUrl) {
-        viewModel.adBlockerState.updateSelectedTab(currentUrl)
-    }
 
     LaunchedEffect(selectedTabSnapshot, newTabState) {
         val selectedTab = selectedTabSnapshot ?: return@LaunchedEffect
@@ -114,7 +112,6 @@ fun BrowserScreen(
 
     if (showHomeFallback) {
         HomeScreen(
-            adBlockerState = viewModel.adBlockerState,
             preferences = appPrefs,
             tabCount = tabCount,
             onSearch = { text -> viewModel.commitSearch(text) },
@@ -135,7 +132,11 @@ fun BrowserScreen(
                 modifier = modifier,
                 toolbarState = viewModel.toolbarState,
                 browserIcons = viewModel.browserIcons,
-                beforeTextField = { AdBlockerAction(viewModel.adBlockerState, openLink = { url -> viewModel.tabsUseCases.addTab(url) }) },
+                beforeTextField = {
+                    AdBlockerAction(enabled = isMidoriPrivacyActionAvailable) {
+                        viewModel.triggerInstalledExtensionAction(MidoriPrivacyFeature.EXTENSION_ID)
+                    }
+                },
                 beforeTextFieldVisible = {
                     !viewModel.toolbarState.hasFocus &&
                         currentUrl?.isNotBlank() == true &&
@@ -206,6 +207,7 @@ fun BrowserScreen(
 fun ToolbarAction( // TODO rename ToolbarAction to SmallIconButton and move to global widgets
     onClick: () -> Unit,
     onLongClick: (() -> Unit)? = null,
+    enabled: Boolean = true,
     content: @Composable () -> Unit
 ) {
     Box(
@@ -215,7 +217,7 @@ fun ToolbarAction( // TODO rename ToolbarAction to SmallIconButton and move to g
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick,
-                enabled = true,
+                enabled = enabled,
                 role = Role.Button,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = ripple(

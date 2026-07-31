@@ -203,11 +203,6 @@ fun HomepageSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
                 onValueChange = viewModel::updateHomepageShortcutsEnabled
             )
             PreferenceToggle(
-                label = R.string.settings_homepage_privacy_report,
-                value = appPrefs.homepagePrivacyStatsEnabled,
-                onValueChange = viewModel::updateHomepagePrivacyStatsEnabled
-            )
-            PreferenceToggle(
                 label = R.string.settings_homepage_weather,
                 value = appPrefs.homepageWeatherEnabled,
                 onValueChange = viewModel::updateHomepageWeatherEnabled

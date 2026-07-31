@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html id="uBO-popup-panel">
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark" />
+<link rel="stylesheet" href="css/themes/default.css">
+<link rel="stylesheet" href="css/common.css">
+<link rel="stylesheet" href="css/fa-icons.css">
+<link rel="stylesheet" href="css/popup-fenix.css">
+<link rel="icon" type="image/png" href="img/icon_64.png">
+<title data-i18n="extName"></title>
+</head>
+
+<body class="loading" data-more="abc" aria-busy="true">
+<div id="panes">
+    <div id="main">
+        <div id="sticky">
+            <header id="brandBar">
+                <a class="brandIdentity" href="dashboard.html#settings.html" target="uBODashboard">
+                    <img src="img/midori-shield.svg" alt="" width="32" height="32">
+                    <div>
+                        <strong data-i18n="extName"></strong>
+                        <span data-i18n="midoriBrandTagline"></span>
+                    </div>
+                </a>
+                <a class="brandSettings fa-icon" href="dashboard.html#settings.html" target="uBODashboard" aria-label="settingsPageName" data-i18n-title="settingsPageName">cog</a>
+            </header>
+        </div>
+
+        <main id="midoriMainView" class="popupView" data-popup-view="main">
+            <section id="midoriActivity" class="protectionHero" aria-live="polite">
+                <span class="heroShield" aria-hidden="true">
+                    <img src="img/midori-shield.svg" alt="" width="54" height="54">
+                    <span class="heroStateIcon fa-icon">check</span>
+                </span>
+                <div class="heroCopy">
+                    <strong id="midoriProtectionStatus" data-i18n="midoriCheckingProtection"></strong>
+                    <div id="hostname"><span></span>&shy;<span>&nbsp;</span></div>
+                </div>
+                <p id="midoriActivityDetail" data-i18n="midoriCheckingProtectionHint"></p>
+            </section>
+
+            <section class="statusList" aria-label="Protection status">
+                <button id="switch" class="statusRow" type="button" data-i18n-title="midoriCheckingProtection" disabled>
+                    <span class="statusIcon fa-icon" aria-hidden="true">filter</span>
+                    <span class="statusCopy">
+                        <strong data-i18n="midoriSiteProtection"></strong>
+                        <span id="midoriSwitchHint" data-i18n="midoriCheckingProtectionHint"></span>
+                    </span>
+                    <span class="statusEnd">
+                        <strong id="midoriSwitchStatus" data-i18n="midoriCheckingProtection"></strong>
+                        <span class="stateSwitch" aria-hidden="true"><i></i></span>
+                    </span>
+                </button>
+                <div id="midoriVpnSummary" class="statusRow vpnStatus" data-vpn-state="off">
+                    <span class="statusIcon fa-icon" aria-hidden="true">lock</span>
+                    <span class="statusCopy">
+                        <strong data-i18n="midoriSecureConnection"></strong>
+                        <span data-i18n="midoriVpnConnectionHint"></span>
+                    </span>
+                    <strong id="midoriVpnStatus" class="statusValue" data-i18n="midoriVpnOff"></strong>
+                </div>
+            </section>
+
+            <div class="mainActions">
+                <button id="midoriRepairButton" class="primaryAction" type="button">
+                    <span class="fa-icon" aria-hidden="true">magic</span>
+                    <span data-i18n="midoriFixThisSite"></span>
+                </button>
+                <button id="midoriDetailsButton" class="secondaryAction" type="button">
+                    <span data-i18n="midoriViewDetails"></span>
+                    <span class="fa-icon" aria-hidden="true">arrow-right</span>
+                </button>
+            </div>
+        </main>
+
+        <section id="midoriProtectionsView" class="popupView" data-popup-view="protections" hidden>
+            <header class="viewHeader">
+                <button class="backButton fa-icon" type="button" data-popup-back data-i18n-title="midoriBack">double-angle-left</button>
+                <div>
+                    <strong data-i18n="midoriProtectionsTitle"></strong>
+                    <span data-i18n="midoriProtectionsHint"></span>
+                </div>
+            </header>
+            <div class="protectionList">
+                <article class="protectionRow">
+                    <span class="protectionIcon fa-icon" aria-hidden="true">filter</span>
+                    <span class="protectionCopy">
+                        <strong data-i18n="midoriAdsTrackers"></strong>
+                        <small data-i18n="midoriAdsTrackersHint"></small>
+                    </span>
+                    <strong id="midoriAdsTrackersStatus" class="protectionValue"></strong>
+                </article>
+                <article class="protectionRow">
+                    <span class="protectionIcon fa-icon" aria-hidden="true">eye-slash</span>
+                    <span class="protectionCopy">
+                        <strong data-i18n="midoriCookiesAnnoyances"></strong>
+                        <small data-i18n="midoriCookiesAnnoyancesHint"></small>
+                    </span>
+                    <strong id="midoriPageCleanupStatus" class="protectionValue"></strong>
+                </article>
+                <article class="protectionRow">
+                    <span class="protectionIcon fa-icon" aria-hidden="true">unlink</span>
+                    <span class="protectionCopy">
+                        <strong data-i18n="midoriCleanLinks"></strong>
+                        <small data-i18n="midoriCleanLinksHint"></small>
+                    </span>
+                    <strong id="midoriCleanLinksStatus" class="protectionValue"></strong>
+                </article>
+                <article class="protectionRow">
+                    <span class="protectionIcon fa-icon" aria-hidden="true">exclamation-triangle</span>
+                    <span class="protectionCopy">
+                        <strong data-i18n="midoriDangerousSites"></strong>
+                        <small data-i18n="midoriDangerousSitesHint"></small>
+                    </span>
+                    <strong id="midoriDangerousSitesStatus" class="protectionValue"></strong>
+                </article>
+                <article class="protectionRow vpnProtectionRow" data-vpn-state="off">
+                    <span class="protectionIcon fa-icon" aria-hidden="true">lock</span>
+                    <span class="protectionCopy">
+                        <strong data-i18n="midoriVpnConnection"></strong>
+                        <small data-i18n="midoriVpnConnectionDetailHint"></small>
+                    </span>
+                    <strong id="midoriVpnProtectionStatus" class="protectionValue"></strong>
+                </article>
+            </div>
+
+            <button id="midoriExpertModeToggle" class="expertModeToggle" type="button" aria-pressed="false">
+                <span class="expertModeIcon fa-icon" aria-hidden="true">sliders</span>
+                <span class="expertModeCopy">
+                    <strong data-i18n="midoriExpertMode"></strong>
+                    <small data-i18n="midoriExpertToolsHint"></small>
+                </span>
+                <span class="expertModeEnd">
+                    <strong id="midoriExpertModeStatus" data-i18n="midoriExpertModeDisabled"></strong>
+                    <span class="expertStateSwitch" aria-hidden="true"><i></i></span>
+                </span>
+            </button>
+
+            <section id="midoriExpertTools" aria-labelledby="midoriExpertToolsTitle">
+                <header>
+                    <strong id="midoriExpertToolsTitle" data-i18n="midoriAdvancedTools"></strong>
+                </header>
+                <div class="expertLinks">
+                    <a href="logger-ui.html#_" target="uBOLogger"><span class="fa-icon" aria-hidden="true">list-alt</span><span data-i18n="midoriRequestLogger"></span></a>
+                    <a href="dashboard.html#dyna-rules.html" target="uBODashboard"><span class="fa-icon" aria-hidden="true">sliders</span><span data-i18n="midoriDynamicRules"></span></a>
+                    <a href="dashboard.html#3p-filters.html" target="uBODashboard"><span class="fa-icon" aria-hidden="true">filter</span><span data-i18n="midoriFilterLists"></span></a>
+                    <a href="dashboard.html#1p-filters.html" target="uBODashboard"><span class="fa-icon" aria-hidden="true">code</span><span data-i18n="midoriCustomFiltersScriptlets"></span></a>
+                </div>
+            </section>
+        </section>
+
+        <section id="midoriRepairView" class="popupView" data-popup-view="repair" hidden>
+            <header class="viewHeader">
+                <button class="backButton fa-icon" type="button" data-popup-back data-i18n-title="midoriBack">double-angle-left</button>
+                <div>
+                    <strong data-i18n="midoriFixThisSite"></strong>
+                    <span data-i18n="midoriRepairIntro"></span>
+                </div>
+            </header>
+            <div class="repairCard">
+                <span class="repairIcon fa-icon" aria-hidden="true">magic</span>
+                <strong data-i18n="midoriRepairRecommended"></strong>
+                <p data-i18n="midoriRepairPauseHint"></p>
+                <button id="midoriPauseAndReload" class="primaryAction" type="button" data-i18n="midoriPauseAndReload"></button>
+            </div>
+            <button id="gotoReport" class="reportAction" type="button">
+                <span class="fa-icon" aria-hidden="true">comment-alt</span>
+                <span data-i18n="midoriReportProblem"></span>
+            </button>
+        </section>
+
+        <section class="engineCompatibility" hidden aria-hidden="true">
+            <span id="midoriBlockedTotal">—</span>
+            <span id="midoriNetworkBlocked">—</span>
+            <span id="midoriTechnicalBlockedValue">—</span>
+            <span id="midoriPopupBlocked">—</span>
+            <span id="midoriDataSaved">—</span>
+            <span id="midoriRequestReduction">—</span>
+            <span id="midoriLiveStatusText"></span>
+            <span id="midoriBlockedDomainsValue">—</span>
+            <span id="midoriBlockedDomainsQuick">—</span>
+            <span id="refresh" class="fa-icon">refresh</span>
+            <span id="saveRules" class="fa-icon">lock</span>
+            <span id="revertRules" class="fa-icon">eraser</span>
+            <button type="button" id="gotoZap" class="needPick">_</button>
+            <button type="button" id="gotoPick" class="needPick">_</button>
+            <div id="extraTools">
+                <span id="no-popups" class="hnSwitch"><span class="fa-icon fa-icon-badged">ph-popups</span></span>
+                <span id="no-large-media" class="hnSwitch"><span class="fa-icon fa-icon-badged">film</span></span>
+                <span id="no-cosmetic-filtering" class="hnSwitch"><span class="fa-icon fa-icon-badged">eye-slash</span></span>
+                <span id="no-remote-fonts" class="hnSwitch"><span class="fa-icon fa-icon-badged">ph-readermode-text-size</span></span>
+                <span id="no-scripting" class="hnSwitch"><span class="fa-icon fa-icon-badged">code</span></span>
+            </div>
+            <div id="basicStats" data-more="a">
+                <span data-i18n="popupBlockedOnThisPage_v2">_</span><span>_</span>
+                <span data-i18n="popupDomainsConnected_v2">_</span><span>_</span>
+                <span data-i18n="popupBlockedSinceInstall_v2" data-more="b">_</span><span data-more="b">_</span>
+            </div>
+            <div id="moreOrLess"><span id="moreButton"></span><span id="lessButton"></span></div>
+            <span id="version"></span>
+            <div id="unprocessedRequestWarning"><span></span><span class="dismiss"></span></div>
+        </section>
+    </div>
+    <div id="firewall" data-more="e">
+        <section><span class="fa-icon">filter</span><div class="filterExpressions"><div><span data-i18n="loggerRowFiltererBuiltinNot" data-expr="not">_</span><span data-i18n="loggerRowFiltererBuiltinBlocked" data-expr="blocked">_</span><span data-i18n="loggerRowFiltererBuiltinAllowed" data-expr="allowed">_</span></div><div><span data-i18n="loggerRowFiltererBuiltinNot" data-expr="not">_</span><span data-expr="script" data-i18n="popup3pScriptFilter">_</span><span data-expr="frame" data-i18n="popup3pFrameFilter">_</span></div></div></section>
+        <div data-des="*" data-type="*"><span data-i18n="popupAnyRulePrompt">_</span><span data-src="/" data-i18n-title="popupTipGlobalRules"> </span><span data-src="." data-i18n-title="popupTipLocalRules"> </span></div>
+        <div data-des="*" data-type="image"><span data-i18n="popupImageRulePrompt"></span><span data-src="/"> </span><span data-src="."> </span></div>
+        <div data-des="*" data-type="3p"><span data-i18n="popup3pAnyRulePrompt"></span><span data-src="/"> </span><span data-src="."> </span></div>
+        <div data-des="*" data-type="inline-script"><span data-i18n="popupInlineScriptRulePrompt"></span><span data-src="/"> </span><span data-src="."> </span></div>
+        <div data-des="*" data-type="1p-script"><span data-i18n="popup1pScriptRulePrompt"></span><span data-src="/"> </span><span data-src="."> </span></div>
+        <div data-des="*" data-type="3p-script"><span data-i18n="popup3pScriptRulePrompt"></span><span data-src="/"> </span><span data-src="."> </span></div>
+        <div data-des="*" data-type="3p-frame"><span data-i18n="popup3pFrameRulePrompt"></span><span data-src="/"> </span><span data-src="."> </span></div>
+    </div>
+    <div id="firewall-vspacer"></div>
+</div>
+
+<div id="templates" style="display: none">
+    <div data-des="" data-type="*"><span><span><span></span></span><sub></sub></span><span data-src="/"></span><span data-src="."></span></div>
+    <div id="actionSelector"><span id="dynaAllow"></span><span id="dynaNoop"></span><span id="dynaBlock"></span><span id="dynaCounts"></span></div>
+    <div id="hotspotTip"></div>
+    <div id="tooltip"></div>
+</div>
+
+<script src="lib/hsluv/hsluv-0.1.0.min.js"></script>
+
+<script src="js/fa-icons.js" type="module"></script>
+<script src="js/vapi.js"></script>
+<script src="js/vapi-common.js"></script>
+<script src="js/vapi-client.js"></script>
+<script src="js/theme.js" type="module"></script>
+<script src="js/i18n.js" type="module"></script>
+<script src="js/popup-fenix.js" type="module"></script>
+
+</body>
+
+</html>

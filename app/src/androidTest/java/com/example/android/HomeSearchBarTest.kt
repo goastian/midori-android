@@ -8,7 +8,6 @@ import androidx.compose.ui.test.performTextInput
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
-import org.midorinext.android.adblock.AdBlockerState
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.ui.browser.home.HomeScreen
 import org.midorinext.android.ui.browser.home.HomeSearchFieldTestTag
@@ -23,7 +22,6 @@ class HomeSearchBarTest {
 
         composeRule.setContent {
             HomeScreen(
-                adBlockerState = AdBlockerState(),
                 preferences = AppPreferencesSerializer.defaultValue,
                 tabCount = 1,
                 onSearch = { submittedValue = it },

@@ -5,8 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import org.midorinext.android.adblock.AdBlockerState
 import org.midorinext.android.contentBlocker.ContentBlockerState
+import org.midorinext.android.adblock.MidoriPrivacyFeature
 import org.midorinext.android.ext.isLegacyMidoriHomeUrl
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
@@ -61,7 +61,6 @@ class BrowserScreenViewModel @Inject constructor(
     val MidoriUseCases: MidoriUseCases,
     private val appPreferencesRepository: AppPreferencesRepository,
     val contentBlockerState: ContentBlockerState,
-    val adBlockerState: AdBlockerState
 ): ViewModel() {
     data class SelectedTabSnapshot(
         val id: String,
@@ -264,6 +263,18 @@ class BrowserScreenViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
+    val isMidoriPrivacyActionAvailable = store.flow()
+        .map { state ->
+            val extension = state.extensions[MidoriPrivacyFeature.EXTENSION_ID]
+            extension?.enabled == true && extension.browserAction?.enabled != false
+        }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = false,
+        )
+
     var showFindInPage by mutableStateOf(false)
         private set
 
@@ -393,7 +404,11 @@ class BrowserScreenViewModel @Inject constructor(
 
     fun triggerInstalledExtensionAction(extensionId: String) {
         viewModelScope.launch(Dispatchers.Main) {
-            store.state.extensions[extensionId]?.browserAction?.onClick?.invoke()
+            val extension = store.state.extensions[extensionId] ?: return@launch
+            val action = extension.browserAction
+            if (extension.enabled && action?.enabled != false) {
+                action?.onClick?.invoke()
+            }
         }
     }
 

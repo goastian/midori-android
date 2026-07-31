@@ -20,17 +20,6 @@
 
     <string name="browser_toolbar_hint">Busca o ingresa una dirección</string>
     <string name="home_subtitle">Privado, rápido y listo</string>
-    <string name="home_privacy_stats">Estadísticas de privacidad</string>
-    <string name="home_shield">Escudo</string>
-    <string name="home_shield_on">Activo</string>
-    <string name="home_shield_off">Inactivo</string>
-    <string name="home_blocked">Bloqueado</string>
-    <string name="home_saved">Ahorrado</string>
-    <string name="home_ads">Anuncios</string>
-    <string name="home_trackers">Rastreadores</string>
-    <string name="home_protected_pages">Páginas</string>
-    <string name="home_last_site">Último sitio</string>
-    <string name="home_level">Nivel</string>
     <string name="home_pinned_shortcuts">Accesos fijados</string>
     <string name="home_quick_access">Acceso rápido</string>
     <string name="home_weather_local">Local</string>

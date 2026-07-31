@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="color-scheme" content="light dark" />
+<title data-i18n="settingsPageName"></title>
+<link rel="stylesheet" type="text/css" href="css/themes/default.css">
+<link rel="stylesheet" type="text/css" href="css/common.css">
+<link rel="stylesheet" type="text/css" href="css/fa-icons.css">
+<link rel="stylesheet" type="text/css" href="css/dashboard-common.css">
+<link rel="stylesheet" type="text/css" href="css/settings.css">
+</head>
+
+<body>
+<main class="settingsPage">
+    <header class="settingsHero">
+        <span class="eyebrow" data-i18n="midoriSettingsEyebrow"></span>
+        <h1 data-i18n="midoriSettingsTitle"></h1>
+        <p data-i18n="midoriSettingsIntro"></p>
+    </header>
+
+    <div class="settingsGrid">
+        <section class="settingsCard" aria-labelledby="settingsBasicsTitle">
+            <header class="cardHeader">
+                <span class="cardIcon fa-icon" aria-hidden="true">check</span>
+                <div><h2 id="settingsBasicsTitle" data-i18n="midoriSettingsBasics"></h2><p data-i18n="midoriSettingsBasicsHint"></p></div>
+            </header>
+            <div class="settingList">
+                <label class="settingRow"><span class="settingCopy"><strong data-i18n="settingsIconBadgePrompt"></strong><span data-i18n="midoriSettingBadgeHint"></span></span><span class="input checkbox"><input type="checkbox" data-setting-name="showIconBadge" data-setting-type="bool"><svg viewBox="0 0 24 24"><path d="M1.73,12.91 8.1,19.28 22.79,4.59"/></svg></span></label>
+                <label class="settingRow"><span class="settingCopy"><strong data-i18n="settingsCollapseBlockedPrompt"></strong><span data-i18n="midoriSettingCollapseHint"></span></span><span class="input checkbox"><input type="checkbox" data-setting-name="collapseBlocked" data-setting-type="bool"><svg viewBox="0 0 24 24"><path d="M1.73,12.91 8.1,19.28 22.79,4.59"/></svg></span></label>
+                <label class="settingRow"><span class="settingCopy"><strong data-i18n="settingsContextMenuPrompt"></strong><span data-i18n="midoriSettingContextHint"></span></span><span class="input checkbox"><input type="checkbox" data-setting-name="contextMenuEnabled" data-setting-type="bool"><svg viewBox="0 0 24 24"><path d="M1.73,12.91 8.1,19.28 22.79,4.59"/></svg></span></label>
+            </div>
+        </section>
+
+        <section class="settingsCard" aria-labelledby="settingsPrivacyTitle">
+            <header class="cardHeader">
+                <span class="cardIcon fa-icon" aria-hidden="true">lock</span>
+                <div><h2 id="settingsPrivacyTitle" data-i18n="3pGroupPrivacy"></h2><p data-i18n="midoriSettingsPrivacyHint"></p></div>
+            </header>
+            <div class="settingList">
+                <label class="settingRow"><span class="settingCopy"><strong><span data-i18n="settingsPrefetchingDisabledPrompt"></span>&nbsp;<a class="fa-icon info" href="https://github.com/gorhill/uBlock/wiki/Dashboard:-Settings#disable-prefetching" target="_blank">info-circle</a></strong><span data-i18n="midoriSettingPrefetchHint"></span></span><span class="input checkbox"><input type="checkbox" data-setting-name="prefetchingDisabled" data-setting-type="bool"><svg viewBox="0 0 24 24"><path d="M1.73,12.91 8.1,19.28 22.79,4.59"/></svg></span></label>
+                <label class="settingRow"><span class="settingCopy"><strong><span data-i18n="settingsHyperlinkAuditingDisabledPrompt"></span>&nbsp;<a class="fa-icon info" href="https://github.com/gorhill/uBlock/wiki/Dashboard:-Settings#disable-hyperlink-auditing" target="_blank">info-circle</a></strong><span data-i18n="midoriSettingAuditHint"></span></span><span class="input checkbox"><input type="checkbox" data-setting-name="hyperlinkAuditingDisabled" data-setting-type="bool"><svg viewBox="0 0 24 24"><path d="M1.73,12.91 8.1,19.28 22.79,4.59"/></svg></span></label>
+                <label class="settingRow" style="display:none"><span class="settingCopy"><strong><span data-i18n="settingsWebRTCIPAddressHiddenPrompt"></span>&nbsp;<a class="fa-icon info important" href="https://github.com/gorhill/uBlock/wiki/Prevent-WebRTC-from-leaking-local-IP-address" target="_blank">info-circle</a></strong></span><span class="input checkbox"><input type="checkbox" data-setting-name="webrtcIPAddressHidden" data-setting-type="bool"><svg viewBox="0 0 24 24"><path d="M1.73,12.91 8.1,19.28 22.79,4.59"/></svg></span></label>
+                <label class="settingRow"><span class="settingCopy"><strong><span data-i18n="settingsNoCSPReportsPrompt"></span>&nbsp;<a class="fa-icon info" href="https://github.com/gorhill/uBlock/wiki/Dashboard:-Settings#block-csp-reports" target="_blank">info-circle</a></strong><span data-i18n="midoriSettingCspHint"></span></span><span class="input checkbox"><input type="checkbox" data-setting-name="noCSPReports" data-setting-type="bool"><svg viewBox="0 0 24 24"><path d="M1.73,12.91 8.1,19.28 22.79,4.59"/></svg></span></label>
+                <label class="settingRow"><span class="settingCopy"><strong><span data-i18n="settingsUncloakCnamePrompt"></span>&nbsp;<a class="fa-icon info" href="https://github.com/gorhill/uBlock/wiki/Dashboard:-Settings#uncloak-canonical-names" target="_blank">info-circle</a></strong><span data-i18n="midoriSettingCnameHint"></span></span><span class="input checkbox"><input type="checkbox" data-setting-name="cnameUncloakEnabled" data-setting-type="bool"><svg viewBox="0 0 24 24"><path d="M1.73,12.91 8.1,19.28 22.79,4.59"/></svg></span></label>
+            </div>
+        </section>
+
+        <section class="settingsCard" aria-labelledby="settingsAppearanceTitle">
+            <header class="cardHeader">
+                <span class="cardIcon fa-icon" aria-hidden="true">sun-o</span>
+                <div><h2 id="settingsAppearanceTitle" data-i18n="settingsAppearance"></h2><p data-i18n="midoriSettingsAppearanceHint"></p></div>
+            </header>
+            <div class="settingList">
+                <label class="settingRow"><span class="settingCopy"><strong data-i18n="settingsThemeLabel"></strong><span data-i18n="midoriSettingThemeHint"></span></span><select data-setting-name="uiTheme" data-setting-type="value"><option value="auto" data-i18n="midoriThemeAuto"></option><option value="light" data-i18n="midoriThemeLight"></option><option value="dark" data-i18n="midoriThemeDark"></option></select></label>
+                <div class="settingRow"><label class="settingCopy accentSetting"><strong data-i18n="settingsThemeAccent0Label"></strong><span data-i18n="midoriSettingAccentHint"></span></label><span class="accentControls"><input type="color" list="preset-accent-colors" data-setting-name="uiAccentCustom0" data-setting-type="value"><span class="input checkbox"><input type="checkbox" data-setting-name="uiAccentCustom" data-setting-type="bool"><svg viewBox="0 0 24 24"><path d="M1.73,12.91 8.1,19.28 22.79,4.59"/></svg></span></span></div>
+                <label class="settingRow"><span class="settingCopy"><strong data-i18n="settingsColorBlindPrompt"></strong><span data-i18n="midoriSettingColorBlindHint"></span></span><span class="input checkbox"><input type="checkbox" data-setting-name="colorBlindFriendly" data-setting-type="bool"><svg viewBox="0 0 24 24"><path d="M1.73,12.91 8.1,19.28 22.79,4.59"/></svg></span></label>
+                <label class="settingRow"><span class="settingCopy"><strong data-i18n="settingsTooltipsPrompt"></strong><span data-i18n="midoriSettingTooltipsHint"></span></span><span class="input checkbox"><input type="checkbox" data-setting-name="tooltipsDisabled" data-setting-type="bool"><svg viewBox="0 0 24 24"><path d="M1.73,12.91 8.1,19.28 22.79,4.59"/></svg></span></label>
+            </div>
+            <datalist id="preset-accent-colors"><option value="#f75782"><option value="#cc7f2b"><option value="#9c932b"><option value="#56a22b"><option value="#2ea283"><option value="#309fa6"><option value="#3498d6"><option value="#ad75f4"><option value="#f542d6"><option value="#919191"></datalist>
+        </section>
+
+        <section class="settingsCard dataCard" aria-labelledby="settingsDataTitle">
+            <header class="cardHeader">
+                <span class="cardIcon fa-icon" aria-hidden="true">cloud-upload</span>
+                <div><h2 id="settingsDataTitle" data-i18n="midoriSettingsData"></h2><p data-i18n="midoriSettingsDataHint"></p></div>
+            </header>
+            <label class="settingRow"><span class="settingCopy"><strong><span data-i18n="settingsCloudStorageEnabledPrompt"></span>&nbsp;<a class="fa-icon info" href="https://github.com/gorhill/uBlock/wiki/Cloud-storage" target="_blank">info-circle</a></strong><span data-i18n="midoriSettingCloudHint"></span></span><span class="input checkbox"><input type="checkbox" data-setting-name="cloudStorageEnabled" data-setting-type="bool"><svg viewBox="0 0 24 24"><path d="M1.73,12.91 8.1,19.28 22.79,4.59"/></svg></span></label>
+            <div id="localData">
+                <div class="dataStatus"><div id="storageUsed"></div><div id="settingsLastBackupPrompt" style="display:none;"></div><div id="settingsLastRestorePrompt" style="display:none;"></div></div>
+                <div class="dataActions"><button class="preferred" type="button" id="export" data-i18n="aboutBackupDataButton">_<span class="hover"></span></button><button type="button" id="import" data-i18n="aboutRestoreDataButton">_<span class="hover"></span></button><button class="dangerButton" type="button" id="reset" data-i18n="aboutResetDataButton">_<span class="hover"></span></button></div>
+            </div>
+        </section>
+    </div>
+
+    <details id="advancedSettingsGroup" class="settingsDisclosure">
+        <summary><span class="summaryIcon fa-icon" aria-hidden="true">sliders</span><span><strong data-i18n="midoriAdvancedSettingsTitle"></strong><span data-i18n="midoriAdvancedSettingsHint"></span></span><span class="summaryChevron fa-icon" aria-hidden="true">angle-up</span></summary>
+        <div class="advancedGrid">
+            <section aria-labelledby="siteDefaultsTitle">
+                <h2 id="siteDefaultsTitle" data-i18n="settingPerSiteSwitchGroup"></h2>
+                <p class="sectionHint"><span data-i18n="midoriSiteDefaultsHint"></span>&nbsp;<a class="fa-icon info" href="https://github.com/gorhill/uBlock/wiki/Per-site-switches" target="_blank">info-circle</a></p>
+                <div class="settingList">
+                    <label class="settingRow"><span class="settingCopy"><strong><span data-i18n="settingsNoCosmeticFilteringPrompt"></span>&nbsp;<a class="fa-icon info" href="https://github.com/gorhill/uBlock/wiki/Per-site-switches#no-cosmetic-filtering" target="_blank">info-circle</a></strong><span data-i18n="midoriRiskMayShowAds"></span></span><span class="input checkbox"><input type="checkbox" data-setting-name="noCosmeticFiltering" data-setting-type="bool"><svg viewBox="0 0 24 24"><path d="M1.73,12.91 8.1,19.28 22.79,4.59"/></svg></span></label>
+                    <label class="settingRow"><span class="settingCopy"><strong><span data-i18n="settingsNoLargeMediaPrompt"><input type="number" min="0" data-setting-name="largeMediaSize" data-setting-type="value"></span>&nbsp;<a class="fa-icon info" href="https://github.com/gorhill/uBlock/wiki/Per-site-switches#no-large-media-elements" target="_blank">info-circle</a></strong><span data-i18n="midoriRiskMayStopMedia"></span></span><span class="input checkbox"><input type="checkbox" data-setting-name="noLargeMedia" data-setting-type="bool"><svg viewBox="0 0 24 24"><path d="M1.73,12.91 8.1,19.28 22.79,4.59"/></svg></span></label>
+                    <label class="settingRow"><span class="settingCopy"><strong><span data-i18n="settingsNoRemoteFontsPrompt"></span>&nbsp;<a class="fa-icon info" href="https://github.com/gorhill/uBlock/wiki/Per-site-switches#no-remote-fonts" target="_blank">info-circle</a></strong><span data-i18n="midoriRiskMayChangeAppearance"></span></span><span class="input checkbox"><input type="checkbox" data-setting-name="noRemoteFonts" data-setting-type="bool"><svg viewBox="0 0 24 24"><path d="M1.73,12.91 8.1,19.28 22.79,4.59"/></svg></span></label>
+                    <label class="settingRow"><span class="settingCopy"><strong><span data-i18n="settingsNoScriptingPrompt"></span>&nbsp;<a class="fa-icon info" href="https://github.com/gorhill/uBlock/wiki/Per-site-switches#no-scripting" target="_blank">info-circle</a></strong><span class="riskText" data-i18n="midoriRiskMayBreakSites"></span></span><span class="input checkbox"><input type="checkbox" data-setting-name="noScripting" data-setting-type="bool"><svg viewBox="0 0 24 24"><path d="M1.73,12.91 8.1,19.28 22.79,4.59"/></svg></span></label>
+                </div>
+            </section>
+            <section aria-labelledby="expertModeTitle">
+                <h2 id="expertModeTitle" data-i18n="settingsAdvanced"></h2>
+                <p class="sectionHint" data-i18n="midoriExpertModeHint"></p>
+                <label class="settingRow expertToggle"><span class="settingCopy"><strong><span data-i18n="settingsAdvancedUserPrompt"></span>&nbsp;<a class="fa-icon info" href="advanced-settings.html" data-i18n-title="settingsAdvancedUserSettings">cogs</a></strong><span class="riskText" data-i18n="settingsAdvancedSynopsis"></span></span><span class="input checkbox"><input type="checkbox" data-setting-name="advancedUserEnabled" data-setting-type="bool"><svg viewBox="0 0 24 24"><path d="M1.73,12.91 8.1,19.28 22.79,4.59"/></svg></span></label>
+            </section>
+        </div>
+    </details>
+</main>
+
+<div class="hidden">
+    <input id="restoreFilePicker" type="file" accept="text/plain,application/json">
+</div>
+
+<script src="lib/hsluv/hsluv-0.1.0.min.js"></script>
+
+<script src="js/fa-icons.js" type="module"></script>
+<script src="js/vapi.js"></script>
+<script src="js/vapi-common.js"></script>
+<script src="js/vapi-client.js"></script>
+<script src="js/theme.js" type="module"></script>
+<script src="js/i18n.js" type="module"></script>
+<script src="js/dashboard-common.js" type="module"></script>
+<script src="js/settings.js" type="module"></script>
+
+</body>
+</html>

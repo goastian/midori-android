@@ -81,12 +81,6 @@ class AppPreferencesRepository @Inject constructor(
         }
     }
 
-    suspend fun updateHomepagePrivacyStatsEnabled(enabled: Boolean) {
-        datastore.updateData { preferences ->
-            preferences.toBuilder().setHomepagePrivacyStatsEnabled(enabled).build()
-        }
-    }
-
     suspend fun updateHomepageWeatherEnabled(enabled: Boolean) {
         datastore.updateData { preferences ->
             preferences.toBuilder().setHomepageWeatherEnabled(enabled).build()

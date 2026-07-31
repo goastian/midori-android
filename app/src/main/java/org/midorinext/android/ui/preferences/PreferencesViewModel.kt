@@ -96,10 +96,6 @@ class PreferencesViewModel @Inject constructor(
         viewModelScope.launch { appPreferencesRepository.updateHomepageShortcutsEnabled(enabled) }
     }
 
-    fun updateHomepagePrivacyStatsEnabled(enabled: Boolean) {
-        viewModelScope.launch { appPreferencesRepository.updateHomepagePrivacyStatsEnabled(enabled) }
-    }
-
     fun updateHomepageWeatherEnabled(enabled: Boolean) {
         viewModelScope.launch { appPreferencesRepository.updateHomepageWeatherEnabled(enabled) }
     }

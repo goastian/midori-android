@@ -1,34 +1,134 @@
 {
-  "manifest_version": 2,
-  "name": "Midori Privacy",
-  "version": "1.0.2",
-  "description": "Built-in ad and tracker filtering for Midori.",
+  "author": "Astian, Inc. <midori-protection@astian.org>; based on uBlock Origin by Raymond Hill & contributors",
+  "background": {
+    "page": "background.html"
+  },
+  "browser_action": {
+    "browser_style": false,
+    "default_area": "navbar",
+    "default_icon": {
+      "16": "img/icon_16.png",
+      "32": "img/icon_32.png",
+      "64": "img/icon_64.png"
+    },
+    "default_popup": "popup-fenix.html",
+    "default_title": "Midori Privacy"
+  },
   "browser_specific_settings": {
     "gecko": {
-      "id": "midori-privacy@astian.org"
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      },
+      "id": "midori-protection@astian.org",
+      "strict_min_version": "115.0"
+    },
+    "gecko_android": {
+      "strict_min_version": "115.0"
+    }
+  },
+  "commands": {
+    "_execute_browser_action": {},
+    "launch-element-picker": {
+      "description": "__MSG_popupTipPicker__"
+    },
+    "launch-element-zapper": {
+      "description": "__MSG_popupTipZapper__"
+    },
+    "launch-logger": {
+      "description": "__MSG_popupTipLog__"
+    },
+    "open-dashboard": {
+      "description": "__MSG_popupTipDashboard__"
+    },
+    "relax-blocking-mode": {
+      "description": "__MSG_relaxBlockingMode__"
+    },
+    "toggle-cosmetic-filtering": {
+      "description": "__MSG_toggleCosmeticFiltering__"
+    },
+    "toggle-javascript": {
+      "description": "__MSG_toggleJavascript__"
     }
   },
   "content_scripts": [
     {
+      "all_frames": true,
+      "js": [
+        "/js/vapi.js",
+        "/js/vapi-client.js",
+        "/js/contentscript.js"
+      ],
+      "match_about_blank": true,
       "matches": [
         "http://*/*",
-        "https://*/*"
+        "https://*/*",
+        "file://*/*"
       ],
-      "exclude_matches": [
-        "*://youtube.com/*",
-        "*://*.youtube.com/*",
-        "*://youtu.be/*",
-        "*://*.youtu.be/*",
-        "*://astiango.com/*",
-        "*://*.astiango.com/*",
-        "*://astian.org/*",
-        "*://*.astian.org/*"
-      ],
+      "run_at": "document_start"
+    },
+    {
+      "all_frames": false,
       "js": [
-        "adblock_cosmetic.js"
+        "/js/scriptlets/subscriber.js"
       ],
-      "run_at": "document_start",
-      "all_frames": true
+      "matches": [
+        "https://easylist.to/*",
+        "https://*.fanboy.co.nz/*",
+        "https://filterlists.com/*",
+        "https://forums.lanik.us/*",
+        "https://github.com/*",
+        "https://*.github.io/*"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "all_frames": false,
+      "js": [
+        "/js/scriptlets/updater.js"
+      ],
+      "matches": [
+        "https://github.com/uBlockOrigin/*",
+        "https://ublockorigin.github.io/*",
+        "https://*.reddit.com/r/uBlockOrigin/*"
+      ],
+      "run_at": "document_idle"
     }
+  ],
+  "default_locale": "en",
+  "description": "Midori Privacy blocks ads, trackers and annoyances with the complete uBlock Origin engine.",
+  "homepage_url": "https://astian.org/",
+  "icons": {
+    "16": "img/ublock.svg",
+    "32": "img/ublock.svg",
+    "48": "img/ublock.svg",
+    "64": "img/ublock.svg",
+    "96": "img/ublock.svg",
+    "128": "img/ublock.svg"
+  },
+  "manifest_version": 2,
+  "name": "Midori Privacy",
+  "options_ui": {
+    "open_in_tab": true,
+    "page": "dashboard.html"
+  },
+  "permissions": [
+    "alarms",
+    "dns",
+    "menus",
+    "privacy",
+    "storage",
+    "tabs",
+    "unlimitedStorage",
+    "webNavigation",
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>"
+  ],
+  "short_name": "Midori Privacy",
+  "version": "2.3.11.5",
+  "web_accessible_resources": [
+    "/web_accessible_resources/*"
   ]
 }

@@ -2,7 +2,6 @@ package org.midorinext.android
 
 import android.app.Application
 import androidx.work.Configuration
-import org.midorinext.android.adblock.MidoriPrivacyFeature
 import org.midorinext.android.migration.MigrationUtility
 import org.midorinext.android.mozac.GeckoPreferences
 import org.midorinext.android.preferences.app.AppPreferences
@@ -16,7 +15,6 @@ import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.*
 import mozilla.components.browser.session.storage.SessionStorage
 import mozilla.components.browser.state.action.SystemAction
-import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
 import mozilla.components.concept.fetch.Client
@@ -45,7 +43,6 @@ class MidoriApplication : Application(), Configuration.Provider {
     @Inject lateinit var MidoriUseCases: dagger.Lazy<MidoriUseCases>
     @Inject lateinit var migrationUtility: dagger.Lazy<MigrationUtility>
     @Inject lateinit var mediaFeature: dagger.Lazy<MediaSessionFeature>
-    @Inject lateinit var adBlockerFeature: dagger.Lazy<MidoriPrivacyFeature>
     @Inject lateinit var appTrackingProtectionController: dagger.Lazy<AppTrackingProtectionController>
     @Inject lateinit var geckoRuntime: dagger.Lazy<GeckoRuntime>
     @Inject lateinit var appPreferencesRepository: dagger.Lazy<AppPreferencesRepository>
@@ -100,13 +97,7 @@ class MidoriApplication : Application(), Configuration.Provider {
 
         engine.get().warmUp()
 
-        restoreBrowserState().invokeOnCompletion {
-            android.util.Log.d("MidoriPrivacy", "restore tabs done")
-            store.get().state.selectedTab?.content?.url?.let {
-                android.util.Log.d("MidoriPrivacy", "selected tab url is $it")
-                adBlockerFeature.get().restoreTabsDone(it)
-            } ?: android.util.Log.d("MidoriPrivacy", "selected tab url is still null after restore")
-        }
+        restoreBrowserState()
 
         migrationUtility.get().checkMigrations()
 

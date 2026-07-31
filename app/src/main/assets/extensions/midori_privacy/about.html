@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark" />
+<title data-i18n="aboutPageName"></title>
+<link rel="stylesheet" type="text/css" href="css/themes/default.css">
+<link rel="stylesheet" type="text/css" href="css/common.css">
+<link rel="stylesheet" type="text/css" href="css/dashboard-common.css">
+<link rel="stylesheet" type="text/css" href="css/about.css">
+</head>
+
+<body>
+
+<main class="aboutPage">
+    <header class="aboutHero">
+        <img src="img/midori-shield.svg" alt="" width="64" height="64">
+        <div>
+            <span class="aboutEyebrow" data-i18n="midoriAboutEyebrow"></span>
+            <h1 id="aboutNameVer"></h1>
+            <p data-i18n="midoriAboutIntro"></p>
+        </div>
+    </header>
+
+    <nav class="aboutLinks" data-i18n-title="midoriAboutProductLinks">
+        <a href="https://astian.org/privacy-policy/" target="_blank"><span class="fa-icon" aria-hidden="true">lock</span><span data-i18n="aboutPrivacyPolicy"></span></a>
+        <a href="https://github.com/goastian/midori-privacy/releases" target="_blank"><span class="fa-icon" aria-hidden="true">clock-o</span><span data-i18n="aboutChangelog"></span></a>
+        <a href="https://github.com/goastian/midori-privacy" target="_blank"><span class="fa-icon" aria-hidden="true">code</span><span data-i18n="aboutCode"></span></a>
+    </nav>
+
+    <section class="ownershipGrid" aria-label="Project ownership and origin">
+        <article class="ownershipCard productOwner">
+            <span class="ownershipIcon fa-icon" aria-hidden="true">home</span>
+            <div>
+                <span class="ownershipLabel" data-i18n="midoriAboutProductOwner"></span>
+                <h2 data-i18n="midoriAboutCopyright"></h2>
+                <p data-i18n="midoriAboutAstianBody"></p>
+                <a href="https://astian.org/" target="_blank">astian.org <span class="fa-icon" aria-hidden="true">external-link</span></a>
+            </div>
+        </article>
+        <article class="ownershipCard upstreamCredit">
+            <span class="ownershipIcon fa-icon" aria-hidden="true">code</span>
+            <div>
+                <span class="ownershipLabel" data-i18n="midoriAboutOpenSourceBase"></span>
+                <h2 data-i18n="midoriAboutUpstreamCredit"></h2>
+                <p data-i18n="midoriAboutLicenseNote"></p>
+                <a href="https://github.com/gorhill/uBlock" target="_blank">uBlock Origin <span class="fa-icon" aria-hidden="true">external-link</span></a>
+            </div>
+        </article>
+    </section>
+
+    <section class="contributorsSection">
+        <header>
+            <div><span class="aboutEyebrow" data-i18n="aboutContributors"></span><h2 data-i18n="midoriAboutCommunityTitle"></h2></div>
+            <p data-i18n="midoriAboutCommunityHint"></p>
+        </header>
+        <div class="contributorLinks">
+            <a href="https://github.com/goastian/midori-privacy/graphs/contributors" target="_blank"><span class="fa-icon" aria-hidden="true">code</span><span data-i18n="midoriAboutMidoriContributors"></span></a>
+            <a href="https://github.com/gorhill/uBlock/graphs/contributors" target="_blank"><span class="fa-icon" aria-hidden="true">home</span><span data-i18n="midoriAboutUpstreamContributors"></span></a>
+            <a href="https://crowdin.com/project/ublock" target="_blank"><span class="fa-icon" aria-hidden="true">comment-alt</span><span data-i18n="aboutTranslations"></span></a>
+            <a href="https://github.com/uBlockOrigin/uAssets/graphs/contributors" target="_blank"><span class="fa-icon" aria-hidden="true">filter</span><span data-i18n="aboutFilterLists"></span></a>
+        </div>
+    </section>
+
+    <details class="creditsDisclosure">
+        <summary><span class="summaryIcon fa-icon" aria-hidden="true">book</span><span><strong data-i18n="midoriAboutAcknowledgements"></strong><small data-i18n="midoriAboutAcknowledgementsHint"></small></span><span class="summaryChevron fa-icon" aria-hidden="true">angle-up</span></summary>
+        <div class="creditsContent">
+            <section>
+                <h2 data-i18n="aboutDependencies"></h2>
+                <ul class="dependencyList">
+                    <li><span><a href="https://codemirror.net/" target="_blank">CodeMirror</a> by <a href="https://github.com/marijnh">Marijn Haverbeke</a></span></li>
+                    <li><span><a href="https://github.com/mathiasbynens/punycode.js" target="_blank">Punycode.js</a> by <a href="https://github.com/mathiasbynens">Mathias Bynens</a></span></li>
+                    <li><span><a href="https://web.archive.org/web/20201013225635/https://github.com/chrismsimpson/Metropolis" target="_blank">Metropolis</a> by <a href="https://github.com/chrismsimpson">Chris Simpson</a></span></li>
+                    <li><span><a href="https://github.com/rsms/inter" target="_blank">Inter</a> by <a href="https://github.com/rsms">Rasmus Andersson</a></span></li>
+                    <li><span><a href="https://fontawesome.com/" target="_blank">FontAwesome</a> by <a href="https://github.com/davegandy">Dave Gandy</a></span></li>
+                    <li><span><a href="https://github.com/Swatinem/diff" target="_blank">Myers diff implementation</a> by <a href="https://github.com/Swatinem">Arpad Borsos</a></span></li>
+                    <li><span><a href="https://github.com/foo123/RegexAnalyzer" target="_blank">Regular Expression Analyzer</a> by <a href="https://github.com/foo123">Nikos M.</a></span></li>
+                    <li><span><a href="https://github.com/hsluv/hsluv" target="_blank">HSLuv</a> by <a href="https://github.com/boronine">Alexei Boronine</a></span></li>
+                    <li><span><a href="https://searchfox.org/mozilla-central/rev/d317e93d9a59c9e4c06ada85fbff9f6a1ceaaad1/browser/extensions/webcompat/shims/google-ima.js" target="_blank">google-ima.js</a> by <a href="https://www.mozilla.org/">Mozilla</a></span></li>
+                    <li><span><a href="https://github.com/csstree/csstree" target="_blank">CSSTree</a> by <a href="https://github.com/lahmatiy">Roman Dvornov</a></span></li>
+                    <li><span><a href="https://github.com/beautify-web/js-beautify" target="_blank">js-beautify</a> by Einar Lielmanis, Liam Newman, et al.</span></li>
+                    <li><span><a href="https://flagpedia.net/" target="_blank">Flags of the World</a> by <a href="https://www.davidkrmela.com/">David Krmela</a></span></li>
+                </ul>
+            </section>
+            <section class="infrastructureCredits">
+                <h2 data-i18n="midoriAboutInfrastructureTitle"></h2>
+                <p data-i18n="aboutCDNs"></p>
+                <p><a href="https://pages.cloudflare.com/" target="_blank">Cloudflare Pages</a>, <a href="https://pages.github.com/" target="_blank">GitHub Pages</a>, <a href="https://www.jsdelivr.com/" target="_blank">jsDelivr</a>, <a href="https://statically.io/" target="_blank">Statically</a></p>
+                <p data-i18n="aboutCDNsInfo"></p>
+            </section>
+        </div>
+    </details>
+</main>
+
+<script src="lib/hsluv/hsluv-0.1.0.min.js"></script>
+
+<script src="js/vapi.js"></script>
+<script src="js/vapi-common.js"></script>
+<script src="js/vapi-client.js"></script>
+<script src="js/theme.js" type="module"></script>
+<script src="js/i18n.js" type="module"></script>
+<script src="js/dashboard-common.js" type="module"></script>
+<script src="js/about.js" type="module"></script>
+
+</body>
+</html>

@@ -437,6 +437,7 @@ tasks.register("verifyMidoriPrivacyBundle") {
         def backgroundPageFile = new File(midoriPrivacyAssets, "background.html")
         def backgroundScriptFile = new File(midoriPrivacyAssets, "js/background.js")
         def assetsScriptFile = new File(midoriPrivacyAssets, "js/assets.js")
+        def vapiCommonScriptFile = new File(midoriPrivacyAssets, "js/vapi-common.js")
         def startFile = new File(midoriPrivacyAssets, "js/start.js")
         def storageScriptFile = new File(midoriPrivacyAssets, "js/storage.js")
         def statsBridgeFile = new File(midoriPrivacyAssets, "js/midori-stats.js")
@@ -446,6 +447,7 @@ tasks.register("verifyMidoriPrivacyBundle") {
                 backgroundPageFile,
                 backgroundScriptFile,
                 assetsScriptFile,
+                vapiCommonScriptFile,
                 startFile,
                 storageScriptFile,
                 statsBridgeFile,
@@ -483,7 +485,7 @@ tasks.register("verifyMidoriPrivacyBundle") {
                 parseMajorVersion(gecko?.strict_min_version) < 115 ||
                 parseMajorVersion(geckoAndroid?.strict_min_version) < 115 ||
                 gecko?.data_collection_permissions?.required != ["none"] ||
-                !(manifest.version ==~ /[0-9]+\.[0-9]+\.[0-9]+\.4/) ||
+                !(manifest.version ==~ /[0-9]+\.[0-9]+\.[0-9]+\.5/) ||
                 permissions.size() != expectedPermissions.size() ||
                 permissions.toSet() != expectedPermissions.toSet()) {
             throw new GradleException("Midori Privacy has an incompatible Firefox Android manifest")
@@ -492,6 +494,7 @@ tasks.register("verifyMidoriPrivacyBundle") {
         def backgroundPage = backgroundPageFile.getText("UTF-8")
         def backgroundScript = backgroundScriptFile.getText("UTF-8")
         def assetsScript = assetsScriptFile.getText("UTF-8")
+        def vapiCommonScript = vapiCommonScriptFile.getText("UTF-8")
         def startScript = startFile.getText("UTF-8")
         def storageScript = storageScriptFile.getText("UTF-8")
         def statsBridge = statsBridgeFile.getText("UTF-8")
@@ -501,17 +504,18 @@ tasks.register("verifyMidoriPrivacyBundle") {
                 !startScript.contains("import './midori-stats.js';")) {
             throw new GradleException("Midori Privacy does not load its statistics bridge")
         }
-        if (!backgroundScript.contains("? 'assets/assets.dev.json'") ||
-                !backgroundScript.contains(": 'assets/assets.json'") ||
-                backgroundScript.contains("? '/assets/assets.dev.json'") ||
+        if (!backgroundScript.contains("assetsJsonPath: 'assets/assets.json'") ||
+                backgroundScript.contains("assets/assets.dev.json") ||
+                !vapiCommonScript.contains("const isAndroidCompatibilityBuild =") ||
+                !vapiCommonScript.contains("isAndroidCompatibilityBuild === false") ||
                 !assetsScript.contains("function assetSourceRegistryIsValid(registry)") ||
                 !assetsScript.contains("registry['assets.json'] instanceof Object === false") ||
-                !assetsScript.contains("entry instanceof Object && entry.content === 'filters'") ||
+                !assetsScript.contains("assetKey !== 'user-filters'") ||
+                !assetsScript.contains("entry.submitter !== 'user'") ||
                 !assetsScript.contains("if ( assetSourceRegistryIsValid(cachedRegistry) )") ||
                 !assetsScript.contains("if ( assetSourceRegistryIsValid(newDict) === false ) { return; }") ||
-                !assetsScript.contains("assets.fetch = async function(url, options = {})") ||
-                !assetsScript.contains("if ( url.startsWith(vAPI.getURL('')) )") ||
-                !assetsScript.contains("const response = await fetch(url);") ||
+                !assetsScript.contains("assets.fetch = function(url, options = {})") ||
+                assetsScript.contains("Midori Privacy could not fetch packaged asset") ||
                 !storageScript.contains("midoriAndroidFilterListsMigration") ||
                 !storageScript.contains("hasBrokenAndroidBootstrapState") ||
                 !storageScript.contains("availableListKeys.every(key => key === this.userFiltersPath)") ||
@@ -537,8 +541,8 @@ tasks.register("verifyMidoriPrivacyBundle") {
 
         if (metadata.version != manifest.version ||
                 !(metadata.sourceVersion ==~ /[0-9]+\.[0-9]+\.[0-9]+/) ||
-                metadata.compatibilityRevision != 4 ||
-                metadata.version != "${metadata.sourceVersion}.4" ||
+                metadata.compatibilityRevision != 5 ||
+                metadata.version != "${metadata.sourceVersion}.5" ||
                 metadata.sourceRepository != "https://github.com/goastian/midori-privacy" ||
                 !(metadata.sourceCommit ==~ /[0-9a-f]{40}/) ||
                 !(metadata.sourceRef ==~ /v[0-9]+\.[0-9]+\.[0-9]+/) ||

@@ -2,6 +2,7 @@ package org.midorinext.android.integration
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -46,7 +47,6 @@ class NavigationTest {
 
         assertFalse(defaults.openBlankNewTab)
         assertTrue(defaults.homepageShortcutsEnabled)
-        assertTrue(defaults.homepagePrivacyStatsEnabled)
         assertTrue(defaults.homepageWeatherEnabled)
         assertTrue(defaults.homepageBackgroundPhotoEnabled)
         assertTrue(defaults.pullToRefreshEnabled)
@@ -83,21 +83,63 @@ class NavigationTest {
     }
 
     @Test
-    fun midoriPrivacyAssetsArePackagedWithoutBlockingBridge() {
+    fun officialMidoriPrivacyBundleAndStatsBridgeArePackaged() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val manifest = context.assets.open("extensions/midori_privacy/manifest.json")
             .bufferedReader()
             .use { it.readText() }
-        val script = context.assets.open("extensions/midori_privacy/adblock_cosmetic.js")
+        val metadata = context.assets.open("extensions/midori_privacy/upstream.json")
             .bufferedReader()
             .use { it.readText() }
+        val background = context.assets.open("extensions/midori_privacy/background.html")
+            .bufferedReader()
+            .use { it.readText() }
+        val start = context.assets.open("extensions/midori_privacy/js/start.js")
+            .bufferedReader()
+            .use { it.readText() }
+        val stats = context.assets.open("extensions/midori_privacy/js/midori-stats.js")
+            .bufferedReader()
+            .use { it.readText() }
+        val manifestJson = JSONObject(manifest)
+        val metadataJson = JSONObject(metadata)
+        val permissions = manifestJson.getJSONArray("permissions").let { values ->
+            List(values.length()) { index -> values.getString(index) }.toSet()
+        }
 
-        assertTrue(manifest.contains("midori-privacy@astian.org"))
-        assertTrue(manifest.contains("youtube.com"))
-        assertFalse(manifest.contains("nativeMessaging"))
-        assertFalse(script.contains("sendNativeMessage"))
-        assertFalse(script.contains("connectNative"))
-        assertFalse(script.contains("querySelectorAll"))
-        assertFalse(script.contains("MutationObserver"))
+        assertEquals(
+            "midori-protection@astian.org",
+            manifestJson
+                .getJSONObject("browser_specific_settings")
+                .getJSONObject("gecko")
+                .getString("id"),
+        )
+        assertFalse(manifest.contains("midori-privacy@astian.org"))
+        assertEquals(
+            "popup-fenix.html",
+            manifestJson.getJSONObject("browser_action").getString("default_popup"),
+        )
+        assertTrue(
+            manifestJson
+                .getJSONObject("browser_specific_settings")
+                .getJSONObject("gecko_android")
+                .getString("strict_min_version")
+                .substringBefore('.')
+                .toInt() >= 115,
+        )
+        assertTrue(permissions.containsAll(setOf("webRequest", "webRequestBlocking", "<all_urls>")))
+        assertEquals(
+            "https://github.com/goastian/midori-privacy",
+            metadataJson.getString("sourceRepository"),
+        )
+        assertEquals(5, metadataJson.getInt("compatibilityRevision"))
+        assertTrue(metadataJson.getJSONObject("release").has("firefoxAsset"))
+        assertTrue(background.contains("src=\"js/start.js\""))
+        assertTrue(start.contains("import './midori-stats.js';"))
+        assertTrue(stats.contains("'midoritabs@astian.org'"))
+        assertTrue(stats.contains("get-stats-summary"))
+        assertTrue(stats.contains("schemaVersion: 2"))
+        assertTrue(stats.contains("totalBlocked: blocked"))
+        assertTrue(stats.contains("estimatedDataSavedBytes"))
+        assertTrue(stats.contains("conservative-8kib-per-block-v1"))
     }
 }

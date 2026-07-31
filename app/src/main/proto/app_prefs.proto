@@ -73,7 +73,8 @@ message AppPreferences {
   bool download_wifi_only = 21;
   bool open_blank_new_tab = 22;
   bool homepage_shortcuts_enabled = 23;
-  bool homepage_privacy_stats_enabled = 24;
+  reserved 24;
+  reserved "homepage_privacy_stats_enabled";
   bool homepage_weather_enabled = 25;
   bool homepage_background_photo_enabled = 26;
   bool pull_to_refresh_enabled = 27;

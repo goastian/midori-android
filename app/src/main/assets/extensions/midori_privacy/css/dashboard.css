@@ -1,0 +1,203 @@
+html, body {
+    background-color: var(--surface-0);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+        height: 100svh;
+    justify-content: stretch;
+    overflow: hidden;
+    position: relative;
+    width: 100vw;
+    }
+body.notReady {
+    display: none;
+    }
+#dashboard-nav {
+    align-items: center;
+    background-color: var(--surface-1);
+    border: 0;
+    border-bottom: 1px solid var(--border-1);
+    display: flex;
+    flex-shrink: 0;
+    justify-content: space-between;
+    gap: 12px;
+    overflow-x: hidden;
+    padding: 0 14px;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 10;
+    }
+#dashboard-nav > span {
+    display: flex;
+    flex: 1;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    }
+.dashboardBrand {
+    align-items: center;
+    color: var(--ink-1);
+    display: flex;
+    flex: none;
+    font-family: Metropolis, var(--font-family);
+    font-size: 13px;
+    font-weight: 600;
+    gap: 8px;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    white-space: nowrap;
+    }
+.dashboardBrand .logo {
+    align-items: center;
+    display: inline-flex;
+    height: 26px;
+    justify-content: center;
+    width: 26px;
+    }
+.dashboardBrand img {
+    height: 24px;
+    width: 24px;
+    }
+.tabButton {
+    background-color: transparent;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    color: var(--dashboard-tab-ink);
+        fill: var(--dashboard-tab-ink);
+    font-family: var(--font-family);
+    font-size: var(--font-size);
+    min-height: 48px;
+    padding: 0.7em 1.05em calc(0.7em - 3px);
+    text-decoration: none;
+    white-space: nowrap;
+    }
+.tabButton:focus-visible,
+.dashboardBrand:focus-visible,
+.wikilink:focus-visible {
+    outline: 2px solid rgb(var(--primary-50));
+    outline-offset: -3px;
+    }
+.tabButton.selected {
+    background-color: var(--dashboard-tab-active-surface);
+    border-bottom: 3px solid var(--dashboard-tab-active-ink);
+    color: var(--dashboard-tab-active-ink);
+        fill: var(--dashboard-tab-active-ink);
+    }
+.navGroupLabel {
+    align-items: center;
+    color: var(--ink-3);
+    display: inline-flex;
+    font-family: var(--font-family);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    padding: 0 4px 0 12px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.navGroupLabel::before {
+    background: var(--border-1);
+    content: '';
+    height: 20px;
+    margin-inline-end: 10px;
+    width: 1px;
+    }
+.advancedTab,
+.navGroupLabel {
+    display: none;
+    }
+body.advancedUser .advancedTab,
+body.advancedUser .navGroupLabel {
+    display: inline-flex;
+    }
+.wikilink {
+    align-items: center;
+    border-radius: 8px;
+    color: var(--ink-2);
+    display: inline-flex;
+    flex: none;
+    font-family: var(--font-family);
+    font-size: 12px;
+    gap: 7px;
+    min-height: 34px;
+    padding: 0 9px;
+    text-decoration: none;
+    }
+.wikilink:hover {
+    background: var(--surface-2);
+    color: rgb(var(--primary-50));
+    }
+iframe {
+    background-color: transparent;
+    border: 0;
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    }
+#unsavedWarning {
+    display: none;
+    left: 0;
+    position: absolute;
+    width: 100%;
+    z-index: 20;
+    }
+#unsavedWarning.on {
+    display: initial;
+    }
+#unsavedWarning > div:first-of-type {
+    padding: 0.5em;
+    }
+#unsavedWarning > div:last-of-type {
+    height: 100vh;
+        height: 100svh;
+    position: absolute;
+    width: 100vw;
+    }
+
+body .tabButton[data-pane="no-dashboard.html"] {
+    display: none;
+    }
+body.noDashboard #dashboard-nav {
+    display: none;
+    }
+
+/* high dpi devices */
+:root.hidpi .tabButton {
+    font-family: Metropolis, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    }
+
+/* hover-able devices */
+:root.desktop .tabButton {
+    cursor: default;
+    }
+:root.desktop .tabButton:not(.selected) {
+    cursor: pointer;
+    }
+:root.desktop .tabButton:not(.selected):hover {
+    background-color: var(--dashboard-tab-hover-surface);
+    border-bottom-color: var(--dashboard-tab-hover-border);
+    }
+
+:root.mobile #dashboard-nav .logo {
+    display: none;
+    }
+
+@media (max-width: 760px) {
+    #dashboard-nav {
+        gap: 4px;
+        padding-inline: 6px;
+        }
+    .dashboardBrand > span:last-child,
+    .wikilink > span:last-child {
+        display: none;
+        }
+    .dashboardBrand {
+        padding-inline: 6px;
+        }
+    .tabButton {
+        padding-inline: 0.8em;
+        }
+    }

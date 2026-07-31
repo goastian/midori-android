@@ -63,7 +63,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import org.midorinext.android.R
-import org.midorinext.android.adblock.AdBlockerState
 import org.midorinext.android.preferences.app.AppPreferences
 import java.util.Calendar
 import java.util.TimeZone
@@ -81,7 +80,6 @@ private data class HomeShortcut(
 
 @Composable
 fun HomeScreen(
-    adBlockerState: AdBlockerState,
     preferences: AppPreferences,
     tabCount: Int,
     onSearch: (String) -> Unit,
@@ -166,10 +164,6 @@ fun HomeScreen(
             )
 
             Spacer(Modifier.height(26.dp))
-            if (preferences.homepagePrivacyStatsEnabled) {
-                PrivacyStatsCard(adBlockerState)
-            }
-
             if (preferences.homepageShortcutsEnabled) {
                 Spacer(Modifier.height(22.dp))
                 SectionTitle(text = stringResource(R.string.home_pinned_shortcuts))
@@ -293,104 +287,6 @@ private fun PhotoCreditChip(modifier: Modifier = Modifier) {
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
-        )
-    }
-}
-
-@Composable
-private fun PrivacyStatsCard(adBlockerState: AdBlockerState) {
-    Surface(
-        color = Color.White.copy(alpha = 0.13f),
-        contentColor = Color.White,
-        shape = RoundedCornerShape(8.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.22f)),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(R.drawable.icons_lock),
-                    contentDescription = null,
-                    tint = Color(0xFF8AF0BE),
-                    modifier = Modifier.size(18.dp)
-                )
-                Text(
-                    text = stringResource(R.string.home_privacy_stats),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                HomeStat(
-                    value = if (adBlockerState.enabled) stringResource(R.string.home_shield_on) else stringResource(R.string.home_shield_off),
-                    label = stringResource(R.string.home_shield),
-                    color = Color(0xFF8AF0BE),
-                    modifier = Modifier.weight(1f)
-                )
-                HomeStat(
-                    value = adBlockerState.protectedPageCount.toString(),
-                    label = stringResource(R.string.home_protected_pages),
-                    color = Color(0xFFFFC978),
-                    modifier = Modifier.weight(1f)
-                )
-                HomeStat(
-                    value = adBlockerState.protectionLevel.replaceFirstChar { it.uppercaseChar() },
-                    label = stringResource(R.string.home_level),
-                    color = Color(0xFF9BC6FF),
-                    modifier = Modifier.weight(1f)
-                )
-            }
-            if (adBlockerState.hasSnapshot) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    HomeStat(
-                        value = adBlockerState.hostname.ifBlank { "-" },
-                        label = stringResource(R.string.home_last_site),
-                        color = Color(0xFFB6F7D1),
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun HomeStat(
-    value: String,
-    label: String,
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(3.dp)
-    ) {
-        Text(
-            text = value,
-            color = color,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Text(
-            text = label,
-            color = Color.White.copy(alpha = 0.72f),
-            style = MaterialTheme.typography.labelSmall,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
         )
     }
 }
