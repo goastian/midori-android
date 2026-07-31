@@ -144,6 +144,27 @@ if [[ "${official_manifest_values[0]}" != "$release_version" ||
     exit 1
 fi
 
+# The official release is already built with the public Unsplash client ID. Reuse
+# that exact value for the Android compatibility rebuild so a local secret/env file
+# is not required and the resulting wallpaper behavior matches the verified asset.
+official_unsplash_key="$(
+    unzip -p "$firefox_archive" index.js | node -e '
+        let source = "";
+        process.stdin.setEncoding("utf8");
+        process.stdin.on("data", (chunk) => { source += chunk; });
+        process.stdin.on("end", () => {
+            const keys = new Set(
+                [...source.matchAll(/\bclient_id\s*:\s*["'\'']([A-Za-z0-9_-]{20,})["'\'']/g)]
+                    .map((match) => match[1]),
+            );
+            if (keys.size > 1) {
+                throw new Error("Official Firefox release contains multiple Unsplash client IDs");
+            }
+            process.stdout.write(keys.values().next().value || "");
+        });
+    '
+)"
+
 tag_ref_url="https://api.github.com/repos/goastian/midori-tab/git/ref/tags/${release_tag}"
 "${github_curl[@]}" -o "$tag_ref_json" "$tag_ref_url"
 readarray -t tag_object_values < <(
@@ -225,9 +246,13 @@ if [[ -z "$unsplash_key" && -n "$env_file" ]]; then
     ' "$env_file")"
 fi
 if [[ -z "$unsplash_key" ]]; then
-    echo "VITE_UNSPLASH_API or MIDORI_TAB_ENV_FILE is required for the default wallpaper" >&2
+    unsplash_key="$official_unsplash_key"
+fi
+if [[ -z "$unsplash_key" ]]; then
+    echo "Official Firefox release is missing a usable Unsplash client ID; set VITE_UNSPLASH_API or MIDORI_TAB_ENV_FILE" >&2
     exit 1
 fi
+export VITE_UNSPLASH_API="$unsplash_key"
 
 (
     cd "$source_dir"
@@ -237,15 +262,17 @@ fi
     test_log="$work_dir/test-update.log"
     if ! npm run test:update 2>&1 | tee "$test_log"; then
         not_ok_count="$(awk '/^not ok / { count += 1 } END { print count + 0 }' "$test_log")"
-        if [[ "$release_tag" == "v1.0.40" &&
-              "$source_commit" == "7a9540a490e141f3a66f81aa293253254ca1a138" &&
-              "$not_ok_count" == "1" ]] &&
+        if [[ ( "$release_tag" == "v1.0.40" &&
+                "$source_commit" == "7a9540a490e141f3a66f81aa293253254ca1a138" ) ||
+              ( "$release_tag" == "v1.0.41" &&
+                "$source_commit" == "1f2b9286541da2e2890ca63e7f8a6bbeabd86c7b" ) ]] &&
+           [[ "$not_ok_count" == "1" ]] &&
            rg -q "^not ok 1 - tests/ads-service.test.mjs$" "$test_log" &&
            rg -q "does not provide an export named 'buildCacheKey'" "$test_log" &&
            rg -q "^# tests 22$" "$test_log" &&
            rg -q "^# pass 21$" "$test_log" &&
            rg -q "^# fail 1$" "$test_log"; then
-            echo "Allowing only the pinned v1.0.40 stale-test import failure; every other release fails closed." >&2
+            echo "Allowing only the pinned $release_tag stale-test import failure; every other release fails closed." >&2
         else
             exit 1
         fi
