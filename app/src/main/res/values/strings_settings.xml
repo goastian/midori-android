@@ -38,9 +38,6 @@
     <string name="settings_homepage_sections">Midori New Tab</string>
     <string name="settings_homepage_midori_tab">Personalize your New Tab</string>
     <string name="settings_homepage_midori_tab_description">Open a new tab and use its Settings button to manage shortcuts, widgets, spaces, language, theme and background. Your choices stay on this device.</string>
-    <string name="settings_homepage_shortcuts">Shortcuts</string>
-    <string name="settings_homepage_weather">Weather</string>
-    <string name="settings_homepage_wallpaper">Photo background</string>
     <string name="settings_homepage_opening_screen">Opening screen</string>
     <string name="settings_homepage_open_homepage">New Tab</string>
     <string name="settings_homepage_open_last_tab">Last tab</string>

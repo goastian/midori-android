@@ -214,17 +214,6 @@
     <string name="onboarding_default_set">Set Midori as Default</string>
     <string name="onboarding_default_skip">Maybe later</string>
 
-    <!-- Home Screen -->
-    <string name="home_search_hint">Search or enter address</string>
-    <string name="home_top_sites">TOP SITES</string>
-    <string name="home_shortcuts">SHORTCUTS</string>
-    <string name="home_shortcut_private">Private</string>
-    <string name="home_shortcut_history">History</string>
-    <string name="home_shortcut_bookmarks">Bookmarks</string>
-    <string name="home_shortcut_downloads">Downloads</string>
-    <string name="home_trackers_blocked">%d trackers blocked</string>
-    <string name="home_trackers_subtitle">Midori is protecting your privacy</string>
-
     <!-- Search Widget -->
     <string name="search_widget_text">Search with Midori</string>
 
@@ -276,12 +265,6 @@
     <string name="tab_tray_empty">No open tabs</string>
     <string name="tab_tray_empty_private">No private tabs</string>
     <string name="tab_tray_swipe_hint">Swipe to close</string>
-
-    <!-- Home Screen enhanced -->
-    <string name="home_greeting_morning">Good Morning</string>
-    <string name="home_greeting_afternoon">Good Afternoon</string>
-    <string name="home_greeting_evening">Good Evening</string>
-    <string name="home_recent_tabs">RECENT TABS</string>
 
     <!-- Bookmarks -->
     <string name="bookmarks_title">Bookmarks</string>
@@ -342,27 +325,6 @@
     <string name="downloads_share">Share</string>
     <string name="downloads_delete_confirm">Delete this file?</string>
     <string name="downloads_deleted">File deleted</string>
-
-    <!-- Home Customization -->
-    <string name="home_customize_title">Customize Home</string>
-    <string name="home_customize_wallpaper">wallpaper</string>
-    <string name="home_customize_wallpaper_desc">Customize background</string>
-    <string name="home_customize_color">Custom color</string>
-    <string name="home_customize_color_desc">Choose a background color</string>
-    <string name="home_customize_features">Features</string>
-    <string name="home_customize_speed_dials">Speed Dials</string>
-    <string name="home_customize_speed_dials_desc">Site shortcuts</string>
-    <string name="home_customize_suggested_sites">Suggested sites</string>
-    <string name="home_customize_suggested_sites_desc">Based on your browsing history</string>
-    <string name="home_customize_shortcut">Customization button</string>
-    <string name="home_customize_shortcut_desc">Show on home page</string>
-    <string name="home_customize_dial_size">Speed ​​Dial Size</string>
-    <string name="home_customize_dial_size_desc">Choose the size of the shortcuts</string>
-    <string name="home_customize_size_small">Little</string>
-    <string name="home_customize_size_medium">Medium</string>
-    <string name="home_customize_size_large">Big</string>
-    <string name="home_customize_size_list">List</string>
-    <string name="home_suggested_sites">SUGGESTED</string>
 
     <!-- Privacy Settings -->
     <string name="privacy_level_title">Protection Level</string>

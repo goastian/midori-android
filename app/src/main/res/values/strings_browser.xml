@@ -32,22 +32,6 @@
     <string name="browser_site_insecure">Insecure connection</string>
 
     <string name="browser_toolbar_hint">Search or enter an address</string>
-    <string name="home_subtitle">Private, fast, and ready</string>
-    <string name="home_pinned_shortcuts">Pinned shortcuts</string>
-    <string name="home_quick_access">Quick access</string>
-    <string name="home_weather_local">Local</string>
-    <string name="home_weather_morning">Morning - %1$s</string>
-    <string name="home_weather_afternoon">Afternoon - %1$s</string>
-    <string name="home_weather_evening">Evening - %1$s</string>
-    <string name="home_weather_night">Night - %1$s</string>
-    <string name="home_photo_credit">Photo by Fabrizio Conti</string>
-    <string name="home_voice_search">Voice search</string>
-    <string name="home_clear_search">Clear search</string>
-    <string name="home_nav_home">Home</string>
-    <string name="home_nav_bookmarks">Bookmarks</string>
-    <string name="home_nav_search">Search</string>
-    <string name="home_nav_more">More</string>
-
     <string name="browser_suggest_clipboard_text">Copied text</string>
     <string name="browser_brand_suggest_ad">Ad</string>
     <string name="browser_brand_suggest_information">This search suggestion is an advertisement for %1$s. You will be redirected to the advertiser\'s website: %2$s</string>
