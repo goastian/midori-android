@@ -5,6 +5,7 @@ preference-ktx = "1.2.1"
 material = "1.14.0"
 # AndroidX
 core-ktx = "1.18.0"
+core-splashscreen = "1.2.0"
 lifecycle = "2.10.0"
 biometric = "1.1.0"
 datastore = "1.2.1"
@@ -45,6 +46,7 @@ androidx-preference = { group = "androidx.preference", name = "preference-ktx", 
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 # AndroidX
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "core-splashscreen" }
 androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
