@@ -1,29 +1,15 @@
 {
   "sourceRepository": "https://github.com/goastian/midori-privacy",
-  "sourceRef": "v2.3.11",
-  "sourceCommit": "ee0563bc990763b22630e94d801cf98086ad3744",
   "sourceVersion": "2.3.11",
   "version": "2.3.11.5",
   "compatibilityRevision": 5,
   "bundleSha256": "4d284b8d90d24a13ed6a219703ee634676a5d38be3458f79c79cd39e8bb5d5ed",
-  "buildTarget": "firefox-android",
-  "importMode": "verified-official-firefox-release-asset",
-  "compatibilityPatch": "scripts/patch-midori-privacy-firefox-android.mjs",
-  "compatibilityPatchSha256": "e85d75894b12d580eb8adb2518d5a4a1025af7c6825be1fea9801ec80a7ddf14",
   "release": {
-    "id": 362155041,
     "tag": "v2.3.11",
     "url": "https://github.com/goastian/midori-privacy/releases/tag/v2.3.11",
-    "publishedAt": "2026-07-30T02:41:18Z",
-    "immutable": false,
-    "tagArchiveUrl": "https://api.github.com/repos/goastian/midori-privacy/tarball/v2.3.11",
-    "sourceArchiveUrl": "https://api.github.com/repos/goastian/midori-privacy/tarball/ee0563bc990763b22630e94d801cf98086ad3744",
-    "sourceArchiveSha256": "8c8c77f52102b4b0722044494574a7a3bb199a63ea3e46b74af13c72d2d611ab",
     "firefoxAsset": {
-      "id": 494818452,
       "name": "midori-privacy-2.3.11-firefox.zip",
       "url": "https://github.com/goastian/midori-privacy/releases/download/v2.3.11/midori-privacy-2.3.11-firefox.zip",
-      "digest": "sha256:4a86c0a6e5c3902bcaf165ca3f42b3b0c2a8b71dfdd4e89e5590ee99be68383e",
       "sha256": "4a86c0a6e5c3902bcaf165ca3f42b3b0c2a8b71dfdd4e89e5590ee99be68383e"
     }
   }

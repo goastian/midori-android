@@ -281,6 +281,34 @@ android {
 def midoriNewTabAssets = file("src/main/assets/extensions/midori_newtab")
 def midoriPrivacyAssets = file("src/main/assets/extensions/midori_privacy")
 
+def isMidoriAddonMetadataValid = { metadata, manifest, addon, repository, compatibilityRevision ->
+    def sourceVersion = metadata.sourceVersion?.toString()
+    def tag = "v${sourceVersion}"
+    def assetName = "${addon}-${sourceVersion}-firefox.zip"
+    def release = metadata.release
+    def asset = release?.firefoxAsset
+
+    metadata.keySet().toSet() == [
+            "sourceRepository", "sourceVersion", "version",
+            "compatibilityRevision", "bundleSha256", "release",
+    ].toSet() &&
+            release instanceof Map &&
+            release.keySet().toSet() == ["tag", "url", "firefoxAsset"].toSet() &&
+            asset instanceof Map &&
+            asset.keySet().toSet() == ["name", "url", "sha256"].toSet() &&
+            metadata.sourceRepository == repository &&
+            sourceVersion ==~ /[0-9]+\.[0-9]+\.[0-9]+/ &&
+            metadata.compatibilityRevision == compatibilityRevision &&
+            metadata.version == "${sourceVersion}.${compatibilityRevision}" &&
+            metadata.version == manifest.version &&
+            metadata.bundleSha256 ==~ /[0-9a-f]{64}/ &&
+            release.tag == tag &&
+            release.url == "${repository}/releases/tag/${tag}" &&
+            asset.name == assetName &&
+            asset.url == "${repository}/releases/download/${tag}/${assetName}" &&
+            asset.sha256 ==~ /[0-9a-f]{64}/
+}
+
 tasks.register("verifyMidoriNewTabBundle") {
     group = "verification"
     description = "Verifies the bundled goastian/midori-tab Firefox artifact."
@@ -325,55 +353,24 @@ tasks.register("verifyMidoriNewTabBundle") {
                 .files
                 .collect { bundledFile -> bundledFile.getText("UTF-8") }
                 .join("\n")
+        def backgroundScript = new File(midoriNewTabAssets, "background.js").getText("UTF-8")
         def privacyContractMarkers = [
                 "midori-protection@astian.org",
                 "get-stats-summary",
-                "estimatedDataSavedBytes",
-                "conservative-8kib-per-block-v1",
-                "androidPrivacyMigrationRevision",
-                "Estimated saved",
-                "Ahorro estimado",
         ]
-        def hasPersistedPrivacyMigration = bundledJavascript.contains(
-                'pick:["enabled","order","androidPrivacyMigrationRevision"],afterHydrate'
-        )
         if (privacyContractMarkers.any { marker -> !bundledJavascript.contains(marker) } ||
-                !hasPersistedPrivacyMigration) {
+                !backgroundScript.contains("ANDROID_UNSUPPORTED_ACTIONS") ||
+                !backgroundScript.contains("chrome.windows?.onFocusChanged?.addListener") ||
+                !backgroundScript.contains("chrome.commands?.onCommand?.addListener")) {
             throw new GradleException("Midori New Tab does not contain the Android Midori Privacy widget contract")
         }
-        if (metadata.version != manifest.version ||
-                !(metadata.sourceVersion ==~ /[0-9]+\.[0-9]+\.[0-9]+/) ||
-                !(metadata.compatibilityRevision instanceof Number) ||
-                metadata.compatibilityRevision.intValue() <= 0 ||
-                metadata.version != "${metadata.sourceVersion}.${metadata.compatibilityRevision}" ||
-                metadata.sourceRepository != "https://github.com/goastian/midori-tab" ||
-                !(metadata.sourceCommit ==~ /[0-9a-f]{40}/) ||
-                !(metadata.sourceRef ==~ /v[0-9]+\.[0-9]+\.[0-9]+/) ||
-                metadata.sourceRef != metadata.release?.tag ||
-                metadata.sourceVersion != metadata.sourceRef.substring(1) ||
-                !(metadata.bundleSha256 ==~ /[0-9a-f]{64}/) ||
-                metadata.buildTarget != "firefox-android" ||
-                metadata.compatibilityPatch != "scripts/patch-midori-tab-firefox-android.mjs" ||
-                !(metadata.compatibilityPatchSha256 ==~ /[0-9a-f]{64}/) ||
-                !(metadata.release?.id instanceof Number) ||
-                metadata.release.id.longValue() <= 0 ||
-                metadata.release.url != "https://github.com/goastian/midori-tab/releases/tag/${metadata.sourceRef}" ||
-                !(metadata.release.publishedAt ==~ /[0-9]{4}-[0-9]{2}-[0-9]{2}T.*/) ||
-                !(metadata.release.immutable instanceof Boolean) ||
-                metadata.release.tagArchiveUrl != "https://api.github.com/repos/goastian/midori-tab/tarball/${metadata.sourceRef}" ||
-                metadata.release.sourceArchiveUrl != "https://api.github.com/repos/goastian/midori-tab/tarball/${metadata.sourceCommit}" ||
-                !(metadata.release.sourceArchiveSha256 ==~ /[0-9a-f]{64}/) ||
-                !(metadata.release.firefoxAsset?.id instanceof Number) ||
-                metadata.release.firefoxAsset.id.longValue() <= 0 ||
-                metadata.release.firefoxAsset.name != "midori-tab-${metadata.sourceVersion}-firefox.zip" ||
-                metadata.release.firefoxAsset.url != "https://github.com/goastian/midori-tab/releases/download/${metadata.sourceRef}/midori-tab-${metadata.sourceVersion}-firefox.zip" ||
-                !(metadata.release.firefoxAsset.sha256 ==~ /[0-9a-f]{64}/) ||
-                !(metadata.buildConfig?.unsplashAccessKeySha256 ==~ /[0-9a-f]{64}/) ||
-                metadata.buildConfig?.marketplaceBaseUrl != "https://marketplace.astian.org" ||
-                metadata.buildConfig?.passportServer != "https://accounts.astian.org" ||
-                metadata.buildConfig?.passportDomainServer != "https://vpn.astian.org" ||
-                metadata.buildConfig?.adsBaseUrl != "https://ads.astian.org" ||
-                metadata.buildConfig?.adsNewTabPath != "/api/v1/ads/newtab") {
+        if (!isMidoriAddonMetadataValid(
+                metadata,
+                manifest,
+                "midori-tab",
+                "https://github.com/goastian/midori-tab",
+                6,
+        )) {
             throw new GradleException("Midori New Tab upstream metadata does not match its bundle")
         }
 
@@ -399,10 +396,6 @@ tasks.register("verifyMidoriNewTabBundle") {
                     .digest(content)
                     .encodeHex()
                     .toString()
-        }
-        def compatibilityPatch = rootProject.file("scripts/patch-midori-tab-firefox-android.mjs")
-        if (!compatibilityPatch.isFile() || sha256(compatibilityPatch.bytes) != metadata.compatibilityPatchSha256) {
-            throw new GradleException("Midori New Tab compatibility patch does not match upstream.json")
         }
         def bundleRecords = fileTree(midoriNewTabAssets)
                 .matching { exclude("upstream.json") }
@@ -539,34 +532,13 @@ tasks.register("verifyMidoriPrivacyBundle") {
             throw new GradleException("Midori Privacy statistics bridge contract is incomplete")
         }
 
-        if (metadata.version != manifest.version ||
-                !(metadata.sourceVersion ==~ /[0-9]+\.[0-9]+\.[0-9]+/) ||
-                metadata.compatibilityRevision != 5 ||
-                metadata.version != "${metadata.sourceVersion}.5" ||
-                metadata.sourceRepository != "https://github.com/goastian/midori-privacy" ||
-                !(metadata.sourceCommit ==~ /[0-9a-f]{40}/) ||
-                !(metadata.sourceRef ==~ /v[0-9]+\.[0-9]+\.[0-9]+/) ||
-                metadata.sourceRef != metadata.release?.tag ||
-                metadata.sourceVersion != metadata.sourceRef.substring(1) ||
-                !(metadata.bundleSha256 ==~ /[0-9a-f]{64}/) ||
-                metadata.buildTarget != "firefox-android" ||
-                metadata.importMode != "verified-official-firefox-release-asset" ||
-                metadata.compatibilityPatch != "scripts/patch-midori-privacy-firefox-android.mjs" ||
-                !(metadata.compatibilityPatchSha256 ==~ /[0-9a-f]{64}/) ||
-                !(metadata.release?.id instanceof Number) ||
-                metadata.release.id.longValue() <= 0 ||
-                metadata.release.url != "https://github.com/goastian/midori-privacy/releases/tag/${metadata.sourceRef}" ||
-                !(metadata.release.publishedAt ==~ /[0-9]{4}-[0-9]{2}-[0-9]{2}T.*/) ||
-                !(metadata.release.immutable instanceof Boolean) ||
-                metadata.release.tagArchiveUrl != "https://api.github.com/repos/goastian/midori-privacy/tarball/${metadata.sourceRef}" ||
-                metadata.release.sourceArchiveUrl != "https://api.github.com/repos/goastian/midori-privacy/tarball/${metadata.sourceCommit}" ||
-                !(metadata.release.sourceArchiveSha256 ==~ /[0-9a-f]{64}/) ||
-                !(metadata.release.firefoxAsset?.id instanceof Number) ||
-                metadata.release.firefoxAsset.id.longValue() <= 0 ||
-                metadata.release.firefoxAsset.name != "midori-privacy-${metadata.sourceVersion}-firefox.zip" ||
-                metadata.release.firefoxAsset.url != "https://github.com/goastian/midori-privacy/releases/download/${metadata.sourceRef}/midori-privacy-${metadata.sourceVersion}-firefox.zip" ||
-                !(metadata.release.firefoxAsset.sha256 ==~ /[0-9a-f]{64}/) ||
-                metadata.release.firefoxAsset.digest != "sha256:${metadata.release.firefoxAsset.sha256}") {
+        if (!isMidoriAddonMetadataValid(
+                metadata,
+                manifest,
+                "midori-privacy",
+                "https://github.com/goastian/midori-privacy",
+                5,
+        )) {
             throw new GradleException("Midori Privacy upstream metadata does not match its bundle")
         }
 
@@ -592,10 +564,6 @@ tasks.register("verifyMidoriPrivacyBundle") {
                     .digest(content)
                     .encodeHex()
                     .toString()
-        }
-        def compatibilityPatch = rootProject.file("scripts/patch-midori-privacy-firefox-android.mjs")
-        if (!compatibilityPatch.isFile() || sha256(compatibilityPatch.bytes) != metadata.compatibilityPatchSha256) {
-            throw new GradleException("Midori Privacy compatibility patch does not match upstream.json")
         }
         def bundleRecords = fileTree(midoriPrivacyAssets)
                 .matching { exclude("upstream.json") }

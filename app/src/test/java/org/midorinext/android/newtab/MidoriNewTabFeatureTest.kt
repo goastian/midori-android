@@ -30,36 +30,26 @@ class MidoriNewTabFeatureTest {
         assertTrue(!manifest.has("chrome_url_overrides"))
         assertTrue(!manifest.has("commands"))
         assertEquals(manifest.getString("version"), metadata.getString("version"))
-        assertTrue(metadata.getInt("compatibilityRevision") > 0)
+        assertEquals(6, metadata.getInt("compatibilityRevision"))
         assertEquals(
             "${metadata.getString("sourceVersion")}.${metadata.getInt("compatibilityRevision")}",
             metadata.getString("version"),
         )
         assertEquals("https://github.com/goastian/midori-tab", metadata.getString("sourceRepository"))
         val release = metadata.getJSONObject("release")
-        assertEquals(release.getString("tag"), metadata.getString("sourceRef"))
         assertEquals("v${metadata.getString("sourceVersion")}", release.getString("tag"))
         assertEquals(
             "https://github.com/goastian/midori-tab/releases/tag/${release.getString("tag")}",
             release.getString("url"),
         )
         assertEquals(
-            "https://api.github.com/repos/goastian/midori-tab/tarball/${metadata.getString("sourceCommit")}",
-            release.getString("sourceArchiveUrl"),
-        )
-        assertEquals(
             "midori-tab-${metadata.getString("sourceVersion")}-firefox.zip",
             release.getJSONObject("firefoxAsset").getString("name"),
         )
         assertTrue(release.getJSONObject("firefoxAsset").getString("sha256").matches(Regex("[0-9a-f]{64}")))
-        assertEquals("firefox-android", metadata.getString("buildTarget"))
-        assertEquals(
-            "scripts/patch-midori-tab-firefox-android.mjs",
-            metadata.getString("compatibilityPatch"),
-        )
-        assertTrue(metadata.getString("sourceCommit").matches(Regex("[0-9a-f]{40}")))
         assertTrue(metadata.getString("bundleSha256").matches(Regex("[0-9a-f]{64}")))
-        assertTrue(metadata.getString("compatibilityPatchSha256").matches(Regex("[0-9a-f]{64}")))
+        assertTrue(!metadata.has("sourceCommit"))
+        assertTrue(!metadata.has("sourceRef"))
         assertTrue(manifest.getJSONArray("permissions").let { permissions ->
             (0 until permissions.length())
                 .map(permissions::getString)

@@ -73,7 +73,8 @@ class MidoriPrivacyAssetsTest {
         assertEquals(manifest.getString("version"), metadata.getString("version"))
         assertEquals(5, metadata.getInt("compatibilityRevision"))
         assertTrue(metadata.getString("bundleSha256").matches(Regex("[0-9a-f]{64}")))
-        assertTrue(metadata.getString("compatibilityPatchSha256").matches(Regex("[0-9a-f]{64}")))
+        assertTrue(!metadata.has("sourceCommit"))
+        assertTrue(!metadata.has("sourceRef"))
         assertTrue(
             metadata
                 .getJSONObject("release")
