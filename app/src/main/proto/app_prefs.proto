@@ -72,11 +72,9 @@ message AppPreferences {
   repeated string app_tracking_excluded_packages = 20;
   bool download_wifi_only = 21;
   bool open_blank_new_tab = 22;
-  bool homepage_shortcuts_enabled = 23;
-  reserved 24;
-  reserved "homepage_privacy_stats_enabled";
-  bool homepage_weather_enabled = 25;
-  bool homepage_background_photo_enabled = 26;
+  reserved 23, 24, 25, 26;
+  reserved "homepage_shortcuts_enabled", "homepage_privacy_stats_enabled",
+    "homepage_weather_enabled", "homepage_background_photo_enabled";
   bool pull_to_refresh_enabled = 27;
   bool save_passwords_enabled = 28;
   bool password_autofill_enabled = 29;
