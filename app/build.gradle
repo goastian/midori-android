@@ -639,6 +639,7 @@ dependencies {
     implementation libs.compose.android.paging
     implementation libs.compose.android.navigation.main
     implementation libs.coil.compose
+    implementation libs.androidx.core.splashscreen
     androidTestImplementation libs.compose.android.navigation.test
 
     // Room
