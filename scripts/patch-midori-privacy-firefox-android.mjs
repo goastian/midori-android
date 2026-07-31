@@ -9,7 +9,7 @@ if (!extensionRoot || !fs.existsSync(extensionRoot) || !fs.statSync(extensionRoo
   throw new Error('Expected the extracted Midori Privacy Firefox extension directory');
 }
 
-const ANDROID_COMPATIBILITY_REVISION = 4;
+const ANDROID_COMPATIBILITY_REVISION = 5;
 const MIDORI_PRIVACY_EXTENSION_ID = 'midori-protection@astian.org';
 
 function extensionPath(relativePath) {
@@ -46,22 +46,38 @@ manifest.browser_specific_settings.gecko ??= {};
 manifest.browser_specific_settings.gecko.id = MIDORI_PRIVACY_EXTENSION_ID;
 fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
-// GeckoView's built-in extension loader does not reliably resolve the
-// leading-slash bootstrap path used by the desktop Firefox package. Keep the
-// path relative to the extension root so the bundled registry is always read.
+// uBlock treats any suffix after the three-part version as a development
+// build. Our numeric fourth component is only an Android compatibility
+// revision, so it must retain the stable release behavior.
+replaceExact(
+  'js/vapi-common.js',
+  `    if ( /^\\d+\\.\\d+\\.\\d+\\D/.test(version) ) {
+        soup.add('devbuild');
+    }`,
+  `    const isAndroidCompatibilityBuild =
+        /^\\d+\\.\\d+\\.\\d+\\.\\d+$/.test(version);
+    if (
+        isAndroidCompatibilityBuild === false &&
+        /^\\d+\\.\\d+\\.\\d+\\D/.test(version)
+    ) {
+        soup.add('devbuild');
+    }`,
+);
+
+// The imported artifact is always a verified stable release. Pin its
+// bootstrap to the packaged stable registry instead of assets.dev.json.
 replaceExact(
   'js/background.js',
   `    assetsJsonPath: vAPI.webextFlavor.soup.has('devbuild')
         ? '/assets/assets.dev.json'
         : '/assets/assets.json',`,
-  `    assetsJsonPath: vAPI.webextFlavor.soup.has('devbuild')
-        ? 'assets/assets.dev.json'
-        : 'assets/assets.json',`,
+  `    assetsJsonPath: 'assets/assets.json',`,
 );
 
 // A failed bootstrap used to persist an empty registry which was then treated
 // as valid forever. Only reuse a cache containing the canonical assets entry
-// and at least one real filter source.
+// and at least one stock filter source. A cache containing only My filters is
+// the fingerprint of the broken Android bootstrap, not a usable registry.
 replaceExact(
   'js/assets.js',
   `let assetSourceRegistryPromise;
@@ -80,8 +96,11 @@ function assetSourceRegistryIsValid(registry) {
         return false;
     }
 
-    return Object.values(registry).some(entry =>
-        entry instanceof Object && entry.content === 'filters'
+    return Object.entries(registry).some(([ assetKey, entry ]) =>
+        assetKey !== 'user-filters' &&
+        entry instanceof Object &&
+        entry.content === 'filters' &&
+        entry.submitter !== 'user'
     );
 }
 
@@ -139,51 +158,6 @@ replaceExact(
         Array.from(Object.entries(newDict))
             .filter(a => a[1].content === 'filters' && a[1].off === undefined)
             .map(a => a[0]);`,
-);
-
-// GeckoView built-in extensions can execute their packaged scripts while an
-// XMLHttpRequest for another packaged resource still resolves with no body.
-// Use the standard Fetch API only for same-extension resources; keep upstream
-// XHR behavior unchanged for every remote list and update request.
-replaceExact(
-  'js/assets.js',
-  `assets.fetch = function(url, options = {}) {
-    return new Promise((resolve, reject) => {`,
-  `assets.fetch = async function(url, options = {}) {
-    if ( url.startsWith(vAPI.getURL('')) ) {
-        try {
-            const response = await fetch(url);
-            const statusCode = response.status || 200;
-            if ( response.ok === false && response.status !== 0 ) {
-                throw new Error(\`\${url}: \${statusCode} \${response.statusText}\`);
-            }
-
-            let content;
-            if ( options.responseType === 'arraybuffer' ) {
-                content = await response.arrayBuffer();
-            } else if ( options.responseType === 'blob' ) {
-                content = await response.blob();
-            } else {
-                content = await response.text();
-            }
-            const resourceTime = typeof content === 'string'
-                ? extractMetadataFromList(content, [ 'Last-Modified' ]).lastModified || 0
-                : 0;
-            return {
-                url,
-                statusCode,
-                statusText: response.statusText || '',
-                content,
-                resourceTime,
-            };
-        } catch (reason) {
-            const error = reason instanceof Error ? reason.message : String(reason);
-            console.error(\`Midori Privacy could not fetch packaged asset \${url}: \${error}\`);
-            return Promise.reject({ url, content: '', error });
-        }
-    }
-
-    return new Promise((resolve, reject) => {`,
 );
 
 // Repair only the fingerprint left by the broken Android bootstrap: the user

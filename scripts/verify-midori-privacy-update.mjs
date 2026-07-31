@@ -46,9 +46,9 @@ if (!/^v\d+\.\d+\.\d+$/.test(String(candidate.sourceRef || '')) ||
 if (!/^[0-9a-f]{40}$/.test(String(candidate.sourceCommit || ''))) {
   throw new Error('Candidate source commit is invalid');
 }
-if (candidate.compatibilityRevision !== 4 ||
-    candidate.version !== `${candidate.sourceVersion}.4`) {
-  throw new Error('Candidate does not use Android compatibility revision 4');
+if (candidate.compatibilityRevision !== 5 ||
+    candidate.version !== `${candidate.sourceVersion}.5`) {
+  throw new Error('Candidate does not use Android compatibility revision 5');
 }
 if (candidate.buildTarget !== 'firefox-android' ||
     candidate.importMode !== 'verified-official-firefox-release-asset' ||

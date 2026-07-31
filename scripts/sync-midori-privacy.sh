@@ -376,12 +376,12 @@ readarray -t patched_manifest_values <<< "$patched_manifest_output"
 if [[ "${patched_manifest_values[0]}" != "2" ||
       "${patched_manifest_values[1]}" != "midori-protection@astian.org" ||
       "${patched_manifest_values[2]}" != "background.html" ||
-      "${patched_manifest_values[3]}" != "$release_version.4" ]]; then
+      "${patched_manifest_values[3]}" != "$release_version.5" ]]; then
     echo "Unexpected patched Midori Privacy Firefox manifest contract" >&2
     exit 1
 fi
 android_version="${patched_manifest_values[3]}"
-compatibility_revision=4
+compatibility_revision=5
 
 bundle_sha256="$({
     cd "$staging_dir"

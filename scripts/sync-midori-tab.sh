@@ -475,10 +475,10 @@ rm -rf "$replacement_dir"
 rm -rf "$backup_dir"
 mkdir -p "$(dirname "$target_dir")"
 mv "$staging_dir" "$replacement_dir"
+replace_started=true
 if [[ -e "$target_dir" ]]; then
     mv "$target_dir" "$backup_dir"
 fi
-replace_started=true
 mv "$replacement_dir" "$target_dir"
 replace_started=false
 rm -rf "$backup_dir"
