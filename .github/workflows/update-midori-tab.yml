@@ -15,13 +15,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build-and-verify:
+  import-and-verify:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     outputs:
       version: ${{ steps.metadata.outputs.version }}
-      commit: ${{ steps.metadata.outputs.commit }}
-      short: ${{ steps.metadata.outputs.short }}
       tag: ${{ steps.metadata.outputs.tag }}
     steps:
       - name: Check out Midori Android without credentials
@@ -34,17 +32,8 @@ jobs:
         with:
           node-version: 22.17.1
 
-      - name: Build and validate the upstream Firefox bundle
-        env:
-          # This value is embedded in the APK. Configure it as a public,
-          # origin-restricted Unsplash client key, never as a privileged secret.
-          VITE_UNSPLASH_API: ${{ vars.MIDORI_TAB_UNSPLASH_API }}
-          VITE_MARKETPLACE_API_BASE_URL: https://marketplace.astian.org
-          VITE_PASSPORT_SERVER: https://accounts.astian.org
-          VITE_PASSPORT_DOMAIN_SERVER: https://vpn.astian.org
-          VITE_ADS_API_BASE: https://ads.astian.org
-          VITE_ADS_NEWTAB_PATH: /api/v1/ads/newtab
-        run: ./scripts/sync-midori-tab.sh
+      - name: Import the official Firefox release
+        run: ./scripts/sync-midori-addons.sh midori-tab
 
       - name: Verify the Play Store release variant
         run: ./gradlew --no-daemon :app:verifyMidoriNewTabBundle :app:testOriginalPlaystoreReleaseUnitTest :app:mergeOriginalPlaystoreReleaseAssets
@@ -64,19 +53,19 @@ jobs:
           node -e '
             const fs = require("fs");
             const metadata = JSON.parse(fs.readFileSync("app/src/main/assets/extensions/midori_newtab/upstream.json", "utf8"));
-            fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=${metadata.sourceVersion}\ntag=${metadata.release.tag}\ncommit=${metadata.sourceCommit}\nshort=${metadata.sourceCommit.slice(0, 12)}\n`);
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, `version=${metadata.sourceVersion}\ntag=${metadata.release.tag}\n`);
           '
 
       - name: Upload the verified bundle only
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: midori-newtab-${{ steps.metadata.outputs.commit }}
+          name: midori-newtab-${{ steps.metadata.outputs.version }}
           path: app/src/main/assets/extensions/midori_newtab
           if-no-files-found: error
           retention-days: 3
 
   open-update-pr:
-    needs: build-and-verify
+    needs: import-and-verify
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -92,7 +81,7 @@ jobs:
       - name: Download the verified bundle
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          name: midori-newtab-${{ needs.build-and-verify.outputs.commit }}
+          name: midori-newtab-${{ needs.import-and-verify.outputs.version }}
           path: ${{ runner.temp }}/midori-newtab
 
       - name: Enforce monotonic update against the trusted tree
@@ -103,7 +92,7 @@ jobs:
           candidate="$ARTIFACT_DIR/upstream.json"
           test -f "$candidate"
           if [ -f "$current" ]; then
-            node scripts/verify-midori-tab-update.mjs "$current" "$candidate"
+            node scripts/verify-midori-addon-update.mjs midori-tab "$current" "$candidate"
           fi
 
       - name: Import only regular bundle files
@@ -133,15 +122,13 @@ jobs:
           merged_dir="app/build/intermediates/assets/originalPlaystoreRelease/mergeOriginalPlaystoreReleaseAssets/extensions/midori_newtab"
           cmp "$source_dir/manifest.json" "$merged_dir/manifest.json"
           cmp "$source_dir/upstream.json" "$merged_dir/upstream.json"
-          node scripts/verify-midori-tab-latest-release.mjs "$source_dir/upstream.json"
+          node scripts/verify-midori-addon-latest-release.mjs midori-tab "$source_dir/upstream.json"
 
       - name: Open or refresh the update pull request
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ needs.build-and-verify.outputs.version }}
-          RELEASE_TAG: ${{ needs.build-and-verify.outputs.tag }}
-          SOURCE_COMMIT: ${{ needs.build-and-verify.outputs.commit }}
-          SHORT_COMMIT: ${{ needs.build-and-verify.outputs.short }}
+          VERSION: ${{ needs.import-and-verify.outputs.version }}
+          RELEASE_TAG: ${{ needs.import-and-verify.outputs.tag }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           target="app/src/main/assets/extensions/midori_newtab"
@@ -150,7 +137,7 @@ jobs:
             exit 0
           fi
 
-          branch="automation/midori-tab-${SHORT_COMMIT}"
+          branch="automation/midori-tab-${VERSION}"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           gh auth setup-git
@@ -162,7 +149,7 @@ jobs:
           fi
           git push --force-with-lease origin "HEAD:${branch}"
 
-          body="Synchronizes the latest stable goastian/midori-tab release ${RELEASE_TAG} at commit ${SOURCE_COMMIT}. The official Firefox asset digest was verified, the tagged source ran in a credential-free build job, and the Android asset contract plus originalPlaystoreRelease unit tests passed again before this PR was created. This PR is intentionally not auto-merged."
+          body="Imports the official Firefox ZIP for goastian/midori-tab ${RELEASE_TAG}, verifies its SHA-256 digest, applies the Android compatibility layer, and passes the originalPlaystoreRelease checks. This PR is intentionally not auto-merged."
           existing_pr="$(gh pr list --state open --head "$branch" --json number --jq '.[0].number // empty')"
           if [ -n "$existing_pr" ]; then
             gh pr edit "$existing_pr" --title "Update Midori New Tab to ${VERSION}" --body "$body"
