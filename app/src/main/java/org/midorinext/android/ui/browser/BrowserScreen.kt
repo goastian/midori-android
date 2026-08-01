@@ -26,7 +26,6 @@ import org.midorinext.android.contentBlocker.ContentBlockerOverlay
 import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.newtab.MidoriNewTabFeature
 import org.midorinext.android.ui.MidoriApplicationViewModel
-import org.midorinext.android.ui.browser.home.HomeScreen
 import org.midorinext.android.ui.browser.home.HomePrivateBrowsing
 import org.midorinext.android.ui.browser.menu.BrowserMenu
 import org.midorinext.android.ui.browser.mozaccompose.*
@@ -80,10 +79,6 @@ fun BrowserScreen(
         }
     }
 
-    val showLegacyHome = currentUrl?.let {
-        it.isLegacyMidoriHomeUrl()
-    } == true
-
     LaunchedEffect(selectedTabSnapshot, newTabState) {
         val selectedTab = selectedTabSnapshot ?: return@LaunchedEffect
         when {
@@ -107,22 +102,6 @@ fun BrowserScreen(
     } */
 
     KeyboardObserver(toolbarState = viewModel.toolbarState)
-
-    val showHomeFallback = showLegacyHome || viewModel.isNewTabLoadingUrl(currentUrl)
-
-    if (showHomeFallback) {
-        HomeScreen(
-            preferences = appPrefs,
-            tabCount = tabCount,
-            onSearch = { text -> viewModel.commitSearch(text) },
-            onOpenUrl = viewModel::openUrlFromHome,
-            onOpenHome = { viewModel.goToHomepage() },
-            onOpenBookmarks = { navigateTo(NavDestination.Bookmarks) },
-            onOpenTabs = { navigateTo(NavDestination.Tabs) },
-            onOpenSettings = { navigateTo(NavDestination.Preferences) }
-        )
-        return
-    }
 
     HideOnScrollToolbar(
         toolbarState = viewModel.toolbarState,
@@ -193,9 +172,10 @@ fun BrowserScreen(
                 }
             }
         } else {
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.primaryContainer)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.primaryContainer)
             )
         }
     }

@@ -92,18 +92,6 @@ class PreferencesViewModel @Inject constructor(
         viewModelScope.launch { appPreferencesRepository.updateShowNewTabHome(show) }
     }
 
-    fun updateHomepageShortcutsEnabled(enabled: Boolean) {
-        viewModelScope.launch { appPreferencesRepository.updateHomepageShortcutsEnabled(enabled) }
-    }
-
-    fun updateHomepageWeatherEnabled(enabled: Boolean) {
-        viewModelScope.launch { appPreferencesRepository.updateHomepageWeatherEnabled(enabled) }
-    }
-
-    fun updateHomepageBackgroundPhotoEnabled(enabled: Boolean) {
-        viewModelScope.launch { appPreferencesRepository.updateHomepageBackgroundPhotoEnabled(enabled) }
-    }
-
     fun updateHomepageOpeningScreen(screen: HomepageOpeningScreen) {
         viewModelScope.launch { appPreferencesRepository.updateHomepageOpeningScreen(screen) }
     }

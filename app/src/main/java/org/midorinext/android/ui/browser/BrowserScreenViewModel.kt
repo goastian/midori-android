@@ -332,14 +332,6 @@ class BrowserScreenViewModel @Inject constructor(
         }
     }
 
-    fun openUrlFromHome(url: String) {
-        val protectedTabId = markSelectedNewTabAsUserNavigation()
-        tabsUseCases.selectOrAddTab(url = url)
-        if (protectedTabId != null && store.state.selectedTabId != protectedTabId) {
-            tabsWithUserNavigationInFlight.remove(protectedTabId)
-        }
-    }
-
     fun replaceTabWithNewTab(tabId: String, expectedUrl: String) {
         if (tabId in tabsWithUserNavigationInFlight) return
         val actualUrl = store.state.tabs

@@ -197,21 +197,6 @@ fun HomepageSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
                 value = !appPrefs.openBlankNewTab,
                 onValueChange = viewModel::updateShowNewTabHome
             )
-            PreferenceToggle(
-                label = R.string.settings_homepage_shortcuts,
-                value = appPrefs.homepageShortcutsEnabled,
-                onValueChange = viewModel::updateHomepageShortcutsEnabled
-            )
-            PreferenceToggle(
-                label = R.string.settings_homepage_weather,
-                value = appPrefs.homepageWeatherEnabled,
-                onValueChange = viewModel::updateHomepageWeatherEnabled
-            )
-            PreferenceToggle(
-                label = R.string.settings_homepage_wallpaper,
-                value = appPrefs.homepageBackgroundPhotoEnabled,
-                onValueChange = viewModel::updateHomepageBackgroundPhotoEnabled
-            )
 
             PreferenceGroupLabel(label = R.string.settings_homepage_opening_screen)
             PreferenceRadioSelectionPopupWithDescription(

@@ -42,13 +42,10 @@ class NavigationTest {
     }
 
     @Test
-    fun settingsDefaultsKeepTheNativeFallbackUsable() {
+    fun settingsDefaultsKeepBrowserBehaviorConsistent() {
         val defaults = AppPreferencesSerializer.defaultValue
 
         assertFalse(defaults.openBlankNewTab)
-        assertTrue(defaults.homepageShortcutsEnabled)
-        assertTrue(defaults.homepageWeatherEnabled)
-        assertTrue(defaults.homepageBackgroundPhotoEnabled)
         assertTrue(defaults.pullToRefreshEnabled)
         assertFalse(defaults.savePasswordsEnabled)
         assertFalse(defaults.passwordAutofillEnabled)
