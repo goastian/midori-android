@@ -1,16 +1,16 @@
 {
   "sourceRepository": "https://github.com/goastian/midori-tab",
-  "sourceVersion": "1.0.42",
-  "version": "1.0.42.6",
+  "sourceVersion": "1.0.44",
+  "version": "1.0.44.6",
   "compatibilityRevision": 6,
-  "bundleSha256": "4d186cc7003a1319fc59c115fa50e1d3866c3746e400217eee7f91a7408f39b7",
+  "bundleSha256": "87282b838edc058df87825155bdba0fee49b7663f15652d3750e0ce21758d898",
   "release": {
-    "tag": "v1.0.42",
-    "url": "https://github.com/goastian/midori-tab/releases/tag/v1.0.42",
+    "tag": "v1.0.44",
+    "url": "https://github.com/goastian/midori-tab/releases/tag/v1.0.44",
     "firefoxAsset": {
-      "name": "midori-tab-1.0.42-firefox.zip",
-      "url": "https://github.com/goastian/midori-tab/releases/download/v1.0.42/midori-tab-1.0.42-firefox.zip",
-      "sha256": "3c172433177a0f5b9ae072addf5c6d3b0451fe6aa91ec47062006c27928d0aa0"
+      "name": "midori-tab-1.0.44-firefox.zip",
+      "url": "https://github.com/goastian/midori-tab/releases/download/v1.0.44/midori-tab-1.0.44-firefox.zip",
+      "sha256": "21528cb7b37eb3e94f372c921529d27ae4ee15b9a15f8374545626a21961942a"
     }
   }
 }
