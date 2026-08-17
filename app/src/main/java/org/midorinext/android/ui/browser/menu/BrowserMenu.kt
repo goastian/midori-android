@@ -1,6 +1,5 @@
 package org.midorinext.android.ui.browser.menu
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -45,8 +44,7 @@ fun BrowserMenu(
 
     Dropdown(
         expanded = expanded,
-        onDismissRequest = onDismissRequest,
-        modifier = Modifier.animateContentSize()
+        onDismissRequest = onDismissRequest
     ) {
         when (menuPage) {
             BrowserMenuPage.Primary -> PrimaryMenu(
