@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.adblock.MidoriPrivacyFeature
+import org.midorinext.android.vpn.MidoriVpnFeature
 import org.midorinext.android.ext.isLegacyMidoriHomeUrl
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
@@ -266,6 +267,18 @@ class BrowserScreenViewModel @Inject constructor(
     val isMidoriPrivacyActionAvailable = store.flow()
         .map { state ->
             val extension = state.extensions[MidoriPrivacyFeature.EXTENSION_ID]
+            extension?.enabled == true && extension.browserAction?.enabled != false
+        }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = false,
+        )
+
+    val isMidoriVpnActionAvailable = store.flow()
+        .map { state ->
+            val extension = state.extensions[MidoriVpnFeature.EXTENSION_ID]
             extension?.enabled == true && extension.browserAction?.enabled != false
         }
         .distinctUntilChanged()

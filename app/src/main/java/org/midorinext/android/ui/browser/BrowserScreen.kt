@@ -36,7 +36,8 @@ import org.midorinext.android.ui.theme.LocalMidoriTheme
 import org.midorinext.android.ui.widgets.Dropdown
 import org.midorinext.android.ui.widgets.DropdownItem
 import org.midorinext.android.ui.widgets.TabCounter
-import org.midorinext.android.ui.zap.ZapButton
+import org.midorinext.android.vpn.MidoriVpnAction
+import org.midorinext.android.vpn.MidoriVpnFeature
 import kotlinx.coroutines.delay
 import mozilla.components.concept.engine.EngineView
 import org.midorinext.android.BuildConfig
@@ -63,6 +64,7 @@ fun BrowserScreen(
     val private by appViewModel.isPrivate.collectAsState()
     val newTabState by viewModel.newTabState.collectAsState()
     val isMidoriPrivacyActionAvailable by viewModel.isMidoriPrivacyActionAvailable.collectAsState()
+    val isMidoriVpnActionAvailable by viewModel.isMidoriVpnActionAvailable.collectAsState()
 
     var engineViewHolder: EngineView? by remember { mutableStateOf(null) }
 
@@ -123,7 +125,14 @@ fun BrowserScreen(
                         !viewModel.isNewTabUrl(currentUrl) &&
                         currentUrl != "about:blank"
                 },
-                afterTextField = { AfterActions(navigateTo, viewModel, appViewModel) },
+                afterTextField = {
+                    AfterActions(
+                        navigateTo,
+                        viewModel,
+                        appViewModel,
+                        isMidoriVpnActionAvailable,
+                    )
+                },
                 afterTextFieldVisible = { !viewModel.toolbarState.hasFocus },
                 onMidoriIconClicked = { viewModel.goToHomepage() }
             )
@@ -216,10 +225,9 @@ fun ToolbarAction( // TODO rename ToolbarAction to SmallIconButton and move to g
 fun AfterActions(
     navigateTo: (NavDestination) -> Unit,
     viewModel: BrowserScreenViewModel,
-    appViewModel: MidoriApplicationViewModel
+    appViewModel: MidoriApplicationViewModel,
+    isMidoriVpnActionAvailable: Boolean,
 ) {
-    val private = appViewModel.isPrivate.collectAsState()
-    val privateBeforeClick = private.value
     Row {
         if (BuildConfig.FLAVOR_target == "canaltoys") {
             val canGoBack by viewModel.canGoBack.collectAsState()
@@ -245,11 +253,9 @@ fun AfterActions(
                 Icon(painter = painterResource(id = R.drawable.icons_arrow_forward), contentDescription = "forward")
             }
         }
-        ZapButton(appViewModel, afterZap = { success ->
-            if (success) {
-                viewModel.openNewMidoriTab(privateBeforeClick)
-            }
-        })
+        MidoriVpnAction(enabled = isMidoriVpnActionAvailable) {
+            viewModel.triggerInstalledExtensionAction(MidoriVpnFeature.EXTENSION_ID)
+        }
         TabsButton(navigateTo, viewModel)
         BrowserMenuButton(navigateTo, viewModel, appViewModel)
         if (BuildConfig.FLAVOR_target == "canaltoys") {

@@ -28,6 +28,8 @@ configure_addon() {
             target_dir="$repo_root/app/src/main/assets/extensions/midori_newtab"
             patch_script="$repo_root/scripts/patch-midori-tab-firefox-android.mjs"
             extension_id="midoritabs@astian.org"
+            asset_name_prefix="midori-tab-"
+            asset_name_suffix="-firefox.zip"
             required_files=(manifest.json index.html index.js background.js)
             ;;
         midori-privacy)
@@ -35,11 +37,22 @@ configure_addon() {
             target_dir="$repo_root/app/src/main/assets/extensions/midori_privacy"
             patch_script="$repo_root/scripts/patch-midori-privacy-firefox-android.mjs"
             extension_id="midori-protection@astian.org"
+            asset_name_prefix="midori-privacy-"
+            asset_name_suffix="-firefox.zip"
             required_files=(manifest.json background.html js/start.js js/midori-stats.js LICENSE.txt)
+            ;;
+        midori-vpn)
+            repository="goastian/midorivpn-extension"
+            target_dir="$repo_root/app/src/main/assets/extensions/midori_vpn"
+            patch_script="$repo_root/scripts/patch-midori-vpn-firefox-android.mjs"
+            extension_id="midorivpn@astian.org"
+            asset_name_prefix="midorivpn-extension-"
+            asset_name_suffix=".zip"
+            required_files=(manifest.json background.js popup.html icons/icon64.png)
             ;;
         *)
             echo "Unknown addon: $addon" >&2
-            echo "Usage: $0 [midori-tab] [midori-privacy]" >&2
+            echo "Usage: $0 [midori-tab] [midori-privacy] [midori-vpn]" >&2
             exit 1
             ;;
     esac
@@ -74,7 +87,7 @@ read_latest_release() {
     fi
 
     source_version="${release_tag#v}"
-    asset_name="$addon-$source_version-firefox.zip"
+    asset_name="$asset_name_prefix$source_version$asset_name_suffix"
     asset_url="$(jq -er --arg name "$asset_name" \
         '.assets[] | select(.name == $name) | .browser_download_url' "$release_json")"
     asset_sha256="$(jq -er --arg name "$asset_name" \
@@ -161,9 +174,14 @@ apply_android_compatibility() {
         curl --fail --location --silent --show-error \
             -o "$staging_dir/LICENSE.upstream" \
             "https://raw.githubusercontent.com/$repository/$release_tag/LICENSE"
-    else
+    elif [[ "$addon" == "midori-privacy" ]]; then
         node --check "$staging_dir/js/midori-stats.js"
         cp "$staging_dir/LICENSE.txt" "$staging_dir/LICENSE.upstream"
+    else
+        node --check "$staging_dir/background.js"
+        curl --fail --location --silent --show-error \
+            -o "$staging_dir/LICENSE.upstream" \
+            "https://raw.githubusercontent.com/$repository/$release_tag/LICENSE"
     fi
 }
 

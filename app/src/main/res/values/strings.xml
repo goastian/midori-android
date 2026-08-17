@@ -491,4 +491,5 @@
 
     <!-- TODO move to datastore -->
     <string name="pref_key_zap_highlight" translatable="false">pref_key_zap_highlight</string>
+    <string name="midori_vpn_action_content_description">MidoriVPN</string>
 </resources>

@@ -6,16 +6,22 @@ const [addon, metadataFile] = process.argv.slice(2);
 const profiles = {
   'midori-tab': {
     repository: 'https://github.com/goastian/midori-tab',
+    assetName: (version) => `midori-tab-${version}-firefox.zip`,
   },
   'midori-privacy': {
     repository: 'https://github.com/goastian/midori-privacy',
+    assetName: (version) => `midori-privacy-${version}-firefox.zip`,
+  },
+  'midori-vpn': {
+    repository: 'https://github.com/goastian/midorivpn-extension',
+    assetName: (version) => `midorivpn-extension-${version}.zip`,
   },
 };
 const profile = profiles[addon];
 
 if (!profile || !metadataFile) {
   throw new Error(
-    'Usage: verify-midori-addon-latest-release.mjs <midori-tab|midori-privacy> <upstream.json>',
+    'Usage: verify-midori-addon-latest-release.mjs <midori-tab|midori-privacy|midori-vpn> <upstream.json>',
   );
 }
 
@@ -41,7 +47,7 @@ if (!response.ok) {
 const release = await response.json();
 const tag = String(release.tag_name || '');
 const sourceVersion = tag.replace(/^v/, '');
-const assetName = `${addon}-${sourceVersion}-firefox.zip`;
+const assetName = profile.assetName(sourceVersion);
 const asset = release.assets?.find((candidate) => candidate.name === assetName);
 const assetSha256 = String(asset?.digest || '').replace(/^sha256:/, '');
 
@@ -76,4 +82,3 @@ if (
 }
 
 console.log(`Latest stable release verified: ${addon} ${tag}`);
-
