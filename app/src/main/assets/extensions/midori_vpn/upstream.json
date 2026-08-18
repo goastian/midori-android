@@ -1,16 +1,16 @@
 {
   "sourceRepository": "https://github.com/goastian/midorivpn-extension",
-  "sourceVersion": "1.0.19",
-  "version": "1.0.19.1",
+  "sourceVersion": "1.0.20",
+  "version": "1.0.20.1",
   "compatibilityRevision": 1,
-  "bundleSha256": "c1f95780ca05419db93480148501cac0488e6ce17d0932c833ae172c6768e4ea",
+  "bundleSha256": "efee1b05a14ffcc47117b7d466f412939446a2f3171613e60e3c85cf5b29231f",
   "release": {
-    "tag": "v1.0.19",
-    "url": "https://github.com/goastian/midorivpn-extension/releases/tag/v1.0.19",
+    "tag": "v1.0.20",
+    "url": "https://github.com/goastian/midorivpn-extension/releases/tag/v1.0.20",
     "firefoxAsset": {
-      "name": "midorivpn-extension-1.0.19.zip",
-      "url": "https://github.com/goastian/midorivpn-extension/releases/download/v1.0.19/midorivpn-extension-1.0.19.zip",
-      "sha256": "36cb3e936eabe354b03d5f006c678f4bf36e010e63fc6dcfc65e8cfe970c1c68"
+      "name": "midorivpn-extension-1.0.20.zip",
+      "url": "https://github.com/goastian/midorivpn-extension/releases/download/v1.0.20/midorivpn-extension-1.0.20.zip",
+      "sha256": "068f70aaa0e589a430f4842c46877b24bbf0bf5fbbb0ab59f402662c0d7263c8"
     }
   }
 }
