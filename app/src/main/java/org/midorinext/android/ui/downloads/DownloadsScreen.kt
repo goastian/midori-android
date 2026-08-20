@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -31,6 +32,7 @@ import mozilla.components.browser.state.state.content.DownloadState
 import org.midorinext.android.R
 import org.midorinext.android.ui.widgets.EmptyPagePlaceholder
 import org.midorinext.android.ui.widgets.ScreenHeader
+import org.midorinext.android.preferences.app.DownloadRemovalBehavior
 import kotlin.math.max
 
 @Composable
@@ -41,6 +43,10 @@ fun DownloadsScreen(
     val activeDownloads by viewModel.downloads.collectAsState()
     val storedDownloads by viewModel.storedDownloads.collectAsState()
     val wifiOnly by viewModel.wifiOnly.collectAsState()
+    val removalBehavior by viewModel.removalBehavior.collectAsState()
+    val downloadPendingRemoval = androidx.compose.runtime.remember {
+        androidx.compose.runtime.mutableStateOf<DownloadState?>(null)
+    }
 
     val downloads = remember(activeDownloads, storedDownloads) {
         (activeDownloads + storedDownloads)
@@ -92,9 +98,42 @@ fun DownloadsScreen(
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 items(downloads, key = { it.id }) { download ->
-                    DownloadCard(download = download, viewModel = viewModel)
+                    DownloadCard(
+                        download = download,
+                        viewModel = viewModel,
+                        removalBehavior = removalBehavior,
+                        onAskToRemove = { downloadPendingRemoval.value = it }
+                    )
                 }
             }
+        }
+
+        downloadPendingRemoval.value?.let { download ->
+            AlertDialog(
+                onDismissRequest = { downloadPendingRemoval.value = null },
+                title = { Text(stringResource(R.string.download_removal_confirm_title)) },
+                confirmButton = {
+                    TextButton(onClick = {
+                        viewModel.remove(download, removeFromDisk = true)
+                        downloadPendingRemoval.value = null
+                    }) {
+                        Text(stringResource(R.string.download_removal_confirm_delete))
+                    }
+                },
+                dismissButton = {
+                    Row {
+                        TextButton(onClick = {
+                            viewModel.remove(download, removeFromDisk = false)
+                            downloadPendingRemoval.value = null
+                        }) {
+                            Text(stringResource(R.string.download_removal_confirm_history))
+                        }
+                        TextButton(onClick = { downloadPendingRemoval.value = null }) {
+                            Text(stringResource(R.string.download_removal_cancel))
+                        }
+                    }
+                }
+            )
         }
     }
 }
@@ -102,7 +141,9 @@ fun DownloadsScreen(
 @Composable
 private fun DownloadCard(
     download: DownloadState,
-    viewModel: DownloadsScreenViewModel
+    viewModel: DownloadsScreenViewModel,
+    removalBehavior: DownloadRemovalBehavior,
+    onAskToRemove: (DownloadState) -> Unit,
 ) {
     val progress = download.progress
     val statusText = downloadStatusText(download, viewModel)
@@ -162,7 +203,9 @@ private fun DownloadCard(
                             onClick = { viewModel.retry(download) },
                             label = { Text(stringResource(R.string.retry_download)) }
                         )
-                        TextButton(onClick = { viewModel.remove(download) }) {
+                        TextButton(onClick = {
+                            removeDownload(download, removalBehavior, viewModel, onAskToRemove)
+                        }) {
                             Text(stringResource(R.string.download_remove))
                         }
                     }
@@ -171,19 +214,41 @@ private fun DownloadCard(
                             onClick = { viewModel.open(download) },
                             label = { Text(stringResource(R.string.download_open)) }
                         )
-                        TextButton(onClick = { viewModel.remove(download) }) {
+                        TextButton(onClick = {
+                            removeDownload(download, removalBehavior, viewModel, onAskToRemove)
+                        }) {
                             Text(stringResource(R.string.download_remove))
                         }
                     }
                     DownloadState.Status.CANCELLED,
                     DownloadState.Status.INITIATED -> {
-                        TextButton(onClick = { viewModel.remove(download) }) {
+                        TextButton(onClick = {
+                            removeDownload(download, removalBehavior, viewModel, onAskToRemove)
+                        }) {
                             Text(stringResource(R.string.download_remove))
                         }
                     }
                 }
             }
         }
+    }
+}
+
+private fun removeDownload(
+    download: DownloadState,
+    behavior: DownloadRemovalBehavior,
+    viewModel: DownloadsScreenViewModel,
+    onAskToRemove: (DownloadState) -> Unit,
+) {
+    when (behavior) {
+        DownloadRemovalBehavior.DOWNLOAD_REMOVAL_DELETE_FROM_DEVICE -> {
+            viewModel.remove(download, removeFromDisk = true)
+        }
+        DownloadRemovalBehavior.DOWNLOAD_REMOVAL_REMOVE_FROM_HISTORY -> {
+            viewModel.remove(download, removeFromDisk = false)
+        }
+        DownloadRemovalBehavior.DOWNLOAD_REMOVAL_ASK,
+        DownloadRemovalBehavior.UNRECOGNIZED -> onAskToRemove(download)
     }
 }
 

@@ -36,6 +36,8 @@ sealed class NavDestination(
     object SavedPasswords : NavDestination(match = "settings/passwords/saved")
     object SavedAutofill : NavDestination(match = "settings/autofill/saved")
     object AccessibilitySettings : NavDestination(match = "settings/accessibility")
+    object NotificationSettings : NavDestination(match = "settings/notifications")
+    object DownloadSettings : NavDestination(match = "settings/downloads")
     object Privacy : NavDestination(match = "privacy")
     object AppTrackingReport : NavDestination(match = "app_tracking_report")
     object History : NavDestination(match = "history")

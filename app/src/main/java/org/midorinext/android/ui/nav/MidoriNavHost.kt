@@ -23,8 +23,10 @@ import org.midorinext.android.ui.history.HistoryScreen
 import org.midorinext.android.ui.preferences.AccessibilitySettingsScreen
 import org.midorinext.android.ui.preferences.AutofillSettingsScreen
 import org.midorinext.android.ui.preferences.CustomizeSettingsScreen
+import org.midorinext.android.ui.preferences.DownloadSettingsScreen
 import org.midorinext.android.ui.preferences.HomepageSettingsScreen
 import org.midorinext.android.ui.preferences.PasswordSettingsScreen
+import org.midorinext.android.ui.preferences.NotificationSettingsScreen
 import org.midorinext.android.ui.preferences.PreferencesScreen
 import org.midorinext.android.ui.preferences.SavedAutofillScreen
 import org.midorinext.android.ui.preferences.SavedPasswordsScreen
@@ -167,6 +169,12 @@ fun MidoriNavHost(
         }
         composable(NavDestination.AccessibilitySettings.match) {
             AccessibilitySettingsScreen()
+        }
+        composable(NavDestination.NotificationSettings.match) {
+            NotificationSettingsScreen()
+        }
+        composable(NavDestination.DownloadSettings.match) {
+            DownloadSettingsScreen()
         }
         composable(NavDestination.Privacy.match) {
             PrivacyScreen(

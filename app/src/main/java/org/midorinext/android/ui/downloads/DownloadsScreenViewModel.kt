@@ -21,6 +21,8 @@ import mozilla.components.feature.downloads.manager.DownloadManager
 import mozilla.components.lib.state.ext.flow
 import mozilla.components.support.utils.DownloadFileUtils
 import org.midorinext.android.preferences.app.AppPreferencesRepository
+import org.midorinext.android.preferences.app.DownloadRemovalBehavior
+import org.midorinext.android.mozac.downloads.openDownloadedFile
 import javax.inject.Inject
 
 @HiltViewModel
@@ -61,6 +63,22 @@ class DownloadsScreenViewModel @Inject constructor(
             initialValue = false
         )
 
+    val removalBehavior = appPreferencesRepository.flow
+        .map { it.downloadRemovalBehavior }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = DownloadRemovalBehavior.DOWNLOAD_REMOVAL_ASK
+        )
+
+    private val manageWithOtherApp = appPreferencesRepository.flow
+        .map { it.manageDownloadsWithOtherApp }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = false
+        )
+
     init {
         downloadsUseCases.restoreDownloads()
     }
@@ -88,11 +106,16 @@ class DownloadsScreenViewModel @Inject constructor(
     }
 
     fun open(download: DownloadState) {
-        downloadFileUtils.openFile(
-            fileName = download.fileName,
-            directoryPath = download.directoryPath,
-            contentType = download.contentType
-        )
+        if (manageWithOtherApp.value) {
+            val fileName = download.fileName ?: return
+            context.openDownloadedFile("${download.directoryPath}/$fileName", download.contentType)
+        } else {
+            downloadFileUtils.openFile(
+                fileName = download.fileName,
+                directoryPath = download.directoryPath,
+                contentType = download.contentType
+            )
+        }
     }
 
     fun remove(download: DownloadState, removeFromDisk: Boolean = false) {

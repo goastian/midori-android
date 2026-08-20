@@ -32,6 +32,9 @@ import org.midorinext.android.ui.preferences.permissions.PermissionsPreference
 import org.midorinext.android.ui.preferences.widgets.*
 import org.midorinext.android.ui.widgets.HtmlText
 import org.midorinext.android.ui.widgets.ScreenHeader
+import android.content.Intent
+import android.os.Build
+import android.provider.Settings
 
 @Composable
 fun PreferencesScreen(
@@ -80,6 +83,19 @@ fun PreferencesScreen(
                 description = stringResource(R.string.settings_customize_summary),
                 onClicked = { navigateTo(NavDestination.CustomizeSettings) }
             )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                SettingsNavRow(
+                    label = R.string.settings_app_language,
+                    description = stringResource(R.string.settings_app_language_summary),
+                    onClicked = {
+                        context.startActivity(
+                            Intent(Settings.ACTION_APP_LOCALE_SETTINGS).apply {
+                                data = android.net.Uri.parse("package:${context.packageName}")
+                            }
+                        )
+                    }
+                )
+            }
             SettingsNavRow(
                 label = R.string.settings_passwords_title,
                 description = passwordSummary(appPrefs),
@@ -94,6 +110,16 @@ fun PreferencesScreen(
                 label = R.string.settings_accessibility_title,
                 description = accessibilitySummary(appPrefs),
                 onClicked = { navigateTo(NavDestination.AccessibilitySettings) }
+            )
+            SettingsNavRow(
+                label = R.string.settings_notifications_title,
+                description = stringResource(R.string.settings_notifications_summary),
+                onClicked = { navigateTo(NavDestination.NotificationSettings) }
+            )
+            SettingsNavRow(
+                label = R.string.settings_downloads_title,
+                description = stringResource(R.string.settings_downloads_summary),
+                onClicked = { navigateTo(NavDestination.DownloadSettings) }
             )
 
             PreferenceGroupLabel(label = R.string.settings_group_privacy)
@@ -259,6 +285,24 @@ fun CustomizeSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
             onValueChange = viewModel::updateTabsView
         )
 
+        PreferenceGroupLabel(label = R.string.settings_customize_shortcut)
+        PreferenceRadioSelectionPopup(
+            label = R.string.settings_toolbar_shortcut,
+            options = remember {
+                listOf(
+                    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_NEW_TAB, R.string.shortcut_new_tab),
+                    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_SHARE, R.string.shortcut_share),
+                    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_BOOKMARK, R.string.shortcut_bookmark),
+                    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_HOMEPAGE, R.string.shortcut_homepage),
+                    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_BACK, R.string.shortcut_back),
+                    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_SUMMARIZE, R.string.shortcut_summarize),
+                    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_NONE, R.string.shortcut_none)
+                )
+            },
+            value = appPrefs.toolbarShortcut,
+            onValueChange = viewModel::updateToolbarShortcut
+        )
+
         PreferenceGroupLabel(label = R.string.settings_customize_gestures)
         PreferenceToggle(
             label = R.string.settings_pull_to_refresh,
@@ -271,9 +315,97 @@ fun CustomizeSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
             onValueChange = viewModel::updateHideToolbarOnScroll
         )
         PreferenceToggle(
-            label = R.string.open_links_in_app_label,
-            value = appPrefs.openLinksInApp,
-            onValueChange = viewModel::updateOpenLinksInApp
+            label = R.string.settings_swipe_address_bar_to_switch_tabs,
+            value = appPrefs.swipeAddressBarToSwitchTabsEnabled,
+            onValueChange = viewModel::updateSwipeAddressBarToSwitchTabsEnabled
+        )
+        PreferenceToggle(
+            label = R.string.settings_swipe_toolbar_to_show_tabs,
+            value = appPrefs.swipeToolbarToShowTabsEnabled,
+            onValueChange = viewModel::updateSwipeToolbarToShowTabsEnabled
+        )
+        PreferenceToggle(
+            label = R.string.settings_shake_to_summarize,
+            description = R.string.settings_shake_to_summarize_summary,
+            value = appPrefs.shakeToSummarizeEnabled,
+            onValueChange = viewModel::updateShakeToSummarizeEnabled
+        )
+    }
+}
+
+@Composable
+fun NotificationSettingsScreen() {
+    val context = LocalContext.current
+    PreferenceScreenScaffold(title = stringResource(R.string.settings_notifications_title)) {
+        PreferenceGroupLabel(label = R.string.settings_notifications_title)
+        PreferenceRow(
+            label = R.string.settings_notifications_open_system,
+            description = stringResource(R.string.settings_notifications_open_system_summary),
+            trailing = {
+                Icon(
+                    painter = painterResource(id = R.drawable.icons_open),
+                    contentDescription = null
+                )
+            },
+            onClicked = {
+                val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                    }
+                } else {
+                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = android.net.Uri.parse("package:${context.packageName}")
+                    }
+                }
+                context.startActivity(intent)
+            }
+        )
+    }
+}
+
+@Composable
+fun DownloadSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
+    val appPrefs by viewModel.appPreferences.collectAsState()
+    PreferenceScreenScaffold(title = stringResource(R.string.settings_downloads_title)) {
+        PreferenceGroupLabel(label = R.string.download_settings_file_storage)
+        PreferenceRow(
+            label = R.string.download_settings_default_location,
+            description = stringResource(R.string.download_settings_default_location_summary)
+        )
+        PreferenceToggle(
+            label = R.string.download_wifi_only,
+            description = R.string.download_wifi_only_summary,
+            value = appPrefs.downloadWifiOnly,
+            onValueChange = viewModel::updateDownloadWifiOnly
+        )
+
+        PreferenceGroupLabel(label = R.string.download_settings_delete_or_remove)
+        PreferenceRadioSelectionPopup(
+            label = R.string.download_settings_delete_or_remove,
+            options = remember {
+                listOf(
+                    RadioButtonOption(
+                        DownloadRemovalBehavior.DOWNLOAD_REMOVAL_DELETE_FROM_DEVICE,
+                        R.string.download_removal_delete_from_device
+                    ),
+                    RadioButtonOption(
+                        DownloadRemovalBehavior.DOWNLOAD_REMOVAL_REMOVE_FROM_HISTORY,
+                        R.string.download_removal_remove_from_history
+                    ),
+                    RadioButtonOption(
+                        DownloadRemovalBehavior.DOWNLOAD_REMOVAL_ASK,
+                        R.string.download_removal_ask
+                    )
+                )
+            },
+            value = appPrefs.downloadRemovalBehavior,
+            onValueChange = viewModel::updateDownloadRemovalBehavior
+        )
+        PreferenceToggle(
+            label = R.string.download_manage_with_other_app,
+            description = R.string.download_manage_with_other_app_summary,
+            value = appPrefs.manageDownloadsWithOtherApp,
+            onValueChange = viewModel::updateManageDownloadsWithOtherApp
         )
     }
 }
