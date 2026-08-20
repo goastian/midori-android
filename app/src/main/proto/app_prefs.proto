@@ -13,6 +13,22 @@ enum TabsViewOption {
   LIST = 1;
 }
 
+enum ToolbarShortcut {
+  TOOLBAR_SHORTCUT_NONE = 0;
+  TOOLBAR_SHORTCUT_NEW_TAB = 1;
+  TOOLBAR_SHORTCUT_SHARE = 2;
+  TOOLBAR_SHORTCUT_BOOKMARK = 3;
+  TOOLBAR_SHORTCUT_HOMEPAGE = 4;
+  TOOLBAR_SHORTCUT_BACK = 5;
+  TOOLBAR_SHORTCUT_SUMMARIZE = 6;
+}
+
+enum DownloadRemovalBehavior {
+  DOWNLOAD_REMOVAL_ASK = 0;
+  DOWNLOAD_REMOVAL_DELETE_FROM_DEVICE = 1;
+  DOWNLOAD_REMOVAL_REMOVE_FROM_HISTORY = 2;
+}
+
 enum Appearance {
   SYSTEM_SETTINGS = 0;
   LIGHT = 1;
@@ -85,4 +101,10 @@ message AppPreferences {
   int32 accessibility_font_scale = 34;
   bool accessibility_force_zoom_enabled = 35;
   HomepageOpeningScreen homepage_opening_screen = 36;
+  ToolbarShortcut toolbar_shortcut = 37;
+  bool swipe_address_bar_to_switch_tabs_enabled = 38;
+  bool swipe_toolbar_to_show_tabs_enabled = 39;
+  bool shake_to_summarize_enabled = 40;
+  DownloadRemovalBehavior download_removal_behavior = 41;
+  bool manage_downloads_with_other_app = 42;
 }
