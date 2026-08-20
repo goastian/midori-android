@@ -20,6 +20,7 @@ import org.midorinext.android.ui.browser.BrowserScreenViewModel
 import org.midorinext.android.ui.nav.NavDestination
 import org.midorinext.android.ui.widgets.Dropdown
 import org.midorinext.android.ui.widgets.DropdownItem
+import org.midorinext.android.vpn.MidoriVpnFeature
 
 // TODO replace canaltoys exception with either specific source file
 //  or buildconfig field regarding android capabilities
@@ -81,7 +82,19 @@ private fun PrimaryMenu(
     onMoreOptionsClick: () -> Unit,
     onDismissRequest: () -> Unit
 ) {
+    val isMidoriVpnActionAvailable by viewModel.isMidoriVpnActionAvailable.collectAsState()
+
     BrowserNavigation(viewModel)
+    HorizontalDivider()
+    DropdownItem(
+        text = stringResource(id = R.string.menu_midori_vpn),
+        icon = R.drawable.ic_midori_vpn_action,
+        enabled = isMidoriVpnActionAvailable,
+        onClick = {
+            onDismissRequest()
+            viewModel.triggerInstalledExtensionAction(MidoriVpnFeature.EXTENSION_ID)
+        }
+    )
     HorizontalDivider()
     NewTabAction(viewModel, onDismissRequest)
     if (showPageActions && !currentUrl.isNullOrBlank()) {
