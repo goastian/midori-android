@@ -35,6 +35,12 @@ object AppPreferencesSerializer : Serializer<AppPreferences> {
         .setAccessibilityFontScale(100)
         .setAccessibilityForceZoomEnabled(false)
         .setHomepageOpeningScreen(HomepageOpeningScreen.HOMEPAGE_AFTER_FOUR_HOURS)
+        .setToolbarShortcut(ToolbarShortcut.TOOLBAR_SHORTCUT_NONE)
+        .setSwipeAddressBarToSwitchTabsEnabled(true)
+        .setSwipeToolbarToShowTabsEnabled(true)
+        .setShakeToSummarizeEnabled(false)
+        .setDownloadRemovalBehavior(DownloadRemovalBehavior.DOWNLOAD_REMOVAL_ASK)
+        .setManageDownloadsWithOtherApp(false)
         .build()
 
     override suspend fun readFrom(input: InputStream): AppPreferences {

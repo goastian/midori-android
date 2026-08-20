@@ -87,6 +87,42 @@ class AppPreferencesRepository @Inject constructor(
         }
     }
 
+    suspend fun updateToolbarShortcut(shortcut: ToolbarShortcut) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setToolbarShortcut(shortcut).build()
+        }
+    }
+
+    suspend fun updateSwipeAddressBarToSwitchTabsEnabled(enabled: Boolean) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setSwipeAddressBarToSwitchTabsEnabled(enabled).build()
+        }
+    }
+
+    suspend fun updateSwipeToolbarToShowTabsEnabled(enabled: Boolean) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setSwipeToolbarToShowTabsEnabled(enabled).build()
+        }
+    }
+
+    suspend fun updateShakeToSummarizeEnabled(enabled: Boolean) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setShakeToSummarizeEnabled(enabled).build()
+        }
+    }
+
+    suspend fun updateDownloadRemovalBehavior(behavior: DownloadRemovalBehavior) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setDownloadRemovalBehavior(behavior).build()
+        }
+    }
+
+    suspend fun updateManageDownloadsWithOtherApp(enabled: Boolean) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setManageDownloadsWithOtherApp(enabled).build()
+        }
+    }
+
     suspend fun updateSavePasswordsEnabled(enabled: Boolean) {
         datastore.updateData { preferences ->
             preferences.toBuilder().setSavePasswordsEnabled(enabled).build()
