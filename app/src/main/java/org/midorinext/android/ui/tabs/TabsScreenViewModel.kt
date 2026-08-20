@@ -95,11 +95,19 @@ class TabsScreenViewModel @Inject constructor(
         )
 
     val tabsViewOption = appPreferencesRepository.flow
-        .map { prefs -> prefs.tabsView }
+        // Protobuf exposes unknown persisted enum values as UNRECOGNIZED. That enum
+        // cannot be used by Compose state saving (its getNumber() throws), so fall
+        // back to the default before it reaches the UI.
+        .map { prefs ->
+            when (prefs.tabsView) {
+                TabsViewOption.LIST -> TabsViewOption.LIST
+                else -> TabsViewOption.GRID
+            }
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = TabsViewOption.UNRECOGNIZED
+            initialValue = TabsViewOption.GRID
         )
 
     private val openBlankNewTab = appPreferencesRepository.flow

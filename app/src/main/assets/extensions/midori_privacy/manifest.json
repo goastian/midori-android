@@ -116,7 +116,6 @@
   "permissions": [
     "alarms",
     "dns",
-    "menus",
     "privacy",
     "storage",
     "tabs",

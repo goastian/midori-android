@@ -11,7 +11,7 @@ datastore = "1.2.1"
 localbroadcastmanager = "1.1.0"
 paging-runtime-ktx = "3.5.0"
 # Hilt
-hilt = "2.58"
+hilt = "2.60.1"
 androidx-hilt = "1.3.0"
 # Compose
 compose-bom = "2026.05.01"
@@ -29,14 +29,14 @@ espresso = "3.7.0"
 protobuf = "4.35.0"
 room = "2.8.4"
 work = "2.11.2"
-mozac = "152.0"
+mozac = "154.0"
 
 # Plugins
-android-gradle-plugin = "8.13.2"
-kotlin-plugin = "2.2.20"
-hilt-plugin = "2.58"
+android-gradle-plugin = "9.1.1"
+kotlin-plugin = "2.4.0"
+hilt-plugin = "2.60.1"
 protobuf-plugin = "0.9.5"
-ksp = "2.2.20-2.0.4"
+ksp = "2.3.9"
 
 [libraries]
 # Legacy

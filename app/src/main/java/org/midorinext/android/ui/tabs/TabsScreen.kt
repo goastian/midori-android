@@ -44,6 +44,13 @@ fun TabsScreen(
     val canUndoClose by tabsViewModel.canUndoClose.collectAsState()
     val recentlyClosedCount by tabsViewModel.recentlyClosedCount.collectAsState()
 
+    // A protobuf value saved by an incompatible app version can be UNRECOGNIZED.
+    // Never pass that sentinel to Compose, which tries to obtain its numeric value.
+    val resolvedTabsViewOption = when (tabsViewOption) {
+        TabsViewOption.LIST -> TabsViewOption.LIST
+        else -> TabsViewOption.GRID
+    }
+
     val normalTabsCount by remember(tabs) { derivedStateOf { tabs.count { !it.content.private } } }
 
     BackHandler {
@@ -108,7 +115,7 @@ fun TabsScreen(
                 val noTabsGroupedString = stringResource(id = R.string.browser_no_tabs_grouped)
                 val tabReopenedString = stringResource(id = R.string.browser_recent_tab_reopened)
                 TabsMenuMore(
-                    tabsViewOption = tabsViewOption,
+                    tabsViewOption = resolvedTabsViewOption,
                     private = private,
                     canUndoClose = canUndoClose,
                     recentlyClosedCount = recentlyClosedCount,
@@ -212,7 +219,7 @@ fun TabsScreen(
             onClose = onClose,
             appViewModel = appViewModel,
             tabsViewModel = tabsViewModel,
-            tabsViewOption = tabsViewOption
+            tabsViewOption = resolvedTabsViewOption
         )
     }
 }

@@ -8,7 +8,6 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.protobuf)
     alias(libs.plugins.ksp)
-    id 'kotlin-kapt'
 }
 
 // Mozac 151+: geckoview-omni bundles glean-native as a capability, causing a conflict
@@ -116,7 +115,8 @@ android {
                 : ["armeabi-v7a", "arm64-v8a"])
 
     namespace 'org.midorinext.android'
-    compileSdk 36
+    compileSdk 37
+    compileSdkMinor 0
     defaultConfig {
         applicationId "org.midorinext.android"
         minSdk 26
@@ -461,7 +461,7 @@ tasks.register("verifyMidoriPrivacyBundle") {
         def manifest = new JsonSlurper().parse(manifestFile)
         def metadata = new JsonSlurper().parse(metadataFile)
         def expectedPermissions = [
-                "alarms", "dns", "menus", "privacy", "storage", "tabs", "unlimitedStorage",
+                "alarms", "dns", "privacy", "storage", "tabs", "unlimitedStorage",
                 "webNavigation", "webRequest", "webRequestBlocking", "<all_urls>",
         ]
         def permissions = manifest.permissions instanceof List ? manifest.permissions : []
@@ -621,7 +621,7 @@ dependencies {
     // Hilt
     implementation libs.hilt.main
     implementation libs.hilt.navigation.compose
-    kapt libs.hilt.compiler.dagger
+    ksp libs.hilt.compiler.dagger
 
     // Compose BOM
     implementation(platform(libs.compose.bom))

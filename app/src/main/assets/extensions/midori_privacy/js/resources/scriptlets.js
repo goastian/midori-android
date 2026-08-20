@@ -20,7 +20,7 @@
 
 */
 
-import { registerScriptlet } from './base.js';
+import { registerScriptlet, registeredScriptlets } from './base.js';
 import { safeSelf } from './safe-self.js';
 
 // Externally added to the private namespace in which scriptlets execute.
@@ -461,3 +461,5 @@ registerScriptlet(lookupElementsFn, {
         onIdleFn,
     ],
 });
+
+export { registeredScriptlets as builtinScriptlets };

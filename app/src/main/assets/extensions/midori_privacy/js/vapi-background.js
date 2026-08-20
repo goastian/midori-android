@@ -1459,7 +1459,10 @@ vAPI.commands = browser.commands;
 //   settings will require an extra extension restart to take effect.
 
 vAPI.adminStorage = (( ) => {
-    if ( webext.storage.managed instanceof Object === false ) {
+    if (
+        vAPI.webextFlavor.soup.has('mobile') ||
+        webext.storage.managed instanceof Object === false
+    ) {
         return {
             get: function() {
                 return Promise.resolve();

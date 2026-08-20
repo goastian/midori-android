@@ -5,7 +5,8 @@ plugins {
 
 android {
     namespace rootProject.ext.companion_id
-    compileSdk 36
+    compileSdk 37
+    compileSdkMinor 0
 
     defaultConfig {
         applicationId rootProject.ext.companion_id

@@ -3,7 +3,7 @@
   "sourceVersion": "2.3.11",
   "version": "2.3.11.5",
   "compatibilityRevision": 5,
-  "bundleSha256": "4d284b8d90d24a13ed6a219703ee634676a5d38be3458f79c79cd39e8bb5d5ed",
+  "bundleSha256": "88245e3de80a9c6793b2ccce8d23c62d37c264ce7987f7146e3c2249c988a260",
   "release": {
     "tag": "v2.3.11",
     "url": "https://github.com/goastian/midori-privacy/releases/tag/v2.3.11",
