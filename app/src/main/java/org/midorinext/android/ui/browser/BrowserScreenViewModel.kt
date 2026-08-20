@@ -28,6 +28,7 @@ import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.WebExtensionState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
+import mozilla.components.concept.engine.pageextraction.ContentParams
 import mozilla.components.concept.fetch.Client
 import mozilla.components.feature.contextmenu.ContextMenuUseCases
 import mozilla.components.feature.downloads.DownloadsUseCases
@@ -305,6 +306,25 @@ class BrowserScreenViewModel @Inject constructor(
     val goForward = sessionUseCases.goForward
     val requestDesktopSite = sessionUseCases.requestDesktopSite
 
+    fun switchTab(direction: Int) {
+        val selectedTab = store.state.selectedTab ?: return
+        val tabs = store.state.tabs.filter { it.content.private == selectedTab.content.private }
+        if (tabs.size < 2) return
+
+        val currentIndex = tabs.indexOfFirst { it.id == selectedTab.id }
+        if (currentIndex < 0) return
+        val targetIndex = (currentIndex + direction).floorMod(tabs.size)
+        tabsUseCases.selectTab(tabs[targetIndex].id)
+    }
+
+    fun summarizeCurrentPage(onResult: (String) -> Unit, onError: () -> Unit) {
+        currentEngineSession.value?.getPageContent(
+            options = ContentParams(removeBoilerplate = true),
+            onResult = { content -> onResult(compactSummary(content)) },
+            onException = { onError() }
+        ) ?: onError()
+    }
+
     fun commitSearch(searchText: String, category: String? = null) {
         val trimmedSearch = searchText.trim()
         if (trimmedSearch.isBlank()) {
@@ -343,6 +363,23 @@ class BrowserScreenViewModel @Inject constructor(
             tabsWithUserNavigationInFlight.remove(tabId)
             MidoriUseCases.loadNewTabPage(tabId)
         }
+    }
+
+    private fun Int.floorMod(size: Int): Int = ((this % size) + size) % size
+
+    private fun compactSummary(content: String): String {
+        val normalized = content
+            .replace(Regex("\\s+"), " ")
+            .trim()
+        if (normalized.isBlank()) return ""
+
+        val sentences = normalized
+            .split(Regex("(?<=[.!?])\\s+"))
+            .filter { it.length >= 35 }
+            .take(3)
+        return (if (sentences.isEmpty()) listOf(normalized.take(600)) else sentences)
+            .joinToString(" ")
+            .take(900)
     }
 
     fun replaceTabWithNewTab(tabId: String, expectedUrl: String) {

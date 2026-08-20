@@ -100,6 +100,38 @@ class PreferencesViewModel @Inject constructor(
         viewModelScope.launch { appPreferencesRepository.updatePullToRefreshEnabled(enabled) }
     }
 
+    fun updateDownloadWifiOnly(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateDownloadWifiOnly(enabled) }
+    }
+
+    fun updateToolbarShortcut(shortcut: ToolbarShortcut) {
+        viewModelScope.launch { appPreferencesRepository.updateToolbarShortcut(shortcut) }
+    }
+
+    fun updateSwipeAddressBarToSwitchTabsEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            appPreferencesRepository.updateSwipeAddressBarToSwitchTabsEnabled(enabled)
+        }
+    }
+
+    fun updateSwipeToolbarToShowTabsEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            appPreferencesRepository.updateSwipeToolbarToShowTabsEnabled(enabled)
+        }
+    }
+
+    fun updateShakeToSummarizeEnabled(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateShakeToSummarizeEnabled(enabled) }
+    }
+
+    fun updateDownloadRemovalBehavior(behavior: DownloadRemovalBehavior) {
+        viewModelScope.launch { appPreferencesRepository.updateDownloadRemovalBehavior(behavior) }
+    }
+
+    fun updateManageDownloadsWithOtherApp(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateManageDownloadsWithOtherApp(enabled) }
+    }
+
     fun updateSavePasswordsEnabled(enabled: Boolean) {
         viewModelScope.launch { appPreferencesRepository.updateSavePasswordsEnabled(enabled) }
     }

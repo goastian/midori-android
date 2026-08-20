@@ -26,7 +26,7 @@ fun HideOnScrollToolbar(
 ) {
     val toolbarPosition by toolbarState.toolbarPosition.collectAsState()
 
-    val shouldHideOnScroll = false // by toolbarState.shouldHideOnScroll.collectAsState()
+    val shouldHideOnScroll by toolbarState.shouldHideOnScroll.collectAsState()
 
     val nestedScrollConnection = rememberThresholdNestedScrollConnection(
         onScroll = { sign ->
@@ -93,7 +93,7 @@ fun AnimatedToolbar(
     toolbar: @Composable (Modifier) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val shouldHideOnScroll = false // by toolbarState.shouldHideOnScroll.collectAsState()
+    val shouldHideOnScroll by toolbarState.shouldHideOnScroll.collectAsState()
 
     if (shouldHideOnScroll) {
         if (!toolbarState.visible) {

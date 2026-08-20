@@ -36,9 +36,8 @@ import org.midorinext.android.ui.theme.LocalMidoriTheme
 import org.midorinext.android.ui.widgets.Dropdown
 import org.midorinext.android.ui.widgets.DropdownItem
 import org.midorinext.android.ui.widgets.TabCounter
-import org.midorinext.android.vpn.MidoriVpnAction
-import org.midorinext.android.vpn.MidoriVpnFeature
 import kotlinx.coroutines.delay
+import mozilla.components.support.ktx.android.content.share
 import mozilla.components.concept.engine.EngineView
 import org.midorinext.android.BuildConfig
 
@@ -64,9 +63,10 @@ fun BrowserScreen(
     val private by appViewModel.isPrivate.collectAsState()
     val newTabState by viewModel.newTabState.collectAsState()
     val isMidoriPrivacyActionAvailable by viewModel.isMidoriPrivacyActionAvailable.collectAsState()
-    val isMidoriVpnActionAvailable by viewModel.isMidoriVpnActionAvailable.collectAsState()
+    val context = LocalContext.current
 
     var engineViewHolder: EngineView? by remember { mutableStateOf(null) }
+    var pageSummary by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(openNewTab) {
         when (openNewTab) {
@@ -104,6 +104,31 @@ fun BrowserScreen(
     } */
 
     KeyboardObserver(toolbarState = viewModel.toolbarState)
+    ShakeToSummarizeEffect(enabled = appPrefs.shakeToSummarizeEnabled) {
+        viewModel.summarizeCurrentPage(
+            onResult = { summary ->
+                if (summary.isBlank()) {
+                    appViewModel.showSnackbar(context.getString(R.string.summary_unavailable))
+                } else {
+                    pageSummary = summary
+                }
+            },
+            onError = { appViewModel.showSnackbar(context.getString(R.string.summary_unavailable)) }
+        )
+    }
+
+    pageSummary?.let { summary ->
+        AlertDialog(
+            onDismissRequest = { pageSummary = null },
+            title = { Text(stringResource(R.string.summary_title)) },
+            text = { Text(summary) },
+            confirmButton = {
+                TextButton(onClick = { pageSummary = null }) {
+                    Text(stringResource(R.string.summary_done))
+                }
+            }
+        )
+    }
 
     HideOnScrollToolbar(
         toolbarState = viewModel.toolbarState,
@@ -130,11 +155,37 @@ fun BrowserScreen(
                         navigateTo,
                         viewModel,
                         appViewModel,
-                        isMidoriVpnActionAvailable,
+                        appPrefs.toolbarShortcut,
+                        onSummarize = {
+                            viewModel.summarizeCurrentPage(
+                                onResult = { summary ->
+                                    if (summary.isBlank()) {
+                                        appViewModel.showSnackbar(context.getString(R.string.summary_unavailable))
+                                    } else {
+                                        pageSummary = summary
+                                    }
+                                },
+                                onError = {
+                                    appViewModel.showSnackbar(context.getString(R.string.summary_unavailable))
+                                }
+                            )
+                        }
                     )
                 },
                 afterTextFieldVisible = { !viewModel.toolbarState.hasFocus },
-                onMidoriIconClicked = { viewModel.goToHomepage() }
+                onMidoriIconClicked = { viewModel.goToHomepage() },
+                onSwipeUp = {
+                    if (appPrefs.swipeToolbarToShowTabsEnabled) navigateTo(NavDestination.Tabs)
+                },
+                onSwipeDown = {
+                    if (appPrefs.swipeToolbarToShowTabsEnabled) navigateTo(NavDestination.Tabs)
+                },
+                onSwipeLeft = {
+                    if (appPrefs.swipeAddressBarToSwitchTabsEnabled) viewModel.switchTab(1)
+                },
+                onSwipeRight = {
+                    if (appPrefs.swipeAddressBarToSwitchTabsEnabled) viewModel.switchTab(-1)
+                }
             )
         },
         engineView = engineViewHolder,
@@ -226,7 +277,8 @@ fun AfterActions(
     navigateTo: (NavDestination) -> Unit,
     viewModel: BrowserScreenViewModel,
     appViewModel: MidoriApplicationViewModel,
-    isMidoriVpnActionAvailable: Boolean,
+    toolbarShortcut: org.midorinext.android.preferences.app.ToolbarShortcut,
+    onSummarize: () -> Unit,
 ) {
     Row {
         if (BuildConfig.FLAVOR_target == "canaltoys") {
@@ -253,14 +305,59 @@ fun AfterActions(
                 Icon(painter = painterResource(id = R.drawable.icons_arrow_forward), contentDescription = "forward")
             }
         }
-        MidoriVpnAction(enabled = isMidoriVpnActionAvailable) {
-            viewModel.triggerInstalledExtensionAction(MidoriVpnFeature.EXTENSION_ID)
-        }
+        ToolbarShortcutAction(
+            shortcut = toolbarShortcut,
+            viewModel = viewModel,
+            onSummarize = onSummarize
+        )
         TabsButton(navigateTo, viewModel)
         BrowserMenuButton(navigateTo, viewModel, appViewModel)
         if (BuildConfig.FLAVOR_target == "canaltoys") {
             ExitButton(appViewModel = appViewModel)
         }
+    }
+}
+
+@Composable
+private fun ToolbarShortcutAction(
+    shortcut: org.midorinext.android.preferences.app.ToolbarShortcut,
+    viewModel: BrowserScreenViewModel,
+    onSummarize: () -> Unit,
+) {
+    val context = LocalContext.current
+    when (shortcut) {
+        org.midorinext.android.preferences.app.ToolbarShortcut.TOOLBAR_SHORTCUT_NEW_TAB -> ToolbarAction(
+            onClick = { viewModel.openNewMidoriTab() }
+        ) {
+            Icon(painterResource(R.drawable.icons_add_tab), stringResource(R.string.shortcut_new_tab))
+        }
+        org.midorinext.android.preferences.app.ToolbarShortcut.TOOLBAR_SHORTCUT_SHARE -> ToolbarAction(
+            onClick = { viewModel.currentUrl.value?.takeIf { it.isNotBlank() }?.let(context::share) }
+        ) {
+            Icon(painterResource(R.drawable.icons_share), stringResource(R.string.shortcut_share))
+        }
+        org.midorinext.android.preferences.app.ToolbarShortcut.TOOLBAR_SHORTCUT_BOOKMARK -> ToolbarAction(
+            onClick = { viewModel.addBookmark() }
+        ) {
+            Icon(painterResource(R.drawable.icons_add_bookmark), stringResource(R.string.shortcut_bookmark))
+        }
+        org.midorinext.android.preferences.app.ToolbarShortcut.TOOLBAR_SHORTCUT_HOMEPAGE -> ToolbarAction(
+            onClick = viewModel::goToHomepage
+        ) {
+            Icon(painterResource(R.drawable.icons_home), stringResource(R.string.shortcut_homepage))
+        }
+        org.midorinext.android.preferences.app.ToolbarShortcut.TOOLBAR_SHORTCUT_BACK -> ToolbarAction(
+            onClick = { viewModel.goBack() }
+        ) {
+            Icon(painterResource(R.drawable.icons_arrow_backward), stringResource(R.string.shortcut_back))
+        }
+        org.midorinext.android.preferences.app.ToolbarShortcut.TOOLBAR_SHORTCUT_SUMMARIZE -> ToolbarAction(
+            onClick = onSummarize
+        ) {
+            Icon(painterResource(R.drawable.icons_summarize), stringResource(R.string.shortcut_summarize))
+        }
+        org.midorinext.android.preferences.app.ToolbarShortcut.TOOLBAR_SHORTCUT_NONE,
+        org.midorinext.android.preferences.app.ToolbarShortcut.UNRECOGNIZED -> Unit
     }
 }
 
