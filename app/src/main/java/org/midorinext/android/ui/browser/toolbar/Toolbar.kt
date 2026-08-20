@@ -40,7 +40,9 @@ fun Toolbar(
     animationEasing: Easing = FastOutSlowInEasing,
     onMidoriIconClicked: () -> Unit = {},
     onSwipeUp: () -> Unit = {},
-    onSwipeDown: () -> Unit = {}
+    onSwipeDown: () -> Unit = {},
+    onSwipeLeft: () -> Unit = {},
+    onSwipeRight: () -> Unit = {}
 ) {
     val toolbarPosition by toolbarState.toolbarPosition.collectAsState()
     val loadingProgress by toolbarState.loadingProgress.collectAsState()
@@ -97,18 +99,34 @@ fun Toolbar(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
             ) { toolbarState.updateFocus(true) }
-            .pointerInput(Unit) {
-                detectDragGestures { change, dragAmount ->
-                    val (dx, dy) = dragAmount
-                    // Check for vertical swipe (up or down)
-                    if (kotlin.math.abs(dy) > kotlin.math.abs(dx)) {
-                        if (dy < -50f) { // Swipe up threshold
-                            onSwipeUp()
-                        } else if (dy > 50f) { // Swipe down threshold
-                            onSwipeDown()
+            .pointerInput(onSwipeUp, onSwipeDown, onSwipeLeft, onSwipeRight) {
+                var totalDragX = 0f
+                var totalDragY = 0f
+                detectDragGestures(
+                    onDragStart = {
+                        totalDragX = 0f
+                        totalDragY = 0f
+                    },
+                    onDrag = { change, dragAmount ->
+                        change.consume()
+                        totalDragX += dragAmount.x
+                        totalDragY += dragAmount.y
+                    },
+                    onDragEnd = {
+                        val threshold = 72f
+                        if (kotlin.math.abs(totalDragY) > kotlin.math.abs(totalDragX)) {
+                            when {
+                                totalDragY <= -threshold -> onSwipeUp()
+                                totalDragY >= threshold -> onSwipeDown()
+                            }
+                        } else {
+                            when {
+                                totalDragX <= -threshold -> onSwipeLeft()
+                                totalDragX >= threshold -> onSwipeRight()
+                            }
                         }
                     }
-                }
+                )
             }
         ) {
             CompositionLocalProvider(
