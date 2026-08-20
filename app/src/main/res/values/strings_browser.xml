@@ -57,6 +57,24 @@
     <string name="download_status_cancelled">Cancelled</string>
     <string name="download_status_pending">Waiting</string>
     <string name="download_eta">ETA %1$s</string>
+    <string name="download_settings_file_storage">File storage</string>
+    <string name="download_settings_default_location">Default download location</string>
+    <string name="download_settings_default_location_summary">Android Downloads folder</string>
+    <string name="download_settings_delete_or_remove">When removing downloads</string>
+    <string name="download_removal_delete_from_device">Delete from device</string>
+    <string name="download_removal_delete_from_device_summary">Delete the file and remove it from download history.</string>
+    <string name="download_removal_remove_from_history">Remove from download history</string>
+    <string name="download_removal_remove_from_history_summary">Keep the file on your device.</string>
+    <string name="download_removal_ask">Ask when I remove files</string>
+    <string name="download_manage_with_other_app">Manage downloads with another app</string>
+    <string name="download_manage_with_other_app_summary">Open completed downloads with an app you choose.</string>
+    <string name="download_removal_confirm_title">Remove download?</string>
+    <string name="download_removal_confirm_delete">Delete from device</string>
+    <string name="download_removal_confirm_history">Remove from history</string>
+    <string name="download_removal_cancel">Cancel</string>
+    <string name="summary_title">Page summary</string>
+    <string name="summary_done">Done</string>
+    <string name="summary_unavailable">Midori could not extract enough text to summarize this page.</string>
 
     <string name="reading_list_title">Reading Mode</string>
     <string name="reading_list_search_hint">Search saved reading pages</string>
