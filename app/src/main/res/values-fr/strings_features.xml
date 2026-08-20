@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_app_language">Langue de l’application</string>
+    <string name="settings_app_language_summary">Choisissez la langue utilisée par Midori sur cet appareil.</string>
+    <string name="settings_customize_shortcut">Raccourci de la barre d’outils</string>
+    <string name="settings_toolbar_shortcut">Choisir un raccourci</string>
+    <string name="shortcut_new_tab">Ouvrir un nouvel onglet</string>
+    <string name="shortcut_share">Partager</string>
+    <string name="shortcut_bookmark">Ajouter un marque-page</string>
+    <string name="shortcut_homepage">Page d’accueil</string>
+    <string name="shortcut_back">Retour</string>
+    <string name="shortcut_summarize">Résumer la page</string>
+    <string name="shortcut_none">Aucun</string>
+    <string name="settings_swipe_address_bar_to_switch_tabs">Balayer la barre d’adresse pour changer d’onglet</string>
+    <string name="settings_swipe_toolbar_to_show_tabs">Balayer la barre d’outils verticalement pour voir les onglets ouverts</string>
+    <string name="settings_shake_to_summarize">Secouer pour résumer</string>
+    <string name="settings_notifications_title">Notifications</string>
+    <string name="settings_notifications_summary">Gérer les notifications des sites et de Midori</string>
+    <string name="settings_notifications_open_system">Paramètres des notifications</string>
+    <string name="settings_downloads_title">Paramètres des téléchargements</string>
+    <string name="settings_downloads_summary">Emplacement, suppression et gestion des téléchargements</string>
+    <string name="download_settings_file_storage">Stockage des fichiers</string>
+    <string name="download_settings_default_location">Emplacement de téléchargement par défaut</string>
+    <string name="download_settings_default_location_summary">Dossier Téléchargements d’Android</string>
+    <string name="download_settings_delete_or_remove">Lors de la suppression des téléchargements</string>
+    <string name="download_removal_delete_from_device">Supprimer de l’appareil</string>
+    <string name="download_removal_remove_from_history">Supprimer de l’historique des téléchargements</string>
+    <string name="download_removal_ask">Demander avant de supprimer des fichiers</string>
+    <string name="download_manage_with_other_app">Gérer les téléchargements avec une autre application</string>
+    <string name="summary_title">Résumé de la page</string>
+    <string name="summary_done">Terminé</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_app_language">Idioma da aplicação</string>
+    <string name="settings_app_language_summary">Escolha o idioma usado pelo Midori neste dispositivo.</string>
+    <string name="settings_customize_shortcut">Atalho da barra de ferramentas</string>
+    <string name="settings_toolbar_shortcut">Selecionar um atalho</string>
+    <string name="shortcut_new_tab">Abrir um novo separador</string><string name="shortcut_share">Partilhar</string><string name="shortcut_bookmark">Adicionar marcador</string><string name="shortcut_homepage">Página inicial</string><string name="shortcut_back">Voltar</string><string name="shortcut_summarize">Resumir página</string><string name="shortcut_none">Nenhum</string>
+    <string name="settings_swipe_address_bar_to_switch_tabs">Deslizar lateralmente a barra de endereço para mudar de separador</string>
+    <string name="settings_swipe_toolbar_to_show_tabs">Deslizar verticalmente a barra para ver separadores abertos</string><string name="settings_shake_to_summarize">Agitar para resumir</string>
+    <string name="settings_notifications_title">Notificações</string><string name="settings_notifications_summary">Gerir notificações de sites e do Midori</string><string name="settings_notifications_open_system">Definições de notificações</string>
+    <string name="settings_downloads_title">Definições de transferências</string><string name="settings_downloads_summary">Localização, remoção e gestão de transferências</string>
+    <string name="download_settings_file_storage">Armazenamento de ficheiros</string><string name="download_settings_default_location">Localização predefinida de transferências</string><string name="download_settings_default_location_summary">Pasta Transferências do Android</string><string name="download_settings_delete_or_remove">Ao remover transferências</string><string name="download_removal_delete_from_device">Eliminar do dispositivo</string><string name="download_removal_remove_from_history">Remover do histórico de transferências</string><string name="download_removal_ask">Perguntar ao eliminar ficheiros</string><string name="download_manage_with_other_app">Gerir transferências com outra aplicação</string>
+    <string name="summary_title">Resumo da página</string><string name="summary_done">Concluído</string>
+</resources>

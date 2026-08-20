@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_app_language">应用语言</string><string name="settings_app_language_summary">选择 Midori 在此设备上使用的语言。</string>
+    <string name="settings_customize_shortcut">工具栏快捷方式</string><string name="settings_toolbar_shortcut">选择快捷方式</string><string name="shortcut_new_tab">打开新标签页</string><string name="shortcut_share">分享</string><string name="shortcut_bookmark">添加书签</string><string name="shortcut_homepage">主页</string><string name="shortcut_back">返回</string><string name="shortcut_summarize">总结页面</string><string name="shortcut_none">无</string>
+    <string name="settings_swipe_address_bar_to_switch_tabs">横向滑动地址栏以切换标签页</string><string name="settings_swipe_toolbar_to_show_tabs">纵向滑动工具栏以查看打开的标签页</string><string name="settings_shake_to_summarize">摇动以总结</string>
+    <string name="settings_notifications_title">通知</string><string name="settings_notifications_summary">管理网站和 Midori 通知</string><string name="settings_notifications_open_system">通知设置</string>
+    <string name="settings_downloads_title">下载设置</string><string name="settings_downloads_summary">位置、删除行为和下载管理</string><string name="download_settings_file_storage">文件存储</string><string name="download_settings_default_location">默认下载位置</string><string name="download_settings_default_location_summary">Android 下载文件夹</string><string name="download_settings_delete_or_remove">移除下载时</string><string name="download_removal_delete_from_device">从设备删除</string><string name="download_removal_remove_from_history">从下载历史中移除</string><string name="download_removal_ask">删除文件时询问</string><string name="download_manage_with_other_app">使用其他应用管理下载</string><string name="summary_title">页面摘要</string><string name="summary_done">完成</string>
+</resources>
