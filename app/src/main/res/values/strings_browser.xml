@@ -10,7 +10,6 @@
     <string name="browser_go_to_tab">Go to tab</string>
     <string name="browser_tab_closed">Tab closed</string>
     <string name="browser_tabs_closed">Tabs deleted</string>
-    <string name="browser_search_tabs_hint">Search tabs</string>
     <string name="browser_active_tabs">Active tabs</string>
     <string name="browser_inactive_tabs">Inactive tabs</string>
     <string name="browser_inactive_tabs_summary">Tabs not used in the last 14 days</string>
@@ -38,6 +37,8 @@
     <string name="browser_delete_tab_group">Delete group</string>
     <string name="browser_delete_tab_group_message">Delete %1$s and close its %2$d tabs?</string>
     <string name="browser_tab_group_deleted">%1$d tabs closed and group deleted</string>
+    <string name="browser_groups_empty_title">No tab groups yet</string>
+    <string name="browser_groups_empty_subtitle">Hold tabs to select them, then create a group.</string>
     <string name="browser_cancel_selection">Cancel</string>
     <string name="browser_tabs_grouped">%1$d tabs grouped</string>
     <string name="browser_no_tabs_grouped">Select at least 2 tabs to create a group</string>

@@ -3,6 +3,7 @@ package org.midorinext.android.ui.tabs
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -29,6 +30,7 @@ import org.midorinext.android.ext.toCleanHost
 import org.midorinext.android.ui.browser.home.HomePrivateBrowsingContent
 import org.midorinext.android.ui.theme.LocalMidoriTheme
 
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun TabRow(
     tab: TabSessionState,
@@ -41,6 +43,7 @@ fun TabRow(
     isSelectedForGrouping: Boolean = false,
     groupId: String? = null,
     onRemoveFromGroup: (String, String) -> Unit = { _, _ -> },
+    onLongPressed: (TabSessionState) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val isTabBlocked = contentBlockerState.getStatusForTab(tab.id) != ContentBlockerState.Status.ALLOWED
@@ -54,7 +57,10 @@ fun TabRow(
                 if (selected || isSelectedForGrouping) MaterialTheme.colorScheme.secondaryContainer
                 else MaterialTheme.colorScheme.surface
             )
-            .clickable { onSelected(tab) }
+            .combinedClickable(
+                onClick = { onSelected(tab) },
+                onLongClick = { onLongPressed(tab) }
+            )
     ) {
         Card(
             shape = RoundedCornerShape(12.dp),

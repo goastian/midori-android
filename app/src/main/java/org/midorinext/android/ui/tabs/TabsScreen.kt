@@ -40,13 +40,11 @@ fun TabsScreen(
     val private by appViewModel.isPrivate.collectAsState()
     val tabs by tabsViewModel.tabs.collectAsState()
     val smartTabs by tabsViewModel.smartTabs.collectAsState()
-    val tabSearchQuery by tabsViewModel.tabSearchQuery.collectAsState()
     val tabsViewOption by tabsViewModel.tabsViewOption.collectAsState()
     val restoreComplete by tabsViewModel.restoreComplete.collectAsState()
-    val canUndoClose by tabsViewModel.canUndoClose.collectAsState()
-    val recentlyClosedCount by tabsViewModel.recentlyClosedCount.collectAsState()
     var selectedTabIds by remember { mutableStateOf(emptySet<String>()) }
     var selectionMode by remember { mutableStateOf(false) }
+    var showGroups by remember { mutableStateOf(false) }
     var selectionTargetGroupId by remember { mutableStateOf<String?>(null) }
     var showGroupNameDialog by remember { mutableStateOf(false) }
     var groupName by remember { mutableStateOf("") }
@@ -90,19 +88,34 @@ fun TabsScreen(
                 .padding(start = 16.dp)
             ) {
                 TabIconButton(
-                    onClick = { appViewModel.setPrivacyMode(PrivacyMode.NORMAL) },
+                    onClick = {
+                        showGroups = false
+                        appViewModel.setPrivacyMode(PrivacyMode.NORMAL)
+                    },
                     icon = {
                         Box(modifier = Modifier.size(30.dp)) {
                             TabCounter(tabCount = normalTabsCount)
                         }
                     },
-                    selected = !private,
+                    selected = !private && !showGroups,
                     modifier = Modifier.size(48.dp, 56.dp)
                 )
                 TabIconButton(
-                    onClick = { appViewModel.setPrivacyMode(PrivacyMode.PRIVATE) },
+                    onClick = {
+                        showGroups = false
+                        appViewModel.setPrivacyMode(PrivacyMode.PRIVATE)
+                    },
                     icon = { Icon(painter = painterResource(id = R.drawable.icons_privacy_mask), contentDescription = "Tabs") },
                     selected = private,
+                    modifier = Modifier.size(48.dp, 56.dp)
+                )
+                TabIconButton(
+                    onClick = {
+                        showGroups = true
+                        appViewModel.setPrivacyMode(PrivacyMode.NORMAL)
+                    },
+                    icon = { Icon(painter = painterResource(id = R.drawable.icons_folder), contentDescription = "Groups") },
+                    selected = showGroups,
                     modifier = Modifier.size(48.dp, 56.dp)
                 )
             }
@@ -111,7 +124,7 @@ fun TabsScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.align(Alignment.CenterEnd)
             ) {
-                val privateBeforeClick = private
+                val privateBeforeClick = private && !showGroups
                 ZapButton(appViewModel, fromScreen = "Tabs") { success ->
                     if (success) {
                         tabsViewModel.openNewTab(privateBeforeClick)
@@ -119,45 +132,16 @@ fun TabsScreen(
                     }
                 }
                 ToolbarAction(onClick = {
-                    tabsViewModel.openNewTab(private)
+                    tabsViewModel.openNewTab(private && !showGroups)
                     onClose(TabOpening.NONE)
                 }) {
                     Icon(painter = painterResource(id = R.drawable.icons_add_tab), contentDescription = "Add tab")
                 }
                 val tabsClosedString = stringResource(id = R.string.browser_tabs_closed)
-                val duplicateTabsClosedString = stringResource(id = R.string.browser_duplicate_tabs_closed)
-                val noDuplicateTabsString = stringResource(id = R.string.browser_no_duplicate_tabs)
-                val tabReopenedString = stringResource(id = R.string.browser_recent_tab_reopened)
                 TabsMenuMore(
                     tabsViewOption = resolvedTabsViewOption,
                     private = private,
-                    canUndoClose = canUndoClose,
-                    recentlyClosedCount = recentlyClosedCount,
                     onTabsViewOptionChange = { tabsViewModel.updateTabsViewOption(it) },
-                    onUndoClose = {
-                        tabsViewModel.undoLastClose()
-                        appViewModel.showSnackbar(tabReopenedString)
-                    },
-                    onReopenRecentlyClosed = {
-                        if (tabsViewModel.reopenRecentlyClosed()) {
-                            appViewModel.showSnackbar(tabReopenedString)
-                        }
-                    },
-                    onCloseDuplicateTabs = {
-                        val closedCount = tabsViewModel.closeDuplicateTabs(private)
-                        appViewModel.showSnackbar(
-                            if (closedCount > 0) {
-                                duplicateTabsClosedString.format(closedCount)
-                            } else {
-                                noDuplicateTabsString
-                            }
-                        )
-                    },
-                    onStartTabSelection = {
-                        selectionMode = true
-                        selectionTargetGroupId = null
-                        selectedTabIds = setOfNotNull(tabsViewModel.selectedTabId.value)
-                    },
                     onRemoveTabs = {
                         tabsViewModel.removeTabs(private)
                         appViewModel.showSnackbar(tabsClosedString)
@@ -178,49 +162,16 @@ fun TabsScreen(
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
 
-        TabSearchField(
-            query = tabSearchQuery,
-            onQueryChange = tabsViewModel::updateTabSearchQuery,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
-        )
-
-        val duplicateTabsClosedString = stringResource(id = R.string.browser_duplicate_tabs_closed)
-        val noDuplicateTabsString = stringResource(id = R.string.browser_no_duplicate_tabs)
         val tabsGroupedString = stringResource(id = R.string.browser_tabs_grouped)
         val noTabsGroupedString = stringResource(id = R.string.browser_no_tabs_grouped)
         val tabsAddedToGroupString = stringResource(id = R.string.browser_tabs_added_to_group)
         val tabGroupDeletedString = stringResource(id = R.string.browser_tab_group_deleted)
         val tabRemovedFromGroupString = stringResource(id = R.string.browser_tab_removed_from_group)
-        val tabReopenedString = stringResource(id = R.string.browser_recent_tab_reopened)
         SmartTabsActionBar(
             private = private,
-            canReopenClosedTab = canUndoClose || recentlyClosedCount > 0,
-            onReopenClosedTab = {
-                if (canUndoClose) {
-                    tabsViewModel.undoLastClose()
-                    appViewModel.showSnackbar(tabReopenedString)
-                } else if (tabsViewModel.reopenRecentlyClosed()) {
-                    appViewModel.showSnackbar(tabReopenedString)
-                }
-            },
-            onCloseDuplicateTabs = {
-                val closedCount = tabsViewModel.closeDuplicateTabs(private)
-                appViewModel.showSnackbar(
-                    if (closedCount > 0) {
-                        duplicateTabsClosedString.format(closedCount)
-                    } else {
-                        noDuplicateTabsString
-                    }
-                )
-            },
             selectionMode = selectionMode,
             addingToGroup = selectionTargetGroupId != null,
             selectedTabsCount = selectedTabIds.size,
-            onStartTabSelection = {
-                selectionMode = true
-                selectionTargetGroupId = null
-                selectedTabIds = setOfNotNull(tabsViewModel.selectedTabId.value)
-            },
             onGroupTabs = {
                 val targetGroupId = selectionTargetGroupId
                 if (targetGroupId == null) {
@@ -338,6 +289,7 @@ fun TabsScreen(
             tabsViewOption = resolvedTabsViewOption,
             selectionMode = selectionMode,
             selectedTabIds = selectedTabIds,
+            groupsOnly = showGroups,
             selectionTargetGroupId = selectionTargetGroupId,
             onTabSelectionChange = { tabId ->
                 selectedTabIds = selectedTabIds.let { selected ->
@@ -355,6 +307,14 @@ fun TabsScreen(
                 if (tabsViewModel.removeTabFromGroup(groupId, tabId)) {
                     appViewModel.showSnackbar(tabRemovedFromGroupString)
                 }
+            },
+            onTabLongPressed = { tab ->
+                if (!tab.content.private) {
+                    showGroups = false
+                    selectionMode = true
+                    selectionTargetGroupId = null
+                    selectedTabIds = setOf(tab.id)
+                }
             }
         )
     }
@@ -363,13 +323,9 @@ fun TabsScreen(
 @Composable
 fun SmartTabsActionBar(
     private: Boolean,
-    canReopenClosedTab: Boolean,
     selectionMode: Boolean,
     addingToGroup: Boolean,
     selectedTabsCount: Int,
-    onReopenClosedTab: () -> Unit,
-    onCloseDuplicateTabs: () -> Unit,
-    onStartTabSelection: () -> Unit,
     onGroupTabs: () -> Unit,
     onCancelTabSelection: () -> Unit,
     modifier: Modifier = Modifier
@@ -401,39 +357,6 @@ fun SmartTabsActionBar(
                 label = { Text(stringResource(R.string.browser_cancel_selection)) }
             )
             return@Row
-        }
-        AssistChip(
-            onClick = onReopenClosedTab,
-            enabled = canReopenClosedTab,
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.icons_reload),
-                    contentDescription = null
-                )
-            },
-            label = { Text(stringResource(id = R.string.browser_reopen_closed_tab)) }
-        )
-        AssistChip(
-            onClick = onCloseDuplicateTabs,
-            leadingIcon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.icons_close_circled),
-                    contentDescription = null
-                )
-            },
-            label = { Text(stringResource(id = R.string.browser_close_duplicate_tabs)) }
-        )
-        if (!private) {
-            AssistChip(
-                onClick = onStartTabSelection,
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.icons_folder_add),
-                        contentDescription = null
-                    )
-                },
-                label = { Text(stringResource(id = R.string.browser_group_tabs)) }
-            )
         }
     }
 }
@@ -521,13 +444,7 @@ private fun TabGroupColorSelector(
 fun TabsMenuMore(
     tabsViewOption: TabsViewOption,
     private: Boolean,
-    canUndoClose: Boolean,
-    recentlyClosedCount: Int,
     onTabsViewOptionChange: (TabsViewOption) -> Unit,
-    onUndoClose: () -> Unit,
-    onReopenRecentlyClosed: () -> Unit,
-    onCloseDuplicateTabs: () -> Unit,
-    onStartTabSelection: () -> Unit,
     onRemoveTabs: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -545,36 +462,6 @@ fun TabsMenuMore(
             onDismissRequest = { showMenu = false },
             modifier = Modifier.defaultMinSize(minWidth = 112.dp)
         ) {
-            DropdownItem(
-                text = stringResource(id = R.string.browser_reopen_closed_tab),
-                icon = R.drawable.icons_reload,
-                onClick = {
-                    showMenu = false
-                    if (canUndoClose) {
-                        onUndoClose()
-                    } else if (recentlyClosedCount > 0) {
-                        onReopenRecentlyClosed()
-                    }
-                }
-            )
-            DropdownItem(
-                text = stringResource(id = R.string.browser_close_duplicate_tabs),
-                icon = R.drawable.icons_close_circled,
-                onClick = {
-                    showMenu = false
-                    onCloseDuplicateTabs()
-                }
-            )
-            if (!private) {
-                DropdownItem(
-                    text = stringResource(id = R.string.browser_group_tabs),
-                    icon = R.drawable.icons_folder_add,
-                    onClick = {
-                        showMenu = false
-                        onStartTabSelection()
-                    }
-                )
-            }
             DropdownItem(
                 text = stringResource(id = if (private) R.string.browser_close_private_tabs else R.string.browser_close_all_tabs),
                 icon = R.drawable.icons_close,
@@ -625,12 +512,14 @@ fun AnimatedTabList(
     tabsViewOption: TabsViewOption,
     selectionMode: Boolean,
     selectedTabIds: Set<String>,
+    groupsOnly: Boolean,
     selectionTargetGroupId: String?,
     onTabSelectionChange: (String) -> Unit,
     onEditGroup: (SmartTabGroup) -> Unit,
     onAddTabsToGroup: (SmartTabGroup) -> Unit,
     onDeleteGroup: (SmartTabGroup) -> Unit,
-    onRemoveTabFromGroup: (String, String) -> Unit
+    onRemoveTabFromGroup: (String, String) -> Unit,
+    onTabLongPressed: (TabSessionState) -> Unit
 ) {
     val selectedTabId by tabsViewModel.selectedTabId.collectAsState()
 
@@ -668,7 +557,8 @@ fun AnimatedTabList(
                 selectionMode = selectionMode,
                 selectedTabIds = selectedTabIds,
                 onTabSelectionChange = onTabSelectionChange,
-                selectionTargetGroupId = selectionTargetGroupId
+                selectionTargetGroupId = selectionTargetGroupId,
+                onTabLongPressed = onTabLongPressed
             )
         }
 
@@ -691,7 +581,9 @@ fun AnimatedTabList(
                 selectionMode = selectionMode,
                 selectedTabIds = selectedTabIds,
                 onTabSelectionChange = onTabSelectionChange,
+                onTabLongPressed = onTabLongPressed,
                 selectionTargetGroupId = selectionTargetGroupId,
+                groupsOnly = groupsOnly,
                 onEditGroup = onEditGroup,
                 onAddTabsToGroup = onAddTabsToGroup,
                 onDeleteGroup = onDeleteGroup,
@@ -701,30 +593,6 @@ fun AnimatedTabList(
     }
 }
 
-@Composable
-fun TabSearchField(
-    query: String,
-    onQueryChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    OutlinedTextField(
-        value = query,
-        onValueChange = onQueryChange,
-        modifier = modifier.fillMaxWidth(),
-        singleLine = true,
-        leadingIcon = {
-            Icon(painterResource(id = R.drawable.icons_search), contentDescription = null)
-        },
-        trailingIcon = {
-            if (query.isNotEmpty()) {
-                IconButton(onClick = { onQueryChange("") }) {
-                    Icon(painterResource(id = R.drawable.icons_close), contentDescription = null)
-                }
-            }
-        },
-        placeholder = { Text(stringResource(id = R.string.browser_search_tabs_hint)) }
-    )
-}
 
 @Composable
 fun TabIconButton(

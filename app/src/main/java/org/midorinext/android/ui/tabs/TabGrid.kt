@@ -4,7 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -49,7 +49,8 @@ fun TabGrid(
     modifier: Modifier = Modifier,
     selectionMode: Boolean = false,
     selectedTabIds: Set<String> = emptySet(),
-    onTabSelectionChange: (String) -> Unit = {}
+    onTabSelectionChange: (String) -> Unit = {},
+    onTabLongPressed: (TabSessionState) -> Unit = {}
 ) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 150.dp),
@@ -70,6 +71,7 @@ fun TabGrid(
                 contentBlockerState = contentBlockerState,
                 selectionMode = selectionMode,
                 isSelectedForGrouping = tab.id in selectedTabIds,
+                onLongPressed = onTabLongPressed,
                 modifier = Modifier.animateItem()
             )
         }
@@ -87,6 +89,7 @@ fun TabCard(
     contentBlockerState: ContentBlockerState,
     selectionMode: Boolean = false,
     isSelectedForGrouping: Boolean = false,
+    onLongPressed: (TabSessionState) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var deleting by remember { mutableStateOf(false) }
@@ -103,7 +106,10 @@ fun TabCard(
     Column(modifier = modifier
         .scale(scale)
         .clip(MaterialTheme.shapes.extraSmall)
-        .clickable { onSelected(tab) }
+        .combinedClickable(
+            onClick = { onSelected(tab) },
+            onLongClick = { onLongPressed(tab) }
+        )
         .background(
             if (selected || isSelectedForGrouping) MaterialTheme.colorScheme.primary
             else MaterialTheme.colorScheme.secondaryContainer

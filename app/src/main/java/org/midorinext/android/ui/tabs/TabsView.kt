@@ -39,15 +39,14 @@ fun SmartTabView(
     selectionMode: Boolean = false,
     selectedTabIds: Set<String> = emptySet(),
     onTabSelectionChange: (String) -> Unit = {},
+    onTabLongPressed: (TabSessionState) -> Unit = {},
     selectionTargetGroupId: String? = null,
+    groupsOnly: Boolean = false,
     onEditGroup: (SmartTabGroup) -> Unit = {},
     onAddTabsToGroup: (SmartTabGroup) -> Unit = {},
     onDeleteGroup: (SmartTabGroup) -> Unit = {},
     onRemoveTabFromGroup: (String, String) -> Unit = { _, _ -> }
 ) {
-    val searchResults = remember(state.searchResults, private) {
-        state.searchResults.filter { it.content.private == private }
-    }
     val activeTabs = remember(state.activeTabs, private) {
         state.activeTabs.filter { it.content.private == private }
     }
@@ -72,27 +71,51 @@ fun SmartTabView(
             tabsViewOption = tabsViewOption,
             selectionMode = selectionMode,
             selectedTabIds = selectedTabIds,
-            onTabSelectionChange = onTabSelectionChange
+            onTabSelectionChange = onTabSelectionChange,
+            onTabLongPressed = onTabLongPressed
         )
     }
 
-    if (state.searchActive) {
-        return TabView(
-            tabs = searchResults,
-            private = private,
-            selectedTabId = selectedTabId,
-            thumbnailStorage = thumbnailStorage,
-            browserIcons = browserIcons,
-            onTabSelected = onTabSelected,
-            onTabDeleted = onTabDeleted,
-            contentBlockerState = contentBlockerState,
-            modifier = modifier,
-            tabsViewOption = tabsViewOption,
-            selectionMode = selectionMode,
-            selectedTabIds = selectedTabIds,
-            onTabSelectionChange = onTabSelectionChange
-        )
+    if (groupsOnly) {
+        if (groups.isEmpty()) {
+            EmptyPagePlaceholder(
+                icon = R.drawable.icons_folder,
+                title = stringResource(R.string.browser_groups_empty_title),
+                subtitle = stringResource(R.string.browser_groups_empty_subtitle)
+            )
+            return
+        }
+
+        LazyColumn(modifier = modifier) {
+            groups.forEach { group ->
+                item(key = "groups-only-${group.id}") {
+                    TabGroupSectionHeader(
+                        group = group,
+                        onEdit = { onEditGroup(group) },
+                        onAddTabs = { onAddTabsToGroup(group) },
+                        onDelete = { onDeleteGroup(group) }
+                    )
+                }
+                items(group.tabs, key = { "groups-only-${group.id}-${it.id}" }) { tab ->
+                    TabRow(
+                        tab = tab,
+                        selected = tab.id == selectedTabId,
+                        thumbnailStorage = thumbnailStorage,
+                        onSelected = onTabSelected,
+                        onDeleted = onTabDeleted,
+                        contentBlockerState = contentBlockerState,
+                        selectionMode = selectionMode,
+                        isSelectedForGrouping = tab.id in selectedTabIds,
+                        groupId = group.id,
+                        onRemoveFromGroup = onRemoveTabFromGroup,
+                        onLongPressed = onTabLongPressed
+                    )
+                }
+            }
+        }
+        return
     }
+
 
     val hasSections = groups.isNotEmpty() || inactiveTabs.isNotEmpty()
     if (!hasSections) {
@@ -109,7 +132,8 @@ fun SmartTabView(
             tabsViewOption = tabsViewOption,
             selectionMode = selectionMode,
             selectedTabIds = selectedTabIds,
-            onTabSelectionChange = onTabSelectionChange
+            onTabSelectionChange = onTabSelectionChange,
+            onTabLongPressed = onTabLongPressed
         )
     }
 
@@ -139,7 +163,8 @@ fun SmartTabView(
                     selectionMode = selectionMode,
                     isSelectedForGrouping = tab.id in selectedTabIds,
                     groupId = group.id,
-                    onRemoveFromGroup = onRemoveTabFromGroup
+                    onRemoveFromGroup = onRemoveTabFromGroup,
+                    onLongPressed = onTabLongPressed
                 )
             }
         }
@@ -160,7 +185,8 @@ fun SmartTabView(
                     onDeleted = onTabDeleted,
                     contentBlockerState = contentBlockerState,
                     selectionMode = selectionMode,
-                    isSelectedForGrouping = tab.id in selectedTabIds
+                    isSelectedForGrouping = tab.id in selectedTabIds,
+                    onLongPressed = onTabLongPressed
                 )
             }
         }
@@ -181,7 +207,8 @@ fun SmartTabView(
                     onDeleted = onTabDeleted,
                     contentBlockerState = contentBlockerState,
                     selectionMode = selectionMode,
-                    isSelectedForGrouping = tab.id in selectedTabIds
+                    isSelectedForGrouping = tab.id in selectedTabIds,
+                    onLongPressed = onTabLongPressed
                 )
             }
         }
@@ -295,7 +322,8 @@ fun TabView(
     tabsViewOption: TabsViewOption = TabsViewOption.LIST,
     selectionMode: Boolean = false,
     selectedTabIds: Set<String> = emptySet(),
-    onTabSelectionChange: (String) -> Unit = {}
+    onTabSelectionChange: (String) -> Unit = {},
+    onTabLongPressed: (TabSessionState) -> Unit = {}
 ) {
     if (tabs.isNotEmpty()) {
         when (tabsViewOption) {
@@ -309,7 +337,8 @@ fun TabView(
                 modifier = modifier,
                 selectionMode = selectionMode,
                 selectedTabIds = selectedTabIds,
-                onTabSelectionChange = onTabSelectionChange
+                onTabSelectionChange = onTabSelectionChange,
+                onTabLongPressed = onTabLongPressed
             )
             TabsViewOption.GRID -> TabGrid(
                 tabs = tabs,
@@ -322,7 +351,8 @@ fun TabView(
                 modifier = modifier,
                 selectionMode = selectionMode,
                 selectedTabIds = selectedTabIds,
-                onTabSelectionChange = onTabSelectionChange
+                onTabSelectionChange = onTabSelectionChange,
+                onTabLongPressed = onTabLongPressed
             )
             TabsViewOption.UNRECOGNIZED -> {}
         }

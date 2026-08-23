@@ -65,11 +65,7 @@ class TabsScreenViewModel @Inject constructor(
             initialValue = false
         )
 
-    private val searchQuery = MutableStateFlow("")
-
     private val recentlyClosedTabs = MutableStateFlow<List<ClosedTabSnapshot>>(emptyList())
-
-    val tabSearchQuery: StateFlow<String> = searchQuery.asStateFlow()
 
     val recentlyClosedCount: StateFlow<Int> = recentlyClosedTabs
         .map { it.size }
@@ -79,9 +75,9 @@ class TabsScreenViewModel @Inject constructor(
             initialValue = 0
         )
 
-    val smartTabs = combine(tabs, tabGroups, appPreferencesRepository.tabGroupColorsFlow, searchQuery) {
-            allTabs, groups, colors, query ->
-        buildSmartTabs(allTabs, groups, colors, query)
+    val smartTabs = combine(tabs, tabGroups, appPreferencesRepository.tabGroupColorsFlow) {
+            allTabs, groups, colors ->
+        buildSmartTabs(allTabs, groups, colors)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000L),
@@ -122,10 +118,6 @@ class TabsScreenViewModel @Inject constructor(
 
     fun updateTabsViewOption(option: TabsViewOption) {
         viewModelScope.launch { appPreferencesRepository.updateTabsView(option) }
-    }
-
-    fun updateTabSearchQuery(query: String) {
-        searchQuery.value = query
     }
 
     fun removeTabs(private: Boolean = false) {
@@ -293,21 +285,9 @@ class TabsScreenViewModel @Inject constructor(
     private fun buildSmartTabs(
         allTabs: List<mozilla.components.browser.state.state.TabSessionState>,
         groups: List<TabGroup>,
-        groupColors: Map<String, Int>,
-        query: String
+        groupColors: Map<String, Int>
     ): SmartTabsState {
-        val trimmedQuery = query.trim()
-        val searchedTabs = allTabs.filter { tab ->
-            trimmedQuery.isBlank() ||
-                tab.content.title.contains(trimmedQuery, ignoreCase = true) ||
-                tab.content.url.contains(trimmedQuery, ignoreCase = true)
-        }
-
-        if (trimmedQuery.isNotBlank()) {
-            return SmartTabsState(searchResults = searchedTabs.reversed(), searchActive = true)
-        }
-
-        val tabsById = searchedTabs.associateBy { it.id }
+        val tabsById = allTabs.associateBy { it.id }
         val visibleGroups = groups.mapIndexedNotNull { index, group ->
             val groupTabs = group.tabIds.mapNotNull { tabsById[it] }
             if (groupTabs.size > 1) {
@@ -325,7 +305,7 @@ class TabsScreenViewModel @Inject constructor(
         }
 
         val groupedIds = visibleGroups.flatMap { group -> group.tabs.map { it.id } }.toSet()
-        val ungroupedTabs = searchedTabs.filterNot { it.id in groupedIds }
+        val ungroupedTabs = allTabs.filterNot { it.id in groupedIds }
         val inactiveTabs = ungroupedTabs.filter { it.isInactive() }
         val activeTabs = ungroupedTabs.filterNot { it.isInactive() }
 
@@ -364,15 +344,12 @@ class TabsScreenViewModel @Inject constructor(
 data class SmartTabsState(
     val activeTabs: List<mozilla.components.browser.state.state.TabSessionState> = emptyList(),
     val inactiveTabs: List<mozilla.components.browser.state.state.TabSessionState> = emptyList(),
-    val groups: List<SmartTabGroup> = emptyList(),
-    val searchResults: List<mozilla.components.browser.state.state.TabSessionState> = emptyList(),
-    val searchActive: Boolean = false
+    val groups: List<SmartTabGroup> = emptyList()
 ) {
     val isEmpty: Boolean
         get() = activeTabs.isEmpty() &&
             inactiveTabs.isEmpty() &&
-            groups.isEmpty() &&
-            searchResults.isEmpty()
+            groups.isEmpty()
 }
 
 data class SmartTabGroup(
