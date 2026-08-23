@@ -107,4 +107,5 @@ message AppPreferences {
   bool shake_to_summarize_enabled = 40;
   DownloadRemovalBehavior download_removal_behavior = 41;
   bool manage_downloads_with_other_app = 42;
+  map<string, int32> tab_group_colors = 43;
 }

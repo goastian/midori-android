@@ -1,13 +1,17 @@
 package org.midorinext.android.ui.tabs
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.midorinext.android.preferences.app.TabsViewOption
@@ -17,6 +21,8 @@ import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 import org.midorinext.android.R
 import org.midorinext.android.contentBlocker.ContentBlockerState
+import org.midorinext.android.ui.widgets.Dropdown
+import org.midorinext.android.ui.widgets.DropdownItem
 
 @Composable
 fun SmartTabView(
@@ -32,7 +38,12 @@ fun SmartTabView(
     tabsViewOption: TabsViewOption = TabsViewOption.LIST,
     selectionMode: Boolean = false,
     selectedTabIds: Set<String> = emptySet(),
-    onTabSelectionChange: (String) -> Unit = {}
+    onTabSelectionChange: (String) -> Unit = {},
+    selectionTargetGroupId: String? = null,
+    onEditGroup: (SmartTabGroup) -> Unit = {},
+    onAddTabsToGroup: (SmartTabGroup) -> Unit = {},
+    onDeleteGroup: (SmartTabGroup) -> Unit = {},
+    onRemoveTabFromGroup: (String, String) -> Unit = { _, _ -> }
 ) {
     val searchResults = remember(state.searchResults, private) {
         state.searchResults.filter { it.content.private == private }
@@ -45,6 +56,24 @@ fun SmartTabView(
     }
     val groups = remember(state.groups, private) {
         if (private) emptyList() else state.groups
+    }
+
+    if (selectionTargetGroupId != null) {
+        return TabView(
+            tabs = (activeTabs + inactiveTabs),
+            private = private,
+            selectedTabId = selectedTabId,
+            thumbnailStorage = thumbnailStorage,
+            browserIcons = browserIcons,
+            onTabSelected = onTabSelected,
+            onTabDeleted = onTabDeleted,
+            contentBlockerState = contentBlockerState,
+            modifier = modifier,
+            tabsViewOption = tabsViewOption,
+            selectionMode = selectionMode,
+            selectedTabIds = selectedTabIds,
+            onTabSelectionChange = onTabSelectionChange
+        )
     }
 
     if (state.searchActive) {
@@ -92,9 +121,11 @@ fun SmartTabView(
     LazyColumn(modifier = modifier) {
         groups.forEach { group ->
             item(key = "group-${group.id}") {
-                TabSectionHeader(
-                    title = group.name,
-                    subtitle = stringResource(R.string.browser_tab_group_count, group.tabs.size)
+                TabGroupSectionHeader(
+                    group = group,
+                    onEdit = { onEditGroup(group) },
+                    onAddTabs = { onAddTabsToGroup(group) },
+                    onDelete = { onDeleteGroup(group) }
                 )
             }
             items(group.tabs, key = { "group-${group.id}-${it.id}" }) { tab ->
@@ -106,7 +137,9 @@ fun SmartTabView(
                     onDeleted = onTabDeleted,
                     contentBlockerState = contentBlockerState,
                     selectionMode = selectionMode,
-                    isSelectedForGrouping = tab.id in selectedTabIds
+                    isSelectedForGrouping = tab.id in selectedTabIds,
+                    groupId = group.id,
+                    onRemoveFromGroup = onRemoveTabFromGroup
                 )
             }
         }
@@ -156,6 +189,74 @@ fun SmartTabView(
 }
 
 @Composable
+private fun TabGroupSectionHeader(
+    group: SmartTabGroup,
+    onEdit: () -> Unit,
+    onAddTabs: () -> Unit,
+    onDelete: () -> Unit
+) {
+    var showMenu by remember { mutableStateOf(false) }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(12.dp)
+                .background(group.color.toComposeColor(), CircleShape)
+        )
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .clickable(onClick = onEdit)
+                .padding(horizontal = 12.dp, vertical = 4.dp)
+        ) {
+            Text(text = group.name, style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = stringResource(R.string.browser_tab_group_count, group.tabs.size),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        IconButton(onClick = onAddTabs) {
+            Icon(
+                painter = painterResource(R.drawable.icons_folder_add),
+                contentDescription = stringResource(R.string.browser_add_tabs_to_group)
+            )
+        }
+        Box {
+            IconButton(onClick = { showMenu = true }) {
+                Icon(
+                    painter = painterResource(R.drawable.icons_more_vertical),
+                    contentDescription = stringResource(R.string.browser_manage_tab_group)
+                )
+            }
+            Dropdown(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                DropdownItem(
+                    text = stringResource(R.string.browser_edit_tab_group),
+                    icon = R.drawable.icons_edit,
+                    onClick = {
+                        showMenu = false
+                        onEdit()
+                    }
+                )
+                DropdownItem(
+                    text = stringResource(R.string.browser_delete_tab_group),
+                    icon = R.drawable.icons_close,
+                    onClick = {
+                        showMenu = false
+                        onDelete()
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun TabSectionHeader(
     title: String,
     subtitle: String,
@@ -169,6 +270,15 @@ private fun TabSectionHeader(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
+}
+
+fun TabGroupColor.toComposeColor(): Color = when (this) {
+    TabGroupColor.BLUE -> Color(0xFF1976D2)
+    TabGroupColor.TEAL -> Color(0xFF00897B)
+    TabGroupColor.GREEN -> Color(0xFF43A047)
+    TabGroupColor.ORANGE -> Color(0xFFFB8C00)
+    TabGroupColor.RED -> Color(0xFFE53935)
+    TabGroupColor.PURPLE -> Color(0xFF8E24AA)
 }
 
 @Composable

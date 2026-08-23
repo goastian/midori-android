@@ -39,6 +39,9 @@ class AppPreferencesRepository @Inject constructor(
             history = it.clearDataHistory
         )}
 
+    val tabGroupColorsFlow: Flow<Map<String, Int>> = flow
+        .map { it.tabGroupColorsMap }
+
     suspend fun updateToolbarPosition(position: ToolbarPosition) {
         datastore.updateData { preferences ->
             preferences.toBuilder().setToolbarPosition(position).build()
@@ -54,6 +57,22 @@ class AppPreferencesRepository @Inject constructor(
     suspend fun updateTabsView(option: TabsViewOption) {
         datastore.updateData { preferences ->
             preferences.toBuilder().setTabsView(option).build()
+        }
+    }
+
+    suspend fun updateTabGroupColor(groupId: String, color: Int) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder()
+                .putTabGroupColors(groupId, color)
+                .build()
+        }
+    }
+
+    suspend fun removeTabGroupColor(groupId: String) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder()
+                .removeTabGroupColors(groupId)
+                .build()
         }
     }
 

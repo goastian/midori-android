@@ -39,6 +39,8 @@ fun TabRow(
     contentBlockerState: ContentBlockerState,
     selectionMode: Boolean = false,
     isSelectedForGrouping: Boolean = false,
+    groupId: String? = null,
+    onRemoveFromGroup: (String, String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     val isTabBlocked = contentBlockerState.getStatusForTab(tab.id) != ContentBlockerState.Status.ALLOWED
@@ -100,6 +102,13 @@ fun TabRow(
                 checked = isSelectedForGrouping,
                 onCheckedChange = { onSelected(tab) }
             )
+        } else if (groupId != null) {
+            IconButton(onClick = { onRemoveFromGroup(groupId, tab.id) }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.icons_folder),
+                    contentDescription = stringResource(R.string.browser_remove_tab_from_group)
+                )
+            }
         } else {
             IconButton(onClick = { onDeleted(tab) }) {
                 Icon(painter = painterResource(id = R.drawable.icons_close), contentDescription = "Delete")
