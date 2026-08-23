@@ -1,6 +1,8 @@
 package org.midorinext.android.ui.browser.menu
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -33,56 +35,42 @@ fun BrowserMenu(
     viewModel: BrowserScreenViewModel,
     applicationViewModel: MidoriApplicationViewModel
 ) {
-    var menuPage by remember { mutableStateOf(BrowserMenuPage.Primary) }
     val currentUrl by viewModel.currentUrl.collectAsState()
     val showPageActions = currentUrl.isExternalPage()
 
-    LaunchedEffect(expanded) {
-        if (!expanded) {
-            menuPage = BrowserMenuPage.Primary
-        }
-    }
-
     Dropdown(
         expanded = expanded,
-        onDismissRequest = onDismissRequest
+        onDismissRequest = onDismissRequest,
+        modifier = Modifier.widthIn(min = 280.dp, max = 320.dp)
     ) {
-        when (menuPage) {
-            BrowserMenuPage.Primary -> PrimaryMenu(
-                navigateTo = navigateTo,
-                viewModel = viewModel,
-                currentUrl = currentUrl,
-                showPageActions = showPageActions,
-                onMoreOptionsClick = { menuPage = BrowserMenuPage.MoreOptions },
-                onDismissRequest = onDismissRequest
-            )
-            BrowserMenuPage.MoreOptions -> MoreOptionsMenu(
+        Column(
+            modifier = Modifier
+                .heightIn(max = 640.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            BrowserMenuContent(
                 navigateTo = navigateTo,
                 viewModel = viewModel,
                 applicationViewModel = applicationViewModel,
+                currentUrl = currentUrl,
                 showPageActions = showPageActions,
-                onBack = { menuPage = BrowserMenuPage.Primary },
                 onDismissRequest = onDismissRequest
             )
         }
     }
 }
 
-private enum class BrowserMenuPage {
-    Primary,
-    MoreOptions
-}
-
 @Composable
-private fun PrimaryMenu(
+private fun BrowserMenuContent(
     navigateTo: (NavDestination) -> Unit,
     viewModel: BrowserScreenViewModel,
+    applicationViewModel: MidoriApplicationViewModel,
     currentUrl: String?,
     showPageActions: Boolean,
-    onMoreOptionsClick: () -> Unit,
     onDismissRequest: () -> Unit
 ) {
     val isMidoriVpnActionAvailable by viewModel.isMidoriVpnActionAvailable.collectAsState()
+    val showQuitApp by applicationViewModel.zapOnQuit.collectAsState()
 
     BrowserNavigation(viewModel)
     HorizontalDivider()
@@ -97,8 +85,34 @@ private fun PrimaryMenu(
     )
     HorizontalDivider()
     NewTabAction(viewModel, onDismissRequest)
+    PrivateTabAction(viewModel, onDismissRequest)
+    DropdownItem(
+        text = stringResource(id = R.string.browser_close_tab),
+        icon = R.drawable.icons_close,
+        onClick = {
+            onDismissRequest()
+            viewModel.closeCurrentTab()
+        }
+    )
     if (showPageActions && !currentUrl.isNullOrBlank()) {
         ShareAction(url = currentUrl, onDismissRequest = onDismissRequest)
+        TranslateAction(
+            viewModel = viewModel,
+            applicationViewModel = applicationViewModel,
+            onDismissRequest = onDismissRequest
+        )
+    }
+    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+    if (BuildConfig.FLAVOR_version == "original" &&
+        LocalContext.current.selectedLocale().language == "fr"
+    ) {
+        QwantAccount(viewModel, applicationViewModel, onDismissRequest)
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+    }
+    AppNavigation(navigateTo, onDismissRequest)
+    if (showPageActions) {
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        PageActions(viewModel, onDismissRequest)
     }
     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
     ExtensionsSection(
@@ -116,52 +130,6 @@ private fun PrimaryMenu(
             navigateTo(NavDestination.Preferences)
         }
     )
-    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-    DropdownItem(
-        text = stringResource(id = R.string.menu_more_options),
-        icon = R.drawable.icons_more_vertical,
-        onClick = onMoreOptionsClick
-    )
-}
-
-@Composable
-private fun MoreOptionsMenu(
-    navigateTo: (NavDestination) -> Unit,
-    viewModel: BrowserScreenViewModel,
-    applicationViewModel: MidoriApplicationViewModel,
-    showPageActions: Boolean,
-    onBack: () -> Unit,
-    onDismissRequest: () -> Unit
-) {
-    val showQuitApp by applicationViewModel.zapOnQuit.collectAsState()
-
-    DropdownItem(
-        text = stringResource(id = R.string.menu_back_to_main),
-        icon = R.drawable.icons_arrow_backward,
-        onClick = onBack
-    )
-    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-    PrivateTabAction(viewModel, onDismissRequest)
-    DropdownItem(
-        text = stringResource(id = R.string.browser_close_tab),
-        icon = R.drawable.icons_close,
-        onClick = {
-            onDismissRequest()
-            viewModel.closeCurrentTab()
-        }
-    )
-    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-    if (BuildConfig.FLAVOR_version == "original" &&
-        LocalContext.current.selectedLocale().language == "fr"
-    ) {
-        QwantAccount(viewModel, applicationViewModel, onDismissRequest)
-        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-    }
-    AppNavigation(navigateTo, viewModel, onDismissRequest)
-    if (showPageActions) {
-        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-        PageActions(viewModel, onDismissRequest)
-    }
     if (showQuitApp && BuildConfig.FLAVOR_target != "canaltoys") {
         val activity = LocalContext.current.activity
         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
@@ -262,13 +230,33 @@ private fun ShareAction(url: String, onDismissRequest: () -> Unit) {
 }
 
 @Composable
-fun AppNavigation(
-    navigateTo: (NavDestination) -> Unit,
+private fun TranslateAction(
     viewModel: BrowserScreenViewModel,
+    applicationViewModel: MidoriApplicationViewModel,
     onDismissRequest: () -> Unit
 ) {
-    val hasReadingModeItems by viewModel.hasReadingModeItems.collectAsState()
+    val canTranslate by viewModel.canTranslateCurrentPage.collectAsState()
+    val translating = stringResource(R.string.browser_translating_page)
+    val translationUnavailable = stringResource(R.string.browser_translation_unavailable)
 
+    DropdownItem(
+        text = stringResource(R.string.browser_translate_page),
+        icon = R.drawable.icons_internet,
+        enabled = canTranslate,
+        onClick = {
+            onDismissRequest()
+            applicationViewModel.showSnackbar(
+                if (viewModel.translateCurrentPage()) translating else translationUnavailable
+            )
+        }
+    )
+}
+
+@Composable
+fun AppNavigation(
+    navigateTo: (NavDestination) -> Unit,
+    onDismissRequest: () -> Unit
+) {
     DropdownItem(
         text = stringResource(id = R.string.history),
         icon = R.drawable.icons_history,
@@ -288,7 +276,6 @@ fun AppNavigation(
     DropdownItem(
         text = stringResource(id = R.string.reading_list_title),
         icon = R.drawable.icons_open,
-        enabled = hasReadingModeItems,
         onClick = {
             onDismissRequest()
             navigateTo(NavDestination.ReadingList)
