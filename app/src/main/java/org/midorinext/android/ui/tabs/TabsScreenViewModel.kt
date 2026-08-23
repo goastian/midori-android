@@ -17,6 +17,7 @@ import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.lib.state.ext.flow
 import javax.inject.Inject
+import java.util.UUID
 
 private const val TAB_GROUPS_PARTITION = "TAB_GROUPS"
 private const val INACTIVE_TAB_AGE_MS = 14L * 24L * 60L * 60L * 1000L
@@ -189,39 +190,39 @@ class TabsScreenViewModel @Inject constructor(
         return duplicates.size
     }
 
-    fun groupTabsBySite(private: Boolean): Int {
-        if (private) {
-            return 0
-        }
+    fun nextGroupName(): String {
+        val existingGroups = store.state.tabPartitions[TAB_GROUPS_PARTITION]?.tabGroups.orEmpty()
+        return "Group ${existingGroups.size + 1}"
+    }
 
-        val groupsByHost = store.state.tabs
-            .filter { !it.content.private }
-            .filter { it.content.url.isNotBlank() }
-            .groupBy { hostForGrouping(it.content.url) }
-            .filterKeys { it.isNotBlank() }
-            .filterValues { it.size > 1 }
+    /** Creates one named group from explicitly selected normal tabs, regardless of their sites. */
+    fun groupTabs(tabIds: Set<String>, name: String): Int {
+        val selectedTabIds = store.state.tabs
+            .filter { !it.content.private && it.id in tabIds }
+            .mapTo(linkedSetOf()) { it.id }
+        if (selectedTabIds.size < 2) return 0
 
-        val existingGroups = store.state.tabPartitions[TAB_GROUPS_PARTITION]
-            ?.tabGroups
-            ?.associateBy { it.id }
-            .orEmpty()
+        val existingGroups = store.state.tabPartitions[TAB_GROUPS_PARTITION]?.tabGroups.orEmpty()
+        existingGroups.forEach { group ->
+            val movedTabIds = group.tabIds.intersect(selectedTabIds)
+            if (movedTabIds.isEmpty()) return@forEach
 
-        var groupedTabs = 0
-        groupsByHost.forEach { (host, hostTabs) ->
-            val groupId = "site:$host"
-            if (existingGroups[groupId] == null) {
-                tabsUseCases.addTabGroup(TabGroup(id = groupId, name = host))
-            }
-
-            val currentTabIds = existingGroups[groupId]?.tabIds.orEmpty()
-            val tabIds = hostTabs.map { it.id }.filterNot { it in currentTabIds }.toSet()
-            if (tabIds.isNotEmpty()) {
-                tabsUseCases.addTabsInGroup(groupId, tabIds)
-                groupedTabs += tabIds.size
+            val remainingTabIds = group.tabIds - movedTabIds
+            if (remainingTabIds.size < 2) {
+                // A one-tab group has no useful representation in the tray. Ungroup its
+                // remaining tab while moving the selected ones into the new group.
+                tabsUseCases.removeTabGroup(group.id)
+            } else {
+                tabsUseCases.removeTabsInGroup(group.id, movedTabIds)
             }
         }
 
-        return groupedTabs
+        val groupId = "group:${UUID.randomUUID()}"
+        tabsUseCases.addTabGroup(
+            TabGroup(id = groupId, name = name.trim().ifBlank { "Group ${existingGroups.size + 1}" })
+        )
+        tabsUseCases.addTabsInGroup(groupId, selectedTabIds)
+        return selectedTabIds.size
     }
 
     private fun buildSmartTabs(
@@ -320,14 +321,6 @@ private data class ClosedTabSnapshot(
 private fun mozilla.components.browser.state.state.TabSessionState.isInactive(): Boolean {
     val lastActiveTime = maxOf(lastAccess, createdAt)
     return System.currentTimeMillis() - lastActiveTime > INACTIVE_TAB_AGE_MS
-}
-
-private fun hostForGrouping(url: String): String {
-    val host = runCatching { Uri.parse(url).host }.getOrNull()
-        ?.lowercase()
-        ?.removePrefix("www.")
-        .orEmpty()
-    return host
 }
 
 private fun canonicalUrl(url: String): String {

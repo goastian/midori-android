@@ -46,7 +46,10 @@ fun TabGrid(
     onTabSelected: (tab: TabSessionState) -> Unit,
     onTabDeleted: (tab: TabSessionState) -> Unit,
     contentBlockerState: ContentBlockerState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selectionMode: Boolean = false,
+    selectedTabIds: Set<String> = emptySet(),
+    onTabSelectionChange: (String) -> Unit = {}
 ) {
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 150.dp),
@@ -65,6 +68,8 @@ fun TabGrid(
                 onSelected = onTabSelected,
                 onDeleted = onTabDeleted,
                 contentBlockerState = contentBlockerState,
+                selectionMode = selectionMode,
+                isSelectedForGrouping = tab.id in selectedTabIds,
                 modifier = Modifier.animateItem()
             )
         }
@@ -80,6 +85,8 @@ fun TabCard(
     onSelected: (tab: TabSessionState) -> Unit,
     onDeleted: (tab: TabSessionState) -> Unit,
     contentBlockerState: ContentBlockerState,
+    selectionMode: Boolean = false,
+    isSelectedForGrouping: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     var deleting by remember { mutableStateOf(false) }
@@ -97,10 +104,14 @@ fun TabCard(
         .scale(scale)
         .clip(MaterialTheme.shapes.extraSmall)
         .clickable { onSelected(tab) }
-        .background(if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer)
+        .background(
+            if (selected || isSelectedForGrouping) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.secondaryContainer
+        )
     ) {
         CompositionLocalProvider(LocalContentColor provides
-            if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer)
+            if (selected || isSelectedForGrouping) MaterialTheme.colorScheme.onPrimary
+            else MaterialTheme.colorScheme.onSecondaryContainer)
         {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -136,8 +147,15 @@ fun TabCard(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(2f)
                 )
-                ToolbarAction(onClick = { deleting = true }) { // TODO rename ToolbarAction to "SmallButton" and put it in widgets
-                    Icon(painterResource(id = R.drawable.icons_close), contentDescription = "icon")
+                if (selectionMode) {
+                    Checkbox(
+                        checked = isSelectedForGrouping,
+                        onCheckedChange = { onSelected(tab) }
+                    )
+                } else {
+                    ToolbarAction(onClick = { deleting = true }) { // TODO rename ToolbarAction to "SmallButton" and put it in widgets
+                        Icon(painterResource(id = R.drawable.icons_close), contentDescription = "icon")
+                    }
                 }
             }
             Box(modifier = Modifier

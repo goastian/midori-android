@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +37,8 @@ fun TabRow(
     onSelected: (tab: TabSessionState) -> Unit,
     onDeleted: (tab: TabSessionState) -> Unit,
     contentBlockerState: ContentBlockerState,
+    selectionMode: Boolean = false,
+    isSelectedForGrouping: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val isTabBlocked = contentBlockerState.getStatusForTab(tab.id) != ContentBlockerState.Status.ALLOWED
@@ -45,7 +48,10 @@ fun TabRow(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
-            .background(if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface)
+            .background(
+                if (selected || isSelectedForGrouping) MaterialTheme.colorScheme.secondaryContainer
+                else MaterialTheme.colorScheme.surface
+            )
             .clickable { onSelected(tab) }
     ) {
         Card(
@@ -89,8 +95,15 @@ fun TabRow(
             )
         }
 
-        IconButton(onClick = { onDeleted(tab) }) {
-            Icon(painter = painterResource(id = R.drawable.icons_close), contentDescription = "Delete")
+        if (selectionMode) {
+            Checkbox(
+                checked = isSelectedForGrouping,
+                onCheckedChange = { onSelected(tab) }
+            )
+        } else {
+            IconButton(onClick = { onDeleted(tab) }) {
+                Icon(painter = painterResource(id = R.drawable.icons_close), contentDescription = "Delete")
+            }
         }
     }
 }

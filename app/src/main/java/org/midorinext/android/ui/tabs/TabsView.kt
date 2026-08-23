@@ -29,7 +29,10 @@ fun SmartTabView(
     onTabDeleted: (tab: TabSessionState) -> Unit,
     contentBlockerState: ContentBlockerState,
     modifier: Modifier = Modifier,
-    tabsViewOption: TabsViewOption = TabsViewOption.LIST
+    tabsViewOption: TabsViewOption = TabsViewOption.LIST,
+    selectionMode: Boolean = false,
+    selectedTabIds: Set<String> = emptySet(),
+    onTabSelectionChange: (String) -> Unit = {}
 ) {
     val searchResults = remember(state.searchResults, private) {
         state.searchResults.filter { it.content.private == private }
@@ -55,7 +58,10 @@ fun SmartTabView(
             onTabDeleted = onTabDeleted,
             contentBlockerState = contentBlockerState,
             modifier = modifier,
-            tabsViewOption = tabsViewOption
+            tabsViewOption = tabsViewOption,
+            selectionMode = selectionMode,
+            selectedTabIds = selectedTabIds,
+            onTabSelectionChange = onTabSelectionChange
         )
     }
 
@@ -71,7 +77,10 @@ fun SmartTabView(
             onTabDeleted = onTabDeleted,
             contentBlockerState = contentBlockerState,
             modifier = modifier,
-            tabsViewOption = tabsViewOption
+            tabsViewOption = tabsViewOption,
+            selectionMode = selectionMode,
+            selectedTabIds = selectedTabIds,
+            onTabSelectionChange = onTabSelectionChange
         )
     }
 
@@ -95,7 +104,9 @@ fun SmartTabView(
                     thumbnailStorage = thumbnailStorage,
                     onSelected = onTabSelected,
                     onDeleted = onTabDeleted,
-                    contentBlockerState = contentBlockerState
+                    contentBlockerState = contentBlockerState,
+                    selectionMode = selectionMode,
+                    isSelectedForGrouping = tab.id in selectedTabIds
                 )
             }
         }
@@ -114,7 +125,9 @@ fun SmartTabView(
                     thumbnailStorage = thumbnailStorage,
                     onSelected = onTabSelected,
                     onDeleted = onTabDeleted,
-                    contentBlockerState = contentBlockerState
+                    contentBlockerState = contentBlockerState,
+                    selectionMode = selectionMode,
+                    isSelectedForGrouping = tab.id in selectedTabIds
                 )
             }
         }
@@ -133,7 +146,9 @@ fun SmartTabView(
                     thumbnailStorage = thumbnailStorage,
                     onSelected = onTabSelected,
                     onDeleted = onTabDeleted,
-                    contentBlockerState = contentBlockerState
+                    contentBlockerState = contentBlockerState,
+                    selectionMode = selectionMode,
+                    isSelectedForGrouping = tab.id in selectedTabIds
                 )
             }
         }
@@ -167,7 +182,10 @@ fun TabView(
     onTabDeleted: (tab: TabSessionState) -> Unit,
     contentBlockerState: ContentBlockerState,
     modifier: Modifier = Modifier,
-    tabsViewOption: TabsViewOption = TabsViewOption.LIST
+    tabsViewOption: TabsViewOption = TabsViewOption.LIST,
+    selectionMode: Boolean = false,
+    selectedTabIds: Set<String> = emptySet(),
+    onTabSelectionChange: (String) -> Unit = {}
 ) {
     if (tabs.isNotEmpty()) {
         when (tabsViewOption) {
@@ -178,7 +196,10 @@ fun TabView(
                 onTabSelected = onTabSelected,
                 onTabDeleted = onTabDeleted,
                 contentBlockerState = contentBlockerState,
-                modifier = modifier
+                modifier = modifier,
+                selectionMode = selectionMode,
+                selectedTabIds = selectedTabIds,
+                onTabSelectionChange = onTabSelectionChange
             )
             TabsViewOption.GRID -> TabGrid(
                 tabs = tabs,
@@ -188,7 +209,10 @@ fun TabView(
                 onTabSelected = onTabSelected,
                 onTabDeleted = onTabDeleted,
                 contentBlockerState = contentBlockerState,
-                modifier = modifier
+                modifier = modifier,
+                selectionMode = selectionMode,
+                selectedTabIds = selectedTabIds,
+                onTabSelectionChange = onTabSelectionChange
             )
             TabsViewOption.UNRECOGNIZED -> {}
         }

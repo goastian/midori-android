@@ -18,7 +18,10 @@ fun TabList(
     onTabSelected: (tab: TabSessionState) -> Unit,
     onTabDeleted: (tab: TabSessionState) -> Unit,
     contentBlockerState: ContentBlockerState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selectionMode: Boolean = false,
+    selectedTabIds: Set<String> = emptySet(),
+    onTabSelectionChange: (String) -> Unit = {}
 ) {
     LazyColumn(
         modifier = modifier.fillMaxWidth()
@@ -30,7 +33,9 @@ fun TabList(
                 thumbnailStorage = thumbnailStorage,
                 onSelected = onTabSelected,
                 onDeleted = onTabDeleted,
-                contentBlockerState = contentBlockerState
+                contentBlockerState = contentBlockerState,
+                selectionMode = selectionMode,
+                isSelectedForGrouping = tab.id in selectedTabIds
             )
 
             /*
