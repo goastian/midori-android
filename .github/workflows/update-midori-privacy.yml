@@ -43,7 +43,7 @@ jobs:
         run: ./scripts/sync-midori-addons.sh midori-privacy
 
       - name: Verify only the Play Store release variant
-        run: ./gradlew --no-daemon :app:verifyMidoriPrivacyBundle :app:verifyMidoriNewTabBundle :app:testOriginalPlaystoreReleaseUnitTest :app:mergeOriginalPlaystoreReleaseAssets
+        run: ./gradlew --no-daemon :app:verifyMidoriPrivacyBundle :app:verifyMidoriNewTabBundle :app:testOriginalPlaystoreDebugUnitTest :app:mergeOriginalPlaystoreReleaseAssets
 
       - name: Verify Midori Privacy is merged into Play Store release assets
         run: |
@@ -134,7 +134,7 @@ jobs:
           cp -a "$ARTIFACT_DIR/." "$target/"
 
       - name: Re-verify only the Play Store release variant without upstream execution
-        run: ./gradlew --no-daemon :app:verifyMidoriPrivacyBundle :app:verifyMidoriNewTabBundle :app:testOriginalPlaystoreReleaseUnitTest :app:mergeOriginalPlaystoreReleaseAssets
+        run: ./gradlew --no-daemon :app:verifyMidoriPrivacyBundle :app:verifyMidoriNewTabBundle :app:testOriginalPlaystoreDebugUnitTest :app:mergeOriginalPlaystoreReleaseAssets
 
       - name: Verify imported release assets and latest release again
         env:

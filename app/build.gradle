@@ -592,7 +592,7 @@ tasks.matching { task -> task.name == "preOriginalPlaystoreReleaseBuild" }.confi
     dependsOn("verifyMidoriPrivacyBundle")
 }
 
-tasks.matching { task -> task.name == "testOriginalPlaystoreReleaseUnitTest" }.configureEach {
+tasks.matching { task -> task.name == "testOriginalPlaystoreDebugUnitTest" }.configureEach {
     // The asset-contract tests read the bundled extensions directly. Declare them as
     // inputs so Gradle and CI cannot reuse a stale test result after a release sync.
     inputs.dir(midoriNewTabAssets)

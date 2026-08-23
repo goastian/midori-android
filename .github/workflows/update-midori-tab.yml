@@ -32,11 +32,18 @@ jobs:
         with:
           node-version: 22.17.1
 
+      - name: Set up Java
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          cache: gradle
+
       - name: Import the official Firefox release
         run: ./scripts/sync-midori-addons.sh midori-tab
 
       - name: Verify the Play Store release variant
-        run: ./gradlew --no-daemon :app:verifyMidoriNewTabBundle :app:testOriginalPlaystoreReleaseUnitTest :app:mergeOriginalPlaystoreReleaseAssets
+        run: ./gradlew --no-daemon :app:verifyMidoriNewTabBundle :app:testOriginalPlaystoreDebugUnitTest :app:mergeOriginalPlaystoreReleaseAssets
 
       - name: Verify Midori Tab is merged into Play Store release assets
         run: |
@@ -84,6 +91,13 @@ jobs:
           name: midori-newtab-${{ needs.import-and-verify.outputs.version }}
           path: ${{ runner.temp }}/midori-newtab
 
+      - name: Set up Java
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          cache: gradle
+
       - name: Enforce monotonic update against the trusted tree
         env:
           ARTIFACT_DIR: ${{ runner.temp }}/midori-newtab
@@ -112,7 +126,7 @@ jobs:
           cp -a "$ARTIFACT_DIR/." "$target/"
 
       - name: Re-verify the Play Store release variant without executing upstream code
-        run: ./gradlew --no-daemon :app:verifyMidoriNewTabBundle :app:testOriginalPlaystoreReleaseUnitTest :app:mergeOriginalPlaystoreReleaseAssets
+        run: ./gradlew --no-daemon :app:verifyMidoriNewTabBundle :app:testOriginalPlaystoreDebugUnitTest :app:mergeOriginalPlaystoreReleaseAssets
 
       - name: Verify imported Play Store release assets and latest release again
         env:
