@@ -5,17 +5,25 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -35,6 +43,10 @@ import org.midorinext.android.ui.widgets.ScreenHeader
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
+import mozilla.components.concept.engine.translate.Language
+import mozilla.components.concept.engine.translate.LanguageModel
+import mozilla.components.concept.engine.translate.LanguageSetting
+import mozilla.components.concept.engine.translate.ModelState
 
 @Composable
 fun PreferencesScreen(
@@ -96,6 +108,11 @@ fun PreferencesScreen(
                     }
                 )
             }
+            SettingsNavRow(
+                label = R.string.settings_translations_title,
+                description = stringResource(R.string.settings_translations_summary),
+                onClicked = { navigateTo(NavDestination.TranslationSettings) }
+            )
             SettingsNavRow(
                 label = R.string.settings_passwords_title,
                 description = passwordSummary(appPrefs),
@@ -528,6 +545,246 @@ fun AccessibilitySettingsScreen(viewModel: PreferencesViewModel = hiltViewModel(
             onValueChange = viewModel::updateAccessibilityForceZoomEnabled
         )
     }
+}
+
+@Composable
+fun TranslationSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
+    val appPrefs by viewModel.appPreferences.collectAsState()
+    val translationState by viewModel.translationState.collectAsState()
+    var showAutomaticLanguages by remember { mutableStateOf(false) }
+    var showNeverTranslateSites by remember { mutableStateOf(false) }
+    var showDownloads by remember { mutableStateOf(false) }
+
+    val supportedLanguages = translationState.supportedLanguages?.fromLanguages.orEmpty()
+        .distinctBy { it.code }
+        .sortedBy { it.localizedDisplayName ?: it.code }
+    val automaticLanguages = translationState.languageSettings.orEmpty()
+        .filterValues { it == LanguageSetting.ALWAYS }
+        .keys
+    val automaticSummary = supportedLanguages
+        .filter { it.code in automaticLanguages }
+        .joinToString { it.localizedDisplayName ?: it.code }
+        .ifBlank { stringResource(R.string.settings_translations_automatic_none) }
+    val neverTranslateSites = translationState.neverTranslateSites.orEmpty()
+    val downloadedLanguages = translationState.languageModels.orEmpty()
+        .count { it.status == ModelState.DOWNLOADED }
+
+    PreferenceScreenScaffold(title = stringResource(R.string.settings_translations_title)) {
+        PreferenceToggle(
+            label = R.string.settings_translations_enabled,
+            description = R.string.settings_translations_enabled_summary,
+            value = !appPrefs.translationsDisabled,
+            onValueChange = viewModel::updateTranslationsEnabled
+        )
+
+        if (!appPrefs.translationsDisabled) {
+            PreferenceToggle(
+                label = R.string.settings_translations_offer,
+                value = translationState.offerTranslation ?: true,
+                onValueChange = viewModel::updateTranslationOffer
+            )
+            PreferenceToggle(
+                label = R.string.settings_translations_data_saver,
+                value = appPrefs.translationsDownloadInDataSaver,
+                onValueChange = viewModel::updateTranslationsDownloadInDataSaver
+            )
+
+            PreferenceGroupLabel(label = R.string.settings_translations_preferences)
+            SettingsNavRow(
+                label = R.string.settings_translations_automatic,
+                description = automaticSummary,
+                onClicked = { showAutomaticLanguages = true }
+            )
+            SettingsNavRow(
+                label = R.string.settings_translations_never_sites,
+                description = if (neverTranslateSites.isEmpty()) {
+                    stringResource(R.string.settings_translations_never_sites_none)
+                } else {
+                    stringResource(
+                        R.string.settings_translations_never_sites_count,
+                        neverTranslateSites.size
+                    )
+                },
+                onClicked = { showNeverTranslateSites = true }
+            )
+            SettingsNavRow(
+                label = R.string.settings_translations_download_languages,
+                description = stringResource(
+                    R.string.settings_translations_downloaded_count,
+                    downloadedLanguages
+                ),
+                onClicked = { showDownloads = true }
+            )
+        }
+    }
+
+    if (showAutomaticLanguages) {
+        AutomaticTranslationDialog(
+            languages = supportedLanguages,
+            automaticLanguages = automaticLanguages,
+            onLanguageChecked = viewModel::updateAutomaticTranslation,
+            onDismiss = { showAutomaticLanguages = false }
+        )
+    }
+    if (showNeverTranslateSites) {
+        NeverTranslateSitesDialog(
+            sites = neverTranslateSites,
+            onRemove = viewModel::removeNeverTranslateSite,
+            onDismiss = { showNeverTranslateSites = false }
+        )
+    }
+    if (showDownloads) {
+        TranslationDownloadsDialog(
+            models = translationState.languageModels.orEmpty(),
+            onModelChecked = viewModel::manageLanguageModel,
+            onDismiss = { showDownloads = false }
+        )
+    }
+}
+
+@Composable
+private fun AutomaticTranslationDialog(
+    languages: List<Language>,
+    automaticLanguages: Set<String>,
+    onLanguageChecked: (String, Boolean) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_translations_manage_automatic)) },
+        text = {
+            Column {
+                Text(stringResource(R.string.settings_translations_manage_automatic_summary))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 360.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    languages.forEach { language ->
+                        val checked = language.code in automaticLanguages
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                        ) {
+                            Checkbox(
+                                checked = checked,
+                                onCheckedChange = { onLanguageChecked(language.code, it) }
+                            )
+                            Text(language.localizedDisplayName ?: language.code)
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.settings_translations_done))
+            }
+        }
+    )
+}
+
+@Composable
+private fun NeverTranslateSitesDialog(
+    sites: List<String>,
+    onRemove: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_translations_manage_sites)) },
+        text = {
+            if (sites.isEmpty()) {
+                Text(stringResource(R.string.settings_translations_manage_sites_empty))
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 360.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    sites.forEach { site ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(text = site, modifier = Modifier.weight(1f))
+                            TextButton(onClick = { onRemove(site) }) {
+                                Text(stringResource(R.string.settings_translations_remove))
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.settings_translations_done))
+            }
+        }
+    )
+}
+
+@Composable
+private fun TranslationDownloadsDialog(
+    models: List<LanguageModel>,
+    onModelChecked: (String, Boolean) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_translations_manage_downloads)) },
+        text = {
+            Column {
+                Text(stringResource(R.string.settings_translations_manage_downloads_summary))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 360.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    models.filter { it.language != null }
+                        .sortedBy { it.language?.localizedDisplayName ?: it.language?.code }
+                        .forEach { model ->
+                            val language = requireNotNull(model.language)
+                            val downloading = model.status == ModelState.DOWNLOAD_IN_PROGRESS
+                            val downloaded = model.status == ModelState.DOWNLOADED
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                            ) {
+                                Checkbox(
+                                    checked = downloaded || downloading,
+                                    enabled = !downloading,
+                                    onCheckedChange = { onModelChecked(language.code, it) }
+                                )
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(language.localizedDisplayName ?: language.code)
+                                    if (downloading || downloaded) {
+                                        Text(
+                                            text = stringResource(
+                                                if (downloading) {
+                                                    R.string.settings_translations_model_downloading
+                                                } else {
+                                                    R.string.settings_translations_model_downloaded
+                                                }
+                                            ),
+                                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.settings_translations_done))
+            }
+        }
+    )
 }
 
 @Composable

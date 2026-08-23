@@ -142,6 +142,18 @@ class AppPreferencesRepository @Inject constructor(
         }
     }
 
+    suspend fun updateTranslationsEnabled(enabled: Boolean) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setTranslationsDisabled(!enabled).build()
+        }
+    }
+
+    suspend fun updateTranslationsDownloadInDataSaver(enabled: Boolean) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setTranslationsDownloadInDataSaver(enabled).build()
+        }
+    }
+
     suspend fun updateSavePasswordsEnabled(enabled: Boolean) {
         datastore.updateData { preferences ->
             preferences.toBuilder().setSavePasswordsEnabled(enabled).build()

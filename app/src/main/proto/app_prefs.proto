@@ -108,4 +108,6 @@ message AppPreferences {
   DownloadRemovalBehavior download_removal_behavior = 41;
   bool manage_downloads_with_other_app = 42;
   map<string, int32> tab_group_colors = 43;
+  bool translations_disabled = 44;
+  bool translations_download_in_data_saver = 45;
 }

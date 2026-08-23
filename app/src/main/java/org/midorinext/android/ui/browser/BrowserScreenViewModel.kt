@@ -165,13 +165,12 @@ class BrowserScreenViewModel @Inject constructor(
             initialValue = null
         )
 
-    val canTranslateCurrentPage = store.flow()
-        .map { state ->
+    val canTranslateCurrentPage = combine(store.flow(), appPreferences) { state, preferences ->
             val tab = state.selectedTab
             // Language detection can arrive after the page menu is opened. Keep the action
             // available for normal pages and let translateCurrentPage wait for Gecko's detected
             // language pair before starting the native translation.
-            tab != null && !tab.content.private
+            !preferences.translationsDisabled && tab != null && !tab.content.private
         }
         .distinctUntilChanged()
         .stateIn(
@@ -349,7 +348,7 @@ class BrowserScreenViewModel @Inject constructor(
      */
     fun translateCurrentPage(): Boolean {
         val tab = store.state.selectedTab ?: return false
-        if (tab.content.private) return false
+        if (tab.content.private || appPreferences.value.translationsDisabled) return false
 
         val languages = tab.translationsState.translationEngineState?.detectedLanguages ?: return false
         val fromLanguage = languages.documentLangTag?.takeIf { it.isNotBlank() } ?: return false

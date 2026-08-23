@@ -5,6 +5,8 @@ import androidx.core.app.NotificationManagerCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
+import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.mozac.downloads.DownloadService
 import org.midorinext.android.mozac.media.MediaSessionService
 import dagger.Module
@@ -54,7 +56,8 @@ object MozacComponentHiltModule {
         downloadStorage: DownloadStorage,
         downloadFileUtils: DownloadFileUtils,
         thumbnailStorage: ThumbnailStorage,
-        notificationsDelegate: NotificationsDelegate
+        notificationsDelegate: NotificationsDelegate,
+        appPreferencesRepository: AppPreferencesRepository,
     ) : BrowserStore {
         return BrowserStore(
             middleware = listOf(
@@ -76,7 +79,7 @@ object MozacComponentHiltModule {
                 // The browser store is application-scoped, so its translation coordinator must
                 // outlive individual screens and sessions.
                 scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
-                isTranslationsEnabled = { true }
+                isTranslationsEnabled = { !appPreferencesRepository.flow.first().translationsDisabled }
             )
         )
     }

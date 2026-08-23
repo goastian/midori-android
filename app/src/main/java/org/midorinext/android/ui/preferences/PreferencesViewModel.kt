@@ -16,13 +16,22 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import mozilla.components.browser.engine.gecko.permission.GeckoSitePermissionsStorage
+import mozilla.components.browser.state.action.TranslationsAction
+import mozilla.components.browser.state.state.TranslationsBrowserState
+import mozilla.components.browser.state.store.BrowserStore
+import mozilla.components.concept.engine.translate.LanguageSetting
+import mozilla.components.concept.engine.translate.ModelManagementOptions
+import mozilla.components.concept.engine.translate.ModelOperation
+import mozilla.components.concept.engine.translate.OperationLevel
 import mozilla.components.concept.engine.Engine
 import mozilla.components.concept.engine.permission.SitePermissions
 import mozilla.components.concept.engine.permission.SitePermissionsStorage
 import mozilla.components.feature.tabs.TabsUseCases
+import mozilla.components.lib.state.ext.flow
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,6 +39,7 @@ class PreferencesViewModel @Inject constructor(
     private val appPreferencesRepository: AppPreferencesRepository,
     private val appTrackingProtectionController: AppTrackingProtectionController,
     private val permissionsStorage: GeckoSitePermissionsStorage,
+    private val store: BrowserStore,
     tabsUseCases: TabsUseCases,
     MidoriUseCases: MidoriUseCases
 ) : ViewModel() {
@@ -55,6 +65,12 @@ class PreferencesViewModel @Inject constructor(
 
     val systemProtectionRunning = appTrackingProtectionController.systemProtectionRunning
     val appTrackingMetrics = AppTrackingRuntimeState.metrics
+
+    val translationState = store.flow().map { it.translationEngine }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = TranslationsBrowserState()
+    )
 
     fun ensurePermissionsLoaded() {
         if (permissionsCollectionJob != null) return
@@ -130,6 +146,48 @@ class PreferencesViewModel @Inject constructor(
 
     fun updateManageDownloadsWithOtherApp(enabled: Boolean) {
         viewModelScope.launch { appPreferencesRepository.updateManageDownloadsWithOtherApp(enabled) }
+    }
+
+    fun updateTranslationsEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            appPreferencesRepository.updateTranslationsEnabled(enabled)
+            store.dispatch(TranslationsAction.SetTranslationsEnabledAction(enabled))
+        }
+    }
+
+    fun updateTranslationsDownloadInDataSaver(enabled: Boolean) {
+        viewModelScope.launch {
+            appPreferencesRepository.updateTranslationsDownloadInDataSaver(enabled)
+        }
+    }
+
+    fun updateTranslationOffer(enabled: Boolean) {
+        store.dispatch(TranslationsAction.UpdateGlobalOfferTranslateSettingAction(enabled))
+    }
+
+    fun updateAutomaticTranslation(languageCode: String, enabled: Boolean) {
+        store.dispatch(
+            TranslationsAction.UpdateLanguageSettingsAction(
+                languageCode = languageCode,
+                setting = if (enabled) LanguageSetting.ALWAYS else LanguageSetting.OFFER
+            )
+        )
+    }
+
+    fun removeNeverTranslateSite(origin: String) {
+        store.dispatch(TranslationsAction.RemoveNeverTranslateSiteAction(origin))
+    }
+
+    fun manageLanguageModel(languageCode: String, download: Boolean) {
+        store.dispatch(
+            TranslationsAction.ManageLanguageModelsAction(
+                ModelManagementOptions(
+                    languageToManage = languageCode,
+                    operation = if (download) ModelOperation.DOWNLOAD else ModelOperation.DELETE,
+                    operationLevel = OperationLevel.LANGUAGE
+                )
+            )
+        )
     }
 
     fun updateSavePasswordsEnabled(enabled: Boolean) {

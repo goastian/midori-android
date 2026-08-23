@@ -41,6 +41,8 @@ object AppPreferencesSerializer : Serializer<AppPreferences> {
         .setShakeToSummarizeEnabled(false)
         .setDownloadRemovalBehavior(DownloadRemovalBehavior.DOWNLOAD_REMOVAL_ASK)
         .setManageDownloadsWithOtherApp(false)
+        .setTranslationsDisabled(false)
+        .setTranslationsDownloadInDataSaver(false)
         .build()
 
     override suspend fun readFrom(input: InputStream): AppPreferences {
