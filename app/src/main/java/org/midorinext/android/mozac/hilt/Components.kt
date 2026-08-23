@@ -2,6 +2,9 @@ package org.midorinext.android.mozac.hilt
 
 import android.content.Context
 import androidx.core.app.NotificationManagerCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import org.midorinext.android.mozac.downloads.DownloadService
 import org.midorinext.android.mozac.media.MediaSessionService
 import dagger.Module
@@ -12,6 +15,7 @@ import dagger.hilt.components.SingletonComponent
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.session.storage.SessionStorage
 import mozilla.components.browser.state.engine.EngineMiddleware
+import mozilla.components.browser.state.engine.middleware.TranslationsMiddleware
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.browser.thumbnails.ThumbnailsMiddleware
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
@@ -67,7 +71,13 @@ object MozacComponentHiltModule {
                 UndoMiddleware(clearAfterMillis = 15_000),
                 LastMediaAccessMiddleware(),
                 RecordingDevicesMiddleware(context, notificationsDelegate)
-            ) + EngineMiddleware.create(engine)
+            ) + EngineMiddleware.create(engine) + TranslationsMiddleware(
+                engine = engine,
+                // The browser store is application-scoped, so its translation coordinator must
+                // outlive individual screens and sessions.
+                scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
+                isTranslationsEnabled = { true }
+            )
         )
     }
 

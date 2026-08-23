@@ -25,10 +25,12 @@ import kotlinx.coroutines.launch
 import mozilla.components.browser.engine.gecko.permission.GeckoSitePermissionsStorage
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.state.selector.selectedTab
+import mozilla.components.browser.state.action.TranslationsAction
 import mozilla.components.browser.state.state.WebExtensionState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
 import mozilla.components.concept.engine.pageextraction.ContentParams
+import mozilla.components.concept.engine.translate.TranslationOptions
 import mozilla.components.concept.fetch.Client
 import mozilla.components.feature.contextmenu.ContextMenuUseCases
 import mozilla.components.feature.downloads.DownloadsUseCases
@@ -161,6 +163,21 @@ class BrowserScreenViewModel @Inject constructor(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
             initialValue = null
+        )
+
+    val canTranslateCurrentPage = store.flow()
+        .map { state ->
+            val tab = state.selectedTab
+            // Language detection can arrive after the page menu is opened. Keep the action
+            // available for normal pages and let translateCurrentPage wait for Gecko's detected
+            // language pair before starting the native translation.
+            tab != null && !tab.content.private
+        }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = false
         )
 
     var isUrlBookmarked = urlFlow
@@ -325,6 +342,31 @@ class BrowserScreenViewModel @Inject constructor(
         ) ?: onError()
     }
 
+    /**
+     * Translates with GeckoView's detected page language and its preferred user language. This
+     * keeps the destination in sync with the browser's language preferences rather than the UI
+     * locale alone.
+     */
+    fun translateCurrentPage(): Boolean {
+        val tab = store.state.selectedTab ?: return false
+        if (tab.content.private) return false
+
+        val languages = tab.translationsState.translationEngineState?.detectedLanguages ?: return false
+        val fromLanguage = languages.documentLangTag?.takeIf { it.isNotBlank() } ?: return false
+        val toLanguage = languages.userPreferredLangTag?.takeIf { it.isNotBlank() } ?: return false
+        if (sameLanguage(fromLanguage, toLanguage)) return false
+
+        store.dispatch(
+            TranslationsAction.TranslateAction(
+                tabId = tab.id,
+                fromLanguage = fromLanguage,
+                toLanguage = toLanguage,
+                options = TranslationOptions(downloadModel = true)
+            )
+        )
+        return true
+    }
+
     fun commitSearch(searchText: String, category: String? = null) {
         val trimmedSearch = searchText.trim()
         if (trimmedSearch.isBlank()) {
@@ -464,3 +506,6 @@ class BrowserScreenViewModel @Inject constructor(
         )
     }
 }
+
+private fun sameLanguage(first: String?, second: String?): Boolean =
+    first?.substringBefore('-')?.equals(second?.substringBefore('-'), ignoreCase = true) == true
