@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history">Historiku</string>
+    <string name="history_today">Sot</string>
+    <string name="history_yesterday">Dje</string>
+    <string name="history_clear_all_confirm_title">Fshi historinë</string>
+    <string name="history_clear_all_confirm_message">Dëshiron vërtet ta fshish gjithë historinë ?</string>
+    <string name="history_clear_all_confirm_ok">Pastroji të gjitha</string>
+    <string name="history_empty_title">Historia është bosh</string>
+    <string name="history_empty_message">Faqet e vizituara do të shfaqen këtu</string>
+</resources>

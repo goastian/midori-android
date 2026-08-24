@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="bookmarks_folder">folder</string>
+    <string name="bookmarks_bookmark">bookmark</string>
+    <string name="bookmarks_folder_title_placeholder">Folder name</string>
+    <string name="bookmarks_move_x_to">Move %1$s to</string>
+    <string name="bookmarks_empty_default_folder_name">The bookmarks list</string>
+    <string name="bookmarks_empty_title">%1$s is empty</string>
+    <string name="bookmarks_empty_message">Add bookmarks using the menu access on the web page.</string>
+</resources>

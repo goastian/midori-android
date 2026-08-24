@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_title">Zgjatjet</string>
+    <string name="extensions_empty_title">Nuk është instaluar asnjë zgjatje</string>
+    <string name="extensions_empty_message">Instalo shtesat për të shtuar veçori shtesë në shfletuesin tënd.</string>
+    <string name="extensions_install">Instalo</string>
+    <string name="extensions_install_hint">Vendos URL-në e një skedari zgjatues (.xpi)</string>
+    <string name="extensions_uninstall">Çinstalo</string>
+    <string name="extensions_uninstall_confirm">Çinstalo \"%1$s\"?</string>
+    <string name="extensions_enable">Aktivizo</string>
+    <string name="extensions_disable">Çaktivizo</string>
+    <string name="extensions_install_error">Zgjatja nuk mund të instalohet</string>
+    <string name="extensions_recommended">Zgjatjet e rekomanduara</string>
+    <string name="extensions_installed">Zgjatjet e instaluara</string>
+    <string name="extensions_loading">Po ngarkohen zgjerimet...</string>
+    <string name="extensions_detail_title">Detajet e zgjatjes</string>
+    <string name="extensions_author_by">nga %1$s</string>
+    <string name="extensions_ratings">%1$s vlerësime</string>
+    <string name="extensions_users">%1$s përdorues</string>
+    <string name="extensions_version">Versioni %1$s</string>
+    <string name="extensions_permissions">Lejet</string>
+    <string name="extensions_no_permissions">Kjo zgjatje nuk kërkon ndonjë leje të veçantë.</string>
+    <string name="extensions_installing">Duke instaluar...</string>
+    <string name="extensions_installed_label">Instaluar</string>
+    <string name="extensions_enabled">Aktivizuar</string>
+    <string name="extensions_open_popup">Hap dritaren e zgjatjes</string>
+    <string name="extensions_manage">Menaxho zgjerimet</string>
+    <string name="extensions_more">Më shumë zgjatje</string>
+    <string name="extensions_search_hint">Kërko shtesa</string>
+    <string name="extensions_search_empty">Asnjë zgjatje nuk përputhet me kërkimin tënd.</string>
+    <string name="extensions_retry">Provo përsëri</string>
+    <string name="extensions_load_error">Zgjatjet nuk mund të ngarkohen</string>
+    <string name="extensions_error_load_actionable">Nuk mundëm të ngarkonim shtesat. Kontrollo lidhjen tënde.</string>
+    <string name="extensions_error_action_actionable">Nuk mundëm ta përfundonim veprimin e zgjatjes. Provo përsëri.</string>
+</resources>

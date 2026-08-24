@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="privatebrowsing_title">Shfletim privat</string>
+    <string name="privatebrowsing_paragraph_1">Faqet e shfaqura në skedat private nuk shfaqen në historikun tënd të Midori dhe kukit e tyre fshihen gjithmonë kur mbyll skedën. Pa shfletim privat, historia juaj e kërkimit ruhet në telefonin tuaj, por nuk është e dukshme për Midorin (ne e respektojmë privatësinë tuaj!).</string>
+    <string name="privatebrowsing_paragraph_2">Ki parasysh se shfletimi privat nuk të bën të padukshëm në internet. Skedat private nuk e pengojnë operatorin tuaj celular ose pronarin e rrjetit Wi-Fi të gjurmojë faqet që vizitoni ose adresën tuaj IP publike.</string>
+</resources>

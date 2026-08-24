@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_add_to_homescreen">Shto në ekranin bazë</string>
+    <string name="menu_request_desktop_site">Kërko uebfaqen e desktopit</string>
+    <string name="menu_quit_app">Mbyll aplikacionin</string>
+    <string name="menu_find_in_page">Gjej në faqe</string>
+    <string name="menu_account">Llogaria</string>
+    <string name="menu_login">Hyr</string>
+    <string name="menu_midori_vpn">MidoriVPN</string>
+    <string name="menu_more_options">Më shumë alternativa</string>
+    <string name="menu_back_to_main">Veprimet kryesore</string>
+</resources>
