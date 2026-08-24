@@ -60,6 +60,16 @@ fun TabsScreen(
 
     val normalTabsCount by remember(tabs) { derivedStateOf { tabs.count { !it.content.private } } }
 
+    val openIndividualTab: (Boolean) -> Unit = { privateTab ->
+        // Creating a tab is always an escape hatch from the grouping flow. In particular, this
+        // prevents a pending "add to group" action from swallowing the next new tab.
+        selectedTabIds = emptySet()
+        selectionMode = false
+        selectionTargetGroupId = null
+        tabsViewModel.openNewTab(privateTab)
+        onClose(TabOpening.NONE)
+    }
+
     BackHandler(enabled = !showGroupNameDialog && groupBeingEdited == null && groupBeingDeleted == null) {
         if (selectionMode) {
             selectedTabIds = emptySet()
@@ -121,13 +131,11 @@ fun TabsScreen(
                 val privateBeforeClick = private
                 ZapButton(appViewModel, fromScreen = "Tabs") { success ->
                     if (success) {
-                        tabsViewModel.openNewTab(privateBeforeClick)
-                        onClose(TabOpening.NONE)
+                        openIndividualTab(privateBeforeClick)
                     }
                 }
                 ToolbarAction(onClick = {
-                    tabsViewModel.openNewTab(private)
-                    onClose(TabOpening.NONE)
+                    openIndividualTab(private)
                 }) {
                     Icon(painter = painterResource(id = R.drawable.icons_add_tab), contentDescription = "Add tab")
                 }
@@ -225,6 +233,7 @@ fun TabsScreen(
                             if (groupedCount > 0) {
                                 selectedTabIds = emptySet()
                                 selectionMode = false
+                                selectionTargetGroupId = null
                             }
                             showGroupNameDialog = false
                         }
