@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -93,17 +94,20 @@ fun TranslationSheet(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .padding(horizontal = 20.dp, vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = stringResource(R.string.browser_translation_sheet_title),
                     modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold
                 )
-                IconButton(onClick = { showQuickSettings = true }) {
+                IconButton(
+                    onClick = { showQuickSettings = true },
+                    modifier = Modifier.size(40.dp)
+                ) {
                     Icon(
                         painter = painterResource(R.drawable.icons_settings),
                         contentDescription = stringResource(R.string.browser_translation_sheet_settings)
@@ -112,7 +116,7 @@ fun TranslationSheet(
             }
             Text(
                 text = stringResource(R.string.browser_translation_sheet_description),
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
@@ -138,21 +142,31 @@ fun TranslationSheet(
             }
 
             Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(onClick = onDismissRequest) {
-                    Text(stringResource(R.string.browser_translation_sheet_not_now))
+                TextButton(
+                    onClick = onDismissRequest,
+                    modifier = Modifier.heightIn(min = 40.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.browser_translation_sheet_not_now),
+                        style = MaterialTheme.typography.labelLarge
+                    )
                 }
-                Spacer(Modifier.width(12.dp))
+                Spacer(Modifier.width(8.dp))
                 Button(
                     enabled = canTranslate,
+                    modifier = Modifier.heightIn(min = 44.dp),
                     onClick = {
                         onTranslate(selectedSource.orEmpty(), selectedTarget.orEmpty())
                     }
                 ) {
-                    Text(stringResource(R.string.browser_translate_page))
+                    Text(
+                        text = stringResource(R.string.browser_translate_page),
+                        style = MaterialTheme.typography.labelLarge
+                    )
                 }
             }
             }
@@ -177,11 +191,11 @@ private fun QuickTranslationSettings(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(horizontal = 20.dp, vertical = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack) {
+            IconButton(onClick = onBack, modifier = Modifier.size(40.dp)) {
                 Icon(
                     painter = painterResource(R.drawable.icons_arrow_backward),
                     contentDescription = stringResource(R.string.browser_translation_sheet_back)
@@ -190,7 +204,7 @@ private fun QuickTranslationSettings(
             Text(
                 text = stringResource(R.string.browser_translation_quick_title),
                 modifier = Modifier.padding(start = 8.dp),
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold
             )
         }
@@ -219,12 +233,12 @@ private fun QuickTranslationSettings(
         HorizontalDivider()
         TextButton(
             onClick = onOpenSettings,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp)
         ) {
             Text(
                 text = stringResource(R.string.browser_translation_quick_full_settings),
                 modifier = Modifier.fillMaxWidth(),
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.bodyLarge
             )
         }
     }
@@ -237,15 +251,15 @@ private fun QuickTranslationToggle(
     onCheckedChange: (Boolean) -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = label,
             modifier = Modifier.weight(1f),
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.bodyLarge
         )
-        Spacer(Modifier.width(16.dp))
+        Spacer(Modifier.width(12.dp))
         Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
@@ -260,26 +274,26 @@ private fun TranslationLanguagePicker(
     var expanded by remember { mutableStateOf(false) }
     val selectedLanguage = languages.firstOrNull { it.code == selectedCode }
 
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(label, style = MaterialTheme.typography.labelLarge)
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(label, style = MaterialTheme.typography.labelMedium)
         Box {
             TextButton(
                 enabled = languages.isNotEmpty(),
                 onClick = { expanded = true },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp)
             ) {
                 Text(
                     text = selectedLanguage?.localizedDisplayName ?: selectedCode
                         ?: stringResource(R.string.browser_translation_sheet_detecting),
                     modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleSmall
                 )
-                Text("⌄", style = MaterialTheme.typography.titleMedium)
+                Text("⌄", style = MaterialTheme.typography.labelLarge)
             }
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = Modifier.heightIn(max = 320.dp)
+                modifier = Modifier.heightIn(max = 280.dp)
             ) {
                 languages.forEach { language ->
                     DropdownMenuItem(
