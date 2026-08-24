@@ -201,12 +201,22 @@
     <string name="onboarding_toolbar_title">Choose your address bar</string>
     <string name="onboarding_toolbar_top">Top</string>
     <string name="onboarding_toolbar_bottom">Bottom</string>
+    <string name="onboarding_toolbar_description">Choose the address bar position that feels natural to you. You can change it later in Settings.</string>
+    <string name="onboarding_toolbar_selected">Selected</string>
 
     <!-- Onboarding - Search Widget -->
     <string name="onboarding_widget_title">Make every search more private</string>
     <string name="onboarding_widget_description">Start every search from your phone\'s home screen and know Midori\'s automatic protections have your back.</string>
     <string name="onboarding_widget_add">Add Midori widget</string>
     <string name="onboarding_widget_skip">Not now</string>
+
+    <string name="onboarding_progress">Step %1$d of %2$d</string>
+    <string name="onboarding_welcome_legal">By continuing, you agree to Midori’s Terms of Use and Privacy Notice.</string>
+    <string name="onboarding_welcome_continue">Explore Midori</string>
+    <string name="onboarding_default_hint">Your links can open here, with privacy protections already on.</string>
+    <string name="onboarding_widget_hint">Keep a private search one tap away on your Home screen.</string>
+    <string name="onboarding_finish">Start browsing</string>
+    <string name="onboarding_private_by_default">Private by default</string>
 
     <!-- Onboarding - Default Browser -->
     <string name="onboarding_default_title">Make Midori your default browser</string>

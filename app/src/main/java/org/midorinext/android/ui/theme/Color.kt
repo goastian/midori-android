@@ -30,6 +30,19 @@ val ActionStrong = Color(0xFF31E000)
 val ActionSuccess = Color(0xFF57C78F)
 val UrlTrustColor = ActionSuccess
 
+// Hallmark · macrostructure: Narrative Workflow · tone: friendly, private, tactile
+// Midori onboarding tokens. Kept separate from the app scheme so the first-run flow has
+// its own calm, branded surface without changing the browser's day-to-day colours.
+val OnboardingPaper = Color(0xFFFFFCF7)
+val OnboardingPaperRaised = Color(0xFFF4F8EF)
+val OnboardingInk = Color(0xFF102118)
+val OnboardingMutedInk = Color(0xFF526158)
+val OnboardingGreen = Color(0xFF00A86B)
+val OnboardingGreenDeep = Color(0xFF087A4B)
+val OnboardingMintMist = Color(0x3326C281)
+val OnboardingLeafLine = Color(0x1F087A4B)
+val OnboardingBorder = Color(0xFFCEE4D4)
+
 val PrivateAction = Color(0xFF99FFCA)
 val PrivateSurfaceDark = Color(0xFF0E581E)
 val PrivateAccent = Color(0xFF20652F)

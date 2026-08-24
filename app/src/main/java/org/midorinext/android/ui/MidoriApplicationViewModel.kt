@@ -30,7 +30,7 @@ enum class PrivacyMode {
 class MidoriApplicationViewModel @Inject constructor(
     store: BrowserStore,
     historyRepository: HistoryRepository,
-    appPreferencesRepository: AppPreferencesRepository,
+    private val appPreferencesRepository: AppPreferencesRepository,
     clearDataUseCase: ClearDataUseCase,
     val cookieState: MidoriCookieState,
 ) : ViewModel() {
@@ -93,6 +93,12 @@ class MidoriApplicationViewModel @Inject constructor(
 
     fun setPrivacyMode(mode: PrivacyMode) {
         privacyMode.update { mode }
+    }
+
+    fun updateToolbarPosition(position: ToolbarPosition) {
+        viewModelScope.launch {
+            appPreferencesRepository.updateToolbarPosition(position)
+        }
     }
 
     val zapOnQuit = appPreferencesRepository.flow

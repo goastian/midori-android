@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import org.midorinext.android.ui.nav.MidoriNavHost
@@ -12,9 +13,14 @@ import org.midorinext.android.ui.theme.MidoriBrowserTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.midorinext.android.preferences.app.Appearance
 import org.midorinext.android.preferences.app.ToolbarPosition
+import androidx.preference.PreferenceManager
+import org.midorinext.android.R
+import org.midorinext.android.ui.onboarding.MidoriOnboarding
 import org.midorinext.android.ui.zap.ZapFeature
 
 @Composable
@@ -22,6 +28,14 @@ fun MidoriBrowserApp(
     applicationViewModel: MidoriApplicationViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
+    val context = LocalContext.current
+    val onboardingKey = stringResource(R.string.pref_key_show_onboarding)
+    val onboardingPreferences = remember(context) {
+        PreferenceManager.getDefaultSharedPreferences(context)
+    }
+    var showOnboarding by rememberSaveable {
+        mutableStateOf(onboardingPreferences.getBoolean(onboardingKey, true))
+    }
 
     val isPrivate by applicationViewModel.isPrivate.collectAsState()
     val appearance by applicationViewModel.appearance.collectAsState()
@@ -55,23 +69,33 @@ fun MidoriBrowserApp(
         darkTheme = darkTheme,
         privacy = isPrivate
     ) {
-        Scaffold(
-            modifier = Modifier.imePadding(),
-            snackbarHost = {
-                SnackbarHost(
-                    hostState = applicationViewModel.snackbarHostState,
-                    modifier = Modifier.offset(
-                        y = if (resolvedToolbarPosition == ToolbarPosition.BOTTOM) (-56).dp else 0.dp
-                    )
-                )
-            },
-        ) { scaffoldPadding ->
-            MidoriNavHost(
-                navController = navController,
-                appViewModel = applicationViewModel,
-                modifier = Modifier.padding(scaffoldPadding)
+        if (showOnboarding) {
+            MidoriOnboarding(
+                onToolbarPositionSelected = applicationViewModel::updateToolbarPosition,
+                onComplete = {
+                    onboardingPreferences.edit().putBoolean(onboardingKey, false).apply()
+                    showOnboarding = false
+                }
             )
-            ZapFeature(state = applicationViewModel.zapState)
+        } else {
+            Scaffold(
+                modifier = Modifier.imePadding(),
+                snackbarHost = {
+                    SnackbarHost(
+                        hostState = applicationViewModel.snackbarHostState,
+                        modifier = Modifier.offset(
+                            y = if (resolvedToolbarPosition == ToolbarPosition.BOTTOM) (-56).dp else 0.dp
+                        )
+                    )
+                },
+            ) { scaffoldPadding ->
+                MidoriNavHost(
+                    navController = navController,
+                    appViewModel = applicationViewModel,
+                    modifier = Modifier.padding(scaffoldPadding)
+                )
+                ZapFeature(state = applicationViewModel.zapState)
+            }
         }
     }
 }
