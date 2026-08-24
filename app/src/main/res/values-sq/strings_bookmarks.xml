@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bookmarks">Faqerojtësit</string>
+    <string name="bookmarks_folder">dosje</string>
+    <string name="bookmarks_bookmark">faqerojtës</string>
+    <string name="bookmarks_folder_title_placeholder">Emri i dosjes</string>
+    <string name="bookmarks_move_x_to">Zhvendos %1$s te</string>
+    <string name="bookmarks_empty_default_folder_name">Lista e faqeshënuesve</string>
+    <string name="bookmarks_empty_title">%1$s është bosh</string>
+    <string name="bookmarks_empty_message">Shtoni faqeshënues duke përdorur hyrjen në meny në faqen e internetit.</string>
+</resources>

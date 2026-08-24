@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bookmarks">ブックマーク</string>
+    <string name="bookmarks_folder">フォルダ</string>
+    <string name="bookmarks_bookmark">ブックマーク</string>
+    <string name="bookmarks_folder_title_placeholder">フォルダ名</string>
+    <string name="bookmarks_move_x_to">%1$s をに移動します</string>
+    <string name="bookmarks_empty_default_folder_name">ブックマークリスト</string>
+    <string name="bookmarks_empty_title">%1$s は空です</string>
+    <string name="bookmarks_empty_message">Web ページのメニュー アクセスを使用してブックマークを追加します。</string>
+</resources>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_title">拡張機能</string>
+    <string name="extensions_empty_title">拡張機能がインストールされていません</string>
+    <string name="extensions_empty_message">拡張機能をインストールしてブラウザに追加機能を追加します。</string>
+    <string name="extensions_install">インストール</string>
+    <string name="extensions_install_hint">拡張ファイル (.xpi) の URL を入力します</string>
+    <string name="extensions_uninstall">アンインストール</string>
+    <string name="extensions_uninstall_confirm">\"%1$s\" をアンインストールしますか?</string>
+    <string name="extensions_enable">有効にする</string>
+    <string name="extensions_disable">無効にする</string>
+    <string name="extensions_install_error">拡張機能をインストールできませんでした</string>
+    <string name="extensions_recommended">推奨される拡張機能</string>
+    <string name="extensions_installed">インストールされている拡張機能</string>
+    <string name="extensions_loading">拡張機能を読み込み中…</string>
+    <string name="extensions_detail_title">拡張機能の詳細</string>
+    <string name="extensions_author_by">by %1$s</string>
+    <string name="extensions_ratings">%1$s の評価</string>
+    <string name="extensions_users">%1$s ユーザー</string>
+    <string name="extensions_version">バージョン %1$s</string>
+    <string name="extensions_permissions">権限</string>
+    <string name="extensions_no_permissions">この拡張機能には特別な権限は必要ありません。</string>
+    <string name="extensions_installing">インストール中…</string>
+    <string name="extensions_installed_label">インストール済み</string>
+    <string name="extensions_enabled">有効</string>
+    <string name="extensions_open_popup">拡張機能のポップアップを開く</string>
+    <string name="extensions_manage">拡張機能の管理</string>
+    <string name="extensions_more">その他の拡張機能</string>
+    <string name="extensions_search_hint">検索拡張機能</string>
+    <string name="extensions_search_empty">検索に一致する拡張子はありません。</string>
+    <string name="extensions_retry">再試行</string>
+    <string name="extensions_load_error">拡張機能を読み込めませんでした</string>
+    <string name="extensions_error_load_actionable">拡張機能を読み込めませんでした。接続を確認してください。</string>
+    <string name="extensions_error_action_actionable">延長アクションを完了できませんでした。もう一度やり直してください。</string>
+</resources>

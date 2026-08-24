@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="privatebrowsing_title">プライベートブラウジング</string>
+    <string name="privatebrowsing_paragraph_1">プライベート タブで閲覧したサイトは、Middle の履歴には表示されず、その Cookie はタブを閉じると常に削除されます。プライベート ブラウジングを使用しない場合、検索履歴は携帯電話に保存されますが、Middle には表示されません (私たちはあなたのプライバシーを尊重します!)。</string>
+    <string name="privatebrowsing_paragraph_2">プライベート ブラウジングによって、インターネット上であなたが見えなくなるわけではないことに注意してください。プライベート タブを使用しても、携帯電話会社や Wi-Fi ネットワークの所有者が、アクセスしたサイトやパブリック IP アドレスを追跡するのを妨げることはありません。</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_add_to_homescreen">Adicionar à tela inicial</string>
+    <string name="menu_request_desktop_site">Solicitar site para desktop</string>
+    <string name="menu_quit_app">Feche o aplicativo</string>
+    <string name="menu_find_in_page">Encontrar na página</string>
+    <string name="menu_account">Conta</string>
+    <string name="menu_login">Entrar</string>
+    <string name="menu_midori_vpn">MidoriVPN</string>
+    <string name="menu_more_options">Mais opções</string>
+    <string name="menu_back_to_main">Principais ações</string>
+</resources>

@@ -8,4 +8,6 @@
     <string name="menu_login">Iniciar sesión</string>
     <string name="menu_more_options">Más opciones</string>
     <string name="menu_back_to_main">Acciones principales</string>
+
+    <string name="menu_midori_vpn">MidoriVPN</string>
 </resources>

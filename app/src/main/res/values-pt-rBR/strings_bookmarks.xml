@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bookmarks">Favoritos</string>
+    <string name="bookmarks_folder">pasta</string>
+    <string name="bookmarks_bookmark">marcador</string>
+    <string name="bookmarks_folder_title_placeholder">Nome da pasta</string>
+    <string name="bookmarks_move_x_to">Mova %1$s para</string>
+    <string name="bookmarks_empty_default_folder_name">A lista de favoritos</string>
+    <string name="bookmarks_empty_title">%1$s está vazio</string>
+    <string name="bookmarks_empty_message">Adicione marcadores usando o menu de acesso na página web.</string>
+</resources>

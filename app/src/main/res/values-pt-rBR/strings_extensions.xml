@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_title">Extensões</string>
+    <string name="extensions_empty_title">Nenhuma extensão instalada</string>
+    <string name="extensions_empty_message">Instale extensões para adicionar recursos extras ao seu navegador.</string>
+    <string name="extensions_install">Instalar</string>
+    <string name="extensions_install_hint">Insira o URL de um arquivo de extensão (.xpi)</string>
+    <string name="extensions_uninstall">Desinstalar</string>
+    <string name="extensions_uninstall_confirm">Desinstalar \"%1$s\"?</string>
+    <string name="extensions_enable">Habilitar</string>
+    <string name="extensions_disable">Desativar</string>
+    <string name="extensions_install_error">Não foi possível instalar a extensão</string>
+    <string name="extensions_recommended">Extensões recomendadas</string>
+    <string name="extensions_installed">Extensões instaladas</string>
+    <string name="extensions_loading">Carregando extensões…</string>
+    <string name="extensions_detail_title">Detalhes da extensão</string>
+    <string name="extensions_author_by">por %1$s</string>
+    <string name="extensions_ratings">Avaliações de %1$s</string>
+    <string name="extensions_users">%1$s usuários</string>
+    <string name="extensions_version">Versão %1$s</string>
+    <string name="extensions_permissions">Permissões</string>
+    <string name="extensions_no_permissions">Esta extensão não requer nenhuma permissão especial.</string>
+    <string name="extensions_installing">Instalando…</string>
+    <string name="extensions_installed_label">Instalado</string>
+    <string name="extensions_enabled">Habilitado</string>
+    <string name="extensions_open_popup">Abrir pop-up de extensão</string>
+    <string name="extensions_manage">Gerenciar extensões</string>
+    <string name="extensions_more">Mais extensões</string>
+    <string name="extensions_search_hint">Extensões de pesquisa</string>
+    <string name="extensions_search_empty">Nenhuma extensão corresponde à sua pesquisa.</string>
+    <string name="extensions_retry">Tentar novamente</string>
+    <string name="extensions_load_error">Não foi possível carregar extensões</string>
+    <string name="extensions_error_load_actionable">Não foi possível carregar extensões. Verifique sua conexão.</string>
+    <string name="extensions_error_action_actionable">Não foi possível concluir a ação de extensão. Tente novamente.</string>
+</resources>

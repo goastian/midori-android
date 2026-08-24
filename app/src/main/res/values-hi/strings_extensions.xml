@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_title">एक्सटेंशन</string>
+    <string name="extensions_empty_title">कोई एक्सटेंशन इंस्टॉल नहीं किया गया</string>
+    <string name="extensions_empty_message">अपने ब्राउज़र में अतिरिक्त सुविधाएँ जोड़ने के लिए एक्सटेंशन इंस्टॉल करें।</string>
+    <string name="extensions_install">स्थापित करें</string>
+    <string name="extensions_install_hint">एक्सटेंशन फ़ाइल का URL दर्ज करें (.xpi)</string>
+    <string name="extensions_uninstall">अनइंस्टॉल करें</string>
+    <string name="extensions_uninstall_confirm">\"%1$s\" को अनइंस्टॉल करें?</string>
+    <string name="extensions_enable">सक्षम करें</string>
+    <string name="extensions_disable">अक्षम करें</string>
+    <string name="extensions_install_error">एक्सटेंशन इंस्टॉल नहीं किया जा सका</string>
+    <string name="extensions_recommended">अनुशंसित एक्सटेंशन</string>
+    <string name="extensions_installed">स्थापित एक्सटेंशन</string>
+    <string name="extensions_loading">एक्सटेंशन लोड हो रहे हैं...</string>
+    <string name="extensions_detail_title">विस्तार विवरण</string>
+    <string name="extensions_author_by">%1$s द्वारा</string>
+    <string name="extensions_ratings">%1$s रेटिंग</string>
+    <string name="extensions_users">%1$s उपयोगकर्ता</string>
+    <string name="extensions_version">संस्करण %1$s</string>
+    <string name="extensions_permissions">अनुमतियाँ</string>
+    <string name="extensions_no_permissions">इस एक्सटेंशन को किसी विशेष अनुमति की आवश्यकता नहीं है.</string>
+    <string name="extensions_installing">इंस्टाल किया जा रहा है...</string>
+    <string name="extensions_installed_label">स्थापित</string>
+    <string name="extensions_enabled">सक्षम</string>
+    <string name="extensions_open_popup">एक्सटेंशन पॉपअप खोलें</string>
+    <string name="extensions_manage">एक्सटेंशन प्रबंधित करें</string>
+    <string name="extensions_more">अधिक एक्सटेंशन</string>
+    <string name="extensions_search_hint">एक्सटेंशन खोजें</string>
+    <string name="extensions_search_empty">कोई भी एक्सटेंशन आपकी खोज से मेल नहीं खाता.</string>
+    <string name="extensions_retry">पुनः प्रयास करें</string>
+    <string name="extensions_load_error">एक्सटेंशन लोड नहीं हो सका</string>
+    <string name="extensions_error_load_actionable">हम एक्सटेंशन लोड नहीं कर सके. अपना कनेक्शन जांचें.</string>
+    <string name="extensions_error_action_actionable">हम विस्तार कार्रवाई पूरी नहीं कर सके. पुनः प्रयास करें।</string>
+</resources>

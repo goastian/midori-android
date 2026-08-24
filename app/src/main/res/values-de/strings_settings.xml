@@ -127,4 +127,244 @@
     <string name="privacy_policy_label">Datenschutzerklärung</string>
 
     <string name="rate_us_label">Bewerten Sie diese App</string>
+
+    <string name="show_new_tab_home_label">Verwenden Sie den Bildschirm „Neuer Tab“.</string>
+    <string name="show_new_tab_home_description">Deaktivieren Sie diese Option, um leere neue Tabs zu öffnen.</string>
+    <string name="settings_all">Alle Einstellungen</string>
+    <string name="settings_on">Auf</string>
+    <string name="settings_off">Aus</string>
+    <string name="settings_homepage_title">Neuer Tab</string>
+    <string name="settings_homepage_summary">Verknüpfungen, Widgets, Leerzeichen, Themen und Hintergründe</string>
+    <string name="settings_homepage_sections">Midori Neuer Tab</string>
+    <string name="settings_homepage_midori_tab">Personalisieren Sie Ihren neuen Tab</string>
+    <string name="settings_homepage_midori_tab_description">Öffnen Sie einen neuen Tab und verwenden Sie die Schaltfläche „Einstellungen“, um Verknüpfungen, Widgets, Leerzeichen, Sprache, Thema und Hintergrund zu verwalten. Ihre Auswahl bleibt auf diesem Gerät.</string>
+    <string name="settings_homepage_opening_screen">Eröffnungsbildschirm</string>
+    <string name="settings_homepage_open_homepage">Neuer Tab</string>
+    <string name="settings_homepage_open_last_tab">Letzte Registerkarte</string>
+    <string name="settings_homepage_open_after_four_hours">Neuer Tab nach vier Stunden</string>
+    <string name="settings_customize_title">Anpassen</string>
+    <string name="settings_customize_summary">Thema, Symbolleiste, Registerkarten und Gesten</string>
+    <string name="settings_customize_gestures">Gesten</string>
+    <string name="settings_translations_title">Übersetzungen</string>
+    <string name="settings_translations_summary">Private Website-Übersetzungen auf dem Gerät</string>
+    <string name="settings_translations_enabled">Übersetzungen</string>
+    <string name="settings_translations_enabled_summary">Übersetzungen bleiben auf Ihrem Gerät privat.</string>
+    <string name="settings_translations_offer">Bieten Sie an, wenn möglich zu übersetzen</string>
+    <string name="settings_translations_data_saver">Laden Sie Sprachen immer im Datensparmodus herunter</string>
+    <string name="settings_translations_preferences">Übersetzungseinstellungen</string>
+    <string name="settings_translations_automatic">Automatische Übersetzung</string>
+    <string name="settings_translations_automatic_none">Keine Sprachen ausgewählt</string>
+    <string name="settings_translations_never_sites">Übersetzen Sie diese Seiten niemals</string>
+    <string name="settings_translations_never_sites_none">Keine Websites ausgeschlossen</string>
+    <string name="settings_translations_never_sites_count">%1$d Websites ausgeschlossen</string>
+    <string name="settings_translations_download_languages">Sprachen herunterladen</string>
+    <string name="settings_translations_downloaded_count">%1$d Sprachen heruntergeladen</string>
+    <string name="settings_translations_manage_automatic">Übersetzen Sie diese Sprachen immer</string>
+    <string name="settings_translations_manage_automatic_summary">Wählen Sie die Sprachen aus, die automatisch übersetzt werden sollen.</string>
+    <string name="settings_translations_manage_sites">Übersetzen Sie niemals Websites</string>
+    <string name="settings_translations_manage_sites_empty">Websites, die Sie beim Übersetzen einer Seite ausschließen, werden hier angezeigt.</string>
+    <string name="settings_translations_remove">Entfernen</string>
+    <string name="settings_translations_manage_downloads">Sprachen herunterladen</string>
+    <string name="settings_translations_manage_downloads_summary">Laden Sie Sprachmodelle für private Offline-Übersetzungen herunter.</string>
+    <string name="settings_translations_done">Fertig</string>
+    <string name="settings_translations_model_downloading">Herunterladen</string>
+    <string name="settings_translations_model_downloaded">Heruntergeladen</string>
+    <string name="settings_pull_to_refresh">Zum Aktualisieren ziehen</string>
+    <string name="settings_shake_to_summarize_summary">Fassen Sie die aktuelle Seite zusammen, wenn das Gerät geschüttelt wird.</string>
+    <string name="settings_notifications_open_system_summary">Wählen Sie die Benachrichtigungskategorien aus, die Midori verwenden darf.</string>
+    <string name="settings_passwords_title">Passwörter</string>
+    <string name="settings_save_passwords">Passwörter speichern</string>
+    <string name="settings_save_passwords_desc">Fragen Sie nach, bevor Sie Site-Logins speichern.</string>
+    <string name="settings_password_autofill">Automatisches Ausfüllen in Midori</string>
+    <string name="settings_password_autofill_desc">Füllen Sie gespeicherte Benutzernamen und Passwörter auf Websites aus.</string>
+    <string name="settings_passwords_manage">Verwalten</string>
+    <string name="settings_saved_passwords">Gespeicherte Passwörter</string>
+    <string name="settings_password_exceptions">Ausnahmen</string>
+    <string name="settings_secure_store_required">Bevor Daten gespeichert werden können, ist eine sichere Speicherung erforderlich.</string>
+    <string name="settings_autofill_title">Automatisch ausfüllen</string>
+    <string name="settings_autofill_addresses">Adressen</string>
+    <string name="settings_autofill_save_addresses">Adressen speichern und ausfüllen</string>
+    <string name="settings_autofill_save_addresses_desc">Enthält Telefonnummern und E-Mail-Adressen.</string>
+    <string name="settings_autofill_add_address">Adresse hinzufügen</string>
+    <string name="settings_autofill_cards">Zahlungsmethoden</string>
+    <string name="settings_autofill_save_cards">Zahlungsarten speichern und ausfüllen</string>
+    <string name="settings_autofill_save_cards_desc">Zahlungsdaten müssen vor dem Speichern verschlüsselt gespeichert werden.</string>
+    <string name="settings_autofill_add_card">Karte hinzufügen</string>
+    <string name="settings_accessibility_title">Barrierefreiheit</string>
+    <string name="settings_accessibility_auto_font">Verwenden Sie die Textgröße des Geräts</string>
+    <string name="settings_accessibility_auto_font_desc">Passen Sie die Textgrößeneinstellungen von Android an.</string>
+    <string name="settings_accessibility_font_size">Schriftgröße</string>
+    <string name="settings_accessibility_font_percent">%1$d %%</string>
+    <string name="settings_accessibility_force_zoom">Zoomen Sie auf alle Websites</string>
+    <string name="settings_accessibility_force_zoom_desc">Erlauben Sie Pinch und Zoom auch auf Websites, die versuchen, dies zu blockieren.</string>
+    <string name="permissions_settings_label">Berechtigungen</string>
+    <string name="privacy_policy_url" translatable="false">https://astian.org/astian-privacy-policies/</string>
+    <string name="qwant_details_description" translatable="false">%1$s\nBuild %2$s – Gecko %3$s</string>
+    <string name="settings_tests_label" translatable="false">Tests</string>
+    <string name="settings_tests_prompts_label" translatable="false">Aufforderungen</string>
+    <string name="licence_label" translatable="false">Lizenz MPL 2.0</string>
+    <string name="settings_licence_content" translatable="false">&lt;h2 id="definitions"&gt;1. Definitionen&lt;/h2&gt;&lt;br/&gt;
+        &lt;dl&gt;
+        &lt;dt&gt;1.1. „Mitwirkender“&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;bezeichnet jede natürliche oder juristische Person, die abgedeckte Software erstellt, zu deren Erstellung beiträgt oder Eigentümerin der abgedeckten Software ist.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.2. „Mitwirkende Version“&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;bezeichnet die Kombination der Beiträge anderer (falls vorhanden), die von einem Mitwirkenden verwendet werden, und des Beitrags dieses bestimmten Mitwirkenden.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.3. „Beitrag“&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;bedeutet Abgedeckte Software eines bestimmten Mitwirkenden.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.4. „Abgedeckte Software“&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;bezeichnet das Quellcode-Formular, dem der ursprüngliche Mitwirkende den Hinweis in Anlage A beigefügt hat, die ausführbare Form dieses Quellcode-Formulars und Änderungen dieses Quellcode-Formulars, jeweils einschließlich Teile davon.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.5. „Inkompatibel mit Sekundärlizenzen“&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;bedeutet&lt;/p&gt;
+        &lt;ol type="a"&gt;
+        &lt;li&gt;&lt;p&gt;dass der ursprüngliche Mitwirkende die in Anlage B beschriebene Mitteilung der abgedeckten Software beigefügt hat; oder&lt;/p&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;p&gt;dass die abgedeckte Software unter den Bedingungen der Version 1.1 oder früher der Lizenz verfügbar gemacht wurde, jedoch nicht auch unter den Bedingungen einer Sekundärlizenz.&lt;/p&gt;&lt;/li&gt;
+        &lt;/ol&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.6. „Ausführbare Form“&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;bezeichnet jede Form des Werks außer der Quellcodeform.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.7. „Größere Arbeit“&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;bezeichnet ein Werk, das abgedeckte Software mit anderem Material in einer oder mehreren separaten Dateien kombiniert, bei dem es sich nicht um abgedeckte Software handelt.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.8. „Lizenz“&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;bedeutet dieses Dokument.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.9. „Lizenzierbar“&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;bedeutet, das Recht zu haben, im größtmöglichen Umfang, sei es zum Zeitpunkt der Erstgewährung oder später, alle durch diese Lizenz übertragenen Rechte zu gewähren.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.10. „Änderungen“&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;bedeutet Folgendes:&lt;/p&gt;
+        &lt;ol type="a"&gt;&lt;br/&gt;
+        &lt;li&gt;&lt;p&gt;jede Datei in Quellcodeform, die aus einer Hinzufügung, Löschung oder Änderung des Inhalts der abgedeckten Software resultiert; oder&lt;/p&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;p&gt;jede neue Datei in Quellcodeform, die abgedeckte Software enthält.&lt;/p&gt;&lt;/li&gt;
+        &lt;/ol&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.11. „Patentansprüche“ eines Mitwirkenden&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;bezeichnet alle Patentansprüche, einschließlich, aber nicht beschränkt auf Methoden-, Prozess- und Vorrichtungsansprüche, in jedem von diesem Mitwirkenden lizenzierbaren Patent, das ohne die Gewährung der Lizenz durch die Erstellung, Nutzung, den Verkauf, das Anbieten zum Verkauf, die Erstellung, den Import oder die Übertragung seiner Beiträge oder seines Mitwirkenden verletzt würde Version.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.12. „Sekundäre Lizenz“&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;bedeutet entweder die GNU General Public License, Version 2.0, die GNU Lesser General Public License, Version 2.1, die GNU Affero General Public License, Version 3.0 oder jede spätere Version dieser Lizenzen.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.13. „Quellcode-Formular“&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;bedeutet die Form der Arbeit, die für die Durchführung von Änderungen bevorzugt wird.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.14. „Sie“ (oder „Ihr“)&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;bezeichnet eine natürliche oder juristische Person, die Rechte im Rahmen dieser Lizenz ausübt. Bei juristischen Personen umfasst „Sie“ jede juristische Person, die Sie kontrolliert, von Ihnen kontrolliert wird oder unter gemeinsamer Kontrolle mit Ihnen steht. Für die Zwecke dieser Definition bedeutet „Kontrolle“ (a) die direkte oder indirekte Macht, die Leitung oder Führung eines solchen Unternehmens zu bestimmen, sei es durch Vertrag oder auf andere Weise, oder (b) das Eigentum an mehr als fünfzig Prozent (50 %) der ausstehenden Aktien oder das wirtschaftliche Eigentum an diesem Unternehmen.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;/dl&gt;&lt;br/&gt;
+        &lt;h2 id="license-grants-and-conditions"&gt;2. Lizenzgewährung und -bedingungen&lt;/h2&gt;&lt;br/&gt;
+        &lt;h3 id="grants"&gt;2.1. Gewährt&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Jeder Mitwirkende gewährt Ihnen hiermit eine weltweite, gebührenfreie, nicht exklusive Lizenz:&lt;/p&gt;
+        &lt;ol type="a"&gt;
+        &lt;li&gt;&lt;p&gt;im Rahmen von geistigen Eigentumsrechten (außer Patent- oder Markenrechten) durch diesen Mitwirkenden lizenzierbar, um seine Beiträge zu nutzen, zu reproduzieren, verfügbar zu machen, zu modifizieren, anzuzeigen, aufzuführen, zu verteilen und anderweitig zu verwerten, entweder auf unveränderter Basis, mit Modifikationen oder als Teil eines größeren Werks; und&lt;/p&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;p&gt;im Rahmen der Patentansprüche eines solchen Mitwirkenden, entweder seine Beiträge oder seine Mitwirkendenversion herzustellen, zu nutzen, zu verkaufen, zum Verkauf anzubieten, erstellt zu haben, zu importieren oder anderweitig zu übertragen.&lt;/p&gt;&lt;/li&gt;
+        &lt;/ol&gt;&lt;br/&gt;
+        &lt;h3 id="effective-date"&gt;2.2. Datum des Inkrafttretens&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Die in Abschnitt 2.1 in Bezug auf jeden Beitrag gewährten Lizenzen werden für jeden Beitrag an dem Tag wirksam, an dem der Mitwirkende diesen Beitrag erstmals verteilt.&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="limitations-on-grant-scope"&gt;2.3. Einschränkungen des Grant-Bereichs&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Die in diesem Abschnitt 2 gewährten Lizenzen sind die einzigen im Rahmen dieser Lizenz gewährten Rechte. Aus der Verbreitung oder Lizenzierung der abgedeckten Software im Rahmen dieser Lizenz ergeben sich keine zusätzlichen Rechte oder Lizenzen. Ungeachtet Abschnitt 2.1(b) oben wird von einem Mitwirkenden keine Patentlizenz gewährt:&lt;/p&gt;
+        &lt;ol type="a"&gt;
+        &lt;li&gt;&lt;p&gt;für jeden Code, den ein Mitwirkender aus der abgedeckten Software entfernt hat; oder&lt;/p&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;p&gt;für Verstöße, die verursacht werden durch: (i) Änderungen der abgedeckten Software durch Sie und andere Dritte oder (ii) die Kombination ihrer Beiträge mit anderer Software (außer als Teil ihrer Mitwirkendenversion); oder&lt;/p&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;p&gt;unter Patentansprüchen, die durch die abgedeckte Software in Abwesenheit ihrer Beiträge verletzt wurden.&lt;/p&gt;&lt;/li&gt;
+        &lt;/ol&gt;
+        &lt;p&gt;Diese Lizenz gewährt keine Rechte an den Marken, Dienstleistungsmarken oder Logos eines Mitwirkenden (außer soweit dies zur Einhaltung der Mitteilungspflichten in Abschnitt 3.4 erforderlich ist).&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="subsequent-licenses"&gt;2.4. Nachfolgende Lizenzen&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Kein Mitwirkender gewährt zusätzliche Zuschüsse aufgrund Ihrer Entscheidung, die abgedeckte Software unter einer Folgeversion dieser Lizenz (siehe Abschnitt 10.2) oder unter den Bedingungen einer Sekundärlizenz (sofern gemäß den Bedingungen von Abschnitt 3.3 zulässig) zu vertreiben.&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="representation"&gt;2.5. Darstellung&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Jeder Mitwirkende erklärt, dass er glaubt, dass seine Beiträge seine ursprüngliche(n) Schöpfung(en) sind, oder dass er über ausreichende Rechte verfügt, um die durch diese Lizenz übertragenen Rechte an seinen Beiträgen zu gewähren.&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="fair-use"&gt;2.6. Faire Nutzung&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Diese Lizenz soll keine Rechte einschränken, die Ihnen gemäß den geltenden Urheberrechtsgrundsätzen der fairen Nutzung, des fairen Handels oder anderer Äquivalente zustehen.&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="conditions"&gt;2.7. Bedingungen&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Abschnitte 3.1, 3.2, 3.3 und 3.4 sind Bedingungen der in Abschnitt 2.1 gewährten Lizenzen.&lt;/p&gt;&lt;br/&gt;
+        &lt;h2 id="responsibilities"&gt;3. Verantwortlichkeiten&lt;/h2&gt;&lt;br/&gt;
+        &lt;h3 id="distribution-of-source-form"&gt;3.1. Verteilung der Quellform&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Jede Verbreitung der abgedeckten Software in Quellcodeform, einschließlich aller Modifikationen, die Sie erstellen oder zu denen Sie beitragen, muss den Bedingungen dieser Lizenz unterliegen. Sie müssen die Empfänger darüber informieren, dass die Quellcodeform der abgedeckten Software den Bedingungen dieser Lizenz unterliegt und wie sie eine Kopie dieser Lizenz erhalten können. Sie dürfen nicht versuchen, die Rechte der Empfänger im Quellcode-Formular zu ändern oder einzuschränken.&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="distribution-of-executable-form"&gt;3.2. Verteilung der ausführbaren Form&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Wenn Sie abgedeckte Software in ausführbarer Form vertreiben, dann:&lt;/p&gt;
+        &lt;ol type="a"&gt;
+        &lt;li&gt;&lt;p&gt;solche abgedeckte Software muss auch in Quellcodeform verfügbar gemacht werden, wie in Abschnitt 3.1 beschrieben, und Sie müssen die Empfänger der ausführbaren Form darüber informieren, wie sie rechtzeitig und mit angemessenen Mitteln eine Kopie dieser Quellcodeform erhalten können, und zwar zu einer Gebühr, die nicht höher ist als die Kosten der Verteilung an den Empfänger; und&lt;/p&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;p&gt;Sie dürfen ein solches ausführbares Formular gemäß den Bedingungen dieser Lizenz vertreiben oder es unter anderen Bedingungen unterlizenzieren, vorausgesetzt, dass die Lizenz für das ausführbare Formular nicht versucht, die Rechte der Empfänger am Quellcode-Formular im Rahmen dieser Lizenz einzuschränken oder zu ändern Lizenz.&lt;/p&gt;&lt;/li&gt;
+        &lt;/ol&gt;&lt;br/&gt;
+        &lt;h3 id="distribution-of-a-larger-work"&gt;3.3. Verbreitung eines größeren Werkes&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Sie dürfen ein größeres Werk zu den Bedingungen Ihrer Wahl erstellen und verbreiten, vorausgesetzt, dass Sie auch die Anforderungen dieser Lizenz für die abgedeckte Software erfüllen. Wenn es sich bei dem größeren Werk um eine Kombination der abgedeckten Software mit einem Werk handelt, das einer oder mehreren Sekundärlizenzen unterliegt, und die abgedeckte Software nicht mit Sekundärlizenzen inkompatibel ist, erlaubt Ihnen diese Lizenz, die abgedeckte Software zusätzlich unter den Bedingungen dieser Sekundärlizenz(en) zu vertreiben, sodass der Empfänger des größeren Werks nach eigenem Ermessen die Abgedeckte Software unter den Bedingungen dieser Lizenz oder dieser Sekundärlizenz(en) weiter vertreiben kann.&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="notices"&gt;3.4. Hinweise&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Sie dürfen den Inhalt von Lizenzhinweisen (einschließlich Urheberrechtshinweisen, Patenthinweisen, Gewährleistungsausschlüssen oder Haftungsbeschränkungen), die in der Quellcodeform der abgedeckten Software enthalten sind, nicht entfernen oder ändern, mit der Ausnahme, dass Sie Lizenzhinweise in dem Umfang ändern dürfen, der erforderlich ist, um bekannte sachliche Ungenauigkeiten zu beheben.&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="application-of-additional-terms"&gt;3.5. Anwendung zusätzlicher Bedingungen&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Sie können sich dafür entscheiden, einem oder mehreren Empfängern der abgedeckten Software Garantie-, Support-, Schadloshaltungs- oder Haftungsverpflichtungen anzubieten und hierfür eine Gebühr zu erheben. Sie dürfen dies jedoch nur in Ihrem eigenen Namen und nicht im Namen eines Mitwirkenden tun. Sie müssen absolut klarstellen, dass eine solche Garantie-, Support-, Schadloshaltungs- oder Haftungsverpflichtung ausschließlich von Ihnen angeboten wird, und Sie erklären sich hiermit damit einverstanden, jeden Mitwirkenden von jeglicher Haftung freizustellen, die diesem Mitwirkenden aufgrund der von Ihnen angebotenen Garantie-, Support-, Schadloshaltungs- oder Haftungsbedingungen entsteht. Sie können zusätzliche Gewährleistungsausschlüsse und Haftungsbeschränkungen hinzufügen, die für jede Gerichtsbarkeit spezifisch sind.&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="inability-to-comply-due-to-statute-or-regulation"&gt;4. Unfähigkeit zur Einhaltung aufgrund von Gesetzen oder Vorschriften&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;Wenn es Ihnen aufgrund von Gesetzen, gerichtlichen Anordnungen oder Vorschriften unmöglich ist, eine der Bedingungen dieser Lizenz in Bezug auf einige oder die gesamte abgedeckte Software einzuhalten, müssen Sie: (a) die Bedingungen dieser Lizenz so weit wie möglich einhalten; und (b) beschreiben Sie die Einschränkungen und den Code, auf den sie sich auswirken. Eine solche Beschreibung muss in einer Textdatei abgelegt werden, die allen Distributionen der abgedeckten Software im Rahmen dieser Lizenz beiliegt. Sofern dies nicht durch Gesetze oder Vorschriften verboten ist, muss eine solche Beschreibung ausreichend detailliert sein, damit ein Empfänger mit normalen Kenntnissen sie verstehen kann.&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="termination"&gt;5. Kündigung&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;5.1. Die im Rahmen dieser Lizenz gewährten Rechte erlöschen automatisch, wenn Sie eine ihrer Bedingungen nicht einhalten. Wenn Sie sich jedoch daran halten, werden die im Rahmen dieser Lizenz von einem bestimmten Mitwirkenden gewährten Rechte (a) vorläufig wieder in Kraft gesetzt, es sei denn und bis dieser Mitwirkende Ihre Gewährung ausdrücklich und endgültig kündigt, und (b) dauerhaft, wenn dieser Mitwirkende Sie nicht innerhalb von 60 Tagen, nachdem Sie die Vorschriften wieder eingehalten haben, mit angemessenen Mitteln über die Nichteinhaltung informiert. Darüber hinaus werden Ihre Zuwendungen von einem bestimmten Mitwirkenden fortlaufend wiederhergestellt, wenn dieser Mitwirkende Sie mit angemessenen Mitteln über die Nichteinhaltung informiert. Dies ist das erste Mal, dass Sie von diesem Mitwirkenden eine Mitteilung über die Nichteinhaltung dieser Lizenz erhalten, und Sie kommen dieser Lizenz vor Ablauf von 30 Tagen nach Erhalt der Mitteilung nach.&lt;/p&gt;
+        &lt;br/&gt;&lt;p&gt;5.2. Wenn Sie einen Rechtsstreit gegen ein Unternehmen einleiten, indem Sie eine Patentverletzungsklage geltend machen (ausgenommen Feststellungsklagen, Widerklagen und Gegenklagen), mit der Behauptung, dass eine Mitwirkende-Version direkt oder indirekt ein Patent verletzt, erlöschen die Ihnen von allen Mitwirkenden für die Abgedeckte Software gemäß Abschnitt 2.1 dieser Lizenz gewährten Rechte.&lt;/p&gt;
+        &lt;br/&gt;&lt;p&gt;5.3. Im Falle einer Kündigung gemäß den Abschnitten 5.1 oder 5.2 oben bleiben alle Endbenutzer-Lizenzverträge (mit Ausnahme von Händlern und Wiederverkäufern), die von Ihnen oder Ihren Händlern im Rahmen dieser Lizenz vor der Kündigung wirksam gewährt wurden, auch nach der Kündigung bestehen.&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="disclaimer-of-warranty"&gt;6. Gewährleistungsausschluss&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;&lt;em&gt;Die abgedeckte Software wird im Rahmen dieser Lizenz „wie besehen“ bereitgestellt, ohne Gewährleistung jeglicher Art, weder ausdrücklich, stillschweigend noch gesetzlich, einschließlich, aber nicht beschränkt auf Garantien, dass die abgedeckte Software frei von Mängeln, handelsüblich, für einen bestimmten Zweck geeignet ist oder keine Rechte verletzt. Das gesamte Risiko hinsichtlich der Qualität und Leistung der abgedeckten Software liegt bei Ihnen. Sollte sich eine abgedeckte Software in irgendeiner Hinsicht als fehlerhaft erweisen, übernehmen Sie (nicht ein Mitwirkender) die Kosten für alle erforderlichen Wartungs-, Reparatur- oder Korrekturarbeiten. Dieser Gewährleistungsausschluss ist ein wesentlicher Bestandteil dieser Lizenz. Mit dieser Lizenz ist keine Nutzung der abgedeckten Software gestattet, mit Ausnahme dieses Haftungsausschlusses.&lt;/em&gt;&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="limitation-of-liability"&gt;7. Haftungsbeschränkung&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;&lt;em&gt;Unter keinen Umständen und unter keiner Rechtstheorie, sei es aus unerlaubter Handlung (einschließlich Fahrlässigkeit), aus Vertrag oder aus anderen Gründen, ist ein Mitwirkender oder jemand, der die abgedeckte Software wie oben zulässig vertreibt, Ihnen gegenüber für direkte, indirekte, besondere, zufällige oder Folgeschäden jeglicher Art haftbar, einschließlich, aber nicht beschränkt auf Schäden für entgangenen Gewinn, Verlust von Kulanz, Arbeitsunterbrechung, Computerausfall oder -fehlfunktion oder alle anderen kommerziellen Schäden oder Verluste, selbst wenn diese Partei über die Möglichkeit solcher Schäden informiert wurde. Diese Haftungsbeschränkung gilt nicht für die Haftung für Tod oder Körperverletzung, die auf die Fahrlässigkeit dieser Partei zurückzuführen sind, soweit geltendes Recht eine solche Beschränkung verbietet. In einigen Gerichtsbarkeiten ist der Ausschluss oder die Beschränkung von Neben- oder Folgeschäden nicht zulässig, daher gelten dieser Ausschluss und diese Beschränkung möglicherweise nicht für Sie.&lt;/em&gt;&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="litigation"&gt;8. Rechtsstreit&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;Alle Rechtsstreitigkeiten im Zusammenhang mit dieser Lizenz können nur vor den Gerichten einer Gerichtsbarkeit anhängig gemacht werden, in der der Beklagte seinen Hauptgeschäftssitz hat, und solche Rechtsstreitigkeiten unterliegen den Gesetzen dieser Gerichtsbarkeit, ohne Bezugnahme auf die Kollisionsnormen. Nichts in diesem Abschnitt hindert eine Partei daran, Gegenansprüche oder Gegenansprüche geltend zu machen.&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="miscellaneous"&gt;9. Sonstiges&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;Diese Lizenz stellt die vollständige Vereinbarung zum Vertragsgegenstand dar. Sollte sich herausstellen, dass eine Bestimmung dieser Lizenz nicht durchsetzbar ist, wird diese Bestimmung nur in dem Umfang geändert, der erforderlich ist, um sie durchsetzbar zu machen. Gesetze oder Vorschriften, die vorsehen, dass die Sprache eines Vertrags gegen den Verfasser auszulegen ist, dürfen nicht dazu verwendet werden, diese Lizenz gegen einen Mitwirkenden auszulegen.&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="versions-of-the-license"&gt;10. Versionen der Lizenz&lt;/h2&gt;&lt;br/&gt;
+        &lt;h3 id="new-versions"&gt;10.1. Neue Versionen&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Mozilla Foundation ist der Lizenzverwalter. Sofern in Abschnitt 10.3 nichts anderes bestimmt ist, hat niemand anderes als der Lizenzverwalter das Recht, neue Versionen dieser Lizenz zu ändern oder zu veröffentlichen. Jede Version erhält eine eindeutige Versionsnummer.&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="effect-of-new-versions"&gt;10.2. Auswirkung neuer Versionen&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Sie dürfen die abgedeckte Software gemäß den Bedingungen der Version der Lizenz vertreiben, unter der Sie die abgedeckte Software ursprünglich erhalten haben, oder gemäß den Bedingungen einer späteren Version, die vom Lizenzverwalter veröffentlicht wurde.&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="modified-versions"&gt;10.3. Modifizierte Versionen&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Wenn Sie Software erstellen, die nicht dieser Lizenz unterliegt, und Sie eine neue Lizenz für diese Software erstellen möchten, können Sie eine modifizierte Version dieser Lizenz erstellen und verwenden, wenn Sie die Lizenz umbenennen und alle Verweise auf den Namen des Lizenzverwalters entfernen (mit der Ausnahme, dass eine solche modifizierte Lizenz von dieser Lizenz abweicht).&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="distributing-source-code-form-that-is-incompatible-with-secondary-licenses"&gt;10.4. Verteilen einer Quellcodeform, die mit Sekundärlizenzen nicht kompatibel ist&lt;/h3&gt;
+        &lt;br/&gt;&lt;p&gt;Wenn Sie sich dafür entscheiden, eine Quellcodeform zu vertreiben, die mit Sekundärlizenzen gemäß den Bedingungen dieser Version der Lizenz nicht kompatibel ist, muss der in Anlage B dieser Lizenz beschriebene Hinweis beigefügt werden.&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="exhibit-a---source-code-form-license-notice"&gt;Anlage A – Lizenzhinweis zum Quellcodeformular&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;Diese Quellcodeform unterliegt den Bedingungen der Mozilla Public License, Version 2.0. Wenn mit dieser Datei keine Kopie der MPL verteilt wurde, können Sie eine unter https://mozilla.org/MPL/2.0/.&lt;/p&gt; erhalten.
+        &lt;br/&gt;
+        &lt;p&gt;Wenn es nicht möglich oder wünschenswert ist, den Hinweis in einer bestimmten Datei abzulegen, können Sie den Hinweis an einem Ort (z. B. einer LIZENZdatei in einem relevanten Verzeichnis) einfügen, an dem ein Empfänger wahrscheinlich nach einem solchen Hinweis suchen würde.&lt;/p&gt;
+        &lt;br/&gt;&lt;p&gt;Sie können zusätzliche genaue Hinweise zum Urheberrechtseigentum hinzufügen.&lt;/p&gt;&lt;br/&gt;
+        &lt;h2 id="exhibit-b---incompatible-with-secondary-licenses-notice"&gt;Anlage B – Hinweis „Inkompatibel mit Sekundärlizenzen“&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;Diese Quellcodeform ist „inkompatibel mit Sekundärlizenzen“, wie in der Mozilla Public License, Version 2.0 definiert.&lt;/p&gt;</string>
+    <string name="prompt_save_login_title">Passwort speichern?</string>
+    <string name="prompt_save_login_description">Speichern Sie den Login für %1$s in Midori.</string>
+    <string name="prompt_fill_login_title">Passwort ausfüllen?</string>
+    <string name="prompt_fill_login_description">Verwenden Sie den gespeicherten Login für %1$s.</string>
+    <string name="prompt_save_card_title">Zahlungsart speichern?</string>
+    <string name="prompt_save_card_description">Speichern Sie die Karte %1$s in Midori.</string>
+    <string name="prompt_fill_card_title">Zahlungsart ausfüllen?</string>
+    <string name="prompt_fill_card_description">Verwenden Sie für dieses Formular die Karte %1$s.</string>
+    <string name="prompt_fill_address_title">Adresse ausfüllen?</string>
+    <string name="prompt_fill_address_description">Verwenden Sie %1$s für dieses Formular.</string>
+    <string name="prompt_fill">Füllen</string>
+    <string name="settings_saved_passwords_secure_desc">Verschlüsselt und geschützt durch Ihre Gerätesperre</string>
+    <string name="settings_autofill_manage_secure_desc">Verschlüsselte Informationen verwalten</string>
+    <string name="settings_accessibility_font_disabled_hint">Deaktivieren Sie „Gerätetextgröße verwenden“, um eine benutzerdefinierte Größe auszuwählen.</string>
+    <string name="settings_accessibility_font_reload_hint">Die neue Größe wird nach dem Neuladen einer Seite verwendet.</string>
+    <string name="settings_accessibility_font_reset">Auf 100 % zurücksetzen</string>
+    <string name="secure_unlock_subtitle">Verwenden Sie Ihren Fingerabdruck, Ihr Gesicht, Ihre PIN, Ihr Muster oder Ihr Passwort</string>
+    <string name="secure_unlock_description">Ihre vertraulichen Informationen bleiben gesperrt, bis Android Ihre Identität überprüft.</string>
+    <string name="secure_unlock_action">Entsperren</string>
+    <string name="secure_unlock_failed">Nicht erkannt. Versuchen Sie es erneut.</string>
+    <string name="secure_unlock_no_screen_lock">Richten Sie in Android eine Bildschirmsperre ein, bevor Sie diesen sicheren Bereich nutzen.</string>
+    <string name="secure_items_count">%1$d gespeichert</string>
+    <string name="secure_storage_error">Midori konnte den sicheren Store nicht aktualisieren. Versuchen Sie es erneut.</string>
+    <string name="secure_required_fields">Füllen Sie alle erforderlichen Felder aus.</string>
+    <string name="secure_delete_irreversible">Dies kann nicht rückgängig gemacht werden.</string>
+    <string name="passwords_vault_title">Ihr privater Tresor</string>
+    <string name="passwords_vault_description">Passwörter werden auf diesem Gerät verschlüsselt und nur passenden Websites angeboten.</string>
+    <string name="passwords_empty_description">Melden Sie sich auf einer Website an und wählen Sie „Speichern“, wenn Midori Sie dazu auffordert.</string>
+    <string name="passwords_no_username">Kein Benutzername</string>
+    <string name="autofill_vault_title">Zahlungs- und Kontaktdaten</string>
+    <string name="autofill_vault_description">Kartennummern werden verschlüsselt. Jedes Mal, wenn Sie diesen Bildschirm öffnen, ist eine Android-Verifizierung erforderlich.</string>
+    <string name="saved_cards_empty_description">Fügen Sie eine Karte hinzu, um unterstützte Zahlungsformulare auszufüllen.</string>
+    <string name="saved_cards_delete">Karte löschen</string>
+    <string name="saved_cards_expires">Läuft ab %1$02d/%2$d</string>
+    <string name="saved_cards_month">Monat</string>
+    <string name="saved_cards_year">Jahr</string>
+    <string name="saved_cards_invalid_number">Geben Sie eine gültige Kartennummer ein.</string>
+    <string name="saved_cards_invalid_expiry">Geben Sie ein zukünftiges Ablaufdatum ein.</string>
+    <string name="saved_cards_encryption_note">Die vollständige Kartennummer wird vor der Speicherung verschlüsselt.</string>
+    <string name="saved_addresses_empty_description">Fügen Sie eine Adresse hinzu, um unterstützte Kontakt- und Versandformulare auszufüllen.</string>
+    <string name="saved_addresses_delete">Adresse löschen</string>
 </resources>

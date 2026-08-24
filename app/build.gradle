@@ -133,7 +133,9 @@ android {
             arg("room.schemaLocation", "$projectDir/schemas")
         }
 
-        resourceConfigurations += ["en", "fr", "de", "es", "it"]
+        resourceConfigurations += [
+            "en", "fr", "de", "es", "it", "ru", "pt-rPT", "pt-rBR", "zh-rCN", "ja", "sq", "hi"
+        ]
         buildConfigField("String", "COMPANION_ID", "\"${rootProject.ext.companion_id}\"")
     }
 
@@ -276,6 +278,48 @@ android {
 
     applicationVariants.configureEach { variant ->
     }
+}
+
+tasks.register("verifyLocalizedStrings") {
+    group = "verification"
+    description = "Checks that every locale declared by locale-config.xml defines every app string."
+
+    doLast {
+        def resourcesDirectory = file("src/main/res")
+        def stringNamesIn = { File directory ->
+            fileTree(directory) {
+                include "strings*.xml"
+            }.collectMany { resourceFile ->
+                new XmlSlurper(false, false)
+                    .parse(resourceFile)
+                    .children()
+                    .findAll { it.@name.text() }
+                    .collect { it.@name.text() }
+            } as Set
+        }
+
+        def baseNames = stringNamesIn(resourcesDirectory.toPath().resolve("values").toFile())
+        def localeConfig = new XmlSlurper(false, false).parse(file("src/main/res/xml/locales_config.xml"))
+        def missingByLocale = localeConfig.locale.collectEntries { locale ->
+            def languageTag = locale.attributes().find { key, value -> key.toString().endsWith("name") }?.value?.toString()
+            def qualifier = languageTag.split("-").withIndex().collect { part, index ->
+                index == 0 ? part : "r${part}"
+            }.join("-")
+            def localeNames = stringNamesIn(resourcesDirectory.toPath().resolve("values-${qualifier}").toFile())
+            [(languageTag): baseNames - localeNames]
+        }.findAll { _, missing -> !missing.isEmpty() }
+
+        if (!missingByLocale.isEmpty()) {
+            def details = missingByLocale.collect { locale, missing ->
+                "${locale}: ${missing.size()} missing (${missing.sort().join(', ')})"
+            }.join("\n")
+            throw new GradleException("Localized strings are out of sync:\n${details}")
+        }
+    }
+}
+
+tasks.named("check").configure {
+    dependsOn(tasks.named("verifyLocalizedStrings"))
 }
 
 def midoriNewTabAssets = file("src/main/assets/extensions/midori_newtab")

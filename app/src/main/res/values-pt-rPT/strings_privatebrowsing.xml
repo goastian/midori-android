@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="privatebrowsing_title">Navegação privada</string>
+    <string name="privatebrowsing_paragraph_1">Os sites visualizados em separadores privados não são apresentados no seu histórico Midori e os seus cookies são sempre eliminados quando fecha o separador. Sem a navegação privada, o seu histórico de pesquisa é armazenado no seu telefone, mas não é visível para a Midori (respeitamos a sua privacidade!).</string>
+    <string name="privatebrowsing_paragraph_2">Esteja ciente de que a navegação privada não o torna invisível na Internet. Os separadores privados não impedem que o seu operador móvel ou proprietário de rede Wi-Fi rastreie os sites que visita ou o seu endereço IP público.</string>
+</resources>

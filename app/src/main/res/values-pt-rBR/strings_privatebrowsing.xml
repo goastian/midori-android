@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="privatebrowsing_title">Navegação privada</string>
+    <string name="privatebrowsing_paragraph_1">Os sites visualizados em abas privadas não são exibidos em seu histórico do Midori e seus cookies são sempre excluídos quando você fecha a aba. Sem a navegação privada, seu histórico de pesquisa é armazenado no seu telefone, mas não fica visível para Midori (respeitamos sua privacidade!).</string>
+    <string name="privatebrowsing_paragraph_2">Esteja ciente de que a navegação privada não o torna invisível na Internet. As guias privadas não impedem que sua operadora móvel ou proprietário de rede Wi-Fi rastreie os sites que você visita ou seu endereço IP público.</string>
+</resources>

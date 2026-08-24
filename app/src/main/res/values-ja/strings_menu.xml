@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_add_to_homescreen">ホーム画面に追加</string>
+    <string name="menu_request_desktop_site">デスクトップサイトをリクエストする</string>
+    <string name="menu_quit_app">アプリを閉じる</string>
+    <string name="menu_find_in_page">ページ内で検索</string>
+    <string name="menu_account">アカウント</string>
+    <string name="menu_login">ログイン</string>
+    <string name="menu_midori_vpn">みどりVPN</string>
+    <string name="menu_more_options">その他のオプション</string>
+    <string name="menu_back_to_main">主な取り組み</string>
+</resources>

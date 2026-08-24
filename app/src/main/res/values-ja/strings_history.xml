@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history">歴史</string>
+    <string name="history_today">今日</string>
+    <string name="history_yesterday">昨日</string>
+    <string name="history_clear_all_confirm_title">履歴の削除</string>
+    <string name="history_clear_all_confirm_message">本当にすべての履歴を削除しますか?</string>
+    <string name="history_clear_all_confirm_ok">すべてクリア</string>
+    <string name="history_empty_title">履歴は空です</string>
+    <string name="history_empty_message">訪問したページがここに表示されます</string>
+</resources>

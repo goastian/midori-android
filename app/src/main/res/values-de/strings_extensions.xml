@@ -12,5 +12,26 @@
     <string name="extensions_install_error">Erweiterung konnte nicht installiert werden</string>
     <string name="extensions_manage">Erweiterungen verwalten</string>
     <string name="extensions_more">Weitere Erweiterungen</string>
+
+    <string name="extensions_recommended">Empfohlene Erweiterungen</string>
+    <string name="extensions_installed">Installierte Erweiterungen</string>
+    <string name="extensions_loading">Erweiterungen werden geladen…</string>
+    <string name="extensions_detail_title">Details zur Erweiterung</string>
+    <string name="extensions_author_by">von %1$s</string>
+    <string name="extensions_ratings">%1$s Bewertungen</string>
+    <string name="extensions_users">%1$s Benutzer</string>
+    <string name="extensions_version">Version %1$s</string>
+    <string name="extensions_permissions">Berechtigungen</string>
+    <string name="extensions_no_permissions">Für diese Erweiterung sind keine besonderen Berechtigungen erforderlich.</string>
+    <string name="extensions_installing">Installieren…</string>
+    <string name="extensions_installed_label">Installiert</string>
+    <string name="extensions_enabled">Aktiviert</string>
+    <string name="extensions_open_popup">Erweiterungs-Popup öffnen</string>
+    <string name="extensions_search_hint">Sucherweiterungen</string>
+    <string name="extensions_search_empty">Keine Erweiterungen entsprechen Ihrer Suche.</string>
+    <string name="extensions_retry">Versuchen Sie es noch einmal</string>
+    <string name="extensions_load_error">Erweiterungen konnten nicht geladen werden</string>
+    <string name="extensions_error_load_actionable">Wir konnten keine Erweiterungen laden. Überprüfen Sie Ihre Verbindung.</string>
+    <string name="extensions_error_action_actionable">Wir konnten die Erweiterungsaktion nicht abschließen. Versuchen Sie es erneut.</string>
 </resources>
 

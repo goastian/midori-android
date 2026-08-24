@@ -130,4 +130,244 @@
     <string name="privacy_policy_label">Politique de confidentialité</string>
 
     <string name="rate_us_label">Noter cette application</string>
+
+    <string name="show_new_tab_home_label">Utiliser l\'écran Nouvel onglet</string>
+    <string name="show_new_tab_home_description">Désactivez-le pour ouvrir de nouveaux onglets vierges.</string>
+    <string name="settings_all">Tous les paramètres</string>
+    <string name="settings_on">Sur</string>
+    <string name="settings_off">Désactivé</string>
+    <string name="settings_homepage_title">Nouvel onglet</string>
+    <string name="settings_homepage_summary">Raccourcis, widgets, espaces, thèmes et arrière-plans</string>
+    <string name="settings_homepage_sections">Nouvel onglet Midori</string>
+    <string name="settings_homepage_midori_tab">Personnalisez votre nouvel onglet</string>
+    <string name="settings_homepage_midori_tab_description">Ouvrez un nouvel onglet et utilisez son bouton Paramètres pour gérer les raccourcis, les widgets, les espaces, la langue, le thème et l\'arrière-plan. Vos choix restent sur cet appareil.</string>
+    <string name="settings_homepage_opening_screen">Écran d\'ouverture</string>
+    <string name="settings_homepage_open_homepage">Nouvel onglet</string>
+    <string name="settings_homepage_open_last_tab">Dernier onglet</string>
+    <string name="settings_homepage_open_after_four_hours">Nouvel onglet après quatre heures</string>
+    <string name="settings_customize_title">Personnaliser</string>
+    <string name="settings_customize_summary">Thème, barre d\'outils, onglets et gestes</string>
+    <string name="settings_customize_gestures">Gestes</string>
+    <string name="settings_translations_title">Traductions</string>
+    <string name="settings_translations_summary">Traductions de sites Web privées sur appareil</string>
+    <string name="settings_translations_enabled">Traductions</string>
+    <string name="settings_translations_enabled_summary">Les traductions restent privées sur votre appareil.</string>
+    <string name="settings_translations_offer">Proposez de traduire lorsque cela est possible</string>
+    <string name="settings_translations_data_saver">Téléchargez toujours les langues en mode d\'économie de données</string>
+    <string name="settings_translations_preferences">Préférences de traduction</string>
+    <string name="settings_translations_automatic">Traduction automatique</string>
+    <string name="settings_translations_automatic_none">Aucune langue sélectionnée</string>
+    <string name="settings_translations_never_sites">Ne traduisez jamais ces sites</string>
+    <string name="settings_translations_never_sites_none">Aucun site exclu</string>
+    <string name="settings_translations_never_sites_count">%1$d sites exclus</string>
+    <string name="settings_translations_download_languages">Télécharger les langues</string>
+    <string name="settings_translations_downloaded_count">%1$d langues téléchargées</string>
+    <string name="settings_translations_manage_automatic">Traduisez toujours ces langues</string>
+    <string name="settings_translations_manage_automatic_summary">Choisissez les langues qui doivent être traduites automatiquement.</string>
+    <string name="settings_translations_manage_sites">Ne traduisez jamais de sites</string>
+    <string name="settings_translations_manage_sites_empty">Les sites que vous excluez lors de la traduction d\'une page apparaîtront ici.</string>
+    <string name="settings_translations_remove">Supprimer</string>
+    <string name="settings_translations_manage_downloads">Télécharger les langues</string>
+    <string name="settings_translations_manage_downloads_summary">Téléchargez des modèles linguistiques pour des traductions privées hors ligne.</string>
+    <string name="settings_translations_done">Terminé</string>
+    <string name="settings_translations_model_downloading">Téléchargement</string>
+    <string name="settings_translations_model_downloaded">Téléchargé</string>
+    <string name="settings_pull_to_refresh">Tirer pour rafraîchir</string>
+    <string name="settings_shake_to_summarize_summary">Résumez la page actuelle lorsque l’appareil est secoué.</string>
+    <string name="settings_notifications_open_system_summary">Choisissez les catégories de notification que Midori peut utiliser.</string>
+    <string name="settings_passwords_title">Mots de passe</string>
+    <string name="settings_save_passwords">Enregistrer les mots de passe</string>
+    <string name="settings_save_passwords_desc">Demandez avant d’enregistrer les connexions au site.</string>
+    <string name="settings_password_autofill">Remplissage automatique dans Midori</string>
+    <string name="settings_password_autofill_desc">Remplissez les noms d\'utilisateur et les mots de passe enregistrés sur les sites Web.</string>
+    <string name="settings_passwords_manage">Gérer</string>
+    <string name="settings_saved_passwords">Mots de passe enregistrés</string>
+    <string name="settings_password_exceptions">Exceptions</string>
+    <string name="settings_secure_store_required">Un stockage sécurisé est requis avant de pouvoir stocker des données.</string>
+    <string name="settings_autofill_title">Remplissage automatique</string>
+    <string name="settings_autofill_addresses">Adresses</string>
+    <string name="settings_autofill_save_addresses">Enregistrer et remplir les adresses</string>
+    <string name="settings_autofill_save_addresses_desc">Comprend les numéros de téléphone et les adresses e-mail.</string>
+    <string name="settings_autofill_add_address">Ajouter une adresse</string>
+    <string name="settings_autofill_cards">Modes de paiement</string>
+    <string name="settings_autofill_save_cards">Enregistrez et remplissez les modes de paiement</string>
+    <string name="settings_autofill_save_cards_desc">Les données de paiement doivent être stockées cryptées avant d\'être enregistrées.</string>
+    <string name="settings_autofill_add_card">Ajouter une carte</string>
+    <string name="settings_accessibility_title">Accessibilité</string>
+    <string name="settings_accessibility_auto_font">Utiliser la taille du texte de l\'appareil</string>
+    <string name="settings_accessibility_auto_font_desc">Faites correspondre les paramètres de taille du texte Android.</string>
+    <string name="settings_accessibility_font_size">Taille de la police</string>
+    <string name="settings_accessibility_font_percent">%1$d %%</string>
+    <string name="settings_accessibility_force_zoom">Zoom sur tous les sites</string>
+    <string name="settings_accessibility_force_zoom_desc">Autorisez le pincement et le zoom même sur les sites qui tentent de le bloquer.</string>
+    <string name="permissions_settings_label">Autorisations</string>
+    <string name="privacy_policy_url" translatable="false">https://astian.org/astian-privacy-policies/</string>
+    <string name="qwant_details_description" translatable="false">%1$s\nConstruire %2$s - Gecko %3$s</string>
+    <string name="settings_tests_label" translatable="false">Essais</string>
+    <string name="settings_tests_prompts_label" translatable="false">Invites</string>
+    <string name="licence_label" translatable="false">Licence MPL 2.0</string>
+    <string name="settings_licence_content" translatable="false">&lt;h2 id="definitions"&gt;1. Définitions&lt;/h2&gt;&lt;br/&gt;
+        &lt;dl&gt;
+        &lt;dt&gt;1.1. « Contributeur »&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;désigne chaque personne physique ou morale qui crée, contribue à la création ou possède un logiciel couvert.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.2. «Version Contributeur»&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;désigne la combinaison des contributions des autres (le cas échéant) utilisées par un contributeur et la contribution de ce contributeur particulier.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.3. « Contribution »&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;désigne le logiciel couvert d\'un contributeur particulier.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.4. « Logiciel couvert »&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;désigne le formulaire de code source auquel le contributeur initial a joint l\'avis de l\'annexe A, le formulaire exécutable de ce formulaire de code source et les modifications de ce formulaire de code source, dans chaque cas, y compris des parties de celui-ci.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.5. « Incompatible avec les licences secondaires »&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;signifie&lt;/p&gt;
+        &lt;ol type="a"&gt;
+        &lt;li&gt;&lt;p&gt;que le contributeur initial a joint l\'avis décrit dans l\'annexe B au logiciel couvert ; ou&lt;/p&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;p&gt;que le logiciel couvert a été mis à disposition selon les termes de la version 1.1 ou antérieure de la licence, mais pas également selon les termes d\'une licence secondaire.&lt;/p&gt;&lt;/li&gt;
+        &lt;/ol&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.6. « Formulaire exécutable »&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;désigne toute forme de travail autre que la forme du code source.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.7. « Œuvre plus importante »&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;désigne une œuvre qui combine un logiciel couvert avec d\'autres éléments, dans un ou plusieurs fichiers séparés, qui ne sont pas des logiciels couverts.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.8. «Licence»&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;désigne ce document.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.9. « Sous licence »&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;signifie avoir le droit d\'accorder, dans la mesure du possible, que ce soit au moment de l\'octroi initial ou ultérieurement, tous les droits conférés par cette Licence.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.10. « Modifications »&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;signifie l\'un des éléments suivants :&lt;/p&gt;
+        &lt;ol type="a"&gt;&lt;br/&gt;
+        &lt;li&gt;&lt;p&gt;tout fichier sous forme de code source résultant d\'un ajout, d\'une suppression ou d\'une modification du contenu du logiciel couvert ; ou&lt;/p&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;p&gt;tout nouveau fichier sous forme de code source contenant un logiciel couvert.&lt;/p&gt;&lt;/li&gt;
+        &lt;/ol&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.11. « Revendications de brevet » d\'un contributeur&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;désigne toute revendication de brevet, y compris, sans limitation, les revendications de méthode, de processus et d\'appareil, dans tout brevet pouvant faire l\'objet d\'une licence par ce contributeur qui serait violé, sans l\'octroi de la licence, par la fabrication, l\'utilisation, la vente, l\'offre à la vente, l\'importation ou le transfert de ses contributions ou de son contributeur. Version.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.12. «Licence secondaire»&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;désigne soit la licence publique générale GNU, version 2.0, la licence publique générale limitée GNU, version 2.1, la licence publique générale GNU Affero, version 3.0, ou toute version ultérieure de ces licences.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.13. «Formulaire de code source»&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;désigne la forme de l\'œuvre préférée pour apporter des modifications.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.14. « Vous » (ou « Votre »)&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;désigne une personne physique ou morale exerçant des droits en vertu de cette licence. Pour les entités juridiques, « Vous » inclut toute entité qui contrôle, est contrôlée par ou est sous contrôle commun avec Vous. Aux fins de cette définition, « contrôle » signifie (a) le pouvoir, direct ou indirect, de diriger ou de gérer une telle entité, que ce soit par contrat ou autrement, ou (b) la propriété de plus de cinquante pour cent (50 %) des actions en circulation ou la propriété effective de cette entité.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;/dl&gt;&lt;br/&gt;
+        &lt;h2 id="license-grants-and-conditions"&gt;2. Octroi et conditions de licence&lt;/h2&gt;&lt;br/&gt;
+        &lt;h3 id="grants"&gt;2.1. Subventions&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Chaque contributeur vous accorde par la présente une licence mondiale, libre de droits et non exclusive :&lt;/p&gt;
+        &lt;ol type="a"&gt;
+        &lt;li&gt;&lt;p&gt;sous droits de propriété intellectuelle (autres que les brevets ou les marques déposées) pouvant être concédés sous licence par ce contributeur pour utiliser, reproduire, rendre disponible, modifier, afficher, exécuter, distribuer et exploiter de toute autre manière ses contributions, soit sur une base non modifiée, avec des modifications, ou dans le cadre d\'une œuvre plus vaste ; et&lt;/p&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;p&gt;en vertu des revendications de brevet d\'un tel contributeur pour fabriquer, utiliser, vendre, proposer à la vente, faire, importer et autrement transférer soit ses contributions, soit sa version de contributeur.&lt;/p&gt;&lt;/li&gt;
+        &lt;/ol&gt;&lt;br/&gt;
+        &lt;h3 id="effective-date"&gt;2.2. Date d\'entrée en vigueur&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Les licences accordées dans la section 2.1 concernant toute contribution entrent en vigueur pour chaque contribution à la date à laquelle le contributeur distribue pour la première fois cette contribution.&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="limitations-on-grant-scope"&gt;2.3. Limites de la portée de la subvention&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Les licences accordées dans cette section 2 sont les seuls droits accordés en vertu de cette licence. Aucun droit ou licence supplémentaire ne sera impliqué dans la distribution ou la licence du logiciel couvert en vertu de cette licence. Nonobstant la section 2.1(b) ci-dessus, aucune licence de brevet n\'est accordée par un contributeur :&lt;/p&gt;
+        &lt;ol type="a"&gt;
+        &lt;li&gt;&lt;p&gt;pour tout code qu\'un contributeur a supprimé du logiciel couvert ; ou&lt;/p&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;p&gt;pour les violations causées par : (i) vos modifications ou celles de tout autre tiers du logiciel couvert, ou (ii) la combinaison de ses contributions avec d\'autres logiciels (sauf dans le cadre de sa version Contributeur) ; ou&lt;/p&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;p&gt;dans le cadre de revendications de brevet violées par le logiciel couvert en l\'absence de ses contributions.&lt;/p&gt;&lt;/li&gt;
+        &lt;/ol&gt;
+        &lt;p&gt;Cette licence n\'accorde aucun droit sur les marques commerciales, marques de service ou logos de tout contributeur (sauf dans la mesure nécessaire pour se conformer aux exigences de notification de la section 3.4).&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="subsequent-licenses"&gt;2.4. Licences ultérieures&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Aucun contributeur n\'accorde de subventions supplémentaires suite à votre choix de distribuer le logiciel couvert sous une version ultérieure de cette licence (voir la section 10.2) ou selon les termes d\'une licence secondaire (si autorisé par les termes de la section 3.3).&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="representation"&gt;2.5. Représentation&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Chaque contributeur déclare qu\'il estime que ses contributions sont sa ou ses créations originales ou qu\'il dispose de droits suffisants pour accorder les droits sur ses contributions véhiculés par cette licence.&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="fair-use"&gt;2.6. Utilisation équitable&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Cette licence n\'est pas destinée à limiter les droits dont vous disposez en vertu des doctrines de droit d\'auteur applicables en matière d\'utilisation équitable, d\'utilisation équitable ou d\'autres équivalents.&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="conditions"&gt;2.7. Conditions&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Les sections 3.1, 3.2, 3.3 et 3.4 sont les conditions des licences accordées dans la section 2.1.&lt;/p&gt;&lt;br/&gt;
+        &lt;h2 id="responsibilities"&gt;3. Responsabilités&lt;/h2&gt;&lt;br/&gt;
+        &lt;h3 id="distribution-of-source-form"&gt;3.1. Distribution du formulaire source&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Toute distribution de logiciels couverts sous forme de code source, y compris toute modification que vous créez ou à laquelle vous contribuez, doit être régie par les termes de cette licence. Vous devez informer les destinataires que la forme du code source du logiciel couvert est régie par les termes de cette licence et comment ils peuvent obtenir une copie de cette licence. Vous ne pouvez pas tenter de modifier ou de restreindre les droits des destinataires dans le formulaire de code source.&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="distribution-of-executable-form"&gt;3.2. Distribution du formulaire exécutable&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Si vous distribuez un logiciel couvert sous forme exécutable alors :&lt;/p&gt;
+        &lt;ol type="a"&gt;
+        &lt;li&gt;&lt;p&gt;un tel logiciel couvert doit également être mis à disposition sous forme de code source, comme décrit dans la section 3.1, et vous devez informer les destinataires du formulaire exécutable de la manière dont ils peuvent obtenir une copie de ce formulaire de code source par des moyens raisonnables en temps opportun, à un prix ne dépassant pas le coût de distribution au destinataire ; et&lt;/p&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;p&gt;Vous pouvez distribuer ce formulaire exécutable selon les termes de cette licence, ou le concéder en sous-licence selon des conditions différentes, à condition que la licence pour le formulaire exécutable ne tente pas de limiter ou de modifier les droits des destinataires dans le formulaire de code source en vertu du présent Licence.&lt;/p&gt;&lt;/li&gt;
+        &lt;/ol&gt;&lt;br/&gt;
+        &lt;h3 id="distribution-of-a-larger-work"&gt;3.3. Distribution d\'une œuvre plus importante&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Vous pouvez créer et distribuer une œuvre plus importante selon les conditions de votre choix, à condition que vous respectiez également les exigences de cette licence pour le logiciel couvert. Si l\'œuvre plus importante est une combinaison d\'un logiciel couvert avec une œuvre régie par une ou plusieurs licences secondaires, et que le logiciel couvert n\'est pas incompatible avec des licences secondaires, cette licence vous permet de distribuer en outre ce logiciel couvert selon les termes de ces licences secondaires, de sorte que le destinataire de l\'œuvre plus importante puisse, à son choix, distribuer davantage le logiciel couvert selon les termes de cette licence ou de ces licences secondaires.&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="notices"&gt;3.4. Avis&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Vous ne pouvez pas supprimer ou modifier la substance des avis de licence (y compris les avis de droits d\'auteur, les avis de brevet, les exclusions de garantie ou les limitations de responsabilité) contenus dans le formulaire de code source du logiciel couvert, sauf que vous pouvez modifier les avis de licence dans la mesure nécessaire pour remédier aux inexactitudes factuelles connues.&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="application-of-additional-terms"&gt;3.5. Application des conditions supplémentaires&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Vous pouvez choisir d\'offrir et de facturer des frais pour des obligations de garantie, d\'assistance, d\'indemnisation ou de responsabilité à un ou plusieurs destinataires du logiciel couvert. Cependant, vous ne pouvez le faire qu\'en votre propre nom et non au nom d\'un quelconque contributeur. Vous devez indiquer absolument clairement que toute obligation de garantie, d\'assistance, d\'indemnisation ou de responsabilité est offerte par Vous seul, et Vous acceptez par la présente d\'indemniser chaque Contributeur pour toute responsabilité encourue par ce Contributeur en raison des conditions de garantie, d\'assistance, d\'indemnisation ou de responsabilité que Vous proposez. Vous pouvez inclure des exclusions de garantie supplémentaires et des limitations de responsabilité spécifiques à toute juridiction.&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="inability-to-comply-due-to-statute-or-regulation"&gt;4. Incapacité de se conformer en raison d\'une loi ou d\'un règlement&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;S\'il vous est impossible de vous conformer à l\'un des termes de cette licence en ce qui concerne tout ou partie du logiciel couvert en raison de la loi, d\'une ordonnance judiciaire ou d\'une réglementation, vous devez : (a) vous conformer aux termes de cette licence dans la mesure du possible ; et (b) décrire les limitations et le code qu\'elles affectent. Cette description doit être placée dans un fichier texte inclus avec toutes les distributions du logiciel couvert sous cette licence. Sauf dans la mesure interdite par la loi ou la réglementation, une telle description doit être suffisamment détaillée pour qu\'un destinataire possédant une compétence ordinaire puisse la comprendre.&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="termination"&gt;5. Résiliation&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;5.1. Les droits accordés en vertu de cette licence prendront fin automatiquement si vous ne respectez pas l\'une de ses conditions. Cependant, si vous vous conformez, alors les droits accordés en vertu de cette licence par un contributeur particulier sont rétablis (a) provisoirement, à moins que et jusqu\'à ce que ce contributeur mette explicitement et définitivement fin à vos subventions, et (b) de manière continue, si ce contributeur omet de vous informer de la non-conformité par des moyens raisonnables dans les 60 jours suivant votre retour en conformité. De plus, vos subventions d\'un contributeur particulier sont rétablies de manière continue si ce contributeur vous informe de la non-conformité par des moyens raisonnables, c\'est la première fois que vous recevez un avis de non-conformité à cette licence de la part d\'un tel contributeur, et vous devenez conforme dans les 30 jours suivant votre réception de l\'avis.&lt;/p&gt;
+        &lt;br/&gt;&lt;p&gt;5.2. Si vous engagez un litige contre une entité en faisant valoir une réclamation pour contrefaçon de brevet (à l\'exclusion des actions en jugement déclaratoire, des demandes reconventionnelles et des demandes reconventionnelles) alléguant qu\'une version du contributeur enfreint directement ou indirectement un brevet, alors les droits qui vous sont accordés par tous les contributeurs pour le logiciel couvert en vertu de la section 2.1 de cette licence prendront fin.&lt;/p&gt;
+        &lt;br/&gt;&lt;p&gt;5.3. En cas de résiliation en vertu des sections 5.1 ou 5.2 ci-dessus, tous les contrats de licence d\'utilisateur final (à l\'exclusion des distributeurs et des revendeurs) qui ont été valablement accordés par vous ou vos distributeurs en vertu de cette licence avant la résiliation survivront à la résiliation.&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="disclaimer-of-warranty"&gt;6. Exclusion de garantie&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;&lt;em&gt;Le logiciel couvert est fourni sous cette licence « tel quel », sans garantie d\'aucune sorte, expresse, implicite ou statutaire, y compris, sans s\'y limiter, les garanties que le logiciel couvert est exempt de défauts, commercialisable, adapté à un usage particulier ou non contrefait. L\'intégralité des risques liés à la qualité et aux performances du logiciel couvert incombe à vous. Si un logiciel couvert s\'avère défectueux à quelque égard que ce soit, vous (et non tout contributeur) assumez le coût de tout entretien, réparation ou correction nécessaire. Cette clause de non-responsabilité constitue une partie essentielle de cette licence. Aucune utilisation d\'un logiciel couvert n\'est autorisée en vertu de cette licence, sauf en vertu de cette clause de non-responsabilité.&lt;/em&gt;&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="limitation-of-liability"&gt;7. Limitation de responsabilité&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;&lt;em&gt;En aucun cas et sous aucune théorie juridique, qu\'il s\'agisse d\'un délit (y compris la négligence), d\'un contrat ou autre, tout contributeur, ou toute personne qui distribue le logiciel couvert comme autorisé ci-dessus, ne pourra être tenu responsable envers vous de tout dommage direct, indirect, spécial, accidentel ou consécutif de quelque nature que ce soit, y compris, sans limitation, les dommages pour perte de profits, perte de bonne volonté, de travail arrêt, panne ou dysfonctionnement informatique, ou tout autre dommage ou perte commerciale, même si cette partie a été informée de la possibilité de tels dommages. Cette limitation de responsabilité ne s’applique pas à la responsabilité en cas de décès ou de blessures corporelles résultant de la négligence d’une telle partie dans la mesure où la loi applicable interdit une telle limitation. Certaines juridictions n\'autorisent pas l\'exclusion ou la limitation des dommages accessoires ou consécutifs, cette exclusion et limitation peuvent donc ne pas s\'appliquer à vous.&lt;/em&gt;&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="litigation"&gt;8. Litige&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;Tout litige relatif à cette licence ne peut être porté que devant les tribunaux d\'une juridiction où le défendeur a son principal lieu d\'activité et ce litige sera régi par les lois de cette juridiction, sans référence à ses dispositions en matière de conflit de lois. Rien dans cette section n\'empêche une partie de présenter des demandes reconventionnelles ou des demandes reconventionnelles.&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="miscellaneous"&gt;9. Divers&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;Cette licence représente l\'accord complet concernant l\'objet des présentes. Si une disposition de cette licence est jugée inapplicable, cette disposition ne sera reformée que dans la mesure nécessaire pour la rendre exécutoire. Toute loi ou réglementation qui prévoit que la langue d\'un contrat doit être interprétée à l\'encontre du rédacteur ne doit pas être utilisée pour interpréter cette licence à l\'encontre d\'un contributeur.&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="versions-of-the-license"&gt;10. Versions de la Licence&lt;/h2&gt;&lt;br/&gt;
+        &lt;h3 id="new-versions"&gt;10.1. Nouvelles versions&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;La Fondation Mozilla est le gestionnaire des licences. Sauf dans les cas prévus à la section 10.3, personne d\'autre que le gestionnaire de licence n\'a le droit de modifier ou de publier de nouvelles versions de cette licence. Chaque version recevra un numéro de version distinctif.&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="effect-of-new-versions"&gt;10.2. Effet des nouvelles versions&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Vous pouvez distribuer le logiciel couvert selon les termes de la version de la licence sous laquelle vous avez initialement reçu le logiciel couvert, ou selon les termes de toute version ultérieure publiée par le gestionnaire de licence.&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="modified-versions"&gt;10.3. Versions modifiées&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;Si vous créez un logiciel non régi par cette licence et que vous souhaitez créer une nouvelle licence pour un tel logiciel, vous pouvez créer et utiliser une version modifiée de cette licence si vous renommez la licence et supprimez toute référence au nom du responsable de la licence (sauf pour noter que cette licence modifiée diffère de cette licence).&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="distributing-source-code-form-that-is-incompatible-with-secondary-licenses"&gt;10.4. Distribution d\'un formulaire de code source incompatible avec les licences secondaires&lt;/h3&gt;
+        &lt;br/&gt;&lt;p&gt;Si vous choisissez de distribuer un formulaire de code source incompatible avec les licences secondaires selon les termes de cette version de la licence, l\'avis décrit dans l\'annexe B de cette licence doit être joint.&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="exhibit-a---source-code-form-license-notice"&gt;Pièce A - Avis de licence du formulaire de code source&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;Ce formulaire de code source est soumis aux termes de la licence publique Mozilla, v. 2.0. Si une copie du MPL n\'a pas été distribuée avec ce fichier, vous pouvez en obtenir une sur https://mozilla.org/MPL/2.0/.&lt;/p&gt;
+        &lt;br/&gt;
+        &lt;p&gt;S\'il n\'est pas possible ou souhaitable de placer l\'avis dans un fichier particulier, vous pouvez alors inclure l\'avis dans un emplacement (tel qu\'un fichier LICENSE dans un répertoire pertinent) où un destinataire serait susceptible de rechercher un tel avis.&lt;/p&gt;
+        &lt;br/&gt;&lt;p&gt;Vous pouvez ajouter des avis supplémentaires précis sur la propriété des droits d\'auteur.&lt;/p&gt;&lt;br/&gt;
+        &lt;h2 id="exhibit-b---incompatible-with-secondary-licenses-notice"&gt;Pièce B - Avis « Incompatible avec les licences secondaires »&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;Ce formulaire de code source est « incompatible avec les licences secondaires », tel que défini par la licence publique Mozilla, v. 2.0.&lt;/p&gt;</string>
+    <string name="prompt_save_login_title">Enregistrer le mot de passe ?</string>
+    <string name="prompt_save_login_description">Enregistrez la connexion pour %1$s à Midori.</string>
+    <string name="prompt_fill_login_title">Remplir le mot de passe ?</string>
+    <string name="prompt_fill_login_description">Utilisez la connexion enregistrée pour %1$s.</string>
+    <string name="prompt_save_card_title">Enregistrer le mode de paiement ?</string>
+    <string name="prompt_save_card_description">Enregistrez la carte %1$s à Midori.</string>
+    <string name="prompt_fill_card_title">Remplir le mode de paiement ?</string>
+    <string name="prompt_fill_card_description">Utilisez la carte %1$s pour ce formulaire.</string>
+    <string name="prompt_fill_address_title">Remplir l\'adresse ?</string>
+    <string name="prompt_fill_address_description">Utilisez %1$s pour ce formulaire.</string>
+    <string name="prompt_fill">Remplir</string>
+    <string name="settings_saved_passwords_secure_desc">Crypté et protégé par le verrouillage de votre appareil</string>
+    <string name="settings_autofill_manage_secure_desc">Gérer les informations cryptées</string>
+    <string name="settings_accessibility_font_disabled_hint">Désactivez « Utiliser la taille du texte de l\'appareil » pour choisir une taille personnalisée.</string>
+    <string name="settings_accessibility_font_reload_hint">La nouvelle taille est utilisée après le rechargement d\'une page.</string>
+    <string name="settings_accessibility_font_reset">Réinitialiser à 100 %</string>
+    <string name="secure_unlock_subtitle">Utilisez votre empreinte digitale, votre visage, votre code PIN, votre schéma ou votre mot de passe</string>
+    <string name="secure_unlock_description">Vos informations sensibles restent verrouillées jusqu\'à ce qu\'Android vérifie votre identité.</string>
+    <string name="secure_unlock_action">Déverrouiller</string>
+    <string name="secure_unlock_failed">Non reconnu. Essayer à nouveau.</string>
+    <string name="secure_unlock_no_screen_lock">Définissez un verrouillage d\'écran dans Android avant d\'utiliser cette zone sécurisée.</string>
+    <string name="secure_items_count">%1$d enregistré</string>
+    <string name="secure_storage_error">Midori n\'a pas pu mettre à jour la boutique sécurisée. Essayer à nouveau.</string>
+    <string name="secure_required_fields">Remplissez tous les champs obligatoires.</string>
+    <string name="secure_delete_irreversible">Cela ne peut pas être annulé.</string>
+    <string name="passwords_vault_title">Votre coffre-fort privé</string>
+    <string name="passwords_vault_description">Les mots de passe sont cryptés sur cet appareil et proposés uniquement aux sites Web correspondants.</string>
+    <string name="passwords_empty_description">Connectez-vous à un site Web et choisissez Enregistrer lorsque Midori vous le demande.</string>
+    <string name="passwords_no_username">Aucun nom d\'utilisateur</string>
+    <string name="autofill_vault_title">Paiement et coordonnées</string>
+    <string name="autofill_vault_description">Les numéros de carte sont cryptés. La vérification Android est requise chaque fois que vous ouvrez cet écran.</string>
+    <string name="saved_cards_empty_description">Ajoutez une carte pour remplir les formulaires de paiement pris en charge.</string>
+    <string name="saved_cards_delete">Supprimer la carte</string>
+    <string name="saved_cards_expires">Expire %1$02d/%2$d</string>
+    <string name="saved_cards_month">Mois</string>
+    <string name="saved_cards_year">Année</string>
+    <string name="saved_cards_invalid_number">Entrez un numéro de carte valide.</string>
+    <string name="saved_cards_invalid_expiry">Saisissez une date d\'expiration future.</string>
+    <string name="saved_cards_encryption_note">Le numéro complet de la carte est crypté avant d\'être stocké.</string>
+    <string name="saved_addresses_empty_description">Ajoutez une adresse pour remplir les formulaires de contact et d’expédition pris en charge.</string>
+    <string name="saved_addresses_delete">Supprimer l\'adresse</string>
 </resources>

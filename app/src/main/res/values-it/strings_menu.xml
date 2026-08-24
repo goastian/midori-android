@@ -6,4 +6,8 @@
     <string name="menu_find_in_page">Trova nella Pagina</string>
     <string name="menu_account">Account</string>
     <string name="menu_login">Login</string>
+
+    <string name="menu_midori_vpn">MidoriVPN</string>
+    <string name="menu_more_options">Più opzioni</string>
+    <string name="menu_back_to_main">Azioni principali</string>
 </resources>

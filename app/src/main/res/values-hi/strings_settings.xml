@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="show_favicon_label">साइट चिह्न प्रदर्शित करें</string>
+    <string name="toolbar_position_label">टूलबार</string>
+    <string name="available_toolbar_position_top">सबसे ऊपर</string>
+    <string name="available_toolbar_position_bottom">तल</string>
+    <string name="hide_toolbar_on_scroll_label">स्क्रॉल पर टूलबार छिपाएँ</string>
+    <string name="appearance_label">दिखावट</string>
+    <string name="available_appearance_system">स्वचालित</string>
+    <string name="cleardata_storage">भंडारण</string>
+    <string name="settings">सेटिंग्स</string>
+    <string name="settings_group_general">सामान्य</string>
+    <string name="settings_group_langue">भाषा</string>
+    <string name="settings_group_privacy">गोपनीयता</string>
+    <string name="settings_group_about">के बारे में</string>
+    <string name="default_browser_label">डिफ़ॉल्ट ब्राउज़र के रूप में सेट करें</string>
+    <string name="tabs_view_label">टैब सेटिंग्स</string>
+    <string name="available_tabs_view_grid">ग्रिड</string>
+    <string name="available_tabs_view_list">सूची</string>
+    <string name="show_new_tab_home_label">नई टैब स्क्रीन का उपयोग करें</string>
+    <string name="show_new_tab_home_description">रिक्त नए टैब खोलने के लिए बंद करें.</string>
+    <string name="settings_all">सभी सेटिंग्स</string>
+    <string name="settings_on">पर</string>
+    <string name="settings_off">बंद</string>
+    <string name="settings_homepage_title">नया टैब</string>
+    <string name="settings_homepage_summary">शॉर्टकट, विजेट, स्पेस, थीम और पृष्ठभूमि</string>
+    <string name="settings_homepage_sections">मिडोरी नया टैब</string>
+    <string name="settings_homepage_midori_tab">अपने नए टैब को वैयक्तिकृत करें</string>
+    <string name="settings_homepage_midori_tab_description">एक नया टैब खोलें और शॉर्टकट, विजेट, स्पेस, भाषा, थीम और पृष्ठभूमि को प्रबंधित करने के लिए इसके सेटिंग्स बटन का उपयोग करें। आपकी पसंद इस डिवाइस पर रहती है.</string>
+    <string name="settings_homepage_opening_screen">स्क्रीन खुल रही है</string>
+    <string name="settings_homepage_open_homepage">नया टैब</string>
+    <string name="settings_homepage_open_last_tab">अंतिम टैब</string>
+    <string name="settings_homepage_open_after_four_hours">चार घंटे बाद नया टैब</string>
+    <string name="settings_customize_title">अनुकूलित करें</string>
+    <string name="settings_customize_summary">थीम, टूलबार, टैब और जेस्चर</string>
+    <string name="settings_customize_gestures">इशारे</string>
+    <string name="settings_translations_title">अनुवाद</string>
+    <string name="settings_translations_summary">निजी, ऑन-डिवाइस वेबसाइट अनुवाद</string>
+    <string name="settings_translations_enabled">अनुवाद</string>
+    <string name="settings_translations_enabled_summary">अनुवाद आपके डिवाइस पर निजी रहते हैं।</string>
+    <string name="settings_translations_offer">जब संभव हो तो अनुवाद करने की पेशकश करें</string>
+    <string name="settings_translations_data_saver">भाषाओं को हमेशा डेटा सेविंग मोड में डाउनलोड करें</string>
+    <string name="settings_translations_preferences">अनुवाद प्राथमिकताएँ</string>
+    <string name="settings_translations_automatic">स्वचालित अनुवाद</string>
+    <string name="settings_translations_automatic_none">कोई भाषा चयनित नहीं</string>
+    <string name="settings_translations_never_sites">इन साइटों का अनुवाद कभी न करें</string>
+    <string name="settings_translations_never_sites_none">किसी भी साइट को बाहर नहीं रखा गया</string>
+    <string name="settings_translations_never_sites_count">%1$d साइटें बाहर रखी गईं</string>
+    <string name="settings_translations_download_languages">भाषाएँ डाउनलोड करें</string>
+    <string name="settings_translations_downloaded_count">%1$d भाषाएं डाउनलोड की गईं</string>
+    <string name="settings_translations_manage_automatic">हमेशा इन भाषाओं का अनुवाद करें</string>
+    <string name="settings_translations_manage_automatic_summary">वे भाषाएँ चुनें जिनका स्वचालित रूप से अनुवाद किया जाना चाहिए।</string>
+    <string name="settings_translations_manage_sites">कभी भी साइटों का अनुवाद न करें</string>
+    <string name="settings_translations_manage_sites_empty">किसी पृष्ठ का अनुवाद करते समय आपने जिन साइटों को बाहर रखा है वे यहां दिखाई देंगी।</string>
+    <string name="settings_translations_remove">हटाओ</string>
+    <string name="settings_translations_manage_downloads">भाषाएँ डाउनलोड करें</string>
+    <string name="settings_translations_manage_downloads_summary">ऑफ़लाइन, निजी अनुवादों के लिए भाषा मॉडल डाउनलोड करें।</string>
+    <string name="settings_translations_done">हो गया</string>
+    <string name="settings_translations_model_downloading">डाउनलोड हो रहा है</string>
+    <string name="settings_translations_model_downloaded">डाउनलोड किया गया</string>
+    <string name="settings_pull_to_refresh">ताज़ा करने के लिए खींचें</string>
+    <string name="settings_shake_to_summarize_summary">डिवाइस के हिलने पर वर्तमान पृष्ठ का सारांश प्रस्तुत करें।</string>
+    <string name="settings_notifications_open_system_summary">वह अधिसूचना श्रेणियाँ चुनें जिनका उपयोग मिडोरी कर सकता है।</string>
+    <string name="settings_passwords_title">पासवर्ड</string>
+    <string name="settings_save_passwords">पासवर्ड सहेजें</string>
+    <string name="settings_save_passwords_desc">साइट लॉगिन सहेजने से पहले पूछें.</string>
+    <string name="settings_password_autofill">मिडोरी में स्वतः भरण</string>
+    <string name="settings_password_autofill_desc">वेबसाइटों पर सहेजे गए उपयोगकर्ता नाम और पासवर्ड भरें।</string>
+    <string name="settings_passwords_manage">प्रबंधित करें</string>
+    <string name="settings_saved_passwords">सहेजे गए पासवर्ड</string>
+    <string name="settings_password_exceptions">अपवाद</string>
+    <string name="settings_secure_store_required">डेटा को संग्रहीत करने से पहले सुरक्षित भंडारण की आवश्यकता होती है।</string>
+    <string name="settings_autofill_title">स्वत:भरण</string>
+    <string name="settings_autofill_addresses">पते</string>
+    <string name="settings_autofill_save_addresses">पते सहेजें और भरें</string>
+    <string name="settings_autofill_save_addresses_desc">फ़ोन नंबर और ईमेल पते शामिल हैं.</string>
+    <string name="settings_autofill_add_address">पता जोड़ें</string>
+    <string name="settings_autofill_cards">भुगतान के तरीके</string>
+    <string name="settings_autofill_save_cards">भुगतान विधियां सहेजें और भरें</string>
+    <string name="settings_autofill_save_cards_desc">भुगतान डेटा को सहेजने से पहले एन्क्रिप्टेड स्टोरेज की आवश्यकता होती है।</string>
+    <string name="settings_autofill_add_card">कार्ड जोड़ें</string>
+    <string name="settings_accessibility_title">अभिगम्यता</string>
+    <string name="settings_accessibility_auto_font">डिवाइस टेक्स्ट आकार का उपयोग करें</string>
+    <string name="settings_accessibility_auto_font_desc">एंड्रॉइड टेक्स्ट आकार सेटिंग्स का मिलान करें।</string>
+    <string name="settings_accessibility_font_size">फ़ॉन्ट आकार</string>
+    <string name="settings_accessibility_font_percent">%1$d %%</string>
+    <string name="settings_accessibility_force_zoom">सभी वेबसाइटों पर ज़ूम करें</string>
+    <string name="settings_accessibility_force_zoom_desc">उन साइटों पर भी पिंच और ज़ूम की अनुमति दें जो इसे ब्लॉक करने का प्रयास करती हैं।</string>
+    <string name="available_appearance_dark">अंधेरा</string>
+    <string name="available_appearance_light">रोशनी</string>
+    <string name="custom_page_color_label">थीम</string>
+    <string name="custom_page_color_disabled_description">आप डार्क मोड में थीम का रंग नहीं बदल सकते</string>
+    <string name="available_custom_page_color_blue">नीला</string>
+    <string name="available_custom_page_color_green">हरा</string>
+    <string name="available_custom_page_color_pink">गुलाबी</string>
+    <string name="available_custom_page_color_purple">बैंगनी</string>
+    <string name="custom_page_character_label">अक्षर</string>
+    <string name="available_custom_page_character_none">कोई नहीं</string>
+    <string name="available_custom_page_character_random">यादृच्छिक</string>
+    <string name="available_custom_page_character_doudoune">डौडौने</string>
+    <string name="available_custom_page_character_football">फुटबॉल</string>
+    <string name="available_custom_page_character_turtleneck">टर्टलनेक</string>
+    <string name="available_custom_page_character_glasses">चश्मा</string>
+    <string name="available_custom_page_character_cat">बिल्ली</string>
+    <string name="available_custom_page_character_balloon">गुब्बारा</string>
+    <string name="available_custom_page_character_pull">खींचो</string>
+    <string name="available_custom_page_character_hat">टोपी</string>
+    <string name="available_custom_page_character_hands">हाथ</string>
+    <string name="show_news_label">मुखपृष्ठ पर समाचार</string>
+    <string name="show_sponsor_label">मुखपृष्ठ पर प्रायोजित शॉर्टकट</string>
+    <string name="adult_filter_label">वयस्क सामग्री फ़िल्टर</string>
+    <string name="available_adult_filter_none">कोई नहीं</string>
+    <string name="available_adult_filter_moderate">मध्यम</string>
+    <string name="available_adult_filter_strict">सख्त</string>
+    <string name="open_links_in_app_label">मूल ऐप में लिंक खोलें</string>
+    <string name="open_results_in_new_tab_label">नए टैब में परिणाम खोलें</string>
+    <string name="search_engine_label">खोज इंजन</string>
+    <string name="search_engine_current_midori">एस्टियनजीओ</string>
+    <string name="search_engine_description">इस संस्करण के लिए मिडोरी खोज अंतर्निहित है।</string>
+    <string name="interface_language_label">इंटरफ़ेस भाषा</string>
+    <string name="available_language_english">अंग्रेजी</string>
+    <string name="available_language_french">फ़्रेंच</string>
+    <string name="available_language_german">जर्मन</string>
+    <string name="available_language_italian">इटालियन</string>
+    <string name="available_language_spanish">स्पैनिश</string>
+    <string name="search_region_label">क्षेत्र खोजें</string>
+    <string name="available_region_france">फ़्रांस</string>
+    <string name="available_region_great_britain">ग्रेट ब्रिटेन</string>
+    <string name="available_region_germany">जर्मनी</string>
+    <string name="available_region_italy">इटली</string>
+    <string name="available_region_argentina">अर्जेंटीना</string>
+    <string name="available_region_australia">ऑस्ट्रेलिया</string>
+    <string name="available_region_usa">संयुक्त राज्य अमेरिका</string>
+    <string name="available_region_spain_es">स्पैनिश (तों)</string>
+    <string name="available_region_spain_ca">स्पैनिश (सीए)</string>
+    <string name="available_region_czech_republic">चेक गणराज्य</string>
+    <string name="available_region_romania">रोमानिया</string>
+    <string name="available_region_greece">ग्रीस</string>
+    <string name="available_region_china">चीन</string>
+    <string name="available_region_hong_kong">हांगकांग</string>
+    <string name="available_region_new_zealand">न्यूज़ीलैंड</string>
+    <string name="available_region_thailand">थाईलैंड</string>
+    <string name="available_region_south_korea">दक्षिण कोरिया</string>
+    <string name="available_region_sweden">स्वीडन</string>
+    <string name="available_region_norway">नॉर्वे</string>
+    <string name="available_region_denmark">डेनमार्क</string>
+    <string name="available_region_hungary">हंगरी</string>
+    <string name="available_region_estonia">एस्टोनिया</string>
+    <string name="available_region_mexico">मेक्सिको</string>
+    <string name="available_region_chile">चिली</string>
+    <string name="available_region_canada_en">कनाडा</string>
+    <string name="available_region_canada_fr">कनाडा (fr)</string>
+    <string name="available_region_malaysia">मलेशिया</string>
+    <string name="available_region_bulgaria">बुल्गारिया</string>
+    <string name="available_region_finland">फ़िनलैंड</string>
+    <string name="available_region_poland">पोलैंड</string>
+    <string name="available_region_netherlands">नीदरलैंड</string>
+    <string name="available_region_portugal">पुर्तगाल</string>
+    <string name="available_region_switzerland_de">स्विट्ज़रलैंड (डी)</string>
+    <string name="available_region_switzerland_fr">स्विट्ज़रलैंड (fr)</string>
+    <string name="available_region_switzerland_it">स्विट्ज़रलैंड (यह)</string>
+    <string name="available_region_austria">ऑस्ट्रिया</string>
+    <string name="available_region_belgium_fr">बेल्जियम (fr)</string>
+    <string name="available_region_belgium_nl">बेल्जियम (एनएल)</string>
+    <string name="available_region_ireland">आयरलैंड</string>
+    <string name="cleardata_settings_label">ब्राउज़र विलोपन सेटिंग्स</string>
+    <string name="cleardata_allsites">सभी साइटों का डेटा</string>
+    <string name="cleardata_cache">कैश</string>
+    <string name="cleardata_cookies">कुकीज़</string>
+    <string name="cleardata_sessions">सत्र</string>
+    <string name="cleardata_permissions">अनुमतियाँ</string>
+    <string name="cleardata_failed">डेटा साफ़ करने में त्रुटि</string>
+    <string name="cleardata_tabs">सामान्य टैब खोले गए</string>
+    <string name="cleardata_tabs_private">निजी टैब खोले गए</string>
+    <string name="cleardata_use_now">डेटा हटाएँ</string>
+    <string name="cleardata_confirm_text">यह बटन आपके सभी टैब बंद कर देता है और आपका सारा ब्राउज़िंग डेटा हटा देता है।</string>
+    <string name="cleardata_done">डेटा हटा दिया गया</string>
+    <string name="permissions_settings_label">अनुमतियाँ</string>
+    <string name="clear_data_on_quit_label">छोड़ने पर डेटा हटाएँ</string>
+    <string name="clear_data_on_quit_description">यह सुनिश्चित करने के लिए कि यह लागू है, कृपया ऐप छोड़ें बटन का उपयोग करें</string>
+    <string name="privacy_policy_label">गोपनीयता नीति</string>
+    <string name="rate_us_label">इस ऐप को रेट करें</string>
+    <string name="privacy_policy_url" translatable="false">https://astian.org/astian-privacy-policies/</string>
+    <string name="qwant_details_description" translatable="false">%1$s\nबिल्ड %2$s - गेको %3$s</string>
+    <string name="settings_tests_label" translatable="false">परीक्षण</string>
+    <string name="settings_tests_prompts_label" translatable="false">संकेत</string>
+    <string name="licence_label" translatable="false">लाइसेंस एमपीएल 2.0</string>
+    <string name="settings_licence_content" translatable="false">&lt;h2 id="definitions"&gt;1. परिभाषाएँ&lt;/h2&gt;&lt;br/&gt;
+        &lt;dl&gt;
+        &lt;dt&gt;1.1. "योगदानकर्ता"&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;मतलब प्रत्येक व्यक्ति या कानूनी इकाई है जो कवर्ड सॉफ़्टवेयर बनाता है, निर्माण में योगदान देता है या उसका मालिक है।&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.2. "योगदानकर्ता संस्करण"&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt; का अर्थ है एक योगदानकर्ता द्वारा उपयोग किए गए अन्य लोगों के योगदान (यदि कोई हो) और उस विशेष योगदानकर्ता के योगदान का संयोजन।&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.3. "योगदान"&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;मतलब किसी विशेष योगदानकर्ता का कवर किया गया सॉफ़्टवेयर।&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.4. "कवर किया गया सॉफ़्टवेयर"&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt; का अर्थ है स्रोत कोड फॉर्म जिसमें प्रारंभिक योगदानकर्ता ने प्रदर्शनी ए में नोटिस संलग्न किया है, ऐसे स्रोत कोड फॉर्म का निष्पादन योग्य फॉर्म, और ऐसे स्रोत कोड फॉर्म के संशोधन, प्रत्येक मामले में उसके कुछ हिस्सों सहित।&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.5. "माध्यमिक लाइसेंस के साथ असंगत"&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;मतलब&lt;/p&gt;
+        &lt;ol type="a"&gt;
+        &lt;li&gt;&lt;p&gt;कि प्रारंभिक योगदानकर्ता ने प्रदर्शनी बी में वर्णित नोटिस को कवर किए गए सॉफ़्टवेयर में संलग्न किया है; या&lt;/p&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;p&gt;कि कवर किया गया सॉफ़्टवेयर लाइसेंस के संस्करण 1.1 या उससे पहले की शर्तों के तहत उपलब्ध कराया गया था, लेकिन द्वितीयक लाइसेंस की शर्तों के तहत भी नहीं।&lt;/p&gt;&lt;/li&gt;
+        &lt;/ol&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.6. "निष्पादन योग्य प्रपत्र"&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;मतलब सोर्स कोड फॉर्म के अलावा किसी भी प्रकार का कार्य।&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.7. "बड़ा काम"&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;का अर्थ है एक ऐसा कार्य जो कवर किए गए सॉफ़्टवेयर को अन्य सामग्री के साथ एक अलग फ़ाइल या फ़ाइलों में जोड़ता है, जो कि कवर किया गया सॉफ़्टवेयर नहीं है।&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.8. "लाइसेंस"&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;मतलब यह दस्तावेज़.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.9. "लाइसेंसयोग्य"&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt; का अर्थ है, अधिकतम संभव सीमा तक अनुदान देने का अधिकार होना, चाहे प्रारंभिक अनुदान के समय या उसके बाद, इस लाइसेंस द्वारा दिए गए किसी भी और सभी अधिकार।&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.10. "संशोधन"&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt; का अर्थ निम्न में से कोई है:&lt;/p&gt;
+        &lt;ol type="a"&gt;&lt;br/&gt;
+        &lt;li&gt;&lt;p&gt;सोर्स कोड फॉर्म में कोई भी फ़ाइल जो कवर किए गए सॉफ़्टवेयर की सामग्री को जोड़ने, हटाने या संशोधित करने के परिणामस्वरूप होती है; या&lt;/p&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;p&gt;स्रोत कोड फॉर्म में कोई भी नई फ़ाइल जिसमें कोई कवर किया गया सॉफ़्टवेयर शामिल है।&lt;/p&gt;&lt;/li&gt;
+        &lt;/ol&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.11. एक योगदानकर्ता का "पेटेंट दावा"&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt;का अर्थ है किसी भी पेटेंट दावे (दावों), जिसमें बिना किसी सीमा, विधि, प्रक्रिया और उपकरण के दावे शामिल हैं, ऐसे योगदानकर्ता द्वारा लाइसेंस योग्य किसी भी पेटेंट में, जिसका उल्लंघन किया जाएगा, लेकिन लाइसेंस के अनुदान के लिए, बनाने, उपयोग करने, बेचने, बिक्री के लिए पेशकश करने, बनाने, आयात करने या इसके योगदान या इसके योगदानकर्ता को स्थानांतरित करने के द्वारा। संस्करण.&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.12. "माध्यमिक लाइसेंस"&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt; का अर्थ है या तो GNU जनरल पब्लिक लाइसेंस, संस्करण 2.0, GNU लेसर जनरल पब्लिक लाइसेंस, संस्करण 2.1, GNU एफ़ेरो जनरल पब्लिक लाइसेंस, संस्करण 3.0, या उन लाइसेंसों के किसी भी बाद के संस्करण।&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.13. "सोर्स कोड फॉर्म"&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt; का अर्थ है संशोधन करने के लिए पसंदीदा कार्य का स्वरूप।&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;dt&gt;1.14. "आप" (या "आपका")&lt;/dt&gt;
+        &lt;dd&gt;&lt;p&gt; का अर्थ है इस लाइसेंस के तहत अधिकारों का प्रयोग करने वाला एक व्यक्ति या कानूनी इकाई। कानूनी संस्थाओं के लिए, "आप" में कोई भी इकाई शामिल है जो आपको नियंत्रित करती है, आपके द्वारा नियंत्रित होती है, या आपके साथ सामान्य नियंत्रण में है। इस परिभाषा के प्रयोजनों के लिए, "नियंत्रण" का अर्थ है (ए) शक्ति, प्रत्यक्ष या अप्रत्यक्ष, ऐसी इकाई के निर्देशन या प्रबंधन का कारण, चाहे अनुबंध द्वारा या अन्यथा, या (बी) बकाया शेयरों के पचास प्रतिशत (50%) से अधिक का स्वामित्व या ऐसी इकाई का लाभकारी स्वामित्व।&lt;/p&gt;
+        &lt;/dd&gt;&lt;br/&gt;
+        &lt;/dl&gt;&lt;br/&gt;
+        &lt;h2 id="license-grants-and-conditions"&gt;2. लाइसेंस अनुदान और शर्तें&lt;/h2&gt;&lt;br/&gt;
+        &lt;h3 id="grants"&gt;2.1. अनुदान&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;प्रत्येक योगदानकर्ता आपको एक विश्वव्यापी, रॉयल्टी-मुक्त, गैर-विशिष्ट लाइसेंस प्रदान करता है:&lt;/p&gt;
+        &lt;ol type="a"&gt;
+        &lt;li&gt;&lt;p&gt;बौद्धिक संपदा अधिकारों (पेटेंट या ट्रेडमार्क के अलावा) के तहत ऐसे योगदानकर्ता द्वारा अपने योगदान का उपयोग, पुनरुत्पादन, उपलब्ध कराने, संशोधित करने, प्रदर्शित करने, प्रदर्शन करने, वितरित करने और अन्यथा शोषण करने के लिए लाइसेंस योग्य है, या तो असंशोधित आधार पर, संशोधनों के साथ, या एक बड़े कार्य के हिस्से के रूप में; और&lt;/p&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;p&gt;ऐसे योगदानकर्ता के पेटेंट दावों के तहत अपने योगदान या इसके योगदानकर्ता संस्करण को बनाने, उपयोग करने, बेचने, बिक्री के लिए पेश करने, बनाने, आयात करने और अन्यथा स्थानांतरित करने के लिए।&lt;/p&gt;&lt;/li&gt;
+        &lt;/ol&gt;&lt;br/&gt;
+        &lt;h3 id="effective-date"&gt;2.2. प्रभावी तिथि&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;किसी भी योगदान के संबंध में धारा 2.1 में दिए गए लाइसेंस प्रत्येक योगदान के लिए उस तिथि से प्रभावी हो जाते हैं, जब योगदानकर्ता पहली बार ऐसा योगदान वितरित करता है।&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="limitations-on-grant-scope"&gt;2.3. अनुदान के दायरे पर सीमाएँ&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;इस धारा 2 में दिए गए लाइसेंस ही इस लाइसेंस के तहत दिए गए एकमात्र अधिकार हैं। इस लाइसेंस के तहत कवर किए गए सॉफ़्टवेयर के वितरण या लाइसेंसिंग से कोई अतिरिक्त अधिकार या लाइसेंस निहित नहीं होगा। उपरोक्त धारा 2.1(बी) के बावजूद, किसी योगदानकर्ता द्वारा कोई पेटेंट लाइसेंस प्रदान नहीं किया जाता है:&lt;/p&gt;
+        &lt;ol type="a"&gt;
+        &lt;li&gt;&lt;p&gt;किसी भी कोड के लिए जिसे किसी योगदानकर्ता ने कवर किए गए सॉफ़्टवेयर से हटा दिया है; या&lt;/p&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;p&gt;के कारण होने वाले उल्लंघन के लिए: (i) आपके और किसी अन्य तीसरे पक्ष द्वारा कवर किए गए सॉफ़्टवेयर में संशोधन, या (ii) अन्य सॉफ़्टवेयर के साथ इसके योगदान का संयोजन (इसके योगदानकर्ता संस्करण के हिस्से को छोड़कर); या&lt;/p&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;p&gt;अपने योगदान के अभाव में कवर किए गए सॉफ़्टवेयर द्वारा उल्लंघन किए गए पेटेंट दावों के तहत।&lt;/p&gt;&lt;/li&gt;
+        &lt;/ol&gt;
+        &lt;p&gt;यह लाइसेंस किसी भी योगदानकर्ता के ट्रेडमार्क, सेवा चिह्न, या लोगो में कोई अधिकार प्रदान नहीं करता है (सिवाय इसके कि धारा 3.4 में नोटिस आवश्यकताओं का अनुपालन करना आवश्यक हो)।&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="subsequent-licenses"&gt;2.4. बाद के लाइसेंस&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;इस लाइसेंस के अगले संस्करण के तहत कवर किए गए सॉफ़्टवेयर को वितरित करने के लिए आपकी पसंद के परिणामस्वरूप कोई भी योगदानकर्ता अतिरिक्त अनुदान नहीं देता है (धारा 10.2 देखें) या द्वितीयक लाइसेंस की शर्तों के तहत (यदि धारा 3.3 की शर्तों के तहत अनुमति है)।&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="representation"&gt;2.5. प्रतिनिधित्व&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;प्रत्येक योगदानकर्ता यह दर्शाता है कि योगदानकर्ता का मानना है कि उसका योगदान उसकी मूल रचना है या उसके पास इस लाइसेंस द्वारा बताए गए अपने योगदान के अधिकार देने के लिए पर्याप्त अधिकार हैं।&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="fair-use"&gt;2.6. उचित उपयोग&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;इस लाइसेंस का उद्देश्य उचित उपयोग, निष्पक्ष व्यवहार, या अन्य समकक्षों के लागू कॉपीराइट सिद्धांतों के तहत आपके किसी भी अधिकार को सीमित करना नहीं है।&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="conditions"&gt;2.7. शर्तें&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;धारा 3.1, 3.2, 3.3, और 3.4 धारा 2.1 में दिए गए लाइसेंस की शर्तें हैं।&lt;/p&gt;&lt;br/&gt;
+        &lt;h2 id="responsibilities"&gt;3. जिम्मेदारियाँ&lt;/h2&gt;&lt;br/&gt;
+        &lt;h3 id="distribution-of-source-form"&gt;3.1. सोर्स फॉर्म का वितरण&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;सोर्स कोड फॉर्म में कवर किए गए सॉफ़्टवेयर के सभी वितरण, जिसमें आपके द्वारा किए गए किसी भी संशोधन या जिसमें आप योगदान करते हैं, इस लाइसेंस की शर्तों के तहत होना चाहिए। आपको प्राप्तकर्ताओं को सूचित करना होगा कि कवर किए गए सॉफ़्टवेयर का स्रोत कोड फॉर्म इस लाइसेंस की शर्तों द्वारा शासित होता है, और वे इस लाइसेंस की एक प्रति कैसे प्राप्त कर सकते हैं। आप सोर्स कोड फॉर्म में प्राप्तकर्ताओं के अधिकारों को बदलने या प्रतिबंधित करने का प्रयास नहीं कर सकते।&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="distribution-of-executable-form"&gt;3.2. निष्पादन योग्य फॉर्म का वितरण&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;यदि आप कवर किए गए सॉफ़्टवेयर को निष्पादन योग्य रूप में वितरित करते हैं तो:&lt;/p&gt;
+        &lt;ol type="a"&gt;
+        &lt;li&gt;&lt;p&gt;इस तरह के कवर किए गए सॉफ़्टवेयर को सोर्स कोड फॉर्म में भी उपलब्ध कराया जाना चाहिए, जैसा कि धारा 3.1 में वर्णित है, और आपको निष्पादन योग्य फॉर्म के प्राप्तकर्ताओं को सूचित करना होगा कि वे समय पर उचित तरीके से ऐसे सोर्स कोड फॉर्म की एक प्रति कैसे प्राप्त कर सकते हैं, प्राप्तकर्ता को वितरण की लागत से अधिक शुल्क नहीं; और&lt;/p&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;p&gt;आप इस लाइसेंस की शर्तों के तहत ऐसे निष्पादन योग्य फॉर्म को वितरित कर सकते हैं, या इसे विभिन्न शर्तों के तहत उप-लाइसेंस दे सकते हैं, बशर्ते कि निष्पादन योग्य फॉर्म का लाइसेंस इसके तहत स्रोत कोड फॉर्म में प्राप्तकर्ताओं के अधिकारों को सीमित करने या बदलने का प्रयास नहीं करता है। लाइसेंस.&lt;/p&gt;&lt;/li&gt;
+        &lt;/ol&gt;&lt;br/&gt;
+        &lt;h3 id="distribution-of-a-larger-work"&gt;3.3. बड़े कार्य का वितरण&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;आप अपनी पसंद की शर्तों के तहत एक बड़ा कार्य बना और वितरित कर सकते हैं, बशर्ते कि आप कवर किए गए सॉफ़्टवेयर के लिए इस लाइसेंस की आवश्यकताओं का भी अनुपालन करते हों। यदि बड़ा कार्य एक या अधिक माध्यमिक लाइसेंस द्वारा शासित कार्य के साथ कवर किए गए सॉफ़्टवेयर का संयोजन है, और कवर किया गया सॉफ़्टवेयर माध्यमिक लाइसेंस के साथ असंगत नहीं है, तो यह लाइसेंस आपको ऐसे कवर किए गए सॉफ़्टवेयर को ऐसे माध्यमिक लाइसेंस की शर्तों के तहत अतिरिक्त रूप से वितरित करने की अनुमति देता है, ताकि बड़े कार्य का प्राप्तकर्ता, अपने विकल्प पर, इस लाइसेंस या ऐसे माध्यमिक लाइसेंस की शर्तों के तहत कवर किए गए सॉफ़्टवेयर को आगे वितरित कर सके।&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="notices"&gt;3.4. नोटिस&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;आप कवर किए गए सॉफ़्टवेयर के स्रोत कोड फॉर्म के भीतर निहित किसी भी लाइसेंस नोटिस (कॉपीराइट नोटिस, पेटेंट नोटिस, वारंटी के अस्वीकरण, या दायित्व की सीमाओं सहित) के सार को हटा या बदल नहीं सकते हैं, सिवाय इसके कि आप ज्ञात तथ्यात्मक अशुद्धियों को दूर करने के लिए आवश्यक सीमा तक किसी भी लाइसेंस नोटिस को बदल सकते हैं।&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="application-of-additional-terms"&gt;3.5. अतिरिक्त शर्तों का आवेदन&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;आप कवर किए गए सॉफ़्टवेयर के एक या अधिक प्राप्तकर्ताओं को वारंटी, समर्थन, क्षतिपूर्ति या दायित्व दायित्वों की पेशकश करना और शुल्क लेना चुन सकते हैं। हालाँकि, आप ऐसा केवल अपनी ओर से कर सकते हैं, किसी योगदानकर्ता की ओर से नहीं। आपको यह बिल्कुल स्पष्ट करना चाहिए कि ऐसी कोई भी वारंटी, समर्थन, क्षतिपूर्ति, या दायित्व दायित्व केवल आपके द्वारा ही पेश किया जाता है, और आप इसके द्वारा आपके द्वारा प्रदान की जाने वाली वारंटी, समर्थन, क्षतिपूर्ति या दायित्व शर्तों के परिणामस्वरूप ऐसे योगदानकर्ता द्वारा किए गए किसी भी दायित्व के लिए प्रत्येक योगदानकर्ता को क्षतिपूर्ति देने के लिए सहमत हैं। आप किसी भी क्षेत्राधिकार के लिए विशिष्ट वारंटी और दायित्व की सीमाओं के अतिरिक्त अस्वीकरण शामिल कर सकते हैं।&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="inability-to-comply-due-to-statute-or-regulation"&gt;4. क़ानून या विनियमन के कारण अनुपालन करने में असमर्थता&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;यदि कानून, न्यायिक आदेश या विनियमन के कारण कवर किए गए सॉफ़्टवेयर में से कुछ या सभी के संबंध में इस लाइसेंस की किसी भी शर्त का पालन करना आपके लिए असंभव है तो आपको: (ए) इस लाइसेंस की शर्तों का यथासंभव अधिकतम सीमा तक अनुपालन करना होगा; और (बी) उन सीमाओं और कोड का वर्णन करें जिनसे वे प्रभावित होते हैं। इस तरह के विवरण को इस लाइसेंस के तहत कवर किए गए सॉफ़्टवेयर के सभी वितरणों के साथ शामिल एक टेक्स्ट फ़ाइल में रखा जाना चाहिए। क़ानून या विनियमन द्वारा निषिद्ध सीमा को छोड़कर, सामान्य कौशल प्राप्तकर्ता के लिए ऐसा विवरण पर्याप्त रूप से विस्तृत होना चाहिए ताकि वह इसे समझ सके।&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="termination"&gt;5. समाप्ति&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;5.1. यदि आप इसकी किसी भी शर्त का पालन करने में विफल रहते हैं तो इस लाइसेंस के तहत दिए गए अधिकार स्वतः समाप्त हो जाएंगे। हालाँकि, यदि आप आज्ञाकारी हो जाते हैं, तो किसी विशेष योगदानकर्ता से इस लाइसेंस के तहत दिए गए अधिकार (ए) अनंतिम रूप से बहाल किए जाते हैं, जब तक कि ऐसा योगदानकर्ता स्पष्ट रूप से और अंततः आपके अनुदान को समाप्त नहीं करता है, और (बी) निरंतर आधार पर, यदि ऐसा योगदानकर्ता आपके अनुपालन में वापस आने के 60 दिनों से पहले कुछ उचित तरीकों से गैर-अनुपालन के बारे में आपको सूचित करने में विफल रहता है। इसके अलावा, किसी विशेष योगदानकर्ता से आपका अनुदान निरंतर आधार पर बहाल किया जाता है यदि ऐसा योगदानकर्ता आपको कुछ उचित तरीकों से गैर-अनुपालन के बारे में सूचित करता है, तो यह पहली बार है कि आपको ऐसे योगदानकर्ता से इस लाइसेंस के गैर-अनुपालन का नोटिस मिला है, और आप नोटिस प्राप्त होने के 30 दिन से पहले अनुपालन करते हैं।&lt;/p&gt;
+        &lt;br/&gt;&lt;p&gt;5.2. यदि आप किसी पेटेंट उल्लंघन के दावे (घोषणात्मक निर्णय कार्यों, प्रति-दावों और क्रॉस-दावों को छोड़कर) का दावा करके किसी इकाई के खिलाफ मुकदमा शुरू करते हैं, जिसमें आरोप लगाया जाता है कि योगदानकर्ता संस्करण प्रत्यक्ष या अप्रत्यक्ष रूप से किसी पेटेंट का उल्लंघन करता है, तो इस लाइसेंस की धारा 2.1 के तहत कवर किए गए सॉफ़्टवेयर के लिए किसी भी और सभी योगदानकर्ताओं द्वारा आपको दिए गए अधिकार समाप्त हो जाएंगे।&lt;/p&gt;
+        &lt;br/&gt;&lt;p&gt;5.3. उपरोक्त धारा 5.1 या 5.2 के तहत समाप्ति की स्थिति में, सभी अंतिम उपयोगकर्ता लाइसेंस समझौते (वितरक और पुनर्विक्रेताओं को छोड़कर) जो समाप्ति से पहले इस लाइसेंस के तहत आपके या आपके वितरकों द्वारा वैध रूप से प्रदान किए गए हैं, समाप्ति से बचे रहेंगे।&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="disclaimer-of-warranty"&gt;6. वारंटी का अस्वीकरण&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;&lt;em&gt;इस लाइसेंस के तहत कवर किया गया सॉफ्टवेयर "जैसा है" के आधार पर प्रदान किया जाता है, बिना किसी प्रकार की व्यक्त, निहित या वैधानिक वारंटी के, जिसमें बिना किसी सीमा के वारंटी शामिल है कि कवर किया गया सॉफ्टवेयर दोषों से मुक्त है, बिक्री योग्य है, किसी विशेष उद्देश्य के लिए उपयुक्त है या गैर-उल्लंघनकारी है। कवर किए गए सॉफ़्टवेयर की गुणवत्ता और प्रदर्शन का पूरा जोखिम आपके ऊपर है। यदि कोई कवर किया गया सॉफ़्टवेयर किसी भी संबंध में दोषपूर्ण साबित होता है, तो आप (कोई योगदानकर्ता नहीं) किसी भी आवश्यक सर्विसिंग, मरम्मत या सुधार की लागत वहन करेंगे। वारंटी का यह अस्वीकरण इस लाइसेंस का एक अनिवार्य हिस्सा है। इस अस्वीकरण के अलावा इस लाइसेंस के तहत किसी भी कवर किए गए सॉफ़्टवेयर का कोई भी उपयोग अधिकृत नहीं है।&lt;/em&gt;&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="limitation-of-liability"&gt;7. दायित्व की सीमा&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;&lt;em&gt;किसी भी परिस्थिति में और किसी भी कानूनी सिद्धांत के तहत, चाहे अपकृत्य (लापरवाही सहित), अनुबंध, या अन्यथा, कोई भी योगदानकर्ता, या कोई भी जो कवर किए गए सॉफ़्टवेयर को ऊपर की अनुमति के अनुसार वितरित करता है, किसी भी चरित्र के प्रत्यक्ष, अप्रत्यक्ष, विशेष, आकस्मिक, या परिणामी नुकसान के लिए आपके प्रति उत्तरदायी नहीं होगा, जिसमें बिना किसी सीमा के, खोए हुए मुनाफे के लिए नुकसान शामिल है। साख की हानि, काम रुकना, कंप्यूटर विफलता या खराबी, या कोई और सभी व्यावसायिक क्षति या हानि, भले ही ऐसी पार्टी को ऐसे नुकसान की संभावना के बारे में सूचित किया गया हो। दायित्व की यह सीमा ऐसे पक्ष की लापरवाही के परिणामस्वरूप होने वाली मृत्यु या व्यक्तिगत चोट के दायित्व पर उस सीमा तक लागू नहीं होगी, जब तक कि लागू कानून ऐसी सीमा को प्रतिबंधित न कर दे। कुछ न्यायक्षेत्र आकस्मिक या परिणामी क्षति के बहिष्कार या सीमा की अनुमति नहीं देते हैं, इसलिए यह बहिष्करण और सीमा आप पर लागू नहीं हो सकती है।&lt;/em&gt;&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="litigation"&gt;8. मुक़दमा&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;इस लाइसेंस से संबंधित कोई भी मुकदमा केवल उस क्षेत्राधिकार की अदालतों में लाया जा सकता है जहां प्रतिवादी अपने व्यवसाय का मुख्य स्थान रखता है और इस तरह के मुकदमे को इसके विरोधाभासी प्रावधानों के संदर्भ के बिना, उस क्षेत्राधिकार के कानूनों द्वारा नियंत्रित किया जाएगा। इस धारा में कुछ भी किसी पक्ष की प्रतिदावा या प्रतिदावा करने की क्षमता को नहीं रोकेगा।&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="miscellaneous"&gt;9. विविध&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;यह लाइसेंस इसकी विषय वस्तु से संबंधित संपूर्ण समझौते का प्रतिनिधित्व करता है। यदि इस लाइसेंस के किसी भी प्रावधान को अप्रवर्तनीय माना जाता है, तो ऐसे प्रावधान को केवल इसे लागू करने योग्य बनाने के लिए आवश्यक सीमा तक सुधार किया जाएगा। कोई भी कानून या विनियम जो यह प्रावधान करता है कि किसी अनुबंध की भाषा को मसौदा तैयार करने वाले के विरुद्ध समझा जाएगा, इस लाइसेंस को किसी योगदानकर्ता के विरुद्ध समझने के लिए उपयोग नहीं किया जाएगा।&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="versions-of-the-license"&gt;10. लाइसेंस के संस्करण&lt;/h2&gt;&lt;br/&gt;
+        &lt;h3 id="new-versions"&gt;10.1. नए संस्करण&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;मोज़िला फाउंडेशन लाइसेंस प्रबंधक है। धारा 10.3 में दिए गए प्रावधानों को छोड़कर, लाइसेंस प्रबंधक के अलावा किसी अन्य को इस लाइसेंस के नए संस्करणों को संशोधित करने या प्रकाशित करने का अधिकार नहीं है। प्रत्येक संस्करण को एक विशिष्ट संस्करण संख्या दी जाएगी।&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="effect-of-new-versions"&gt;10.2. नए संस्करणों का प्रभाव&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;आप कवर किए गए सॉफ़्टवेयर को लाइसेंस के उस संस्करण की शर्तों के तहत वितरित कर सकते हैं जिसके तहत आपको मूल रूप से कवर किया गया सॉफ़्टवेयर प्राप्त हुआ था, या लाइसेंस प्रबंधक द्वारा प्रकाशित किसी भी बाद के संस्करण की शर्तों के तहत।&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="modified-versions"&gt;10.3. संशोधित संस्करण&lt;/h3&gt;&lt;br/&gt;
+        &lt;p&gt;यदि आप ऐसा सॉफ़्टवेयर बनाते हैं जो इस लाइसेंस द्वारा शासित नहीं है, और आप ऐसे सॉफ़्टवेयर के लिए एक नया लाइसेंस बनाना चाहते हैं, तो आप इस लाइसेंस का एक संशोधित संस्करण बना सकते हैं और उपयोग कर सकते हैं यदि आप लाइसेंस का नाम बदलते हैं और लाइसेंस प्रबंधक के नाम का कोई संदर्भ हटा देते हैं (सिवाय इसके कि यह संशोधित लाइसेंस इस लाइसेंस से भिन्न है)।&lt;/p&gt;
+        &lt;br/&gt;&lt;h3 id="distributing-source-code-form-that-is-incompatible-with-secondary-licenses"&gt;10.4. सोर्स कोड फॉर्म वितरित करना जो माध्यमिक लाइसेंस के साथ असंगत है&lt;/h3&gt;
+        &lt;br/&gt;&lt;p&gt;यदि आप लाइसेंस के इस संस्करण की शर्तों के तहत माध्यमिक लाइसेंस के साथ असंगत स्रोत कोड फॉर्म वितरित करना चुनते हैं, तो इस लाइसेंस के प्रदर्शनी बी में वर्णित नोटिस संलग्न किया जाना चाहिए।&lt;/p&gt;
+        &lt;br/&gt;&lt;h2 id="exhibit-a---source-code-form-license-notice"&gt;प्रदर्शनी ए - स्रोत कोड फॉर्म लाइसेंस नोटिस&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;यह सोर्स कोड फॉर्म मोज़िला पब्लिक लाइसेंस, वी. 2.0 की शर्तों के अधीन है। यदि इस फ़ाइल के साथ एमपीएल की एक प्रति वितरित नहीं की गई थी, तो आप https://mozilla.org/MPL/2.0/.&lt;/p&gt; पर एक प्रति प्राप्त कर सकते हैं
+        &lt;br/&gt;
+        &lt;p&gt;यदि किसी विशेष फ़ाइल में नोटिस डालना संभव या वांछनीय नहीं है, तो आप नोटिस को किसी स्थान पर शामिल कर सकते हैं (जैसे प्रासंगिक निर्देशिका में LICENSE फ़ाइल) जहां प्राप्तकर्ता को ऐसे नोटिस की तलाश करने की संभावना होगी।&lt;/p&gt;
+        &lt;br/&gt;&lt;p&gt;आप कॉपीराइट स्वामित्व की अतिरिक्त सटीक सूचनाएं जोड़ सकते हैं।&lt;/p&gt;&lt;br/&gt;
+        &lt;h2 id="exhibit-b---incompatible-with-secondary-licenses-notice"&gt;प्रदर्शनी B - "माध्यमिक लाइसेंस के साथ असंगत" सूचना&lt;/h2&gt;&lt;br/&gt;
+        &lt;p&gt;यह सोर्स कोड फॉर्म "माध्यमिक लाइसेंस के साथ असंगत" है, जैसा कि मोज़िला पब्लिक लाइसेंस, v. 2.0.&lt;/p&gt; द्वारा परिभाषित किया गया है।</string>
+    <string name="prompt_save_login_title">पासवर्ड को बचाओ?</string>
+    <string name="prompt_save_login_description">मिडोरी में %1$s के लिए लॉगिन सहेजें।</string>
+    <string name="prompt_fill_login_title">पासवर्ड भरें?</string>
+    <string name="prompt_fill_login_description">%1$s के लिए सहेजे गए लॉगिन का उपयोग करें।</string>
+    <string name="prompt_save_card_title">भुगतान विधि सहेजें?</string>
+    <string name="prompt_save_card_description">मिडोरी में कार्ड %1$s सहेजें।</string>
+    <string name="prompt_fill_card_title">भुगतान विधि भरें?</string>
+    <string name="prompt_fill_card_description">इस फॉर्म के लिए कार्ड %1$s का उपयोग करें।</string>
+    <string name="prompt_fill_address_title">पता भरें?</string>
+    <string name="prompt_fill_address_description">इस फॉर्म के लिए %1$s का उपयोग करें।</string>
+    <string name="prompt_fill">भरें</string>
+    <string name="settings_saved_passwords_secure_desc">आपके डिवाइस लॉक द्वारा एन्क्रिप्टेड और संरक्षित</string>
+    <string name="settings_autofill_manage_secure_desc">एन्क्रिप्टेड जानकारी प्रबंधित करें</string>
+    <string name="settings_accessibility_font_disabled_hint">कस्टम आकार चुनने के लिए "डिवाइस टेक्स्ट आकार का उपयोग करें" बंद करें।</string>
+    <string name="settings_accessibility_font_reload_hint">किसी पृष्ठ को पुनः लोड करने के बाद नए आकार का उपयोग किया जाता है।</string>
+    <string name="settings_accessibility_font_reset">100% पर रीसेट करें</string>
+    <string name="secure_unlock_subtitle">अपने फ़िंगरप्रिंट, चेहरे, पिन, पैटर्न या पासवर्ड का उपयोग करें</string>
+    <string name="secure_unlock_description">आपकी संवेदनशील जानकारी तब तक लॉक रहती है जब तक Android आपकी पहचान सत्यापित नहीं कर लेता।</string>
+    <string name="secure_unlock_action">अनलॉक</string>
+    <string name="secure_unlock_failed">पहचाना नहीं गया. पुनः प्रयास करें।</string>
+    <string name="secure_unlock_no_screen_lock">इस सुरक्षित क्षेत्र का उपयोग करने से पहले एंड्रॉइड में स्क्रीन लॉक सेट करें।</string>
+    <string name="secure_items_count">%1$d सहेजा गया</string>
+    <string name="secure_storage_error">मिडोरी सुरक्षित स्टोर को अपडेट नहीं कर सका। पुनः प्रयास करें।</string>
+    <string name="secure_required_fields">सभी आवश्यक फ़ील्ड पूर्ण करें.</string>
+    <string name="secure_delete_irreversible">इसे पूर्ववत नहीं किया जा सकता.</string>
+    <string name="passwords_vault_title">आपकी निजी तिजोरी</string>
+    <string name="passwords_vault_description">इस डिवाइस पर पासवर्ड एन्क्रिप्ट किए जाते हैं और केवल मेल खाने वाली वेबसाइटों को ही दिए जाते हैं।</string>
+    <string name="passwords_empty_description">किसी वेबसाइट में साइन इन करें और मिडोरी के पूछने पर सहेजें चुनें।</string>
+    <string name="passwords_no_username">कोई उपयोक्तानाम नहीं</string>
+    <string name="autofill_vault_title">भुगतान और संपर्क विवरण</string>
+    <string name="autofill_vault_description">कार्ड नंबर एन्क्रिप्टेड हैं. हर बार जब आप यह स्क्रीन खोलते हैं तो Android सत्यापन आवश्यक होता है।</string>
+    <string name="saved_cards_empty_description">समर्थित भुगतान फ़ॉर्म भरने के लिए एक कार्ड जोड़ें।</string>
+    <string name="saved_cards_delete">कार्ड हटाएँ</string>
+    <string name="saved_cards_expires">%1$02d/%2$d की समाप्ति</string>
+    <string name="saved_cards_month">महीना</string>
+    <string name="saved_cards_year">वर्ष</string>
+    <string name="saved_cards_invalid_number">एक वैध कार्ड नंबर दर्ज करें.</string>
+    <string name="saved_cards_invalid_expiry">भविष्य की समाप्ति तिथि दर्ज करें.</string>
+    <string name="saved_cards_encryption_note">संग्रहित करने से पहले पूरा कार्ड नंबर एन्क्रिप्ट किया जाता है।</string>
+    <string name="saved_addresses_empty_description">समर्थित संपर्क और शिपिंग फ़ॉर्म भरने के लिए एक पता जोड़ें।</string>
+    <string name="saved_addresses_delete">पता हटाएँ</string>
+</resources>

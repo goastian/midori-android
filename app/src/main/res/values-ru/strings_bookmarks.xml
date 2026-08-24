@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bookmarks">Закладки</string>
+    <string name="bookmarks_folder">папка</string>
+    <string name="bookmarks_bookmark">закладка</string>
+    <string name="bookmarks_folder_title_placeholder">Имя папки</string>
+    <string name="bookmarks_move_x_to">Переместите %1$s в</string>
+    <string name="bookmarks_empty_default_folder_name">Список закладок</string>
+    <string name="bookmarks_empty_title">%1$s пусто.</string>
+    <string name="bookmarks_empty_message">Добавляйте закладки, используя доступ к меню на веб-странице.</string>
+</resources>

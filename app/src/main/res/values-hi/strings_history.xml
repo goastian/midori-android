@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history">इतिहास</string>
+    <string name="history_today">आज</string>
+    <string name="history_yesterday">कल</string>
+    <string name="history_clear_all_confirm_title">इतिहास हटाएँ</string>
+    <string name="history_clear_all_confirm_message">क्या आप सचमुच सारा इतिहास मिटाना चाहते हैं?</string>
+    <string name="history_clear_all_confirm_ok">सब साफ़ करें</string>
+    <string name="history_empty_title">इतिहास खोखला है</string>
+    <string name="history_empty_message">विज़िट किए गए पृष्ठ यहां दिखाई देंगे</string>
+</resources>

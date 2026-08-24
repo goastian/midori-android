@@ -12,5 +12,26 @@
     <string name="extensions_install_error">Impossible d\'installer l\'extension</string>
     <string name="extensions_manage">Gérer les extensions</string>
     <string name="extensions_more">Plus d\'extensions</string>
+
+    <string name="extensions_recommended">Extensions recommandées</string>
+    <string name="extensions_installed">Extensions installées</string>
+    <string name="extensions_loading">Chargement des extensions…</string>
+    <string name="extensions_detail_title">Détails de l\'extension</string>
+    <string name="extensions_author_by">par %1$s</string>
+    <string name="extensions_ratings">%1$s notes</string>
+    <string name="extensions_users">%1$s utilisateurs</string>
+    <string name="extensions_version">Version %1$s</string>
+    <string name="extensions_permissions">Autorisations</string>
+    <string name="extensions_no_permissions">Cette extension ne nécessite aucune autorisation spéciale.</string>
+    <string name="extensions_installing">Installation…</string>
+    <string name="extensions_installed_label">Installé</string>
+    <string name="extensions_enabled">Activé</string>
+    <string name="extensions_open_popup">Ouvrir la fenêtre contextuelle de l\'extension</string>
+    <string name="extensions_search_hint">Rechercher des extensions</string>
+    <string name="extensions_search_empty">Aucune extension ne correspond à votre recherche.</string>
+    <string name="extensions_retry">Réessayer</string>
+    <string name="extensions_load_error">Impossible de charger les extensions</string>
+    <string name="extensions_error_load_actionable">Nous n\'avons pas pu charger les extensions. Vérifiez votre connexion.</string>
+    <string name="extensions_error_action_actionable">Nous n\'avons pas pu terminer l\'action d\'extension. Essayer à nouveau.</string>
 </resources>
 

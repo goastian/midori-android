@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_add_to_homescreen">होमस्क्रीन पर जोड़ें</string>
+    <string name="menu_request_desktop_site">डेस्कटॉप साइट का अनुरोध करें</string>
+    <string name="menu_quit_app">ऐप बंद करें</string>
+    <string name="menu_find_in_page">पेज में खोजें</string>
+    <string name="menu_account">खाता</string>
+    <string name="menu_login">लॉग इन करें</string>
+    <string name="menu_midori_vpn">मिडोरीवीपीएन</string>
+    <string name="menu_more_options">अधिक विकल्प</string>
+    <string name="menu_back_to_main">मुख्य क्रियाएं</string>
+</resources>

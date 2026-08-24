@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bookmarks">बुकमार्क</string>
+    <string name="bookmarks_folder">फ़ोल्डर</string>
+    <string name="bookmarks_bookmark">बुकमार्क</string>
+    <string name="bookmarks_folder_title_placeholder">फ़ोल्डर का नाम</string>
+    <string name="bookmarks_move_x_to">%1$s को ले जाएँ</string>
+    <string name="bookmarks_empty_default_folder_name">बुकमार्क सूची</string>
+    <string name="bookmarks_empty_title">%1$s खाली है</string>
+    <string name="bookmarks_empty_message">वेब पेज पर मेनू एक्सेस का उपयोग करके बुकमार्क जोड़ें।</string>
+</resources>

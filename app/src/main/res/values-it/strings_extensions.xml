@@ -12,5 +12,26 @@
     <string name="extensions_install_error">Impossibile installare l\'estensione</string>
     <string name="extensions_manage">Gestisci estensioni</string>
     <string name="extensions_more">Altre estensioni</string>
+
+    <string name="extensions_recommended">Estensioni consigliate</string>
+    <string name="extensions_installed">Estensioni installate</string>
+    <string name="extensions_loading">Caricamento estensioni…</string>
+    <string name="extensions_detail_title">Dettagli dell\'estensione</string>
+    <string name="extensions_author_by">di %1$s</string>
+    <string name="extensions_ratings">%1$s valutazioni</string>
+    <string name="extensions_users">Utenti %1$s</string>
+    <string name="extensions_version">Versione %1$s</string>
+    <string name="extensions_permissions">Autorizzazioni</string>
+    <string name="extensions_no_permissions">Questa estensione non richiede autorizzazioni speciali.</string>
+    <string name="extensions_installing">Installazione…</string>
+    <string name="extensions_installed_label">Installato</string>
+    <string name="extensions_enabled">Abilitato</string>
+    <string name="extensions_open_popup">Apri il popup dell\'estensione</string>
+    <string name="extensions_search_hint">Estensioni di ricerca</string>
+    <string name="extensions_search_empty">Nessuna estensione corrisponde alla tua ricerca.</string>
+    <string name="extensions_retry">Riprova</string>
+    <string name="extensions_load_error">Impossibile caricare le estensioni</string>
+    <string name="extensions_error_load_actionable">Non è stato possibile caricare le estensioni. Controlla la tua connessione.</string>
+    <string name="extensions_error_action_actionable">Non è stato possibile completare l\'azione di estensione. Riprova.</string>
 </resources>
 

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_title">Расширения</string>
+    <string name="extensions_empty_title">Расширения не установлены</string>
+    <string name="extensions_empty_message">Установите расширения, чтобы добавить дополнительные функции в ваш браузер.</string>
+    <string name="extensions_install">Установить</string>
+    <string name="extensions_install_hint">Введите URL-адрес файла расширения (.xpi).</string>
+    <string name="extensions_uninstall">Удалить</string>
+    <string name="extensions_uninstall_confirm">Удалить \"%1$s\"?</string>
+    <string name="extensions_enable">Включить</string>
+    <string name="extensions_disable">Отключить</string>
+    <string name="extensions_install_error">Не удалось установить расширение</string>
+    <string name="extensions_recommended">Рекомендуемые расширения</string>
+    <string name="extensions_installed">Установленные расширения</string>
+    <string name="extensions_loading">Загрузка расширений…</string>
+    <string name="extensions_detail_title">Подробности расширения</string>
+    <string name="extensions_author_by">автор %1$s</string>
+    <string name="extensions_ratings">%1$s рейтинги</string>
+    <string name="extensions_users">%1$s пользователей</string>
+    <string name="extensions_version">Версия %1$s</string>
+    <string name="extensions_permissions">Разрешения</string>
+    <string name="extensions_no_permissions">Это расширение не требует каких-либо специальных разрешений.</string>
+    <string name="extensions_installing">Установка…</string>
+    <string name="extensions_installed_label">Установлено</string>
+    <string name="extensions_enabled">Включено</string>
+    <string name="extensions_open_popup">Открыть всплывающее окно расширения</string>
+    <string name="extensions_manage">Управление расширениями</string>
+    <string name="extensions_more">Больше расширений</string>
+    <string name="extensions_search_hint">Расширения поиска</string>
+    <string name="extensions_search_empty">Нет расширений, соответствующих вашему запросу.</string>
+    <string name="extensions_retry">Повторить попытку</string>
+    <string name="extensions_load_error">Не удалось загрузить расширения.</string>
+    <string name="extensions_error_load_actionable">Не удалось загрузить расширения. Проверьте свое соединение.</string>
+    <string name="extensions_error_action_actionable">Нам не удалось завершить действие по продлению. Попробуйте еще раз.</string>
+</resources>
