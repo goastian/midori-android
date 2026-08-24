@@ -30,7 +30,10 @@ import mozilla.components.browser.state.state.WebExtensionState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
 import mozilla.components.concept.engine.pageextraction.ContentParams
+import mozilla.components.concept.engine.translate.Language
+import mozilla.components.concept.engine.translate.LanguageSetting
 import mozilla.components.concept.engine.translate.TranslationOptions
+import mozilla.components.concept.engine.translate.TranslationPageSettingOperation
 import mozilla.components.concept.fetch.Client
 import mozilla.components.feature.contextmenu.ContextMenuUseCases
 import mozilla.components.feature.downloads.DownloadsUseCases
@@ -66,6 +69,18 @@ class BrowserScreenViewModel @Inject constructor(
     private val appPreferencesRepository: AppPreferencesRepository,
     val contentBlockerState: ContentBlockerState,
 ): ViewModel() {
+    data class TranslationSheetState(
+        val enabled: Boolean = false,
+        val sourceLanguage: String? = null,
+        val targetLanguage: String? = null,
+        val sourceLanguages: List<Language> = emptyList(),
+        val targetLanguages: List<Language> = emptyList(),
+        val offerTranslation: Boolean = true,
+        val alwaysTranslateSource: Boolean = false,
+        val neverTranslateSource: Boolean = false,
+        val neverTranslateSite: Boolean = false,
+    )
+
     data class SelectedTabSnapshot(
         val id: String,
         val url: String,
@@ -177,6 +192,31 @@ class BrowserScreenViewModel @Inject constructor(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
             initialValue = false
+        )
+
+    val translationSheetState = combine(store.flow(), appPreferences) { state, preferences ->
+            val tab = state.selectedTab
+            val detectedLanguages = tab?.translationsState?.translationEngineState?.detectedLanguages
+            val supportedLanguages = state.translationEngine.supportedLanguages
+            val sourceLanguage = detectedLanguages?.documentLangTag?.takeIf { it.isNotBlank() }
+            val languageSetting = sourceLanguage?.let { state.translationEngine.languageSettings?.get(it) }
+
+            TranslationSheetState(
+                enabled = !preferences.translationsDisabled && tab != null && !tab.content.private,
+                sourceLanguage = sourceLanguage,
+                targetLanguage = detectedLanguages?.userPreferredLangTag?.takeIf { it.isNotBlank() },
+                sourceLanguages = supportedLanguages?.fromLanguages.orEmpty().distinctBy { it.code },
+                targetLanguages = supportedLanguages?.toLanguages.orEmpty().distinctBy { it.code },
+                offerTranslation = state.translationEngine.offerTranslation ?: true,
+                alwaysTranslateSource = languageSetting == LanguageSetting.ALWAYS,
+                neverTranslateSource = languageSetting == LanguageSetting.NEVER,
+                neverTranslateSite = tab?.translationsState?.pageSettings?.neverTranslateSite ?: false,
+            )
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = TranslationSheetState()
         )
 
     var isUrlBookmarked = urlFlow
@@ -341,18 +381,11 @@ class BrowserScreenViewModel @Inject constructor(
         ) ?: onError()
     }
 
-    /**
-     * Translates with GeckoView's detected page language and its preferred user language. This
-     * keeps the destination in sync with the browser's language preferences rather than the UI
-     * locale alone.
-     */
-    fun translateCurrentPage(): Boolean {
+    /** Starts GeckoView's on-device translation after the user confirms its language pair. */
+    fun translateCurrentPage(fromLanguage: String, toLanguage: String): Boolean {
         val tab = store.state.selectedTab ?: return false
         if (tab.content.private || appPreferences.value.translationsDisabled) return false
-
-        val languages = tab.translationsState.translationEngineState?.detectedLanguages ?: return false
-        val fromLanguage = languages.documentLangTag?.takeIf { it.isNotBlank() } ?: return false
-        val toLanguage = languages.userPreferredLangTag?.takeIf { it.isNotBlank() } ?: return false
+        if (fromLanguage.isBlank() || toLanguage.isBlank()) return false
         if (sameLanguage(fromLanguage, toLanguage)) return false
 
         store.dispatch(
@@ -364,6 +397,57 @@ class BrowserScreenViewModel @Inject constructor(
             )
         )
         return true
+    }
+
+    fun updateTranslationOffer(enabled: Boolean) {
+        store.dispatch(TranslationsAction.UpdateGlobalOfferTranslateSettingAction(enabled))
+    }
+
+    fun updateAlwaysTranslateSource(enabled: Boolean) {
+        updateTranslationPageSetting(
+            operation = TranslationPageSettingOperation.UPDATE_ALWAYS_TRANSLATE_LANGUAGE,
+            enabled = enabled
+        )
+        if (enabled) {
+            updateTranslationPageSetting(
+                operation = TranslationPageSettingOperation.UPDATE_NEVER_TRANSLATE_LANGUAGE,
+                enabled = false
+            )
+        }
+    }
+
+    fun updateNeverTranslateSource(enabled: Boolean) {
+        updateTranslationPageSetting(
+            operation = TranslationPageSettingOperation.UPDATE_NEVER_TRANSLATE_LANGUAGE,
+            enabled = enabled
+        )
+        if (enabled) {
+            updateTranslationPageSetting(
+                operation = TranslationPageSettingOperation.UPDATE_ALWAYS_TRANSLATE_LANGUAGE,
+                enabled = false
+            )
+        }
+    }
+
+    fun updateNeverTranslateSite(enabled: Boolean) {
+        updateTranslationPageSetting(
+            operation = TranslationPageSettingOperation.UPDATE_NEVER_TRANSLATE_SITE,
+            enabled = enabled
+        )
+    }
+
+    private fun updateTranslationPageSetting(
+        operation: TranslationPageSettingOperation,
+        enabled: Boolean,
+    ) {
+        val tab = store.state.selectedTab ?: return
+        store.dispatch(
+            TranslationsAction.UpdatePageSettingAction(
+                tabId = tab.id,
+                operation = operation,
+                setting = enabled
+            )
+        )
     }
 
     fun commitSearch(searchText: String, category: String? = null) {

@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -37,26 +38,57 @@ fun BrowserMenu(
 ) {
     val currentUrl by viewModel.currentUrl.collectAsState()
     val showPageActions = currentUrl.isExternalPage()
+    var showTranslationSheet by rememberSaveable { mutableStateOf(false) }
 
-    Dropdown(
-        expanded = expanded,
-        onDismissRequest = onDismissRequest,
-        modifier = Modifier.widthIn(min = 280.dp, max = 320.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .heightIn(max = 640.dp)
-                .verticalScroll(rememberScrollState())
+    Box {
+        Dropdown(
+            expanded = expanded,
+            onDismissRequest = onDismissRequest,
+            modifier = Modifier.widthIn(min = 280.dp, max = 320.dp)
         ) {
-            BrowserMenuContent(
-                navigateTo = navigateTo,
-                viewModel = viewModel,
-                applicationViewModel = applicationViewModel,
-                currentUrl = currentUrl,
-                showPageActions = showPageActions,
-                onDismissRequest = onDismissRequest
-            )
+            Column(
+                modifier = Modifier
+                    .heightIn(max = 640.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                BrowserMenuContent(
+                    navigateTo = navigateTo,
+                    viewModel = viewModel,
+                    applicationViewModel = applicationViewModel,
+                    currentUrl = currentUrl,
+                    showPageActions = showPageActions,
+                    onDismissRequest = onDismissRequest,
+                    onTranslateClick = { showTranslationSheet = true }
+                )
+            }
         }
+    }
+
+    if (showTranslationSheet) {
+        val translating = stringResource(R.string.browser_translating_page)
+        val translationUnavailable = stringResource(R.string.browser_translation_unavailable)
+        val translationState by viewModel.translationSheetState.collectAsState()
+
+        TranslationSheet(
+            state = translationState,
+            onDismissRequest = { showTranslationSheet = false },
+            onOpenSettings = {
+                showTranslationSheet = false
+                navigateTo(NavDestination.TranslationSettings)
+            },
+            onUpdateOfferTranslation = viewModel::updateTranslationOffer,
+            onUpdateAlwaysTranslateSource = viewModel::updateAlwaysTranslateSource,
+            onUpdateNeverTranslateSource = viewModel::updateNeverTranslateSource,
+            onUpdateNeverTranslateSite = viewModel::updateNeverTranslateSite,
+            onTranslate = { fromLanguage, toLanguage ->
+                if (viewModel.translateCurrentPage(fromLanguage, toLanguage)) {
+                    applicationViewModel.showSnackbar(translating)
+                    showTranslationSheet = false
+                } else {
+                    applicationViewModel.showSnackbar(translationUnavailable)
+                }
+            }
+        )
     }
 }
 
@@ -67,7 +99,8 @@ private fun BrowserMenuContent(
     applicationViewModel: MidoriApplicationViewModel,
     currentUrl: String?,
     showPageActions: Boolean,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
+    onTranslateClick: () -> Unit,
 ) {
     val isMidoriVpnActionAvailable by viewModel.isMidoriVpnActionAvailable.collectAsState()
     val showQuitApp by applicationViewModel.zapOnQuit.collectAsState()
@@ -98,8 +131,10 @@ private fun BrowserMenuContent(
         ShareAction(url = currentUrl, onDismissRequest = onDismissRequest)
         TranslateAction(
             viewModel = viewModel,
-            applicationViewModel = applicationViewModel,
-            onDismissRequest = onDismissRequest
+            onClick = {
+                onDismissRequest()
+                onTranslateClick()
+            }
         )
     }
     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
@@ -232,23 +267,15 @@ private fun ShareAction(url: String, onDismissRequest: () -> Unit) {
 @Composable
 private fun TranslateAction(
     viewModel: BrowserScreenViewModel,
-    applicationViewModel: MidoriApplicationViewModel,
-    onDismissRequest: () -> Unit
+    onClick: () -> Unit
 ) {
     val canTranslate by viewModel.canTranslateCurrentPage.collectAsState()
-    val translating = stringResource(R.string.browser_translating_page)
-    val translationUnavailable = stringResource(R.string.browser_translation_unavailable)
 
     DropdownItem(
         text = stringResource(R.string.browser_translate_page),
         icon = R.drawable.icons_internet,
         enabled = canTranslate,
-        onClick = {
-            onDismissRequest()
-            applicationViewModel.showSnackbar(
-                if (viewModel.translateCurrentPage()) translating else translationUnavailable
-            )
-        }
+        onClick = onClick
     )
 }
 
