@@ -5,6 +5,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -73,6 +77,38 @@ fun SmartTabView(
             selectedTabIds = selectedTabIds,
             onTabSelectionChange = onTabSelectionChange,
             onTabLongPressed = onTabLongPressed
+        )
+    }
+
+    if (tabsViewOption == TabsViewOption.GRID) {
+        if (groupsOnly && groups.isEmpty()) {
+            EmptyPagePlaceholder(
+                icon = R.drawable.icons_folder,
+                title = stringResource(R.string.browser_groups_empty_title),
+                subtitle = stringResource(R.string.browser_groups_empty_subtitle)
+            )
+            return
+        }
+
+        return SmartTabsGrid(
+            groups = groups,
+            activeTabs = if (groupsOnly) emptyList() else activeTabs,
+            inactiveTabs = if (groupsOnly) emptyList() else inactiveTabs,
+            private = private,
+            selectedTabId = selectedTabId,
+            thumbnailStorage = thumbnailStorage,
+            browserIcons = browserIcons,
+            onTabSelected = onTabSelected,
+            onTabDeleted = onTabDeleted,
+            contentBlockerState = contentBlockerState,
+            modifier = modifier,
+            selectionMode = selectionMode,
+            selectedTabIds = selectedTabIds,
+            onTabLongPressed = onTabLongPressed,
+            onEditGroup = onEditGroup,
+            onAddTabsToGroup = onAddTabsToGroup,
+            onDeleteGroup = onDeleteGroup,
+            onRemoveTabFromGroup = onRemoveTabFromGroup
         )
     }
 
@@ -203,6 +239,118 @@ fun SmartTabView(
                     tab = tab,
                     selected = tab.id == selectedTabId,
                     thumbnailStorage = thumbnailStorage,
+                    onSelected = onTabSelected,
+                    onDeleted = onTabDeleted,
+                    contentBlockerState = contentBlockerState,
+                    selectionMode = selectionMode,
+                    isSelectedForGrouping = tab.id in selectedTabIds,
+                    onLongPressed = onTabLongPressed
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SmartTabsGrid(
+    groups: List<SmartTabGroup>,
+    activeTabs: List<TabSessionState>,
+    inactiveTabs: List<TabSessionState>,
+    private: Boolean,
+    selectedTabId: String?,
+    thumbnailStorage: ThumbnailStorage,
+    browserIcons: BrowserIcons,
+    onTabSelected: (TabSessionState) -> Unit,
+    onTabDeleted: (TabSessionState) -> Unit,
+    contentBlockerState: ContentBlockerState,
+    modifier: Modifier,
+    selectionMode: Boolean,
+    selectedTabIds: Set<String>,
+    onTabLongPressed: (TabSessionState) -> Unit,
+    onEditGroup: (SmartTabGroup) -> Unit,
+    onAddTabsToGroup: (SmartTabGroup) -> Unit,
+    onDeleteGroup: (SmartTabGroup) -> Unit,
+    onRemoveTabFromGroup: (String, String) -> Unit,
+) {
+    if (groups.isEmpty() && activeTabs.isEmpty() && inactiveTabs.isEmpty()) {
+        EmptyTabsPlaceholder(private)
+        return
+    }
+
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 150.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        groups.forEach { group ->
+            item(
+                key = "grid-group-${group.id}",
+                span = { GridItemSpan(maxLineSpan) }
+            ) {
+                TabGroupSectionHeader(
+                    group = group,
+                    onEdit = { onEditGroup(group) },
+                    onAddTabs = { onAddTabsToGroup(group) },
+                    onDelete = { onDeleteGroup(group) }
+                )
+            }
+            gridItems(group.tabs, key = { "grid-group-${group.id}-${it.id}" }) { tab ->
+                TabCard(
+                    tab = tab,
+                    selected = tab.id == selectedTabId,
+                    thumbnailStorage = thumbnailStorage,
+                    browserIcons = browserIcons,
+                    onSelected = onTabSelected,
+                    onDeleted = onTabDeleted,
+                    contentBlockerState = contentBlockerState,
+                    selectionMode = selectionMode,
+                    isSelectedForGrouping = tab.id in selectedTabIds,
+                    groupId = group.id,
+                    onRemoveFromGroup = onRemoveTabFromGroup,
+                    onLongPressed = onTabLongPressed
+                )
+            }
+        }
+
+        if (activeTabs.isNotEmpty()) {
+            item(key = "grid-active-header", span = { GridItemSpan(maxLineSpan) }) {
+                TabSectionHeader(
+                    title = stringResource(R.string.browser_active_tabs),
+                    subtitle = stringResource(R.string.browser_tab_group_count, activeTabs.size)
+                )
+            }
+            gridItems(activeTabs, key = { "grid-active-${it.id}" }) { tab ->
+                TabCard(
+                    tab = tab,
+                    selected = tab.id == selectedTabId,
+                    thumbnailStorage = thumbnailStorage,
+                    browserIcons = browserIcons,
+                    onSelected = onTabSelected,
+                    onDeleted = onTabDeleted,
+                    contentBlockerState = contentBlockerState,
+                    selectionMode = selectionMode,
+                    isSelectedForGrouping = tab.id in selectedTabIds,
+                    onLongPressed = onTabLongPressed
+                )
+            }
+        }
+
+        if (inactiveTabs.isNotEmpty()) {
+            item(key = "grid-inactive-header", span = { GridItemSpan(maxLineSpan) }) {
+                TabSectionHeader(
+                    title = stringResource(R.string.browser_inactive_tabs),
+                    subtitle = stringResource(R.string.browser_inactive_tabs_summary)
+                )
+            }
+            gridItems(inactiveTabs, key = { "grid-inactive-${it.id}" }) { tab ->
+                TabCard(
+                    tab = tab,
+                    selected = tab.id == selectedTabId,
+                    thumbnailStorage = thumbnailStorage,
+                    browserIcons = browserIcons,
                     onSelected = onTabSelected,
                     onDeleted = onTabDeleted,
                     contentBlockerState = contentBlockerState,

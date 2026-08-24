@@ -89,6 +89,8 @@ fun TabCard(
     contentBlockerState: ContentBlockerState,
     selectionMode: Boolean = false,
     isSelectedForGrouping: Boolean = false,
+    groupId: String? = null,
+    onRemoveFromGroup: (String, String) -> Unit = { _, _ -> },
     onLongPressed: (TabSessionState) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -158,6 +160,13 @@ fun TabCard(
                         checked = isSelectedForGrouping,
                         onCheckedChange = { onSelected(tab) }
                     )
+                } else if (groupId != null) {
+                    ToolbarAction(onClick = { onRemoveFromGroup(groupId, tab.id) }) {
+                        Icon(
+                            painterResource(id = R.drawable.icons_folder),
+                            contentDescription = stringResource(R.string.browser_remove_tab_from_group)
+                        )
+                    }
                 } else {
                     ToolbarAction(onClick = { deleting = true }) { // TODO rename ToolbarAction to "SmallButton" and put it in widgets
                         Icon(painterResource(id = R.drawable.icons_close), contentDescription = "icon")
