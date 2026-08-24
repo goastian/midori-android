@@ -1,4 +1,5 @@
 import groovy.json.JsonSlurper
+import groovy.xml.XmlSlurper
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -302,9 +303,14 @@ tasks.register("verifyLocalizedStrings") {
         def localeConfig = new XmlSlurper(false, false).parse(file("src/main/res/xml/locales_config.xml"))
         def missingByLocale = localeConfig.locale.collectEntries { locale ->
             def languageTag = locale.attributes().find { key, value -> key.toString().endsWith("name") }?.value?.toString()
-            def qualifier = languageTag.split("-").withIndex().collect { part, index ->
-                index == 0 ? part : "r${part}"
-            }.join("-")
+            if (languageTag == "en") {
+                return [(languageTag): [] as Set]
+            }
+            def qualifierParts = []
+            languageTag.split("-").eachWithIndex { part, index ->
+                qualifierParts << (index == 0 ? part : "r${part}")
+            }
+            def qualifier = qualifierParts.join("-")
             def localeNames = stringNamesIn(resourcesDirectory.toPath().resolve("values-${qualifier}").toFile())
             [(languageTag): baseNames - localeNames]
         }.findAll { _, missing -> !missing.isEmpty() }

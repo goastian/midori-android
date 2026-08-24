@@ -185,129 +185,131 @@
     <string name="settings_tests_label" translatable="false">テスト</string>
     <string name="settings_tests_prompts_label" translatable="false">プロンプト</string>
     <string name="licence_label" translatable="false">ライセンスMPL 2.0</string>
-    <string name="settings_licence_content" translatable="false">&lt;h2 id="definitions"&gt;1.定義&lt;/h2&gt;&lt;br/&gt;
-        &lt;dl&gt;
-        &lt;dt&gt;1.1。 「投稿者」&lt;/dt&gt;
-        &lt;dd&gt;&lt;p&gt;は、対象ソフトウェアを作成、作成に貢献、または所有する各個人または法人を意味します。&lt;/p&gt;
-        &lt;/dd&gt;&lt;br/&gt;
-        &lt;dt&gt;1.2。 「コントリビューターバージョン」&lt;/dt&gt;
-        &lt;dd&gt;&lt;p&gt;は、コントリビューターによって使用される他者のコントリビューション（存在する場合）と、その特定のコントリビューターのコントリビューションの組み合わせを意味します。&lt;/p&gt;
-        &lt;/dd&gt;&lt;br/&gt;
-        &lt;dt&gt;1.3。 「貢献」&lt;/dt&gt;
-        &lt;dd&gt;&lt;p&gt;は、特定の貢献者の対象ソフトウェアを意味します。&lt;/p&gt;
-        &lt;/dd&gt;&lt;br/&gt;
-        &lt;dt&gt;1.4。 「対象ソフトウェア」&lt;/dt&gt;
-        &lt;dd&gt;&lt;p&gt;とは、最初の貢献者が別紙 A の通知を添付したソース コード フォーム、かかるソース コード フォームの実行可能形式、およびかかるソース コード フォームの修正を意味し、それぞれその一部を含みます。&lt;/p&gt;
-        &lt;/dd&gt;&lt;br/&gt;
-        &lt;dt&gt;1.5。 「セカンダリライセンスと互換性がありません」&lt;/dt&gt;
-        &lt;dd&gt;&lt;p&gt;は&lt;/p&gt;を意味します
-        &lt;ol type="a"&gt;
-        &lt;li&gt;&lt;p&gt;最初の貢献者が、別紙 B に記載されている通知を対象ソフトウェアに添付したこと。または&lt;/p&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;p&gt;対象ソフトウェアはバージョン 1.1 以前のライセンスの条件に基づいて利用可能であり、二次ライセンスの条件にも基づいて利用可能ではないこと。&lt;/p&gt;&lt;/li&gt;
-        &lt;/ol&gt;
-        &lt;/dd&gt;&lt;br/&gt;
-        &lt;dt&gt;1.6。 「実行形式」&lt;/dt&gt;
-        &lt;dd&gt;&lt;p&gt;は、ソースコード形式以外のあらゆる形式の著作物を意味します。&lt;/p&gt;
-        &lt;/dd&gt;&lt;br/&gt;
-        &lt;dt&gt;1.7。 「大きめの作品」&lt;/dt&gt;
-        &lt;dd&gt;&lt;p&gt;は、対象ソフトウェアと、対象ソフトウェアではない別のファイルにある他の素材とを組み合わせた著作物を意味します。&lt;/p&gt;
-        &lt;/dd&gt;&lt;br/&gt;
-        &lt;dt&gt;1.8。 「ライセンス」&lt;/dt&gt;
-        &lt;dd&gt;&lt;p&gt;はこの文書を意味します。&lt;/p&gt;
-        &lt;/dd&gt;&lt;br/&gt;
-        &lt;dt&gt;1.9。 「ライセンス可能」&lt;/dt&gt;
-        &lt;dd&gt;&lt;p&gt;は、最初の付与時またはその後に関わらず、本ライセンスによって伝えられるあらゆる権利を可能な限り最大限に付与する権利を有することを意味します。&lt;/p&gt;
-        &lt;/dd&gt;&lt;br/&gt;
-        &lt;dt&gt;1.10。 「変更」&lt;/dt&gt;
-        &lt;dd&gt;&lt;p&gt;は、次のいずれかを意味します:&lt;/p&gt;
-        &lt;ol type="a"&gt;&lt;br/&gt;
-        &lt;li&gt;&lt;p&gt;対象ソフトウェアの内容の追加、削除、または変更によって生じるソース コード形式のファイル。または&lt;/p&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;p&gt;対象ソフトウェアを含むソース コード フォームの新しいファイル。&lt;/p&gt;&lt;/li&gt;
-        &lt;/ol&gt;
-        &lt;/dd&gt;&lt;br/&gt;
-        &lt;dt&gt;1.11。投稿者の「特許請求」&lt;/dt&gt;
-        &lt;dd&gt;&lt;p&gt;とは、その寄稿者によってライセンスが付与されている特許のうち、ライセンスの付与を条件として、その寄稿物またはその寄稿者のいずれかの作成、使用、販売、売り出し、作成、輸入、または譲渡によって侵害される、方法、プロセス、および装置のクレームを含むがこれらに限定されない特許クレームを意味します。バージョン.&lt;/p&gt;
-        &lt;/dd&gt;&lt;br/&gt;
-        &lt;dt&gt;1.12。 「セカンダリライセンス」&lt;/dt&gt;
-        &lt;dd&gt;&lt;p&gt;は、GNU General Public License バージョン 2.0、GNU Lesser General Public License バージョン 2.1、GNU Affero General Public License バージョン 3.0、またはこれらのライセンスのそれ以降のバージョンを意味します。&lt;/p&gt;
-        &lt;/dd&gt;&lt;br/&gt;
-        &lt;dt&gt;1.13。 「ソースコードフォーム」&lt;/dt&gt;
-        &lt;dd&gt;&lt;p&gt;は、変更を加えるために推奨される作品の形式を意味します。&lt;/p&gt;
-        &lt;/dd&gt;&lt;br/&gt;
-        &lt;dt&gt;1.14。 「あなた」（または「あなたの」）&lt;/dt&gt;
-        &lt;dd&gt;&lt;p&gt;とは、本ライセンスに基づいて権利を行使する個人または法人を意味します。法人の場合、「お客様」には、お客様を管理する、お客様に管理される、またはお客様との共通の管理下にあるあらゆる法人が含まれます。この定義の目的上、「支配」とは、(a) 直接的または間接的に、契約またはその他によるかどうかにかかわらず、当該事業体の指示または管理を引き起こす権限、または (b) 当該事業体の発行済み株式の 50% を超える所有権または受益所有権を意味します。&lt;/p&gt;
-        &lt;/dd&gt;&lt;br/&gt;
-        &lt;/dl&gt;&lt;br/&gt;
-        &lt;h2 id="license-grants-and-conditions"&gt;2.ライセンスの付与と条件&lt;/h2&gt;&lt;br/&gt;
-        &lt;h3 id="grants"&gt;2.1.助成金&lt;/h3&gt;&lt;br/&gt;
-        &lt;p&gt;各寄稿者は、ここにより、世界規模のロイヤリティフリーの非独占的ライセンスをあなたに付与します:&lt;/p&gt;
-        &lt;ol type="a"&gt;
-        &lt;li&gt;&lt;p&gt;知的財産権 (特許または商標を除く) に基づき、当該寄稿者は、その寄稿物を、修正なし、修正あり、またはより大きな作品の一部として、使用、複製、利用可能、変更、表示、実行、配布、その他の方法で利用することが許諾されます。と&lt;/p&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;p&gt;その寄稿者の特許請求に基づいて、その寄稿物またはその寄稿者バージョンのいずれかを作成、使用、販売、販売の申し出、作成、輸入、その他の方法で譲渡します。&lt;/p&gt;&lt;/li&gt;
-        &lt;/ol&gt;&lt;br/&gt;
-        &lt;h3 id="effective-date"&gt;2.2.発効日&lt;/h3&gt;&lt;br/&gt;
-        &lt;p&gt;コントリビュートに関してセクション 2.1 で付与されたライセンスは、コントリビュータがそのコントリビューションを最初に配布した日に各コントリビューションに対して有効になります。&lt;/p&gt;
-        &lt;br/&gt;&lt;h3 id="limitations-on-grant-scope"&gt;2.3.付与範囲の制限&lt;/h3&gt;&lt;br/&gt;
-        &lt;p&gt;このセクション 2 で付与されるライセンスは、このライセンスに基づいて付与される唯一の権利です。本ライセンスに基づく対象ソフトウェアの配布またはライセンス供与によって、追加の権利またはライセンスが暗示されることはありません。上記のセクション 2.1(b) にかかわらず、寄稿者:&lt;/p&gt; によって特許ライセンスは付与されません。
-        &lt;ol type="a"&gt;
-        &lt;li&gt;&lt;p&gt;貢献者が対象ソフトウェアから削除したコード。または&lt;/p&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;p&gt;: (i) お客様およびその他の第三者による対象ソフトウェアの改変、または (ii) その貢献物と他のソフトウェアとの組み合わせ (貢献者バージョンの一部を除く)。または&lt;/p&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;p&gt;は、貢献がない場合に対象ソフトウェアによって侵害された特許請求に基づいています。&lt;/p&gt;&lt;/li&gt;
-        &lt;/ol&gt;
-        &lt;p&gt;このライセンスは、投稿者の商標、サービスマーク、またはロゴに対するいかなる権利も付与しません（セクション 3.4 の通知要件に従うために必要な場合を除く）。&lt;/p&gt;
-        &lt;br/&gt;&lt;h3 id="subsequent-licenses"&gt;2.4。以降のライセンス&lt;/h3&gt;&lt;br/&gt;
-        &lt;p&gt;本ライセンスの後続バージョン (セクション 10.2 を参照) または二次ライセンスの条件 (セクション 3.3 の条件で許可されている場合) に基づいて対象ソフトウェアを配布することをお客様が選択した結果、寄稿者は追加の付与を行うことはありません。&lt;/p&gt;
-        &lt;br/&gt;&lt;h3 id="representation"&gt;2.5。代表者&lt;/h3&gt;&lt;br/&gt;
-        &lt;p&gt;各コントリビューターは、コントリビューターがそのコントリビュートがオリジナルの創作物であると信じているか、またはこのライセンスによって伝えられるコントリビュートに対する権利を付与する十分な権利を持っていると信じていることを表明します。&lt;/p&gt;
-        &lt;br/&gt;&lt;h3 id="fair-use"&gt;2.6。フェアユース&lt;/h3&gt;&lt;br/&gt;
-        &lt;p&gt;このライセンスは、フェアユース、フェアディーリング、またはその他の同等の著作権原則に基づいてお客様が有するいかなる権利も制限することを目的としたものではありません。&lt;/p&gt;
-        &lt;br/&gt;&lt;h3 id="conditions"&gt;2.7。条件&lt;/h3&gt;&lt;br/&gt;
-        &lt;p&gt;セクション 3.1、3.2、3.3、および 3.4 は、セクション 2.1 で付与されるライセンスの条件です。&lt;/p&gt;&lt;br/&gt;
-        &lt;h2 id="responsibilities"&gt;3.責任&lt;/h2&gt;&lt;br/&gt;
-        &lt;h3 id="distribution-of-source-form"&gt;3.1.ソースフォームの配布&lt;/h3&gt;&lt;br/&gt;
-        &lt;p&gt;ソース コード形式での対象ソフトウェアの配布はすべて、お客様が作成または貢献した変更を含め、本ライセンスの条件に従う必要があります。対象ソフトウェアのソース コード フォームにはこのライセンスの条項が適用されること、およびこのライセンスのコピーの入手方法を受信者に通知する必要があります。ソース コード フォーム内の受信者の権利を変更または制限しようとすることはできません。&lt;/p&gt;
-        &lt;br/&gt;&lt;h3 id="distribution-of-executable-form"&gt;3.2.実行形式の配布&lt;/h3&gt;&lt;br/&gt;
-        &lt;p&gt;対象ソフトウェアを実行可能形式で配布する場合:&lt;/p&gt;
-        &lt;ol type="a"&gt;
-        &lt;li&gt;&lt;p&gt;そのような対象ソフトウェアは、セクション 3.1 で説明されているように、ソース コード フォームでも利用可能にする必要があり、お客様は、実行可能フォームの受信者に、合理的な手段により適時にそのソース コード フォームのコピーを取得する方法を、受信者への配布コスト以下の料金で通知する必要があります。と&lt;/p&gt;&lt;/li&gt;
-        &lt;li&gt;&lt;p&gt;実行可能フォームのライセンスが、本ライセンスに基づくソース コード フォームにおける受信者の権利を制限または変更しようとするものでない限り、このような実行可能フォームを本ライセンスの条件に基づいて配布したり、別の条件に基づいてサブライセンスしたりすることができます。ライセンス。&lt;/p&gt;&lt;/li&gt;
-        &lt;/ol&gt;&lt;br/&gt;
-        &lt;h3 id="distribution-of-a-larger-work"&gt;3.3.大きな作品の配布&lt;/h3&gt;&lt;br/&gt;
-        &lt;p&gt;対象ソフトウェアの本ライセンスの要件にも従う場合、お客様は、お客様が選択した条件に基づいて、より大きな著作物を作成および配布することができます。より大規模な著作物が、対象ソフトウェアと 1 つ以上の二次ライセンスが適用される著作物の組み合わせであり、対象ソフトウェアが二次ライセンスと互換性がない場合、本ライセンスにより、お客様は、かかる二次ライセンスの条項に基づいて当該対象ソフトウェアを追加配布することが許可されるため、より大規模な著作物の受領者は、自らの選択で、本ライセンスまたは二次ライセンスのいずれかの条項に基づいて対象ソフトウェアをさらに配布することができます。ライセンス。&lt;/p&gt;
-        &lt;br/&gt;&lt;h3 id="notices"&gt;3.4。お知らせ&lt;/h3&gt;&lt;br/&gt;
-        &lt;p&gt;対象ソフトウェアのソース コード フォームに含まれるライセンス通知 (著作権通知、特許通知、保証の否認、または責任の制限を含む) の内容を削除または変更することはできません。ただし、既知の事実上の誤りを修正するために必要な範囲でライセンス通知を変更することはできます。&lt;/p&gt;
-        &lt;br/&gt;&lt;h3 id="application-of-additional-terms"&gt;3.5。追加規約の適用&lt;/h3&gt;&lt;br/&gt;
-        &lt;p&gt;お客様は、対象ソフトウェアの 1 人以上の受信者に対して、保証、サポート、補償、または責任義務を提供し、料金を請求することを選択できます。ただし、これは投稿者に代わってではなく、自分自身に代わってのみ行うことができます。あなたは、そのような保証、サポート、補償、または責任義務があなた単独によって提供されるものであることを完全に明確にする必要があり、あなたはここに、あなたが提供する保証、サポート、補償、または責任条件の結果として当該貢献者が被るあらゆる責任をすべての貢献者に補償することに同意するものとします。追加の保証の免責事項と、管轄区域に固有の責任の制限を含めることができます。&lt;/p&gt;
-        &lt;br/&gt;&lt;h2 id="inability-to-comply-due-to-statute-or-regulation"&gt;4.法令または規制による遵守不能&lt;/h2&gt;&lt;br/&gt;
-        &lt;p&gt;法令、司法命令、または規制により、対象ソフトウェアの一部またはすべてに関して本ライセンスの条項に従うことが不可能な場合、お客様は次のことを行う必要があります。(a) 可能な限り本ライセンスの条項に従う。 (b) 制限とそれが影響するコードについて説明します。このような説明は、本ライセンスに基づく対象ソフトウェアのすべての配布に含まれるテキスト ファイルに含める必要があります。法令または規制で禁止されている範囲を除き、そのような説明は、通常の技能を有する受信者が理解できるように十分に詳細でなければなりません。&lt;/p&gt;
-        &lt;br/&gt;&lt;h2 id="termination"&gt;5。終了&lt;/h2&gt;&lt;br/&gt;
-        &lt;p&gt;5.1。このライセンスに基づいて付与された権利は、お客様がその条件のいずれかに従わなかった場合、自動的に終了します。ただし、お客様が準拠した場合、特定の貢献者から本ライセンスに基づいて付与された権利は、(a) 当該貢献者が明示的かつ最終的に付与を終了しない限り、暫定的に回復され、(b) 当該貢献者が、お客様が準拠に戻ってから 60 日以内に何らかの合理的な手段で非準拠をお客様に通知しなかった場合は、継続的に回復されます。さらに、特定の貢献者が合理的な方法で非準拠をあなたに通知した場合、特定の貢献者からの付与は継続的に回復されます。あなたがそのような貢献者から本ライセンスの不遵守の通知を受け取ったのはこれが初めてであり、通知の受領後 30 日以内に準拠したことになります。&lt;/p&gt;
-        &lt;br/&gt;&lt;p&gt;5.2.お客様が、コントリビューター バージョンが直接的または間接的に特許を侵害していると主張する特許侵害請求 (確認判決訴訟、反訴、および相互請求を除く) を主張して、いずれかの団体に対して訴訟を起こした場合、本ライセンスの第 2.1 項に基づいて対象ソフトウェアに関してすべてのコントリビューターによってお客様に付与された権利は終了します。&lt;/p&gt;
-        &lt;br/&gt;&lt;p&gt;5.3。上記のセクション 5.1 または 5.2 に基づいて終了した場合、終了前に本ライセンスに基づいてお客様またはお客様のディストリビューターによって有効に付与されたすべてのエンド ユーザー ライセンス契約 (ディストリビューターおよび再販業者を除く) は終了後も存続するものとします。&lt;/p&gt;
-        &lt;br/&gt;&lt;h2 id="disclaimer-of-warranty"&gt;6.保証の免責事項&lt;/h2&gt;&lt;br/&gt;
-        &lt;p&gt;&lt;em&gt;対象ソフトウェアは、本ライセンスに基づいて「現状のまま」で提供され、対象ソフトウェアに欠陥がないこと、商品性があること、特定の目的に適合していること、または権利を侵害していないことの保証を含むがこれに限定されず、明示的、黙示的、法定を問わず、いかなる種類の保証もありません。対象ソフトウェアの品質とパフォーマンスに関するリスクはすべてお客様にあります。対象ソフトウェアに何らかの点で欠陥があることが判明した場合、必要なサービス、修理、または修正の費用はお客様 (寄稿者ではありません) が負担するものとします。この保証の免責事項は、このライセンスの重要な部分を構成します。この免責条項に基づく場合を除き、本ライセンスに基づく対象ソフトウェアの使用は許可されません。&lt;/em&gt;&lt;/p&gt;
-        &lt;br/&gt;&lt;h2 id="limitation-of-liability"&gt;7。責任の制限&lt;/h2&gt;&lt;br/&gt;
-        &lt;p&gt;&lt;em&gt;いかなる状況においても、いかなる法理論にも基づき、不法行為 (過失を含む)、契約、その他を問わず、貢献者、または上記で許可されている対象ソフトウェアを配布する者は、逸失利益、営業権の喪失、仕事に対する損害を含むがこれらに限定されない、あらゆる性質の直接的、間接的、特別、付随的、結果的損害について、お客様に対して責任を負わないものとします。たとえ当該当事者がそのような損害の可能性について知らされていたとしても、停止、コンピュータの故障または誤動作、またはその他すべての商業上の損害または損失。この責任の制限は、適用法がかかる制限を禁止している限り、当事者の過失に起因する死亡または人身傷害に対する責任には適用されません。一部の管轄区域では、付随的または結果的損害の除外または制限が認められていないため、この除外および制限はお客様には適用されない場合があります。&lt;/em&gt;&lt;/p&gt;
-        &lt;br/&gt;&lt;h2 id="litigation"&gt;8。訴訟&lt;/h2&gt;&lt;br/&gt;
-        &lt;p&gt;本ライセンスに関連する訴訟は、被告が主たる事業所を維持する管轄区域の裁判所でのみ提起することができ、かかる訴訟は、抵触法の規定に関係なく、その管轄区域の法律に準拠するものとします。本条のいかなる規定も、当事者が相互請求または反対請求を提起する能力を妨げるものではありません。&lt;/p&gt;
-        &lt;br/&gt;&lt;h2 id="miscellaneous"&gt;9。その他&lt;/h2&gt;&lt;br/&gt;
-        &lt;p&gt;このライセンスは、本契約の主題に関する完全な合意を表します。本ライセンスのいずれかの条項が法的強制力がないと判断された場合、その条項は法的強制力を持たせるために必要な範囲でのみ改正されるものとします。契約の文言が起草者に不利に解釈されることを規定する法律または規制は、本ライセンスを寄稿者に不利に解釈するために使用されないものとします。&lt;/p&gt;
-        &lt;br/&gt;&lt;h2 id="versions-of-the-license"&gt;10。ライセンスのバージョン&lt;/h2&gt;&lt;br/&gt;
-        &lt;h3 id="new-versions"&gt;10.1。新しいバージョン&lt;/h3&gt;&lt;br/&gt;
-        &lt;p&gt;Mozilla Foundation がライセンス管理者です。セクション 10.3 に規定されている場合を除き、ライセンス管理者以外の者は、本ライセンスの新しいバージョンを変更または公開する権利を持ちません。各バージョンには、識別可能なバージョン番号が与えられます。&lt;/p&gt;
-        &lt;br/&gt;&lt;h3 id="effect-of-new-versions"&gt;10.2。新バージョンの影響&lt;/h3&gt;&lt;br/&gt;
-        &lt;p&gt;お客様は、対象ソフトウェアを最初に受け取ったときのライセンスのバージョンの条件、またはライセンス管理者によって公開されたその後のバージョンの条件に基づいて、対象ソフトウェアを配布できます。&lt;/p&gt;
-        &lt;br/&gt;&lt;h3 id="modified-versions"&gt;10.3。修正バージョン&lt;/h3&gt;&lt;br/&gt;
-        &lt;p&gt;本ライセンスが適用されないソフトウェアを作成し、そのようなソフトウェアに対して新しいライセンスを作成したい場合は、ライセンスの名前を変更し、ライセンス管理者の名前への参照を削除すれば、本ライセンスの修正版を作成して使用することができます（ただし、修正されたライセンスは本ライセンスとは異なることに注意してください）。&lt;/p&gt;
-        &lt;br/&gt;&lt;h3 id="distributing-source-code-form-that-is-incompatible-with-secondary-licenses"&gt;10.4。二次ライセンスと互換性のないソースコード形式の配布について&lt;/h3&gt;
-        &lt;br/&gt;&lt;p&gt;このバージョンのライセンスの条項に基づいて二次ライセンスと互換性のないソース コード フォームを配布することを選択した場合は、このライセンスの別紙 B に記載されている通知を添付する必要があります。&lt;/p&gt;
-        &lt;br/&gt;&lt;h2 id="exhibit-a---source-code-form-license-notice"&gt;別紙 A - ソース コード フォーム ライセンス通知&lt;/h2&gt;&lt;br/&gt;
-        &lt;p&gt;このソース コード フォームには、Mozilla Public License v. 2.0 の条件が適用されます。 MPL のコピーがこのファイルと一緒に配布されていない場合は、https://mozilla.org/MPL/2.0/.&lt;/p&gt; で入手できます。
-        &lt;br/&gt;
-        &lt;p&gt;通知を特定のファイルに入れることが不可能または望ましい場合は、受信者がそのような通知を探す可能性が高い場所 (関連ディレクトリ内の LICENSE ファイルなど) に通知を含めることができます。&lt;/p&gt;
-        &lt;br/&gt;&lt;p&gt;著作権所有権の正確な通知を追加できます。&lt;/p&gt;&lt;br/&gt;
-        &lt;h2 id="exhibit-b---incompatible-with-secondary-licenses-notice"&gt;別紙 B - 「二次ライセンスと互換性がない」に関する通知&lt;/h2&gt;&lt;br/&gt;
-        &lt;p&gt;このソース コード フォームは、Mozilla Public License v. 2.0 で定義されているように「二次ライセンスと互換性がありません」です。&lt;/p&gt;</string>
+    <string name="settings_licence_content" translatable="false"><![CDATA[
+        <h2 id="definitions">1. Definitions</h2><br/>
+        <dl>
+        <dt>1.1. “Contributor”</dt>
+        <dd><p>means each individual or legal entity that creates, contributes to the creation of, or owns Covered Software.</p>
+        </dd><br/>
+        <dt>1.2. “Contributor Version”</dt>
+        <dd><p>means the combination of the Contributions of others (if any) used by a Contributor and that particular Contributor’s Contribution.</p>
+        </dd><br/>
+        <dt>1.3. “Contribution”</dt>
+        <dd><p>means Covered Software of a particular Contributor.</p>
+        </dd><br/>
+        <dt>1.4. “Covered Software”</dt>
+        <dd><p>means Source Code Form to which the initial Contributor has attached the notice in Exhibit A, the Executable Form of such Source Code Form, and Modifications of such Source Code Form, in each case including portions thereof.</p>
+        </dd><br/>
+        <dt>1.5. “Incompatible With Secondary Licenses”</dt>
+        <dd><p>means</p>
+        <ol type="a">
+        <li><p>that the initial Contributor has attached the notice described in Exhibit B to the Covered Software; or</p></li>
+        <li><p>that the Covered Software was made available under the terms of version 1.1 or earlier of the License, but not also under the terms of a Secondary License.</p></li>
+        </ol>
+        </dd><br/>
+        <dt>1.6. “Executable Form”</dt>
+        <dd><p>means any form of the work other than Source Code Form.</p>
+        </dd><br/>
+        <dt>1.7. “Larger Work”</dt>
+        <dd><p>means a work that combines Covered Software with other material, in a separate file or files, that is not Covered Software.</p>
+        </dd><br/>
+        <dt>1.8. “License”</dt>
+        <dd><p>means this document.</p>
+        </dd><br/>
+        <dt>1.9. “Licensable”</dt>
+        <dd><p>means having the right to grant, to the maximum extent possible, whether at the time of the initial grant or subsequently, any and all of the rights conveyed by this License.</p>
+        </dd><br/>
+        <dt>1.10. “Modifications”</dt>
+        <dd><p>means any of the following:</p>
+        <ol type="a"><br/>
+        <li><p>any file in Source Code Form that results from an addition to, deletion from, or modification of the contents of Covered Software; or</p></li>
+        <li><p>any new file in Source Code Form that contains any Covered Software.</p></li>
+        </ol>
+        </dd><br/>
+        <dt>1.11. “Patent Claims” of a Contributor</dt>
+        <dd><p>means any patent claim(s), including without limitation, method, process, and apparatus claims, in any patent Licensable by such Contributor that would be infringed, but for the grant of the License, by the making, using, selling, offering for sale, having made, import, or transfer of either its Contributions or its Contributor Version.</p>
+        </dd><br/>
+        <dt>1.12. “Secondary License”</dt>
+        <dd><p>means either the GNU General Public License, Version 2.0, the GNU Lesser General Public License, Version 2.1, the GNU Affero General Public License, Version 3.0, or any later versions of those licenses.</p>
+        </dd><br/>
+        <dt>1.13. “Source Code Form”</dt>
+        <dd><p>means the form of the work preferred for making modifications.</p>
+        </dd><br/>
+        <dt>1.14. “You” (or “Your”)</dt>
+        <dd><p>means an individual or a legal entity exercising rights under this License. For legal entities, “You” includes any entity that controls, is controlled by, or is under common control with You. For purposes of this definition, “control” means (a) the power, direct or indirect, to cause the direction or management of such entity, whether by contract or otherwise, or (b) ownership of more than fifty percent (50%) of the outstanding shares or beneficial ownership of such entity.</p>
+        </dd><br/>
+        </dl><br/>
+        <h2 id="license-grants-and-conditions">2. License Grants and Conditions</h2><br/>
+        <h3 id="grants">2.1. Grants</h3><br/>
+        <p>Each Contributor hereby grants You a world-wide, royalty-free, non-exclusive license:</p>
+        <ol type="a">
+        <li><p>under intellectual property rights (other than patent or trademark) Licensable by such Contributor to use, reproduce, make available, modify, display, perform, distribute, and otherwise exploit its Contributions, either on an unmodified basis, with Modifications, or as part of a Larger Work; and</p></li>
+        <li><p>under Patent Claims of such Contributor to make, use, sell, offer for sale, have made, import, and otherwise transfer either its Contributions or its Contributor Version.</p></li>
+        </ol><br/>
+        <h3 id="effective-date">2.2. Effective Date</h3><br/>
+        <p>The licenses granted in Section&nbsp;2.1 with respect to any Contribution become effective for each Contribution on the date the Contributor first distributes such Contribution.</p>
+        <br/><h3 id="limitations-on-grant-scope">2.3. Limitations on Grant Scope</h3><br/>
+        <p>The licenses granted in this Section&nbsp;2 are the only rights granted under this License. No additional rights or licenses will be implied from the distribution or licensing of Covered Software under this License. Notwithstanding Section&nbsp;2.1(b) above, no patent license is granted by a Contributor:</p>
+        <ol type="a">
+        <li><p>for any code that a Contributor has removed from Covered Software; or</p></li>
+        <li><p>for infringements caused by: (i) Your and any other third party’s modifications of Covered Software, or (ii) the combination of its Contributions with other software (except as part of its Contributor Version); or</p></li>
+        <li><p>under Patent Claims infringed by Covered Software in the absence of its Contributions.</p></li>
+        </ol>
+        <p>This License does not grant any rights in the trademarks, service marks, or logos of any Contributor (except as may be necessary to comply with the notice requirements in Section&nbsp;3.4).</p>
+        <br/><h3 id="subsequent-licenses">2.4. Subsequent Licenses</h3><br/>
+        <p>No Contributor makes additional grants as a result of Your choice to distribute the Covered Software under a subsequent version of this License (see Section&nbsp;10.2) or under the terms of a Secondary License (if permitted under the terms of Section&nbsp;3.3).</p>
+        <br/><h3 id="representation">2.5. Representation</h3><br/>
+        <p>Each Contributor represents that the Contributor believes its Contributions are its original creation(s) or it has sufficient rights to grant the rights to its Contributions conveyed by this License.</p>
+        <br/><h3 id="fair-use">2.6. Fair Use</h3><br/>
+        <p>This License is not intended to limit any rights You have under applicable copyright doctrines of fair use, fair dealing, or other equivalents.</p>
+        <br/><h3 id="conditions">2.7. Conditions</h3><br/>
+        <p>Sections 3.1, 3.2, 3.3, and 3.4 are conditions of the licenses granted in Section&nbsp;2.1.</p><br/>
+        <h2 id="responsibilities">3. Responsibilities</h2><br/>
+        <h3 id="distribution-of-source-form">3.1. Distribution of Source Form</h3><br/>
+        <p>All distribution of Covered Software in Source Code Form, including any Modifications that You create or to which You contribute, must be under the terms of this License. You must inform recipients that the Source Code Form of the Covered Software is governed by the terms of this License, and how they can obtain a copy of this License. You may not attempt to alter or restrict the recipients’ rights in the Source Code Form.</p>
+        <br/><h3 id="distribution-of-executable-form">3.2. Distribution of Executable Form</h3><br/>
+        <p>If You distribute Covered Software in Executable Form then:</p>
+        <ol type="a">
+        <li><p>such Covered Software must also be made available in Source Code Form, as described in Section&nbsp;3.1, and You must inform recipients of the Executable Form how they can obtain a copy of such Source Code Form by reasonable means in a timely manner, at a charge no more than the cost of distribution to the recipient; and</p></li>
+        <li><p>You may distribute such Executable Form under the terms of this License, or sublicense it under different terms, provided that the license for the Executable Form does not attempt to limit or alter the recipients’ rights in the Source Code Form under this License.</p></li>
+        </ol><br/>
+        <h3 id="distribution-of-a-larger-work">3.3. Distribution of a Larger Work</h3><br/>
+        <p>You may create and distribute a Larger Work under terms of Your choice, provided that You also comply with the requirements of this License for the Covered Software. If the Larger Work is a combination of Covered Software with a work governed by one or more Secondary Licenses, and the Covered Software is not Incompatible With Secondary Licenses, this License permits You to additionally distribute such Covered Software under the terms of such Secondary License(s), so that the recipient of the Larger Work may, at their option, further distribute the Covered Software under the terms of either this License or such Secondary License(s).</p>
+        <br/><h3 id="notices">3.4. Notices</h3><br/>
+        <p>You may not remove or alter the substance of any license notices (including copyright notices, patent notices, disclaimers of warranty, or limitations of liability) contained within the Source Code Form of the Covered Software, except that You may alter any license notices to the extent required to remedy known factual inaccuracies.</p>
+        <br/><h3 id="application-of-additional-terms">3.5. Application of Additional Terms</h3><br/>
+        <p>You may choose to offer, and to charge a fee for, warranty, support, indemnity or liability obligations to one or more recipients of Covered Software. However, You may do so only on Your own behalf, and not on behalf of any Contributor. You must make it absolutely clear that any such warranty, support, indemnity, or liability obligation is offered by You alone, and You hereby agree to indemnify every Contributor for any liability incurred by such Contributor as a result of warranty, support, indemnity or liability terms You offer. You may include additional disclaimers of warranty and limitations of liability specific to any jurisdiction.</p>
+        <br/><h2 id="inability-to-comply-due-to-statute-or-regulation">4. Inability to Comply Due to Statute or Regulation</h2><br/>
+        <p>If it is impossible for You to comply with any of the terms of this License with respect to some or all of the Covered Software due to statute, judicial order, or regulation then You must: (a) comply with the terms of this License to the maximum extent possible; and (b) describe the limitations and the code they affect. Such description must be placed in a text file included with all distributions of the Covered Software under this License. Except to the extent prohibited by statute or regulation, such description must be sufficiently detailed for a recipient of ordinary skill to be able to understand it.</p>
+        <br/><h2 id="termination">5. Termination</h2><br/>
+        <p>5.1. The rights granted under this License will terminate automatically if You fail to comply with any of its terms. However, if You become compliant, then the rights granted under this License from a particular Contributor are reinstated (a) provisionally, unless and until such Contributor explicitly and finally terminates Your grants, and (b) on an ongoing basis, if such Contributor fails to notify You of the non-compliance by some reasonable means prior to 60 days after You have come back into compliance. Moreover, Your grants from a particular Contributor are reinstated on an ongoing basis if such Contributor notifies You of the non-compliance by some reasonable means, this is the first time You have received notice of non-compliance with this License from such Contributor, and You become compliant prior to 30 days after Your receipt of the notice.</p>
+        <br/><p>5.2. If You initiate litigation against any entity by asserting a patent infringement claim (excluding declaratory judgment actions, counter-claims, and cross-claims) alleging that a Contributor Version directly or indirectly infringes any patent, then the rights granted to You by any and all Contributors for the Covered Software under Section&nbsp;2.1 of this License shall terminate.</p>
+        <br/><p>5.3. In the event of termination under Sections&nbsp;5.1 or 5.2 above, all end user license agreements (excluding distributors and resellers) which have been validly granted by You or Your distributors under this License prior to termination shall survive termination.</p>
+        <br/><h2 id="disclaimer-of-warranty">6. Disclaimer of Warranty</h2><br/>
+        <p><em>Covered Software is provided under this License on an “as is” basis, without warranty of any kind, either expressed, implied, or statutory, including, without limitation, warranties that the Covered Software is free of defects, merchantable, fit for a particular purpose or non-infringing. The entire risk as to the quality and performance of the Covered Software is with You. Should any Covered Software prove defective in any respect, You (not any Contributor) assume the cost of any necessary servicing, repair, or correction. This disclaimer of warranty constitutes an essential part of this License. No use of any Covered Software is authorized under this License except under this disclaimer.</em></p>
+        <br/><h2 id="limitation-of-liability">7. Limitation of Liability</h2><br/>
+        <p><em>Under no circumstances and under no legal theory, whether tort (including negligence), contract, or otherwise, shall any Contributor, or anyone who distributes Covered Software as permitted above, be liable to You for any direct, indirect, special, incidental, or consequential damages of any character including, without limitation, damages for lost profits, loss of goodwill, work stoppage, computer failure or malfunction, or any and all other commercial damages or losses, even if such party shall have been informed of the possibility of such damages. This limitation of liability shall not apply to liability for death or personal injury resulting from such party’s negligence to the extent applicable law prohibits such limitation. Some jurisdictions do not allow the exclusion or limitation of incidental or consequential damages, so this exclusion and limitation may not apply to You.</em></p>
+        <br/><h2 id="litigation">8. Litigation</h2><br/>
+        <p>Any litigation relating to this License may be brought only in the courts of a jurisdiction where the defendant maintains its principal place of business and such litigation shall be governed by laws of that jurisdiction, without reference to its conflict-of-law provisions. Nothing in this Section shall prevent a party’s ability to bring cross-claims or counter-claims.</p>
+        <br/><h2 id="miscellaneous">9. Miscellaneous</h2><br/>
+        <p>This License represents the complete agreement concerning the subject matter hereof. If any provision of this License is held to be unenforceable, such provision shall be reformed only to the extent necessary to make it enforceable. Any law or regulation which provides that the language of a contract shall be construed against the drafter shall not be used to construe this License against a Contributor.</p>
+        <br/><h2 id="versions-of-the-license">10. Versions of the License</h2><br/>
+        <h3 id="new-versions">10.1. New Versions</h3><br/>
+        <p>Mozilla Foundation is the license steward. Except as provided in Section&nbsp;10.3, no one other than the license steward has the right to modify or publish new versions of this License. Each version will be given a distinguishing version number.</p>
+        <br/><h3 id="effect-of-new-versions">10.2. Effect of New Versions</h3><br/>
+        <p>You may distribute the Covered Software under the terms of the version of the License under which You originally received the Covered Software, or under the terms of any subsequent version published by the license steward.</p>
+        <br/><h3 id="modified-versions">10.3. Modified Versions</h3><br/>
+        <p>If you create software not governed by this License, and you want to create a new license for such software, you may create and use a modified version of this License if you rename the license and remove any references to the name of the license steward (except to note that such modified license differs from this License).</p>
+        <br/><h3 id="distributing-source-code-form-that-is-incompatible-with-secondary-licenses">10.4. Distributing Source Code Form that is Incompatible With Secondary Licenses</h3>
+        <br/><p>If You choose to distribute Source Code Form that is Incompatible With Secondary Licenses under the terms of this version of the License, the notice described in Exhibit B of this License must be attached.</p>
+        <br/><h2 id="exhibit-a---source-code-form-license-notice">Exhibit A - Source Code Form License Notice</h2><br/>
+        <p>This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.</p>
+        <br/>
+        <p>If it is not possible or desirable to put the notice in a particular file, then You may include the notice in a location (such as a LICENSE file in a relevant directory) where a recipient would be likely to look for such a notice.</p>
+        <br/><p>You may add additional accurate notices of copyright ownership.</p><br/>
+        <h2 id="exhibit-b---incompatible-with-secondary-licenses-notice">Exhibit B - “Incompatible With Secondary Licenses” Notice</h2><br/>
+        <p>This Source Code Form is “Incompatible With Secondary Licenses”, as defined by the Mozilla Public License, v. 2.0.</p>
+    ]]></string>
     <string name="prompt_save_login_title">パスワードを保存しますか?</string>
     <string name="prompt_save_login_description">%1$s のログイン情報を Midri に保存します。</string>
     <string name="prompt_fill_login_title">パスワードを入力しますか?</string>
