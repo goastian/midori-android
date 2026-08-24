@@ -50,6 +50,7 @@ fun TabsScreen(
     var groupColor by remember { mutableStateOf(TabGroupColor.BLUE) }
     var groupBeingEdited by remember { mutableStateOf<SmartTabGroup?>(null) }
     var groupBeingDeleted by remember { mutableStateOf<SmartTabGroup?>(null) }
+    var groupBeingOpened by remember { mutableStateOf<SmartTabGroup?>(null) }
 
     // A protobuf value saved by an incompatible app version can be UNRECOGNIZED.
     // Never pass that sentinel to Compose, which tries to obtain its numeric value.
@@ -70,7 +71,13 @@ fun TabsScreen(
         onClose(TabOpening.NONE)
     }
 
-    BackHandler(enabled = !showGroupNameDialog && groupBeingEdited == null && groupBeingDeleted == null) {
+    BackHandler(
+        enabled = !showGroupNameDialog && groupBeingEdited == null && groupBeingDeleted == null
+    ) {
+        if (groupBeingOpened != null) {
+            groupBeingOpened = null
+            return@BackHandler
+        }
         if (selectionMode) {
             selectedTabIds = emptySet()
             selectionMode = false
@@ -283,6 +290,33 @@ fun TabsScreen(
             )
         }
 
+        groupBeingOpened?.let { openedGroup ->
+            // Resolve against the latest state so closing a tab while this sheet is open updates
+            // the group immediately instead of leaving a stale snapshot on screen.
+            smartTabs.groups.firstOrNull { it.id == openedGroup.id }?.let { group ->
+                val tabClosedString = stringResource(id = R.string.browser_tab_closed)
+                TabGroupTabsSheet(
+                    group = group,
+                    selectedTabId = tabsViewModel.selectedTabId.collectAsState().value,
+                    thumbnailStorage = tabsViewModel.thumbnailStorage,
+                    browserIcons = tabsViewModel.browserIcons,
+                    contentBlockerState = tabsViewModel.contentBlockerState,
+                    onDismissRequest = { groupBeingOpened = null },
+                    onTabSelected = { tab ->
+                        tabsViewModel.selectTab(tab.id)
+                        groupBeingOpened = null
+                        onClose(TabOpening.NONE)
+                    },
+                    onTabDeleted = { tab ->
+                        tabsViewModel.removeTab(tab.id)
+                        appViewModel.showSnackbar(tabClosedString)
+                    }
+                )
+            } ?: run {
+                groupBeingOpened = null
+            }
+        }
+
         AnimatedTabList(
             smartTabs = smartTabs,
             private = private,
@@ -305,6 +339,7 @@ fun TabsScreen(
                 selectedTabIds = emptySet()
             },
             onDeleteGroup = { groupBeingDeleted = it },
+            onOpenGroup = { groupBeingOpened = it },
             onRemoveTabFromGroup = { groupId, tabId ->
                 if (tabsViewModel.removeTabFromGroup(groupId, tabId)) {
                     appViewModel.showSnackbar(tabRemovedFromGroupString)
@@ -518,6 +553,7 @@ fun AnimatedTabList(
     onEditGroup: (SmartTabGroup) -> Unit,
     onAddTabsToGroup: (SmartTabGroup) -> Unit,
     onDeleteGroup: (SmartTabGroup) -> Unit,
+    onOpenGroup: (SmartTabGroup) -> Unit,
     onRemoveTabFromGroup: (String, String) -> Unit,
     onTabLongPressed: (TabSessionState) -> Unit
 ) {
@@ -586,6 +622,7 @@ fun AnimatedTabList(
                 onEditGroup = onEditGroup,
                 onAddTabsToGroup = onAddTabsToGroup,
                 onDeleteGroup = onDeleteGroup,
+                onOpenGroup = onOpenGroup,
                 onRemoveTabFromGroup = onRemoveTabFromGroup
             )
         }
