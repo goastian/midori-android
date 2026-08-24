@@ -44,6 +44,14 @@
     <string name="browser_translate_page">Përkthe faqen</string>
     <string name="browser_translating_page">Faqja po përkthehet…</string>
     <string name="browser_translation_unavailable">Përkthimi nuk është i disponueshëm për këtë faqe</string>
+    <string name="browser_translation_sheet_title">Provo përkthimet private në Midori</string>
+    <string name="browser_translation_sheet_description">Përkthimet mbeten private në pajisjen tuaj. Modelet e gjuhës shkarkohen vetëm kur nevojiten.</string>
+    <string name="browser_translation_sheet_settings">Cilësimet e përkthimit</string>
+    <string name="browser_translation_sheet_from">Përkthe nga</string>
+    <string name="browser_translation_sheet_to">Përkthe në</string>
+    <string name="browser_translation_sheet_not_now">Jo tani</string>
+    <string name="browser_translation_sheet_detecting">Po zbulohet gjuha e faqes…</string>
+    <string name="browser_translation_sheet_unavailable">Për të përkthyer këtë faqe, zgjidhni dy gjuhë të ndryshme të mbështetura.</string>
     <string name="browser_tabs_empty_title">Skedat tuaja do të shfaqen këtu</string>
     <string name="browser_tabs_empty_subtitle">Përdorni skedat për të parë disa faqe në të njëjtën kohë.</string>
     <string name="browser_tabs_empty_title_private">Skedat e shfletimit privat do të shfaqen këtu</string>
