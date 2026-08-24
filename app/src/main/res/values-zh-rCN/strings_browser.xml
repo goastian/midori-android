@@ -52,6 +52,13 @@
     <string name="browser_translation_sheet_not_now">暂不</string>
     <string name="browser_translation_sheet_detecting">正在检测页面语言…</string>
     <string name="browser_translation_sheet_unavailable">请选择两种不同的受支持语言来翻译此页面。</string>
+    <string name="browser_translation_sheet_back">返回</string>
+    <string name="browser_translation_quick_title">翻译选项</string>
+    <string name="browser_translation_quick_offer">始终提供翻译</string>
+    <string name="browser_translation_quick_always_source">始终翻译 %1$s</string>
+    <string name="browser_translation_quick_never_source">永不翻译 %1$s</string>
+    <string name="browser_translation_quick_never_site">永不翻译此网站</string>
+    <string name="browser_translation_quick_full_settings">翻译设置</string>
     <string name="browser_tabs_empty_title">Your tabs will be displayed here</string>
     <string name="browser_tabs_empty_subtitle">Use the tabs to view several pages at the same time.</string>
     <string name="browser_tabs_empty_title_private">Private browsing tabs will be displayed here</string>
