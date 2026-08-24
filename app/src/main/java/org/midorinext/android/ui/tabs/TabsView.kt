@@ -45,7 +45,6 @@ fun SmartTabView(
     onTabSelectionChange: (String) -> Unit = {},
     onTabLongPressed: (TabSessionState) -> Unit = {},
     selectionTargetGroupId: String? = null,
-    groupsOnly: Boolean = false,
     onEditGroup: (SmartTabGroup) -> Unit = {},
     onAddTabsToGroup: (SmartTabGroup) -> Unit = {},
     onDeleteGroup: (SmartTabGroup) -> Unit = {},
@@ -81,19 +80,10 @@ fun SmartTabView(
     }
 
     if (tabsViewOption == TabsViewOption.GRID) {
-        if (groupsOnly && groups.isEmpty()) {
-            EmptyPagePlaceholder(
-                icon = R.drawable.icons_folder,
-                title = stringResource(R.string.browser_groups_empty_title),
-                subtitle = stringResource(R.string.browser_groups_empty_subtitle)
-            )
-            return
-        }
-
         return SmartTabsGrid(
             groups = groups,
-            activeTabs = if (groupsOnly) emptyList() else activeTabs,
-            inactiveTabs = if (groupsOnly) emptyList() else inactiveTabs,
+            activeTabs = activeTabs,
+            inactiveTabs = inactiveTabs,
             private = private,
             selectedTabId = selectedTabId,
             thumbnailStorage = thumbnailStorage,
@@ -111,47 +101,6 @@ fun SmartTabView(
             onRemoveTabFromGroup = onRemoveTabFromGroup
         )
     }
-
-    if (groupsOnly) {
-        if (groups.isEmpty()) {
-            EmptyPagePlaceholder(
-                icon = R.drawable.icons_folder,
-                title = stringResource(R.string.browser_groups_empty_title),
-                subtitle = stringResource(R.string.browser_groups_empty_subtitle)
-            )
-            return
-        }
-
-        LazyColumn(modifier = modifier) {
-            groups.forEach { group ->
-                item(key = "groups-only-${group.id}") {
-                    TabGroupSectionHeader(
-                        group = group,
-                        onEdit = { onEditGroup(group) },
-                        onAddTabs = { onAddTabsToGroup(group) },
-                        onDelete = { onDeleteGroup(group) }
-                    )
-                }
-                items(group.tabs, key = { "groups-only-${group.id}-${it.id}" }) { tab ->
-                    TabRow(
-                        tab = tab,
-                        selected = tab.id == selectedTabId,
-                        thumbnailStorage = thumbnailStorage,
-                        onSelected = onTabSelected,
-                        onDeleted = onTabDeleted,
-                        contentBlockerState = contentBlockerState,
-                        selectionMode = selectionMode,
-                        isSelectedForGrouping = tab.id in selectedTabIds,
-                        groupId = group.id,
-                        onRemoveFromGroup = onRemoveTabFromGroup,
-                        onLongPressed = onTabLongPressed
-                    )
-                }
-            }
-        }
-        return
-    }
-
 
     val hasSections = groups.isNotEmpty() || inactiveTabs.isNotEmpty()
     if (!hasSections) {

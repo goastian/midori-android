@@ -44,7 +44,6 @@ fun TabsScreen(
     val restoreComplete by tabsViewModel.restoreComplete.collectAsState()
     var selectedTabIds by remember { mutableStateOf(emptySet<String>()) }
     var selectionMode by remember { mutableStateOf(false) }
-    var showGroups by remember { mutableStateOf(false) }
     var selectionTargetGroupId by remember { mutableStateOf<String?>(null) }
     var showGroupNameDialog by remember { mutableStateOf(false) }
     var groupName by remember { mutableStateOf("") }
@@ -89,33 +88,28 @@ fun TabsScreen(
             ) {
                 TabIconButton(
                     onClick = {
-                        showGroups = false
                         appViewModel.setPrivacyMode(PrivacyMode.NORMAL)
                     },
                     icon = {
-                        Box(modifier = Modifier.size(30.dp)) {
+                        Box(modifier = Modifier.size(26.dp)) {
                             TabCounter(tabCount = normalTabsCount)
                         }
                     },
-                    selected = !private && !showGroups,
+                    selected = !private,
                     modifier = Modifier.size(48.dp, 56.dp)
                 )
                 TabIconButton(
                     onClick = {
-                        showGroups = false
                         appViewModel.setPrivacyMode(PrivacyMode.PRIVATE)
                     },
-                    icon = { Icon(painter = painterResource(id = R.drawable.icons_privacy_mask), contentDescription = "Tabs") },
-                    selected = private,
-                    modifier = Modifier.size(48.dp, 56.dp)
-                )
-                TabIconButton(
-                    onClick = {
-                        showGroups = true
-                        appViewModel.setPrivacyMode(PrivacyMode.NORMAL)
+                    icon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.icons_privacy_mask),
+                            contentDescription = "Private tabs",
+                            modifier = Modifier.size(22.dp)
+                        )
                     },
-                    icon = { Icon(painter = painterResource(id = R.drawable.icons_folder), contentDescription = "Groups") },
-                    selected = showGroups,
+                    selected = private,
                     modifier = Modifier.size(48.dp, 56.dp)
                 )
             }
@@ -124,7 +118,7 @@ fun TabsScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.align(Alignment.CenterEnd)
             ) {
-                val privateBeforeClick = private && !showGroups
+                val privateBeforeClick = private
                 ZapButton(appViewModel, fromScreen = "Tabs") { success ->
                     if (success) {
                         tabsViewModel.openNewTab(privateBeforeClick)
@@ -132,7 +126,7 @@ fun TabsScreen(
                     }
                 }
                 ToolbarAction(onClick = {
-                    tabsViewModel.openNewTab(private && !showGroups)
+                    tabsViewModel.openNewTab(private)
                     onClose(TabOpening.NONE)
                 }) {
                     Icon(painter = painterResource(id = R.drawable.icons_add_tab), contentDescription = "Add tab")
@@ -289,7 +283,6 @@ fun TabsScreen(
             tabsViewOption = resolvedTabsViewOption,
             selectionMode = selectionMode,
             selectedTabIds = selectedTabIds,
-            groupsOnly = showGroups,
             selectionTargetGroupId = selectionTargetGroupId,
             onTabSelectionChange = { tabId ->
                 selectedTabIds = selectedTabIds.let { selected ->
@@ -310,7 +303,6 @@ fun TabsScreen(
             },
             onTabLongPressed = { tab ->
                 if (!tab.content.private) {
-                    showGroups = false
                     selectionMode = true
                     selectionTargetGroupId = null
                     selectedTabIds = setOf(tab.id)
@@ -512,7 +504,6 @@ fun AnimatedTabList(
     tabsViewOption: TabsViewOption,
     selectionMode: Boolean,
     selectedTabIds: Set<String>,
-    groupsOnly: Boolean,
     selectionTargetGroupId: String?,
     onTabSelectionChange: (String) -> Unit,
     onEditGroup: (SmartTabGroup) -> Unit,
@@ -583,7 +574,6 @@ fun AnimatedTabList(
                 onTabSelectionChange = onTabSelectionChange,
                 onTabLongPressed = onTabLongPressed,
                 selectionTargetGroupId = selectionTargetGroupId,
-                groupsOnly = groupsOnly,
                 onEditGroup = onEditGroup,
                 onAddTabsToGroup = onAddTabsToGroup,
                 onDeleteGroup = onDeleteGroup,
