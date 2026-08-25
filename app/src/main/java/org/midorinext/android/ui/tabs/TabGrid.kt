@@ -4,7 +4,9 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -124,32 +126,50 @@ fun TabCard(
         .alpha(if (isBeingDragged) 0.42f else 1f)
         .onGloballyPositioned { coordinates = it }
         .clip(MaterialTheme.shapes.extraSmall)
-        .combinedClickable(
-            onClick = { onSelected(tab) },
-            onLongClick = { onLongPressed(tab) }
+        .then(
+            if (dragEnabled) {
+                // Drag and selection must share the same long-press stream. A combinedClickable
+                // long-click consumes it before the drag detector can receive movement.
+                Modifier.clickable(onClick = { onSelected(tab) })
+            } else {
+                Modifier.combinedClickable(
+                    onClick = { onSelected(tab) },
+                    onLongClick = { onLongPressed(tab) }
+                )
+            }
         )
         .then(
             if (dragEnabled) {
-                Modifier.pointerInput(tab.id) {
-                    detectDragGesturesAfterLongPress(
-                        onDragStart = { position ->
-                            onDragStarted(tab)
-                            coordinates?.boundsInWindow()?.let { bounds ->
-                                onDragPositionChanged(
-                                    Offset(bounds.left + position.x, bounds.top + position.y)
-                                )
-                            }
-                        },
-                        onDrag = { change, _ ->
-                            coordinates?.boundsInWindow()?.let { bounds ->
-                                onDragPositionChanged(
-                                    Offset(bounds.left + change.position.x, bounds.top + change.position.y)
-                                )
-                            }
-                        },
-                        onDragEnd = onDragFinished,
-                        onDragCancel = onDragCancelled
-                    )
+                Modifier.pointerInput(tab.id, selectionMode) {
+                    val reportDragPosition: (Offset) -> Unit = { position ->
+                        coordinates?.boundsInWindow()?.let { bounds ->
+                            onDragPositionChanged(
+                                Offset(bounds.left + position.x, bounds.top + position.y)
+                            )
+                        }
+                    }
+                    if (selectionMode) {
+                        // After selection, Firefox starts the drag with the next press-and-move.
+                        detectDragGestures(
+                            onDragStart = {
+                                onDragStarted(tab)
+                                reportDragPosition(it)
+                            },
+                            onDrag = { change, _ -> reportDragPosition(change.position) },
+                            onDragEnd = onDragFinished,
+                            onDragCancel = onDragCancelled
+                        )
+                    } else {
+                        detectDragGesturesAfterLongPress(
+                            onDragStart = {
+                                onDragStarted(tab)
+                                reportDragPosition(it)
+                            },
+                            onDrag = { change, _ -> reportDragPosition(change.position) },
+                            onDragEnd = onDragFinished,
+                            onDragCancel = onDragCancelled
+                        )
+                    }
                 }
             } else {
                 Modifier

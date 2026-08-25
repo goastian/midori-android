@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -75,32 +76,51 @@ fun TabRow(
                 if (selected || isSelectedForGrouping) MaterialTheme.colorScheme.secondaryContainer
                 else MaterialTheme.colorScheme.surface
             )
-            .combinedClickable(
-                onClick = { onSelected(tab) },
-                onLongClick = { onLongPressed(tab) }
+            .then(
+                if (dragEnabled) {
+                    // Keep the long press available to the drag detector; combinedClickable would
+                    // consume it and leave the tab selected but unable to be dropped on a group.
+                    Modifier.clickable(onClick = { onSelected(tab) })
+                } else {
+                    Modifier.combinedClickable(
+                        onClick = { onSelected(tab) },
+                        onLongClick = { onLongPressed(tab) }
+                    )
+                }
             )
             .then(
                 if (dragEnabled) {
-                    Modifier.pointerInput(tab.id) {
-                        detectDragGesturesAfterLongPress(
-                        onDragStart = { position ->
-                            onDragStarted(tab)
+                    Modifier.pointerInput(tab.id, selectionMode) {
+                        val reportDragPosition: (Offset) -> Unit = { position ->
                             coordinates.value?.boundsInWindow()?.let { bounds ->
                                 onDragPositionChanged(
                                     Offset(bounds.left + position.x, bounds.top + position.y)
                                 )
                             }
-                        },
-                        onDrag = { change, _ ->
-                            coordinates.value?.boundsInWindow()?.let { bounds ->
-                                onDragPositionChanged(
-                                    Offset(bounds.left + change.position.x, bounds.top + change.position.y)
-                                )
-                            }
-                            },
-                            onDragEnd = onDragFinished,
-                            onDragCancel = onDragCancelled
-                        )
+                        }
+                        if (selectionMode) {
+                            // A selected tab follows the next press-and-move without requiring
+                            // another long press before it can be dropped onto a group.
+                            detectDragGestures(
+                                onDragStart = {
+                                    onDragStarted(tab)
+                                    reportDragPosition(it)
+                                },
+                                onDrag = { change, _ -> reportDragPosition(change.position) },
+                                onDragEnd = onDragFinished,
+                                onDragCancel = onDragCancelled
+                            )
+                        } else {
+                            detectDragGesturesAfterLongPress(
+                                onDragStart = {
+                                    onDragStarted(tab)
+                                    reportDragPosition(it)
+                                },
+                                onDrag = { change, _ -> reportDragPosition(change.position) },
+                                onDragEnd = onDragFinished,
+                                onDragCancel = onDragCancelled
+                            )
+                        }
                     }
                 } else {
                     Modifier

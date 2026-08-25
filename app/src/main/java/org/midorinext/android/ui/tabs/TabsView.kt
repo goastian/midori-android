@@ -22,6 +22,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -73,33 +74,54 @@ fun SmartTabView(
     var draggingTabId by remember { mutableStateOf<String?>(null) }
     var draggedTabIds by remember { mutableStateOf(emptySet<String>()) }
     var dragPosition by remember { mutableStateOf<Offset?>(null) }
-    val dropTarget = dragPosition?.let { position ->
-        groups.firstOrNull { group ->
-            draggingTabId !in group.tabs.map { it.id } && groupBounds[group.id]?.contains(position) == true
+    var hoveredGroupId by remember { mutableStateOf<String?>(null) }
+    val dropZonePadding = with(LocalDensity.current) { 24.dp.toPx() }
+
+    fun findDropTarget(position: Offset?): SmartTabGroup? {
+        val movingTabIds = draggedTabIds
+        return position?.let { pointerPosition ->
+            groups.firstOrNull { group ->
+                val bounds = groupBounds[group.id]
+                movingTabIds.none { tabId -> tabId in group.tabs.map { it.id } } &&
+                    bounds != null &&
+                    pointerPosition.x in (bounds.left - dropZonePadding)..(bounds.right + dropZonePadding) &&
+                    pointerPosition.y in (bounds.top - dropZonePadding)..(bounds.bottom + dropZonePadding)
+            }
         }
     }
+    val dropTarget = findDropTarget(dragPosition)
+        ?: groups.firstOrNull { it.id == hoveredGroupId }
 
     val beginTabDrag: (TabSessionState) -> Unit = { tab ->
         val tabsToMove = if (tab.id in selectedTabIds) selectedTabIds else setOf(tab.id)
         draggedTabIds = tabsToMove
         draggingTabId = tab.id
+        hoveredGroupId = null
         if (!selectionMode) {
             onTabLongPressed(tab)
         } else if (tab.id !in selectedTabIds) {
             onTabSelectionChange(tab.id)
         }
     }
-    val updateTabDrag: (Offset) -> Unit = { dragPosition = it }
+    val updateTabDrag: (Offset) -> Unit = { position ->
+        dragPosition = position
+        findDropTarget(position)?.let { target -> hoveredGroupId = target.id }
+    }
     val finishTabDrag = {
-        dropTarget?.let { target -> onTabsDroppedOnGroup(target, draggedTabIds) }
+        // Calculate the target from the most recent pointer coordinate at drop time. Reading a
+        // previously composed target can miss a fast drop before Compose redraws the hover state.
+        (findDropTarget(dragPosition) ?: groups.firstOrNull { it.id == hoveredGroupId })
+            ?.let { target -> onTabsDroppedOnGroup(target, draggedTabIds) }
         draggingTabId = null
         draggedTabIds = emptySet()
         dragPosition = null
+        hoveredGroupId = null
     }
     val cancelTabDrag = {
         draggingTabId = null
         draggedTabIds = emptySet()
         dragPosition = null
+        hoveredGroupId = null
     }
     val dragEnabled = !private && groups.isNotEmpty() && selectionTargetGroupId == null
 
@@ -143,6 +165,7 @@ fun SmartTabView(
             onDeleteGroup = onDeleteGroup,
             onOpenGroup = onOpenGroup,
             dragEnabled = dragEnabled,
+            isDragInProgress = draggingTabId != null,
             draggingTabId = draggingTabId,
             dropTargetId = dropTarget?.id,
             onGroupBoundsChanged = { groupId, bounds -> groupBounds[groupId] = bounds },
@@ -179,7 +202,10 @@ fun SmartTabView(
         return
     }
 
-    LazyColumn(modifier = modifier) {
+    LazyColumn(
+        modifier = modifier,
+        userScrollEnabled = draggingTabId == null
+    ) {
         groups.forEach { group ->
             item(key = "group-${group.id}") {
                 TabGroupCard(
@@ -276,6 +302,7 @@ private fun SmartTabsGrid(
     onDeleteGroup: (SmartTabGroup) -> Unit,
     onOpenGroup: (SmartTabGroup) -> Unit,
     dragEnabled: Boolean,
+    isDragInProgress: Boolean,
     draggingTabId: String?,
     dropTargetId: String?,
     onGroupBoundsChanged: (String, Rect) -> Unit,
@@ -294,6 +321,7 @@ private fun SmartTabsGrid(
         columns = GridCells.Adaptive(minSize = 150.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
+        userScrollEnabled = !isDragInProgress,
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp)
