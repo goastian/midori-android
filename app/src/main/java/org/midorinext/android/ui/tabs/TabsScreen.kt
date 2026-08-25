@@ -340,6 +340,15 @@ fun TabsScreen(
             },
             onDeleteGroup = { groupBeingDeleted = it },
             onOpenGroup = { groupBeingOpened = it },
+            onTabsDroppedOnGroup = { group, tabIds ->
+                val addedCount = tabsViewModel.addTabsToGroup(group.id, tabIds)
+                if (addedCount > 0) {
+                    appViewModel.showSnackbar(tabsAddedToGroupString.format(addedCount))
+                    selectedTabIds = emptySet()
+                    selectionMode = false
+                    selectionTargetGroupId = null
+                }
+            },
             onRemoveTabFromGroup = { groupId, tabId ->
                 if (tabsViewModel.removeTabFromGroup(groupId, tabId)) {
                     appViewModel.showSnackbar(tabRemovedFromGroupString)
@@ -554,6 +563,7 @@ fun AnimatedTabList(
     onAddTabsToGroup: (SmartTabGroup) -> Unit,
     onDeleteGroup: (SmartTabGroup) -> Unit,
     onOpenGroup: (SmartTabGroup) -> Unit,
+    onTabsDroppedOnGroup: (SmartTabGroup, Set<String>) -> Unit,
     onRemoveTabFromGroup: (String, String) -> Unit,
     onTabLongPressed: (TabSessionState) -> Unit
 ) {
@@ -623,6 +633,7 @@ fun AnimatedTabList(
                 onAddTabsToGroup = onAddTabsToGroup,
                 onDeleteGroup = onDeleteGroup,
                 onOpenGroup = onOpenGroup,
+                onTabsDroppedOnGroup = onTabsDroppedOnGroup,
                 onRemoveTabFromGroup = onRemoveTabFromGroup
             )
         }

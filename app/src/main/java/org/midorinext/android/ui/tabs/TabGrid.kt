@@ -5,6 +5,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -14,10 +15,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -92,6 +99,12 @@ fun TabCard(
     groupId: String? = null,
     onRemoveFromGroup: (String, String) -> Unit = { _, _ -> },
     onLongPressed: (TabSessionState) -> Unit = {},
+    dragEnabled: Boolean = false,
+    isBeingDragged: Boolean = false,
+    onDragStarted: (TabSessionState) -> Unit = {},
+    onDragPositionChanged: (Offset) -> Unit = {},
+    onDragFinished: () -> Unit = {},
+    onDragCancelled: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var deleting by remember { mutableStateOf(false) }
@@ -104,13 +117,43 @@ fun TabCard(
 
     val isTabBlocked = contentBlockerState.getStatusForTab(tab.id) != ContentBlockerState.Status.ALLOWED
     val isPrivateBrowsingHome = LocalMidoriTheme.current.private && tab.content.url == ""
+    var coordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
 
     Column(modifier = modifier
         .scale(scale)
+        .alpha(if (isBeingDragged) 0.42f else 1f)
+        .onGloballyPositioned { coordinates = it }
         .clip(MaterialTheme.shapes.extraSmall)
         .combinedClickable(
             onClick = { onSelected(tab) },
             onLongClick = { onLongPressed(tab) }
+        )
+        .then(
+            if (dragEnabled) {
+                Modifier.pointerInput(tab.id) {
+                    detectDragGesturesAfterLongPress(
+                        onDragStart = { position ->
+                            onDragStarted(tab)
+                            coordinates?.boundsInWindow()?.let { bounds ->
+                                onDragPositionChanged(
+                                    Offset(bounds.left + position.x, bounds.top + position.y)
+                                )
+                            }
+                        },
+                        onDrag = { change, _ ->
+                            coordinates?.boundsInWindow()?.let { bounds ->
+                                onDragPositionChanged(
+                                    Offset(bounds.left + change.position.x, bounds.top + change.position.y)
+                                )
+                            }
+                        },
+                        onDragEnd = onDragFinished,
+                        onDragCancel = onDragCancelled
+                    )
+                }
+            } else {
+                Modifier
+            }
         )
         .background(
             if (selected || isSelectedForGrouping) MaterialTheme.colorScheme.primary

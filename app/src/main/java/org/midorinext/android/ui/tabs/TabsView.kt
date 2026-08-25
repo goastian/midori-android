@@ -18,6 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -53,6 +57,7 @@ fun SmartTabView(
     onAddTabsToGroup: (SmartTabGroup) -> Unit = {},
     onDeleteGroup: (SmartTabGroup) -> Unit = {},
     onOpenGroup: (SmartTabGroup) -> Unit = {},
+    onTabsDroppedOnGroup: (SmartTabGroup, Set<String>) -> Unit = { _, _ -> },
     onRemoveTabFromGroup: (String, String) -> Unit = { _, _ -> }
 ) {
     val activeTabs = remember(state.activeTabs, private) {
@@ -64,6 +69,39 @@ fun SmartTabView(
     val groups = remember(state.groups, private) {
         if (private) emptyList() else state.groups
     }
+    val groupBounds = remember { mutableStateMapOf<String, Rect>() }
+    var draggingTabId by remember { mutableStateOf<String?>(null) }
+    var draggedTabIds by remember { mutableStateOf(emptySet<String>()) }
+    var dragPosition by remember { mutableStateOf<Offset?>(null) }
+    val dropTarget = dragPosition?.let { position ->
+        groups.firstOrNull { group ->
+            draggingTabId !in group.tabs.map { it.id } && groupBounds[group.id]?.contains(position) == true
+        }
+    }
+
+    val beginTabDrag: (TabSessionState) -> Unit = { tab ->
+        val tabsToMove = if (tab.id in selectedTabIds) selectedTabIds else setOf(tab.id)
+        draggedTabIds = tabsToMove
+        draggingTabId = tab.id
+        if (!selectionMode) {
+            onTabLongPressed(tab)
+        } else if (tab.id !in selectedTabIds) {
+            onTabSelectionChange(tab.id)
+        }
+    }
+    val updateTabDrag: (Offset) -> Unit = { dragPosition = it }
+    val finishTabDrag = {
+        dropTarget?.let { target -> onTabsDroppedOnGroup(target, draggedTabIds) }
+        draggingTabId = null
+        draggedTabIds = emptySet()
+        dragPosition = null
+    }
+    val cancelTabDrag = {
+        draggingTabId = null
+        draggedTabIds = emptySet()
+        dragPosition = null
+    }
+    val dragEnabled = !private && groups.isNotEmpty() && selectionTargetGroupId == null
 
     if (selectionTargetGroupId != null) {
         return TabView(
@@ -104,6 +142,14 @@ fun SmartTabView(
             onAddTabsToGroup = onAddTabsToGroup,
             onDeleteGroup = onDeleteGroup,
             onOpenGroup = onOpenGroup,
+            dragEnabled = dragEnabled,
+            draggingTabId = draggingTabId,
+            dropTargetId = dropTarget?.id,
+            onGroupBoundsChanged = { groupId, bounds -> groupBounds[groupId] = bounds },
+            onTabDragStarted = beginTabDrag,
+            onTabDragPositionChanged = updateTabDrag,
+            onTabDragFinished = finishTabDrag,
+            onTabDragCancelled = cancelTabDrag,
             onRemoveTabFromGroup = onRemoveTabFromGroup
         )
     }
@@ -144,7 +190,9 @@ fun SmartTabView(
                     onOpen = { onOpenGroup(group) },
                     onEdit = { onEditGroup(group) },
                     onAddTabs = { onAddTabsToGroup(group) },
-                    onDelete = { onDeleteGroup(group) }
+                    onDelete = { onDeleteGroup(group) },
+                    isDropTarget = dropTarget?.id == group.id,
+                    onBoundsChanged = { bounds -> groupBounds[group.id] = bounds }
                 )
             }
         }
@@ -166,7 +214,13 @@ fun SmartTabView(
                     contentBlockerState = contentBlockerState,
                     selectionMode = selectionMode,
                     isSelectedForGrouping = tab.id in selectedTabIds,
-                    onLongPressed = onTabLongPressed
+                    onLongPressed = onTabLongPressed,
+                    dragEnabled = dragEnabled,
+                    isBeingDragged = draggingTabId == tab.id,
+                    onDragStarted = beginTabDrag,
+                    onDragPositionChanged = updateTabDrag,
+                    onDragFinished = finishTabDrag,
+                    onDragCancelled = cancelTabDrag
                 )
             }
         }
@@ -188,7 +242,13 @@ fun SmartTabView(
                     contentBlockerState = contentBlockerState,
                     selectionMode = selectionMode,
                     isSelectedForGrouping = tab.id in selectedTabIds,
-                    onLongPressed = onTabLongPressed
+                    onLongPressed = onTabLongPressed,
+                    dragEnabled = dragEnabled,
+                    isBeingDragged = draggingTabId == tab.id,
+                    onDragStarted = beginTabDrag,
+                    onDragPositionChanged = updateTabDrag,
+                    onDragFinished = finishTabDrag,
+                    onDragCancelled = cancelTabDrag
                 )
             }
         }
@@ -215,6 +275,14 @@ private fun SmartTabsGrid(
     onAddTabsToGroup: (SmartTabGroup) -> Unit,
     onDeleteGroup: (SmartTabGroup) -> Unit,
     onOpenGroup: (SmartTabGroup) -> Unit,
+    dragEnabled: Boolean,
+    draggingTabId: String?,
+    dropTargetId: String?,
+    onGroupBoundsChanged: (String, Rect) -> Unit,
+    onTabDragStarted: (TabSessionState) -> Unit,
+    onTabDragPositionChanged: (Offset) -> Unit,
+    onTabDragFinished: () -> Unit,
+    onTabDragCancelled: () -> Unit,
     onRemoveTabFromGroup: (String, String) -> Unit,
 ) {
     if (groups.isEmpty() && activeTabs.isEmpty() && inactiveTabs.isEmpty()) {
@@ -240,7 +308,9 @@ private fun SmartTabsGrid(
                     onOpen = { onOpenGroup(group) },
                     onEdit = { onEditGroup(group) },
                     onAddTabs = { onAddTabsToGroup(group) },
-                    onDelete = { onDeleteGroup(group) }
+                    onDelete = { onDeleteGroup(group) },
+                    isDropTarget = dropTargetId == group.id,
+                    onBoundsChanged = { bounds -> onGroupBoundsChanged(group.id, bounds) }
                 )
             }
         }
@@ -265,7 +335,13 @@ private fun SmartTabsGrid(
                     contentBlockerState = contentBlockerState,
                     selectionMode = selectionMode,
                     isSelectedForGrouping = tab.id in selectedTabIds,
-                    onLongPressed = onTabLongPressed
+                    onLongPressed = onTabLongPressed,
+                    dragEnabled = dragEnabled,
+                    isBeingDragged = draggingTabId == tab.id,
+                    onDragStarted = onTabDragStarted,
+                    onDragPositionChanged = onTabDragPositionChanged,
+                    onDragFinished = onTabDragFinished,
+                    onDragCancelled = onTabDragCancelled
                 )
             }
         }
@@ -288,7 +364,13 @@ private fun SmartTabsGrid(
                     contentBlockerState = contentBlockerState,
                     selectionMode = selectionMode,
                     isSelectedForGrouping = tab.id in selectedTabIds,
-                    onLongPressed = onTabLongPressed
+                    onLongPressed = onTabLongPressed,
+                    dragEnabled = dragEnabled,
+                    isBeingDragged = draggingTabId == tab.id,
+                    onDragStarted = onTabDragStarted,
+                    onDragPositionChanged = onTabDragPositionChanged,
+                    onDragFinished = onTabDragFinished,
+                    onDragCancelled = onTabDragCancelled
                 )
             }
         }
@@ -304,7 +386,9 @@ private fun TabGroupCard(
     onOpen: () -> Unit,
     onEdit: () -> Unit,
     onAddTabs: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    isDropTarget: Boolean,
+    onBoundsChanged: (Rect) -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val shape = RoundedCornerShape(16.dp)
@@ -313,7 +397,8 @@ private fun TabGroupCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .border(if (selected) 4.dp else 3.dp, color, shape)
+            .onGloballyPositioned { onBoundsChanged(it.boundsInWindow()) }
+            .border(if (selected || isDropTarget) 4.dp else 3.dp, color, shape)
             .clip(shape)
             .clickable(onClick = onOpen),
         shape = shape,
@@ -379,7 +464,7 @@ private fun TabGroupCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(132.dp)
+                    .height(if (isDropTarget) 142.dp else 132.dp)
                     .padding(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
