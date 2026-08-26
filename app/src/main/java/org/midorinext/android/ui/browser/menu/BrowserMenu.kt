@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import mozilla.components.support.ktx.android.content.share
 import org.midorinext.android.BuildConfig
@@ -44,6 +45,9 @@ fun BrowserMenu(
         Dropdown(
             expanded = expanded,
             onDismissRequest = onDismissRequest,
+            // Keep the wide browser menu close to the overflow button while
+            // preserving a 16 dp inset from the screen edge.
+            offset = DpOffset(24.dp, 0.dp),
             modifier = Modifier.widthIn(min = 280.dp, max = 320.dp)
         ) {
             Column(
