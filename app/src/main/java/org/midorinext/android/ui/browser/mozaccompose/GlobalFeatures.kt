@@ -1,12 +1,14 @@
 package org.midorinext.android.ui.browser.mozaccompose
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.midorinext.android.BuildConfig
+import org.midorinext.android.R
 import org.midorinext.android.legacy.ClFeature
 import org.midorinext.android.mozac.downloads.openDownloadedFile
 import org.midorinext.android.contentBlocker.ContentBlockerObserver
@@ -51,6 +53,7 @@ fun GlobalFeatures(
     )
 
     val context = LocalContext.current
+    val pdfSaveFailedText = stringResource(id = R.string.menu_save_as_pdf_failed)
     val completedDownloadText = stringResource(id = mozacR.string.mozac_feature_downloads_completed_notification_text2)
     val failedDownloadText = stringResource(id = mozacR.string.mozac_feature_downloads_failed_notification_text2)
     DownloadFeature(
@@ -76,6 +79,12 @@ fun GlobalFeatures(
         },
         showSnackbar = { message, action -> appViewModel.showSnackbar(message, action) }
     )
+
+    LaunchedEffect(viewModel.pdfSaveEvents, pdfSaveFailedText) {
+        viewModel.pdfSaveEvents.failures.collect {
+            appViewModel.showSnackbar(pdfSaveFailedText)
+        }
+    }
 
     val appPreferences by viewModel.appPreferences.collectAsState()
     PromptFeature(

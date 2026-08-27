@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.adblock.MidoriPrivacyFeature
+import org.midorinext.android.mozac.pdf.PdfSaveEvents
 import org.midorinext.android.vpn.MidoriVpnFeature
 import org.midorinext.android.ext.isLegacyMidoriHomeUrl
 import org.midorinext.android.preferences.app.AppPreferencesRepository
@@ -68,6 +69,7 @@ class BrowserScreenViewModel @Inject constructor(
     val MidoriUseCases: MidoriUseCases,
     private val appPreferencesRepository: AppPreferencesRepository,
     val contentBlockerState: ContentBlockerState,
+    val pdfSaveEvents: PdfSaveEvents,
 ): ViewModel() {
     data class TranslationSheetState(
         val enabled: Boolean = false,

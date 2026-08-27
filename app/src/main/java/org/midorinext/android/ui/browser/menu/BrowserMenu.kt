@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -39,6 +40,7 @@ fun BrowserMenu(
 ) {
     val currentUrl by viewModel.currentUrl.collectAsState()
     val showPageActions = currentUrl.isExternalPage()
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     var showTranslationSheet by rememberSaveable { mutableStateOf(false) }
 
     Box {
@@ -52,7 +54,10 @@ fun BrowserMenu(
         ) {
             Column(
                 modifier = Modifier
-                    .heightIn(max = 640.dp)
+                    // The previous fixed 640 dp cap forced an internal scroll on tall phones
+                    // even when the complete menu fit on screen. Leave a small edge inset while
+                    // allowing the popup to use the actual available display height.
+                    .heightIn(max = (screenHeight - 16.dp).coerceAtLeast(1.dp))
                     .verticalScroll(rememberScrollState())
             ) {
                 BrowserMenuContent(
@@ -421,6 +426,14 @@ fun PageActions(
             }
         )
     }
+    DropdownItem(
+        text = stringResource(id = R.string.menu_save_as_pdf),
+        icon = R.drawable.icons_download,
+        onClick = {
+            onDismissRequest()
+            viewModel.sessionUseCases.saveToPdf()
+        }
+    )
 }
 
 private fun String?.isExternalPage(): Boolean {

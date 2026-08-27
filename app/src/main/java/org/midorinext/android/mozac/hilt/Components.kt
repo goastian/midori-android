@@ -10,6 +10,8 @@ import kotlinx.coroutines.launch
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.mozac.downloads.DownloadService
 import org.midorinext.android.mozac.media.MediaSessionService
+import org.midorinext.android.mozac.pdf.PdfSaveEvents
+import org.midorinext.android.mozac.pdf.SaveToPdfMiddleware
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -60,6 +62,7 @@ object MozacComponentHiltModule {
         thumbnailStorage: ThumbnailStorage,
         notificationsDelegate: NotificationsDelegate,
         appPreferencesRepository: AppPreferencesRepository,
+        pdfSaveEvents: PdfSaveEvents,
     ) : BrowserStore {
         val translationsScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         return BrowserStore(
@@ -71,6 +74,7 @@ object MozacComponentHiltModule {
                     downloadFileUtils = downloadFileUtils,
                     downloadStorage = downloadStorage
                 ),
+                SaveToPdfMiddleware(pdfSaveEvents),
                 ThumbnailsMiddleware(thumbnailStorage),
                 PromptMiddleware(),
                 LastAccessMiddleware(),
