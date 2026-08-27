@@ -110,4 +110,5 @@ message AppPreferences {
   map<string, int32> tab_group_colors = 43;
   bool translations_disabled = 44;
   bool translations_download_in_data_saver = 45;
+  string download_directory_uri = 46;
 }
