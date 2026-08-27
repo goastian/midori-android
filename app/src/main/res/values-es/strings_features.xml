@@ -22,6 +22,7 @@
     <string name="download_settings_file_storage">Almacenamiento de archivos</string>
     <string name="download_settings_default_location">Ubicación predeterminada de descarga</string>
     <string name="download_settings_default_location_summary">Carpeta Descargas de Android</string>
+    <string name="download_settings_use_android_downloads">Usar la carpeta Descargas de Android</string>
     <string name="download_settings_delete_or_remove">Al eliminar descargas</string>
     <string name="download_removal_delete_from_device">Eliminar del dispositivo</string>
     <string name="download_removal_remove_from_history">Quitar del historial de descargas</string>
