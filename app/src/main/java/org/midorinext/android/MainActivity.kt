@@ -42,6 +42,13 @@ class MainActivity : MidoriActivity() {
         super.onPause()
     }
 
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        if (!hasFocus) {
+            backgroundPlaybackFeature.onBrowserActivityLosingFocus()
+        }
+        super.onWindowFocusChanged(hasFocus)
+    }
+
     override fun onResume() {
         super.onResume()
         backgroundPlaybackFeature.onBrowserActivityResumed()

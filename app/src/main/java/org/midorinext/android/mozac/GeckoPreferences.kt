@@ -1,12 +1,16 @@
 package org.midorinext.android.mozac
 
+import android.util.Log
 import org.mozilla.geckoview.ContentBlocking
+import org.mozilla.geckoview.GeckoPreferenceController
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoRuntimeSettings
+import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 import org.midorinext.android.preferences.app.TrackingProtectionLevel
 import org.midorinext.android.preferences.app.AppTrackingProtectionMode
 import org.midorinext.android.preferences.app.HttpsOnlyLevel
 import org.midorinext.android.preferences.app.DoHProvider
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Firefox 146-151 Security & Privacy Preferences
@@ -15,6 +19,10 @@ import org.midorinext.android.preferences.app.DoHProvider
  * fingerprinting protection, and cookie controls.
  */
 object GeckoPreferences {
+
+    private const val LOG_TAG = "MIDORI_GECKO_MEDIA"
+    private const val BACKGROUND_VIDEO_SUSPEND_PREF = "media.suspend-background-video.enabled"
+    private val backgroundVideoSuspensionConfigured = AtomicBoolean(false)
 
     data class UserSettings(
         val globalPrivacyControl: Boolean,
@@ -32,6 +40,34 @@ object GeckoPreferences {
         applyContentBlockingSettings(runtime, settings)
         applyHttpsSettings(runtime, settings)
         applyDnsSettings(runtime, settings.dohProvider)
+        disableBackgroundVideoSuspension()
+    }
+
+    /**
+     * Keep the decoder alive when Android hides the browser window.
+     *
+     * GeckoView's typed runtime settings do not currently expose this media preference. The
+     * public preference controller is used after the runtime has started so it is persisted in
+     * the browser profile and applies consistently to the tab tray, another app, and screen lock.
+     */
+    private fun disableBackgroundVideoSuspension() {
+        if (!backgroundVideoSuspensionConfigured.compareAndSet(false, true)) return
+
+        // The application preference flow is collected on Dispatchers.IO. GeckoResult requires
+        // a Handler, so this bridge must be created on GeckoView's UI thread.
+        runOnUiThread {
+            GeckoPreferenceController.setGeckoPref(
+                BACKGROUND_VIDEO_SUSPEND_PREF,
+                false,
+                GeckoPreferenceController.PREF_BRANCH_USER,
+            ).accept(
+                { Log.d(LOG_TAG, "Disabled Gecko background video suspension") },
+                { error ->
+                    backgroundVideoSuspensionConfigured.set(false)
+                    Log.e(LOG_TAG, "Could not disable Gecko background video suspension", error)
+                },
+            )
+        }
     }
 
     private fun applyRuntimeSettings(runtime: GeckoRuntime, settings: UserSettings) {

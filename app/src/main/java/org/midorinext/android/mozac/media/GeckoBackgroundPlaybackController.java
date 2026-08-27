@@ -10,9 +10,10 @@ final class GeckoBackgroundPlaybackController {
 
     static void keepActive(EngineSession engineSession) {
         if (engineSession instanceof GeckoEngineSession) {
-            ((GeckoEngineSession) engineSession)
-                .getGeckoSession$browser_engine_gecko()
-                .setActive(true);
+            final org.mozilla.geckoview.GeckoSession geckoSession =
+                ((GeckoEngineSession) engineSession).getGeckoSession$browser_engine_gecko();
+            geckoSession.setActive(true);
+            geckoSession.setFocused(true);
         }
     }
 }

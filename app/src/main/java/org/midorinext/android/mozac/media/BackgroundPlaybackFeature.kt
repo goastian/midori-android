@@ -2,6 +2,7 @@ package org.midorinext.android.mozac.media
 
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -31,6 +32,7 @@ class BackgroundPlaybackFeature(
     private var appInBackground = false
     private var browserSurfaceHidden = false
     private var playbackWasReportedActive = false
+    private var transitionRecoveryDeadlineMillis = 0L
     private val continuationTasks = mutableListOf<Runnable>()
 
     fun start() {
@@ -69,11 +71,22 @@ class BackgroundPlaybackFeature(
      */
     fun onBrowserActivityPaused() {
         appInBackground = true
+        beginTransitionRecovery()
+        continuePlaybackAfterUiTransition()
+    }
+
+    /**
+     * Window focus is lost just before Android pauses the activity. Starting the hand-off here
+     * gives GeckoView a head start before it hides the display surface.
+     */
+    fun onBrowserActivityLosingFocus() {
+        beginTransitionRecovery()
         continuePlaybackAfterUiTransition()
     }
 
     fun onBrowserActivityResumed() {
         appInBackground = false
+        transitionRecoveryDeadlineMillis = 0L
         finishUiTransitionIfNeeded()
     }
 
@@ -83,6 +96,7 @@ class BackgroundPlaybackFeature(
      */
     fun onBrowserSurfaceHidden() {
         browserSurfaceHidden = true
+        beginTransitionRecovery()
         continuePlaybackAfterUiTransition()
         scheduleContinuation(SURFACE_TRANSITION_TIMEOUT_MS) {
             browserSurfaceHidden = false
@@ -92,6 +106,7 @@ class BackgroundPlaybackFeature(
 
     fun onBrowserSurfaceVisible() {
         browserSurfaceHidden = false
+        transitionRecoveryDeadlineMillis = 0L
         finishUiTransitionIfNeeded()
     }
 
@@ -127,7 +142,7 @@ class BackgroundPlaybackFeature(
 
         BACKGROUND_CONTINUATION_DELAYS_MS.forEach { delayMillis ->
             scheduleContinuation(delayMillis) {
-                if (isPlaybackProtected && prioritizedSession === session) {
+                if (isTransitionRecoveryActive && prioritizedSession === session) {
                     GeckoBackgroundPlaybackController.keepActive(session)
                     controller.play()
                 }
@@ -156,7 +171,12 @@ class BackgroundPlaybackFeature(
             updateSessionPriority(playingMedia.session, playingMedia.controller)
         } else {
             playbackWasReportedActive = false
-            if (!isPlaybackProtected) {
+            if (isTransitionRecoveryActive) {
+                // The first play request is necessarily speculative: Gecko has not emitted its
+                // paused state yet. Trigger another one at the exact state change, which avoids
+                // waiting for the later retry (previously the source of a ~700 ms audible gap).
+                continuePlaybackAfterUiTransition()
+            } else if (!isPlaybackProtected) {
                 updateSessionPriority(null, null)
             }
         }
@@ -178,6 +198,16 @@ class BackgroundPlaybackFeature(
     private val isPlaybackProtected: Boolean
         get() = appInBackground || browserSurfaceHidden
 
+    private val isTransitionRecoveryActive: Boolean
+        get() = isPlaybackProtected && SystemClock.uptimeMillis() < transitionRecoveryDeadlineMillis
+
+    private fun beginTransitionRecovery() {
+        transitionRecoveryDeadlineMillis = maxOf(
+            transitionRecoveryDeadlineMillis,
+            SystemClock.uptimeMillis() + TRANSITION_RECOVERY_WINDOW_MS,
+        )
+    }
+
     private fun updateSessionPriority(
         session: EngineSession?,
         controller: MediaSession.Controller?,
@@ -194,7 +224,11 @@ class BackgroundPlaybackFeature(
     private companion object {
         const val SURFACE_RELEASE_SETTLE_DELAY_MS = 750L
         const val SURFACE_TRANSITION_TIMEOUT_MS = 2400L
-        val BACKGROUND_CONTINUATION_DELAYS_MS = longArrayOf(450L, 1000L, 1800L)
+        const val TRANSITION_RECOVERY_WINDOW_MS = 1500L
+        // GeckoView generally releases its surface a few hundred milliseconds after navigation.
+        // Probe that short interval closely so playback is reasserted immediately afterwards,
+        // rather than leaving the user with a perceptible pause before the former 450 ms retry.
+        val BACKGROUND_CONTINUATION_DELAYS_MS = longArrayOf(0L, 50L, 100L, 150L, 200L, 250L, 300L, 350L, 400L, 500L, 650L, 800L)
     }
 
     private data class PlayingMedia(

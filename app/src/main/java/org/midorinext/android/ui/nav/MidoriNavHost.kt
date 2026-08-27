@@ -3,7 +3,9 @@ package org.midorinext.android.ui.nav
 import android.os.Build
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -43,11 +45,13 @@ fun MidoriNavHost(
 ) {
     val onBrowse = { navController.navigateSingleTopTo(NavDestination.Browser.route()) }
     val transitionTimeMs = 250
+    var showTabsOverlay by rememberSaveable { mutableStateOf(false) }
 
+    Box(modifier = modifier) {
     NavHost(
         navController = navController,
         startDestination = NavDestination.Browser.match,
-        modifier = modifier,
+        modifier = Modifier,
         enterTransition = {
             slideIntoContainer(
                 towards = AnimatedContentTransitionScope.SlideDirection.Left,
@@ -112,7 +116,13 @@ fun MidoriNavHost(
                 }
             }
             BrowserScreen(
-                navigateTo = { destination -> navController.navigateSingleTopTo(destination.route()) },
+                navigateTo = { destination ->
+                    if (destination == NavDestination.Tabs) {
+                        showTabsOverlay = true
+                    } else {
+                        navController.navigateSingleTopTo(destination.route())
+                    }
+                },
                 appViewModel = appViewModel,
                 openNewTab = openNewTab
             )
@@ -220,5 +230,12 @@ fun MidoriNavHost(
                 )
             }
         }
+    }
+    if (showTabsOverlay) {
+        TabsScreen(
+            appViewModel = appViewModel,
+            onClose = { showTabsOverlay = false }
+        )
+    }
     }
 }
