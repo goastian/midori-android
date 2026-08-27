@@ -88,6 +88,12 @@ class AppPreferencesRepository @Inject constructor(
         }
     }
 
+    suspend fun updateDownloadDirectoryUri(uri: String) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setDownloadDirectoryUri(uri).build()
+        }
+    }
+
     suspend fun updateShowNewTabHome(show: Boolean) {
         datastore.updateData { preferences ->
             preferences.toBuilder().setOpenBlankNewTab(!show).build()

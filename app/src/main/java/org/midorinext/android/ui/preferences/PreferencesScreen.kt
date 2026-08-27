@@ -1,5 +1,11 @@
 package org.midorinext.android.ui.preferences
 
+import android.content.Intent
+import android.provider.DocumentsContract
+import android.os.Build
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -40,9 +46,6 @@ import org.midorinext.android.ui.preferences.permissions.PermissionsPreference
 import org.midorinext.android.ui.preferences.widgets.*
 import org.midorinext.android.ui.widgets.HtmlText
 import org.midorinext.android.ui.widgets.ScreenHeader
-import android.content.Intent
-import android.os.Build
-import android.provider.Settings
 import mozilla.components.concept.engine.translate.Language
 import mozilla.components.concept.engine.translate.LanguageModel
 import mozilla.components.concept.engine.translate.LanguageSetting
@@ -382,12 +385,37 @@ fun NotificationSettingsScreen() {
 
 @Composable
 fun DownloadSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
+    val context = LocalContext.current
     val appPrefs by viewModel.appPreferences.collectAsState()
+    val downloadDirectoryPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        val permissions = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        try {
+            context.contentResolver.takePersistableUriPermission(uri, permissions)
+            viewModel.updateDownloadDirectoryUri(uri.toString())
+        } catch (_: SecurityException) {
+            // The picker only returns a URI with a persistable grant. Keep the existing location
+            // if a document provider unexpectedly does not grant it.
+        }
+    }
+    val selectedDirectory = appPrefs.downloadDirectoryUri
+        .takeIf { it.isNotBlank() }
+        ?.let(::downloadDirectoryName)
+
     PreferenceScreenScaffold(title = stringResource(R.string.settings_downloads_title)) {
         PreferenceGroupLabel(label = R.string.download_settings_file_storage)
         PreferenceRow(
             label = R.string.download_settings_default_location,
-            description = stringResource(R.string.download_settings_default_location_summary)
+            description = selectedDirectory ?: stringResource(R.string.download_settings_default_location_summary),
+            trailing = {
+                Icon(
+                    painter = painterResource(id = R.drawable.icons_arrow_forward),
+                    contentDescription = null
+                )
+            },
+            onClicked = { downloadDirectoryPicker.launch(null) }
         )
         PreferenceToggle(
             label = R.string.download_wifi_only,
@@ -426,6 +454,14 @@ fun DownloadSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
         )
     }
 }
+
+private fun downloadDirectoryName(uriString: String): String? = runCatching {
+    DocumentsContract.getTreeDocumentId(android.net.Uri.parse(uriString))
+        .substringAfter(':')
+        .trim('/')
+        .substringAfterLast('/')
+        .takeIf { it.isNotBlank() }
+}.getOrNull()
 
 @Composable
 fun PasswordSettingsScreen(

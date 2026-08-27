@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
+import android.os.Environment
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
@@ -12,6 +14,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import dagger.hilt.android.qualifiers.ApplicationContext
 import org.midorinext.android.ui.widgets.YesNoDialog
 import org.midorinext.android.R
 import org.midorinext.android.ext.activity
@@ -20,6 +23,7 @@ import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.ui.MidoriApplicationViewModel
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.SessionState
+import mozilla.components.browser.state.state.content.DownloadState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.downloads.*
 import mozilla.components.feature.downloads.manager.DownloadManager
@@ -51,6 +55,7 @@ fun DownloadFeature(
     val downloadState = remember(tab) { tab?.content?.download }
     val url = remember(tab) { tab?.content?.url }
     val wifiOnly by downloadPreferences.wifiOnly.collectAsState()
+    val downloadDirectory by downloadPreferences.directory.collectAsState()
 
     var showDownloadRequest by remember { mutableStateOf(false) }
     var showAskPermissionAgain by remember { mutableStateOf(false) }
@@ -61,7 +66,7 @@ fun DownloadFeature(
         tab?.let { t ->
             downloadState?.let { d ->
                 useCases.consumeDownload(t.id, d.id)
-                if (downloadManager.download(d) == null) {
+                if (downloadManager.download(d.copy(directoryPath = downloadDirectory)) == null) {
                     showSnackbar("Download not supported", null)
                 }
             }
@@ -156,7 +161,7 @@ fun DownloadFeature(
                 id = mozacR.string.mozac_feature_downloads_dialog_title_3,
                 downloadState?.contentLength?.let { fileSizeFormatter.formatSizeInBytes(it) } ?: ""
             ),
-            description = "${downloadState?.fileName}",
+            description = downloadState?.displayNameForConfirmation(),
             icon = R.drawable.icons_download,
             yesText = stringResource(id = mozacR.string.mozac_feature_downloads_dialog_download)
         )
@@ -188,7 +193,8 @@ fun DownloadFeature(
 
 @HiltViewModel
 class DownloadPreferencesViewModel @Inject constructor(
-    appPreferencesRepository: AppPreferencesRepository
+    appPreferencesRepository: AppPreferencesRepository,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
     val wifiOnly = appPreferencesRepository.flow
         .map { it.downloadWifiOnly }
@@ -197,6 +203,34 @@ class DownloadPreferencesViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000L),
             initialValue = false
         )
+
+    val directory = appPreferencesRepository.flow
+        .map { preferences ->
+            preferences.downloadDirectoryUri.takeIf(::hasPersistedDirectoryPermission)
+                ?: Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+        )
+
+    private fun hasPersistedDirectoryPermission(uriString: String): Boolean {
+        if (!uriString.startsWith("content://")) return false
+
+        return context.contentResolver.persistedUriPermissions.any { permission ->
+            permission.uri.toString() == uriString &&
+                permission.isReadPermission &&
+                permission.isWritePermission
+        }
+    }
+}
+
+private fun DownloadState.displayNameForConfirmation(): String {
+    val serverFileName = fileName?.trim()?.takeUnless { it.equals("null", ignoreCase = true) }
+    if (!serverFileName.isNullOrEmpty()) return serverFileName
+
+    return Uri.parse(url).lastPathSegment?.trim()?.takeIf { it.isNotEmpty() } ?: url
 }
 
 private fun Context.isConnectedToWifi(): Boolean {

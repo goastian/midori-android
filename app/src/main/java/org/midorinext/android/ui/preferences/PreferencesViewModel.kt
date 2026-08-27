@@ -120,6 +120,10 @@ class PreferencesViewModel @Inject constructor(
         viewModelScope.launch { appPreferencesRepository.updateDownloadWifiOnly(enabled) }
     }
 
+    fun updateDownloadDirectoryUri(uri: String) {
+        viewModelScope.launch { appPreferencesRepository.updateDownloadDirectoryUri(uri) }
+    }
+
     fun updateToolbarShortcut(shortcut: ToolbarShortcut) {
         viewModelScope.launch { appPreferencesRepository.updateToolbarShortcut(shortcut) }
     }
