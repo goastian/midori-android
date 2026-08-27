@@ -19,9 +19,11 @@ fun EngineView(
     var engineView: EngineView? by remember { mutableStateOf(null) }
     val latestFeatures by rememberUpdatedState(features)
 
-    Box(modifier = modifier) {
+    // GeckoView must receive the exact bounds allocated by Compose. Keeping this explicit avoids
+    // a content-sized AndroidView when its caller provides only parent-data (for example weight).
+    Box(modifier = modifier.fillMaxSize()) {
         AndroidView(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.matchParentSize(),
             factory = { context ->
                 engine.createView(context).asView().apply {
                     this.isNestedScrollingEnabled = true
