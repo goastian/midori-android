@@ -22,7 +22,7 @@ import mozilla.components.lib.state.ext.flow
 import mozilla.components.support.utils.DownloadFileUtils
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.DownloadRemovalBehavior
-import org.midorinext.android.mozac.downloads.openDownloadedFile
+import org.midorinext.android.ext.openDownloadWithChooser
 import javax.inject.Inject
 
 @HiltViewModel
@@ -107,8 +107,11 @@ class DownloadsScreenViewModel @Inject constructor(
 
     fun open(download: DownloadState) {
         if (manageWithOtherApp.value) {
-            val fileName = download.fileName ?: return
-            context.openDownloadedFile("${download.directoryPath}/$fileName", download.contentType)
+            downloadFileUtils.createOpenFileIntent(
+                fileName = download.fileName,
+                directoryPath = download.directoryPath,
+                downloadContentType = download.contentType,
+            )?.let(context::openDownloadWithChooser)
         } else {
             downloadFileUtils.openFile(
                 fileName = download.fileName,

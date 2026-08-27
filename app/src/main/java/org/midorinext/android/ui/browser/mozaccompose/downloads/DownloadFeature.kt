@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
-import android.os.Environment
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
@@ -14,11 +13,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import dagger.hilt.android.qualifiers.ApplicationContext
 import org.midorinext.android.ui.widgets.YesNoDialog
 import org.midorinext.android.R
 import org.midorinext.android.ext.activity
 import org.midorinext.android.ext.openAppSystemSettings
+import org.midorinext.android.mozac.downloads.DownloadLocationProvider
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.ui.MidoriApplicationViewModel
 import mozilla.components.browser.state.selector.selectedTab
@@ -194,7 +193,7 @@ fun DownloadFeature(
 @HiltViewModel
 class DownloadPreferencesViewModel @Inject constructor(
     appPreferencesRepository: AppPreferencesRepository,
-    @ApplicationContext private val context: Context,
+    private val downloadLocationProvider: DownloadLocationProvider,
 ) : ViewModel() {
     val wifiOnly = appPreferencesRepository.flow
         .map { it.downloadWifiOnly }
@@ -205,25 +204,12 @@ class DownloadPreferencesViewModel @Inject constructor(
         )
 
     val directory = appPreferencesRepository.flow
-        .map { preferences ->
-            preferences.downloadDirectoryUri.takeIf(::hasPersistedDirectoryPermission)
-                ?: Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
-        }
+        .map { preferences -> downloadLocationProvider.resolve(preferences.downloadDirectoryUri) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path
+            initialValue = downloadLocationProvider.currentDirectory(),
         )
-
-    private fun hasPersistedDirectoryPermission(uriString: String): Boolean {
-        if (!uriString.startsWith("content://")) return false
-
-        return context.contentResolver.persistedUriPermissions.any { permission ->
-            permission.uri.toString() == uriString &&
-                permission.isReadPermission &&
-                permission.isWritePermission
-        }
-    }
 }
 
 private fun DownloadState.displayNameForConfirmation(): String {

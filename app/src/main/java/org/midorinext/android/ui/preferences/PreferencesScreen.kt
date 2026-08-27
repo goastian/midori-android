@@ -39,6 +39,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.midorinext.android.BuildConfig
 import org.midorinext.android.R
 import org.midorinext.android.ext.openAppStorePage
+import org.midorinext.android.mozac.downloads.hasPersistedWritableTreePermission
 import org.midorinext.android.preferences.app.*
 import org.midorinext.android.ui.MidoriApplicationViewModel
 import org.midorinext.android.ui.nav.NavDestination
@@ -400,8 +401,9 @@ fun DownloadSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
             // if a document provider unexpectedly does not grant it.
         }
     }
-    val selectedDirectory = appPrefs.downloadDirectoryUri
-        .takeIf { it.isNotBlank() }
+    val selectedDirectoryUri = appPrefs.downloadDirectoryUri
+        .takeIf(context::hasPersistedWritableTreePermission)
+    val selectedDirectory = selectedDirectoryUri
         ?.let(::downloadDirectoryName)
 
     PreferenceScreenScaffold(title = stringResource(R.string.settings_downloads_title)) {
@@ -415,8 +417,15 @@ fun DownloadSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
                     contentDescription = null
                 )
             },
-            onClicked = { downloadDirectoryPicker.launch(null) }
+            onClicked = { downloadDirectoryPicker.launch(selectedDirectoryUri?.let(android.net.Uri::parse)) }
         )
+        if (selectedDirectory != null) {
+            PreferenceRow(
+                label = R.string.download_settings_use_android_downloads,
+                description = stringResource(R.string.download_settings_default_location_summary),
+                onClicked = { viewModel.updateDownloadDirectoryUri("") }
+            )
+        }
         PreferenceToggle(
             label = R.string.download_wifi_only,
             description = R.string.download_wifi_only_summary,

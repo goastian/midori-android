@@ -41,11 +41,16 @@ fun Context.openAppSystemSettings() = startActivity(
 )
 
 fun Context.openFileInApp(contentUri: Uri, contentType: String?) {
-    try {
-        val intent = Intent(Intent.ACTION_VIEW).apply {
+    openDownloadWithChooser(
+        Intent(Intent.ACTION_VIEW).apply {
             setDataAndType(contentUri, contentType)
             flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_GRANT_READ_URI_PERMISSION
-        }
+        },
+    )
+}
+
+fun Context.openDownloadWithChooser(intent: Intent) {
+    try {
         val chooserIntent = Intent.createChooser(
             intent,
             this.getString(downloadsR.string.mozac_feature_downloads_third_party_app_chooser_dialog_title),

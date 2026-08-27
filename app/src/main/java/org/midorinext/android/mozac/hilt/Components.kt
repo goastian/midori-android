@@ -8,8 +8,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.midorinext.android.preferences.app.AppPreferencesRepository
+import org.midorinext.android.mozac.downloads.DownloadLocationProvider
 import org.midorinext.android.mozac.downloads.DownloadService
 import org.midorinext.android.mozac.media.MediaSessionService
+import org.midorinext.android.mozac.media.BackgroundPlaybackFeature
 import org.midorinext.android.mozac.pdf.PdfSaveEvents
 import org.midorinext.android.mozac.pdf.SaveToPdfMiddleware
 import dagger.Module
@@ -121,9 +123,13 @@ object MozacComponentHiltModule {
     @Singleton
     @Provides
     fun provideDownloadFileUtils(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
+        downloadLocationProvider: DownloadLocationProvider,
     ): DownloadFileUtils {
-        return DefaultDownloadFileUtils(context)
+        return DefaultDownloadFileUtils(
+            context = context,
+            downloadLocation = downloadLocationProvider::currentDirectory,
+        )
     }
 
     @Singleton
@@ -185,6 +191,12 @@ object MozacComponentHiltModule {
     ) : MediaSessionFeature {
         return MediaSessionFeature(context, MediaSessionService::class.java, store)
     }
+
+    @Singleton
+    @Provides
+    fun provideBackgroundPlaybackFeature(
+        store: BrowserStore,
+    ): BackgroundPlaybackFeature = BackgroundPlaybackFeature(store)
 
     @Singleton
     @Provides
