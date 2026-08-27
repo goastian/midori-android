@@ -97,18 +97,6 @@
     <string name="download_removal_confirm_history">Remover do histórico</string>
     <string name="download_removal_cancel">Cancelar</string>
     <string name="summary_unavailable">Midori não conseguiu extrair texto suficiente para resumir esta página.</string>
-    <string name="reading_list_title">Modo de leitura</string>
-    <string name="reading_list_search_hint">Pesquisar páginas de leitura salvas</string>
-    <string name="reading_list_empty_title">Nenhuma página salva ainda</string>
-    <string name="reading_list_empty_summary">Salve páginas no modo de leitura no menu do navegador.</string>
-    <string name="reading_list_add_current">Salvar para modo de leitura</string>
-    <string name="reading_list_remove_current">Remover do modo de leitura</string>
-    <string name="reading_list_open">Abrir</string>
-    <string name="reading_list_mark_read">Marcar como lido</string>
-    <string name="reading_list_mark_unread">Marcar como não lido</string>
-    <string name="reading_list_remove">Remover</string>
-    <string name="reading_list_offline_later">A leitura offline pode ser adicionada na próxima fase.</string>
-    <string name="reading_list_offline_available">Disponível off-line</string>
     <string name="bookmark_add_current">Adicionar favorito</string>
     <string name="bookmark_remove_current">Remover favorito</string>
 </resources>

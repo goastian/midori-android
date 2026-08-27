@@ -13,7 +13,6 @@ import org.midorinext.android.ext.isLegacyMidoriHomeUrl
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.storage.bookmarks.BookmarksRepository
-import org.midorinext.android.storage.readinglist.ReadingListRepository
 import org.midorinext.android.ui.browser.toolbar.BrowserToolbarState
 import org.midorinext.android.ui.browser.toolbar.BrowserToolbarStateFactory
 import org.midorinext.android.usecases.MidoriUseCases
@@ -53,7 +52,6 @@ import javax.inject.Inject
 @HiltViewModel
 class BrowserScreenViewModel @Inject constructor(
     private val bookmarksRepository: BookmarksRepository,
-    private val readingListRepository: ReadingListRepository,
     private val webAppUseCases: WebAppUseCases,
     val sessionUseCases: SessionUseCases,
     val tabsUseCases: TabsUseCases,
@@ -230,22 +228,6 @@ class BrowserScreenViewModel @Inject constructor(
             initialValue = false
         )
 
-    val isUrlInReadingList = urlFlow
-        .filterNotNull()
-        .flatMapLatest { readingListRepository.isUrlSavedFlow(it) }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = false
-        )
-
-    val hasReadingModeItems = readingListRepository.hasItemsFlow
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = false
-        )
-
     fun addBookmark() {
         store.state.selectedTab?.let { tab ->
             viewModelScope.launch(Dispatchers.IO) {
@@ -263,25 +245,6 @@ class BrowserScreenViewModel @Inject constructor(
         store.state.selectedTab?.content?.url?.let { url ->
             viewModelScope.launch(Dispatchers.IO) {
                 bookmarksRepository.deleteBookmarksByUrl(url)
-            }
-        }
-    }
-
-    fun addCurrentPageToReadingList() {
-        val tab = store.state.selectedTab ?: return
-        val url = tab.content.url
-        if (url.isBlank() || url == "about:blank" || !url.isUrl()) {
-            return
-        }
-        viewModelScope.launch(Dispatchers.IO) {
-            readingListRepository.addOrUpdate(url, tab.content.title)
-        }
-    }
-
-    fun removeCurrentPageFromReadingList() {
-        store.state.selectedTab?.content?.url?.let { url ->
-            viewModelScope.launch(Dispatchers.IO) {
-                readingListRepository.deleteByUrl(url)
             }
         }
     }

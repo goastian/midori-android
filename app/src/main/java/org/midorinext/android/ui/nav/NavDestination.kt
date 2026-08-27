@@ -26,7 +26,6 @@ sealed class NavDestination(
     }
     object Tabs : NavDestination(match = "tabs")
     object Bookmarks : NavDestination(match = "bookmarks")
-    object ReadingList : NavDestination(match = "reading_list")
     object Downloads : NavDestination(match = "downloads")
     object Preferences : NavDestination(match = "preferences")
     object HomepageSettings : NavDestination(match = "settings/homepage")

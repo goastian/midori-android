@@ -102,18 +102,6 @@
     <string name="download_removal_confirm_history">Aus dem Verlauf entfernen</string>
     <string name="download_removal_cancel">Abbrechen</string>
     <string name="summary_unavailable">Midori konnte nicht genügend Text extrahieren, um diese Seite zusammenzufassen.</string>
-    <string name="reading_list_title">Lesemodus</string>
-    <string name="reading_list_search_hint">Durchsuchen Sie gespeicherte Leseseiten</string>
-    <string name="reading_list_empty_title">Noch keine gespeicherten Seiten</string>
-    <string name="reading_list_empty_summary">Speichern Sie Seiten für den Lesemodus über das Browsermenü.</string>
-    <string name="reading_list_add_current">Für den Lesemodus speichern</string>
-    <string name="reading_list_remove_current">Aus dem Lesemodus entfernen</string>
-    <string name="reading_list_open">Offen</string>
-    <string name="reading_list_mark_read">Mark hat gelesen</string>
-    <string name="reading_list_mark_unread">Als ungelesen markieren</string>
-    <string name="reading_list_remove">Entfernen</string>
-    <string name="reading_list_offline_later">Offline-Lesen kann in der nächsten Phase hinzugefügt werden.</string>
-    <string name="reading_list_offline_available">Offline verfügbar</string>
     <string name="bookmark_add_current">Lesezeichen hinzufügen</string>
     <string name="bookmark_remove_current">Lesezeichen entfernen</string>
 </resources>

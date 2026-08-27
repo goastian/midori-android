@@ -301,14 +301,6 @@ fun AppNavigation(
             navigateTo(NavDestination.Bookmarks)
         }
     )
-    DropdownItem(
-        text = stringResource(id = R.string.reading_list_title),
-        icon = R.drawable.icons_open,
-        onClick = {
-            onDismissRequest()
-            navigateTo(NavDestination.ReadingList)
-        }
-    )
     if (BuildConfig.FLAVOR_target != "canaltoys") {
         DropdownItem(
             text = stringResource(id = R.string.browser_downloads),
@@ -347,7 +339,6 @@ fun PageActions(
     onDismissRequest: () -> Unit,
 ) {
     val currentUrl by viewModel.currentUrl.collectAsState()
-    val isUrlInReadingList by viewModel.isUrlInReadingList.collectAsState()
     val isUrlBookmarked by viewModel.isUrlBookmarked.collectAsState()
     val desktopSite by viewModel.desktopMode.collectAsState()
     val onDesktopSiteClicked = { checked: Boolean ->
@@ -369,24 +360,6 @@ fun PageActions(
                     viewModel.removeBookmark()
                 } else {
                     viewModel.addBookmark()
-                }
-                onDismissRequest()
-            }
-        )
-        DropdownItem(
-            text = stringResource(
-                id = if (isUrlInReadingList) {
-                    R.string.reading_list_remove_current
-                } else {
-                    R.string.reading_list_add_current
-                }
-            ),
-            icon = R.drawable.icons_bookmark,
-            onClick = {
-                if (isUrlInReadingList) {
-                    viewModel.removeCurrentPageFromReadingList()
-                } else {
-                    viewModel.addCurrentPageToReadingList()
                 }
                 onDismissRequest()
             }

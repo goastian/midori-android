@@ -96,18 +96,6 @@
     <string name="download_removal_confirm_history">इतिहास से हटाओ</string>
     <string name="download_removal_cancel">रद्द करें</string>
     <string name="summary_unavailable">मिदोरी इस पृष्ठ को सारांशित करने के लिए पर्याप्त पाठ नहीं निकाल सका।</string>
-    <string name="reading_list_title">पढ़ने का तरीका</string>
-    <string name="reading_list_search_hint">सहेजे गए पठन पृष्ठ खोजें</string>
-    <string name="reading_list_empty_title">अभी तक कोई सहेजा गया पेज नहीं</string>
-    <string name="reading_list_empty_summary">ब्राउज़र मेनू से रीडिंग मोड के लिए पेज सहेजें।</string>
-    <string name="reading_list_add_current">रीडिंग मोड के लिए सहेजें</string>
-    <string name="reading_list_remove_current">रीडिंग मोड से हटाएँ</string>
-    <string name="reading_list_open">खुला</string>
-    <string name="reading_list_mark_read">मार्क पढ़ें</string>
-    <string name="reading_list_mark_unread">अपठित चिह्नित करें</string>
-    <string name="reading_list_remove">हटाओ</string>
-    <string name="reading_list_offline_later">अगले चरण में ऑफलाइन रीडिंग को जोड़ा जा सकता है।</string>
-    <string name="reading_list_offline_available">ऑफ़लाइन उपलब्ध है</string>
     <string name="bookmark_add_current">बुकमार्क जोड़ें</string>
     <string name="bookmark_remove_current">बुकमार्क हटाएँ</string>
 </resources>

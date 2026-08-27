@@ -96,18 +96,6 @@
     <string name="download_removal_confirm_history">Hiq nga historia</string>
     <string name="download_removal_cancel">Anulo</string>
     <string name="summary_unavailable">Midori nuk mund të nxirrte mjaft tekst për të përmbledhur këtë faqe.</string>
-    <string name="reading_list_title">Mënyra e leximit</string>
-    <string name="reading_list_search_hint">Kërkoni faqet e ruajtura të leximit</string>
-    <string name="reading_list_empty_title">Nuk ka ende faqe të ruajtura</string>
-    <string name="reading_list_empty_summary">Ruani faqet për modalitetin e leximit nga menyja e shfletuesit.</string>
-    <string name="reading_list_add_current">Ruaj për modalitetin e leximit</string>
-    <string name="reading_list_remove_current">Hiq nga modaliteti i leximit</string>
-    <string name="reading_list_open">Hapur</string>
-    <string name="reading_list_mark_read">Shënoni lexuar</string>
-    <string name="reading_list_mark_unread">Shëno si të palexuar</string>
-    <string name="reading_list_remove">Hiq</string>
-    <string name="reading_list_offline_later">Leximi jashtë linje mund të shtohet në fazën tjetër.</string>
-    <string name="reading_list_offline_available">E disponueshme jashtë linje</string>
     <string name="bookmark_add_current">Shto faqerojtës</string>
     <string name="bookmark_remove_current">Hiq faqerojtësin</string>
 </resources>

@@ -33,7 +33,6 @@ import org.midorinext.android.ui.preferences.SavedAutofillScreen
 import org.midorinext.android.ui.preferences.SavedPasswordsScreen
 import org.midorinext.android.ui.preferences.AppTrackingProtectionReportScreen
 import org.midorinext.android.ui.preferences.PrivacyScreen
-import org.midorinext.android.ui.readinglist.ReadingListScreen
 import org.midorinext.android.ui.tabs.TabsScreen
 
 @Composable
@@ -131,9 +130,6 @@ fun MidoriNavHost(
         }
         composable(NavDestination.Bookmarks.match) {
             BookmarksScreen(onBrowse)
-        }
-        composable(NavDestination.ReadingList.match) {
-            ReadingListScreen(onBrowse)
         }
         composable(NavDestination.Downloads.match) {
             DownloadsScreen(onClose = onBrowse)

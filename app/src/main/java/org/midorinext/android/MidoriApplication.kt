@@ -32,6 +32,8 @@ import org.mozilla.geckoview.GeckoRuntime
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
+private const val READING_LIST_DATABASE_NAME = "reading_list_db"
+
 @HiltAndroidApp
 class MidoriApplication : Application(), Configuration.Provider {
     @Inject lateinit var engine: dagger.Lazy<Engine>
@@ -64,6 +66,10 @@ class MidoriApplication : Application(), Configuration.Provider {
             // Gecko content and crash processes duplicates startup work and competes for CPU.
             return
         }
+
+        // Reading Mode and its Room database have been removed. Delete any data left by earlier
+        // versions so discontinued saved pages do not remain in the application's storage.
+        deleteDatabase(READING_LIST_DATABASE_NAME)
 
         AppServicesInitializer.init(
             AppServicesInitializer.Config(

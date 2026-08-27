@@ -96,18 +96,6 @@
     <string name="download_removal_confirm_history">Удалить из истории</string>
     <string name="download_removal_cancel">Отмена</string>
     <string name="summary_unavailable">Мидори не удалось извлечь достаточно текста, чтобы суммировать эту страницу.</string>
-    <string name="reading_list_title">Режим чтения</string>
-    <string name="reading_list_search_hint">Поиск сохраненных страниц для чтения</string>
-    <string name="reading_list_empty_title">Сохраненных страниц пока нет.</string>
-    <string name="reading_list_empty_summary">Сохраняйте страницы для режима чтения из меню браузера.</string>
-    <string name="reading_list_add_current">Сохранить для режима чтения</string>
-    <string name="reading_list_remove_current">Выйти из режима чтения</string>
-    <string name="reading_list_open">Открыть</string>
-    <string name="reading_list_mark_read">Отметить прочитанным</string>
-    <string name="reading_list_mark_unread">Отметить как непрочитанное</string>
-    <string name="reading_list_remove">Удалить</string>
-    <string name="reading_list_offline_later">Офлайн-чтение можно добавить на следующем этапе.</string>
-    <string name="reading_list_offline_available">Доступно офлайн</string>
     <string name="bookmark_add_current">Добавить закладку</string>
     <string name="bookmark_remove_current">Удалить закладку</string>
 </resources>

@@ -102,18 +102,6 @@
     <string name="download_removal_confirm_history">Rimuovi dalla cronologia</string>
     <string name="download_removal_cancel">Annulla</string>
     <string name="summary_unavailable">Midori non è riuscita a estrarre abbastanza testo per riassumere questa pagina.</string>
-    <string name="reading_list_title">Modalità di lettura</string>
-    <string name="reading_list_search_hint">Cerca le pagine di lettura salvate</string>
-    <string name="reading_list_empty_title">Nessuna pagina salvata ancora</string>
-    <string name="reading_list_empty_summary">Salva le pagine per la modalità di lettura dal menu del browser.</string>
-    <string name="reading_list_add_current">Salva per la modalità di lettura</string>
-    <string name="reading_list_remove_current">Rimuovi dalla modalità di lettura</string>
-    <string name="reading_list_open">Aperto</string>
-    <string name="reading_list_mark_read">Marco ha letto</string>
-    <string name="reading_list_mark_unread">Segna come non letto</string>
-    <string name="reading_list_remove">Rimuovi</string>
-    <string name="reading_list_offline_later">La lettura offline può essere aggiunta nella fase successiva.</string>
-    <string name="reading_list_offline_available">Disponibile offline</string>
     <string name="bookmark_add_current">Aggiungi segnalibro</string>
     <string name="bookmark_remove_current">Rimuovi segnalibro</string>
 </resources>

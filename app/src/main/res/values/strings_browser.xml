@@ -112,18 +112,6 @@
     <string name="summary_done">Done</string>
     <string name="summary_unavailable">Midori could not extract enough text to summarize this page.</string>
 
-    <string name="reading_list_title">Reading Mode</string>
-    <string name="reading_list_search_hint">Search saved reading pages</string>
-    <string name="reading_list_empty_title">No saved pages yet</string>
-    <string name="reading_list_empty_summary">Save pages for Reading Mode from the browser menu.</string>
-    <string name="reading_list_add_current">Save for Reading Mode</string>
-    <string name="reading_list_remove_current">Remove from Reading Mode</string>
-    <string name="reading_list_open">Open</string>
-    <string name="reading_list_mark_read">Mark read</string>
-    <string name="reading_list_mark_unread">Mark unread</string>
-    <string name="reading_list_remove">Remove</string>
-    <string name="reading_list_offline_later">Offline reading can be added in the next phase.</string>
-    <string name="reading_list_offline_available">Available offline</string>
     <string name="bookmark_add_current">Add bookmark</string>
     <string name="bookmark_remove_current">Remove bookmark</string>
 </resources>
