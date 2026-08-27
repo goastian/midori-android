@@ -6,7 +6,6 @@
     <string name="browser_new_tab_private">Nouvel onglet privé</string>
     <string name="browser_close_all_tabs">Fermer tous les onglets</string>
     <string name="browser_close_private_tabs">Fermer les onglets privés</string>
-    <string name="browser_close_tab">Fermer cet onglet</string>
     <string name="browser_go_to_tab">Aller à l\’onglet</string>
     <string name="browser_tab_closed">Onglet fermé</string>
     <string name="browser_tabs_closed">Onglets effacés</string>

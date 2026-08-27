@@ -5,7 +5,6 @@
     <string name="browser_new_tab_private">Новая приватная вкладка</string>
     <string name="browser_close_all_tabs">Закрыть все вкладки</string>
     <string name="browser_close_private_tabs">Закрыть частные вкладки</string>
-    <string name="browser_close_tab">Закрыть эту вкладку</string>
     <string name="browser_go_to_tab">Перейти на вкладку</string>
     <string name="browser_tab_closed">Вкладка закрыта</string>
     <string name="browser_tabs_closed">Вкладки удалены</string>

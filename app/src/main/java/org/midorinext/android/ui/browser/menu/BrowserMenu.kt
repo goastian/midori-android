@@ -128,14 +128,6 @@ private fun BrowserMenuContent(
     HorizontalDivider()
     NewTabAction(viewModel, onDismissRequest)
     PrivateTabAction(viewModel, onDismissRequest)
-    DropdownItem(
-        text = stringResource(id = R.string.browser_close_tab),
-        icon = R.drawable.icons_close,
-        onClick = {
-            onDismissRequest()
-            viewModel.closeCurrentTab()
-        }
-    )
     if (showPageActions && !currentUrl.isNullOrBlank()) {
         ShareAction(url = currentUrl, onDismissRequest = onDismissRequest)
         TranslateAction(

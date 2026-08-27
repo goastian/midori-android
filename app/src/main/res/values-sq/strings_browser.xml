@@ -5,7 +5,6 @@
     <string name="browser_new_tab_private">Skeda e re private</string>
     <string name="browser_close_all_tabs">Mbyllni të gjitha skedat</string>
     <string name="browser_close_private_tabs">Mbyllni skedat private</string>
-    <string name="browser_close_tab">Mbyllni këtë skedë</string>
     <string name="browser_go_to_tab">Shkoni te skeda</string>
     <string name="browser_tab_closed">Skeda u mbyll</string>
     <string name="browser_tabs_closed">Skedat u fshinë</string>

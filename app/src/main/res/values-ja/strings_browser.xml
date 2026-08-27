@@ -5,7 +5,6 @@
     <string name="browser_new_tab_private">新しいプライベートタブ</string>
     <string name="browser_close_all_tabs">すべてのタブを閉じます</string>
     <string name="browser_close_private_tabs">プライベートタブを閉じる</string>
-    <string name="browser_close_tab">このタブを閉じます</string>
     <string name="browser_go_to_tab">タブに移動</string>
     <string name="browser_tab_closed">タブを閉じた</string>
     <string name="browser_tabs_closed">タブが削除されました</string>

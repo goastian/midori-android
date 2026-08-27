@@ -462,14 +462,6 @@ fun TabsButton(
             onDismissRequest = { showTabsDropdown = false },
             modifier = Modifier.defaultMinSize(minWidth = 240.dp)
         ) {
-            DropdownItem(
-                text = stringResource(id = R.string.browser_close_tab),
-                icon = R.drawable.icons_close,
-                onClick = {
-                    viewModel.closeCurrentTab()
-                    showTabsDropdown = false
-                }
-            )
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
             DropdownItem(
                 text = stringResource(id = R.string.browser_new_tab),

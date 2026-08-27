@@ -6,7 +6,6 @@
     <string name="browser_new_tab_private">Aggiungi scheda private</string>
     <string name="browser_close_all_tabs">Chiudi tutte le schede</string>
     <string name="browser_close_private_tabs">Chiudi le schede private</string>
-    <string name="browser_close_tab">Chiudi questa scheda</string>
     <string name="browser_go_to_tab">Vai alla scheda</string>
     <string name="browser_tab_closed">Scheda chiusa</string>
     <string name="browser_tabs_closed">Schede eliminate</string>

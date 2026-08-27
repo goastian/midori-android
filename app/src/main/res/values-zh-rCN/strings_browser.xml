@@ -5,7 +5,6 @@
     <string name="browser_new_tab_private">New private tab</string>
     <string name="browser_close_all_tabs">Close all tabs</string>
     <string name="browser_close_private_tabs">Close private tabs</string>
-    <string name="browser_close_tab">Close this tab</string>
     <string name="browser_go_to_tab">Go to tab</string>
     <string name="browser_tab_closed">Tab closed</string>
     <string name="browser_tabs_closed">Tabs deleted</string>

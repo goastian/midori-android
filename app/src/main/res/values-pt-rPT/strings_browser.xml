@@ -5,7 +5,6 @@
     <string name="browser_new_tab_private">Nova guia privada</string>
     <string name="browser_close_all_tabs">Feche todas as guias</string>
     <string name="browser_close_private_tabs">Fechar separadores privados</string>
-    <string name="browser_close_tab">Fechar esta guia</string>
     <string name="browser_go_to_tab">Vá para o separador</string>
     <string name="browser_tab_closed">Guia fechada</string>
     <string name="browser_tabs_closed">Guias excluídas</string>

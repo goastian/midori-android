@@ -5,7 +5,6 @@
     <string name="browser_new_tab_private">नया निजी टैब</string>
     <string name="browser_close_all_tabs">सभी टैब बंद करें</string>
     <string name="browser_close_private_tabs">निजी टैब बंद करें</string>
-    <string name="browser_close_tab">इस टैब को बंद करें</string>
     <string name="browser_go_to_tab">टैब पर जाएं</string>
     <string name="browser_tab_closed">टैब बंद</string>
     <string name="browser_tabs_closed">टैब हटा दिए गए</string>
