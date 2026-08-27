@@ -46,7 +46,6 @@ object GeckoSettingsHiltModule {
         return DefaultSettings(
             historyTrackingDelegate = HistoryDelegate(lazy { historyStorage.get() }),
             requestInterceptor = appRequestInterceptor,
-            userAgentString = org.mozilla.geckoview.BuildConfig.USER_AGENT_GECKOVIEW_MOBILE,
             remoteDebuggingEnabled = debugEnabled,
             testingModeEnabled = debugEnabled
         )
