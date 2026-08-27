@@ -4,6 +4,8 @@
     <string name="menu_request_desktop_site">Solicitar sitio de escritorio</string>
     <string name="menu_quit_app">Cierra la aplicación</string>
     <string name="menu_find_in_page">Buscar en la página</string>
+    <string name="menu_save_as_pdf">Guardar página como PDF</string>
+    <string name="menu_save_as_pdf_failed">No se pudo guardar la página como PDF</string>
     <string name="menu_account">Cuenta</string>
     <string name="menu_login">Iniciar sesión</string>
     <string name="menu_more_options">Más opciones</string>

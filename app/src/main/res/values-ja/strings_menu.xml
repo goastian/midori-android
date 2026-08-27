@@ -4,6 +4,8 @@
     <string name="menu_request_desktop_site">デスクトップサイトをリクエストする</string>
     <string name="menu_quit_app">アプリを閉じる</string>
     <string name="menu_find_in_page">ページ内で検索</string>
+    <string name="menu_save_as_pdf">ページを PDF として保存</string>
+    <string name="menu_save_as_pdf_failed">ページを PDF として保存できませんでした</string>
     <string name="menu_account">アカウント</string>
     <string name="menu_login">ログイン</string>
     <string name="menu_midori_vpn">みどりVPN</string>

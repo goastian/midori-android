@@ -4,6 +4,8 @@
     <string name="menu_request_desktop_site">Kërko uebfaqen e desktopit</string>
     <string name="menu_quit_app">Mbyll aplikacionin</string>
     <string name="menu_find_in_page">Gjej në faqe</string>
+    <string name="menu_save_as_pdf">Ruaje faqen si PDF</string>
+    <string name="menu_save_as_pdf_failed">Faqja nuk u ruajt si PDF</string>
     <string name="menu_account">Llogaria</string>
     <string name="menu_login">Hyr</string>
     <string name="menu_midori_vpn">MidoriVPN</string>

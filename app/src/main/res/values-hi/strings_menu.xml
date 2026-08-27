@@ -4,6 +4,8 @@
     <string name="menu_request_desktop_site">डेस्कटॉप साइट का अनुरोध करें</string>
     <string name="menu_quit_app">ऐप बंद करें</string>
     <string name="menu_find_in_page">पेज में खोजें</string>
+    <string name="menu_save_as_pdf">पेज को PDF के रूप में सहेजें</string>
+    <string name="menu_save_as_pdf_failed">पेज को PDF के रूप में सहेजा नहीं जा सका</string>
     <string name="menu_account">खाता</string>
     <string name="menu_login">लॉग इन करें</string>
     <string name="menu_midori_vpn">मिडोरीवीपीएन</string>

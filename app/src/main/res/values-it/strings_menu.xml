@@ -4,6 +4,8 @@
     <string name="menu_request_desktop_site">Richiedi sito desktop</string>
     <string name="menu_quit_app">Chiudi l\'app</string>
     <string name="menu_find_in_page">Trova nella Pagina</string>
+    <string name="menu_save_as_pdf">Salva pagina come PDF</string>
+    <string name="menu_save_as_pdf_failed">Impossibile salvare la pagina come PDF</string>
     <string name="menu_account">Account</string>
     <string name="menu_login">Login</string>
 
