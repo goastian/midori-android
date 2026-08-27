@@ -68,6 +68,16 @@ fun BrowserScreen(
     var engineViewHolder: EngineView? by remember { mutableStateOf(null) }
     var pageSummary by remember { mutableStateOf<String?>(null) }
 
+    // Navigation to the tab tray disposes the browser surface. Reassert background media after
+    // that surface is released so the playing tab remains active without keeping the UI alive.
+    DisposableEffect(Unit) {
+        onDispose { viewModel.keepPlayingMediaWhileSurfaceIsHidden() }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.onBrowserSurfaceVisible()
+    }
+
     LaunchedEffect(openNewTab) {
         when (openNewTab) {
             TabOpening.NORMAL -> viewModel.openNewMidoriTab(private = false)

@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.work.Configuration
 import org.midorinext.android.migration.MigrationUtility
 import org.midorinext.android.mozac.GeckoPreferences
+import org.midorinext.android.mozac.media.BackgroundPlaybackFeature
 import org.midorinext.android.preferences.app.AppPreferences
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.preferences.app.AppPreferencesRepository
@@ -45,6 +46,7 @@ class MidoriApplication : Application(), Configuration.Provider {
     @Inject lateinit var MidoriUseCases: dagger.Lazy<MidoriUseCases>
     @Inject lateinit var migrationUtility: dagger.Lazy<MigrationUtility>
     @Inject lateinit var mediaFeature: dagger.Lazy<MediaSessionFeature>
+    @Inject lateinit var backgroundPlaybackFeature: dagger.Lazy<BackgroundPlaybackFeature>
     @Inject lateinit var appTrackingProtectionController: dagger.Lazy<AppTrackingProtectionController>
     @Inject lateinit var geckoRuntime: dagger.Lazy<GeckoRuntime>
     @Inject lateinit var appPreferencesRepository: dagger.Lazy<AppPreferencesRepository>
@@ -109,6 +111,7 @@ class MidoriApplication : Application(), Configuration.Provider {
 
 
         mediaFeature.get().start()
+        backgroundPlaybackFeature.get().start()
 
         // TODO
         //  Should be removed in futur version, once mozilla has fully migrated

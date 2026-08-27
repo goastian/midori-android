@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import org.midorinext.android.storage.MidoriClientProvider
+import org.midorinext.android.mozac.media.BackgroundPlaybackFeature
 import org.midorinext.android.ui.MidoriBrowserApp
 import dagger.hilt.android.AndroidEntryPoint
 import mozilla.components.support.base.android.NotificationsDelegate
@@ -19,6 +20,7 @@ import kotlin.system.exitProcess
 class MainActivity : MidoriActivity() {
     @Inject lateinit var notificationsDelegate: NotificationsDelegate
     @Inject lateinit var clientProvider: MidoriClientProvider
+    @Inject lateinit var backgroundPlaybackFeature: BackgroundPlaybackFeature
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,5 +35,15 @@ class MainActivity : MidoriActivity() {
         }
         setContentView(v)
         this.bindRootView(v.rootView)
+    }
+
+    override fun onPause() {
+        backgroundPlaybackFeature.onBrowserActivityPaused()
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        backgroundPlaybackFeature.onBrowserActivityResumed()
     }
 }

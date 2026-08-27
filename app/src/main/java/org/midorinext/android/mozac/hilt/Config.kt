@@ -47,7 +47,10 @@ object GeckoSettingsHiltModule {
             historyTrackingDelegate = HistoryDelegate(lazy { historyStorage.get() }),
             requestInterceptor = appRequestInterceptor,
             remoteDebuggingEnabled = debugEnabled,
-            testingModeEnabled = debugEnabled
+            testingModeEnabled = debugEnabled,
+            // Sessions lose their display when the user opens the tab tray, leaves the app, or
+            // locks the device. Keep active media running across those transitions.
+            suspendMediaWhenInactive = false,
         )
     }
 }

@@ -1,5 +1,6 @@
 package org.midorinext.android.mozac.media
 
+import android.content.Intent
 import dagger.hilt.android.AndroidEntryPoint
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.base.crash.CrashReporting
@@ -16,4 +17,11 @@ class MediaSessionService: AbstractMediaSessionService() {
 
     @Inject lateinit var s: dagger.Lazy<BrowserStore>
     override val store: BrowserStore by lazy { s.get() }
+
+    /**
+     * Keep active web media alive after the browser task is dismissed. The foreground media
+     * service and its notification remain visible, so users can still pause or resume playback
+     * from Android's system controls.
+     */
+    override fun onTaskRemoved(rootIntent: Intent?) = Unit
 }

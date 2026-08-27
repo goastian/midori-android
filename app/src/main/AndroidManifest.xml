@@ -162,7 +162,8 @@
         <!-- Media feature -->
         <service android:name=".mozac.media.MediaSessionService"
             android:foregroundServiceType="mediaPlayback"
-            android:exported="false" />
+            android:exported="false"
+            android:stopWithTask="false" />
 
         <!-- App tracking protection (hybrid system mode) -->
         <service

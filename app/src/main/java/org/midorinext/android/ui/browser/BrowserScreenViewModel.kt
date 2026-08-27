@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.adblock.MidoriPrivacyFeature
 import org.midorinext.android.mozac.pdf.PdfSaveEvents
+import org.midorinext.android.mozac.media.BackgroundPlaybackFeature
 import org.midorinext.android.vpn.MidoriVpnFeature
 import org.midorinext.android.ext.isLegacyMidoriHomeUrl
 import org.midorinext.android.preferences.app.AppPreferencesRepository
@@ -68,6 +69,7 @@ class BrowserScreenViewModel @Inject constructor(
     private val appPreferencesRepository: AppPreferencesRepository,
     val contentBlockerState: ContentBlockerState,
     val pdfSaveEvents: PdfSaveEvents,
+    private val backgroundPlaybackFeature: BackgroundPlaybackFeature,
 ): ViewModel() {
     data class TranslationSheetState(
         val enabled: Boolean = false,
@@ -171,6 +173,18 @@ class BrowserScreenViewModel @Inject constructor(
     val newTabState = MidoriUseCases.newTabState
 
     val newTabPageUrl = MidoriUseCases.newTabPageUrl
+
+    fun keepPlayingMediaActive() {
+        backgroundPlaybackFeature.reassertPlayingSession()
+    }
+
+    fun keepPlayingMediaWhileSurfaceIsHidden() {
+        backgroundPlaybackFeature.onBrowserSurfaceHidden()
+    }
+
+    fun onBrowserSurfaceVisible() {
+        backgroundPlaybackFeature.onBrowserSurfaceVisible()
+    }
 
     val currentEngineSession = store.flow()
         .map { state -> state.selectedTab?.engineState?.engineSession }
