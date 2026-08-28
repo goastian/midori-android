@@ -153,7 +153,7 @@ fun TabsScreen(
                     onTabsViewOptionChange = { tabsViewModel.updateTabsViewOption(it) },
                     onRemoveTabs = {
                         tabsViewModel.removeTabs(private)
-                        appViewModel.showSnackbar(tabsClosedString)
+                        appViewModel.showTabClosureSnackbar(tabsClosedString)
                         if (private) {
                             appViewModel.setPrivacyMode(PrivacyMode.NORMAL)
                         } else {
@@ -309,7 +309,7 @@ fun TabsScreen(
                     },
                     onTabDeleted = { tab ->
                         tabsViewModel.removeTab(tab.id)
-                        appViewModel.showSnackbar(tabClosedString)
+                        appViewModel.showTabClosureSnackbar(tabClosedString)
                     }
                 )
             } ?: run {
@@ -581,7 +581,7 @@ fun AnimatedTabList(
         val tabClosedString = stringResource(id = R.string.browser_tab_closed)
         val onTabDeleted: (TabSessionState) -> Unit = { tab: SessionState ->
             tabsViewModel.removeTab(tab.id)
-            appViewModel.showSnackbar(tabClosedString)
+            appViewModel.showTabClosureSnackbar(tabClosedString)
         }
 
         AnimatedVisibility(

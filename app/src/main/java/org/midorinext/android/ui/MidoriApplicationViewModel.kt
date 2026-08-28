@@ -14,6 +14,7 @@ import org.midorinext.android.ui.zap.ZapState
 import org.midorinext.android.usecases.ClearDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.store.BrowserStore
@@ -47,7 +48,25 @@ class MidoriApplicationViewModel @Inject constructor(
         )
 
     val snackbarHostState = SnackbarHostState()
+    private var tabClosureSnackbarJob: Job? = null
+
     data class SnackbarAction(val label: String, val apply: () -> Unit)
+
+    /**
+     * Tab closures are frequent and have no follow-up action. Keep only the latest one so a
+     * rapid series of closes cannot leave stale snackbars queued after the user moves on.
+     */
+    fun showTabClosureSnackbar(message: String) {
+        tabClosureSnackbarJob?.cancel()
+        tabClosureSnackbarJob = viewModelScope.launch {
+            snackbarHostState.showSnackbar(
+                message = message,
+                withDismissAction = false,
+                duration = SnackbarDuration.Short
+            )
+        }
+    }
+
     fun showSnackbar(
         message: String,
         action: SnackbarAction? = null,
