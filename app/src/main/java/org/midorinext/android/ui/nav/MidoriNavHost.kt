@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -47,11 +48,14 @@ fun MidoriNavHost(
     val transitionTimeMs = 250
     var showTabsOverlay by rememberSaveable { mutableStateOf(false) }
 
-    Box(modifier = modifier) {
+    // The browser surface is an AndroidView.  Keep the navigation host constrained to the
+    // padded area provided by Scaffold so Gecko never measures against the full window and
+    // renders underneath Midori's toolbar (particularly noticeable on large, older tablets).
+    Box(modifier = modifier.fillMaxSize()) {
     NavHost(
         navController = navController,
         startDestination = NavDestination.Browser.match,
-        modifier = Modifier,
+        modifier = Modifier.fillMaxSize(),
         enterTransition = {
             slideIntoContainer(
                 towards = AnimatedContentTransitionScope.SlideDirection.Left,
