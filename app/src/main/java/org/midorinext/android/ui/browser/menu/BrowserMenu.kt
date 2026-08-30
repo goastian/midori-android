@@ -114,7 +114,7 @@ private fun BrowserMenuContent(
     val isMidoriVpnActionAvailable by viewModel.isMidoriVpnActionAvailable.collectAsState()
     val showQuitApp by applicationViewModel.zapOnQuit.collectAsState()
 
-    BrowserNavigation(viewModel)
+    BrowserNavigation(viewModel, onDismissRequest)
     HorizontalDivider()
     DropdownItem(
         text = stringResource(id = R.string.menu_midori_vpn),
@@ -204,24 +204,49 @@ fun QwantAccount(
 }
 
 @Composable
-fun BrowserNavigation(viewModel: BrowserScreenViewModel) {
+fun BrowserNavigation(
+    viewModel: BrowserScreenViewModel,
+    onDismissRequest: () -> Unit,
+) {
     val canGoBack by viewModel.canGoBack.collectAsState()
     val canGoForward by viewModel.canGoForward.collectAsState()
     val loadingProgress by viewModel.toolbarState.loadingProgress.collectAsState()
 
     Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-        IconButton(onClick = { viewModel.goBack() }, enabled = canGoBack) {
+        IconButton(
+            onClick = {
+                onDismissRequest()
+                viewModel.goBack()
+            },
+            enabled = canGoBack
+        ) {
             Icon(painter = painterResource(id = R.drawable.icons_arrow_backward), contentDescription = "back")
         }
-        IconButton(onClick = { viewModel.goForward() }, enabled = canGoForward) {
+        IconButton(
+            onClick = {
+                onDismissRequest()
+                viewModel.goForward()
+            },
+            enabled = canGoForward
+        ) {
             Icon(painter = painterResource(id = R.drawable.icons_arrow_forward), contentDescription = "forward")
         }
         if (loadingProgress != 1f) {
-            IconButton(onClick = { viewModel.stopLoading() }) {
+            IconButton(
+                onClick = {
+                    onDismissRequest()
+                    viewModel.stopLoading()
+                }
+            ) {
                 Icon(painter = painterResource(id = R.drawable.icons_close), contentDescription = "stop loading")
             }
         } else {
-            IconButton(onClick = { viewModel.reloadUrl() }) {
+            IconButton(
+                onClick = {
+                    onDismissRequest()
+                    viewModel.reloadUrl()
+                }
+            ) {
                 Icon(painter = painterResource(id = R.drawable.icons_reload), contentDescription = "reload")
             }
         }
