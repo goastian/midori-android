@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.browser.toolbar
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -22,7 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,7 +44,7 @@ import org.midorinext.android.ui.widgets.UrlIcon
 
 @Composable
 fun SiteSecurityIcon(toolbarState: BrowserToolbarState) {
-    val siteSecurity by toolbarState.siteSecurity.collectAsState()
+    val siteSecurity by toolbarState.siteSecurity.collectAsStateWithLifecycle()
     val density = LocalDensity.current
 
     siteSecurity?.let { securityInfo ->

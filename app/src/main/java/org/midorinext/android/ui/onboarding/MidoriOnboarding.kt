@@ -22,7 +22,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -458,7 +458,7 @@ private fun ToolbarPlacementPreview(
                 color = if (selected) OnboardingGreen else OnboardingBorder,
                 shape = RoundedCornerShape(24.dp),
             )
-            .clickable(role = Role.RadioButton, onClick = onSelected)
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onSelected)
             .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -558,8 +558,7 @@ private fun OnboardingActions(
             onClick = onPrimary,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
-                .semantics { contentDescription = primaryAction },
+                .height(56.dp),
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = OnboardingGreen,

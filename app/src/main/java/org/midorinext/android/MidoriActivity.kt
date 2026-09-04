@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import kotlin.system.exitProcess
 
 open class MidoriActivity: AppCompatActivity() {
     private var imm: InputMethodManager? = null
@@ -42,7 +41,8 @@ open class MidoriActivity: AppCompatActivity() {
     }
 
     fun quit() {
-        finishAffinity()
-        exitProcess(0)
+        // Let Android keep or reclaim the cached process. Killing it explicitly skips normal
+        // lifecycle cleanup and guarantees a slower cold start the next time Midori opens.
+        finishAndRemoveTask()
     }
 }

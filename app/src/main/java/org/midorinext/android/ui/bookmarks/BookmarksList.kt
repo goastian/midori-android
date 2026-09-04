@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.bookmarks
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import android.content.ClipData
 import android.content.ClipDescription
 import android.content.ClipDescription.MIMETYPE_TEXT_URILIST
@@ -18,7 +20,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
@@ -50,14 +51,14 @@ fun BookmarksList(
     onBrowse: () -> Unit,
     lazyListState: LazyListState = rememberLazyListState()
 ) {
-    val bookmarksUnordered by viewModel.bookmarks.collectAsState()
+    val bookmarksUnordered by viewModel.bookmarks.collectAsStateWithLifecycle()
     val bookmarks by remember(bookmarksUnordered) { derivedStateOf {
         bookmarksUnordered
             .sortedWith(compareByDescending<BookmarkNode> { it.type }
                 .thenBy { it.title?.lowercase(Locale.getDefault()) })
     }}
 
-    val folder by viewModel.folder.collectAsState()
+    val folder by viewModel.folder.collectAsStateWithLifecycle()
 
     var editItem: BookmarkNode? by remember { mutableStateOf(null) }
     var moveItem: BookmarkNode? by remember { mutableStateOf(null) }
@@ -193,7 +194,7 @@ fun BookmarksList(
         )
     }
 
-    val folderTree by viewModel.folderTree.collectAsState()
+    val folderTree by viewModel.folderTree.collectAsStateWithLifecycle()
     moveItem?.let { item ->
         folderTree?.let { folderTree ->
             BookmarkMoveDialog(

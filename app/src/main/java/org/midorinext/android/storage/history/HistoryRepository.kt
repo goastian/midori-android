@@ -36,7 +36,6 @@ class HistoryRepository @Inject constructor(
     override suspend fun recordVisit(uri: String, visit: PageVisit) = withContext(Dispatchers.IO) {
         dao.insertIfNeeded(Page(uri))
         dao.insert(Visit(uri, System.currentTimeMillis(), visit.visitType))
-        runMaintenance(0U)
     }
 
     suspend fun recordVisitWithTimestamp(uri: String, visit: PageVisit, timestamp: Long) = withContext(Dispatchers.IO) {
@@ -83,14 +82,21 @@ class HistoryRepository @Inject constructor(
 
 
     override fun getSuggestions(query: String, limit: Int): List<SearchResult> {
-        TODO("should run this on background thread. Not done yet as it's unused in our app")
-        // dao.getSuggestions(query, limit)
-        //     .mapIndexed { index, page -> SearchResult(
-        //         id = page.uri,
-        //         url = page.uri,
-        //         title = page.title,
-        //         score = index // Not really relevant. Should rank it using levenshteinDistance
-        //     ) }
+        if (query.isBlank() || limit <= 0) {
+            return emptyList()
+        }
+
+        // HistoryStorage defines this as a synchronous API. Android Components invokes it from
+        // suggestion work off the UI thread; our own provider uses the suspend overload below.
+        return dao.getSuggestions(query, limit)
+            .mapIndexed { index, page ->
+                SearchResult(
+                    id = page.uri,
+                    url = page.uri,
+                    title = page.title,
+                    score = limit - index,
+                )
+            }
     }
 
     override suspend fun getSuggestions(text: String): List<Suggestion> = withContext(Dispatchers.IO) {

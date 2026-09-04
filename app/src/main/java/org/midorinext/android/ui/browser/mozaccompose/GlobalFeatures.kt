@@ -1,8 +1,9 @@
 package org.midorinext.android.ui.browser.mozaccompose
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -86,7 +87,7 @@ fun GlobalFeatures(
         }
     }
 
-    val appPreferences by viewModel.appPreferences.collectAsState()
+    val appPreferences by viewModel.appPreferences.collectAsStateWithLifecycle()
     PromptFeature(
         store = viewModel.store,
         exitFullscreenUseCase = viewModel.sessionUseCases.exitFullscreen,
@@ -101,7 +102,7 @@ fun GlobalFeatures(
         appPreferences = appPreferences,
     )
 
-    val session by viewModel.currentEngineSession.collectAsState()
+    val session by viewModel.currentEngineSession.collectAsStateWithLifecycle()
     ToolbarAlwaysVisibleWhenScrolledToTopFeature(
         toolbarState = viewModel.toolbarState,
         session = session

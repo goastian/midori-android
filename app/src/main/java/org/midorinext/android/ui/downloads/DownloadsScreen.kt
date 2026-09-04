@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.downloads
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +21,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -40,10 +41,10 @@ fun DownloadsScreen(
     onClose: () -> Unit,
     viewModel: DownloadsScreenViewModel = hiltViewModel()
 ) {
-    val activeDownloads by viewModel.downloads.collectAsState()
-    val storedDownloads by viewModel.storedDownloads.collectAsState()
-    val wifiOnly by viewModel.wifiOnly.collectAsState()
-    val removalBehavior by viewModel.removalBehavior.collectAsState()
+    val activeDownloads by viewModel.downloads.collectAsStateWithLifecycle()
+    val storedDownloads by viewModel.storedDownloads.collectAsStateWithLifecycle()
+    val wifiOnly by viewModel.wifiOnly.collectAsStateWithLifecycle()
+    val removalBehavior by viewModel.removalBehavior.collectAsStateWithLifecycle()
     val downloadPendingRemoval = androidx.compose.runtime.remember {
         androidx.compose.runtime.mutableStateOf<DownloadState?>(null)
     }

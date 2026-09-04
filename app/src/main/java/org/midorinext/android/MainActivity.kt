@@ -8,13 +8,13 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.doOnPreDraw
 import org.midorinext.android.storage.MidoriClientProvider
 import org.midorinext.android.mozac.media.BackgroundPlaybackFeature
 import org.midorinext.android.ui.MidoriBrowserApp
 import dagger.hilt.android.AndroidEntryPoint
 import mozilla.components.support.base.android.NotificationsDelegate
 import javax.inject.Inject
-import kotlin.system.exitProcess
 
 @AndroidEntryPoint
 class MainActivity : MidoriActivity() {
@@ -35,6 +35,11 @@ class MainActivity : MidoriActivity() {
         }
         setContentView(v)
         this.bindRootView(v.rootView)
+        v.doOnPreDraw {
+            // Posting from pre-draw ensures the first frame reaches the renderer before optional
+            // browser warm-up, migrations and media observers begin competing for resources.
+            v.post { (application as MidoriApplication).onFirstFrameDrawn() }
+        }
     }
 
     override fun onPause() {

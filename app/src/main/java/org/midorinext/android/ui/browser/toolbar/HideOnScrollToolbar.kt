@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.browser.toolbar
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -24,9 +26,9 @@ fun HideOnScrollToolbar(
     lock: () -> Boolean = { false },
     content: @Composable (Modifier) -> Unit = {},
 ) {
-    val toolbarPosition by toolbarState.toolbarPosition.collectAsState()
+    val toolbarPosition by toolbarState.toolbarPosition.collectAsStateWithLifecycle()
 
-    val shouldHideOnScroll by toolbarState.shouldHideOnScroll.collectAsState()
+    val shouldHideOnScroll by toolbarState.shouldHideOnScroll.collectAsStateWithLifecycle()
 
     val nestedScrollConnection = rememberThresholdNestedScrollConnection(
         onScroll = { sign ->
@@ -93,7 +95,7 @@ fun AnimatedToolbar(
     toolbar: @Composable (Modifier) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val shouldHideOnScroll by toolbarState.shouldHideOnScroll.collectAsState()
+    val shouldHideOnScroll by toolbarState.shouldHideOnScroll.collectAsStateWithLifecycle()
 
     if (shouldHideOnScroll) {
         if (!toolbarState.visible) {

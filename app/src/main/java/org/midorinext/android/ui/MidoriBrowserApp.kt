@@ -1,5 +1,7 @@
 package org.midorinext.android.ui
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
@@ -37,9 +39,9 @@ fun MidoriBrowserApp(
         mutableStateOf(onboardingPreferences.getBoolean(onboardingKey, true))
     }
 
-    val isPrivate by applicationViewModel.isPrivate.collectAsState()
-    val appearance by applicationViewModel.appearance.collectAsState()
-    val toolbarPosition by applicationViewModel.toolbarPosition.collectAsState()
+    val isPrivate by applicationViewModel.isPrivate.collectAsStateWithLifecycle()
+    val appearance by applicationViewModel.appearance.collectAsStateWithLifecycle()
+    val toolbarPosition by applicationViewModel.toolbarPosition.collectAsStateWithLifecycle()
 
     // Protobuf returns UNRECOGNIZED for enum values written by a newer or older app
     // version. Never hand that sentinel to Compose as a remember key: its generated

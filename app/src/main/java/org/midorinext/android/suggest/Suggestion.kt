@@ -1,7 +1,5 @@
 package org.midorinext.android.suggest
 
-import android.graphics.Bitmap
-
 sealed class Suggestion(val provider: SuggestionProvider, val search: String) {
     class SearchSuggestion(provider: SuggestionProvider, search: String,
                            val text: String
@@ -9,7 +7,7 @@ sealed class Suggestion(val provider: SuggestionProvider, val search: String) {
     class BrandSuggestion(provider: SuggestionProvider, search: String,
                           val title: String,
                           val url: String,
-                          val favicon: Bitmap?,
+                          val faviconUrl: String?,
                           val brand: String,
                           val domain: String,
                           val rank: Int,

@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.tabs
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInHorizontally
@@ -37,11 +39,11 @@ fun TabsScreen(
     appViewModel: MidoriApplicationViewModel = hiltViewModel(),
     tabsViewModel: TabsScreenViewModel = hiltViewModel()
 ) {
-    val private by appViewModel.isPrivate.collectAsState()
-    val tabs by tabsViewModel.tabs.collectAsState()
-    val smartTabs by tabsViewModel.smartTabs.collectAsState()
-    val tabsViewOption by tabsViewModel.tabsViewOption.collectAsState()
-    val restoreComplete by tabsViewModel.restoreComplete.collectAsState()
+    val private by appViewModel.isPrivate.collectAsStateWithLifecycle()
+    val tabs by tabsViewModel.tabs.collectAsStateWithLifecycle()
+    val smartTabs by tabsViewModel.smartTabs.collectAsStateWithLifecycle()
+    val tabsViewOption by tabsViewModel.tabsViewOption.collectAsStateWithLifecycle()
+    val restoreComplete by tabsViewModel.restoreComplete.collectAsStateWithLifecycle()
     var selectedTabIds by remember { mutableStateOf(emptySet<String>()) }
     var selectionMode by remember { mutableStateOf(false) }
     var selectionTargetGroupId by remember { mutableStateOf<String?>(null) }
@@ -122,7 +124,7 @@ fun TabsScreen(
                     icon = {
                         Icon(
                             painter = painterResource(id = R.drawable.icons_privacy_mask),
-                            contentDescription = "Private tabs",
+                            contentDescription = stringResource(R.string.tab_tray_private_tabs),
                             modifier = Modifier.size(22.dp)
                         )
                     },
@@ -144,7 +146,10 @@ fun TabsScreen(
                 ToolbarAction(onClick = {
                     openIndividualTab(private)
                 }) {
-                    Icon(painter = painterResource(id = R.drawable.icons_add_tab), contentDescription = "Add tab")
+                    Icon(
+                        painter = painterResource(id = R.drawable.icons_add_tab),
+                        contentDescription = stringResource(R.string.menu_action_add_tab),
+                    )
                 }
                 val tabsClosedString = stringResource(id = R.string.browser_tabs_closed)
                 TabsMenuMore(
@@ -297,7 +302,7 @@ fun TabsScreen(
                 val tabClosedString = stringResource(id = R.string.browser_tab_closed)
                 TabGroupTabsSheet(
                     group = group,
-                    selectedTabId = tabsViewModel.selectedTabId.collectAsState().value,
+                    selectedTabId = tabsViewModel.selectedTabId.collectAsStateWithLifecycle().value,
                     thumbnailStorage = tabsViewModel.thumbnailStorage,
                     browserIcons = tabsViewModel.browserIcons,
                     contentBlockerState = tabsViewModel.contentBlockerState,
@@ -499,7 +504,7 @@ fun TabsMenuMore(
         ToolbarAction(onClick = { showMenu = true }) {
             Icon(
                 painter = painterResource(id = R.drawable.icons_more_vertical),
-                contentDescription = "More"
+                contentDescription = stringResource(R.string.menu_more_options)
             )
         }
         Dropdown(
@@ -567,7 +572,7 @@ fun AnimatedTabList(
     onRemoveTabFromGroup: (String, String) -> Unit,
     onTabLongPressed: (TabSessionState) -> Unit
 ) {
-    val selectedTabId by tabsViewModel.selectedTabId.collectAsState()
+    val selectedTabId by tabsViewModel.selectedTabId.collectAsStateWithLifecycle()
 
     Box(Modifier.fillMaxSize()) {
         val onTabSelected = { tab: SessionState ->

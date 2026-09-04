@@ -138,7 +138,7 @@ fun TabRow(
                 Image(
                     painter = painterResource(R.drawable.icons_privacy_mask),
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
-                    contentDescription = "privacy_mask",
+                    contentDescription = null,
                     modifier = Modifier.fillMaxSize().padding(16.dp)
                 )
             } else {
@@ -182,7 +182,10 @@ fun TabRow(
             }
         } else {
             IconButton(onClick = { onDeleted(tab) }) {
-                Icon(painter = painterResource(id = R.drawable.icons_close), contentDescription = "Delete")
+                Icon(
+                    painter = painterResource(id = R.drawable.icons_close),
+                    contentDescription = stringResource(R.string.tab_tray_close_tab),
+                )
             }
         }
     }

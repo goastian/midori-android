@@ -196,13 +196,13 @@ fun TabCard(
                         MidoriIconOnBackground(shape = RoundedCornerShape(4.dp))
                     } else {
                         tab.content.icon?.let {
-                            Image(bitmap = it.asImageBitmap(), contentDescription = "icon")
+                            Image(bitmap = it.asImageBitmap(), contentDescription = null)
                         } ?: browserIcons.Loader(url = tab.content.url, isPrivate = tab.content.private) {
                             WithIcon {
-                                Image(painter = it.painter, contentDescription = "icon")
+                                Image(painter = it.painter, contentDescription = null)
                             }
                             Placeholder {
-                                Image(painter = painterResource(id = R.drawable.icons_internet), contentDescription = "icon")
+                                Image(painter = painterResource(id = R.drawable.icons_internet), contentDescription = null)
                             }
                         }
                     }
@@ -232,7 +232,10 @@ fun TabCard(
                     }
                 } else {
                     ToolbarAction(onClick = { deleting = true }) { // TODO rename ToolbarAction to "SmallButton" and put it in widgets
-                        Icon(painterResource(id = R.drawable.icons_close), contentDescription = "icon")
+                        Icon(
+                            painterResource(id = R.drawable.icons_close),
+                            contentDescription = stringResource(R.string.tab_tray_close_tab),
+                        )
                     }
                 }
             }

@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.browser.mozaccompose.downloads
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import android.Manifest.permission.POST_NOTIFICATIONS
 import android.content.Context
 import android.content.pm.PackageManager
@@ -53,8 +55,8 @@ fun DownloadFeature(
     val tab by store.observeAsComposableState { state -> state.selectedTab }
     val downloadState = remember(tab) { tab?.content?.download }
     val url = remember(tab) { tab?.content?.url }
-    val wifiOnly by downloadPreferences.wifiOnly.collectAsState()
-    val downloadDirectory by downloadPreferences.directory.collectAsState()
+    val wifiOnly by downloadPreferences.wifiOnly.collectAsStateWithLifecycle()
+    val downloadDirectory by downloadPreferences.directory.collectAsStateWithLifecycle()
 
     var showDownloadRequest by remember { mutableStateOf(false) }
     var showAskPermissionAgain by remember { mutableStateOf(false) }

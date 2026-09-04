@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.extensions
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import android.content.Intent
 import android.net.Uri
 import android.text.Html
@@ -37,11 +39,11 @@ fun ExtensionListScreen(
     onAddonClick: (String) -> Unit = {},
     viewModel: ExtensionViewModel = hiltViewModel()
 ) {
-    val addons by viewModel.addons.collectAsState()
-    val addonsLoading by viewModel.addonsLoading.collectAsState()
-    val addonsError by viewModel.addonsError.collectAsState()
-    val error by viewModel.error.collectAsState()
-    val installingAddonId by viewModel.installingAddonId.collectAsState()
+    val addons by viewModel.addons.collectAsStateWithLifecycle()
+    val addonsLoading by viewModel.addonsLoading.collectAsStateWithLifecycle()
+    val addonsError by viewModel.addonsError.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
+    val installingAddonId by viewModel.installingAddonId.collectAsStateWithLifecycle()
     val lazyListState = rememberLazyListState()
     val context = LocalContext.current
     var searchQuery by rememberSaveable { mutableStateOf("") }

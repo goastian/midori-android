@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.browser.menu
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -38,15 +40,27 @@ fun BrowserMenu(
     viewModel: BrowserScreenViewModel,
     applicationViewModel: MidoriApplicationViewModel
 ) {
-    val currentUrl by viewModel.currentUrl.collectAsState()
+    val currentUrl by viewModel.currentUrl.collectAsStateWithLifecycle()
     val showPageActions = currentUrl.isExternalPage()
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     var showTranslationSheet by rememberSaveable { mutableStateOf(false) }
+    var showMoreOptions by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(expanded) {
+        if (!expanded) {
+            showMoreOptions = false
+        }
+    }
+
+    val dismissMenu = {
+        showMoreOptions = false
+        onDismissRequest()
+    }
 
     Box {
         Dropdown(
             expanded = expanded,
-            onDismissRequest = onDismissRequest,
+            onDismissRequest = dismissMenu,
             // Keep the wide browser menu close to the overflow button while
             // preserving a 16 dp inset from the screen edge.
             offset = DpOffset(24.dp, 0.dp),
@@ -66,7 +80,9 @@ fun BrowserMenu(
                     applicationViewModel = applicationViewModel,
                     currentUrl = currentUrl,
                     showPageActions = showPageActions,
-                    onDismissRequest = onDismissRequest,
+                    showMoreOptions = showMoreOptions,
+                    onShowMoreOptionsChange = { showMoreOptions = it },
+                    onDismissRequest = dismissMenu,
                     onTranslateClick = { showTranslationSheet = true }
                 )
             }
@@ -76,7 +92,7 @@ fun BrowserMenu(
     if (showTranslationSheet) {
         val translating = stringResource(R.string.browser_translating_page)
         val translationUnavailable = stringResource(R.string.browser_translation_unavailable)
-        val translationState by viewModel.translationSheetState.collectAsState()
+        val translationState by viewModel.translationSheetState.collectAsStateWithLifecycle()
 
         TranslationSheet(
             state = translationState,
@@ -108,11 +124,24 @@ private fun BrowserMenuContent(
     applicationViewModel: MidoriApplicationViewModel,
     currentUrl: String?,
     showPageActions: Boolean,
+    showMoreOptions: Boolean,
+    onShowMoreOptionsChange: (Boolean) -> Unit,
     onDismissRequest: () -> Unit,
     onTranslateClick: () -> Unit,
 ) {
-    val isMidoriVpnActionAvailable by viewModel.isMidoriVpnActionAvailable.collectAsState()
-    val showQuitApp by applicationViewModel.zapOnQuit.collectAsState()
+    val isMidoriVpnActionAvailable by viewModel.isMidoriVpnActionAvailable.collectAsStateWithLifecycle()
+    val showQuitApp by applicationViewModel.zapOnQuit.collectAsStateWithLifecycle()
+
+    if (showMoreOptions && showPageActions) {
+        DropdownItem(
+            text = stringResource(R.string.menu_back_to_main),
+            icon = R.drawable.icons_arrow_backward,
+            onClick = { onShowMoreOptionsChange(false) },
+        )
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        PageActions(viewModel, onDismissRequest)
+        return
+    }
 
     BrowserNavigation(viewModel, onDismissRequest)
     HorizontalDivider()
@@ -148,7 +177,11 @@ private fun BrowserMenuContent(
     AppNavigation(navigateTo, onDismissRequest)
     if (showPageActions) {
         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-        PageActions(viewModel, onDismissRequest)
+        DropdownItem(
+            text = stringResource(R.string.menu_more_options),
+            icon = R.drawable.icons_more_vertical,
+            onClick = { onShowMoreOptionsChange(true) },
+        )
     }
     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
     ExtensionsSection(
@@ -208,9 +241,9 @@ fun BrowserNavigation(
     viewModel: BrowserScreenViewModel,
     onDismissRequest: () -> Unit,
 ) {
-    val canGoBack by viewModel.canGoBack.collectAsState()
-    val canGoForward by viewModel.canGoForward.collectAsState()
-    val loadingProgress by viewModel.toolbarState.loadingProgress.collectAsState()
+    val canGoBack by viewModel.canGoBack.collectAsStateWithLifecycle()
+    val canGoForward by viewModel.canGoForward.collectAsStateWithLifecycle()
+    val loadingProgress by viewModel.toolbarState.loadingProgress.collectAsStateWithLifecycle()
 
     Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
         IconButton(
@@ -220,7 +253,10 @@ fun BrowserNavigation(
             },
             enabled = canGoBack
         ) {
-            Icon(painter = painterResource(id = R.drawable.icons_arrow_backward), contentDescription = "back")
+            Icon(
+                painter = painterResource(id = R.drawable.icons_arrow_backward),
+                contentDescription = stringResource(R.string.nav_back),
+            )
         }
         IconButton(
             onClick = {
@@ -229,7 +265,10 @@ fun BrowserNavigation(
             },
             enabled = canGoForward
         ) {
-            Icon(painter = painterResource(id = R.drawable.icons_arrow_forward), contentDescription = "forward")
+            Icon(
+                painter = painterResource(id = R.drawable.icons_arrow_forward),
+                contentDescription = stringResource(R.string.nav_forward),
+            )
         }
         if (loadingProgress != 1f) {
             IconButton(
@@ -238,7 +277,10 @@ fun BrowserNavigation(
                     viewModel.stopLoading()
                 }
             ) {
-                Icon(painter = painterResource(id = R.drawable.icons_close), contentDescription = "stop loading")
+                Icon(
+                    painter = painterResource(id = R.drawable.icons_close),
+                    contentDescription = stringResource(R.string.menu_stop),
+                )
             }
         } else {
             IconButton(
@@ -247,7 +289,10 @@ fun BrowserNavigation(
                     viewModel.reloadUrl()
                 }
             ) {
-                Icon(painter = painterResource(id = R.drawable.icons_reload), contentDescription = "reload")
+                Icon(
+                    painter = painterResource(id = R.drawable.icons_reload),
+                    contentDescription = stringResource(R.string.menu_refresh),
+                )
             }
         }
     }
@@ -295,7 +340,7 @@ private fun TranslateAction(
     viewModel: BrowserScreenViewModel,
     onClick: () -> Unit
 ) {
-    val canTranslate by viewModel.canTranslateCurrentPage.collectAsState()
+    val canTranslate by viewModel.canTranslateCurrentPage.collectAsStateWithLifecycle()
 
     DropdownItem(
         text = stringResource(R.string.browser_translate_page),
@@ -343,7 +388,7 @@ private fun ExtensionsSection(
     viewModel: BrowserScreenViewModel,
     onExtensionsClick: () -> Unit,
 ) {
-    val installedExtensions by viewModel.installedMenuExtensions.collectAsState()
+    val installedExtensions by viewModel.installedMenuExtensions.collectAsStateWithLifecycle()
     val extensionCount = installedExtensions.size
     val extensionsLabel = if (extensionCount > 0) {
         stringResource(R.string.extensions_title) + " $extensionCount"
@@ -363,9 +408,9 @@ fun PageActions(
     viewModel: BrowserScreenViewModel,
     onDismissRequest: () -> Unit,
 ) {
-    val currentUrl by viewModel.currentUrl.collectAsState()
-    val isUrlBookmarked by viewModel.isUrlBookmarked.collectAsState()
-    val desktopSite by viewModel.desktopMode.collectAsState()
+    val currentUrl by viewModel.currentUrl.collectAsStateWithLifecycle()
+    val isUrlBookmarked by viewModel.isUrlBookmarked.collectAsStateWithLifecycle()
+    val desktopSite by viewModel.desktopMode.collectAsStateWithLifecycle()
     val onDesktopSiteClicked = { checked: Boolean ->
         viewModel.requestDesktopSite(checked)
     }

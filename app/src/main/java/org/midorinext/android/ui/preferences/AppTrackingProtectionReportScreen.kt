@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.preferences
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +24,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,9 +47,9 @@ fun AppTrackingProtectionReportScreen(
     viewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val scrollState = rememberScrollState()
-    val appPrefs by viewModel.appPreferences.collectAsState()
-    val appTrackingMetrics by viewModel.appTrackingMetrics.collectAsState()
-    val running by viewModel.systemProtectionRunning.collectAsState()
+    val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
+    val appTrackingMetrics by viewModel.appTrackingMetrics.collectAsStateWithLifecycle()
+    val running by viewModel.systemProtectionRunning.collectAsStateWithLifecycle()
 
     val protectedApps = remember(appTrackingMetrics.blockedByApp) {
         appTrackingMetrics.blockedByApp

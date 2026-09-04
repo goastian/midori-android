@@ -1,8 +1,9 @@
 package org.midorinext.android.ui.browser.mozaccompose
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.midorinext.android.preferences.app.Appearance
@@ -17,7 +18,7 @@ fun EngineSettingsFeature(
     engine: Engine,
     appPreferences: AppPreferences,
 ) {
-    val appearance by appViewModel.appearance.collectAsState()
+    val appearance by appViewModel.appearance.collectAsStateWithLifecycle()
 
     LaunchedEffect(
         appearance,

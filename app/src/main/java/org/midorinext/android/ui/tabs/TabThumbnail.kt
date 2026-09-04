@@ -34,18 +34,17 @@ fun TabThumbnail(
         ContentBlockerOverlay(status = contentBlockerStatus, blockReason = contentBlockerState.getBlockReasonForTab(tabId))
     } else {
         val pixelSize = with(LocalDensity.current) { size.roundToPx() }
-        var loadedImage: Bitmap? by remember { mutableStateOf(null) }
-
         val private = LocalMidoriTheme.current.private
+        var loadedImage: Bitmap? by remember(tabId, pixelSize, private) { mutableStateOf(null) }
 
-        LaunchedEffect(tabId) {
+        LaunchedEffect(tabId, pixelSize, private) {
             loadedImage = thumbnailStorage.loadThumbnail(ImageLoadRequest(id = tabId, pixelSize , private)).await()
         }
 
         loadedImage?.let {
             Image(
                 bitmap = it.asImageBitmap(),
-                contentDescription = "Tab Thumbnail",
+                contentDescription = null,
                 contentScale = ContentScale.Crop,
                 alignment = Alignment.TopCenter,
                 modifier = modifier.fillMaxWidth()

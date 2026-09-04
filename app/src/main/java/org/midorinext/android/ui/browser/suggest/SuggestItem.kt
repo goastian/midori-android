@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import org.midorinext.android.R
 import org.midorinext.android.ext.toCleanUrl
 import org.midorinext.android.preferences.app.ToolbarPosition
@@ -115,10 +116,12 @@ fun SuggestItem(
                     if (suggestion is Suggestion.SearchSuggestion) {
                         SuggestIcon(R.drawable.icons_search)
                     } else if (suggestion is Suggestion.BrandSuggestion) {
-                        suggestion.favicon?.let {
-                            Image(
-                                bitmap = it.asImageBitmap(),
-                                contentDescription = "favicon",
+                        suggestion.faviconUrl?.let {
+                            AsyncImage(
+                                model = it,
+                                contentDescription = null,
+                                placeholder = painterResource(R.drawable.icons_search),
+                                error = painterResource(R.drawable.icons_search),
                                 modifier = Modifier
                                     .size(32.dp)
                                     .clip(

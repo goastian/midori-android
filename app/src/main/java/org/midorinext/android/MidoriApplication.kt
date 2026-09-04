@@ -11,7 +11,9 @@ import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.AppTrackingProtectionMode
 import org.midorinext.android.apptracking.AppTrackingProtectionController
 import org.midorinext.android.storage.autofill.AutofillPreferenceState
+import org.midorinext.android.storage.history.HistoryRepository
 import org.midorinext.android.usecases.MidoriUseCases
+import org.midorinext.android.vpn.MidoriVpnFeature
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.*
 import mozilla.components.browser.session.storage.SessionStorage
@@ -31,6 +33,7 @@ import mozilla.components.support.rusthttp.RustHttpConfig
 import mozilla.components.support.webextensions.WebExtensionSupport
 import org.mozilla.geckoview.GeckoRuntime
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 private const val READING_LIST_DATABASE_NAME = "reading_list_db"
@@ -51,8 +54,11 @@ class MidoriApplication : Application(), Configuration.Provider {
     @Inject lateinit var geckoRuntime: dagger.Lazy<GeckoRuntime>
     @Inject lateinit var appPreferencesRepository: dagger.Lazy<AppPreferencesRepository>
     @Inject lateinit var autofillPreferenceState: dagger.Lazy<AutofillPreferenceState>
+    @Inject lateinit var historyRepository: dagger.Lazy<HistoryRepository>
+    @Inject lateinit var midoriVpnFeature: dagger.Lazy<MidoriVpnFeature>
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val postFirstFrameWorkStarted = AtomicBoolean(false)
 
     /** Lazily initializes WorkManager when Mozilla's add-on updater first schedules work. */
     override val workManagerConfiguration: Configuration
@@ -68,10 +74,6 @@ class MidoriApplication : Application(), Configuration.Provider {
             // Gecko content and crash processes duplicates startup work and competes for CPU.
             return
         }
-
-        // Reading Mode and its Room database have been removed. Delete any data left by earlier
-        // versions so discontinued saved pages do not remain in the application's storage.
-        deleteDatabase(READING_LIST_DATABASE_NAME)
 
         AppServicesInitializer.init(
             AppServicesInitializer.Config(
@@ -103,15 +105,7 @@ class MidoriApplication : Application(), Configuration.Provider {
             }
         }
 
-        engine.get().warmUp()
-
         restoreBrowserState()
-
-        migrationUtility.get().checkMigrations()
-
-
-        mediaFeature.get().start()
-        backgroundPlaybackFeature.get().start()
 
         // TODO
         //  Should be removed in futur version, once mozilla has fully migrated
@@ -138,6 +132,34 @@ class MidoriApplication : Application(), Configuration.Provider {
             },
             onExtensionsLoaded = {}
         )
+    }
+
+    /**
+     * Starts work that is useful for an active browser session but is not required to draw the
+     * first frame. Firefox uses the same visual-completeness boundary to keep maintenance,
+     * warm-up and secondary services out of the critical startup path.
+     */
+    fun onFirstFrameDrawn() {
+        if (!postFirstFrameWorkStarted.compareAndSet(false, true)) {
+            return
+        }
+
+        applicationScope.launch {
+            engine.get().warmUp()
+            // VPN is an optional action. Register it after the UI is visible so extension
+            // discovery and manifest I/O do not compete with the first frame.
+            midoriVpnFeature.get().install(geckoRuntime.get())
+            mediaFeature.get().start()
+            backgroundPlaybackFeature.get().start()
+        }
+
+        applicationScope.launch(Dispatchers.IO) {
+            // Reading Mode and its Room database have been removed. Delete any data left by
+            // earlier versions without doing file-system work before the first frame.
+            deleteDatabase(READING_LIST_DATABASE_NAME)
+            migrationUtility.get().checkMigrations()
+            historyRepository.get().runMaintenance(0U)
+        }
     }
 
     private fun restoreBrowserState() = applicationScope.launch(Dispatchers.Main) {

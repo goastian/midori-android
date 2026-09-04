@@ -124,10 +124,16 @@ class PermissionsFeature(
         // permissions are granted first, otherwise, we reject the request
         if (permissionRequest.isMedia && !permissionRequest.areAllMediaPermissionsGranted(context)) {
             permissionRequest.consumeAndReject()
+            return
         }
 
-        val private: Boolean = store.state.selectedTab?.content?.private
-            ?: throw IllegalStateException("Unable to find selected session")
+        val private = store.state.selectedTab?.content?.private
+        if (private == null) {
+            // The tab may disappear while Gecko's request is in flight. Rejecting is safer than
+            // crashing the browser or showing a permission prompt detached from its origin.
+            permissionRequest.consumeAndReject()
+            return
+        }
 
         val permissionFromStorage = withContext(Dispatchers.IO) {
             storage.findSitePermissionsBy(origin, private = private)

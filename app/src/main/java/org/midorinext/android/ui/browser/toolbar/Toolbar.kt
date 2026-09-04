@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.browser.toolbar
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -44,14 +46,14 @@ fun Toolbar(
     onSwipeLeft: () -> Unit = {},
     onSwipeRight: () -> Unit = {}
 ) {
-    val toolbarPosition by toolbarState.toolbarPosition.collectAsState()
-    val loadingProgress by toolbarState.loadingProgress.collectAsState()
+    val toolbarPosition by toolbarState.toolbarPosition.collectAsStateWithLifecycle()
+    val loadingProgress by toolbarState.loadingProgress.collectAsStateWithLifecycle()
 
     // TODO move suggestShown variable to viewmodel
     //  or handle dividers differently
     //  or pass down this values to ToolbarSuggest which does the same again
     //  as it's expensive here for only handling toolbar divider visibility
-    val suggestions by toolbarState.suggestions.collectAsState()
+    val suggestions by toolbarState.suggestions.collectAsStateWithLifecycle()
     val suggestShown = remember(toolbarState.hasFocus, suggestions) {
         toolbarState.hasFocus && suggestions.any { it.value.isNotEmpty() }
     }
@@ -183,7 +185,7 @@ fun Toolbar(
 private fun ToolbarProgressBar(
     toolbarState: BrowserToolbarState
 ) {
-    val loadingProgress by toolbarState.loadingProgress.collectAsState()
+    val loadingProgress by toolbarState.loadingProgress.collectAsStateWithLifecycle()
 
     ProgressBar(
         loadingProgress = loadingProgress,
@@ -200,8 +202,8 @@ private fun ToolbarSuggest(
     commitSuggestion: (Suggestion) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val toolbarPosition by toolbarState.toolbarPosition.collectAsState()
-    val suggestions by toolbarState.suggestions.collectAsState()
+    val toolbarPosition by toolbarState.toolbarPosition.collectAsStateWithLifecycle()
+    val suggestions by toolbarState.suggestions.collectAsStateWithLifecycle()
 
     if (toolbarState.hasFocus && suggestions.any { it.value.isNotEmpty() }) {
         Suggest(

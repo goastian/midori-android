@@ -1,5 +1,7 @@
 package org.midorinext.android.widget.ui
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -15,7 +17,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -84,7 +85,7 @@ fun Widget(
                         }
                     }
 
-                    val suggestions by viewmodel.toolbarState.suggestions.collectAsState()
+                    val suggestions by viewmodel.toolbarState.suggestions.collectAsStateWithLifecycle()
                     if (viewmodel.toolbarState.hasFocus && viewmodel.toolbarState.text.text.isNotEmpty() && suggestions.isNotEmpty()) {
                         Suggest(
                             suggestions = suggestions,

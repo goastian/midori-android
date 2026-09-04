@@ -85,9 +85,12 @@ interface HistoryDao {
         numItems: Int
     ): List<Page> */
 
-    @Query("SELECT * FROM pages " +
-            "WHERE uri LIKE '%' || :query || '%' " +
-            "OR title LIKE '%' || :query || '%'" +
+    @Query("SELECT pages.* FROM pages " +
+            "LEFT JOIN visits ON pages.uri = visits.pageUri " +
+            "WHERE pages.uri LIKE '%' || :query || '%' " +
+            "OR pages.title LIKE '%' || :query || '%' " +
+            "GROUP BY pages.uri " +
+            "ORDER BY MAX(visits.time) DESC " +
             "LIMIT :limit")
     fun getSuggestions(
         query: String,

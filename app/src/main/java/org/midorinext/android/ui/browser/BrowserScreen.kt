@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.browser
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -45,8 +47,8 @@ enum class TabOpening {
     NONE, NORMAL, PRIVATE
 }
 
-private val ToolbarActionWidth = 44.dp
-private val ToolbarActionRippleRadius = 22.dp
+private val ToolbarActionWidth = 48.dp
+private val ToolbarActionRippleRadius = 24.dp
 
 @Composable
 fun BrowserScreen(
@@ -55,14 +57,14 @@ fun BrowserScreen(
     viewModel: BrowserScreenViewModel = hiltViewModel(),
     openNewTab: TabOpening = TabOpening.NONE
 ) {
-    val currentUrl by viewModel.currentUrl.collectAsState()
-    val selectedTabSnapshot by viewModel.selectedTabSnapshot.collectAsState()
-    val tabCount by viewModel.tabCount.collectAsState()
-    val restoreComplete by viewModel.restoreComplete.collectAsState()
-    val appPrefs by viewModel.appPreferences.collectAsState()
-    val private by appViewModel.isPrivate.collectAsState()
-    val newTabState by viewModel.newTabState.collectAsState()
-    val isMidoriPrivacyActionAvailable by viewModel.isMidoriPrivacyActionAvailable.collectAsState()
+    val currentUrl by viewModel.currentUrl.collectAsStateWithLifecycle()
+    val selectedTabSnapshot by viewModel.selectedTabSnapshot.collectAsStateWithLifecycle()
+    val tabCount by viewModel.tabCount.collectAsStateWithLifecycle()
+    val restoreComplete by viewModel.restoreComplete.collectAsStateWithLifecycle()
+    val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
+    val private by appViewModel.isPrivate.collectAsStateWithLifecycle()
+    val newTabState by viewModel.newTabState.collectAsStateWithLifecycle()
+    val isMidoriPrivacyActionAvailable by viewModel.isMidoriPrivacyActionAvailable.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     var engineViewHolder: EngineView? by remember { mutableStateOf(null) }
@@ -292,8 +294,8 @@ fun AfterActions(
 ) {
     Row {
         if (BuildConfig.FLAVOR_target == "canaltoys") {
-            val canGoBack by viewModel.canGoBack.collectAsState()
-            val canGoForward by viewModel.canGoForward.collectAsState()
+            val canGoBack by viewModel.canGoBack.collectAsStateWithLifecycle()
+            val canGoForward by viewModel.canGoForward.collectAsStateWithLifecycle()
             IconButton(
                 onClick = { viewModel.goBack() },
                 enabled = canGoBack,
@@ -302,7 +304,10 @@ fun AfterActions(
                     .fillMaxHeight()
                     .padding(8.dp)
             ) {
-                Icon(painter = painterResource(id = R.drawable.icons_arrow_backward), contentDescription = "back")
+                Icon(
+                    painter = painterResource(id = R.drawable.icons_arrow_backward),
+                    contentDescription = stringResource(R.string.nav_back),
+                )
             }
             IconButton(
                 onClick = { viewModel.goForward() },
@@ -312,7 +317,10 @@ fun AfterActions(
                     .fillMaxHeight()
                     .padding(8.dp)
             ) {
-                Icon(painter = painterResource(id = R.drawable.icons_arrow_forward), contentDescription = "forward")
+                Icon(
+                    painter = painterResource(id = R.drawable.icons_arrow_forward),
+                    contentDescription = stringResource(R.string.nav_forward),
+                )
             }
         }
         ToolbarShortcutAction(
@@ -375,7 +383,7 @@ private fun ToolbarShortcutAction(
 fun ExitButton(
     appViewModel: MidoriApplicationViewModel
 ) {
-    val shouldZapOnQuit by appViewModel.zapOnQuit.collectAsState()
+    val shouldZapOnQuit by appViewModel.zapOnQuit.collectAsStateWithLifecycle()
     val activity = LocalContext.current.activity
 
     ToolbarAction(onClick = {
@@ -393,7 +401,7 @@ fun ExitButton(
     }) {
         Icon(
             painter = painterResource(id = R.drawable.icons_close),
-            contentDescription = "Close app",
+            contentDescription = stringResource(R.string.menu_quit_app),
             modifier = Modifier.fillMaxSize()
         )
     }
@@ -405,7 +413,7 @@ fun TabsButton(
     navigateTo: (NavDestination) -> Unit,
     viewModel: BrowserScreenViewModel
 ) {
-    val tabCount by viewModel.tabCount.collectAsState()
+    val tabCount by viewModel.tabCount.collectAsStateWithLifecycle()
     var showTabsDropdown by remember { mutableStateOf(false) }
 
     val private = LocalMidoriTheme.current.private
@@ -457,7 +465,7 @@ fun TabsButton(
                     ) {
                         Icon(
                             painterResource(R.drawable.icons_privacy_mask_small),
-                            contentDescription = "private navigation indicator"
+                            contentDescription = stringResource(R.string.tab_tray_private_tabs)
                         )
                     }
                 }
@@ -507,7 +515,7 @@ fun BrowserMenuButton(
         }) {
             Icon(
                 painter = painterResource(id = R.drawable.icons_more_vertical),
-                contentDescription = "menu",
+                contentDescription = stringResource(R.string.nav_menu),
                 modifier = Modifier.fillMaxSize()
             )
         }

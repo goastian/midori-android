@@ -1,8 +1,9 @@
 package org.midorinext.android.ui.browser.mozaccompose
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,7 +17,7 @@ fun BoxScope.EngineViewFeatures(
     engineView: EngineView,
     viewModel: BrowserScreenViewModel = hiltViewModel(),
 ) {
-    val canGoBack by viewModel.canGoBack.collectAsState()
+    val canGoBack by viewModel.canGoBack.collectAsStateWithLifecycle()
     SessionFeature(
         engineView = engineView,
         store = viewModel.store,

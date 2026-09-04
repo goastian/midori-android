@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.extensions
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -25,11 +27,11 @@ fun AddonDetailScreen(
     onClose: () -> Unit,
     viewModel: ExtensionViewModel
 ) {
-    val addons by viewModel.addons.collectAsState()
+    val addons by viewModel.addons.collectAsStateWithLifecycle()
     val addon = remember(addons, addonId) { addons.find { it.id == addonId } }
-    val installingAddonId by viewModel.installingAddonId.collectAsState()
-    val webExtensionStates by viewModel.webExtensionStates.collectAsState()
-    val error by viewModel.error.collectAsState()
+    val installingAddonId by viewModel.installingAddonId.collectAsStateWithLifecycle()
+    val webExtensionStates by viewModel.webExtensionStates.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
 
     Column(modifier = Modifier.fillMaxSize()) {

@@ -243,6 +243,12 @@ android {
         buildConfig true
     }
 
+    androidResources {
+        // GeckoView packages its internal JavaScript in omni.ja. Keeping it uncompressed avoids
+        // inflating ~15 MB before Gecko can start, which directly improves cold startup.
+        noCompress 'ja'
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
@@ -661,6 +667,7 @@ dependencies {
     // AndroidX
     implementation libs.androidx.core.ktx
     implementation libs.androidx.lifecycle.runtime.ktx
+    implementation libs.androidx.lifecycle.runtime.compose
     implementation libs.androidx.lifecycle.process
     implementation libs.androidx.biometric
     implementation libs.androidx.datastore

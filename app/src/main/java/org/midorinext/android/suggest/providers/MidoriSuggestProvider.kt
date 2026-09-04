@@ -1,8 +1,7 @@
 package org.midorinext.android.suggest.providers
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.net.Uri
 import android.util.Log
 import org.midorinext.android.BuildConfig
 import org.midorinext.android.ext.selectedLocale
@@ -33,7 +32,7 @@ class MidoriSuggestProvider @Inject constructor(
                 val request = Request(SuggestFormatUrl.format(
                     midoriClientProvider.clientState.value,
                     context.selectedLocale().toString(),
-                    text
+                    Uri.encode(text)
                 ))
                 client.fetch(request).use { response ->
                     if (response.status == 200) {
@@ -48,28 +47,15 @@ class MidoriSuggestProvider @Inject constructor(
                                 .filter { it.getString("type") == "brand_suggest" }
                                 .take(2) // TODO make this suggestion limit a parameter
                                 .mapIndexed { index, jsonObject ->
-                                    // TODO Add the option to request any icon to BrowserIcons mozilla component and contribute
-                                    var favicon: Bitmap? = null
-                                    try {
-                                        client.fetch(Request(jsonObject.getString("favicon_url"))).use { response ->
-                                            if (response.status == 200) {
-                                                response.body.useStream { stream ->
-                                                    favicon = BitmapFactory.decodeStream(stream)
-                                                }
-                                            }
-                                        }
-                                    } catch (e: IOException) {
-                                        Log.e(LOGTAG, "Error fetching ad favicon", e)
-                                    } catch (e: Exception) {
-                                        Log.e(LOGTAG, "Error decoding ad favicon stream", e)
-                                    }
-
                                     Suggestion.BrandSuggestion(
                                         provider = this@MidoriSuggestProvider,
                                         search = text,
                                         title = jsonObject.getString("name"),
                                         url = jsonObject.getString("url"),
-                                        favicon = favicon,
+                                        // Let the UI image loader fetch, cache and downsample this independently.
+                                        // Suggestions no longer wait for two additional network requests.
+                                        faviconUrl = jsonObject.optString("favicon_url")
+                                            .takeIf(String::isNotBlank),
                                         brand = jsonObject.getString("brand"),
                                         domain = jsonObject.getString("domain"),
                                         rank = index + 1,
@@ -108,4 +94,3 @@ class MidoriSuggestProvider @Inject constructor(
         private const val SuggestFormatUrl = "${BuildConfig.QWANT_API_BASE_URL}/suggest?client=%s&locale=%s&version=2&q=%s"
     }
 }
-

@@ -10,7 +10,10 @@ import org.midorinext.android.suggest.SuggestionProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.coroutineScope as runProvidersInParallel
 import kotlinx.coroutines.flow.*
 import mozilla.components.browser.icons.BrowserIcons
 
@@ -34,7 +37,14 @@ open class ToolbarState(
         .mapLatest { search ->
             delay(100)
             if (hasFocus && search.isNotBlank()) {
-                suggestionProviders.associateWith { provider -> provider.getSuggestions(search) }
+                runProvidersInParallel {
+                    suggestionProviders
+                        .map { provider ->
+                            async { provider to provider.getSuggestions(search) }
+                        }
+                        .awaitAll()
+                        .toMap()
+                }
             } else emptySuggestions
         }
         .stateIn(

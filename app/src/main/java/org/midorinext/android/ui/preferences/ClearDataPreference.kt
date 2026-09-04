@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.preferences
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,7 +32,7 @@ fun ClearDataPreference(
     viewModel: PreferencesViewModel,
     applicationViewModel: MidoriApplicationViewModel
 ) {
-    val prefs by viewModel.clearDataPreferences.collectAsState()
+    val prefs by viewModel.clearDataPreferences.collectAsStateWithLifecycle()
 
     val browsingDataOptions = remember(prefs.browsingData) {
         val allChecked = prefs.browsingData.contains(Engine.BrowsingData.ALL)

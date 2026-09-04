@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.preferences
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -15,7 +17,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -35,9 +36,9 @@ fun PrivacyScreen(
     viewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val scrollState = rememberScrollState()
-    val appPrefs by viewModel.appPreferences.collectAsState()
-    val systemProtectionRunning by viewModel.systemProtectionRunning.collectAsState()
-    val appTrackingMetrics by viewModel.appTrackingMetrics.collectAsState()
+    val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
+    val systemProtectionRunning by viewModel.systemProtectionRunning.collectAsStateWithLifecycle()
+    val appTrackingMetrics by viewModel.appTrackingMetrics.collectAsStateWithLifecycle()
 
     val vpnPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -48,7 +49,10 @@ fun PrivacyScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        ScreenHeader(title = "Privacy and Security", scrollableState = scrollState)
+        ScreenHeader(
+            title = stringResource(R.string.settings_group_privacy),
+            scrollableState = scrollState,
+        )
 
         Column(
             modifier = Modifier
@@ -285,4 +289,3 @@ fun PrivacyScreen(
         }
     }
 }
-

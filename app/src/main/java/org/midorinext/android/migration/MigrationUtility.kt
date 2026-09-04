@@ -8,9 +8,7 @@ import org.midorinext.android.storage.bookmarks.BookmarksRepository
 import org.midorinext.android.storage.history.HistoryRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mozilla.components.concept.storage.PageObservation
 import mozilla.components.concept.storage.PageVisit
@@ -31,11 +29,9 @@ class MigrationUtility @Inject constructor(
     private val historyRepository: HistoryRepository,
     private val bookmarksRepository: BookmarksRepository
 ) {
-    fun checkMigrations() {
-        MainScope().launch {
-            val migrationData = migrationDataRepository.flow.first()
-            migration504(migrationData)
-        }
+    suspend fun checkMigrations() {
+        val migrationData = migrationDataRepository.flow.first()
+        migration504(migrationData)
     }
 
     private suspend fun migration504(migrationData: MigrationData) {

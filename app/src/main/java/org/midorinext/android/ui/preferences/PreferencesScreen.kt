@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.preferences
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import android.content.Intent
 import android.provider.DocumentsContract
 import android.os.Build
@@ -24,7 +26,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,7 +64,7 @@ fun PreferencesScreen(
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
-    val appPrefs by viewModel.appPreferences.collectAsState()
+    val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         ScreenHeader(title = stringResource(id = R.string.settings), scrollableState = scrollState)
@@ -229,7 +230,7 @@ fun PreferencesScreen(
 
 @Composable
 fun HomepageSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
-    val appPrefs by viewModel.appPreferences.collectAsState()
+    val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
     PreferenceScreenScaffold(title = stringResource(R.string.settings_homepage_title)) {
         PreferenceGroupLabel(label = R.string.settings_homepage_sections)
         if (BuildConfig.FLAVOR_version == "original") {
@@ -273,7 +274,7 @@ fun HomepageSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
 
 @Composable
 fun CustomizeSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
-    val appPrefs by viewModel.appPreferences.collectAsState()
+    val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
     PreferenceScreenScaffold(title = stringResource(R.string.settings_customize_title)) {
         PreferenceGroupLabel(label = R.string.appearance_label)
         PreferenceRadioSelectionPopup(
@@ -387,7 +388,7 @@ fun NotificationSettingsScreen() {
 @Composable
 fun DownloadSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
     val context = LocalContext.current
-    val appPrefs by viewModel.appPreferences.collectAsState()
+    val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
     val downloadDirectoryPicker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocumentTree()
     ) { uri ->
@@ -477,7 +478,7 @@ fun PasswordSettingsScreen(
     navigateTo: (NavDestination) -> Unit = {},
     viewModel: PreferencesViewModel = hiltViewModel(),
 ) {
-    val appPrefs by viewModel.appPreferences.collectAsState()
+    val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
     PreferenceScreenScaffold(title = stringResource(R.string.settings_passwords_title)) {
         PreferenceGroupLabel(label = R.string.settings_passwords_title)
         PreferenceToggle(
@@ -506,7 +507,7 @@ fun AutofillSettingsScreen(
     navigateTo: (NavDestination) -> Unit = {},
     viewModel: PreferencesViewModel = hiltViewModel(),
 ) {
-    val appPrefs by viewModel.appPreferences.collectAsState()
+    val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
     PreferenceScreenScaffold(title = stringResource(R.string.settings_autofill_title)) {
         PreferenceGroupLabel(label = R.string.settings_autofill_addresses)
         PreferenceToggle(
@@ -538,7 +539,7 @@ fun AutofillSettingsScreen(
 
 @Composable
 fun AccessibilitySettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
-    val appPrefs by viewModel.appPreferences.collectAsState()
+    val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
     PreferenceScreenScaffold(title = stringResource(R.string.settings_accessibility_title)) {
         PreferenceToggle(
             label = R.string.settings_accessibility_auto_font,
@@ -594,8 +595,8 @@ fun AccessibilitySettingsScreen(viewModel: PreferencesViewModel = hiltViewModel(
 
 @Composable
 fun TranslationSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
-    val appPrefs by viewModel.appPreferences.collectAsState()
-    val translationState by viewModel.translationState.collectAsState()
+    val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
+    val translationState by viewModel.translationState.collectAsStateWithLifecycle()
     var showAutomaticLanguages by remember { mutableStateOf(false) }
     var showNeverTranslateSites by remember { mutableStateOf(false) }
     var showDownloads by remember { mutableStateOf(false) }

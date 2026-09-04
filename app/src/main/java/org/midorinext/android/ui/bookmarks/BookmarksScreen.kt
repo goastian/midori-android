@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.bookmarks
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -9,7 +11,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,8 +28,8 @@ fun BookmarksScreen(
     viewModel: BookmarksScreenViewModel = hiltViewModel()
 ) {
     val lazyListState = rememberLazyListState()
-    val isRootFolder by viewModel.isRootFolder.collectAsState()
-    val folder by viewModel.folder.collectAsState()
+    val isRootFolder by viewModel.isRootFolder.collectAsStateWithLifecycle()
+    val folder by viewModel.folder.collectAsStateWithLifecycle()
 
     BackHandler(!isRootFolder) {
         folder.parentGuid?.let { viewModel.visitFolder(it) }

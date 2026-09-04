@@ -4,7 +4,6 @@ import android.content.Context
 import org.midorinext.android.adblock.MidoriPrivacyFeature
 import org.midorinext.android.cookies.MidoriCookieFeature
 import org.midorinext.android.newtab.MidoriNewTabFeature
-import org.midorinext.android.vpn.MidoriVpnFeature
 import org.midorinext.android.youtubeRestrictedExtension.YoutubeRestrictedFeature
 import dagger.Module
 import dagger.Provides
@@ -52,11 +51,9 @@ object GeckoHiltModule {
         cookieFeature: MidoriCookieFeature,
         adBlockerFeature: MidoriPrivacyFeature,
         newTabFeature: MidoriNewTabFeature,
-        midoriVpnFeature: MidoriVpnFeature,
     ): Engine {
         return GeckoEngine(context, settings, runtime).also {
             adBlockerFeature.install(runtime)
-            midoriVpnFeature.install(runtime)
             cookieFeature.install(runtime)
             newTabFeature.install(runtime)
             YoutubeRestrictedFeature.install(runtime)

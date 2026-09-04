@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.zap
 
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 import android.content.SharedPreferences
 import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
 import androidx.compose.animation.graphics.res.animatedVectorResource
@@ -15,7 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,7 +48,7 @@ fun ZapButton(
     val prefs: SharedPreferences = remember { PreferenceManager.getDefaultSharedPreferences(context) }
     var shouldHighlightZapPref by remember { mutableStateOf(prefs.getBoolean(prefkey, true)) }
 
-    val hasHistory by appViewModel.hasHistory.collectAsState()
+    val hasHistory by appViewModel.hasHistory.collectAsStateWithLifecycle()
 
     val listener = SharedPreferences.OnSharedPreferenceChangeListener { p, key ->
         key?.takeIf { it == prefkey }?.let {
