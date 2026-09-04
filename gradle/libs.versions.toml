@@ -29,7 +29,7 @@ espresso = "3.7.0"
 protobuf = "4.35.0"
 room = "2.8.4"
 work = "2.11.2"
-mozac = "154.0"
+mozac = "155.0"
 
 # Plugins
 android-gradle-plugin = "9.1.1"
