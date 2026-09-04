@@ -145,9 +145,10 @@ class BookmarksRepository @Inject constructor(
     override suspend fun getRecentBookmarks(
         limit: Int,
         maxAge: Long?,
-        currentTime: Long
     ): Result<List<BookmarkNode>> = withContext(Dispatchers.IO) {
-        Result.success(dao.getRecent(maxAge ?: 0, currentTime, limit).map { it.toMozillaBookmarkNode() })
+        val currentTime = System.currentTimeMillis()
+        val oldestAllowedDate = maxAge?.let { currentTime - it } ?: 0
+        Result.success(dao.getRecent(oldestAllowedDate, currentTime, limit).map { it.toMozillaBookmarkNode() })
     }
 
     override suspend fun getTree(guid: String, recursive: Boolean): Result<BookmarkNode?> = withContext(Dispatchers.IO) {
