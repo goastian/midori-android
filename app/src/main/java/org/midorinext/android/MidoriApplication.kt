@@ -121,11 +121,12 @@ class MidoriApplication : Application(), Configuration.Provider {
             runtime = engine.get(),
             store = store.get(),
             openPopupInTab = true,
-            onNewTabOverride = { _, engineSession, url, _ ->
+            onNewTabOverride = { _, engineSession, url, isActive, isPrivate ->
                 val tabId = tuc.addTab(
                     url = url,
-                    selectTab = true,
-                    engineSession = engineSession
+                    selectTab = isActive,
+                    engineSession = engineSession,
+                    private = isPrivate,
                 )
                 tabId
             },
