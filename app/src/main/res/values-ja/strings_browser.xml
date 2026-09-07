@@ -65,6 +65,8 @@
     <string name="browser_site_secure">安全な接続</string>
     <string name="browser_site_insecure">安全でない接続</string>
     <string name="browser_toolbar_hint">住所を検索または入力してください</string>
+    <string name="browser_reader_view_open">リーダービューを開く</string>
+    <string name="browser_reader_view_close">リーダービューを閉じる</string>
     <string name="browser_recent_searches">最近の検索</string>
     <string name="browser_suggest_clipboard_text">コピーされたテキスト</string>
     <string name="browser_brand_suggest_ad">広告</string>

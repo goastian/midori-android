@@ -65,6 +65,8 @@
     <string name="browser_site_secure">Lidhje e sigurt</string>
     <string name="browser_site_insecure">Lidhje e pasigurt</string>
     <string name="browser_toolbar_hint">Kërkoni ose vendosni një adresë</string>
+    <string name="browser_reader_view_open">Hap pamjen e leximit</string>
+    <string name="browser_reader_view_close">Mbyll pamjen e leximit</string>
     <string name="browser_recent_searches">Kërkimet e fundit</string>
     <string name="browser_suggest_clipboard_text">Teksti i kopjuar</string>
     <string name="browser_brand_suggest_ad">Ad</string>

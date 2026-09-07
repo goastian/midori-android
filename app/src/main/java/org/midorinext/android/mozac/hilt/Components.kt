@@ -42,6 +42,7 @@ import mozilla.components.feature.media.middleware.RecordingDevicesMiddleware
 import mozilla.components.feature.prompts.PromptMiddleware
 import mozilla.components.feature.pwa.ManifestStorage
 import mozilla.components.feature.pwa.WebAppShortcutManager
+import mozilla.components.feature.readerview.ReaderViewMiddleware
 import mozilla.components.feature.session.middleware.LastAccessMiddleware
 import mozilla.components.feature.session.middleware.undo.UndoMiddleware
 import mozilla.components.support.base.android.NotificationsDelegate
@@ -82,7 +83,8 @@ object MozacComponentHiltModule {
                 LastAccessMiddleware(),
                 UndoMiddleware(clearAfterMillis = 15_000),
                 LastMediaAccessMiddleware(),
-                RecordingDevicesMiddleware(context, notificationsDelegate)
+                RecordingDevicesMiddleware(context, notificationsDelegate),
+                ReaderViewMiddleware(),
             ) + EngineMiddleware.create(engine) + TranslationsMiddleware(
                 engine = engine,
                 // The browser store is application-scoped, so its translation coordinator must

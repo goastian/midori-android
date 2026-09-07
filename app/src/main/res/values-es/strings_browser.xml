@@ -18,6 +18,8 @@
     <string name="browser_site_insecure">Conexión sin protección</string>
 
     <string name="browser_toolbar_hint">Busca o ingresa una dirección</string>
+    <string name="browser_reader_view_open">Abrir vista de lectura</string>
+    <string name="browser_reader_view_close">Cerrar vista de lectura</string>
     <string name="browser_recent_searches">Búsquedas recientes</string>
     <string name="browser_suggest_clipboard_text">Texto copiado</string>
     <string name="browser_brand_suggest_ad">Anuncio</string>

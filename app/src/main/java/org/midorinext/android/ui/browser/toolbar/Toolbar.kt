@@ -45,6 +45,8 @@ fun Toolbar(
     browserIcons: BrowserIcons,
     beforeTextField: @Composable () -> Unit = {},
     beforeTextFieldVisible: () -> Boolean = { true },
+    pageEndAction: @Composable () -> Unit = {},
+    pageEndActionVisible: () -> Boolean = { false },
     afterTextField: @Composable () -> Unit = {},
     afterTextFieldVisible: () -> Boolean = { true },
     onMidoriIconClicked: () -> Unit = {},
@@ -96,6 +98,8 @@ fun Toolbar(
             isEditMode = isEditMode,
             beforeTextField = beforeTextField,
             beforeTextFieldVisible = beforeTextFieldVisible,
+            pageEndAction = pageEndAction,
+            pageEndActionVisible = pageEndActionVisible,
             afterTextField = afterTextField,
             afterTextFieldVisible = afterTextFieldVisible,
             onTextCommit = onTextCommit,
@@ -131,6 +135,8 @@ private fun ToolbarChrome(
     isEditMode: Boolean,
     beforeTextField: @Composable () -> Unit,
     beforeTextFieldVisible: () -> Boolean,
+    pageEndAction: @Composable () -> Unit,
+    pageEndActionVisible: () -> Boolean,
     afterTextField: @Composable () -> Unit,
     afterTextFieldVisible: () -> Boolean,
     onTextCommit: (String) -> Unit,
@@ -173,6 +179,11 @@ private fun ToolbarChrome(
                         isEditMode -> ({ ToolbarSearchSelector() })
                         beforeTextFieldVisible() -> beforeTextField
                         else -> null
+                    },
+                    trailingContent = if (!isEditMode && pageEndActionVisible()) {
+                        pageEndAction
+                    } else {
+                        null
                     },
                     onMidoriIconClicked = onMidoriIconClicked,
                 )

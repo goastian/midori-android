@@ -30,6 +30,7 @@ fun AppDetailsPreference() {
         description = stringResource(
             R.string.qwant_details_description,
             packageInfo.versionName ?: "",
+            R.string.madeby,
             PackageInfoCompat.getLongVersionCode(packageInfo).toString(),
             BuildConfig.MOZ_APP_VERSION
         ),

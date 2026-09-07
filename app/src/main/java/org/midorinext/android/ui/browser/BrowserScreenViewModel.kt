@@ -88,6 +88,11 @@ class BrowserScreenViewModel @Inject constructor(
         val url: String,
     )
 
+    data class ReaderModeStatus(
+        val isAvailable: Boolean = false,
+        val isActive: Boolean = false,
+    )
+
     data class InstalledMenuExtension(
         val id: String,
         val name: String,
@@ -139,6 +144,26 @@ class BrowserScreenViewModel @Inject constructor(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
             initialValue = null,
+        )
+
+    val readerModeStatus = store.flow()
+        .map { state ->
+            state.selectedTab?.let { tab ->
+                ReaderModeStatus(
+                    // Midori offers Reader View for every regular web document. The bundled
+                    // extension falls back to a text-first extraction when Mozilla Readability's
+                    // conservative article detector cannot produce a result.
+                    isAvailable = tab.content.url.startsWith("http://", ignoreCase = true) ||
+                        tab.content.url.startsWith("https://", ignoreCase = true),
+                    isActive = tab.readerState.active,
+                )
+            } ?: ReaderModeStatus()
+        }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = ReaderModeStatus(),
         )
 
     val appPreferences = appPreferencesRepository.flow

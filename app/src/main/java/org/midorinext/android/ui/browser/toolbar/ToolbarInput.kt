@@ -43,6 +43,7 @@ fun ToolbarInput(
     onCommit: (String) -> Unit,
     modifier: Modifier = Modifier,
     leadingContent: (@Composable () -> Unit)? = null,
+    trailingContent: (@Composable () -> Unit)? = null,
     onMidoriIconClicked: () -> Unit = {}
 ) {
     val localStyle = LocalTextStyle.current
@@ -110,6 +111,8 @@ fun ToolbarInput(
                             )
                         }
                     }
+                } else {
+                    trailingContent?.invoke()
                 }
             },
             leadingContent = leadingContent,

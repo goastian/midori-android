@@ -97,6 +97,7 @@ mozac-feature-pwa = { group = "org.mozilla.components", name = "feature-pwa", ve
 mozac-feature-intent = { group = "org.mozilla.components", name = "feature-intent", version.ref = "mozac" }
 mozac-feature-webcompat = { group = "org.mozilla.components", name = "feature-webcompat", version.ref = "mozac" }
 mozac-feature-media = { group = "org.mozilla.components", name = "feature-media", version.ref = "mozac" }
+mozac-feature-readerview = { group = "org.mozilla.components", name = "feature-readerview", version.ref = "mozac" }
 mozac-support-utils = { group = "org.mozilla.components", name = "support-utils", version.ref = "mozac" }
 mozac-support-ktx = { group = "org.mozilla.components", name = "support-ktx", version.ref = "mozac" }
 mozac-support-appservices = { group = "org.mozilla.components", name = "support-appservices", version.ref = "mozac" }

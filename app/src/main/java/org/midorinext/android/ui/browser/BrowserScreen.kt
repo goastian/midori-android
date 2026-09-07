@@ -1,5 +1,6 @@
 package org.midorinext.android.ui.browser
 
+import androidx.activity.compose.BackHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -41,6 +42,7 @@ import org.midorinext.android.ui.widgets.TabCounter
 import kotlinx.coroutines.delay
 import mozilla.components.support.ktx.android.content.share
 import mozilla.components.concept.engine.EngineView
+import mozilla.components.ui.icons.R as iconsR
 import org.midorinext.android.BuildConfig
 
 enum class TabOpening {
@@ -65,7 +67,14 @@ fun BrowserScreen(
     val private by appViewModel.isPrivate.collectAsStateWithLifecycle()
     val newTabState by viewModel.newTabState.collectAsStateWithLifecycle()
     val isMidoriPrivacyActionAvailable by viewModel.isMidoriPrivacyActionAvailable.collectAsStateWithLifecycle()
+    val readerModeStatus by viewModel.readerModeStatus.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val readerViewFeature = rememberReaderViewFeature(
+        store = viewModel.store,
+        engine = viewModel.engine,
+    )
+
+    ComposeFeatureWrapper(readerViewFeature)
 
     var engineViewHolder: EngineView? by remember { mutableStateOf(null) }
     var pageSummary by remember { mutableStateOf<String?>(null) }
@@ -151,16 +160,34 @@ fun BrowserScreen(
                 toolbarState = viewModel.toolbarState,
                 browserIcons = viewModel.browserIcons,
                 beforeTextField = {
-                    AdBlockerAction(enabled = isMidoriPrivacyActionAvailable) {
-                        viewModel.triggerInstalledExtensionAction(MidoriPrivacyFeature.EXTENSION_ID)
+                    if (!readerModeStatus.isActive) {
+                        AdBlockerAction(enabled = isMidoriPrivacyActionAvailable) {
+                            viewModel.triggerInstalledExtensionAction(MidoriPrivacyFeature.EXTENSION_ID)
+                        }
                     }
                 },
                 beforeTextFieldVisible = {
-                    !viewModel.toolbarState.hasFocus &&
-                        currentUrl?.isNotBlank() == true &&
-                        currentUrl?.isMidoriUrl() == false &&
-                        !viewModel.isNewTabUrl(currentUrl) &&
-                        currentUrl != "about:blank"
+                    readerModeStatus.isActive ||
+                        (!viewModel.toolbarState.hasFocus &&
+                            currentUrl?.isNotBlank() == true &&
+                            currentUrl?.isMidoriUrl() == false &&
+                            !viewModel.isNewTabUrl(currentUrl) &&
+                            currentUrl != "about:blank")
+                },
+                pageEndAction = {
+                    ReaderModeAction(
+                        active = readerModeStatus.isActive,
+                        onClick = {
+                            if (readerModeStatus.isActive) {
+                                readerViewFeature.hideReaderView()
+                            } else {
+                                readerViewFeature.showReaderView()
+                            }
+                        },
+                    )
+                },
+                pageEndActionVisible = {
+                    readerModeStatus.isAvailable || readerModeStatus.isActive
                 },
                 afterTextField = {
                     AfterActions(
@@ -250,6 +277,39 @@ fun BrowserScreen(
                     .background(MaterialTheme.colorScheme.primaryContainer)
             )
         }
+    }
+
+    // Register after the engine session handler so Back exits Reader View before navigating away.
+    BackHandler(enabled = readerModeStatus.isActive) {
+        readerViewFeature.onBackPressed()
+    }
+}
+
+
+@Composable
+private fun ReaderModeAction(
+    active: Boolean,
+    onClick: () -> Unit,
+) {
+    ToolbarAction(onClick = onClick) {
+        Icon(
+            painter = painterResource(
+                if (active) {
+                    iconsR.drawable.mozac_ic_reader_view_fill_24
+                } else {
+                    iconsR.drawable.mozac_ic_reader_view_24
+                },
+            ),
+            contentDescription = stringResource(
+                if (active) {
+                    R.string.browser_reader_view_close
+                } else {
+                    R.string.browser_reader_view_open
+                },
+            ),
+            modifier = Modifier.size(24.dp),
+            tint = if (active) MaterialTheme.colorScheme.primary else LocalContentColor.current,
+        )
     }
 }
 

@@ -18,6 +18,8 @@
     <string name="browser_site_insecure">Ungesicherte Verbindung</string>
 
     <string name="browser_toolbar_hint">Adresse suchen oder eingeben</string>
+    <string name="browser_reader_view_open">Leseansicht öffnen</string>
+    <string name="browser_reader_view_close">Leseansicht schließen</string>
     <string name="browser_recent_searches">Kürzlich gesucht</string>
 
     <string name="browser_suggest_clipboard_text">Kopierter Text</string>
