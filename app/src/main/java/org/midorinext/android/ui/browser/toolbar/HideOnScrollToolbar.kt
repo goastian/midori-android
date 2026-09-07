@@ -11,7 +11,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.zIndex
 import org.midorinext.android.preferences.app.ToolbarPosition
 import org.midorinext.android.ui.animation.reduceMotionRequested
@@ -63,7 +62,6 @@ fun HideOnScrollToolbar(
             content(
                 Modifier
                     .fillMaxSize()
-                    .testTag("browser-content")
                     .then(contentModifier)
             )
             DrawAnimatedToolbar(

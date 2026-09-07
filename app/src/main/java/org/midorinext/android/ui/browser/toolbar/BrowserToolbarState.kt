@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import org.midorinext.android.BuildConfig
 import org.midorinext.android.ext.getMidoriSERPSearch
 import org.midorinext.android.ext.isMidoriUrl
 import org.midorinext.android.ext.toCleanHost
@@ -77,7 +76,7 @@ class BrowserToolbarState @AssistedInject constructor(
         )
 
     val shouldHideOnScroll = appPreferencesRepository.flow
-        .map { prefs -> BuildConfig.IS_MACROBENCHMARK || prefs.hideToolbarOnScroll }
+        .map { prefs -> prefs.hideToolbarOnScroll }
         .stateIn(
             scope = coroutineScope,
             started = SharingStarted.WhileSubscribed(5000L),
