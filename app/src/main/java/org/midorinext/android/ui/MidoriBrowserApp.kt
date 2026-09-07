@@ -86,7 +86,7 @@ fun MidoriBrowserApp(
                     SnackbarHost(
                         hostState = applicationViewModel.snackbarHostState,
                         modifier = Modifier.offset(
-                            y = if (resolvedToolbarPosition == ToolbarPosition.BOTTOM) (-56).dp else 0.dp
+                            y = if (resolvedToolbarPosition == ToolbarPosition.BOTTOM) (-64).dp else 0.dp
                         )
                     )
                 },

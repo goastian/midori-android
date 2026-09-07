@@ -70,6 +70,13 @@ class BrowserToolbarState @AssistedInject constructor(
             initialValue = ToolbarPosition.UNRECOGNIZED
         )
 
+    val recentSearches = appPreferencesRepository.recentSearchesFlow
+        .stateIn(
+            scope = coroutineScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = emptyList()
+        )
+
     val shouldHideOnScroll = appPreferencesRepository.flow
         .map { prefs -> prefs.hideToolbarOnScroll }
         .stateIn(
@@ -116,6 +123,9 @@ class BrowserToolbarState @AssistedInject constructor(
 
     override fun updateFocus(hasFocus: Boolean) {
         super.updateFocus(hasFocus)
+        if (hasFocus) {
+            updateVisibility(true)
+        }
         coroutineScope.launch {
             delay(10) // Needed else change to toolbar text is overridden by call to onChange.
             updateTextWithUrl(currentUrl.value ?: "")

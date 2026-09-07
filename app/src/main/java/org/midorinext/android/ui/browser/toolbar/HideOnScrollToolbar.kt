@@ -46,45 +46,47 @@ fun HideOnScrollToolbar(
         Modifier.nestedScroll(nestedScrollConnection)
     } else Modifier
 
-    Column(modifier = modifier) {
-        if (toolbarPosition == ToolbarPosition.BOTTOM) {
-            HorizontalDivider(
-                modifier = Modifier.fillMaxWidth(),
-                thickness = 1.dp,
-                color = MaterialTheme.colorScheme.outline
-            )
-            content(
+    if (toolbarState.hasFocus) {
+        // Keep GeckoView composed while the Firefox-style edit surface replaces it visually.
+        Box(modifier = modifier) {
+            content(Modifier.fillMaxSize())
+            toolbar(
                 Modifier
-                    .fillMaxWidth()
-                    .weight(2f, true)
-                    .then(contentModifier)
-            )
-            AnimatedToolbar(
-                toolbarState,
-                toolbar,
-                Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .zIndex(2f)
             )
-        } else if (toolbarPosition == ToolbarPosition.TOP) {
-            AnimatedToolbar(
-                toolbarState,
-                toolbar,
-                Modifier
-                    .fillMaxWidth()
-                    .zIndex(2f)
-            )
-            content(
-                Modifier
-                    .fillMaxWidth()
-                    .weight(2f, true)
-                    .then(contentModifier)
-            )
-            HorizontalDivider(
-                modifier = Modifier.fillMaxWidth(),
-                thickness = 1.dp,
-                color = MaterialTheme.colorScheme.outline
-            )
+        }
+    } else {
+        Column(modifier = modifier) {
+            if (toolbarPosition == ToolbarPosition.BOTTOM) {
+                content(
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(2f, true)
+                        .then(contentModifier)
+                )
+                AnimatedToolbar(
+                    toolbarState,
+                    toolbar,
+                    Modifier
+                        .fillMaxWidth()
+                        .zIndex(2f)
+                )
+            } else if (toolbarPosition == ToolbarPosition.TOP) {
+                AnimatedToolbar(
+                    toolbarState,
+                    toolbar,
+                    Modifier
+                        .fillMaxWidth()
+                        .zIndex(2f)
+                )
+                content(
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(2f, true)
+                        .then(contentModifier)
+                )
+            }
         }
     }
 }

@@ -68,6 +68,7 @@
     <string name="browser_site_insecure">Insecure connection</string>
 
     <string name="browser_toolbar_hint">Search or enter an address</string>
+    <string name="browser_recent_searches">Recent searches</string>
     <string name="browser_suggest_clipboard_text">Copied text</string>
     <string name="browser_brand_suggest_ad">Ad</string>
     <string name="browser_brand_suggest_information">This search suggestion is an advertisement for %1$s. You will be redirected to the advertiser\'s website: %2$s</string>

@@ -249,6 +249,43 @@ fun SuggestItem(
     )
 }
 
+@Composable
+fun RecentSearchSuggestionItem(
+    search: String,
+    toolbarPosition: ToolbarPosition,
+    onSetTextClicked: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    WebsiteRow(
+        title = search,
+        leading = {
+            Icon(
+                painter = painterResource(R.drawable.icons_history),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(24.dp),
+            )
+        },
+        trailing = {
+            Icon(
+                painter = painterResource(
+                    when (toolbarPosition) {
+                        ToolbarPosition.TOP -> R.drawable.icons_arrow_backward_up
+                        else -> R.drawable.icons_arrow_backward_down
+                    }
+                ),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clickable { onSetTextClicked(search) }
+                    .padding(12.dp),
+            )
+        },
+        modifier = modifier,
+    )
+}
+
 // TODO Move WebsiteRow to it's own widget file as it is used all over the app
 @Composable
 fun WebsiteRow(

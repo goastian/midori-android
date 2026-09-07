@@ -65,6 +65,7 @@
     <string name="browser_site_secure">Conexão segura</string>
     <string name="browser_site_insecure">Conexão insegura</string>
     <string name="browser_toolbar_hint">Pesquise ou insira um endereço</string>
+    <string name="browser_recent_searches">Pesquisas recentes</string>
     <string name="browser_suggest_clipboard_text">Texto copiado</string>
     <string name="browser_brand_suggest_ad">Anúncio</string>
     <string name="browser_brand_suggest_information">Esta sugestão de pesquisa é um anúncio de %1$s. Você será redirecionado para o site do anunciante\': %2$s</string>

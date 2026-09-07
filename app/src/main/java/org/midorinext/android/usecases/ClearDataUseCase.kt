@@ -38,6 +38,7 @@ class ClearDataUseCase @Inject constructor(
         val historyJob: Job? = if (p.history) {
             coroutineScope.launch {
                 historyStorage.deleteEverything()
+                appPrefs.clearRecentSearches()
             }
         } else null
 

@@ -65,6 +65,7 @@
     <string name="browser_site_secure">Безопасное соединение</string>
     <string name="browser_site_insecure">Небезопасное соединение</string>
     <string name="browser_toolbar_hint">Найдите или введите адрес</string>
+    <string name="browser_recent_searches">Недавние поисковые запросы</string>
     <string name="browser_suggest_clipboard_text">Скопированный текст</string>
     <string name="browser_brand_suggest_ad">Объявление</string>
     <string name="browser_brand_suggest_information">Это поисковое предложение является рекламой %1$s. Вы будете перенаправлены на сайт рекламодателя\': %2$s.</string>

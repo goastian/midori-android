@@ -18,6 +18,7 @@
     <string name="browser_site_insecure">Conexión sin protección</string>
 
     <string name="browser_toolbar_hint">Busca o ingresa una dirección</string>
+    <string name="browser_recent_searches">Búsquedas recientes</string>
     <string name="browser_suggest_clipboard_text">Texto copiado</string>
     <string name="browser_brand_suggest_ad">Anuncio</string>
     <string name="browser_brand_suggest_information">Esta sugerencia de búsqueda es un anuncio de %1$s, usted será redirigido al sitio web del anunciante : %2$s</string>

@@ -10,7 +10,7 @@ import java.io.OutputStream
 
 object AppPreferencesSerializer : Serializer<AppPreferences> {
     override val defaultValue: AppPreferences = AppPreferences.getDefaultInstance().toBuilder()
-        .setToolbarPosition(ToolbarPosition.TOP)
+        .setToolbarPosition(ToolbarPosition.BOTTOM)
         .setHideToolbarOnScroll(true)
         .setTabsView(TabsViewOption.GRID)
         .setOpenLinksInApp(true)
@@ -35,7 +35,7 @@ object AppPreferencesSerializer : Serializer<AppPreferences> {
         .setAccessibilityFontScale(100)
         .setAccessibilityForceZoomEnabled(false)
         .setHomepageOpeningScreen(HomepageOpeningScreen.HOMEPAGE_AFTER_FOUR_HOURS)
-        .setToolbarShortcut(ToolbarShortcut.TOOLBAR_SHORTCUT_NONE)
+        .setToolbarShortcut(ToolbarShortcut.TOOLBAR_SHORTCUT_NEW_TAB)
         .setSwipeAddressBarToSwitchTabsEnabled(true)
         .setSwipeToolbarToShowTabsEnabled(true)
         .setShakeToSummarizeEnabled(false)

@@ -1,8 +1,16 @@
 package org.midorinext.android.ui.browser.toolbar
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -13,6 +21,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -33,6 +42,7 @@ fun ToolbarInput(
     toolbarState: ToolbarState,
     onCommit: (String) -> Unit,
     modifier: Modifier = Modifier,
+    leadingContent: (@Composable () -> Unit)? = null,
     onMidoriIconClicked: () -> Unit = {}
 ) {
     val localStyle = LocalTextStyle.current
@@ -42,6 +52,7 @@ fun ToolbarInput(
     val activity = LocalContext.current.activity
     val focusRequester = remember { FocusRequester() }
     BackHandler(toolbarState.hasFocus) {
+        toolbarState.updateFocus(false)
         focusManager.clearFocus()
         activity?.forceHideKeyboard()
     }
@@ -56,11 +67,12 @@ fun ToolbarInput(
 
     BasicTextField(
         value = toolbarState.text,
-        onValueChange = { toolbarState.updateText(it) },
+        onValueChange = { toolbarState.updateTextFromUser(it) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go),
         keyboardActions = KeyboardActions(
             onGo = {
                 onCommit(toolbarState.text.text)
+                toolbarState.updateFocus(false)
                 focusManager.clearFocus()
                 activity?.forceHideKeyboard()
             }
@@ -72,7 +84,12 @@ fun ToolbarInput(
         modifier = modifier
             .focusRequester(focusRequester)
             .onFocusChanged {
-                toolbarState.updateFocus(it.hasFocus)
+                // Entering edit mode moves the toolbar into a full-screen composition. The old
+                // text field reports focus loss while it is disposed, so only promote focus here;
+                // all exit paths explicitly clear the toolbar state.
+                if (it.hasFocus) {
+                    toolbarState.updateFocus(true)
+                }
             }
     ) { innerTextField ->
         ToolbarDecorator(
@@ -83,19 +100,54 @@ fun ToolbarInput(
                 if (toolbarState.hasFocus) {
                     if (toolbarState.text.text.isNotEmpty()) {
                         IconButton(
-                            onClick = { toolbarState.updateText("") },
-                            modifier = Modifier.padding(end = 8.dp)
+                            onClick = { toolbarState.updateTextFromUser("") },
+                            modifier = Modifier.size(48.dp)
                         ) {
                             Icon(
                                 painterResource(id = R.drawable.icons_close_circled),
-                                contentDescription = "clear"
+                                contentDescription = "Clear",
+                                modifier = Modifier.size(24.dp),
                             )
                         }
                     }
                 }
             },
+            leadingContent = leadingContent,
             onMidoriIconClicked = onMidoriIconClicked
         )
+    }
+}
+
+/** Search-engine affordance used by the focused Firefox-style address bar. */
+@Composable
+fun ToolbarSearchSelector() {
+    Box(
+        modifier = Modifier
+            .padding(horizontal = 4.dp)
+            .width(52.dp)
+            .height(40.dp)
+            .background(
+                color = MaterialTheme.colorScheme.surface,
+                shape = CircleShape,
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            MidoriIconOnBackground(
+                shape = CircleShape,
+                modifier = Modifier.size(24.dp),
+            )
+            Spacer(Modifier.width(4.dp))
+            Icon(
+                painter = painterResource(R.drawable.icons_chevron_down_small),
+                contentDescription = null,
+                modifier = Modifier.size(8.dp),
+            )
+        }
     }
 }
 

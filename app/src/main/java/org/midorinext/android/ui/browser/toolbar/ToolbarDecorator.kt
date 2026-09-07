@@ -4,7 +4,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -34,42 +33,47 @@ fun ToolbarDecorator(
     innerTextField: @Composable () -> Unit,
     trailingIcons: @Composable () -> Unit,
     modifier: Modifier = Modifier,
+    leadingContent: (@Composable () -> Unit)? = null,
     onMidoriIconClicked: () -> Unit = {}
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
-            .height(40.dp)
+            .height(48.dp)
             .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(50))
-            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(50))
-            .padding(4.dp)
     ) {
-        when (state) {
-            is BrowserToolbarState -> {
-                val shouldShowMidoriIcon = state.hasFocus || state.onMidori || state.text.text.isEmpty()
-                AnimatedVisibility(visible = shouldShowMidoriIcon) {
-                    MidoriIconOnBackground(
-                        shape = CircleShape,
-                        Modifier
-                            .size(32.dp)
-                            .clickable { onMidoriIconClicked() }
-                    )
+        if (leadingContent != null) {
+            leadingContent()
+        } else {
+            when (state) {
+                is BrowserToolbarState -> {
+                    val shouldShowMidoriIcon = state.hasFocus || state.onMidori || state.text.text.isEmpty()
+                    AnimatedVisibility(visible = shouldShowMidoriIcon) {
+                        MidoriIconOnBackground(
+                            shape = CircleShape,
+                            Modifier
+                                .padding(start = 8.dp)
+                                .size(32.dp)
+                                .clickable { onMidoriIconClicked() }
+                        )
+                    }
+                    AnimatedVisibility(visible = !shouldShowMidoriIcon) {
+                        SiteSecurityIcon(state)
+                    }
                 }
-                AnimatedVisibility(visible = !shouldShowMidoriIcon) {
-                    SiteSecurityIcon(state)
-                }
+                else -> MidoriIconOnBackground(
+                    shape = CircleShape,
+                    Modifier
+                        .padding(start = 8.dp)
+                        .size(32.dp)
+                        .clickable { onMidoriIconClicked() }
+                )
             }
-            else -> MidoriIconOnBackground(
-                shape = CircleShape,
-                Modifier
-                    .size(32.dp)
-                    .clickable { onMidoriIconClicked() }
-            )
         }
 
         Box(modifier = Modifier
             .weight(2f)
-            .padding(start = 12.dp)
+            .padding(start = 8.dp)
         ) {
             // { !viewModel.toolbarState.hasFocus && currentUrl?.isNotBlank() ?: false && !(currentUrl?.isMidoriUrl() ?: false) }
             if (state.text.text.isEmpty()) {

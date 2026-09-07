@@ -65,6 +65,7 @@
     <string name="browser_site_secure">सुरक्षित कनेक्शन</string>
     <string name="browser_site_insecure">असुरक्षित कनेक्शन</string>
     <string name="browser_toolbar_hint">कोई पता खोजें या दर्ज करें</string>
+    <string name="browser_recent_searches">हाल की खोजें</string>
     <string name="browser_suggest_clipboard_text">कॉपी किया गया पाठ</string>
     <string name="browser_brand_suggest_ad">विज्ञापन</string>
     <string name="browser_brand_suggest_information">यह खोज सुझाव %1$s के लिए एक विज्ञापन है। आपको विज्ञापनदाता\' की वेबसाइट पर पुनः निर्देशित किया जाएगा: %2$s</string>

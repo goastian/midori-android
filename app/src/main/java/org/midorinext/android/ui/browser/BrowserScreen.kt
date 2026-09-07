@@ -470,7 +470,7 @@ fun TabsButton(
                     }
                 }
             },
-            modifier = Modifier.size(40.dp)
+            modifier = Modifier.size(24.dp)
         ) {
             TabCounter(tabCount)
         }
@@ -516,7 +516,7 @@ fun BrowserMenuButton(
             Icon(
                 painter = painterResource(id = R.drawable.icons_more_vertical),
                 contentDescription = stringResource(R.string.nav_menu),
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.size(24.dp)
             )
         }
 

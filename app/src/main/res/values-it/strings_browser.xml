@@ -18,6 +18,7 @@
     <string name="browser_site_insecure">Connessione non sicura</string>
 
     <string name="browser_toolbar_hint">Cerca o inserisci un indirizzo</string>
+    <string name="browser_recent_searches">Ricerche recenti</string>
 
     <string name="browser_suggest_clipboard_text">Testo copiato</string>
     <string name="browser_brand_suggest_ad">Inserzione</string>

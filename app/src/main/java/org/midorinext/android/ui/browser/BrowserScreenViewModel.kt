@@ -441,6 +441,11 @@ class BrowserScreenViewModel @Inject constructor(
         if (trimmedSearch.isUrl()) {
             sessionUseCases.loadUrl(url = trimmedSearch.toNormalizedUrl())
         } else {
+            if (store.state.selectedTab?.content?.private != true) {
+                viewModelScope.launch {
+                    appPreferencesRepository.recordRecentSearch(trimmedSearch)
+                }
+            }
             MidoriUseCases.loadSERPPage(trimmedSearch, category)
         }
     }

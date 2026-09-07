@@ -29,18 +29,27 @@ open class ToolbarState(
     var hasFocus by mutableStateOf(false)
         private set
 
+    var isQueryPrefilled by mutableStateOf(false)
+        private set
+
     private val emptySuggestions = suggestionProviders.associateWith { emptyList<Suggestion>() }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val suggestions = snapshotFlow { text.getTextBeforeSelection(text.text.length).text }
+    val suggestions = snapshotFlow {
+        SuggestionQuery(
+            text = text.getTextBeforeSelection(text.text.length).text,
+            hasFocus = hasFocus,
+            isPrefilled = isQueryPrefilled,
+        )
+    }
         .distinctUntilChanged()
-        .mapLatest { search ->
+        .mapLatest { query ->
             delay(100)
-            if (hasFocus && search.isNotBlank()) {
+            if (query.hasFocus && !query.isPrefilled && query.text.isNotBlank()) {
                 runProvidersInParallel {
                     suggestionProviders
                         .map { provider ->
-                            async { provider to provider.getSuggestions(search) }
+                            async { provider to provider.getSuggestions(query.text) }
                         }
                         .awaitAll()
                         .toMap()
@@ -61,7 +70,27 @@ open class ToolbarState(
         updateText(TextFieldValue(text, selection = TextRange(text.length)))
     }
 
+    internal fun updateTextFromUser(text: TextFieldValue) {
+        isQueryPrefilled = false
+        this.text = text
+    }
+
+    internal fun updateTextFromUser(text: String) {
+        updateTextFromUser(TextFieldValue(text, selection = TextRange(text.length)))
+    }
+
     internal open fun updateFocus(hasFocus: Boolean) {
+        if (hasFocus && !this.hasFocus) {
+            isQueryPrefilled = true
+        } else if (!hasFocus) {
+            isQueryPrefilled = false
+        }
         this.hasFocus = hasFocus
     }
+
+    private data class SuggestionQuery(
+        val text: String,
+        val hasFocus: Boolean,
+        val isPrefilled: Boolean,
+    )
 }

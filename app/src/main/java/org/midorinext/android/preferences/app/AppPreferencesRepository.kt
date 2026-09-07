@@ -42,6 +42,9 @@ class AppPreferencesRepository @Inject constructor(
     val tabGroupColorsFlow: Flow<Map<String, Int>> = flow
         .map { it.tabGroupColorsMap }
 
+    val recentSearchesFlow: Flow<List<String>> = flow
+        .map { it.recentSearchesList }
+
     suspend fun updateToolbarPosition(position: ToolbarPosition) {
         datastore.updateData { preferences ->
             preferences.toBuilder().setToolbarPosition(position).build()
@@ -115,6 +118,33 @@ class AppPreferencesRepository @Inject constructor(
     suspend fun updateToolbarShortcut(shortcut: ToolbarShortcut) {
         datastore.updateData { preferences ->
             preferences.toBuilder().setToolbarShortcut(shortcut).build()
+        }
+    }
+
+    suspend fun recordRecentSearch(search: String) {
+        val normalizedSearch = search.trim()
+        if (normalizedSearch.isEmpty()) return
+
+        datastore.updateData { preferences ->
+            val recentSearches = buildList {
+                add(normalizedSearch)
+                addAll(
+                    preferences.recentSearchesList.filterNot {
+                        it.equals(normalizedSearch, ignoreCase = true)
+                    }
+                )
+            }.take(MAX_RECENT_SEARCHES)
+
+            preferences.toBuilder()
+                .clearRecentSearches()
+                .addAllRecentSearches(recentSearches)
+                .build()
+        }
+    }
+
+    suspend fun clearRecentSearches() {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().clearRecentSearches().build()
         }
     }
 
@@ -259,6 +289,10 @@ class AppPreferencesRepository @Inject constructor(
         datastore.updateData { prefs ->
             prefs.toBuilder().setDohProvider(provider).build()
         }
+    }
+
+    private companion object {
+        const val MAX_RECENT_SEARCHES = 8
     }
 
     suspend fun updateHttpsOnlyLevel(level: HttpsOnlyLevel) {
