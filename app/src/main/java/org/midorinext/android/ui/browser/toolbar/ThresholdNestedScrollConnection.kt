@@ -29,7 +29,10 @@ class ThresholdNestedScrollConnection(
         }
         lastOffsetSign = available.y.sign
 
-        return available // Offset.Zero // available ?
+        // This connection only observes the gesture so the toolbar can react to its direction.
+        // Consuming [available] here prevents GeckoView from receiving the scroll delta, which
+        // makes pages appear frozen and forces the user to swipe repeatedly.
+        return Offset.Zero
     }
 
     override suspend fun onPreFling(available: Velocity): Velocity {
