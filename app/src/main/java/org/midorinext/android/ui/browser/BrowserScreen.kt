@@ -21,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.midorinext.android.R
@@ -41,7 +42,6 @@ import org.midorinext.android.ui.theme.LocalMidoriTheme
 import org.midorinext.android.ui.widgets.Dropdown
 import org.midorinext.android.ui.widgets.DropdownItem
 import org.midorinext.android.ui.widgets.TabCounter
-import kotlinx.coroutines.delay
 import mozilla.components.support.ktx.android.content.share
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.ui.icons.R as iconsR
@@ -485,18 +485,11 @@ fun TabsButton(
 
     val private = LocalMidoriTheme.current.private
 
-    var badgeVisible by remember { mutableStateOf(false) }
-    LaunchedEffect(private, viewModel.toolbarState.visible) {
-        badgeVisible = if (private && viewModel.toolbarState.visible) {
-            delay(200)
-            true
-        } else {
-            false
-        }
-    }
+    val badgeVisible = private && viewModel.toolbarState.visible
 
     Box(
         modifier = Modifier
+            .testTag("tab-tray-button")
             .semantics { contentDescription = tabsDescription }
             .width(ToolbarActionWidth)
             .fillMaxHeight()

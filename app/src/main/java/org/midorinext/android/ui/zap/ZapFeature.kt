@@ -3,19 +3,18 @@ package org.midorinext.android.ui.zap
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.EaseInOut
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -41,6 +40,7 @@ import org.midorinext.android.ui.widgets.YesNoDialog
 import org.midorinext.android.R
 import org.midorinext.android.ui.theme.ScrimDark
 import org.midorinext.android.ui.theme.ZapYellow
+import org.midorinext.android.ui.animation.reduceMotionRequested
 
 @Composable
 fun ZapFeature(
@@ -63,6 +63,8 @@ internal fun ZapAnimation(
 
     val stepDuration = 200
     val easing = EaseIn
+    val reduceMotion = reduceMotionRequested()
+    val motionSpec = if (reduceMotion) snap<Float>() else tween(durationMillis = stepDuration, easing = easing)
 
     var showBackground by remember { mutableStateOf(false) }
     var showIcon by remember { mutableStateOf(false) }
@@ -80,7 +82,7 @@ internal fun ZapAnimation(
 
     val background by animateColorAsState(
         targetValue = if (showBackground) ZapYellow else ZapYellow.copy(0f),
-        animationSpec = tween(durationMillis = stepDuration, easing = easing),
+        animationSpec = if (reduceMotion) snap() else tween(durationMillis = stepDuration, easing = easing),
         label = "ZapYellowBackground",
         finishedListener = {
             if (showBackground) {
@@ -93,17 +95,17 @@ internal fun ZapAnimation(
 
     val iconAlpha by animateFloatAsState(
         targetValue = if (showIcon) 1f else 0f,
-        animationSpec = tween(durationMillis = stepDuration, easing = easing),
+        animationSpec = motionSpec,
         label = "ZapIconAlpha"
     )
-    val iconOffsetX by animateDpAsState(
-        targetValue = if (showIcon) 0.dp else 50.dp,
-        animationSpec = tween(durationMillis = stepDuration, easing = easing),
+    val iconProgress by animateFloatAsState(
+        targetValue = if (showIcon) 1f else 0f,
+        animationSpec = motionSpec,
         label = "ZapIconOffsetX"
     )
-    val iconOffsetY by animateDpAsState(
-        targetValue = if (showIcon) 0.dp else 100.dp,
-        animationSpec = tween(durationMillis = stepDuration, easing = easing),
+    val iconSequenceProgress by animateFloatAsState(
+        targetValue = if (showIcon) 1f else 0f,
+        animationSpec = motionSpec,
         label = "ZapIconOffsetY",
         finishedListener = {
             if (showIcon) {
@@ -116,7 +118,7 @@ internal fun ZapAnimation(
 
     val blackOverlayColor by animateColorAsState(
         targetValue = if (showBlackOverlay && !exitBlackOverlay) ScrimDark else ScrimDark.copy(0f),
-        animationSpec = tween(durationMillis = stepDuration, easing = easing),
+        animationSpec = if (reduceMotion) snap() else tween(durationMillis = stepDuration, easing = easing),
         label = "ZapBlackOverlayAlpha",
         finishedListener = {
             if (exitBlackOverlay) {
@@ -129,23 +131,23 @@ internal fun ZapAnimation(
         }
     )
     val blackOverlayMaxSizeDp = maxOf(LocalConfiguration.current.screenHeightDp, LocalConfiguration.current.screenWidthDp)
-    val blackOverlaySize by animateDpAsState(
-        targetValue = if (showBlackOverlay) blackOverlayMaxSizeDp.dp else 0.dp,
-        animationSpec = tween(durationMillis = stepDuration, easing = easing),
+    val blackOverlayScale by animateFloatAsState(
+        targetValue = if (showBlackOverlay) 1f else 0f,
+        animationSpec = motionSpec,
         label = "ZapBlackOverlaySize"
     )
     val blackOverlayCornerPercent by animateIntAsState(
         targetValue = if (showBlackOverlay) 0 else 50,
-        animationSpec = keyframes {
-            durationMillis = stepDuration
-            50.at(0)
-            50.at(stepDuration * 9 / 10)
-            0.at(stepDuration)
-        },
+        animationSpec = if (reduceMotion) snap() else keyframes {
+                durationMillis = stepDuration
+                50.at(0)
+                50.at(stepDuration * 9 / 10)
+                0.at(stepDuration)
+            },
         label = "blackOverlayCornerPercent"
     )
 
-    val infiniteRotation = if (state.animationStatus == ZapState.AnimationStatus.Wait) {
+    val infiniteRotation = if (!reduceMotion && state.animationStatus == ZapState.AnimationStatus.Wait) {
         rememberInfiniteTransition(label = "ZapInfiniteTransition").animateFloat(
             initialValue = 0f,
             targetValue = 360f,
@@ -179,8 +181,11 @@ internal fun ZapAnimation(
                     contentScale = ContentScale.None,
                     modifier = Modifier
                         .fillMaxSize()
-                        .graphicsLayer(alpha = iconAlpha)
-                        .offset(iconOffsetX, -iconOffsetY)
+                        .graphicsLayer {
+                            alpha = iconAlpha
+                            translationX = (1f - iconProgress) * 50.dp.toPx()
+                            translationY = -(1f - iconSequenceProgress) * 100.dp.toPx()
+                        }
                 )
                 Image(
                     painter = painterResource(id = R.drawable.zap_bottom_full),
@@ -188,11 +193,18 @@ internal fun ZapAnimation(
                     contentScale = ContentScale.None,
                     modifier = Modifier
                         .fillMaxSize()
-                        .graphicsLayer(alpha = iconAlpha)
-                        .offset(-iconOffsetX, iconOffsetY)
+                        .graphicsLayer {
+                            alpha = iconAlpha
+                            translationX = -(1f - iconProgress) * 50.dp.toPx()
+                            translationY = (1f - iconSequenceProgress) * 100.dp.toPx()
+                        }
                 )
                 Box(modifier = Modifier
-                    .requiredSize(blackOverlaySize)
+                    .requiredSize(blackOverlayMaxSizeDp.dp)
+                    .graphicsLayer {
+                        scaleX = blackOverlayScale
+                        scaleY = blackOverlayScale
+                    }
                     .clip(RoundedCornerShape(percent = blackOverlayCornerPercent))
                     .background(blackOverlayColor)
                 )

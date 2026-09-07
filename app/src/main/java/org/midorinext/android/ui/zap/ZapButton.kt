@@ -33,6 +33,7 @@ import org.midorinext.android.R
 import org.midorinext.android.ui.MidoriApplicationViewModel
 import org.midorinext.android.ui.browser.ToolbarAction
 import org.midorinext.android.ui.theme.LocalMidoriTheme
+import org.midorinext.android.ui.animation.reduceMotionRequested
 import kotlinx.coroutines.delay
 
 @Composable
@@ -106,6 +107,7 @@ fun AnimatedZapButton(
     var staticOverlayVisible by remember { mutableStateOf(true) }
 
     val midoriTheme = LocalMidoriTheme.current
+    val reduceMotion = reduceMotionRequested()
     val animatedImage = AnimatedImageVector.animatedVectorResource(id = midoriTheme.icons.zapAnimated)
     val animatedPainter = rememberAnimatedVectorPainter(animatedImage, atEnd)
     val staticPainter = painterResource(id = midoriTheme.icons.zap)
@@ -134,8 +136,13 @@ fun AnimatedZapButton(
         }
     }
 
-    LaunchedEffect(animatedImage) {
-        runAnimation()
+    LaunchedEffect(animatedImage, reduceMotion) {
+        if (reduceMotion) {
+            atEnd = false
+            staticOverlayVisible = true
+        } else {
+            runAnimation()
+        }
     }
 
     Box(

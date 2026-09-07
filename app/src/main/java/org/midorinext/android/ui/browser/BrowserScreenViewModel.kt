@@ -20,7 +20,6 @@ import org.midorinext.android.usecases.MidoriUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import mozilla.components.browser.engine.gecko.permission.GeckoSitePermissionsStorage
@@ -476,6 +475,7 @@ class BrowserScreenViewModel @Inject constructor(
     }
 
     fun openNewMidoriTab(private: Boolean = false, focusToolbar: Boolean = true) {
+        val previousSelectedTabId = store.state.selectedTabId
         if (private) {
             MidoriUseCases.openPrivatePage()
         } else if (!MidoriUseCases.isNewTabEnabled && openBlankNewTab) {
@@ -483,11 +483,17 @@ class BrowserScreenViewModel @Inject constructor(
         } else {
             MidoriUseCases.openMidoriPage(private = false)
         }
-        // TODO use invokeOnCompletion from store.dispatch instead of delay,
-        //  but this needs MidoriUseCases to be recoded using dispatch directly
-        viewModelScope.launch {
-            delay(100)
+        if (!focusToolbar || store.state.selectedTabId != previousSelectedTabId) {
             toolbarState.updateFocus(focusToolbar)
+        } else {
+            // Store dispatch can complete asynchronously. Observe the actual selected-tab change
+            // instead of guessing when navigation is ready with a fixed delay.
+            viewModelScope.launch {
+                store.flow()
+                    .map { state -> state.selectedTabId }
+                    .first { selectedTabId -> selectedTabId != previousSelectedTabId }
+                toolbarState.updateFocus(true)
+            }
         }
     }
 

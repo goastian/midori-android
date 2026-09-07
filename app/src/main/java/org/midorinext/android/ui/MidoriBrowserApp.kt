@@ -15,6 +15,8 @@ import org.midorinext.android.ui.theme.MidoriBrowserTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -22,6 +24,7 @@ import org.midorinext.android.preferences.app.Appearance
 import org.midorinext.android.preferences.app.ToolbarPosition
 import androidx.preference.PreferenceManager
 import org.midorinext.android.R
+import org.midorinext.android.BuildConfig
 import org.midorinext.android.ui.onboarding.MidoriOnboarding
 import org.midorinext.android.ui.zap.ZapFeature
 
@@ -36,7 +39,7 @@ fun MidoriBrowserApp(
         PreferenceManager.getDefaultSharedPreferences(context)
     }
     var showOnboarding by rememberSaveable {
-        mutableStateOf(onboardingPreferences.getBoolean(onboardingKey, true))
+        mutableStateOf(onboardingPreferences.getBoolean(onboardingKey, !BuildConfig.IS_MACROBENCHMARK))
     }
 
     val isPrivate by applicationViewModel.isPrivate.collectAsStateWithLifecycle()
@@ -81,7 +84,9 @@ fun MidoriBrowserApp(
             )
         } else {
             Scaffold(
-                modifier = Modifier.imePadding(),
+                modifier = Modifier
+                    .imePadding()
+                    .semantics { testTagsAsResourceId = true },
                 snackbarHost = {
                     SnackbarHost(
                         hostState = applicationViewModel.snackbarHostState,

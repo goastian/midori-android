@@ -6,7 +6,6 @@ package org.midorinext.android.ui.onboarding
 import android.app.Activity
 import android.app.role.RoleManager
 import android.appwidget.AppWidgetManager
-import android.animation.ValueAnimator
 import android.content.ComponentName
 import android.content.Context
 import android.os.Build
@@ -62,6 +61,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -72,6 +72,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.view.WindowCompat
 import org.midorinext.android.R
 import org.midorinext.android.ext.openDefaultAppsSystemSettings
@@ -85,6 +86,7 @@ import org.midorinext.android.ui.theme.OnboardingMintMist
 import org.midorinext.android.ui.theme.OnboardingMutedInk
 import org.midorinext.android.ui.theme.OnboardingPaper
 import org.midorinext.android.ui.theme.OnboardingPaperRaised
+import org.midorinext.android.ui.animation.reduceMotionRequested
 import org.midorinext.android.widget.WidgetProvider
 
 private const val OnboardingPageCount = 4
@@ -97,7 +99,8 @@ fun MidoriOnboarding(
     val context = LocalContext.current
     var page by rememberSaveable { mutableStateOf(0) }
     var toolbarAtBottom by rememberSaveable { mutableStateOf(false) }
-    val reduceMotion = !ValueAnimator.areAnimatorsEnabled()
+    val reduceMotion = reduceMotionRequested()
+    val layoutDirection = LocalLayoutDirection.current
 
     MidoriOnboardingSystemBars()
 
@@ -141,13 +144,14 @@ fun MidoriOnboarding(
                 if (reduceMotion) {
                     fadeIn(animationSpec = tween(150)) togetherWith fadeOut(animationSpec = tween(150))
                 } else {
+                    val towardsEnd = if (layoutDirection == LayoutDirection.Ltr) 1 else -1
                     (slideInHorizontally(
                         animationSpec = tween(280),
-                        initialOffsetX = { fullWidth -> fullWidth / 7 }
+                        initialOffsetX = { fullWidth -> towardsEnd * fullWidth / 7 }
                     ) + fadeIn(animationSpec = tween(220))) togetherWith
                         (slideOutHorizontally(
                             animationSpec = tween(190),
-                            targetOffsetX = { fullWidth -> -fullWidth / 9 }
+                            targetOffsetX = { fullWidth -> -towardsEnd * fullWidth / 9 }
                         ) + fadeOut(animationSpec = tween(150)))
                 }
             },

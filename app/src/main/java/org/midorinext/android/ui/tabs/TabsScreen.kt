@@ -1,14 +1,6 @@
 package org.midorinext.android.ui.tabs
 
-import android.animation.ValueAnimator
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -20,10 +12,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -137,6 +128,7 @@ fun TabsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .testTag("tab-tray")
             .background(MaterialTheme.colorScheme.background),
     ) {
         Box(
@@ -645,35 +637,17 @@ fun AnimatedTabList(
     val privateSearchListState = rememberLazyListState()
     val normalSearchGridState = rememberLazyGridState()
     val privateSearchGridState = rememberLazyGridState()
-    val animationsEnabled = ValueAnimator.areAnimatorsEnabled()
-    val layoutDirection = LocalLayoutDirection.current
     val tabClosedString = stringResource(id = R.string.browser_tab_closed)
     val onTabDeleted: (TabSessionState) -> Unit = { tab: SessionState ->
         tabsViewModel.removeTab(tab.id)
         appViewModel.showTabClosureSnackbar(tabClosedString)
     }
 
-    AnimatedContent(
-        targetState = page,
-        contentKey = { targetPage -> targetPage },
-        transitionSpec = {
-            if (!animationsEnabled) {
-                EnterTransition.None togetherWith ExitTransition.None
-            } else {
-                val logicalEnd = if (layoutDirection == LayoutDirection.Ltr) 1 else -1
-                val enteringOffset = if (targetState == TabsPage.PRIVATE) logicalEnd else -logicalEnd
-                slideInHorizontally(
-                    animationSpec = tween(durationMillis = 220),
-                    initialOffsetX = { width -> width * enteringOffset },
-                ) togetherWith slideOutHorizontally(
-                    animationSpec = tween(durationMillis = 220),
-                    targetOffsetX = { width -> -width * enteringOffset },
-                )
-            }
-        },
-        label = "tabsPage",
-        modifier = Modifier.fillMaxSize(),
-    ) { targetPage ->
+    // A tray can contain many thumbnails. Composing both outgoing and incoming pages during a
+    // mode transition doubles that work and competes with image loading. Keep exactly one page
+    // alive; the selected-mode control supplies the immediate visual feedback.
+    key(page) {
+        val targetPage = page
         val pageState = remember(smartTabs, targetPage, searchQuery) {
             smartTabs.forPageAndQuery(targetPage, searchQuery)
         }

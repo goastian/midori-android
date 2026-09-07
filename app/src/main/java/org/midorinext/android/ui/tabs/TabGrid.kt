@@ -1,6 +1,5 @@
 package org.midorinext.android.ui.tabs
 
-import android.animation.ValueAnimator
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
@@ -43,6 +42,7 @@ import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.ui.browser.ToolbarAction
 import org.midorinext.android.ui.browser.home.HomePrivateBrowsingContent
 import org.midorinext.android.ui.widgets.MidoriIconOnBackground
+import org.midorinext.android.ui.animation.reduceMotionRequested
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.icons.compose.Loader
 import mozilla.components.browser.icons.compose.Placeholder
@@ -65,7 +65,7 @@ fun TabGrid(
     onTabSelectionChange: (String) -> Unit = {},
     onTabLongPressed: (TabSessionState) -> Unit = {}
 ) {
-    val animationsEnabled = ValueAnimator.areAnimatorsEnabled()
+    val animationsEnabled = !reduceMotionRequested()
     LazyVerticalGrid(
         state = state,
         columns = GridCells.Adaptive(minSize = 150.dp),
@@ -120,7 +120,7 @@ fun TabCard(
     modifier: Modifier = Modifier
 ) {
     var deleting by remember { mutableStateOf(false) }
-    val animationsEnabled = ValueAnimator.areAnimatorsEnabled()
+    val animationsEnabled = !reduceMotionRequested()
     val scale by animateFloatAsState(
         targetValue = if (deleting) 0f else 1f,
         animationSpec = if (animationsEnabled) tween(durationMillis = 140) else snap(),

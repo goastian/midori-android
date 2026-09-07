@@ -2,7 +2,6 @@ package org.midorinext.android.ui.browser.toolbar
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -48,17 +48,24 @@ fun ToolbarDecorator(
             when (state) {
                 is BrowserToolbarState -> {
                     val shouldShowMidoriIcon = state.hasFocus || state.onMidori || state.text.text.isEmpty()
-                    AnimatedVisibility(visible = shouldShowMidoriIcon) {
-                        MidoriIconOnBackground(
-                            shape = CircleShape,
-                            Modifier
-                                .padding(start = 8.dp)
-                                .size(32.dp)
-                                .clickable { onMidoriIconClicked() }
-                        )
-                    }
-                    AnimatedVisibility(visible = !shouldShowMidoriIcon) {
-                        SiteSecurityIcon(state)
+                    // Reserve one stable slot and compose only the active mode. Two independent
+                    // AnimatedVisibility nodes briefly measured both icons and shifted the field.
+                    Box(
+                        modifier = Modifier
+                            .width(48.dp)
+                            .height(48.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (shouldShowMidoriIcon) {
+                            MidoriIconOnBackground(
+                                shape = CircleShape,
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clickable { onMidoriIconClicked() }
+                            )
+                        } else {
+                            SiteSecurityIcon(state)
+                        }
                     }
                 }
                 else -> MidoriIconOnBackground(

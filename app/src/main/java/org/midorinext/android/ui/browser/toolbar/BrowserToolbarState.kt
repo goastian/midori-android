@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import org.midorinext.android.BuildConfig
 import org.midorinext.android.ext.getMidoriSERPSearch
 import org.midorinext.android.ext.isMidoriUrl
 import org.midorinext.android.ext.toCleanHost
@@ -20,7 +21,6 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.store.BrowserStore
@@ -78,7 +77,7 @@ class BrowserToolbarState @AssistedInject constructor(
         )
 
     val shouldHideOnScroll = appPreferencesRepository.flow
-        .map { prefs -> prefs.hideToolbarOnScroll }
+        .map { prefs -> BuildConfig.IS_MACROBENCHMARK || prefs.hideToolbarOnScroll }
         .stateIn(
             scope = coroutineScope,
             started = SharingStarted.WhileSubscribed(5000L),
@@ -126,27 +125,24 @@ class BrowserToolbarState @AssistedInject constructor(
         if (hasFocus) {
             updateVisibility(true)
         }
-        coroutineScope.launch {
-            delay(10) // Needed else change to toolbar text is overridden by call to onChange.
-            updateTextWithUrl(currentUrl.value ?: "")
-        }
+        // Focus state is the source of truth for text formatting. Updating in the same snapshot
+        // removes the timing race previously hidden behind a fixed coroutine delay.
+        updateTextWithUrl(currentUrl.value ?: "")
     }
 
     private fun updateTextWithUrl(url: String) {
-        coroutineScope.launch {
-            text = if (newTabFeature.isNewTabUrl(url)) {
-                TextFieldValue("")
-            } else if (url.isMidoriUrl()) {
-                url.getMidoriSERPSearch()?.let { search ->
-                    if (hasFocus) TextFieldValue(search.urlDecode(), selection = TextRange(0, search.length))
-                    else TextFieldValue(search.urlDecode())
-                } ?: TextFieldValue("")
-            } else if (!hasFocus) {
-                TextFieldValue(url.toCleanHost())
-            } else {
-                // TODO Constraint url to a maximum size
-                TextFieldValue(url, selection = TextRange(0, url.length))
-            }
+        text = if (newTabFeature.isNewTabUrl(url)) {
+            TextFieldValue("")
+        } else if (url.isMidoriUrl()) {
+            url.getMidoriSERPSearch()?.let { search ->
+                if (hasFocus) TextFieldValue(search.urlDecode(), selection = TextRange(0, search.length))
+                else TextFieldValue(search.urlDecode())
+            } ?: TextFieldValue("")
+        } else if (!hasFocus) {
+            TextFieldValue(url.toCleanHost())
+        } else {
+            // TODO Constraint url to a maximum size
+            TextFieldValue(url, selection = TextRange(0, url.length))
         }
     }
 

@@ -2,7 +2,8 @@ package org.midorinext.android.ui.browser.toolbar
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -25,27 +25,29 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import org.midorinext.android.R
 import org.midorinext.android.ui.widgets.UrlIcon
+import org.midorinext.android.ui.animation.reduceMotionRequested
+import kotlinx.coroutines.launch
 
 @Composable
 fun SiteSecurityIcon(toolbarState: BrowserToolbarState) {
     val siteSecurity by toolbarState.siteSecurity.collectAsStateWithLifecycle()
-    val density = LocalDensity.current
+    val reduceMotion = reduceMotionRequested()
 
     siteSecurity?.let { securityInfo ->
         Box {
@@ -60,24 +62,25 @@ fun SiteSecurityIcon(toolbarState: BrowserToolbarState) {
             )
 
             if (toolbarState.showSiteSecurity) {
-                var watchEnd by remember { mutableStateOf(false) }
-                var dialogOffsetTarget by remember { mutableStateOf((-100).dp) }
-                val dialogOffset by animateDpAsState(
-                    targetValue = dialogOffsetTarget,
-                    animationSpec = tween(durationMillis = 400),
-                    label = "site security dialog offset"
-                )
-                LaunchedEffect(true) {
-                    dialogOffsetTarget = 0.dp
-                    watchEnd = true
+                val panelProgress = remember { Animatable(if (reduceMotion) 1f else 0f) }
+                val coroutineScope = rememberCoroutineScope()
+                var dismissing by remember { mutableStateOf(false) }
+                val animationSpec = if (reduceMotion) snap<Float>() else tween(durationMillis = 220)
+                val dismiss = {
+                    if (!dismissing) {
+                        dismissing = true
+                        coroutineScope.launch {
+                            panelProgress.animateTo(0f, animationSpec)
+                            toolbarState.updateShowSiteSecurity(false)
+                        }
+                    }
                 }
-                LaunchedEffect(dialogOffset) {
-                    if (watchEnd && dialogOffsetTarget == (-100).dp && dialogOffset == (-100).dp)
-                        toolbarState.updateShowSiteSecurity(false)
+                LaunchedEffect(Unit) {
+                    panelProgress.animateTo(1f, animationSpec)
                 }
                 Dialog(
                     properties = DialogProperties(usePlatformDefaultWidth = false),
-                    onDismissRequest = { dialogOffsetTarget = (-100).dp }
+                    onDismissRequest = dismiss,
                 ) {
                     Box(
                         modifier = Modifier
@@ -85,19 +88,16 @@ fun SiteSecurityIcon(toolbarState: BrowserToolbarState) {
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
-                            ) {
-                                dialogOffsetTarget = (-100).dp
-                            }
+                            ) { dismiss() }
                     ) {
                         Column(
                             verticalArrangement = Arrangement.spacedBy(4.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
-                                .offset {
-                                    with(density) {
-                                        IntOffset(0, dialogOffset.roundToPx())
-                                    }
+                                .graphicsLayer {
+                                    translationY = -size.height * (1f - panelProgress.value)
+                                    alpha = panelProgress.value
                                 }
                                 .background(MaterialTheme.colorScheme.background)
                                 .padding(16.dp)

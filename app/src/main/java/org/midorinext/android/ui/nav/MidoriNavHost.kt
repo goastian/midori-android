@@ -1,6 +1,5 @@
 package org.midorinext.android.ui.nav
 
-import android.animation.ValueAnimator
 import android.os.Build
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
@@ -37,6 +36,7 @@ import org.midorinext.android.ui.preferences.SavedPasswordsScreen
 import org.midorinext.android.ui.preferences.AppTrackingProtectionReportScreen
 import org.midorinext.android.ui.preferences.PrivacyScreen
 import org.midorinext.android.ui.tabs.TabsScreen
+import org.midorinext.android.ui.animation.reduceMotionRequested
 
 @Composable
 fun MidoriNavHost(
@@ -45,7 +45,7 @@ fun MidoriNavHost(
     appViewModel: MidoriApplicationViewModel = hiltViewModel(),
 ) {
     val onBrowse = { navController.navigateSingleTopTo(NavDestination.Browser.route()) }
-    val transitionTimeMs = if (ValueAnimator.areAnimatorsEnabled()) 250 else 0
+    val transitionTimeMs = if (reduceMotionRequested()) 0 else 250
 
     // The browser surface is an AndroidView.  Keep the navigation host constrained to the
     // padded area provided by Scaffold so Gecko never measures against the full window and

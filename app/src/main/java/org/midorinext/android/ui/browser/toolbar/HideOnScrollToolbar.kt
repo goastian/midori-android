@@ -2,19 +2,19 @@ package org.midorinext.android.ui.browser.toolbar
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.zIndex
 import org.midorinext.android.preferences.app.ToolbarPosition
+import org.midorinext.android.ui.animation.reduceMotionRequested
 import mozilla.components.concept.engine.EngineView
 
 @Composable
@@ -56,6 +56,32 @@ fun HideOnScrollToolbar(
                     .zIndex(2f)
             )
         }
+    } else if (shouldHideOnScroll) {
+        // In scroll-aware mode the browser surface owns its final size from the start. Moving the
+        // toolbar in draw avoids remeasuring GeckoView and the rest of the screen on every frame.
+        Box(modifier = modifier) {
+            content(
+                Modifier
+                    .fillMaxSize()
+                    .testTag("browser-content")
+                    .then(contentModifier)
+            )
+            DrawAnimatedToolbar(
+                visible = toolbarState.visible,
+                toolbarPosition = toolbarPosition,
+                toolbar = toolbar,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(
+                        if (toolbarPosition == ToolbarPosition.BOTTOM) {
+                            Alignment.BottomCenter
+                        } else {
+                            Alignment.TopCenter
+                        }
+                    )
+                    .zIndex(2f),
+            )
+        }
     } else {
         Column(modifier = modifier) {
             if (toolbarPosition == ToolbarPosition.BOTTOM) {
@@ -65,21 +91,9 @@ fun HideOnScrollToolbar(
                         .weight(2f, true)
                         .then(contentModifier)
                 )
-                AnimatedToolbar(
-                    toolbarState,
-                    toolbar,
-                    Modifier
-                        .fillMaxWidth()
-                        .zIndex(2f)
-                )
+                toolbar(Modifier.fillMaxWidth().zIndex(2f))
             } else if (toolbarPosition == ToolbarPosition.TOP) {
-                AnimatedToolbar(
-                    toolbarState,
-                    toolbar,
-                    Modifier
-                        .fillMaxWidth()
-                        .zIndex(2f)
-                )
+                toolbar(Modifier.fillMaxWidth().zIndex(2f))
                 content(
                     Modifier
                         .fillMaxWidth()
@@ -92,29 +106,24 @@ fun HideOnScrollToolbar(
 }
 
 @Composable
-fun AnimatedToolbar(
-    toolbarState: BrowserToolbarState,
+private fun DrawAnimatedToolbar(
+    visible: Boolean,
+    toolbarPosition: ToolbarPosition,
     toolbar: @Composable (Modifier) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    val shouldHideOnScroll by toolbarState.shouldHideOnScroll.collectAsStateWithLifecycle()
+    val reduceMotion = reduceMotionRequested()
+    val visibleFraction by animateFloatAsState(
+        targetValue = if (visible) 1f else 0f,
+        animationSpec = if (reduceMotion) snap() else tween(durationMillis = 120),
+        label = "scrollToolbarVisibility",
+    )
+    val direction = if (toolbarPosition == ToolbarPosition.BOTTOM) 1f else -1f
 
-    if (shouldHideOnScroll) {
-        if (!toolbarState.visible) {
-            HorizontalDivider(
-                modifier = Modifier.fillMaxWidth(),
-                thickness = 1.dp,
-                color = MaterialTheme.colorScheme.outline
-            )
+    toolbar(
+        modifier.graphicsLayer {
+            translationY = direction * size.height * (1f - visibleFraction)
+            alpha = visibleFraction
         }
-        AnimatedVisibility(
-            visible = toolbarState.visible,
-            enter = expandVertically(animationSpec = tween(100)),
-            exit = shrinkVertically(animationSpec = tween(100))
-        ) {
-            toolbar(modifier)
-        }
-    } else {
-        toolbar(modifier)
-    }
+    )
 }

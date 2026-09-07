@@ -5,6 +5,7 @@ import android.os.Build
 import android.view.WindowManager
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +17,8 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import org.midorinext.android.R
+import org.midorinext.android.ui.animation.LocalReduceMotion
+import org.midorinext.android.ui.animation.systemReduceMotionRequested
 
 data class MidoriIcons(
     @DrawableRes val zap: Int,
@@ -87,31 +90,31 @@ private val privateColorScheme = darkColorScheme.copy(
 )
 
 @Composable
-fun animateColor(targetValue: Color) =
+fun animateColor(targetValue: Color, reduceMotion: Boolean) =
     animateColorAsState(
         targetValue = targetValue,
-        animationSpec = tween(durationMillis = 250),
+        animationSpec = if (reduceMotion) snap() else tween(durationMillis = 250),
         label = "theme colors"
     ).value
 
 @Composable
-fun ColorScheme.animatedColors() = copy(
-    primary = animateColor(primary),
-    onPrimary = animateColor(onPrimary),
-    primaryContainer = animateColor(primaryContainer),
-    onPrimaryContainer = animateColor(onPrimaryContainer),
-    secondaryContainer = animateColor(secondaryContainer),
-    onSecondaryContainer = animateColor(onSecondaryContainer),
-    tertiary = animateColor(tertiary),
-    tertiaryContainer = animateColor(tertiaryContainer),
-    onTertiaryContainer = animateColor(onTertiaryContainer),
-    outline = animateColor(outline),
-    surface = animateColor(primaryContainer),
-    onSurface = animateColor(onPrimaryContainer),
-    surfaceVariant = animateColor(surfaceVariant),
-    onSurfaceVariant = animateColor(onSurfaceVariant),
-    background = animateColor(primaryContainer),
-    onBackground = animateColor(onPrimaryContainer)
+fun ColorScheme.animatedColors(reduceMotion: Boolean) = copy(
+    primary = animateColor(primary, reduceMotion),
+    onPrimary = animateColor(onPrimary, reduceMotion),
+    primaryContainer = animateColor(primaryContainer, reduceMotion),
+    onPrimaryContainer = animateColor(onPrimaryContainer, reduceMotion),
+    secondaryContainer = animateColor(secondaryContainer, reduceMotion),
+    onSecondaryContainer = animateColor(onSecondaryContainer, reduceMotion),
+    tertiary = animateColor(tertiary, reduceMotion),
+    tertiaryContainer = animateColor(tertiaryContainer, reduceMotion),
+    onTertiaryContainer = animateColor(onTertiaryContainer, reduceMotion),
+    outline = animateColor(outline, reduceMotion),
+    surface = animateColor(primaryContainer, reduceMotion),
+    onSurface = animateColor(onPrimaryContainer, reduceMotion),
+    surfaceVariant = animateColor(surfaceVariant, reduceMotion),
+    onSurfaceVariant = animateColor(onSurfaceVariant, reduceMotion),
+    background = animateColor(primaryContainer, reduceMotion),
+    onBackground = animateColor(onPrimaryContainer, reduceMotion)
 )
 
 @Composable
@@ -120,11 +123,12 @@ fun MidoriBrowserTheme(
     privacy: Boolean = false,
     content: @Composable () -> Unit
 ) {
+    val reduceMotion = systemReduceMotionRequested()
     val colorScheme = when {
         privacy -> privateColorScheme
         darkTheme -> darkColorScheme
         else -> lightColorScheme
-    }.animatedColors()
+    }.animatedColors(reduceMotion)
 
     val icons = if (privacy || darkTheme) darkAndPrivateIcons else lightIcons
 
@@ -150,7 +154,8 @@ fun MidoriBrowserTheme(
     }
 
     CompositionLocalProvider(
-        LocalMidoriTheme provides MidoriTheme(darkTheme, privacy, icons)
+        LocalMidoriTheme provides MidoriTheme(darkTheme, privacy, icons),
+        LocalReduceMotion provides reduceMotion,
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
