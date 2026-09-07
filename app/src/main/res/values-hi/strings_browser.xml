@@ -101,4 +101,9 @@
     <string name="summary_unavailable">मिदोरी इस पृष्ठ को सारांशित करने के लिए पर्याप्त पाठ नहीं निकाल सका।</string>
     <string name="bookmark_add_current">बुकमार्क जोड़ें</string>
     <string name="bookmark_remove_current">बुकमार्क हटाएँ</string>
+    <string name="browser_search_tabs">टैब खोजें</string>
+    <string name="browser_search_tabs_hint">शीर्षक या पते से खोजें</string>
+    <string name="browser_close_tab_search">टैब खोज बंद करें</string>
+    <string name="browser_tabs_search_empty_title">कोई मेल खाता टैब नहीं</string>
+    <string name="browser_tabs_search_empty_subtitle">“%1$s” से कोई टैब मेल नहीं खाता।</string>
 </resources>

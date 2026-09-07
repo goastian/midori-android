@@ -101,4 +101,9 @@
     <string name="summary_unavailable">Мидори не удалось извлечь достаточно текста, чтобы суммировать эту страницу.</string>
     <string name="bookmark_add_current">Добавить закладку</string>
     <string name="bookmark_remove_current">Удалить закладку</string>
+    <string name="browser_search_tabs">Поиск вкладок</string>
+    <string name="browser_search_tabs_hint">Поиск по заголовку или адресу</string>
+    <string name="browser_close_tab_search">Закрыть поиск вкладок</string>
+    <string name="browser_tabs_search_empty_title">Подходящих вкладок нет</string>
+    <string name="browser_tabs_search_empty_subtitle">Нет вкладок, соответствующих запросу «%1$s».</string>
 </resources>

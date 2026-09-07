@@ -107,4 +107,9 @@
     <string name="summary_unavailable">Midori non è riuscita a estrarre abbastanza testo per riassumere questa pagina.</string>
     <string name="bookmark_add_current">Aggiungi segnalibro</string>
     <string name="bookmark_remove_current">Rimuovi segnalibro</string>
+    <string name="browser_search_tabs">Cerca schede</string>
+    <string name="browser_search_tabs_hint">Cerca per titolo o indirizzo</string>
+    <string name="browser_close_tab_search">Chiudi la ricerca delle schede</string>
+    <string name="browser_tabs_search_empty_title">Nessuna scheda corrispondente</string>
+    <string name="browser_tabs_search_empty_subtitle">Nessuna scheda corrisponde a “%1$s”.</string>
 </resources>

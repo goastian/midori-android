@@ -101,4 +101,9 @@
     <string name="summary_unavailable">Midori não conseguiu extrair texto suficiente para resumir esta página.</string>
     <string name="bookmark_add_current">Adicionar favorito</string>
     <string name="bookmark_remove_current">Remover favorito</string>
+    <string name="browser_search_tabs">Pesquisar separadores</string>
+    <string name="browser_search_tabs_hint">Pesquisar por título ou endereço</string>
+    <string name="browser_close_tab_search">Fechar pesquisa de separadores</string>
+    <string name="browser_tabs_search_empty_title">Nenhum separador correspondente</string>
+    <string name="browser_tabs_search_empty_subtitle">Nenhum separador corresponde a “%1$s”.</string>
 </resources>

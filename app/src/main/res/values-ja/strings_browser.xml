@@ -101,4 +101,9 @@
     <string name="summary_unavailable">ミドリは、このページを要約するのに十分なテキストを抽出できませんでした。</string>
     <string name="bookmark_add_current">ブックマークを追加する</string>
     <string name="bookmark_remove_current">ブックマークを削除する</string>
+    <string name="browser_search_tabs">タブを検索</string>
+    <string name="browser_search_tabs_hint">タイトルまたはアドレスで検索</string>
+    <string name="browser_close_tab_search">タブ検索を閉じる</string>
+    <string name="browser_tabs_search_empty_title">一致するタブはありません</string>
+    <string name="browser_tabs_search_empty_subtitle">「%1$s」に一致するタブはありません。</string>
 </resources>

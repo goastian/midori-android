@@ -107,4 +107,9 @@
     <string name="summary_unavailable">Midori n\'a pas pu extraire suffisamment de texte pour résumer cette page.</string>
     <string name="bookmark_add_current">Ajouter un signet</string>
     <string name="bookmark_remove_current">Supprimer le favori</string>
+    <string name="browser_search_tabs">Rechercher des onglets</string>
+    <string name="browser_search_tabs_hint">Rechercher par titre ou adresse</string>
+    <string name="browser_close_tab_search">Fermer la recherche d’onglets</string>
+    <string name="browser_tabs_search_empty_title">Aucun onglet correspondant</string>
+    <string name="browser_tabs_search_empty_subtitle">Aucun onglet ne correspond à « %1$s ».</string>
 </resources>

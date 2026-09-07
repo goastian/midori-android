@@ -107,4 +107,9 @@
     <string name="summary_unavailable">Midori konnte nicht genügend Text extrahieren, um diese Seite zusammenzufassen.</string>
     <string name="bookmark_add_current">Lesezeichen hinzufügen</string>
     <string name="bookmark_remove_current">Lesezeichen entfernen</string>
+    <string name="browser_search_tabs">Tabs durchsuchen</string>
+    <string name="browser_search_tabs_hint">Nach Titel oder Adresse suchen</string>
+    <string name="browser_close_tab_search">Tab-Suche schließen</string>
+    <string name="browser_tabs_search_empty_title">Keine passenden Tabs</string>
+    <string name="browser_tabs_search_empty_subtitle">Keine Tabs entsprechen „%1$s“.</string>
 </resources>

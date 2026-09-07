@@ -101,4 +101,9 @@
     <string name="summary_unavailable">Midori nuk mund të nxirrte mjaft tekst për të përmbledhur këtë faqe.</string>
     <string name="bookmark_add_current">Shto faqerojtës</string>
     <string name="bookmark_remove_current">Hiq faqerojtësin</string>
+    <string name="browser_search_tabs">Kërko skedat</string>
+    <string name="browser_search_tabs_hint">Kërko sipas titullit ose adresës</string>
+    <string name="browser_close_tab_search">Mbyll kërkimin e skedave</string>
+    <string name="browser_tabs_search_empty_title">Nuk ka skeda që përputhen</string>
+    <string name="browser_tabs_search_empty_subtitle">Asnjë skedë nuk përputhet me “%1$s”.</string>
 </resources>

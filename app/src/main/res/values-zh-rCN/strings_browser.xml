@@ -101,4 +101,9 @@
     <string name="summary_unavailable">Midori could not extract enough text to summarize this page.</string>
     <string name="bookmark_add_current">Add bookmark</string>
     <string name="bookmark_remove_current">Remove bookmark</string>
+    <string name="browser_search_tabs">搜索标签页</string>
+    <string name="browser_search_tabs_hint">按标题或地址搜索</string>
+    <string name="browser_close_tab_search">关闭标签页搜索</string>
+    <string name="browser_tabs_search_empty_title">没有匹配的标签页</string>
+    <string name="browser_tabs_search_empty_subtitle">没有与“%1$s”匹配的标签页。</string>
 </resources>

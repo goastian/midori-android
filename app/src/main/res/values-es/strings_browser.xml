@@ -107,4 +107,9 @@
     <string name="download_removal_confirm_history">Eliminar del historial</string>
     <string name="download_removal_cancel">Cancelar</string>
     <string name="summary_unavailable">Midori no pudo extraer suficiente texto para resumir esta página.</string>
+    <string name="browser_search_tabs">Buscar pestañas</string>
+    <string name="browser_search_tabs_hint">Buscar por título o dirección</string>
+    <string name="browser_close_tab_search">Cerrar búsqueda de pestañas</string>
+    <string name="browser_tabs_search_empty_title">No hay pestañas coincidentes</string>
+    <string name="browser_tabs_search_empty_subtitle">Ninguna pestaña coincide con “%1$s”.</string>
 </resources>
