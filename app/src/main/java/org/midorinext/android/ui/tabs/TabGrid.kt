@@ -1,6 +1,9 @@
 package org.midorinext.android.ui.tabs
 
+import android.animation.ValueAnimator
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -10,6 +13,7 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,7 +42,6 @@ import org.midorinext.android.R
 import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.ui.browser.ToolbarAction
 import org.midorinext.android.ui.browser.home.HomePrivateBrowsingContent
-import org.midorinext.android.ui.theme.LocalMidoriTheme
 import org.midorinext.android.ui.widgets.MidoriIconOnBackground
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.icons.compose.Loader
@@ -49,6 +52,7 @@ import mozilla.components.browser.icons.compose.WithIcon
 @Composable
 fun TabGrid(
     tabs: List<TabSessionState>,
+    state: LazyGridState,
     selectedTabId: String?,
     thumbnailStorage: ThumbnailStorage,
     browserIcons: BrowserIcons,
@@ -61,7 +65,9 @@ fun TabGrid(
     onTabSelectionChange: (String) -> Unit = {},
     onTabLongPressed: (TabSessionState) -> Unit = {}
 ) {
+    val animationsEnabled = ValueAnimator.areAnimatorsEnabled()
     LazyVerticalGrid(
+        state = state,
         columns = GridCells.Adaptive(minSize = 150.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -69,7 +75,11 @@ fun TabGrid(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        items(tabs, key = { it.id }) { tab ->
+        items(
+            items = tabs,
+            key = { it.id },
+            contentType = { "tab" },
+        ) { tab ->
             TabCard(
                 tab = tab,
                 selected = tab.id == selectedTabId,
@@ -81,7 +91,7 @@ fun TabGrid(
                 selectionMode = selectionMode,
                 isSelectedForGrouping = tab.id in selectedTabIds,
                 onLongPressed = onTabLongPressed,
-                modifier = Modifier.animateItem()
+                modifier = if (animationsEnabled) Modifier.animateItem() else Modifier
             )
         }
     }
@@ -110,15 +120,21 @@ fun TabCard(
     modifier: Modifier = Modifier
 ) {
     var deleting by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(targetValue = if (deleting) 0f else 1f, finishedListener = {
-        if (it == 0f) {
-            onDeleted(tab)
-            deleting = false
-        }
-    }, label = "tabSwipeScale")
+    val animationsEnabled = ValueAnimator.areAnimatorsEnabled()
+    val scale by animateFloatAsState(
+        targetValue = if (deleting) 0f else 1f,
+        animationSpec = if (animationsEnabled) tween(durationMillis = 140) else snap(),
+        finishedListener = {
+            if (it == 0f) {
+                onDeleted(tab)
+                deleting = false
+            }
+        },
+        label = "tabSwipeScale",
+    )
 
     val isTabBlocked = contentBlockerState.getStatusForTab(tab.id) != ContentBlockerState.Status.ALLOWED
-    val isPrivateBrowsingHome = LocalMidoriTheme.current.private && tab.content.url == ""
+    val isPrivateBrowsingHome = tab.content.private && tab.content.url.isBlank()
     var coordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
 
     Column(modifier = modifier
@@ -231,7 +247,9 @@ fun TabCard(
                         )
                     }
                 } else {
-                    ToolbarAction(onClick = { deleting = true }) { // TODO rename ToolbarAction to "SmallButton" and put it in widgets
+                    ToolbarAction(
+                        onClick = { deleting = true },
+                    ) { // TODO rename ToolbarAction to "SmallButton" and put it in widgets
                         Icon(
                             painterResource(id = R.drawable.icons_close),
                             contentDescription = stringResource(R.string.tab_tray_close_tab),
@@ -268,7 +286,7 @@ fun TabCard(
                 } else {
                     TabThumbnail(
                         tabId = tab.id,
-                        size = 200.dp,
+                        private = tab.content.private,
                         thumbnailStorage = thumbnailStorage,
                         contentBlockerState = contentBlockerState
                     )

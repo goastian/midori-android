@@ -1,55 +1,77 @@
 package org.midorinext.android.ui.tabs
 
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-
+import android.animation.ValueAnimator
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.midorinext.android.R
 import org.midorinext.android.preferences.app.TabsViewOption
-import org.midorinext.android.ui.PrivacyMode
 import org.midorinext.android.ui.MidoriApplicationViewModel
-import org.midorinext.android.ui.browser.TabOpening
+import org.midorinext.android.ui.PrivacyMode
 import org.midorinext.android.ui.browser.ToolbarAction
-import org.midorinext.android.ui.zap.ZapButton
 import org.midorinext.android.ui.preferences.TabsViewPreferenceSelector
+import org.midorinext.android.ui.widgets.EmptyPagePlaceholder
 import org.midorinext.android.ui.widgets.Dropdown
 import org.midorinext.android.ui.widgets.DropdownItem
 import org.midorinext.android.ui.widgets.TabCounter
 import org.midorinext.android.ui.widgets.YesNoDialog
+import org.midorinext.android.ui.zap.ZapButton
 import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.state.TabSessionState
 
 @Composable
 fun TabsScreen(
-    onClose: (openNewTab: TabOpening) -> Unit = {},
+    onClose: () -> Unit = {},
     appViewModel: MidoriApplicationViewModel = hiltViewModel(),
     tabsViewModel: TabsScreenViewModel = hiltViewModel()
 ) {
-    val private by appViewModel.isPrivate.collectAsStateWithLifecycle()
+    val selectedTabIsPrivate by appViewModel.isPrivate.collectAsStateWithLifecycle()
     val tabs by tabsViewModel.tabs.collectAsStateWithLifecycle()
     val smartTabs by tabsViewModel.smartTabs.collectAsStateWithLifecycle()
     val tabsViewOption by tabsViewModel.tabsViewOption.collectAsStateWithLifecycle()
     val restoreComplete by tabsViewModel.restoreComplete.collectAsStateWithLifecycle()
-    var selectedTabIds by remember { mutableStateOf(emptySet<String>()) }
-    var selectionMode by remember { mutableStateOf(false) }
-    var selectionTargetGroupId by remember { mutableStateOf<String?>(null) }
-    var showGroupNameDialog by remember { mutableStateOf(false) }
-    var groupName by remember { mutableStateOf("") }
-    var groupColor by remember { mutableStateOf(TabGroupColor.BLUE) }
+    val selectedTabId by tabsViewModel.selectedTabId.collectAsStateWithLifecycle()
+    var uiState by rememberSaveable(stateSaver = TabsUiStateSaver) {
+        mutableStateOf(
+            TabsUiState(
+                page = if (selectedTabIsPrivate) TabsPage.PRIVATE else TabsPage.NORMAL,
+            ),
+        )
+    }
+    var pageInitialized by rememberSaveable { mutableStateOf(false) }
+    val private = uiState.page.isPrivate
+    val selection = uiState.mode as? TabsMode.Selecting
+    val selectionMode = selection != null
+    val selectedTabIds = selection?.tabIds.orEmpty()
+    val selectionTargetGroupId = selection?.targetGroupId
+    val searchQuery = (uiState.mode as? TabsMode.Searching)?.query.orEmpty()
+    val dispatch: (TabsUiAction) -> Unit = { action -> uiState = uiState.reduce(action) }
+    var showGroupNameDialog by rememberSaveable { mutableStateOf(false) }
+    var groupName by rememberSaveable { mutableStateOf("") }
+    var groupColor by rememberSaveable { mutableStateOf(TabGroupColor.BLUE) }
     var groupBeingEdited by remember { mutableStateOf<SmartTabGroup?>(null) }
     var groupBeingDeleted by remember { mutableStateOf<SmartTabGroup?>(null) }
     var groupBeingOpened by remember { mutableStateOf<SmartTabGroup?>(null) }
@@ -63,30 +85,47 @@ fun TabsScreen(
 
     val normalTabsCount by remember(tabs) { derivedStateOf { tabs.count { !it.content.private } } }
 
+    LaunchedEffect(restoreComplete, selectedTabId, tabs) {
+        if (restoreComplete && !pageInitialized) {
+            val restoredSelectionIsPrivate = tabs
+                .firstOrNull { tab -> tab.id == selectedTabId }
+                ?.content
+                ?.private
+                ?: selectedTabIsPrivate
+            uiState = uiState.reduce(
+                TabsUiAction.SelectPage(
+                    if (restoredSelectionIsPrivate) TabsPage.PRIVATE else TabsPage.NORMAL,
+                ),
+            )
+            pageInitialized = true
+        }
+    }
+
+    LaunchedEffect(uiState.page) {
+        appViewModel.setPrivacyMode(
+            if (uiState.page == TabsPage.PRIVATE) PrivacyMode.PRIVATE else PrivacyMode.NORMAL,
+        )
+    }
+
     val openIndividualTab: (Boolean) -> Unit = { privateTab ->
         // Creating a tab is always an escape hatch from the grouping flow. In particular, this
         // prevents a pending "add to group" action from swallowing the next new tab.
-        selectedTabIds = emptySet()
-        selectionMode = false
-        selectionTargetGroupId = null
+        dispatch(TabsUiAction.ExitTransientMode)
         tabsViewModel.openNewTab(privateTab)
-        onClose(TabOpening.NONE)
+        onClose()
     }
 
     BackHandler(
-        enabled = !showGroupNameDialog && groupBeingEdited == null && groupBeingDeleted == null
+        enabled = (groupBeingOpened != null || uiState.mode !is TabsMode.Browsing) &&
+            !showGroupNameDialog &&
+            groupBeingEdited == null &&
+            groupBeingDeleted == null,
     ) {
         if (groupBeingOpened != null) {
             groupBeingOpened = null
             return@BackHandler
         }
-        if (selectionMode) {
-            selectedTabIds = emptySet()
-            selectionMode = false
-            selectionTargetGroupId = null
-        } else {
-            onClose(TabOpening.NONE)
-        }
+        dispatch(TabsUiAction.ExitTransientMode)
     }
 
     DisposableEffect(true) {
@@ -95,43 +134,33 @@ fun TabsScreen(
         }
     }
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .background(MaterialTheme.colorScheme.background))  {
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)) {
-            Row(modifier = Modifier
-                .align(Alignment.CenterStart)
-                .padding(start = 16.dp)
-            ) {
-                TabIconButton(
-                    onClick = {
-                        appViewModel.setPrivacyMode(PrivacyMode.NORMAL)
-                    },
-                    icon = {
-                        Box(modifier = Modifier.size(26.dp)) {
-                            TabCounter(tabCount = normalTabsCount)
-                        }
-                    },
-                    selected = !private,
-                    modifier = Modifier.size(48.dp, 56.dp)
-                )
-                TabIconButton(
-                    onClick = {
-                        appViewModel.setPrivacyMode(PrivacyMode.PRIVATE)
-                    },
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.icons_privacy_mask),
-                            contentDescription = stringResource(R.string.tab_tray_private_tabs),
-                            modifier = Modifier.size(22.dp)
-                        )
-                    },
-                    selected = private,
-                    modifier = Modifier.size(48.dp, 56.dp)
-                )
-            }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+        ) {
+            Text(
+                text = when (val mode = uiState.mode) {
+                    is TabsMode.Selecting -> stringResource(
+                        R.string.browser_group_tabs_selected,
+                        mode.tabIds.size,
+                    )
+                    is TabsMode.Searching -> stringResource(R.string.browser_search_tabs)
+                    TabsMode.Browsing -> stringResource(
+                        if (private) R.string.tab_tray_private_tabs else R.string.tab_tray_normal_tabs,
+                    )
+                },
+                style = MaterialTheme.typography.titleLarge,
+                maxLines = 1,
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 16.dp, end = 208.dp),
+            )
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -142,6 +171,20 @@ fun TabsScreen(
                     if (success) {
                         openIndividualTab(privateBeforeClick)
                     }
+                }
+                ToolbarAction(
+                    onClick = {
+                        if (uiState.mode is TabsMode.Searching) {
+                            dispatch(TabsUiAction.ExitTransientMode)
+                        } else {
+                            dispatch(TabsUiAction.ToggleSearch)
+                        }
+                    },
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.icons_search),
+                        contentDescription = stringResource(R.string.browser_search_tabs),
+                    )
                 }
                 ToolbarAction(onClick = {
                     openIndividualTab(private)
@@ -160,14 +203,47 @@ fun TabsScreen(
                         tabsViewModel.removeTabs(private)
                         appViewModel.showTabClosureSnackbar(tabsClosedString)
                         if (private) {
-                            appViewModel.setPrivacyMode(PrivacyMode.NORMAL)
+                            dispatch(TabsUiAction.SelectPage(TabsPage.NORMAL))
                         } else {
                             tabsViewModel.openNewTab(false)
-                            onClose(TabOpening.NONE)
+                            onClose()
                         }
                     }
                 )
             }
+        }
+
+        TabsPageSelector(
+            selectedPage = uiState.page,
+            normalTabsCount = normalTabsCount,
+            onPageSelected = { page ->
+                if (page != uiState.page) {
+                    dispatch(TabsUiAction.SelectPage(page))
+                }
+            },
+        )
+
+        if (uiState.mode is TabsMode.Searching) {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { query -> dispatch(TabsUiAction.UpdateSearch(query)) },
+                placeholder = { Text(stringResource(R.string.browser_search_tabs_hint)) },
+                leadingIcon = {
+                    Icon(painterResource(R.drawable.icons_search), contentDescription = null)
+                },
+                trailingIcon = {
+                    IconButton(onClick = { dispatch(TabsUiAction.ExitTransientMode) }) {
+                        Icon(
+                            painterResource(R.drawable.icons_close),
+                            contentDescription = stringResource(R.string.browser_close_tab_search),
+                        )
+                    }
+                },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+            )
         }
 
         HorizontalDivider()
@@ -181,39 +257,35 @@ fun TabsScreen(
         val tabsAddedToGroupString = stringResource(id = R.string.browser_tabs_added_to_group)
         val tabGroupDeletedString = stringResource(id = R.string.browser_tab_group_deleted)
         val tabRemovedFromGroupString = stringResource(id = R.string.browser_tab_removed_from_group)
-        SmartTabsActionBar(
-            private = private,
-            selectionMode = selectionMode,
-            addingToGroup = selectionTargetGroupId != null,
-            selectedTabsCount = selectedTabIds.size,
-            onGroupTabs = {
-                val targetGroupId = selectionTargetGroupId
-                if (targetGroupId == null) {
-                    groupName = tabsViewModel.nextGroupName()
-                    groupColor = tabsViewModel.nextGroupColor()
-                    showGroupNameDialog = true
-                } else {
-                    val addedCount = tabsViewModel.addTabsToGroup(targetGroupId, selectedTabIds)
-                    appViewModel.showSnackbar(
+        if (selectionMode) {
+            SmartTabsActionBar(
+                addingToGroup = selectionTargetGroupId != null,
+                selectedTabsCount = selectedTabIds.size,
+                onGroupTabs = {
+                    val targetGroupId = selectionTargetGroupId
+                    if (targetGroupId == null) {
+                        groupName = tabsViewModel.nextGroupName()
+                        groupColor = tabsViewModel.nextGroupColor()
+                        showGroupNameDialog = true
+                    } else {
+                        val addedCount = tabsViewModel.addTabsToGroup(targetGroupId, selectedTabIds)
+                        appViewModel.showSnackbar(
+                            if (addedCount > 0) {
+                                tabsAddedToGroupString.format(addedCount)
+                            } else {
+                                noTabsGroupedString
+                            }
+                        )
                         if (addedCount > 0) {
-                            tabsAddedToGroupString.format(addedCount)
-                        } else {
-                            noTabsGroupedString
+                            dispatch(TabsUiAction.ExitTransientMode)
                         }
-                    )
-                    if (addedCount > 0) {
-                        selectedTabIds = emptySet()
-                        selectionMode = false
-                        selectionTargetGroupId = null
                     }
-                }
-            },
-            onCancelTabSelection = {
-                selectedTabIds = emptySet()
-                selectionMode = false
-                selectionTargetGroupId = null
-            }
-        )
+                },
+                onCancelTabSelection = {
+                    dispatch(TabsUiAction.ExitTransientMode)
+                },
+            )
+        }
 
         if (showGroupNameDialog) {
             AlertDialog(
@@ -243,9 +315,7 @@ fun TabsScreen(
                                 }
                             )
                             if (groupedCount > 0) {
-                                selectedTabIds = emptySet()
-                                selectionMode = false
-                                selectionTargetGroupId = null
+                                dispatch(TabsUiAction.ExitTransientMode)
                             }
                             showGroupNameDialog = false
                         }
@@ -310,7 +380,7 @@ fun TabsScreen(
                     onTabSelected = { tab ->
                         tabsViewModel.selectTab(tab.id)
                         groupBeingOpened = null
-                        onClose(TabOpening.NONE)
+                        onClose()
                     },
                     onTabDeleted = { tab ->
                         tabsViewModel.removeTab(tab.id)
@@ -324,24 +394,23 @@ fun TabsScreen(
 
         AnimatedTabList(
             smartTabs = smartTabs,
-            private = private,
+            page = uiState.page,
+            searchActive = uiState.mode is TabsMode.Searching,
+            searchQuery = searchQuery,
             onClose = onClose,
             appViewModel = appViewModel,
             tabsViewModel = tabsViewModel,
+            selectedTabId = selectedTabId,
             tabsViewOption = resolvedTabsViewOption,
             selectionMode = selectionMode,
             selectedTabIds = selectedTabIds,
             selectionTargetGroupId = selectionTargetGroupId,
             onTabSelectionChange = { tabId ->
-                selectedTabIds = selectedTabIds.let { selected ->
-                    if (tabId in selected) selected - tabId else selected + tabId
-                }
+                dispatch(TabsUiAction.ToggleTabSelection(tabId))
             },
             onEditGroup = { groupBeingEdited = it },
             onAddTabsToGroup = { group ->
-                selectionMode = true
-                selectionTargetGroupId = group.id
-                selectedTabIds = emptySet()
+                dispatch(TabsUiAction.BeginSelection(targetGroupId = group.id))
             },
             onDeleteGroup = { groupBeingDeleted = it },
             onOpenGroup = { groupBeingOpened = it },
@@ -349,9 +418,7 @@ fun TabsScreen(
                 val addedCount = tabsViewModel.addTabsToGroup(group.id, tabIds)
                 if (addedCount > 0) {
                     appViewModel.showSnackbar(tabsAddedToGroupString.format(addedCount))
-                    selectedTabIds = emptySet()
-                    selectionMode = false
-                    selectionTargetGroupId = null
+                    dispatch(TabsUiAction.ExitTransientMode)
                 }
             },
             onRemoveTabFromGroup = { groupId, tabId ->
@@ -361,9 +428,7 @@ fun TabsScreen(
             },
             onTabLongPressed = { tab ->
                 if (!tab.content.private) {
-                    selectionMode = true
-                    selectionTargetGroupId = null
-                    selectedTabIds = setOf(tab.id)
+                    dispatch(TabsUiAction.BeginSelection(tabIds = setOf(tab.id)))
                 }
             }
         )
@@ -372,8 +437,6 @@ fun TabsScreen(
 
 @Composable
 fun SmartTabsActionBar(
-    private: Boolean,
-    selectionMode: Boolean,
     addingToGroup: Boolean,
     selectedTabsCount: Int,
     onGroupTabs: () -> Unit,
@@ -387,27 +450,24 @@ fun SmartTabsActionBar(
             .horizontalScroll(rememberScrollState())
             .padding(start = 16.dp, end = 16.dp, bottom = 10.dp)
     ) {
-        if (selectionMode) {
-            AssistChip(
-                onClick = {},
-                label = { Text(stringResource(R.string.browser_group_tabs_selected, selectedTabsCount)) }
-            )
-            AssistChip(
-                onClick = onGroupTabs,
-                enabled = if (addingToGroup) selectedTabsCount >= 1 else selectedTabsCount >= 2,
-                leadingIcon = {
-                    Icon(painterResource(R.drawable.icons_folder_add), contentDescription = null)
-                },
-                label = {
-                    Text(stringResource(if (addingToGroup) R.string.browser_add_to_group else R.string.browser_group_tabs))
-                }
-            )
-            AssistChip(
-                onClick = onCancelTabSelection,
-                label = { Text(stringResource(R.string.browser_cancel_selection)) }
-            )
-            return@Row
-        }
+        AssistChip(
+            onClick = {},
+            label = { Text(stringResource(R.string.browser_group_tabs_selected, selectedTabsCount)) },
+        )
+        AssistChip(
+            onClick = onGroupTabs,
+            enabled = if (addingToGroup) selectedTabsCount >= 1 else selectedTabsCount >= 2,
+            leadingIcon = {
+                Icon(painterResource(R.drawable.icons_folder_add), contentDescription = null)
+            },
+            label = {
+                Text(stringResource(if (addingToGroup) R.string.browser_add_to_group else R.string.browser_group_tabs))
+            },
+        )
+        AssistChip(
+            onClick = onCancelTabSelection,
+            label = { Text(stringResource(R.string.browser_cancel_selection)) },
+        )
     }
 }
 
@@ -501,7 +561,9 @@ fun TabsMenuMore(
     var showViewOptionPopup by remember { mutableStateOf(false) }
 
     Box {
-        ToolbarAction(onClick = { showMenu = true }) {
+        ToolbarAction(
+            onClick = { showMenu = true },
+        ) {
             Icon(
                 painter = painterResource(id = R.drawable.icons_more_vertical),
                 contentDescription = stringResource(R.string.menu_more_options)
@@ -555,10 +617,13 @@ fun TabsMenuMore(
 @Composable
 fun AnimatedTabList(
     smartTabs: SmartTabsState,
-    private: Boolean,
-    onClose: (openNewTab: TabOpening) -> Unit,
+    page: TabsPage,
+    searchActive: Boolean,
+    searchQuery: String,
+    onClose: () -> Unit,
     appViewModel: MidoriApplicationViewModel,
     tabsViewModel: TabsScreenViewModel,
+    selectedTabId: String?,
     tabsViewOption: TabsViewOption,
     selectionMode: Boolean,
     selectedTabIds: Set<String>,
@@ -572,58 +637,80 @@ fun AnimatedTabList(
     onRemoveTabFromGroup: (String, String) -> Unit,
     onTabLongPressed: (TabSessionState) -> Unit
 ) {
-    val selectedTabId by tabsViewModel.selectedTabId.collectAsStateWithLifecycle()
+    val normalListState = rememberLazyListState()
+    val privateListState = rememberLazyListState()
+    val normalGridState = rememberLazyGridState()
+    val privateGridState = rememberLazyGridState()
+    val normalSearchListState = rememberLazyListState()
+    val privateSearchListState = rememberLazyListState()
+    val normalSearchGridState = rememberLazyGridState()
+    val privateSearchGridState = rememberLazyGridState()
+    val animationsEnabled = ValueAnimator.areAnimatorsEnabled()
+    val layoutDirection = LocalLayoutDirection.current
+    val tabClosedString = stringResource(id = R.string.browser_tab_closed)
+    val onTabDeleted: (TabSessionState) -> Unit = { tab: SessionState ->
+        tabsViewModel.removeTab(tab.id)
+        appViewModel.showTabClosureSnackbar(tabClosedString)
+    }
 
-    Box(Modifier.fillMaxSize()) {
+    AnimatedContent(
+        targetState = page,
+        contentKey = { targetPage -> targetPage },
+        transitionSpec = {
+            if (!animationsEnabled) {
+                EnterTransition.None togetherWith ExitTransition.None
+            } else {
+                val logicalEnd = if (layoutDirection == LayoutDirection.Ltr) 1 else -1
+                val enteringOffset = if (targetState == TabsPage.PRIVATE) logicalEnd else -logicalEnd
+                slideInHorizontally(
+                    animationSpec = tween(durationMillis = 220),
+                    initialOffsetX = { width -> width * enteringOffset },
+                ) togetherWith slideOutHorizontally(
+                    animationSpec = tween(durationMillis = 220),
+                    targetOffsetX = { width -> -width * enteringOffset },
+                )
+            }
+        },
+        label = "tabsPage",
+        modifier = Modifier.fillMaxSize(),
+    ) { targetPage ->
+        val pageState = remember(smartTabs, targetPage, searchQuery) {
+            smartTabs.forPageAndQuery(targetPage, searchQuery)
+        }
         val onTabSelected = { tab: SessionState ->
-            if (selectionMode && !private) {
+            if (selectionMode && !targetPage.isPrivate) {
                 onTabSelectionChange(tab.id)
             } else {
                 tabsViewModel.selectTab(tab.id)
-                onClose(TabOpening.NONE)
+                onClose()
             }
         }
-        val tabClosedString = stringResource(id = R.string.browser_tab_closed)
-        val onTabDeleted: (TabSessionState) -> Unit = { tab: SessionState ->
-            tabsViewModel.removeTab(tab.id)
-            appViewModel.showTabClosureSnackbar(tabClosedString)
-        }
 
-        AnimatedVisibility(
-            visible = private,
-            enter = slideInHorizontally(initialOffsetX = { it }),
-            exit = slideOutHorizontally(targetOffsetX = { it })
-        ) {
-            SmartTabView(
-                state = smartTabs,
-                private = private,
-                selectedTabId = selectedTabId,
-                thumbnailStorage = tabsViewModel.thumbnailStorage,
-                browserIcons = tabsViewModel.browserIcons,
-                modifier = Modifier.fillMaxHeight(),
-                onTabSelected = onTabSelected,
-                onTabDeleted = onTabDeleted,
-                contentBlockerState = tabsViewModel.contentBlockerState,
-                tabsViewOption = tabsViewOption,
-                selectionMode = selectionMode,
-                selectedTabIds = selectedTabIds,
-                onTabSelectionChange = onTabSelectionChange,
-                selectionTargetGroupId = selectionTargetGroupId,
-                onTabLongPressed = onTabLongPressed
+        if (searchQuery.isNotBlank() && pageState.isEmpty) {
+            EmptyPagePlaceholder(
+                icon = R.drawable.icons_search,
+                title = stringResource(R.string.browser_tabs_search_empty_title),
+                subtitle = stringResource(R.string.browser_tabs_search_empty_subtitle, searchQuery),
             )
-        }
-
-        AnimatedVisibility(
-            visible = !private,
-            enter = slideInHorizontally(initialOffsetX = { -it }),
-            exit = slideOutHorizontally(targetOffsetX = { -it })
-        ) {
+        } else {
             SmartTabView(
-                state = smartTabs,
-                private = private,
+                state = pageState,
+                private = targetPage.isPrivate,
                 selectedTabId = selectedTabId,
                 thumbnailStorage = tabsViewModel.thumbnailStorage,
                 browserIcons = tabsViewModel.browserIcons,
+                listState = when {
+                    searchActive && targetPage.isPrivate -> privateSearchListState
+                    searchActive -> normalSearchListState
+                    targetPage.isPrivate -> privateListState
+                    else -> normalListState
+                },
+                gridState = when {
+                    searchActive && targetPage.isPrivate -> privateSearchGridState
+                    searchActive -> normalSearchGridState
+                    targetPage.isPrivate -> privateGridState
+                    else -> normalGridState
+                },
                 modifier = Modifier.fillMaxHeight(),
                 onTabSelected = onTabSelected,
                 onTabDeleted = onTabDeleted,
@@ -639,35 +726,49 @@ fun AnimatedTabList(
                 onDeleteGroup = onDeleteGroup,
                 onOpenGroup = onOpenGroup,
                 onTabsDroppedOnGroup = onTabsDroppedOnGroup,
-                onRemoveTabFromGroup = onRemoveTabFromGroup
+                onRemoveTabFromGroup = onRemoveTabFromGroup,
             )
         }
     }
 }
 
-
 @Composable
-fun TabIconButton(
-    onClick: () -> Unit,
-    icon: @Composable () -> Unit,
-    selected: Boolean,
-    modifier: Modifier = Modifier
+private fun TabsPageSelector(
+    selectedPage: TabsPage,
+    normalTabsCount: Int,
+    onPageSelected: (TabsPage) -> Unit,
 ) {
-    Box(modifier = modifier
-        .minimumInteractiveComponentSize()
-        .clickable(onClick = onClick)
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
     ) {
-        Box(modifier = Modifier.align(Alignment.Center)) {
-            val contentColor = if (selected) MaterialTheme.colorScheme.primary else LocalContentColor.current
-            CompositionLocalProvider(LocalContentColor provides contentColor) {
-                icon()
-            }
-        }
-
-        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
-            AnimatedVisibility(visible = selected) {
-                HorizontalDivider(thickness = 2.dp, color = MaterialTheme.colorScheme.primary)
-            }
-        }
+        FilterChip(
+            selected = selectedPage == TabsPage.NORMAL,
+            onClick = { onPageSelected(TabsPage.NORMAL) },
+            label = { Text(stringResource(R.string.tab_tray_normal_tabs)) },
+            leadingIcon = {
+                Box(modifier = Modifier.size(24.dp)) {
+                    TabCounter(tabCount = normalTabsCount)
+                }
+            },
+            modifier = Modifier
+                .weight(1f),
+        )
+        FilterChip(
+            selected = selectedPage == TabsPage.PRIVATE,
+            onClick = { onPageSelected(TabsPage.PRIVATE) },
+            label = { Text(stringResource(R.string.tab_tray_private_tabs)) },
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.icons_privacy_mask),
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                )
+            },
+            modifier = Modifier
+                .weight(1f),
+        )
     }
 }

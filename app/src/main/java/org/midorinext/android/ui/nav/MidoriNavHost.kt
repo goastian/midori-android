@@ -1,12 +1,12 @@
 package org.midorinext.android.ui.nav
 
+import android.animation.ValueAnimator
 import android.os.Build
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -45,8 +45,7 @@ fun MidoriNavHost(
     appViewModel: MidoriApplicationViewModel = hiltViewModel(),
 ) {
     val onBrowse = { navController.navigateSingleTopTo(NavDestination.Browser.route()) }
-    val transitionTimeMs = 250
-    var showTabsOverlay by rememberSaveable { mutableStateOf(false) }
+    val transitionTimeMs = if (ValueAnimator.areAnimatorsEnabled()) 250 else 0
 
     // The browser surface is an AndroidView.  Keep the navigation host constrained to the
     // padded area provided by Scaffold so Gecko never measures against the full window and
@@ -58,25 +57,25 @@ fun MidoriNavHost(
         modifier = Modifier.fillMaxSize(),
         enterTransition = {
             slideIntoContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                towards = AnimatedContentTransitionScope.SlideDirection.Start,
                 animationSpec = tween(durationMillis = transitionTimeMs)
             )
         },
         exitTransition = {
             slideOutOfContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                towards = AnimatedContentTransitionScope.SlideDirection.Start,
                 animationSpec = tween(durationMillis = transitionTimeMs)
             )
         },
         popEnterTransition = {
             slideIntoContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                towards = AnimatedContentTransitionScope.SlideDirection.End,
                 animationSpec = tween(durationMillis = transitionTimeMs)
             )
         },
         popExitTransition = {
             slideOutOfContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                towards = AnimatedContentTransitionScope.SlideDirection.End,
                 animationSpec = tween(durationMillis = transitionTimeMs)
             )
         }
@@ -86,25 +85,25 @@ fun MidoriNavHost(
             arguments = NavDestination.Browser.arguments,
             enterTransition = {
                 slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    towards = AnimatedContentTransitionScope.SlideDirection.Start,
                     animationSpec = tween(durationMillis = transitionTimeMs)
                 )
             },
             popEnterTransition = {
                 slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    towards = AnimatedContentTransitionScope.SlideDirection.End,
                     animationSpec = tween(durationMillis = transitionTimeMs)
                 )
             },
             exitTransition = {
                 slideOutOfContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    towards = AnimatedContentTransitionScope.SlideDirection.Start,
                     animationSpec = tween(durationMillis = transitionTimeMs)
                 )
             },
             popExitTransition = {
                 slideOutOfContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    towards = AnimatedContentTransitionScope.SlideDirection.End,
                     animationSpec = tween(durationMillis = transitionTimeMs)
                 )
             }
@@ -122,7 +121,9 @@ fun MidoriNavHost(
             BrowserScreen(
                 navigateTo = { destination ->
                     if (destination == NavDestination.Tabs) {
-                        showTabsOverlay = true
+                        navController.navigate(destination.route()) {
+                            launchSingleTop = true
+                        }
                     } else {
                         navController.navigateSingleTopTo(destination.route())
                     }
@@ -134,8 +135,10 @@ fun MidoriNavHost(
         composable(NavDestination.Tabs.match) {
             TabsScreen(
                 appViewModel = appViewModel,
-                onClose = { openNewTab ->
-                    navController.navigateSingleTopTo(NavDestination.Browser.route(openNewTab) )
+                onClose = {
+                    if (!navController.popBackStack()) {
+                        navController.navigateSingleTopTo(NavDestination.Browser.route())
+                    }
                 }
             )
         }
@@ -234,12 +237,6 @@ fun MidoriNavHost(
                 )
             }
         }
-    }
-    if (showTabsOverlay) {
-        TabsScreen(
-            appViewModel = appViewModel,
-            onClose = { showTabsOverlay = false }
-        )
     }
     }
 }

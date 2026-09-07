@@ -559,20 +559,6 @@ class BrowserScreenViewModel @Inject constructor(
         }
     }
 
-    fun closeCurrentTab() {
-        val state = store.state
-        val selectedTab = state.selectedTab ?: return
-        val closingLastTab = state.tabs.size == 1
-        val closingLastNormalTab =
-            !selectedTab.content.private && state.tabs.count { !it.content.private } == 1
-
-        toolbarState.updateFocus(false)
-        tabsUseCases.removeTab(selectedTab.id, selectParentIfExists = true)
-        if (closingLastTab || closingLastNormalTab) {
-            openNewMidoriTab(private = false, focusToolbar = false)
-        }
-    }
-
     fun updateShowFindInPage(show: Boolean) {
         toolbarState.updateVisibility(!show)
         showFindInPage = show

@@ -38,7 +38,6 @@ import org.midorinext.android.R
 import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.ext.toCleanHost
 import org.midorinext.android.ui.browser.home.HomePrivateBrowsingContent
-import org.midorinext.android.ui.theme.LocalMidoriTheme
 
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
@@ -63,7 +62,7 @@ fun TabRow(
     modifier: Modifier = Modifier
 ) {
     val isTabBlocked = contentBlockerState.getStatusForTab(tab.id) != ContentBlockerState.Status.ALLOWED
-    val isPrivateBrowsingHome = LocalMidoriTheme.current.private && tab.content.url == ""
+    val isPrivateBrowsingHome = tab.content.private && tab.content.url.isBlank()
     val coordinates = remember { mutableStateOf<LayoutCoordinates?>(null) }
 
     Row(
@@ -142,7 +141,12 @@ fun TabRow(
                     modifier = Modifier.fillMaxSize().padding(16.dp)
                 )
             } else {
-                TabThumbnail(tab.id, 90.dp, thumbnailStorage, contentBlockerState)
+                TabThumbnail(
+                    tabId = tab.id,
+                    private = tab.content.private,
+                    thumbnailStorage = thumbnailStorage,
+                    contentBlockerState = contentBlockerState,
+                )
             }
         }
 
@@ -181,7 +185,9 @@ fun TabRow(
                 )
             }
         } else {
-            IconButton(onClick = { onDeleted(tab) }) {
+            IconButton(
+                onClick = { onDeleted(tab) },
+            ) {
                 Icon(
                     painter = painterResource(id = R.drawable.icons_close),
                     contentDescription = stringResource(R.string.tab_tray_close_tab),

@@ -5,9 +5,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.shape.CircleShape
@@ -47,6 +49,8 @@ fun SmartTabView(
     onTabSelected: (tab: TabSessionState) -> Unit,
     onTabDeleted: (tab: TabSessionState) -> Unit,
     contentBlockerState: ContentBlockerState,
+    listState: LazyListState,
+    gridState: LazyGridState,
     modifier: Modifier = Modifier,
     tabsViewOption: TabsViewOption = TabsViewOption.LIST,
     selectionMode: Boolean = false,
@@ -61,15 +65,11 @@ fun SmartTabView(
     onTabsDroppedOnGroup: (SmartTabGroup, Set<String>) -> Unit = { _, _ -> },
     onRemoveTabFromGroup: (String, String) -> Unit = { _, _ -> }
 ) {
-    val activeTabs = remember(state.activeTabs, private) {
-        state.activeTabs.filter { it.content.private == private }
-    }
-    val inactiveTabs = remember(state.inactiveTabs, private) {
-        state.inactiveTabs.filter { it.content.private == private }
-    }
-    val groups = remember(state.groups, private) {
-        if (private) emptyList() else state.groups
-    }
+    // TabsScreen already scopes and searches the immutable state once. Do not allocate another
+    // three filtered collections on every tray recomposition.
+    val activeTabs = state.activeTabs
+    val inactiveTabs = state.inactiveTabs
+    val groups = state.groups
     val groupBounds = remember { mutableStateMapOf<String, Rect>() }
     var draggingTabId by remember { mutableStateOf<String?>(null) }
     var draggedTabIds by remember { mutableStateOf(emptySet<String>()) }
@@ -82,7 +82,7 @@ fun SmartTabView(
         return position?.let { pointerPosition ->
             groups.firstOrNull { group ->
                 val bounds = groupBounds[group.id]
-                movingTabIds.none { tabId -> tabId in group.tabs.map { it.id } } &&
+                movingTabIds.none { tabId -> tabId in group.tabIds } &&
                     bounds != null &&
                     pointerPosition.x in (bounds.left - dropZonePadding)..(bounds.right + dropZonePadding) &&
                     pointerPosition.y in (bounds.top - dropZonePadding)..(bounds.bottom + dropZonePadding)
@@ -135,6 +135,8 @@ fun SmartTabView(
             onTabSelected = onTabSelected,
             onTabDeleted = onTabDeleted,
             contentBlockerState = contentBlockerState,
+            listState = listState,
+            gridState = gridState,
             modifier = modifier,
             tabsViewOption = tabsViewOption,
             selectionMode = selectionMode,
@@ -156,6 +158,7 @@ fun SmartTabView(
             onTabSelected = onTabSelected,
             onTabDeleted = onTabDeleted,
             contentBlockerState = contentBlockerState,
+            gridState = gridState,
             modifier = modifier,
             selectionMode = selectionMode,
             selectedTabIds = selectedTabIds,
@@ -188,6 +191,8 @@ fun SmartTabView(
             onTabSelected = onTabSelected,
             onTabDeleted = onTabDeleted,
             contentBlockerState = contentBlockerState,
+            listState = listState,
+            gridState = gridState,
             modifier = modifier,
             tabsViewOption = tabsViewOption,
             selectionMode = selectionMode,
@@ -203,11 +208,12 @@ fun SmartTabView(
     }
 
     LazyColumn(
+        state = listState,
         modifier = modifier,
         userScrollEnabled = draggingTabId == null
     ) {
         groups.forEach { group ->
-            item(key = "group-${group.id}") {
+            item(key = "group-${group.id}", contentType = "group") {
                 TabGroupCard(
                     group = group,
                     selected = group.tabs.any { it.id == selectedTabId },
@@ -224,13 +230,17 @@ fun SmartTabView(
         }
 
         if (activeTabs.isNotEmpty()) {
-            item(key = "active-header") {
+            item(key = "active-header", contentType = "header") {
                 TabSectionHeader(
                     title = stringResource(R.string.browser_active_tabs),
                     subtitle = stringResource(R.string.browser_tab_group_count, activeTabs.size)
                 )
             }
-            items(activeTabs, key = { "active-${it.id}" }) { tab ->
+            items(
+                items = activeTabs,
+                key = { "active-${it.id}" },
+                contentType = { "tab" },
+            ) { tab ->
                 TabRow(
                     tab = tab,
                     selected = tab.id == selectedTabId,
@@ -252,13 +262,17 @@ fun SmartTabView(
         }
 
         if (inactiveTabs.isNotEmpty()) {
-            item(key = "inactive-header") {
+            item(key = "inactive-header", contentType = "header") {
                 TabSectionHeader(
                     title = stringResource(R.string.browser_inactive_tabs),
                     subtitle = stringResource(R.string.browser_inactive_tabs_summary)
                 )
             }
-            items(inactiveTabs, key = { "inactive-${it.id}" }) { tab ->
+            items(
+                items = inactiveTabs,
+                key = { "inactive-${it.id}" },
+                contentType = { "tab" },
+            ) { tab ->
                 TabRow(
                     tab = tab,
                     selected = tab.id == selectedTabId,
@@ -293,6 +307,7 @@ private fun SmartTabsGrid(
     onTabSelected: (TabSessionState) -> Unit,
     onTabDeleted: (TabSessionState) -> Unit,
     contentBlockerState: ContentBlockerState,
+    gridState: LazyGridState,
     modifier: Modifier,
     selectionMode: Boolean,
     selectedTabIds: Set<String>,
@@ -318,6 +333,7 @@ private fun SmartTabsGrid(
     }
 
     LazyVerticalGrid(
+        state = gridState,
         columns = GridCells.Adaptive(minSize = 150.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -327,7 +343,7 @@ private fun SmartTabsGrid(
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         groups.forEach { group ->
-            item(key = "grid-group-${group.id}") {
+            item(key = "grid-group-${group.id}", contentType = "group") {
                 TabGroupCard(
                     group = group,
                     selected = group.tabs.any { it.id == selectedTabId },
@@ -345,14 +361,22 @@ private fun SmartTabsGrid(
 
         if (activeTabs.isNotEmpty()) {
             if (groups.isEmpty()) {
-                item(key = "grid-active-header", span = { GridItemSpan(maxLineSpan) }) {
+                item(
+                    key = "grid-active-header",
+                    contentType = "header",
+                    span = { GridItemSpan(maxLineSpan) },
+                ) {
                     TabSectionHeader(
                         title = stringResource(R.string.browser_active_tabs),
                         subtitle = stringResource(R.string.browser_tab_group_count, activeTabs.size)
                     )
                 }
             }
-            gridItems(activeTabs, key = { "grid-active-${it.id}" }) { tab ->
+            gridItems(
+                items = activeTabs,
+                key = { "grid-active-${it.id}" },
+                contentType = { "tab" },
+            ) { tab ->
                 TabCard(
                     tab = tab,
                     selected = tab.id == selectedTabId,
@@ -375,13 +399,21 @@ private fun SmartTabsGrid(
         }
 
         if (inactiveTabs.isNotEmpty()) {
-            item(key = "grid-inactive-header", span = { GridItemSpan(maxLineSpan) }) {
+            item(
+                key = "grid-inactive-header",
+                contentType = "header",
+                span = { GridItemSpan(maxLineSpan) },
+            ) {
                 TabSectionHeader(
                     title = stringResource(R.string.browser_inactive_tabs),
                     subtitle = stringResource(R.string.browser_inactive_tabs_summary)
                 )
             }
-            gridItems(inactiveTabs, key = { "grid-inactive-${it.id}" }) { tab ->
+            gridItems(
+                items = inactiveTabs,
+                key = { "grid-inactive-${it.id}" },
+                contentType = { "tab" },
+            ) { tab ->
                 TabCard(
                     tab = tab,
                     selected = tab.id == selectedTabId,
@@ -506,7 +538,7 @@ private fun TabGroupCard(
                     ) {
                         TabThumbnail(
                             tabId = tab.id,
-                            size = 160.dp,
+                            private = tab.content.private,
                             thumbnailStorage = thumbnailStorage,
                             contentBlockerState = contentBlockerState
                         )
@@ -568,7 +600,11 @@ fun TabGroupTabsSheet(
                     .heightIn(max = 560.dp)
                     .padding(vertical = 12.dp)
             ) {
-                gridItems(group.tabs, key = { it.id }) { tab ->
+                gridItems(
+                    items = group.tabs,
+                    key = { it.id },
+                    contentType = { "tab" },
+                ) { tab ->
                     TabCard(
                         tab = tab,
                         selected = tab.id == selectedTabId,
@@ -619,6 +655,8 @@ fun TabView(
     onTabSelected: (tab: TabSessionState) -> Unit,
     onTabDeleted: (tab: TabSessionState) -> Unit,
     contentBlockerState: ContentBlockerState,
+    listState: LazyListState,
+    gridState: LazyGridState,
     modifier: Modifier = Modifier,
     tabsViewOption: TabsViewOption = TabsViewOption.LIST,
     selectionMode: Boolean = false,
@@ -630,6 +668,7 @@ fun TabView(
         when (tabsViewOption) {
             TabsViewOption.LIST -> TabList(
                 tabs = tabs,
+                state = listState,
                 selectedTabId = selectedTabId,
                 thumbnailStorage = thumbnailStorage,
                 onTabSelected = onTabSelected,
@@ -643,6 +682,7 @@ fun TabView(
             )
             TabsViewOption.GRID -> TabGrid(
                 tabs = tabs,
+                state = gridState,
                 selectedTabId = selectedTabId,
                 thumbnailStorage = thumbnailStorage,
                 browserIcons = browserIcons,
@@ -664,10 +704,9 @@ fun TabView(
 
 @Composable
 private fun EmptyTabsPlaceholder(private: Boolean) {
-    val privateMode = remember { private }
     EmptyPagePlaceholder(
-        icon = if (privateMode) R.drawable.icons_privacy_mask else R.drawable.icons_tab_smiley,
-        title = stringResource(id = if (privateMode) R.string.browser_tabs_empty_title_private else R.string.browser_tabs_empty_title),
-        subtitle = stringResource(id = if (privateMode) R.string.browser_tabs_empty_subtitle_private else R.string.browser_tabs_empty_subtitle)
+        icon = if (private) R.drawable.icons_privacy_mask else R.drawable.icons_tab_smiley,
+        title = stringResource(id = if (private) R.string.browser_tabs_empty_title_private else R.string.browser_tabs_empty_title),
+        subtitle = stringResource(id = if (private) R.string.browser_tabs_empty_subtitle_private else R.string.browser_tabs_empty_subtitle)
     )
 }

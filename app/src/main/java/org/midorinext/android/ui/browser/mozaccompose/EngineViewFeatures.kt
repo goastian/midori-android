@@ -24,7 +24,6 @@ fun BoxScope.EngineViewFeatures(
         canGoBack = canGoBack,
         goBackUseCase = viewModel.goBack,
         goForwardUseCase = viewModel.goForward,
-        closeCurrentTab = viewModel::closeCurrentTab,
         backEnabled = { !viewModel.toolbarState.hasFocus }
     )
 

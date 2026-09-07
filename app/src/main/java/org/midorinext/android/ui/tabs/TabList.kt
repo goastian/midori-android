@@ -2,6 +2,7 @@ package org.midorinext.android.ui.tabs
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -13,6 +14,7 @@ import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 @Composable
 fun TabList(
     tabs: List<TabSessionState>,
+    state: LazyListState,
     selectedTabId: String?,
     thumbnailStorage: ThumbnailStorage,
     onTabSelected: (tab: TabSessionState) -> Unit,
@@ -25,9 +27,14 @@ fun TabList(
     onTabLongPressed: (TabSessionState) -> Unit = {}
 ) {
     LazyColumn(
+        state = state,
         modifier = modifier.fillMaxWidth()
     ) {
-        itemsIndexed(tabs, key = { _, tab -> tab.id }) { _, tab ->
+        itemsIndexed(
+            items = tabs,
+            key = { _, tab -> tab.id },
+            contentType = { _, _ -> "tab" },
+        ) { _, tab ->
             TabRow(
                 tab = tab,
                 selected = tab.id == selectedTabId,

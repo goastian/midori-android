@@ -19,6 +19,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.midorinext.android.R
@@ -474,6 +476,11 @@ fun TabsButton(
     viewModel: BrowserScreenViewModel
 ) {
     val tabCount by viewModel.tabCount.collectAsStateWithLifecycle()
+    val tabsDescription = if (tabCount == 1) {
+        stringResource(R.string.tab_tray_title_single)
+    } else {
+        stringResource(R.string.tab_tray_title, tabCount)
+    }
     var showTabsDropdown by remember { mutableStateOf(false) }
 
     val private = LocalMidoriTheme.current.private
@@ -490,6 +497,7 @@ fun TabsButton(
 
     Box(
         modifier = Modifier
+            .semantics { contentDescription = tabsDescription }
             .width(ToolbarActionWidth)
             .fillMaxHeight()
             .combinedClickable(

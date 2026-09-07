@@ -14,7 +14,6 @@ fun SessionFeature(
     canGoBack: Boolean,
     goBackUseCase: SessionUseCases.GoBackUseCase,
     goForwardUseCase: SessionUseCases.GoForwardUseCase,
-    closeCurrentTab: () -> Unit,
     backEnabled: () -> Boolean = { true }
 ) {
     val feature = remember(engineView) {
@@ -38,8 +37,10 @@ fun SessionFeature(
             BackHandler(true) { engineView.clearSelection() }
         } else if (canGoBack) {
             BackHandler(true) { goBackUseCase() }
-        } else {
-            BackHandler(true) { closeCurrentTab() }
         }
+        // At the root of the selected page there is deliberately no handler: Android's activity
+        // dispatcher owns Back, including predictive Back. Closing a tab remains an explicit tab
+        // tray action and can no longer trap users by closing and immediately recreating the last
+        // normal tab.
     }
 }

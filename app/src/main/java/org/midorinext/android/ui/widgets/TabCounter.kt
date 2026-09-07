@@ -20,7 +20,7 @@ fun TabCounter(tabCount: Int) {
     ) {
         Icon(
             painter = painterResource(id = R.drawable.icons_checkbox_unchecked),
-            contentDescription = "tab counter border",
+            contentDescription = null,
             modifier = Modifier.fillMaxSize()
         )
         Text(

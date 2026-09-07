@@ -8,6 +8,7 @@ import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.TabsViewOption
 import org.midorinext.android.usecases.MidoriUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import mozilla.components.browser.icons.BrowserIcons
@@ -35,6 +36,10 @@ class TabsScreenViewModel @Inject constructor(
 ): ViewModel() {
     val tabs = store.flow()
         .map { state -> state.tabs }
+        // BrowserState also changes for loading progress, history and prompts. Those fields are
+        // not rendered by the tray, so they must not invalidate every visible tab card.
+        .distinctUntilChanged { previous, current -> previous.hasSameTrayContentAs(current) }
+        .flowOn(Dispatchers.Default)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
@@ -43,6 +48,7 @@ class TabsScreenViewModel @Inject constructor(
 
     private val tabGroups = store.flow()
         .map { state -> state.tabPartitions[TAB_GROUPS_PARTITION]?.tabGroups.orEmpty() }
+        .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
@@ -51,6 +57,7 @@ class TabsScreenViewModel @Inject constructor(
 
     val restoreComplete = store.flow()
         .map { state -> state.restoreComplete }
+        .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
@@ -59,6 +66,7 @@ class TabsScreenViewModel @Inject constructor(
 
     val canUndoClose = store.flow()
         .map { state -> state.undoHistory.tabs.isNotEmpty() }
+        .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
@@ -78,14 +86,17 @@ class TabsScreenViewModel @Inject constructor(
     val smartTabs = combine(tabs, tabGroups, appPreferencesRepository.tabGroupColorsFlow) {
             allTabs, groups, colors ->
         buildSmartTabs(allTabs, groups, colors)
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000L),
-        initialValue = SmartTabsState()
-    )
+    }
+        .flowOn(Dispatchers.Default)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = SmartTabsState()
+        )
 
     val selectedTabId = store.flow()
         .map { state -> state.selectedTabId }
+        .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
@@ -304,7 +315,9 @@ class TabsScreenViewModel @Inject constructor(
             }
         }
 
-        val groupedIds = visibleGroups.flatMap { group -> group.tabs.map { it.id } }.toSet()
+        val groupedIds = visibleGroups.flatMapTo(hashSetOf()) { group ->
+            group.tabs.map { tab -> tab.id }
+        }
         val ungroupedTabs = allTabs.filterNot { it.id in groupedIds }
         val inactiveTabs = ungroupedTabs.filter { it.isInactive() }
         val activeTabs = ungroupedTabs.filterNot { it.isInactive() }
@@ -357,7 +370,11 @@ data class SmartTabGroup(
     val name: String,
     val color: TabGroupColor,
     val tabs: List<mozilla.components.browser.state.state.TabSessionState>
-)
+) {
+    // Drag hit-testing reads this on every pointer event. Materialize it once per state update
+    // instead of allocating a list repeatedly while the finger moves.
+    val tabIds: Set<String> = tabs.mapTo(hashSetOf()) { tab -> tab.id }
+}
 
 enum class TabGroupColor(val value: Int) {
     BLUE(0),
@@ -399,4 +416,22 @@ private fun canonicalUrl(url: String): String {
             append(query)
         }
     }.ifBlank { url.trim() }
+}
+
+private fun List<mozilla.components.browser.state.state.TabSessionState>.hasSameTrayContentAs(
+    other: List<mozilla.components.browser.state.state.TabSessionState>,
+): Boolean {
+    if (size != other.size) return false
+
+    return indices.all { index ->
+        val previous = this[index]
+        val current = other[index]
+        previous.id == current.id &&
+            previous.content.url == current.content.url &&
+            previous.content.title == current.content.title &&
+            previous.content.private == current.content.private &&
+            previous.content.icon === current.content.icon &&
+            previous.lastAccess == current.lastAccess &&
+            previous.createdAt == current.createdAt
+    }
 }
