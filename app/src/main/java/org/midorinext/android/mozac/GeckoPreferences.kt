@@ -30,7 +30,7 @@ object GeckoPreferences {
         val cookiePartitioning: Boolean,
         val strictTrackingProtection: Boolean,
         val trackingProtectionLevel: TrackingProtectionLevel,
-        val httpsOnlyLevel: HttpsOnlyLevel = HttpsOnlyLevel.OFF,
+        val httpsOnlyLevel: HttpsOnlyLevel = HttpsOnlyLevel.ALL_TABS,
         val dohProvider: DoHProvider = DoHProvider.DOH_DEFAULT,
         val appTrackingProtectionMode: AppTrackingProtectionMode = AppTrackingProtectionMode.BROWSER_FIRST
     )

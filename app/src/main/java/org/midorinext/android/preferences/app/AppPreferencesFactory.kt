@@ -12,7 +12,10 @@ object AppPreferencesFactory {
         return DataStoreFactory.create(
             serializer = AppPreferencesSerializer,
             produceFile = { context.dataStoreFile(FILENAME) },
-            migrations = listOf(AppPreferencesMigration.create(context))
+            migrations = listOf(
+                AppPreferencesMigration.create(context),
+                HttpsOnlyAllTabsMigration,
+            ),
         )
     }
 }
