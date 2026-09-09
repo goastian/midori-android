@@ -11,6 +11,7 @@ import org.junit.runner.RunWith
 import org.midorinext.android.R
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.preferences.app.HomepageOpeningScreen
+import org.midorinext.android.preferences.app.HttpsOnlyLevel
 import org.midorinext.android.ui.browser.TabOpening
 import org.midorinext.android.ui.nav.NavDestination
 
@@ -53,6 +54,8 @@ class NavigationTest {
         assertFalse(defaults.accessibilityAutomaticFontSizing)
         assertEquals(100, defaults.accessibilityFontScale)
         assertFalse(defaults.accessibilityForceZoomEnabled)
+        assertEquals(HttpsOnlyLevel.ALL_TABS, defaults.httpsOnlyLevel)
+        assertTrue(defaults.httpsOnlyAllTabsMigrationCompleted)
         assertEquals(HomepageOpeningScreen.HOMEPAGE_AFTER_FOUR_HOURS, defaults.homepageOpeningScreen)
     }
 

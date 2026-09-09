@@ -15,6 +15,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.first
 import mozilla.components.support.ktx.android.content.share
 import org.midorinext.android.BuildConfig
 import org.midorinext.android.R
@@ -22,6 +23,7 @@ import org.midorinext.android.ext.activity
 import org.midorinext.android.ext.isMidoriUrl
 import org.midorinext.android.ext.selectedLocale
 import org.midorinext.android.ext.toCleanHost
+import org.midorinext.android.preferences.app.ToolbarPosition
 import org.midorinext.android.ui.MidoriApplicationViewModel
 import org.midorinext.android.ui.browser.BrowserScreenViewModel
 import org.midorinext.android.ui.nav.NavDestination
@@ -41,8 +43,16 @@ fun BrowserMenu(
     applicationViewModel: MidoriApplicationViewModel
 ) {
     val currentUrl by viewModel.currentUrl.collectAsStateWithLifecycle()
+    val toolbarPosition by applicationViewModel.toolbarPosition.collectAsStateWithLifecycle()
+    val toolbarAtBottom = toolbarPosition == ToolbarPosition.BOTTOM
     val showPageActions = currentUrl.isExternalPage()
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val menuMaxHeight = if (toolbarAtBottom) {
+        (screenHeight * 0.52f).coerceAtMost(400.dp)
+    } else {
+        (screenHeight - 16.dp).coerceAtLeast(1.dp)
+    }
+    val menuScrollState = rememberScrollState()
     var showTranslationSheet by rememberSaveable { mutableStateOf(false) }
     var showMoreOptions by rememberSaveable { mutableStateOf(false) }
 
@@ -50,6 +60,14 @@ fun BrowserMenu(
         if (!expanded) {
             showMoreOptions = false
         }
+    }
+
+    LaunchedEffect(expanded, toolbarAtBottom, showMoreOptions) {
+        if (!expanded) return@LaunchedEffect
+
+        snapshotFlow { menuScrollState.maxValue }
+            .first { maxValue -> maxValue > 0 || !toolbarAtBottom }
+        menuScrollState.scrollTo(if (toolbarAtBottom) menuScrollState.maxValue else 0)
     }
 
     val dismissMenu = {
@@ -63,16 +81,13 @@ fun BrowserMenu(
             onDismissRequest = dismissMenu,
             // Keep the wide browser menu close to the overflow button while
             // preserving a 16 dp inset from the screen edge.
-            offset = DpOffset(24.dp, 0.dp),
+            offset = DpOffset(24.dp, if (toolbarAtBottom) (-8).dp else 0.dp),
             modifier = Modifier.widthIn(min = 280.dp, max = 320.dp)
         ) {
             Column(
                 modifier = Modifier
-                    // The previous fixed 640 dp cap forced an internal scroll on tall phones
-                    // even when the complete menu fit on screen. Leave a small edge inset while
-                    // allowing the popup to use the actual available display height.
-                    .heightIn(max = (screenHeight - 16.dp).coerceAtLeast(1.dp))
-                    .verticalScroll(rememberScrollState())
+                    .heightIn(max = menuMaxHeight)
+                    .verticalScroll(menuScrollState)
             ) {
                 BrowserMenuContent(
                     navigateTo = navigateTo,
@@ -80,6 +95,7 @@ fun BrowserMenu(
                     applicationViewModel = applicationViewModel,
                     currentUrl = currentUrl,
                     showPageActions = showPageActions,
+                    toolbarPosition = toolbarPosition,
                     showMoreOptions = showMoreOptions,
                     onShowMoreOptionsChange = { showMoreOptions = it },
                     onDismissRequest = dismissMenu,
@@ -124,6 +140,7 @@ private fun BrowserMenuContent(
     applicationViewModel: MidoriApplicationViewModel,
     currentUrl: String?,
     showPageActions: Boolean,
+    toolbarPosition: ToolbarPosition,
     showMoreOptions: Boolean,
     onShowMoreOptionsChange: (Boolean) -> Unit,
     onDismissRequest: () -> Unit,
@@ -132,29 +149,119 @@ private fun BrowserMenuContent(
     val isMidoriVpnActionAvailable by viewModel.isMidoriVpnActionAvailable.collectAsStateWithLifecycle()
     val showQuitApp by applicationViewModel.zapOnQuit.collectAsStateWithLifecycle()
 
+    val toolbarAtBottom = toolbarPosition == ToolbarPosition.BOTTOM
+
     if (showMoreOptions && showPageActions) {
+        if (toolbarAtBottom) {
+            PageActions(viewModel, onDismissRequest)
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        }
         DropdownItem(
             text = stringResource(R.string.menu_back_to_main),
             icon = R.drawable.icons_arrow_backward,
             onClick = { onShowMoreOptionsChange(false) },
         )
-        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-        PageActions(viewModel, onDismissRequest)
+        if (!toolbarAtBottom) {
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            PageActions(viewModel, onDismissRequest)
+        }
         return
     }
 
-    BrowserNavigation(viewModel, onDismissRequest)
-    HorizontalDivider()
+    if (toolbarAtBottom) {
+        BrowserMenuSettings(
+            navigateTo = navigateTo,
+            viewModel = viewModel,
+            applicationViewModel = applicationViewModel,
+            showQuitApp = showQuitApp,
+            onDismissRequest = onDismissRequest,
+        )
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        BrowserMenuDestinations(
+            navigateTo = navigateTo,
+            viewModel = viewModel,
+            applicationViewModel = applicationViewModel,
+            showPageActions = showPageActions,
+            onShowMoreOptionsChange = onShowMoreOptionsChange,
+            onDismissRequest = onDismissRequest,
+        )
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        BrowserPageShortcuts(
+            currentUrl = currentUrl,
+            showPageActions = showPageActions,
+            viewModel = viewModel,
+            onDismissRequest = onDismissRequest,
+            onTranslateClick = onTranslateClick,
+        )
+        HorizontalDivider()
+        MidoriVpnAction(
+            enabled = isMidoriVpnActionAvailable,
+            viewModel = viewModel,
+            onDismissRequest = onDismissRequest,
+        )
+        HorizontalDivider()
+        BrowserNavigation(viewModel, onDismissRequest)
+    } else {
+        BrowserNavigation(viewModel, onDismissRequest)
+        HorizontalDivider()
+        MidoriVpnAction(
+            enabled = isMidoriVpnActionAvailable,
+            viewModel = viewModel,
+            onDismissRequest = onDismissRequest,
+        )
+        HorizontalDivider()
+        BrowserPageShortcuts(
+            currentUrl = currentUrl,
+            showPageActions = showPageActions,
+            viewModel = viewModel,
+            onDismissRequest = onDismissRequest,
+            onTranslateClick = onTranslateClick,
+        )
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        BrowserMenuDestinations(
+            navigateTo = navigateTo,
+            viewModel = viewModel,
+            applicationViewModel = applicationViewModel,
+            showPageActions = showPageActions,
+            onShowMoreOptionsChange = onShowMoreOptionsChange,
+            onDismissRequest = onDismissRequest,
+        )
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        BrowserMenuSettings(
+            navigateTo = navigateTo,
+            viewModel = viewModel,
+            applicationViewModel = applicationViewModel,
+            showQuitApp = showQuitApp,
+            onDismissRequest = onDismissRequest,
+        )
+    }
+}
+
+@Composable
+private fun MidoriVpnAction(
+    enabled: Boolean,
+    viewModel: BrowserScreenViewModel,
+    onDismissRequest: () -> Unit,
+) {
     DropdownItem(
         text = stringResource(id = R.string.menu_midori_vpn),
         icon = R.drawable.ic_midori_vpn_action,
-        enabled = isMidoriVpnActionAvailable,
+        enabled = enabled,
         onClick = {
             onDismissRequest()
             viewModel.triggerInstalledExtensionAction(MidoriVpnFeature.EXTENSION_ID)
-        }
+        },
     )
-    HorizontalDivider()
+}
+
+@Composable
+private fun BrowserPageShortcuts(
+    currentUrl: String?,
+    showPageActions: Boolean,
+    viewModel: BrowserScreenViewModel,
+    onDismissRequest: () -> Unit,
+    onTranslateClick: () -> Unit,
+) {
     NewTabAction(viewModel, onDismissRequest)
     PrivateTabAction(viewModel, onDismissRequest)
     if (showPageActions && !currentUrl.isNullOrBlank()) {
@@ -164,10 +271,20 @@ private fun BrowserMenuContent(
             onClick = {
                 onDismissRequest()
                 onTranslateClick()
-            }
+            },
         )
     }
-    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+}
+
+@Composable
+private fun BrowserMenuDestinations(
+    navigateTo: (NavDestination) -> Unit,
+    viewModel: BrowserScreenViewModel,
+    applicationViewModel: MidoriApplicationViewModel,
+    showPageActions: Boolean,
+    onShowMoreOptionsChange: (Boolean) -> Unit,
+    onDismissRequest: () -> Unit,
+) {
     if (BuildConfig.FLAVOR_version == "original" &&
         LocalContext.current.selectedLocale().language == "fr"
     ) {
@@ -183,13 +300,22 @@ private fun BrowserMenuContent(
             onClick = { onShowMoreOptionsChange(true) },
         )
     }
-    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+}
+
+@Composable
+private fun BrowserMenuSettings(
+    navigateTo: (NavDestination) -> Unit,
+    viewModel: BrowserScreenViewModel,
+    applicationViewModel: MidoriApplicationViewModel,
+    showQuitApp: Boolean,
+    onDismissRequest: () -> Unit,
+) {
     ExtensionsSection(
         viewModel = viewModel,
         onExtensionsClick = {
             onDismissRequest()
             navigateTo(NavDestination.Extensions)
-        }
+        },
     )
     DropdownItem(
         text = stringResource(id = R.string.settings),
@@ -197,7 +323,7 @@ private fun BrowserMenuContent(
         onClick = {
             onDismissRequest()
             navigateTo(NavDestination.Preferences)
-        }
+        },
     )
     if (showQuitApp && BuildConfig.FLAVOR_target != "canaltoys") {
         val activity = LocalContext.current.activity
@@ -209,11 +335,9 @@ private fun BrowserMenuContent(
                 applicationViewModel.zap(skipConfirmation = true) { success ->
                     if (success) {
                         activity?.quit()
-                    } else {
-                        // TODO handle clear on quit fails
                     }
                 }
-            }
+            },
         )
     }
 }
