@@ -140,7 +140,11 @@ object MozacComponentHiltModule {
         @ApplicationContext context: Context,
         engine: Engine
     ) : SessionStorage {
-        return SessionStorage(context, engine)
+        return SessionStorage(
+            context,
+            engine,
+            applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+        )
     }
 
     @Singleton

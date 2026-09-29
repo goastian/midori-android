@@ -28,7 +28,7 @@ import org.midorinext.android.suggest.Suggestion
 import org.midorinext.android.suggest.SuggestionProvider
 import org.midorinext.android.ui.browser.suggest.Suggest
 
-private val ToolbarHeight = 64.dp
+internal val ToolbarHeight = 64.dp
 private val AddressBarHeight = 48.dp
 
 /**

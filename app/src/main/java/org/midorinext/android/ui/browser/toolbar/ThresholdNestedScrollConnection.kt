@@ -3,6 +3,7 @@ package org.midorinext.android.ui.browser.toolbar
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -48,7 +49,8 @@ fun rememberThresholdNestedScrollConnection(
     scrollThreshold: Int = 10,
     consecutiveThreshold: Int = 4
 ) : ThresholdNestedScrollConnection {
-    return remember(onScroll, scrollThreshold, consecutiveThreshold) {
-        ThresholdNestedScrollConnection(onScroll, scrollThreshold, consecutiveThreshold)
+    val currentOnScroll = rememberUpdatedState(onScroll)
+    return remember(scrollThreshold, consecutiveThreshold) {
+        ThresholdNestedScrollConnection({ sign -> currentOnScroll.value(sign) }, scrollThreshold, consecutiveThreshold)
     }
 }

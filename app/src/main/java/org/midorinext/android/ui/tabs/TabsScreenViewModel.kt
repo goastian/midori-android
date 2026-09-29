@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.preferences.app.AppPreferencesRepository
+import org.midorinext.android.preferences.app.SavedTabGroup
 import org.midorinext.android.preferences.app.TabsViewOption
 import org.midorinext.android.usecases.MidoriUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,7 +13,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import mozilla.components.browser.icons.BrowserIcons
-import mozilla.components.browser.state.state.TabGroup
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 import mozilla.components.feature.tabs.TabsUseCases
@@ -20,7 +20,6 @@ import mozilla.components.lib.state.ext.flow
 import javax.inject.Inject
 import java.util.UUID
 
-private const val TAB_GROUPS_PARTITION = "TAB_GROUPS"
 private const val INACTIVE_TAB_AGE_MS = 14L * 24L * 60L * 60L * 1000L
 private const val MAX_RECENTLY_CLOSED = 10
 
@@ -46,12 +45,11 @@ class TabsScreenViewModel @Inject constructor(
             initialValue = listOf()
         )
 
-    private val tabGroups = store.flow()
-        .map { state -> state.tabPartitions[TAB_GROUPS_PARTITION]?.tabGroups.orEmpty() }
+    private val tabGroups = appPreferencesRepository.tabGroupsFlow
         .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
+            started = SharingStarted.Eagerly,
             initialValue = emptyList()
         )
 
@@ -63,6 +61,28 @@ class TabsScreenViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000L),
             initialValue = false
         )
+
+    init {
+        // Mozilla 157 no longer owns group membership. Remove IDs for tabs closed outside the
+        // tray, but wait for session restoration before comparing against the browser store.
+        viewModelScope.launch {
+            val openTabIds = store.flow()
+                .map { state -> state.restoreComplete to state.tabs.mapTo(hashSetOf()) { it.id } }
+                .distinctUntilChanged()
+            combine(openTabIds, tabGroups) { (restored, openIds), groups ->
+                Triple(restored, openIds, groups)
+            }.collectLatest { (restored, openIds, groups) ->
+                if (!restored) return@collectLatest
+                val validGroups = groups.keepOpenTabs(openIds)
+                if (validGroups == groups) return@collectLatest
+                appPreferencesRepository.updateTabGroups { it.keepOpenTabs(openIds) }
+                val validGroupIds = validGroups.mapTo(hashSetOf()) { it.id }
+                groups.filterNot { it.id in validGroupIds }.forEach {
+                    appPreferencesRepository.removeTabGroupColor(it.id)
+                }
+            }
+        }
+    }
 
     val canUndoClose = store.flow()
         .map { state -> state.undoHistory.tabs.isNotEmpty() }
@@ -195,8 +215,7 @@ class TabsScreenViewModel @Inject constructor(
     }
 
     fun nextGroupName(): String {
-        val existingGroups = store.state.tabPartitions[TAB_GROUPS_PARTITION]?.tabGroups.orEmpty()
-        return "Group ${existingGroups.size + 1}"
+        return "Group ${tabGroups.value.size + 1}"
     }
 
     fun nextGroupColor(): TabGroupColor = TabGroupColor.entries[tabGroups.value.size % TabGroupColor.entries.size]
@@ -208,15 +227,17 @@ class TabsScreenViewModel @Inject constructor(
             .mapTo(linkedSetOf()) { it.id }
         if (selectedTabIds.size < 2) return 0
 
-        val existingGroups = store.state.tabPartitions[TAB_GROUPS_PARTITION]?.tabGroups.orEmpty()
-        detachTabsFromGroups(selectedTabIds)
-
         val groupId = "group:${UUID.randomUUID()}"
-        tabsUseCases.addTabGroup(
-            TabGroup(id = groupId, name = name.trim().ifBlank { "Group ${existingGroups.size + 1}" })
-        )
-        tabsUseCases.addTabsInGroup(groupId, selectedTabIds)
-        viewModelScope.launch { appPreferencesRepository.updateTabGroupColor(groupId, color.value) }
+        viewModelScope.launch {
+            appPreferencesRepository.updateTabGroups { groups ->
+                groups.withoutTabIds(selectedTabIds) + SavedTabGroup.newBuilder()
+                    .setId(groupId)
+                    .setName(name.trim().ifBlank { "Group ${groups.size + 1}" })
+                    .addAllTabIds(selectedTabIds)
+                    .build()
+            }
+            appPreferencesRepository.updateTabGroupColor(groupId, color.value)
+        }
         return selectedTabIds.size
     }
 
@@ -225,10 +246,11 @@ class TabsScreenViewModel @Inject constructor(
         val updatedName = name.trim().ifBlank { group.name }
         if (updatedName == group.name) return true
 
-        // Android Components has no update action for TabGroup metadata. Replacing the group
-        // with the same ID preserves the membership and any UI color stored by Midori.
-        tabsUseCases.removeTabGroup(groupId)
-        tabsUseCases.addTabGroup(group.copy(name = updatedName))
+        viewModelScope.launch {
+            appPreferencesRepository.updateTabGroups { groups ->
+                groups.map { if (it.id == groupId) it.toBuilder().setName(updatedName).build() else it }
+            }
+        }
         return true
     }
 
@@ -245,62 +267,67 @@ class TabsScreenViewModel @Inject constructor(
             .mapTo(linkedSetOf()) { it.id }
         if (selectedTabIds.isEmpty()) return 0
 
-        detachTabsFromGroups(selectedTabIds, exceptGroupId = groupId)
-        tabsUseCases.addTabsInGroup(groupId, selectedTabIds)
+        viewModelScope.launch {
+            appPreferencesRepository.updateTabGroups { groups ->
+                groups.withoutTabIds(selectedTabIds, exceptGroupId = groupId)
+                    .map { group ->
+                        if (group.id == groupId) {
+                            group.toBuilder().addAllTabIds(selectedTabIds - group.tabIdsList.toSet()).build()
+                        } else group
+                    }
+            }
+        }
         return selectedTabIds.size
     }
 
     fun removeTabFromGroup(groupId: String, tabId: String): Boolean {
         val group = findGroup(groupId) ?: return false
-        if (tabId !in group.tabIds) return false
+        if (tabId !in group.tabIdsList) return false
 
-        if (group.tabIds.size <= 2) {
+        if (group.tabIdsCount <= 2) {
             // Keep the tab tray meaningful: removing one of two tabs dissolves the group and
             // leaves the other tab available as a regular tab.
-            tabsUseCases.removeTabGroup(groupId)
-            viewModelScope.launch { appPreferencesRepository.removeTabGroupColor(groupId) }
+            viewModelScope.launch {
+                appPreferencesRepository.updateTabGroups { groups -> groups.filterNot { it.id == groupId } }
+                appPreferencesRepository.removeTabGroupColor(groupId)
+            }
         } else {
-            tabsUseCases.removeTabsInGroup(groupId, setOf(tabId))
+            viewModelScope.launch {
+                appPreferencesRepository.updateTabGroups { groups ->
+                    groups.map {
+                        if (it.id == groupId) it.toBuilder().clearTabIds()
+                            .addAllTabIds(it.tabIdsList.filterNot { id -> id == tabId }).build()
+                        else it
+                    }
+                }
+            }
         }
         return true
     }
 
     fun deleteGroup(groupId: String): Int {
         val group = findGroup(groupId) ?: return 0
-        val groupedTabs = store.state.tabs.filter { it.id in group.tabIds }
+        val groupedTabs = store.state.tabs.filter { it.id in group.tabIdsList }
         rememberClosedTabs(groupedTabs)
-        tabsUseCases.closeTabGroup(groupId, group.tabIds.toList())
-        viewModelScope.launch { appPreferencesRepository.removeTabGroupColor(groupId) }
+        tabsUseCases.removeTabs(group.tabIdsList)
+        viewModelScope.launch {
+            appPreferencesRepository.updateTabGroups { groups -> groups.filterNot { it.id == groupId } }
+            appPreferencesRepository.removeTabGroupColor(groupId)
+        }
         return groupedTabs.size
     }
 
-    private fun findGroup(groupId: String): TabGroup? =
-        store.state.tabPartitions[TAB_GROUPS_PARTITION]?.tabGroups?.firstOrNull { it.id == groupId }
-
-    private fun detachTabsFromGroups(tabIds: Set<String>, exceptGroupId: String? = null) {
-        store.state.tabPartitions[TAB_GROUPS_PARTITION]?.tabGroups.orEmpty().forEach { group ->
-            if (group.id == exceptGroupId) return@forEach
-            val movedTabIds = group.tabIds.intersect(tabIds)
-            if (movedTabIds.isEmpty()) return@forEach
-
-            val remainingTabIds = group.tabIds - movedTabIds
-            if (remainingTabIds.size < 2) {
-                tabsUseCases.removeTabGroup(group.id)
-                viewModelScope.launch { appPreferencesRepository.removeTabGroupColor(group.id) }
-            } else {
-                tabsUseCases.removeTabsInGroup(group.id, movedTabIds)
-            }
-        }
-    }
+    private fun findGroup(groupId: String): SavedTabGroup? =
+        tabGroups.value.firstOrNull { it.id == groupId }
 
     private fun buildSmartTabs(
         allTabs: List<mozilla.components.browser.state.state.TabSessionState>,
-        groups: List<TabGroup>,
+        groups: List<SavedTabGroup>,
         groupColors: Map<String, Int>
     ): SmartTabsState {
         val tabsById = allTabs.associateBy { it.id }
         val visibleGroups = groups.mapIndexedNotNull { index, group ->
-            val groupTabs = group.tabIds.mapNotNull { tabsById[it] }
+            val groupTabs = group.tabIdsList.mapNotNull { tabsById[it] }
             if (groupTabs.size > 1) {
                 SmartTabGroup(
                     id = group.id,
@@ -353,6 +380,29 @@ class TabsScreenViewModel @Inject constructor(
             .take(MAX_RECENTLY_CLOSED)
     }
 }
+
+private fun List<SavedTabGroup>.withoutTabIds(
+    tabIds: Set<String>,
+    exceptGroupId: String? = null,
+): List<SavedTabGroup> = mapNotNull { group ->
+    if (group.id == exceptGroupId) return@mapNotNull group
+    val remainingIds = group.tabIdsList.filterNot { it in tabIds }
+    when {
+        remainingIds.size == group.tabIdsCount -> group
+        remainingIds.size < 2 -> null
+        else -> group.toBuilder().clearTabIds().addAllTabIds(remainingIds).build()
+    }
+}
+
+private fun List<SavedTabGroup>.keepOpenTabs(openIds: Set<String>): List<SavedTabGroup> =
+    mapNotNull { group ->
+        val remainingIds = group.tabIdsList.filter { it in openIds }
+        when {
+            remainingIds.size == group.tabIdsCount -> group
+            remainingIds.size < 2 -> null
+            else -> group.toBuilder().clearTabIds().addAllTabIds(remainingIds).build()
+        }
+    }
 
 data class SmartTabsState(
     val activeTabs: List<mozilla.components.browser.state.state.TabSessionState> = emptyList(),

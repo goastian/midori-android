@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import org.midorinext.android.preferences.app.ToolbarPosition
 import org.midorinext.android.ui.animation.reduceMotionRequested
@@ -56,12 +57,16 @@ fun HideOnScrollToolbar(
             )
         }
     } else if (shouldHideOnScroll) {
-        // In scroll-aware mode the browser surface owns its final size from the start. Moving the
-        // toolbar in draw avoids remeasuring GeckoView and the rest of the screen on every frame.
+        // Reserve the toolbar's space while it is visible so web controls at either edge remain
+        // reachable. Resize GeckoView only when visibility changes, not during each animation frame.
         Box(modifier = modifier) {
             content(
                 Modifier
                     .fillMaxSize()
+                    .padding(
+                        top = if (toolbarState.visible && toolbarPosition != ToolbarPosition.BOTTOM) ToolbarHeight else 0.dp,
+                        bottom = if (toolbarState.visible && toolbarPosition == ToolbarPosition.BOTTOM) ToolbarHeight else 0.dp,
+                    )
                     .then(contentModifier)
             )
             DrawAnimatedToolbar(
@@ -90,7 +95,7 @@ fun HideOnScrollToolbar(
                         .then(contentModifier)
                 )
                 toolbar(Modifier.fillMaxWidth().zIndex(2f))
-            } else if (toolbarPosition == ToolbarPosition.TOP) {
+            } else {
                 toolbar(Modifier.fillMaxWidth().zIndex(2f))
                 content(
                     Modifier
@@ -118,10 +123,13 @@ private fun DrawAnimatedToolbar(
     )
     val direction = if (toolbarPosition == ToolbarPosition.BOTTOM) 1f else -1f
 
-    toolbar(
-        modifier.graphicsLayer {
-            translationY = direction * size.height * (1f - visibleFraction)
-            alpha = visibleFraction
-        }
-    )
+    // A fully hidden composable still participates in hit testing even with alpha = 0.
+    if (visibleFraction > 0f) {
+        toolbar(
+            modifier.graphicsLayer {
+                translationY = direction * size.height * (1f - visibleFraction)
+                alpha = visibleFraction
+            }
+        )
+    }
 }

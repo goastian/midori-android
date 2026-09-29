@@ -8,10 +8,12 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import mozilla.components.concept.engine.DefaultSettings
+import mozilla.components.concept.engine.DownloadDelegate
 import mozilla.components.concept.engine.Settings
 import mozilla.components.concept.storage.HistoryStorage
 import mozilla.components.feature.session.HistoryDelegate
 import org.mozilla.geckoview.GeckoRuntimeSettings
+import mozilla.components.support.utils.DownloadFileUtils
 import javax.inject.Singleton
 
 
@@ -41,10 +43,18 @@ object GeckoSettingsHiltModule {
     @Provides
     fun provideEngineSettings(
         appRequestInterceptor: AppRequestInterceptor,
-        historyStorage: Lazy<HistoryStorage>
+        historyStorage: Lazy<HistoryStorage>,
+        downloadFileUtils: DownloadFileUtils,
     ) : Settings {
         return DefaultSettings(
             historyTrackingDelegate = HistoryDelegate(lazy { historyStorage.get() }),
+            downloadDelegate = object : DownloadDelegate {
+                override fun guessFileName(
+                    contentDisposition: String?,
+                    url: String?,
+                    mimeType: String?,
+                ): String = downloadFileUtils.guessFileName(contentDisposition, url, mimeType)
+            },
             requestInterceptor = appRequestInterceptor,
             remoteDebuggingEnabled = debugEnabled,
             testingModeEnabled = debugEnabled,

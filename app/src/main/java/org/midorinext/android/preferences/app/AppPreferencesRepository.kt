@@ -42,6 +42,29 @@ class AppPreferencesRepository @Inject constructor(
     val tabGroupColorsFlow: Flow<Map<String, Int>> = flow
         .map { it.tabGroupColorsMap }
 
+    val tabGroupsFlow: Flow<List<SavedTabGroup>> = flow
+        .map { it.tabGroupsList }
+
+    suspend fun updateTabGroups(update: (List<SavedTabGroup>) -> List<SavedTabGroup>) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder()
+                .clearTabGroups()
+                .addAllTabGroups(update(preferences.tabGroupsList))
+                .build()
+        }
+    }
+
+    suspend fun migrateLegacyTabGroups(groups: List<SavedTabGroup>) {
+        datastore.updateData { preferences ->
+            if (preferences.tabGroupsMigrated) preferences else preferences.toBuilder()
+                .apply {
+                    if (preferences.tabGroupsCount == 0) addAllTabGroups(groups)
+                }
+                .setTabGroupsMigrated(true)
+                .build()
+        }
+    }
+
     val recentSearchesFlow: Flow<List<String>> = flow
         .map { it.recentSearchesList }
 

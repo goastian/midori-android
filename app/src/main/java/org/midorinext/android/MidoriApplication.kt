@@ -8,6 +8,7 @@ import org.midorinext.android.mozac.media.BackgroundPlaybackFeature
 import org.midorinext.android.preferences.app.AppPreferences
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.preferences.app.AppPreferencesRepository
+import org.midorinext.android.preferences.app.migrateLegacyTabGroups
 import org.midorinext.android.preferences.app.AppTrackingProtectionMode
 import org.midorinext.android.apptracking.AppTrackingProtectionController
 import org.midorinext.android.storage.autofill.AutofillPreferenceState
@@ -163,6 +164,7 @@ class MidoriApplication : Application(), Configuration.Provider {
     }
 
     private fun restoreBrowserState() = applicationScope.launch(Dispatchers.Main) {
+        migrateLegacyTabGroups(this@MidoriApplication, engine.get().name(), appPreferencesRepository.get())
         sessionStorage.get().let {
             tabsUseCases.get().restore(it)
             // Now that we have restored our previous state (if there's one) let's setup auto saving the state while the app is used.

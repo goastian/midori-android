@@ -113,4 +113,12 @@ message AppPreferences {
   string download_directory_uri = 46;
   repeated string recent_searches = 47;
   bool https_only_all_tabs_migration_completed = 48;
+  repeated SavedTabGroup tab_groups = 49;
+  bool tab_groups_migrated = 50;
+}
+
+message SavedTabGroup {
+  string id = 1;
+  string name = 2;
+  repeated string tab_ids = 3;
 }
