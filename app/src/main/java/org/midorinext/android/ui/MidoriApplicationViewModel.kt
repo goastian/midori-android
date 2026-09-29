@@ -82,11 +82,14 @@ class MidoriApplicationViewModel @Inject constructor(
     }
 
     val toolbarPosition = appPreferencesRepository.flow
-        .map { it.toolbarPosition }
+        .map { preferences ->
+            if (preferences.toolbarPosition == ToolbarPosition.BOTTOM) ToolbarPosition.BOTTOM
+            else ToolbarPosition.TOP
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = ToolbarPosition.UNRECOGNIZED
+            initialValue = ToolbarPosition.TOP
         )
 
     val isPrivate = privacyMode

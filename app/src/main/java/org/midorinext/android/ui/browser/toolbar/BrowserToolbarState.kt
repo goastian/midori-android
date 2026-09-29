@@ -61,11 +61,14 @@ class BrowserToolbarState @AssistedInject constructor(
         private set
 
     val toolbarPosition = appPreferencesRepository.flow
-        .map { it.toolbarPosition }
+        .map { preferences ->
+            if (preferences.toolbarPosition == ToolbarPosition.BOTTOM) ToolbarPosition.BOTTOM
+            else ToolbarPosition.TOP
+        }
         .stateIn(
             scope = coroutineScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = ToolbarPosition.UNRECOGNIZED
+            initialValue = ToolbarPosition.TOP
         )
 
     val recentSearches = appPreferencesRepository.recentSearchesFlow
