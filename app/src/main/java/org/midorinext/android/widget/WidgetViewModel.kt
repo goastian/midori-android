@@ -13,6 +13,7 @@ import org.midorinext.android.suggest.providers.DomainProvider
 import org.midorinext.android.suggest.providers.MidoriSuggestProvider
 import org.midorinext.android.ui.browser.toolbar.ToolbarState
 import org.midorinext.android.usecases.MidoriUseCases
+import org.midorinext.android.preferences.app.AppPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -34,9 +35,11 @@ class WidgetViewModel @Inject constructor(
     midoriSuggestProvider: MidoriSuggestProvider,
     domainProvider: DomainProvider,
     browserIcons: BrowserIcons,
+    appPreferencesRepository: AppPreferencesRepository,
 )  : ViewModel() {
     val toolbarState: ToolbarState = ToolbarState(
-        browserIcons, datahub, listOf(clipboardProvider, midoriSuggestProvider, domainProvider), viewModelScope
+        browserIcons, datahub, listOf(clipboardProvider, midoriSuggestProvider, domainProvider),
+        viewModelScope, appPreferencesRepository.flow,
     )
 
     var currentCategory: String? by mutableStateOf(null)

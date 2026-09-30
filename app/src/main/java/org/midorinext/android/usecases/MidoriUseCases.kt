@@ -6,10 +6,18 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import org.midorinext.android.BuildConfig
 import org.midorinext.android.newtab.MidoriNewTabFeature
+import org.midorinext.android.preferences.app.AppPreferencesRepository
+import org.midorinext.android.preferences.app.SearchEnginePreference
 import org.midorinext.android.storage.MidoriClientProvider
 import dagger.Lazy
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.tabs.TabsUseCases
@@ -23,7 +31,28 @@ class MidoriUseCases @Inject constructor(
     @ApplicationContext val context: Context,
     private val clientProvider: MidoriClientProvider,
     private val newTabFeature: MidoriNewTabFeature,
+    appPreferencesRepository: AppPreferencesRepository,
 ) {
+    private val searchPreferences = appPreferencesRepository.flow
+        .stateIn(
+            CoroutineScope(SupervisorJob() + Dispatchers.Default),
+            SharingStarted.Eagerly,
+            org.midorinext.android.preferences.app.AppPreferences.getDefaultInstance(),
+        )
+
+    private fun searchUrl(
+        search: String,
+        category: String? = null,
+        widget: Boolean = false,
+        private: Boolean = false,
+        engineOverride: String? = null,
+    ): String = SearchEngines.url(
+        searchPreferences.value,
+        engineOverride ?: SearchEngines.selectedId(searchPreferences.value, private),
+        search,
+    ) {
+        midoriUrl(search = search, category = category, widget = widget)
+    }
     // TODO Use constructor injection for those. lazy init the usecase itself if needed
     @Inject lateinit var sessionUseCases: Lazy<SessionUseCases>
     @Inject lateinit var tabsUseCases: Lazy<TabsUseCases>
@@ -69,7 +98,7 @@ class MidoriUseCases @Inject constructor(
             val url = if (usesLocalNewTab) {
                 newTabFeature.currentOrLoadingUrl()
             } else {
-                midoriUrl(search = search)
+                search?.let { searchUrl(it, private = private) } ?: midoriUrl()
             }
             if (selectIfExists) {
                 tabsUseCases.selectOrAddTab.invoke(url, private = private)
@@ -108,14 +137,21 @@ class MidoriUseCases @Inject constructor(
         }
 
     inner class GetMidoriUrlUseCase internal constructor() {
-        operator fun invoke(path: String? = null, search: String? = null, category: String? = null, widget: Boolean = false) = midoriUrl(path, search, category, widget)
+        operator fun invoke(path: String? = null, search: String? = null, category: String? = null, widget: Boolean = false) =
+            if (search != null && path == null) searchUrl(search, category, widget)
+            else midoriUrl(path, search, category, widget)
     }
 
     inner class LoadSERPPageUseCase internal constructor(
         private val sessionUseCases: SessionUseCases
     ) {
-        operator fun invoke(search: String, category: String? = null) {
-            sessionUseCases.loadUrl(midoriUrl(search = search, category = category))
+        operator fun invoke(
+            search: String,
+            category: String? = null,
+            private: Boolean = false,
+            engineOverride: String? = null,
+        ) {
+            sessionUseCases.loadUrl(searchUrl(search, category, private = private, engineOverride = engineOverride))
         }
     }
 

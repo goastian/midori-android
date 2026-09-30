@@ -31,6 +31,9 @@ import org.midorinext.android.ui.preferences.HomepageSettingsScreen
 import org.midorinext.android.ui.preferences.PasswordSettingsScreen
 import org.midorinext.android.ui.preferences.NotificationSettingsScreen
 import org.midorinext.android.ui.preferences.PreferencesScreen
+import org.midorinext.android.ui.preferences.SearchSettingsScreen
+import org.midorinext.android.ui.preferences.DefaultSearchEngineSettingsScreen
+import org.midorinext.android.ui.preferences.AlternativeSearchEngineSettingsScreen
 import org.midorinext.android.ui.preferences.SavedAutofillScreen
 import org.midorinext.android.ui.preferences.SavedPasswordsScreen
 import org.midorinext.android.ui.preferences.AppTrackingProtectionReportScreen
@@ -158,6 +161,15 @@ fun MidoriNavHost(
                 onNavigateToPrivacy = { navController.navigate(NavDestination.Privacy.route()) },
                 applicationViewModel = appViewModel
             )
+        }
+        composable(NavDestination.SearchSettings.match) {
+            SearchSettingsScreen(navigateTo = { navController.navigate(it.route()) })
+        }
+        composable(NavDestination.DefaultSearchEngineSettings.match) {
+            DefaultSearchEngineSettingsScreen()
+        }
+        composable(NavDestination.AlternativeSearchEngineSettings.match) {
+            AlternativeSearchEngineSettingsScreen()
         }
         composable(NavDestination.HomepageSettings.match) {
             HomepageSettingsScreen()

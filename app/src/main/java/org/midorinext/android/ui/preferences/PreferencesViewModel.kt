@@ -92,6 +92,42 @@ class PreferencesViewModel @Inject constructor(
         viewModelScope.launch { appPreferencesRepository.updateToolbarPosition(position) }
     }
 
+    fun updateSearchEngine(engine: SearchEnginePreference) {
+        viewModelScope.launch { appPreferencesRepository.updateSearchEngine(engine) }
+    }
+
+    fun updatePrivateSearchEngine(engine: SearchEnginePreference) {
+        viewModelScope.launch { appPreferencesRepository.updatePrivateSearchEngine(engine) }
+    }
+
+    fun updateSeparatePrivateSearchEngine(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateSeparatePrivateSearchEngine(enabled) }
+    }
+
+    fun updateAlternativeSearchEngine(engineId: String, visible: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateAlternativeSearchEngine(engineId, visible) }
+    }
+
+    fun updateCustomSearchEngine(id: String, private: Boolean = false) {
+        viewModelScope.launch { appPreferencesRepository.updateCustomSearchEngine(id, private) }
+    }
+
+    fun addCustomSearchEngine(name: String, searchUrl: String, suggestionUrl: String = "") {
+        viewModelScope.launch { appPreferencesRepository.addCustomSearchEngine(name, searchUrl, suggestionUrl) }
+    }
+
+    fun removeCustomSearchEngine(id: String) {
+        viewModelScope.launch { appPreferencesRepository.removeCustomSearchEngine(id) }
+    }
+
+    fun updateSearchSetting(setting: SearchSetting, enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateSearchSetting(setting, enabled) }
+    }
+
+    fun updateOpenBookmarksInCurrentTab(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateOpenBookmarksInCurrentTab(enabled) }
+    }
+
     fun updateHideToolbarOnScroll(hideOnScroll: Boolean) {
         viewModelScope.launch { appPreferencesRepository.updateHideToolbarOnScroll(hideOnScroll) }
     }

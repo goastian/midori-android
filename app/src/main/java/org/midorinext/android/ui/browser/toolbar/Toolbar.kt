@@ -176,7 +176,7 @@ private fun ToolbarChrome(
                             end = if (isEditMode) 8.dp else 0.dp,
                         ),
                     leadingContent = when {
-                        isEditMode -> ({ ToolbarSearchSelector() })
+                        isEditMode -> ({ ToolbarSearchSelector(toolbarState) })
                         beforeTextFieldVisible() -> beforeTextField
                         else -> null
                     },

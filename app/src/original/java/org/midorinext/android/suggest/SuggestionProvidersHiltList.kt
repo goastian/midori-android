@@ -6,6 +6,7 @@ import org.midorinext.android.suggest.providers.ClipboardProvider
 import org.midorinext.android.suggest.providers.DomainProvider
 import org.midorinext.android.suggest.providers.MidoriSuggestProvider
 import org.midorinext.android.suggest.providers.SessionTabsProvider
+import org.midorinext.android.suggest.providers.TrendingSuggestProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,6 +18,7 @@ object SuggestionProvidersHiltModule {
     @Provides fun provideSuggestionProviders(
         clipboardProvider: ClipboardProvider,
         midoriSuggestProvider: MidoriSuggestProvider,
+        trendingSuggestProvider: TrendingSuggestProvider,
         domainProvider: DomainProvider,
         sessionTabsProvider: SessionTabsProvider,
         historyRepository: HistoryRepository,
@@ -25,6 +27,7 @@ object SuggestionProvidersHiltModule {
         return listOf(
             clipboardProvider,
             midoriSuggestProvider,
+            trendingSuggestProvider,
             domainProvider,
             sessionTabsProvider,
             historyRepository,

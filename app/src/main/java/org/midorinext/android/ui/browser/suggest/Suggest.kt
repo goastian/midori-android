@@ -23,6 +23,7 @@ import org.midorinext.android.suggest.SuggestionProvider
 import org.midorinext.android.suggest.providers.ClipboardProvider
 import org.midorinext.android.suggest.providers.DomainProvider
 import org.midorinext.android.suggest.providers.SessionTabsProvider
+import org.midorinext.android.suggest.providers.TrendingSuggestProvider
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.concept.storage.BookmarksStorage
 import mozilla.components.concept.storage.HistoryStorage
@@ -45,6 +46,7 @@ fun Suggest(
         listOf(
             suggestions.keys.find { it is ClipboardProvider },
             suggestions.keys.find { it is MidoriSuggestProvider },
+            suggestions.keys.find { it is TrendingSuggestProvider },
             suggestions.keys.find { it is DomainProvider },
             suggestions.keys.find { it is BookmarksStorage },
             suggestions.keys.find { it is HistoryStorage },
@@ -81,8 +83,8 @@ fun Suggest(
                         .padding(start = 24.dp, end = 4.dp)
                 )
             }
-        } else {
-            providersOrdered.forEach { provider ->
+        }
+        providersOrdered.forEach { provider ->
                 suggestions[provider]?.let { suggestions ->
                     items(items = suggestions) { suggestion ->
                         SuggestItem( // TODO add key and animateItemPlacement to suggest item
@@ -98,7 +100,6 @@ fun Suggest(
                         )
                     }
                 }
-            }
         }
     }
 }

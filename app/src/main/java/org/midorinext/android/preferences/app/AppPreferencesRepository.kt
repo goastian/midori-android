@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import kotlinx.coroutines.flow.*
 import mozilla.components.concept.engine.Engine
 import java.io.IOException
+import java.util.UUID
 import javax.inject.Inject
 
 
@@ -22,6 +23,88 @@ data class ClearDataPreferences(
 class AppPreferencesRepository @Inject constructor(
     private val datastore: DataStore<AppPreferences>
 ) {
+    suspend fun updateSearchEngine(engine: SearchEnginePreference) {
+        datastore.updateData { it.toBuilder().setSearchEngine(engine).clearCustomDefaultSearchEngineId().build() }
+    }
+
+    suspend fun updatePrivateSearchEngine(engine: SearchEnginePreference) {
+        datastore.updateData {
+            it.toBuilder().setPrivateSearchEngine(engine).clearCustomPrivateSearchEngineId()
+                .setUseSeparatePrivateSearchEngine(true).build()
+        }
+    }
+
+    suspend fun updateCustomSearchEngine(id: String, private: Boolean = false) {
+        datastore.updateData { prefs ->
+            if (prefs.customSearchEnginesList.none { it.id == id }) prefs
+            else if (private) prefs.toBuilder().setCustomPrivateSearchEngineId(id)
+                .setUseSeparatePrivateSearchEngine(true).build()
+            else prefs.toBuilder().setCustomDefaultSearchEngineId(id).build()
+        }
+    }
+
+    suspend fun addCustomSearchEngine(name: String, searchUrl: String, suggestionUrl: String = "") {
+        datastore.updateData { prefs ->
+            prefs.toBuilder().addCustomSearchEngines(
+                CustomSearchEngine.newBuilder()
+                    .setId(UUID.randomUUID().toString())
+                    .setName(name.trim())
+                    .setSearchUrlTemplate(searchUrl.trim())
+                    .setSuggestionUrlTemplate(suggestionUrl.trim())
+                    .build()
+            ).build()
+        }
+    }
+
+    suspend fun removeCustomSearchEngine(id: String) {
+        datastore.updateData { prefs ->
+            prefs.toBuilder().apply {
+                clearCustomSearchEngines()
+                addAllCustomSearchEngines(prefs.customSearchEnginesList.filterNot { it.id == id })
+                if (prefs.customDefaultSearchEngineId == id) clearCustomDefaultSearchEngineId()
+                if (prefs.customPrivateSearchEngineId == id) clearCustomPrivateSearchEngineId()
+                clearHiddenSearchEngines()
+                addAllHiddenSearchEngines(prefs.hiddenSearchEnginesList.filterNot { it == id })
+            }.build()
+        }
+    }
+
+    suspend fun updateSeparatePrivateSearchEngine(enabled: Boolean) {
+        datastore.updateData { it.toBuilder().setUseSeparatePrivateSearchEngine(enabled).build() }
+    }
+
+    suspend fun updateAlternativeSearchEngine(engineId: String, visible: Boolean) {
+        datastore.updateData { prefs ->
+            prefs.toBuilder().clearHiddenSearchEngines().addAllHiddenSearchEngines(
+                prefs.hiddenSearchEnginesList.filterNot { it == engineId } +
+                    if (visible) emptyList() else listOf(engineId)
+            ).build()
+        }
+    }
+
+    suspend fun updateSearchSetting(setting: SearchSetting, enabled: Boolean) {
+        datastore.updateData { prefs ->
+            prefs.toBuilder().apply {
+                when (setting) {
+                    SearchSetting.SUGGESTIONS -> disableSearchSuggestions = !enabled
+                    SearchSetting.PRIVATE_SUGGESTIONS -> searchSuggestionsInPrivate = enabled
+                    SearchSetting.TRENDING -> disableTrendingSuggestions = !enabled
+                    SearchSetting.RECENT -> disableRecentSearches = !enabled
+                    SearchSetting.HISTORY -> disableHistorySuggestions = !enabled
+                    SearchSetting.BOOKMARKS -> disableBookmarkSuggestions = !enabled
+                    SearchSetting.TABS -> disableTabSuggestions = !enabled
+                    SearchSetting.CLIPBOARD -> disableClipboardSuggestions = !enabled
+                    SearchSetting.VOICE -> disableVoiceSearch = !enabled
+                    SearchSetting.URL_AUTOCOMPLETE -> disableUrlAutocomplete = !enabled
+                }
+            }.build()
+        }
+    }
+
+    suspend fun updateOpenBookmarksInCurrentTab(enabled: Boolean) {
+        datastore.updateData { it.toBuilder().setOpenBookmarksInCurrentTab(enabled).build() }
+    }
+
     val flow: Flow<AppPreferences> = datastore.data
         .catch { exception ->
             if (exception is IOException) {

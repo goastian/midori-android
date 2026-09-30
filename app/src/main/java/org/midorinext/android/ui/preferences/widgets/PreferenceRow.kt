@@ -19,6 +19,7 @@ fun PreferenceRow(
     @StringRes label: Int,
     modifier: Modifier = Modifier,
     description: String? = null,
+    enabled: Boolean = true,
     trailing: @Composable () -> Unit = {},
     onClicked: () -> Unit = {}
 ) {
@@ -27,7 +28,7 @@ fun PreferenceRow(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onClicked() }
+            .clickable(enabled = enabled) { onClicked() }
             .minimumInteractiveComponentSize()
             .padding(horizontal = 16.dp, vertical = if (description != null) 12.dp else 2.dp)
     ) {

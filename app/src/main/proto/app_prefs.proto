@@ -65,6 +65,13 @@ enum HomepageOpeningScreen {
   HOMEPAGE_AFTER_FOUR_HOURS = 2;
 }
 
+enum SearchEnginePreference {
+  ASTIANGO = 0;
+  ECOSIA = 1;
+  QWANT = 2;
+  STARTPAGE = 3;
+}
+
 message AppPreferences {
   bool hide_toolbar_on_scroll = 1;
   ToolbarPosition toolbar_position = 2;
@@ -115,6 +122,31 @@ message AppPreferences {
   bool https_only_all_tabs_migration_completed = 48;
   repeated SavedTabGroup tab_groups = 49;
   bool tab_groups_migrated = 50;
+  SearchEnginePreference search_engine = 51;
+  bool open_bookmarks_in_current_tab = 52;
+  SearchEnginePreference private_search_engine = 53;
+  bool use_separate_private_search_engine = 54;
+  repeated string hidden_search_engines = 55;
+  bool disable_search_suggestions = 56;
+  bool search_suggestions_in_private = 57;
+  bool disable_trending_suggestions = 58;
+  bool disable_recent_searches = 59;
+  bool disable_history_suggestions = 60;
+  bool disable_bookmark_suggestions = 61;
+  bool disable_tab_suggestions = 62;
+  bool disable_clipboard_suggestions = 63;
+  bool disable_voice_search = 64;
+  bool disable_url_autocomplete = 65;
+  repeated CustomSearchEngine custom_search_engines = 66;
+  string custom_default_search_engine_id = 67;
+  string custom_private_search_engine_id = 68;
+}
+
+message CustomSearchEngine {
+  string id = 1;
+  string name = 2;
+  string search_url_template = 3;
+  string suggestion_url_template = 4;
 }
 
 message SavedTabGroup {

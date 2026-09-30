@@ -460,6 +460,7 @@ class BrowserScreenViewModel @Inject constructor(
             return
         }
 
+        val engineOverride = toolbarState.searchEngineOverride
         toolbarState.updateFocus(false)
         markSelectedNewTabAsUserNavigation()
         if (trimmedSearch.isUrl()) {
@@ -470,7 +471,12 @@ class BrowserScreenViewModel @Inject constructor(
                     appPreferencesRepository.recordRecentSearch(trimmedSearch)
                 }
             }
-            MidoriUseCases.loadSERPPage(trimmedSearch, category)
+            MidoriUseCases.loadSERPPage(
+                trimmedSearch,
+                category,
+                private = store.state.selectedTab?.content?.private == true,
+                engineOverride = engineOverride,
+            )
         }
     }
 

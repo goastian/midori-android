@@ -12,6 +12,7 @@ import org.midorinext.android.ext.toCleanHost
 import org.midorinext.android.ext.urlDecode
 import org.midorinext.android.newtab.MidoriNewTabFeature
 import org.midorinext.android.preferences.app.AppPreferencesRepository
+import org.midorinext.android.preferences.app.AppPreferences
 import org.midorinext.android.preferences.app.ToolbarPosition
 import org.midorinext.android.stats.Datahub
 import org.midorinext.android.suggest.SuggestionProvider
@@ -46,7 +47,9 @@ class BrowserToolbarState @AssistedInject constructor(
     private val newTabFeature: MidoriNewTabFeature,
     @Assisted private val coroutineScope: CoroutineScope = MainScope()
 ): ToolbarState(
-    browserIcons, datahub, suggestionProviders, coroutineScope
+    browserIcons, datahub, suggestionProviders, coroutineScope,
+    appPreferencesRepository.flow,
+    store.flow().map { it.selectedTab?.content?.private == true },
 ) {
     var visible by mutableStateOf(true)
         private set
@@ -60,6 +63,16 @@ class BrowserToolbarState @AssistedInject constructor(
     var trueHeightPx by mutableIntStateOf(0)
         private set
 
+    val searchPreferences = appPreferencesRepository.flow.stateIn(
+        scope = coroutineScope,
+        started = SharingStarted.WhileSubscribed(5000L),
+        initialValue = AppPreferences.getDefaultInstance(),
+    )
+
+    val isPrivateMode = store.flow()
+        .map { it.selectedTab?.content?.private == true }
+        .stateIn(coroutineScope, SharingStarted.WhileSubscribed(5000L), false)
+
     val toolbarPosition = appPreferencesRepository.flow
         .map { preferences ->
             if (preferences.toolbarPosition == ToolbarPosition.BOTTOM) ToolbarPosition.BOTTOM
@@ -71,7 +84,12 @@ class BrowserToolbarState @AssistedInject constructor(
             initialValue = ToolbarPosition.TOP
         )
 
-    val recentSearches = appPreferencesRepository.recentSearchesFlow
+    val recentSearches = combine(
+        appPreferencesRepository.flow,
+        store.flow().map { it.selectedTab?.content?.private == true },
+    ) { prefs, privateMode ->
+        if (privateMode || prefs.disableRecentSearches) emptyList() else prefs.recentSearchesList
+    }
         .stateIn(
             scope = coroutineScope,
             started = SharingStarted.WhileSubscribed(5000L),
@@ -124,6 +142,7 @@ class BrowserToolbarState @AssistedInject constructor(
 
     override fun updateFocus(hasFocus: Boolean) {
         super.updateFocus(hasFocus)
+        if (!hasFocus) searchEngineOverride = null
         if (hasFocus) {
             updateVisibility(true)
         }

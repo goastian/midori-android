@@ -87,7 +87,7 @@ fun BookmarksList(
                                     text = stringResource(mozacR.string.mozac_feature_contextmenu_open_link_in_new_tab),
                                     icon = R.drawable.icons_add_tab,
                                     onClick = {
-                                        viewModel.openBookmarkTab(bookmark)
+                                        viewModel.openBookmarkTab(bookmark, forceNewTab = true)
                                         onBrowse()
                                     }
                                 )

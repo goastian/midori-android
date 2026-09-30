@@ -11,6 +11,10 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
@@ -59,6 +63,7 @@ fun DownloadFeature(
     val downloadDirectory by downloadPreferences.directory.collectAsStateWithLifecycle()
 
     var showDownloadRequest by remember { mutableStateOf(false) }
+    var downloadName by remember { mutableStateOf("") }
     var showAskPermissionAgain by remember { mutableStateOf(false) }
     var showPermissionRefused by remember { mutableStateOf(false) }
     var previousTab: SessionState? by remember { mutableStateOf(null) }
@@ -67,7 +72,10 @@ fun DownloadFeature(
         tab?.let { t ->
             downloadState?.let { d ->
                 useCases.consumeDownload(t.id, d.id)
-                if (downloadManager.download(d.copy(directoryPath = downloadDirectory)) == null) {
+                if (downloadManager.download(d.copy(
+                        directoryPath = downloadDirectory,
+                        fileName = downloadName.takeIf { it.isValidDownloadName() } ?: d.fileName
+                    )) == null) {
                     showSnackbar("Download not supported", null)
                 }
             }
@@ -142,6 +150,7 @@ fun DownloadFeature(
 
     LaunchedEffect(downloadState) {
         if (downloadState != null) {
+            downloadName = downloadState.displayNameForConfirmation()
             previousTab = tab
             if (downloadState.skipConfirmation) {
                 checkPermissionAndStartDownload()
@@ -154,17 +163,35 @@ fun DownloadFeature(
     }
 
     if (showDownloadRequest) {
-        YesNoDialog(
+        AlertDialog(
             onDismissRequest = { cancelDownload() },
-            onYes = { checkPermissionAndStartDownload() },
-            onNo = { cancelDownload() },
-            title = stringResource(
+            title = { Text(stringResource(
                 id = mozacR.string.mozac_feature_downloads_dialog_title_3,
                 downloadState?.contentLength?.let { fileSizeFormatter.formatSizeInBytes(it) } ?: ""
-            ),
-            description = downloadState?.displayNameForConfirmation(),
-            icon = R.drawable.icons_download,
-            yesText = stringResource(id = mozacR.string.mozac_feature_downloads_dialog_download)
+            )) },
+            text = {
+                OutlinedTextField(
+                    value = downloadName,
+                    onValueChange = { downloadName = it },
+                    label = { Text(stringResource(R.string.download_file_name)) },
+                    singleLine = true,
+                    isError = !downloadName.isValidDownloadName(),
+                    supportingText = if (!downloadName.isValidDownloadName()) {
+                        { Text(stringResource(R.string.download_file_name_invalid)) }
+                    } else null,
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = downloadName.isValidDownloadName(),
+                    onClick = { checkPermissionAndStartDownload() }
+                ) { Text(stringResource(mozacR.string.mozac_feature_downloads_dialog_download)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { cancelDownload() }) {
+                    Text(stringResource(R.string.download_removal_cancel))
+                }
+            }
         )
     }
 
@@ -192,6 +219,10 @@ fun DownloadFeature(
     }
 }
 
+private fun String.isValidDownloadName(): Boolean =
+    isNotBlank() && this == trim() && this != "." && this != ".." &&
+        none { it == '/' || it == '\\' || Character.isISOControl(it) }
+
 @HiltViewModel
 class DownloadPreferencesViewModel @Inject constructor(
     appPreferencesRepository: AppPreferencesRepository,
@@ -218,7 +249,7 @@ private fun DownloadState.displayNameForConfirmation(): String {
     val serverFileName = fileName?.trim()?.takeUnless { it.equals("null", ignoreCase = true) }
     if (!serverFileName.isNullOrEmpty()) return serverFileName
 
-    return Uri.parse(url).lastPathSegment?.trim()?.takeIf { it.isNotEmpty() } ?: url
+    return Uri.parse(url).lastPathSegment?.trim()?.takeIf { it.isNotEmpty() } ?: "download"
 }
 
 private fun Context.isConnectedToWifi(): Boolean {

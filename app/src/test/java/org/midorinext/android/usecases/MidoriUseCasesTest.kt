@@ -3,6 +3,8 @@ package org.midorinext.android.usecases
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.midorinext.android.preferences.app.SearchEnginePreference
+import org.midorinext.android.preferences.app.AppPreferences
+import org.midorinext.android.preferences.app.CustomSearchEngine
 
 class MidoriUseCasesTest {
     @Test
@@ -36,6 +38,40 @@ class MidoriUseCasesTest {
         assertEquals(
             "https://astiango.com",
             SearchEngines.url(SearchEnginePreference.ASTIANGO, query) { "https://astiango.com" },
+        )
+    }
+
+    @Test
+    fun privateSearchEngineUsesNormalEngineUntilSeparatelySelected() {
+        val preferences = AppPreferences.newBuilder()
+            .setSearchEngine(SearchEnginePreference.ECOSIA)
+            .setPrivateSearchEngine(SearchEnginePreference.QWANT)
+            .build()
+        assertEquals("ecosia", SearchEngines.selectedId(preferences, private = true))
+        assertEquals(
+            "qwant",
+            SearchEngines.selectedId(
+                preferences.toBuilder().setUseSeparatePrivateSearchEngine(true).build(),
+                private = true,
+            ),
+        )
+    }
+
+    @Test
+    fun customEngineRequiresHttpsAndEncodesQuery() {
+        val template = "https://example.org/search?q=%s"
+        val preferences = AppPreferences.newBuilder().addCustomSearchEngines(
+            CustomSearchEngine.newBuilder()
+                .setId("custom")
+                .setName("Example")
+                .setSearchUrlTemplate(template)
+                .build()
+        ).build()
+        assertEquals(true, SearchEngines.isValidTemplate(template))
+        assertEquals(false, SearchEngines.isValidTemplate("javascript:alert(%s)"))
+        assertEquals(
+            "https://example.org/search?q=caf%C3%A9%20%26%20privacy",
+            SearchEngines.url(preferences, "custom", "café & privacy") { "https://astiango.com" },
         )
     }
 }

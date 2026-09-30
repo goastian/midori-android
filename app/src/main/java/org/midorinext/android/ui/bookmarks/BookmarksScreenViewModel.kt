@@ -24,6 +24,10 @@ import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.concept.storage.BookmarkInfo
 import mozilla.components.concept.storage.BookmarkNode
 import mozilla.components.feature.tabs.TabsUseCases
+import mozilla.components.feature.session.SessionUseCases
+import mozilla.components.browser.state.selector.selectedTab
+import mozilla.components.browser.state.store.BrowserStore
+import org.midorinext.android.preferences.app.AppPreferencesRepository
 import mozilla.components.support.ktx.kotlin.toNormalizedUrl
 import javax.inject.Inject
 
@@ -32,8 +36,14 @@ import javax.inject.Inject
 class BookmarksScreenViewModel @Inject constructor(
     private val bookmarksRepository: BookmarksRepository,
     private val tabsUseCases: TabsUseCases,
+    private val sessionUseCases: SessionUseCases,
+    private val browserStore: BrowserStore,
+    appPreferencesRepository: AppPreferencesRepository,
     val browserIcons: BrowserIcons
 ): ViewModel() {
+    private val openInCurrentTab = appPreferencesRepository.flow
+        .map { it.openBookmarksInCurrentTab }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
     var folderGuid: String by mutableStateOf(bookmarksRepository.root.guid)
         private set
 
@@ -121,9 +131,13 @@ class BookmarksScreenViewModel @Inject constructor(
         }.invokeOnCompletion { this.loadFolderTree() }
     }
 
-    fun openBookmarkTab(item: BookmarkNode, private: Boolean = false) {
-        item.url?.let {
-            tabsUseCases.addTab(it.toNormalizedUrl(), private = private)
+    fun openBookmarkTab(item: BookmarkNode, private: Boolean = false, forceNewTab: Boolean = false) {
+        val url = item.url?.toNormalizedUrl() ?: return
+        val currentTab = browserStore.state.selectedTab
+        if (!forceNewTab && openInCurrentTab.value && currentTab != null && !private) {
+            sessionUseCases.loadUrl(url = url, sessionId = currentTab.id)
+        } else {
+            tabsUseCases.addTab(url, private = private)
         }
     }
 }

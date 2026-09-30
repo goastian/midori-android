@@ -75,15 +75,16 @@ fun PreferencesScreen(
 
             PreferenceGroupLabel(label = R.string.settings_group_general)
 
-            PreferenceRow(
+            SettingsNavRow(
                 label = R.string.search_engine_label,
-                description = stringResource(id = R.string.search_engine_description),
-                trailing = {
-                    Text(
-                        text = stringResource(id = R.string.search_engine_current_midori),
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-                    )
-                }
+                description = selectedEngineName(appPrefs),
+                onClicked = { navigateTo(NavDestination.SearchSettings) }
+            )
+            PreferenceToggle(
+                label = R.string.settings_bookmarks_current_tab,
+                description = R.string.settings_bookmarks_current_tab_summary,
+                value = appPrefs.openBookmarksInCurrentTab,
+                onValueChange = viewModel::updateOpenBookmarksInCurrentTab
             )
 
             SettingsNavRow(
@@ -227,6 +228,17 @@ fun PreferencesScreen(
         }
     }
 }
+
+internal fun searchEngineNameResource(engine: SearchEnginePreference): Int = when (engine) {
+    SearchEnginePreference.ECOSIA -> R.string.search_engine_ecosia
+    SearchEnginePreference.QWANT -> R.string.search_engine_qwant
+    SearchEnginePreference.STARTPAGE -> R.string.search_engine_startpage
+    SearchEnginePreference.ASTIANGO, SearchEnginePreference.UNRECOGNIZED -> R.string.search_engine_current_midori
+}
+
+@Composable
+internal fun searchEngineName(engine: SearchEnginePreference): String =
+    stringResource(searchEngineNameResource(engine))
 
 @Composable
 fun HomepageSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
@@ -834,7 +846,7 @@ private fun TranslationDownloadsDialog(
 }
 
 @Composable
-private fun PreferenceScreenScaffold(
+internal fun PreferenceScreenScaffold(
     title: String,
     content: @Composable () -> Unit
 ) {
@@ -852,7 +864,7 @@ private fun PreferenceScreenScaffold(
 }
 
 @Composable
-private fun SettingsNavRow(
+internal fun SettingsNavRow(
     label: Int,
     description: String,
     onClicked: () -> Unit
