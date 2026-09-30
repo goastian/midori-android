@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_engines_group">検索エンジン</string>
+    <string name="settings_manage_search_engines">他の検索エンジンを管理</string>
+    <string name="settings_manage_search_engines_summary">検索メニューに表示するエンジンを編集</string>
+    <string name="settings_home_screen_widget">ホーム画面のウィジェット</string>
+    <string name="settings_widget_instructions">ホーム画面のウィジェットメニューから Midori の検索ウィジェットを追加します。削除するときはホーム画面から取り除いてください。</string>
+    <string name="settings_search_suggestions_group">検索エンジンからの候補</string>
+    <string name="settings_show_search_suggestions">検索候補を表示</string>
+    <string name="settings_search_suggestions_private">プライベートセッションでも表示</string>
+    <string name="settings_trending_suggestions">話題の検索候補を表示</string>
+    <string name="settings_recent_searches">最近の検索を表示</string>
+    <string name="settings_address_bar_suggest_group">アドレスバーの候補</string>
+    <string name="settings_search_history">閲覧履歴を検索</string>
+    <string name="settings_search_bookmarks">ブックマークを検索</string>
+    <string name="settings_search_open_tabs">開いているタブを検索</string>
+    <string name="settings_address_bar_preferences_group">アドレスバーの設定</string>
+    <string name="settings_clipboard_suggestions">クリップボードの候補を表示</string>
+    <string name="settings_voice_search">音声検索を表示</string>
+    <string name="settings_voice_search_unavailable">この端末では音声認識を利用できません</string>
+    <string name="settings_autocomplete_urls">URL を自動補完</string>
+    <string name="settings_normal_search_engine">通常ブラウジングの既定の検索エンジン</string>
+    <string name="settings_private_search_engine">プライベートブラウジングの既定の検索エンジン</string>
+    <string name="settings_same_search_engine">通常ブラウジングと同じ検索エンジンを使用</string>
+    <string name="settings_alternative_search_engines">検索メニューに表示するエンジン</string>
+    <string name="settings_add_search_engine">検索エンジンを追加</string>
+    <string name="settings_search_engine_name">名前</string>
+    <string name="settings_search_engine_url">検索 URL</string>
+    <string name="settings_search_suggestion_url">候補の URL（任意）</string>
+    <string name="settings_search_engine_url_hint" formatted="false">検索語の位置に %s を使用してください。HTTPS が必要です。</string>
+    <string name="settings_remove_search_engine">検索エンジンを削除しますか？</string>
+    <string name="settings_search_title">検索</string>
+    <string name="settings_default_search_engine">既定の検索エンジン</string>
+    <string name="search_engine_ecosia">Ecosia</string>
+    <string name="search_engine_qwant">Qwant</string>
+    <string name="search_engine_startpage">Startpage</string>
+    <string name="settings_bookmarks_current_tab">現在のタブでブックマークを開く</string>
+    <string name="settings_bookmarks_current_tab_summary">ブックマークをタップしたとき現在のタブを使用</string>
+    <string name="download_file_name">ファイル名</string>
+    <string name="download_file_name_invalid">スラッシュや制御文字を含まない名前を入力してください</string>
+    <string name="download_settings_use_android_downloads">Android のダウンロードフォルダーを使用</string>
+</resources>

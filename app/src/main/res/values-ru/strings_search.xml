@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_engines_group">Поисковые системы</string>
+    <string name="settings_manage_search_engines">Управление другими поисковыми системами</string>
+    <string name="settings_manage_search_engines_summary">Изменить системы, видимые в меню поиска</string>
+    <string name="settings_home_screen_widget">Виджет на главном экране</string>
+    <string name="settings_widget_instructions">Добавьте поисковый виджет Midori через меню виджетов главного экрана. Чтобы убрать его, удалите виджет с главного экрана.</string>
+    <string name="settings_search_suggestions_group">Подсказки поисковых систем</string>
+    <string name="settings_show_search_suggestions">Показывать поисковые подсказки</string>
+    <string name="settings_search_suggestions_private">Показывать в приватных сеансах</string>
+    <string name="settings_trending_suggestions">Показывать популярные запросы</string>
+    <string name="settings_recent_searches">Показывать недавние запросы</string>
+    <string name="settings_address_bar_suggest_group">Подсказки в адресной строке</string>
+    <string name="settings_search_history">Искать в истории</string>
+    <string name="settings_search_bookmarks">Искать в закладках</string>
+    <string name="settings_search_open_tabs">Искать в открытых вкладках</string>
+    <string name="settings_address_bar_preferences_group">Настройки адресной строки</string>
+    <string name="settings_clipboard_suggestions">Показывать подсказки из буфера обмена</string>
+    <string name="settings_voice_search">Показывать голосовой поиск</string>
+    <string name="settings_voice_search_unavailable">Распознавание речи недоступно на этом устройстве</string>
+    <string name="settings_autocomplete_urls">Автоматически дополнять URL</string>
+    <string name="settings_normal_search_engine">Поисковая система для обычного просмотра</string>
+    <string name="settings_private_search_engine">Поисковая система для приватного просмотра</string>
+    <string name="settings_same_search_engine">Использовать систему обычного просмотра</string>
+    <string name="settings_alternative_search_engines">Системы в меню поиска</string>
+    <string name="settings_add_search_engine">Добавить поисковую систему</string>
+    <string name="settings_search_engine_name">Название</string>
+    <string name="settings_search_engine_url">URL поиска</string>
+    <string name="settings_search_suggestion_url">URL подсказок (необязательно)</string>
+    <string name="settings_search_engine_url_hint" formatted="false">Используйте %s вместо поискового запроса. Требуется HTTPS.</string>
+    <string name="settings_remove_search_engine">Удалить поисковую систему?</string>
+    <string name="settings_search_title">Поиск</string>
+    <string name="settings_default_search_engine">Поисковая система по умолчанию</string>
+    <string name="search_engine_ecosia">Ecosia</string>
+    <string name="search_engine_qwant">Qwant</string>
+    <string name="search_engine_startpage">Startpage</string>
+    <string name="settings_bookmarks_current_tab">Открывать закладки в текущей вкладке</string>
+    <string name="settings_bookmarks_current_tab_summary">Использовать текущую вкладку при открытии закладки</string>
+    <string name="download_file_name">Имя файла</string>
+    <string name="download_file_name_invalid">Введите имя без косой черты и управляющих символов</string>
+    <string name="download_settings_use_android_downloads">Использовать папку загрузок Android</string>
+</resources>

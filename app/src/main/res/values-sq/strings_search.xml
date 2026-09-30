@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_engines_group">Motorët e kërkimit</string>
+    <string name="settings_manage_search_engines">Menaxho motorët alternativë të kërkimit</string>
+    <string name="settings_manage_search_engines_summary">Ndrysho motorët që shfaqen në menynë e kërkimit</string>
+    <string name="settings_home_screen_widget">Vegla e ekranit kryesor</string>
+    <string name="settings_widget_instructions">Shto veglën e kërkimit Midori nga menyja e veglave në ekranin kryesor. Për ta hequr, fshije nga ekrani kryesor.</string>
+    <string name="settings_search_suggestions_group">Sugjerime nga motorët e kërkimit</string>
+    <string name="settings_show_search_suggestions">Shfaq sugjerimet e kërkimit</string>
+    <string name="settings_search_suggestions_private">Shfaq në sesione private</string>
+    <string name="settings_trending_suggestions">Shfaq sugjerimet në trend</string>
+    <string name="settings_recent_searches">Shfaq kërkimet e fundit</string>
+    <string name="settings_address_bar_suggest_group">Sugjerime në shiritin e adresës</string>
+    <string name="settings_search_history">Kërko në historikun e shfletimit</string>
+    <string name="settings_search_bookmarks">Kërko te faqerojtësit</string>
+    <string name="settings_search_open_tabs">Kërko në skedat e hapura</string>
+    <string name="settings_address_bar_preferences_group">Parapëlqimet e shiritit të adresës</string>
+    <string name="settings_clipboard_suggestions">Shfaq sugjerimet nga kujtesa e përkohshme</string>
+    <string name="settings_voice_search">Shfaq kërkimin me zë</string>
+    <string name="settings_voice_search_unavailable">Njohja e zërit nuk është e disponueshme në këtë pajisje</string>
+    <string name="settings_autocomplete_urls">Plotëso automatikisht URL-të</string>
+    <string name="settings_normal_search_engine">Motori parazgjedhje për shfletim normal</string>
+    <string name="settings_private_search_engine">Motori parazgjedhje për shfletim privat</string>
+    <string name="settings_same_search_engine">Përdor të njëjtin motor si në shfletimin normal</string>
+    <string name="settings_alternative_search_engines">Motorët që shfaqen në menynë e kërkimit</string>
+    <string name="settings_add_search_engine">Shto motor kërkimi</string>
+    <string name="settings_search_engine_name">Emri</string>
+    <string name="settings_search_engine_url">URL-ja e kërkimit</string>
+    <string name="settings_search_suggestion_url">URL-ja e sugjerimeve (opsionale)</string>
+    <string name="settings_search_engine_url_hint" formatted="false">Përdor %s në vend të termit të kërkimit. Kërkohet HTTPS.</string>
+    <string name="settings_remove_search_engine">Të hiqet motori i kërkimit?</string>
+    <string name="settings_search_title">Kërkimi</string>
+    <string name="settings_default_search_engine">Motori parazgjedhje i kërkimit</string>
+    <string name="search_engine_ecosia">Ecosia</string>
+    <string name="search_engine_qwant">Qwant</string>
+    <string name="search_engine_startpage">Startpage</string>
+    <string name="settings_bookmarks_current_tab">Hap faqerojtësit në skedën aktuale</string>
+    <string name="settings_bookmarks_current_tab_summary">Përdor skedën aktuale kur prek një faqerojtës</string>
+    <string name="download_file_name">Emri i skedarit</string>
+    <string name="download_file_name_invalid">Shkruaj një emër pa vija ndarëse ose karaktere kontrolli</string>
+    <string name="download_settings_use_android_downloads">Përdor dosjen Shkarkime të Android</string>
+</resources>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_engines_group">खोज इंजन</string>
+    <string name="settings_manage_search_engines">वैकल्पिक खोज इंजन प्रबंधित करें</string>
+    <string name="settings_manage_search_engines_summary">खोज मेन्यू में दिखने वाले इंजन बदलें</string>
+    <string name="settings_home_screen_widget">होम स्क्रीन विजेट</string>
+    <string name="settings_widget_instructions">होम स्क्रीन के विजेट मेन्यू से Midori खोज विजेट जोड़ें। हटाने के लिए उसे होम स्क्रीन से निकालें।</string>
+    <string name="settings_search_suggestions_group">खोज इंजन के सुझाव</string>
+    <string name="settings_show_search_suggestions">खोज सुझाव दिखाएं</string>
+    <string name="settings_search_suggestions_private">निजी सत्रों में दिखाएं</string>
+    <string name="settings_trending_suggestions">लोकप्रिय खोज सुझाव दिखाएं</string>
+    <string name="settings_recent_searches">हाल की खोजें दिखाएं</string>
+    <string name="settings_address_bar_suggest_group">पता बार के सुझाव</string>
+    <string name="settings_search_history">ब्राउज़िंग इतिहास में खोजें</string>
+    <string name="settings_search_bookmarks">बुकमार्क में खोजें</string>
+    <string name="settings_search_open_tabs">खुले टैब में खोजें</string>
+    <string name="settings_address_bar_preferences_group">पता बार की प्राथमिकताएं</string>
+    <string name="settings_clipboard_suggestions">क्लिपबोर्ड सुझाव दिखाएं</string>
+    <string name="settings_voice_search">आवाज़ से खोज दिखाएं</string>
+    <string name="settings_voice_search_unavailable">इस डिवाइस पर आवाज़ पहचान उपलब्ध नहीं है</string>
+    <string name="settings_autocomplete_urls">URL स्वतः पूर्ण करें</string>
+    <string name="settings_normal_search_engine">सामान्य ब्राउज़िंग का डिफ़ॉल्ट खोज इंजन</string>
+    <string name="settings_private_search_engine">निजी ब्राउज़िंग का डिफ़ॉल्ट खोज इंजन</string>
+    <string name="settings_same_search_engine">सामान्य ब्राउज़िंग वाला खोज इंजन उपयोग करें</string>
+    <string name="settings_alternative_search_engines">खोज मेन्यू में दिखने वाले इंजन</string>
+    <string name="settings_add_search_engine">खोज इंजन जोड़ें</string>
+    <string name="settings_search_engine_name">नाम</string>
+    <string name="settings_search_engine_url">खोज URL</string>
+    <string name="settings_search_suggestion_url">सुझाव URL (वैकल्पिक)</string>
+    <string name="settings_search_engine_url_hint" formatted="false">खोज शब्द की जगह %s लिखें। HTTPS आवश्यक है।</string>
+    <string name="settings_remove_search_engine">खोज इंजन हटाएं?</string>
+    <string name="settings_search_title">खोज</string>
+    <string name="settings_default_search_engine">डिफ़ॉल्ट खोज इंजन</string>
+    <string name="search_engine_ecosia">Ecosia</string>
+    <string name="search_engine_qwant">Qwant</string>
+    <string name="search_engine_startpage">Startpage</string>
+    <string name="settings_bookmarks_current_tab">बुकमार्क वर्तमान टैब में खोलें</string>
+    <string name="settings_bookmarks_current_tab_summary">बुकमार्क टैप करने पर वर्तमान टैब का उपयोग करें</string>
+    <string name="download_file_name">फ़ाइल का नाम</string>
+    <string name="download_file_name_invalid">स्लैश या नियंत्रण वर्णों के बिना नाम दर्ज करें</string>
+    <string name="download_settings_use_android_downloads">Android डाउनलोड फ़ोल्डर का उपयोग करें</string>
+</resources>

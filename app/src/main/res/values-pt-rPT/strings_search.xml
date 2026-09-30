@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_engines_group">Motores de pesquisa</string>
+    <string name="settings_manage_search_engines">Gerir motores de pesquisa alternativos</string>
+    <string name="settings_manage_search_engines_summary">Editar os motores visíveis no menu de pesquisa</string>
+    <string name="settings_home_screen_widget">Widget do ecrã inicial</string>
+    <string name="settings_widget_instructions">Adicione o widget de pesquisa Midori pelo menu de widgets do ecrã inicial. Para o remover, retire-o do ecrã inicial.</string>
+    <string name="settings_search_suggestions_group">Sugestões dos motores de pesquisa</string>
+    <string name="settings_show_search_suggestions">Mostrar sugestões de pesquisa</string>
+    <string name="settings_search_suggestions_private">Mostrar em sessões privadas</string>
+    <string name="settings_trending_suggestions">Mostrar sugestões populares</string>
+    <string name="settings_recent_searches">Mostrar pesquisas recentes</string>
+    <string name="settings_address_bar_suggest_group">Sugestões da barra de endereço</string>
+    <string name="settings_search_history">Pesquisar no histórico</string>
+    <string name="settings_search_bookmarks">Pesquisar nos marcadores</string>
+    <string name="settings_search_open_tabs">Pesquisar nos separadores abertos</string>
+    <string name="settings_address_bar_preferences_group">Preferências da barra de endereço</string>
+    <string name="settings_clipboard_suggestions">Mostrar sugestões da área de transferência</string>
+    <string name="settings_voice_search">Mostrar pesquisa por voz</string>
+    <string name="settings_voice_search_unavailable">O reconhecimento de voz não está disponível neste dispositivo</string>
+    <string name="settings_autocomplete_urls">Completar URLs automaticamente</string>
+    <string name="settings_normal_search_engine">Motor predefinido da navegação normal</string>
+    <string name="settings_private_search_engine">Motor predefinido da navegação privada</string>
+    <string name="settings_same_search_engine">Usar o mesmo motor da navegação normal</string>
+    <string name="settings_alternative_search_engines">Motores apresentados no menu de pesquisa</string>
+    <string name="settings_add_search_engine">Adicionar motor de pesquisa</string>
+    <string name="settings_search_engine_name">Nome</string>
+    <string name="settings_search_engine_url">URL de pesquisa</string>
+    <string name="settings_search_suggestion_url">URL de sugestões (opcional)</string>
+    <string name="settings_search_engine_url_hint" formatted="false">Use %s no lugar do termo pesquisado. É necessário HTTPS.</string>
+    <string name="settings_remove_search_engine">Remover motor de pesquisa?</string>
+    <string name="settings_search_title">Pesquisa</string>
+    <string name="settings_default_search_engine">Motor de pesquisa predefinido</string>
+    <string name="search_engine_ecosia">Ecosia</string>
+    <string name="search_engine_qwant">Qwant</string>
+    <string name="search_engine_startpage">Startpage</string>
+    <string name="settings_bookmarks_current_tab">Abrir marcadores no separador atual</string>
+    <string name="settings_bookmarks_current_tab_summary">Usar o separador atual ao tocar num marcador</string>
+    <string name="download_file_name">Nome do ficheiro</string>
+    <string name="download_file_name_invalid">Introduza um nome sem barras ou caracteres de controlo</string>
+    <string name="download_settings_use_android_downloads">Usar a pasta Transferências do Android</string>
+</resources>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_engines_group">Search engines</string>
+    <string name="settings_manage_search_engines">Manage alternative search engines</string>
+    <string name="settings_manage_search_engines_summary">Edit engines visible in the search menu</string>
+    <string name="settings_home_screen_widget">Home screen widget</string>
+    <string name="settings_widget_instructions">Add the Midori search widget from your home screen widgets menu. To remove an existing widget, remove it from your home screen.</string>
+    <string name="settings_search_suggestions_group">Suggestions from search engines</string>
+    <string name="settings_show_search_suggestions">Show search suggestions</string>
+    <string name="settings_search_suggestions_private">Show in private sessions</string>
+    <string name="settings_trending_suggestions">Show trending suggestions</string>
+    <string name="settings_recent_searches">Show recent searches</string>
+    <string name="settings_address_bar_suggest_group">Address bar suggestions</string>
+    <string name="settings_search_history">Search browsing history</string>
+    <string name="settings_search_bookmarks">Search bookmarks</string>
+    <string name="settings_search_open_tabs">Search open tabs</string>
+    <string name="settings_address_bar_preferences_group">Address bar preferences</string>
+    <string name="settings_clipboard_suggestions">Show clipboard suggestions</string>
+    <string name="settings_voice_search">Show voice search</string>
+    <string name="settings_voice_search_unavailable">Voice recognition is not available on this device</string>
+    <string name="settings_autocomplete_urls">Autocomplete URLs</string>
+    <string name="settings_normal_search_engine">Normal browsing default search engine</string>
+    <string name="settings_private_search_engine">Private browsing default search engine</string>
+    <string name="settings_same_search_engine">Use the same search engine as normal browsing</string>
+    <string name="settings_alternative_search_engines">Engines shown in the search menu</string>
+    <string name="settings_add_search_engine">Add search engine</string>
+    <string name="settings_search_engine_name">Name</string>
+    <string name="settings_search_engine_url">Search URL</string>
+    <string name="settings_search_suggestion_url">Suggestion URL (optional)</string>
+    <string name="settings_search_engine_url_hint" formatted="false">Use %s where the search term belongs. HTTPS is required.</string>
+    <string name="settings_remove_search_engine">Remove search engine?</string>
+</resources>

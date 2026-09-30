@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_engines_group">搜索引擎</string>
+    <string name="settings_manage_search_engines">管理其他搜索引擎</string>
+    <string name="settings_manage_search_engines_summary">编辑搜索菜单中显示的搜索引擎</string>
+    <string name="settings_home_screen_widget">主屏幕小组件</string>
+    <string name="settings_widget_instructions">从主屏幕的小组件菜单添加 Midori 搜索小组件。要移除现有小组件，请从主屏幕删除。</string>
+    <string name="settings_search_suggestions_group">来自搜索引擎的建议</string>
+    <string name="settings_show_search_suggestions">显示搜索建议</string>
+    <string name="settings_search_suggestions_private">在隐私会话中显示</string>
+    <string name="settings_trending_suggestions">显示热门搜索建议</string>
+    <string name="settings_recent_searches">显示最近搜索</string>
+    <string name="settings_address_bar_suggest_group">地址栏建议</string>
+    <string name="settings_search_history">搜索浏览历史</string>
+    <string name="settings_search_bookmarks">搜索书签</string>
+    <string name="settings_search_open_tabs">搜索打开的标签页</string>
+    <string name="settings_address_bar_preferences_group">地址栏偏好设置</string>
+    <string name="settings_clipboard_suggestions">显示剪贴板建议</string>
+    <string name="settings_voice_search">显示语音搜索</string>
+    <string name="settings_voice_search_unavailable">此设备无法使用语音识别</string>
+    <string name="settings_autocomplete_urls">自动补全网址</string>
+    <string name="settings_normal_search_engine">普通浏览默认搜索引擎</string>
+    <string name="settings_private_search_engine">隐私浏览默认搜索引擎</string>
+    <string name="settings_same_search_engine">使用与普通浏览相同的搜索引擎</string>
+    <string name="settings_alternative_search_engines">搜索菜单中显示的引擎</string>
+    <string name="settings_add_search_engine">添加搜索引擎</string>
+    <string name="settings_search_engine_name">名称</string>
+    <string name="settings_search_engine_url">搜索网址</string>
+    <string name="settings_search_suggestion_url">建议网址（可选）</string>
+    <string name="settings_search_engine_url_hint" formatted="false">用 %s 代替搜索词。必须使用 HTTPS。</string>
+    <string name="settings_remove_search_engine">移除搜索引擎？</string>
+    <string name="settings_search_title">搜索</string>
+    <string name="settings_default_search_engine">默认搜索引擎</string>
+    <string name="search_engine_ecosia">Ecosia</string>
+    <string name="search_engine_qwant">Qwant</string>
+    <string name="search_engine_startpage">Startpage</string>
+    <string name="settings_bookmarks_current_tab">在当前标签页中打开书签</string>
+    <string name="settings_bookmarks_current_tab_summary">点按书签时使用当前标签页</string>
+    <string name="download_file_name">文件名</string>
+    <string name="download_file_name_invalid">请输入不含斜杠或控制字符的名称</string>
+    <string name="download_settings_use_android_downloads">使用 Android 下载文件夹</string>
+</resources>

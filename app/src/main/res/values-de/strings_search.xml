@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_engines_group">Suchmaschinen</string>
+    <string name="settings_manage_search_engines">Alternative Suchmaschinen verwalten</string>
+    <string name="settings_manage_search_engines_summary">Im Suchmenü angezeigte Suchmaschinen bearbeiten</string>
+    <string name="settings_home_screen_widget">Startbildschirm-Widget</string>
+    <string name="settings_widget_instructions">Füge das Midori-Suchwidget über das Widget-Menü deines Startbildschirms hinzu. Zum Entfernen entferne es vom Startbildschirm.</string>
+    <string name="settings_search_suggestions_group">Vorschläge von Suchmaschinen</string>
+    <string name="settings_show_search_suggestions">Suchvorschläge anzeigen</string>
+    <string name="settings_search_suggestions_private">In privaten Sitzungen anzeigen</string>
+    <string name="settings_trending_suggestions">Trends als Vorschläge anzeigen</string>
+    <string name="settings_recent_searches">Letzte Suchanfragen anzeigen</string>
+    <string name="settings_address_bar_suggest_group">Vorschläge in der Adressleiste</string>
+    <string name="settings_search_history">Browserverlauf durchsuchen</string>
+    <string name="settings_search_bookmarks">Lesezeichen durchsuchen</string>
+    <string name="settings_search_open_tabs">Offene Tabs durchsuchen</string>
+    <string name="settings_address_bar_preferences_group">Einstellungen der Adressleiste</string>
+    <string name="settings_clipboard_suggestions">Vorschläge aus der Zwischenablage anzeigen</string>
+    <string name="settings_voice_search">Sprachsuche anzeigen</string>
+    <string name="settings_voice_search_unavailable">Spracherkennung ist auf diesem Gerät nicht verfügbar</string>
+    <string name="settings_autocomplete_urls">URLs automatisch vervollständigen</string>
+    <string name="settings_normal_search_engine">Standardsuchmaschine für normales Surfen</string>
+    <string name="settings_private_search_engine">Standardsuchmaschine für privates Surfen</string>
+    <string name="settings_same_search_engine">Dieselbe Suchmaschine wie beim normalen Surfen verwenden</string>
+    <string name="settings_alternative_search_engines">Suchmaschinen im Suchmenü</string>
+    <string name="settings_add_search_engine">Suchmaschine hinzufügen</string>
+    <string name="settings_search_engine_name">Name</string>
+    <string name="settings_search_engine_url">Such-URL</string>
+    <string name="settings_search_suggestion_url">Vorschlags-URL (optional)</string>
+    <string name="settings_search_engine_url_hint" formatted="false">Verwende %s als Platzhalter für den Suchbegriff. HTTPS ist erforderlich.</string>
+    <string name="settings_remove_search_engine">Suchmaschine entfernen?</string>
+    <string name="settings_search_title">Suche</string>
+    <string name="settings_default_search_engine">Standardsuchmaschine</string>
+    <string name="search_engine_ecosia">Ecosia</string>
+    <string name="search_engine_qwant">Qwant</string>
+    <string name="search_engine_startpage">Startpage</string>
+    <string name="settings_bookmarks_current_tab">Lesezeichen im aktuellen Tab öffnen</string>
+    <string name="settings_bookmarks_current_tab_summary">Beim Antippen eines Lesezeichens den aktuellen Tab verwenden</string>
+    <string name="download_file_name">Dateiname</string>
+    <string name="download_file_name_invalid">Gib einen Namen ohne Schrägstriche oder Steuerzeichen ein</string>
+    <string name="download_settings_use_android_downloads">Android-Downloadordner verwenden</string>
+</resources>

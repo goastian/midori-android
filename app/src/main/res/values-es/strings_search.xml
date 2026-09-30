@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_engines_group">Buscadores</string>
+    <string name="settings_manage_search_engines">Gestionar buscadores alternativos</string>
+    <string name="settings_manage_search_engines_summary">Editar los buscadores visibles en el menú de búsqueda</string>
+    <string name="settings_home_screen_widget">Widget de la pantalla de inicio</string>
+    <string name="settings_widget_instructions">Añade el widget de búsqueda de Midori desde el menú de widgets de la pantalla de inicio. Para quitarlo, elimínalo de esa pantalla.</string>
+    <string name="settings_search_suggestions_group">Sugerencias de los buscadores</string>
+    <string name="settings_show_search_suggestions">Mostrar sugerencias de búsqueda</string>
+    <string name="settings_search_suggestions_private">Mostrar en sesiones privadas</string>
+    <string name="settings_trending_suggestions">Mostrar tendencias de búsqueda</string>
+    <string name="settings_recent_searches">Mostrar búsquedas recientes</string>
+    <string name="settings_address_bar_suggest_group">Sugerencias de la barra de direcciones</string>
+    <string name="settings_search_history">Buscar en el historial</string>
+    <string name="settings_search_bookmarks">Buscar en marcadores</string>
+    <string name="settings_search_open_tabs">Buscar en pestañas abiertas</string>
+    <string name="settings_address_bar_preferences_group">Preferencias de la barra de direcciones</string>
+    <string name="settings_clipboard_suggestions">Mostrar sugerencias del portapapeles</string>
+    <string name="settings_voice_search">Mostrar búsqueda por voz</string>
+    <string name="settings_voice_search_unavailable">El reconocimiento de voz no está disponible en este dispositivo</string>
+    <string name="settings_autocomplete_urls">Autocompletar URL</string>
+    <string name="settings_normal_search_engine">Buscador predeterminado para navegación normal</string>
+    <string name="settings_private_search_engine">Buscador predeterminado para navegación privada</string>
+    <string name="settings_same_search_engine">Usar el mismo buscador que en navegación normal</string>
+    <string name="settings_alternative_search_engines">Buscadores visibles en el menú de búsqueda</string>
+    <string name="settings_add_search_engine">Añadir buscador</string>
+    <string name="settings_search_engine_name">Nombre</string>
+    <string name="settings_search_engine_url">URL de búsqueda</string>
+    <string name="settings_search_suggestion_url">URL de sugerencias (opcional)</string>
+    <string name="settings_search_engine_url_hint" formatted="false">Usa %s en lugar del término de búsqueda. Se requiere HTTPS.</string>
+    <string name="settings_remove_search_engine">¿Eliminar buscador?</string>
+    <string name="search_engine_ecosia">Ecosia</string>
+    <string name="search_engine_qwant">Qwant</string>
+    <string name="search_engine_startpage">Startpage</string>
+</resources>
