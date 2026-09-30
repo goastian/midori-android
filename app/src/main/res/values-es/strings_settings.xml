@@ -123,6 +123,12 @@
     <string name="open_results_in_new_tab_label">Abrir los resultados en una nueva pestaña</string>
 
     <string name="search_engine_label">Buscador</string>
+    <string name="settings_search_title">Búsqueda</string>
+    <string name="settings_default_search_engine">Buscador predeterminado</string>
+    <string name="settings_bookmarks_current_tab">Abrir marcadores en la pestaña actual</string>
+    <string name="settings_bookmarks_current_tab_summary">Usar la pestaña actual al tocar un marcador</string>
+    <string name="download_file_name">Nombre del archivo</string>
+    <string name="download_file_name_invalid">Escribe un nombre sin barras ni caracteres de control</string>
     <string name="search_engine_current_midori">AstianGO</string>
     <string name="search_engine_description">La búsqueda de Midori viene integrada en esta versión.</string>
 

@@ -156,6 +156,15 @@
     <string name="search_engine_label">Search engine</string>
     <string name="search_engine_current_midori">AstianGO</string>
     <string name="search_engine_description">Midori search is built in for this version.</string>
+    <string name="settings_search_title">Search</string>
+    <string name="settings_default_search_engine">Default search engine</string>
+    <string name="search_engine_ecosia">Ecosia</string>
+    <string name="search_engine_qwant">Qwant</string>
+    <string name="search_engine_startpage">Startpage</string>
+    <string name="settings_bookmarks_current_tab">Open bookmarks in current tab</string>
+    <string name="settings_bookmarks_current_tab_summary">Use the current tab when tapping a bookmark</string>
+    <string name="download_file_name">File name</string>
+    <string name="download_file_name_invalid">Enter a name without slashes or control characters</string>
 
     <string name="interface_language_label">Interface language</string>
     <string name="available_language_english">English</string>
