@@ -15,6 +15,8 @@
     <string name="settings_group_about">Sobre</string>
     <string name="default_browser_label">Definir como navegador predefinido</string>
     <string name="tabs_view_label">Configurações da guia</string>
+    <string name="tab_strip_label">Mostrar barra de separadores</string>
+    <string name="tab_strip_description">Mostra os separadores abertos na parte superior do navegador.</string>
     <string name="available_tabs_view_grid">Grade</string>
     <string name="available_tabs_view_list">Lista</string>
     <string name="show_new_tab_home_label">Utilizar o ecrã Nova guia</string>

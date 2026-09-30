@@ -18,6 +18,8 @@
     <string name="default_browser_label">Als Standardbrowser festlegen</string>
 
     <string name="tabs_view_label">Tabeinstellungen</string>
+    <string name="tab_strip_label">Tableiste anzeigen</string>
+    <string name="tab_strip_description">Offene Tabs oben im Browser anzeigen.</string>
     <string name="available_tabs_view_grid">Raster</string>
     <string name="available_tabs_view_list">Liste</string>
 

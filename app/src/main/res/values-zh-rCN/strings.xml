@@ -139,7 +139,7 @@
     <string name="tab_tray_private_tabs">Private</string>
     <string name="tab_tray_new_tab">New Tab</string>
     <string name="tab_tray_close_all">Close All</string>
-    <string name="tab_tray_close_tab">Close tab</string>
+    <string name="tab_tray_close_tab">关闭标签页</string>
     <string name="tab_tray_empty">No open tabs</string>
     <string name="tab_tray_empty_private">No private tabs</string>
     <string name="tab_tray_swipe_hint">Swipe to close</string>

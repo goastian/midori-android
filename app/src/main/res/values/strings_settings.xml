@@ -26,6 +26,8 @@
     <string name="default_browser_label">Set as default browser</string>
 
     <string name="tabs_view_label">Tab settings</string>
+    <string name="tab_strip_label">Show tab bar</string>
+    <string name="tab_strip_description">Show open tabs in a bar at the top of the browser.</string>
     <string name="available_tabs_view_grid">Grid</string>
     <string name="available_tabs_view_list">List</string>
     <string name="show_new_tab_home_label">Use New Tab screen</string>

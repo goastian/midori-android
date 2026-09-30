@@ -15,6 +15,8 @@
     <string name="settings_group_about">Sobre</string>
     <string name="default_browser_label">Definir como navegador padrão</string>
     <string name="tabs_view_label">Configurações da guia</string>
+    <string name="tab_strip_label">Mostrar barra de guias</string>
+    <string name="tab_strip_description">Mostra as guias abertas na parte superior do navegador.</string>
     <string name="available_tabs_view_grid">Grade</string>
     <string name="available_tabs_view_list">Lista</string>
     <string name="show_new_tab_home_label">Usar a tela Nova guia</string>

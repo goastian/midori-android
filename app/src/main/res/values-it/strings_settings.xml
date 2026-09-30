@@ -17,6 +17,8 @@
     <string name="default_browser_label">Imposta come browser predefinito</string>
 
     <string name="tabs_view_label">Impostazioni della scheda</string>
+    <string name="tab_strip_label">Mostra la barra delle schede</string>
+    <string name="tab_strip_description">Mostra le schede aperte nella parte superiore del browser.</string>
     <string name="available_tabs_view_grid">Griglia</string>
     <string name="available_tabs_view_list">Elenco</string>
 

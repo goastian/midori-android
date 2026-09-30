@@ -17,6 +17,8 @@
     <string name="default_browser_label">Abra todos sus enlaces en la aplicación Midori</string>
 
     <string name="tabs_view_label">Configuración de pestañas</string>
+    <string name="tab_strip_label">Mostrar barra de pestañas</string>
+    <string name="tab_strip_description">Muestra las pestañas abiertas en la parte superior del navegador.</string>
     <string name="available_tabs_view_grid">Red</string>
     <string name="available_tabs_view_list">Lista</string>
     <string name="show_new_tab_home_label">Usar pantalla New Tab</string>
