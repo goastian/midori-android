@@ -169,6 +169,12 @@ class AppPreferencesRepository @Inject constructor(
         }
     }
 
+    suspend fun updateShowTabStrip(enabled: Boolean) {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setShowTabStrip(enabled).build()
+        }
+    }
+
     suspend fun updateTabGroupColor(groupId: String, color: Int) {
         datastore.updateData { preferences ->
             preferences.toBuilder()

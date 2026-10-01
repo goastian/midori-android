@@ -63,6 +63,8 @@ fun BrowserScreen(
     val currentUrl by viewModel.currentUrl.collectAsStateWithLifecycle()
     val selectedTabSnapshot by viewModel.selectedTabSnapshot.collectAsStateWithLifecycle()
     val tabCount by viewModel.tabCount.collectAsStateWithLifecycle()
+    val tabStripTabs by viewModel.tabStripTabs.collectAsStateWithLifecycle()
+    val isFullScreen by viewModel.isFullScreen.collectAsStateWithLifecycle()
     val restoreComplete by viewModel.restoreComplete.collectAsStateWithLifecycle()
     val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
     val private by appViewModel.isPrivate.collectAsStateWithLifecycle()
@@ -152,131 +154,145 @@ fun BrowserScreen(
         )
     }
 
-    HideOnScrollToolbar(
-        toolbarState = viewModel.toolbarState,
-        toolbar = { modifier ->
-            Toolbar(
-                onTextCommit = { text -> viewModel.commitSearch(text, currentUrl?.getMidoriSERPCategory()) },
-                modifier = modifier,
-                toolbarState = viewModel.toolbarState,
+    Column(Modifier.fillMaxSize()) {
+        if (appPrefs.showTabStrip && !isFullScreen && !viewModel.toolbarState.hasFocus) {
+            BrowserTabStrip(
+                tabs = tabStripTabs,
+                selectedTabId = selectedTabSnapshot?.id,
                 browserIcons = viewModel.browserIcons,
-                beforeTextField = {
-                    if (!readerModeStatus.isActive) {
-                        AdBlockerAction(enabled = isMidoriPrivacyActionAvailable) {
-                            viewModel.triggerInstalledExtensionAction(MidoriPrivacyFeature.EXTENSION_ID)
-                        }
-                    }
+                onTabSelected = viewModel::selectTab,
+                onTabClosed = viewModel::closeTab,
+                onNewTab = {
+                    viewModel.openNewMidoriTab(private = private)
                 },
-                beforeTextFieldVisible = {
-                    readerModeStatus.isActive ||
-                        (!viewModel.toolbarState.hasFocus &&
-                            currentUrl?.isNotBlank() == true &&
-                            currentUrl?.isMidoriUrl() == false &&
-                            !viewModel.isNewTabUrl(currentUrl) &&
-                            currentUrl != "about:blank")
-                },
-                pageEndAction = {
-                    ReaderModeAction(
-                        active = readerModeStatus.isActive,
-                        onClick = {
-                            if (readerModeStatus.isActive) {
-                                readerViewFeature.hideReaderView()
-                            } else {
-                                readerViewFeature.showReaderView()
+            )
+        }
+        HideOnScrollToolbar(
+            toolbarState = viewModel.toolbarState,
+            toolbar = { modifier ->
+                Toolbar(
+                    onTextCommit = { text -> viewModel.commitSearch(text, currentUrl?.getMidoriSERPCategory()) },
+                    modifier = modifier,
+                    toolbarState = viewModel.toolbarState,
+                    browserIcons = viewModel.browserIcons,
+                    beforeTextField = {
+                        if (!readerModeStatus.isActive) {
+                            AdBlockerAction(enabled = isMidoriPrivacyActionAvailable) {
+                                viewModel.triggerInstalledExtensionAction(MidoriPrivacyFeature.EXTENSION_ID)
                             }
-                        },
-                    )
-                },
-                pageEndActionVisible = {
-                    readerModeStatus.isAvailable || readerModeStatus.isActive
-                },
-                afterTextField = {
-                    AfterActions(
-                        navigateTo,
-                        viewModel,
-                        appViewModel,
-                        appPrefs.toolbarShortcut,
-                        onSummarize = {
-                            viewModel.summarizeCurrentPage(
-                                onResult = { summary ->
-                                    if (summary.isBlank()) {
-                                        appViewModel.showSnackbar(context.getString(R.string.summary_unavailable))
-                                    } else {
-                                        pageSummary = summary
-                                    }
-                                },
-                                onError = {
-                                    appViewModel.showSnackbar(context.getString(R.string.summary_unavailable))
-                                }
-                            )
                         }
-                    )
-                },
-                afterTextFieldVisible = { !viewModel.toolbarState.hasFocus },
-                onMidoriIconClicked = { viewModel.goToHomepage() },
-                onSwipeUp = {
-                    if (appPrefs.swipeToolbarToShowTabsEnabled) navigateTo(NavDestination.Tabs)
-                },
-                onSwipeDown = {
-                    if (appPrefs.swipeToolbarToShowTabsEnabled) navigateTo(NavDestination.Tabs)
-                },
-                onSwipeLeft = {
-                    if (appPrefs.swipeAddressBarToSwitchTabsEnabled) viewModel.switchTab(1)
-                },
-                onSwipeRight = {
-                    if (appPrefs.swipeAddressBarToSwitchTabsEnabled) viewModel.switchTab(-1)
-                }
-            )
-        },
-        engineView = engineViewHolder,
-        modifier = Modifier.fillMaxSize(),
-        lock = { viewModel.showFindInPage }
-    ) { modifier ->
-        if (currentUrl != null) {
-            if (currentUrl == "" && private) {
-                HomePrivateBrowsing(modifier)
-            } else {
-                GlobalFeatures(appViewModel, viewModel)
-
-                PullToRefreshBox(
-                    onRefresh = { viewModel.reloadUrl() },
-                    enabled = {
-                        appPrefs.pullToRefreshEnabled &&
-                        engineViewHolder?.canScrollVerticallyUp() == false &&
-                        engineViewHolder?.getInputResultDetail()?.let {
-                            it.canOverscrollTop() &&
-                            it.canOverscrollLeft() &&
-                            it.canOverscrollRight()
-                        } == true
                     },
-                    modifier = modifier
-                ) {
-                    val contentBlockerStatus = viewModel.contentBlockerState.status
-                    if (contentBlockerStatus != ContentBlockerState.Status.ALLOWED) {
-                        ContentBlockerOverlay(
-                            contentBlockerStatus,
-                            viewModel.contentBlockerState.blockReason,
-                            imageModifier = Modifier.width(300.dp),
-                            imageScale = ContentScale.FillWidth,
-                            alignment = Alignment.TopCenter
+                    beforeTextFieldVisible = {
+                        readerModeStatus.isActive ||
+                            (!viewModel.toolbarState.hasFocus &&
+                                currentUrl?.isNotBlank() == true &&
+                                currentUrl?.isMidoriUrl() == false &&
+                                !viewModel.isNewTabUrl(currentUrl) &&
+                                currentUrl != "about:blank")
+                    },
+                    pageEndAction = {
+                        ReaderModeAction(
+                            active = readerModeStatus.isActive,
+                            onClick = {
+                                if (readerModeStatus.isActive) {
+                                    readerViewFeature.hideReaderView()
+                                } else {
+                                    readerViewFeature.showReaderView()
+                                }
+                            },
                         )
-                    } else {
-                        EngineView(
-                            engine = viewModel.engine,
-                            modifier = Modifier.fillMaxSize()
-                        ) { engineView ->
-                            engineViewHolder = engineView
-                            EngineViewFeatures(engineView, viewModel)
+                    },
+                    pageEndActionVisible = {
+                        readerModeStatus.isAvailable || readerModeStatus.isActive
+                    },
+                    afterTextField = {
+                        AfterActions(
+                            navigateTo,
+                            viewModel,
+                            appViewModel,
+                            appPrefs.toolbarShortcut,
+                            onSummarize = {
+                                viewModel.summarizeCurrentPage(
+                                    onResult = { summary ->
+                                        if (summary.isBlank()) {
+                                            appViewModel.showSnackbar(context.getString(R.string.summary_unavailable))
+                                        } else {
+                                            pageSummary = summary
+                                        }
+                                    },
+                                    onError = {
+                                        appViewModel.showSnackbar(context.getString(R.string.summary_unavailable))
+                                    }
+                                )
+                            }
+                        )
+                    },
+                    afterTextFieldVisible = { !viewModel.toolbarState.hasFocus },
+                    onMidoriIconClicked = { viewModel.goToHomepage() },
+                    onSwipeUp = {
+                        if (appPrefs.swipeToolbarToShowTabsEnabled) navigateTo(NavDestination.Tabs)
+                    },
+                    onSwipeDown = {
+                        if (appPrefs.swipeToolbarToShowTabsEnabled) navigateTo(NavDestination.Tabs)
+                    },
+                    onSwipeLeft = {
+                        if (appPrefs.swipeAddressBarToSwitchTabsEnabled) viewModel.switchTab(1)
+                    },
+                    onSwipeRight = {
+                        if (appPrefs.swipeAddressBarToSwitchTabsEnabled) viewModel.switchTab(-1)
+                    }
+                )
+            },
+            engineView = engineViewHolder,
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            lock = { viewModel.showFindInPage }
+        ) { modifier ->
+            if (currentUrl != null) {
+                if (currentUrl == "" && private) {
+                    HomePrivateBrowsing(modifier)
+                } else {
+                    GlobalFeatures(appViewModel, viewModel)
+
+                    PullToRefreshBox(
+                        onRefresh = { viewModel.reloadUrl() },
+                        enabled = {
+                            appPrefs.pullToRefreshEnabled &&
+                            engineViewHolder?.canScrollVerticallyUp() == false &&
+                            engineViewHolder?.getInputResultDetail()?.let {
+                                it.canOverscrollTop() &&
+                                it.canOverscrollLeft() &&
+                                it.canOverscrollRight()
+                            } == true
+                        },
+                        modifier = modifier
+                    ) {
+                        val contentBlockerStatus = viewModel.contentBlockerState.status
+                        if (contentBlockerStatus != ContentBlockerState.Status.ALLOWED) {
+                            ContentBlockerOverlay(
+                                contentBlockerStatus,
+                                viewModel.contentBlockerState.blockReason,
+                                imageModifier = Modifier.width(300.dp),
+                                imageScale = ContentScale.FillWidth,
+                                alignment = Alignment.TopCenter
+                            )
+                        } else {
+                            EngineView(
+                                engine = viewModel.engine,
+                                modifier = Modifier.fillMaxSize()
+                            ) { engineView ->
+                                engineViewHolder = engineView
+                                EngineViewFeatures(engineView, viewModel)
+                            }
                         }
                     }
                 }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                )
             }
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-            )
         }
     }
 

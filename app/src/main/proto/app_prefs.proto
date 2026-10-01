@@ -140,6 +140,7 @@ message AppPreferences {
   repeated CustomSearchEngine custom_search_engines = 66;
   string custom_default_search_engine_id = 67;
   string custom_private_search_engine_id = 68;
+  bool show_tab_strip = 69;
 }
 
 message CustomSearchEngine {

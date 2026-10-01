@@ -318,6 +318,12 @@ fun CustomizeSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
             value = appPrefs.tabsView,
             onValueChange = viewModel::updateTabsView
         )
+        PreferenceToggle(
+            label = R.string.tab_strip_label,
+            description = R.string.tab_strip_description,
+            value = appPrefs.showTabStrip,
+            onValueChange = viewModel::updateShowTabStrip
+        )
 
         PreferenceGroupLabel(label = R.string.settings_customize_shortcut)
         PreferenceRadioSelectionPopup(

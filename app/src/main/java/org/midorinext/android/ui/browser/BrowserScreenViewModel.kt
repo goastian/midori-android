@@ -113,6 +113,34 @@ class BrowserScreenViewModel @Inject constructor(
             initialValue = 0
         )
 
+    val tabStripTabs = store.flow()
+        .map { state ->
+            state.tabs.filter { it.content.private == (state.selectedTab?.content?.private == true) }
+        }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = emptyList()
+        )
+
+    val isFullScreen = store.flow()
+        .map { state -> state.selectedTab?.content?.fullScreen == true }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = false
+        )
+
+    fun selectTab(tabId: String) {
+        tabsUseCases.selectTab(tabId)
+    }
+
+    fun closeTab(tabId: String) {
+        tabsUseCases.removeTab(tabId)
+    }
+
     private val urlFlow = store.flow()
         .map { state -> state.selectedTab?.content?.url }
         .distinctUntilChanged()
