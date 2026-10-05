@@ -1,0 +1,14 @@
+These host-only rules were extracted from the EasyList and EasyPrivacy lists
+bundled in goastian/midori-desktop at commit 4bae8de6d5.
+Source attribution: The EasyList authors (https://easylist.to/).
+
+EasyList and EasyPrivacy: https://easylist.to/
+The adapted ads.txt, trackers.txt, and their exceptions data are distributed under Creative
+Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0):
+https://creativecommons.org/licenses/by-sa/3.0/
+Original licensing: https://easylist.to/pages/licence.html
+
+The extraction keeps EasyList advertising hosts and EasyPrivacy tracking hosts
+separate. It includes only plain ||host^ network rules and plain @@||host^
+exceptions. It does not include cosmetic, scriptlet, option-bearing, or URL
+pattern rules.
