@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="adblock_settings_title">Tracker and Ad Blocking</string>
+    <string name="adblock_settings_summary">Choose what Midori blocks</string>
+    <string name="adblock_default_level">Default blocking level</string>
+    <string name="adblock_level_off">No blocking</string>
+    <string name="adblock_level_trackers">Block trackers</string>
+    <string name="adblock_level_trackers_ads">Block trackers and ads</string>
+    <string name="adblock_exceptions">Exceptions</string>
+    <string name="adblock_manage_sites">Manage blocking level per site</string>
+    <string name="adblock_sources">Sources</string>
+    <string name="adblock_tracker_sources">Manage tracker sources</string>
+    <string name="adblock_ad_sources">Manage ad sources</string>
+    <string name="adblock_strict">Strict blocking</string>
+    <string name="adblock_strict_description">Use stronger tracker protection. Some sites may not work as expected.</string>
+    <string name="adblock_scope_note">Built-in tracker protection uses GeckoView. Midori Desktop host rules and custom host lists block third-party frames.</string>
+    <string name="adblock_add_site">Add site</string>
+    <string name="adblock_no_sites">No site exceptions yet</string>
+    <string name="adblock_remove">Remove</string>
+    <string name="adblock_site_domain">Site domain</string>
+    <string name="adblock_invalid_site">Enter a valid domain</string>
+    <string name="adblock_add">Add</string>
+    <string name="adblock_cancel">Cancel</string>
+    <string name="adblock_add_source">Add new source</string>
+    <string name="adblock_gecko_source">GeckoView + EasyPrivacy</string>
+    <string name="adblock_gecko_source_description">Built-in tracker protection</string>
+    <string name="adblock_midori_source">Midori Desktop EasyList</string>
+    <string name="adblock_midori_source_description">Host-only rules bundled with Midori</string>
+    <string name="adblock_source_updated">Updated: %1$s</string>
+    <string name="adblock_source_pending">Waiting for update</string>
+    <string name="adblock_refresh">Refresh</string>
+    <string name="adblock_source_url">HTTPS source URL</string>
+    <string name="adblock_invalid_source">Enter a unique HTTPS URL</string>
+    <string name="adblock_source_format">Supports plain ||host^ and @@||host^ rules. Other filter syntax is ignored.</string>
+    <string name="onboarding_adblock_title">Choose your protection</string>
+    <string name="onboarding_adblock_description">Would you like Midori to block trackers and ads?</string>
+    <string name="onboarding_adblock_hint">You can change this later in Settings.</string>
+    <string name="adblock_source_disabled">Disabled</string>
+    <string name="adblock_source_failed">Update failed. Tap Refresh to try again.</string>
+</resources>

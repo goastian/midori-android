@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="adblock_settings_title">Bllokimi i gjurmuesve dhe reklamave</string>
+    <string name="adblock_settings_summary">Zgjidhni çfarë bllokon Midori</string>
+    <string name="adblock_default_level">Niveli i parazgjedhur i bllokimit</string>
+    <string name="adblock_level_off">Pa bllokim</string>
+    <string name="adblock_level_trackers">Blloko gjurmuesit</string>
+    <string name="adblock_level_trackers_ads">Blloko gjurmuesit dhe reklamat</string>
+    <string name="adblock_exceptions">Përjashtime</string>
+    <string name="adblock_manage_sites">Menaxho bllokimin për çdo sajt</string>
+    <string name="adblock_sources">Burimet</string>
+    <string name="adblock_tracker_sources">Menaxho burimet e gjurmuesve</string>
+    <string name="adblock_ad_sources">Menaxho burimet e reklamave</string>
+    <string name="adblock_strict">Bllokim i rreptë</string>
+    <string name="adblock_strict_description">Përdor mbrojtje më të fortë. Disa sajte mund të mos punojnë si duhet.</string>
+    <string name="adblock_scope_note">Mbrojtja e integruar përdor GeckoView. Rregullat e Midori Desktop dhe listat vetjake bllokojnë kornizat e palëve të treta.</string>
+    <string name="adblock_add_site">Shto sajt</string>
+    <string name="adblock_no_sites">Ende nuk ka përjashtime</string>
+    <string name="adblock_remove">Hiq</string>
+    <string name="adblock_site_domain">Domeni i sajtit</string>
+    <string name="adblock_invalid_site">Shkruani domen të vlefshëm</string>
+    <string name="adblock_add">Shto</string>
+    <string name="adblock_cancel">Anulo</string>
+    <string name="adblock_add_source">Shto burim të ri</string>
+    <string name="adblock_gecko_source">GeckoView + EasyPrivacy</string>
+    <string name="adblock_gecko_source_description">Mbrojtja e integruar e gjurmuesve</string>
+    <string name="adblock_midori_source">Midori Desktop EasyList</string>
+    <string name="adblock_midori_source_description">Rregullat e domeneve të përfshira në Midori</string>
+    <string name="adblock_source_updated">Përditësuar: %1$s</string>
+    <string name="adblock_source_pending">Në pritje të përditësimit</string>
+    <string name="adblock_refresh">Përditëso</string>
+    <string name="adblock_source_url">URL HTTPS e burimit</string>
+    <string name="adblock_invalid_source">Shkruani URL HTTPS unike</string>
+    <string name="adblock_source_format">Pranohen rregullat ||host^ dhe @@||host^. Rregullat e tjera shpërfillen.</string>
+    <string name="onboarding_adblock_title">Zgjidhni mbrojtjen</string>
+    <string name="onboarding_adblock_description">Doni që Midori të bllokojë gjurmuesit dhe reklamat?</string>
+    <string name="onboarding_adblock_hint">Mund ta ndryshoni më vonë te Cilësimet.</string>
+    <string name="adblock_source_disabled">Çaktivizuar</string>
+    <string name="adblock_source_failed">Përditësimi dështoi. Prekni Përditëso për të provuar përsëri.</string>
+</resources>

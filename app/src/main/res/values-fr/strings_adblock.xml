@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="adblock_settings_title">Blocage des traqueurs et publicités</string>
+    <string name="adblock_settings_summary">Choisissez ce que Midori bloque</string>
+    <string name="adblock_default_level">Niveau de blocage par défaut</string>
+    <string name="adblock_level_off">Aucun blocage</string>
+    <string name="adblock_level_trackers">Bloquer les traqueurs</string>
+    <string name="adblock_level_trackers_ads">Bloquer les traqueurs et publicités</string>
+    <string name="adblock_exceptions">Exceptions</string>
+    <string name="adblock_manage_sites">Gérer le blocage par site</string>
+    <string name="adblock_sources">Sources</string>
+    <string name="adblock_tracker_sources">Gérer les sources de traqueurs</string>
+    <string name="adblock_ad_sources">Gérer les sources de publicités</string>
+    <string name="adblock_strict">Blocage strict</string>
+    <string name="adblock_strict_description">Utiliser une protection renforcée. Certains sites peuvent mal fonctionner.</string>
+    <string name="adblock_scope_note">La protection des traqueurs utilise GeckoView. Les règles de Midori Desktop et les listes personnalisées bloquent les cadres tiers.</string>
+    <string name="adblock_add_site">Ajouter un site</string>
+    <string name="adblock_no_sites">Aucune exception pour le moment</string>
+    <string name="adblock_remove">Supprimer</string>
+    <string name="adblock_site_domain">Domaine du site</string>
+    <string name="adblock_invalid_site">Saisissez un domaine valide</string>
+    <string name="adblock_add">Ajouter</string>
+    <string name="adblock_cancel">Annuler</string>
+    <string name="adblock_add_source">Ajouter une source</string>
+    <string name="adblock_gecko_source">GeckoView + EasyPrivacy</string>
+    <string name="adblock_gecko_source_description">Protection intégrée contre les traqueurs</string>
+    <string name="adblock_midori_source">Midori Desktop EasyList</string>
+    <string name="adblock_midori_source_description">Règles de domaines incluses dans Midori</string>
+    <string name="adblock_source_updated">Mise à jour : %1$s</string>
+    <string name="adblock_source_pending">Mise à jour en attente</string>
+    <string name="adblock_refresh">Actualiser</string>
+    <string name="adblock_source_url">URL HTTPS de la source</string>
+    <string name="adblock_invalid_source">Saisissez une URL HTTPS unique</string>
+    <string name="adblock_source_format">Accepte les règles ||host^ et @@||host^. Les autres règles sont ignorées.</string>
+    <string name="onboarding_adblock_title">Choisissez votre protection</string>
+    <string name="onboarding_adblock_description">Voulez-vous bloquer les traqueurs et publicités dans Midori ?</string>
+    <string name="onboarding_adblock_hint">Vous pourrez changer ce choix dans les paramètres.</string>
+    <string name="adblock_source_disabled">Désactivée</string>
+    <string name="adblock_source_failed">Échec de la mise à jour. Touchez Actualiser pour réessayer.</string>
+</resources>

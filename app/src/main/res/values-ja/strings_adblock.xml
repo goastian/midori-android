@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="adblock_settings_title">トラッカーと広告のブロック</string>
+    <string name="adblock_settings_summary">Midori がブロックする内容を選択</string>
+    <string name="adblock_default_level">標準のブロックレベル</string>
+    <string name="adblock_level_off">ブロックしない</string>
+    <string name="adblock_level_trackers">トラッカーをブロック</string>
+    <string name="adblock_level_trackers_ads">トラッカーと広告をブロック</string>
+    <string name="adblock_exceptions">例外</string>
+    <string name="adblock_manage_sites">サイトごとのブロックレベル</string>
+    <string name="adblock_sources">ソース</string>
+    <string name="adblock_tracker_sources">トラッカー用ソースを管理</string>
+    <string name="adblock_ad_sources">広告用ソースを管理</string>
+    <string name="adblock_strict">厳格なブロック</string>
+    <string name="adblock_strict_description">より強い追跡防止を使用します。一部のサイトが正常に動作しない場合があります。</string>
+    <string name="adblock_scope_note">内蔵の追跡防止には GeckoView を使用します。Midori Desktop のルールとカスタムリストは第三者フレームをブロックします。</string>
+    <string name="adblock_add_site">サイトを追加</string>
+    <string name="adblock_no_sites">例外はまだありません</string>
+    <string name="adblock_remove">削除</string>
+    <string name="adblock_site_domain">サイトのドメイン</string>
+    <string name="adblock_invalid_site">有効なドメインを入力</string>
+    <string name="adblock_add">追加</string>
+    <string name="adblock_cancel">キャンセル</string>
+    <string name="adblock_add_source">新しいソースを追加</string>
+    <string name="adblock_gecko_source">GeckoView + EasyPrivacy</string>
+    <string name="adblock_gecko_source_description">内蔵の追跡防止</string>
+    <string name="adblock_midori_source">Midori Desktop EasyList</string>
+    <string name="adblock_midori_source_description">Midori に同梱されたホストルール</string>
+    <string name="adblock_source_updated">更新日時: %1$s</string>
+    <string name="adblock_source_pending">更新待ち</string>
+    <string name="adblock_refresh">更新</string>
+    <string name="adblock_source_url">ソースの HTTPS URL</string>
+    <string name="adblock_invalid_source">重複しない HTTPS URL を入力</string>
+    <string name="adblock_source_format">||host^ と @@||host^ のルールに対応します。他の形式は無視されます。</string>
+    <string name="onboarding_adblock_title">保護を選択</string>
+    <string name="onboarding_adblock_description">Midori でトラッカーと広告をブロックしますか？</string>
+    <string name="onboarding_adblock_hint">後から設定で変更できます。</string>
+    <string name="adblock_source_disabled">無効</string>
+    <string name="adblock_source_failed">更新できませんでした。「更新」をタップして再試行してください。</string>
+</resources>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="adblock_settings_title">跟踪器和广告拦截</string>
+    <string name="adblock_settings_summary">选择 Midori 拦截的内容</string>
+    <string name="adblock_default_level">默认拦截级别</string>
+    <string name="adblock_level_off">不拦截</string>
+    <string name="adblock_level_trackers">拦截跟踪器</string>
+    <string name="adblock_level_trackers_ads">拦截跟踪器和广告</string>
+    <string name="adblock_exceptions">例外</string>
+    <string name="adblock_manage_sites">按网站管理拦截级别</string>
+    <string name="adblock_sources">来源</string>
+    <string name="adblock_tracker_sources">管理跟踪器来源</string>
+    <string name="adblock_ad_sources">管理广告来源</string>
+    <string name="adblock_strict">严格拦截</string>
+    <string name="adblock_strict_description">使用更强的跟踪防护。部分网站可能无法正常工作。</string>
+    <string name="adblock_scope_note">内置跟踪防护使用 GeckoView。Midori Desktop 规则及自定义列表拦截第三方框架。</string>
+    <string name="adblock_add_site">添加网站</string>
+    <string name="adblock_no_sites">暂无网站例外</string>
+    <string name="adblock_remove">移除</string>
+    <string name="adblock_site_domain">网站域名</string>
+    <string name="adblock_invalid_site">请输入有效域名</string>
+    <string name="adblock_add">添加</string>
+    <string name="adblock_cancel">取消</string>
+    <string name="adblock_add_source">添加新来源</string>
+    <string name="adblock_gecko_source">GeckoView + EasyPrivacy</string>
+    <string name="adblock_gecko_source_description">内置跟踪防护</string>
+    <string name="adblock_midori_source">Midori Desktop EasyList</string>
+    <string name="adblock_midori_source_description">Midori 内置的域名规则</string>
+    <string name="adblock_source_updated">更新时间：%1$s</string>
+    <string name="adblock_source_pending">等待更新</string>
+    <string name="adblock_refresh">更新</string>
+    <string name="adblock_source_url">来源的 HTTPS 地址</string>
+    <string name="adblock_invalid_source">请输入唯一的 HTTPS 地址</string>
+    <string name="adblock_source_format">支持 ||host^ 和 @@||host^ 规则，其他规则会被忽略。</string>
+    <string name="onboarding_adblock_title">选择防护级别</string>
+    <string name="onboarding_adblock_description">是否让 Midori 拦截跟踪器和广告？</string>
+    <string name="onboarding_adblock_hint">稍后可在设置中更改。</string>
+    <string name="adblock_source_disabled">已停用</string>
+    <string name="adblock_source_failed">更新失败。点按“更新”重试。</string>
+</resources>
