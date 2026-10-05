@@ -161,6 +161,11 @@ fun PreferencesScreen(
                 )},
                 onClicked = { onNavigateToPrivacy() }
             )
+            SettingsNavRow(
+                label = R.string.adblock_settings_title,
+                description = stringResource(R.string.adblock_settings_summary),
+                onClicked = { navigateTo(NavDestination.AdBlockSettings) },
+            )
 
             // Permissions granted to websites editor
             PermissionsPreference(viewModel)
