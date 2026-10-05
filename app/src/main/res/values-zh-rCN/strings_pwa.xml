@@ -13,7 +13,7 @@
     <string name="pwa_install_explanation">将在独立窗口中打开。离线访问取决于网站是否支持。</string>
     <string name="pwa_manage_summary">打开和管理已安装的网页应用</string>
     <string name="pwa_offline_explanation">如果网站支持，网页应用可以离线使用。</string>
-    <string name="pwa_empty">尚未安装网页应用。打开网站并从菜单中选择安装网页应用。</string>
+    <string name="pwa_empty">尚未安装网页应用。在这里发现应用，或打开 HTTPS 网站并从菜单中选择安装网页应用。</string>
     <string name="pwa_open">打开</string>
     <string name="pwa_remove">移除</string>
     <string name="pwa_remove_title">移除 %1$s？</string>

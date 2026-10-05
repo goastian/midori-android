@@ -13,7 +13,7 @@
     <string name="pwa_install_explanation">S’ouvre dans sa propre fenêtre. Le mode hors ligne dépend du site.</string>
     <string name="pwa_manage_summary">Ouvrir et gérer les applications web installées</string>
     <string name="pwa_offline_explanation">Les applications web peuvent fonctionner hors ligne si le site le permet.</string>
-    <string name="pwa_empty">Aucune application web installée. Ouvrez un site et choisissez Installer une application web dans le menu.</string>
+    <string name="pwa_empty">Aucune application web installée. Découvrez-en une ici ou ouvrez un site HTTPS et choisissez Installer une application web dans le menu.</string>
     <string name="pwa_open">Ouvrir</string>
     <string name="pwa_remove">Supprimer</string>
     <string name="pwa_remove_title">Supprimer %1$s ?</string>

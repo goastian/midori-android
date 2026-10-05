@@ -13,7 +13,7 @@
     <string name="pwa_install_explanation">Открывается в отдельном окне. Работа без сети зависит от сайта.</string>
     <string name="pwa_manage_summary">Открыть и настроить установленные веб-приложения</string>
     <string name="pwa_offline_explanation">Веб-приложения могут работать без сети, если сайт это поддерживает.</string>
-    <string name="pwa_empty">Веб-приложений пока нет. Откройте сайт и выберите Установить веб-приложение в меню.</string>
+    <string name="pwa_empty">Веб-приложений пока нет. Найдите приложение здесь или откройте сайт HTTPS и выберите Установить веб-приложение в меню.</string>
     <string name="pwa_open">Открыть</string>
     <string name="pwa_remove">Удалить</string>
     <string name="pwa_remove_title">Удалить %1$s?</string>

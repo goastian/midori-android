@@ -13,7 +13,7 @@
     <string name="pwa_install_explanation">Si apre in una finestra separata. La modalità offline dipende dal sito.</string>
     <string name="pwa_manage_summary">Apri e gestisci le app web installate</string>
     <string name="pwa_offline_explanation">Le app web possono funzionare offline se il sito lo supporta.</string>
-    <string name="pwa_empty">Nessuna app web installata. Apri un sito e scegli Installa app web dal menu.</string>
+    <string name="pwa_empty">Nessuna app web installata. Scoprine una qui oppure apri un sito HTTPS e scegli Installa app web dal menu.</string>
     <string name="pwa_open">Apri</string>
     <string name="pwa_remove">Rimuovi</string>
     <string name="pwa_remove_title">Rimuovere %1$s?</string>

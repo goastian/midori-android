@@ -13,7 +13,7 @@
     <string name="pwa_install_explanation">専用のウィンドウで開きます。オフライン利用はサイトの対応状況によります。</string>
     <string name="pwa_manage_summary">インストール済みウェブアプリを開いて管理</string>
     <string name="pwa_offline_explanation">サイトが対応していれば、ウェブアプリはオフラインでも動作します。</string>
-    <string name="pwa_empty">ウェブアプリはまだありません。サイトを開き、メニューからウェブアプリをインストールを選んでください。</string>
+    <string name="pwa_empty">ウェブアプリはまだありません。ここで見つけるか、HTTPS サイトを開いてメニューからウェブアプリをインストールを選んでください。</string>
     <string name="pwa_open">開く</string>
     <string name="pwa_remove">削除</string>
     <string name="pwa_remove_title">%1$s を削除しますか？</string>

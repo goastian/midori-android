@@ -13,7 +13,7 @@
     <string name="pwa_install_explanation">Hapet në dritare më vete. Përdorimi pa internet varet nga sajti.</string>
     <string name="pwa_manage_summary">Hap dhe menaxho aplikacionet web të instaluara</string>
     <string name="pwa_offline_explanation">Aplikacionet web mund të punojnë pa internet kur sajti e mbështet.</string>
-    <string name="pwa_empty">Ende nuk ka aplikacione web të instaluara. Hap një sajt dhe zgjidh Instalo aplikacionin web nga menuja.</string>
+    <string name="pwa_empty">Ende nuk ka aplikacione web të instaluara. Zbulo një këtu ose hap një sajt HTTPS dhe zgjidh Instalo aplikacionin web nga menuja.</string>
     <string name="pwa_open">Hap</string>
     <string name="pwa_remove">Hiq</string>
     <string name="pwa_remove_title">Të hiqet %1$s?</string>

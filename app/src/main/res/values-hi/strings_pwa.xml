@@ -13,7 +13,7 @@
     <string name="pwa_install_explanation">अलग विंडो में खुलता है। ऑफलाइन सुविधा वेबसाइट पर निर्भर करती है।</string>
     <string name="pwa_manage_summary">इंस्टॉल किए गए वेब ऐप्स खोलें और प्रबंधित करें</string>
     <string name="pwa_offline_explanation">वेबसाइट के समर्थन पर वेब ऐप्स ऑफलाइन काम कर सकते हैं।</string>
-    <string name="pwa_empty">अभी कोई वेब ऐप इंस्टॉल नहीं है। वेबसाइट खोलें और मेनू से वेब ऐप इंस्टॉल करें चुनें।</string>
+    <string name="pwa_empty">अभी कोई वेब ऐप इंस्टॉल नहीं है। यहाँ कोई ऐप खोजें या HTTPS साइट खोलकर मेनू से वेब ऐप इंस्टॉल करें चुनें।</string>
     <string name="pwa_open">खोलें</string>
     <string name="pwa_remove">हटाएँ</string>
     <string name="pwa_remove_title">%1$s हटाएँ?</string>

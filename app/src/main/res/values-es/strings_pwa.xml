@@ -13,7 +13,7 @@
     <string name="pwa_install_explanation">Se abre en su propia ventana. El acceso sin conexión depende del sitio web.</string>
     <string name="pwa_manage_summary">Abrir y gestionar aplicaciones web instaladas</string>
     <string name="pwa_offline_explanation">Las aplicaciones web funcionan sin conexión cuando el sitio ofrece esa función.</string>
-    <string name="pwa_empty">Aún no hay aplicaciones web instaladas. Abre un sitio compatible y elige Instalar aplicación web en el menú.</string>
+    <string name="pwa_empty">Aún no hay aplicaciones web instaladas. Descubre una aquí o abre un sitio HTTPS y elige Instalar aplicación web en el menú.</string>
     <string name="pwa_open">Abrir</string>
     <string name="pwa_remove">Eliminar</string>
     <string name="pwa_remove_title">¿Eliminar %1$s?</string>

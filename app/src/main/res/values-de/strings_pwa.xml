@@ -13,7 +13,7 @@
     <string name="pwa_install_explanation">Wird in einem eigenen Fenster geöffnet. Offlinezugriff hängt von der Website ab.</string>
     <string name="pwa_manage_summary">Installierte Web-Apps öffnen und verwalten</string>
     <string name="pwa_offline_explanation">Web-Apps können offline funktionieren, wenn die Website dies unterstützt.</string>
-    <string name="pwa_empty">Noch keine Web-Apps installiert. Öffne eine Website und wähle Web-App installieren im Menü.</string>
+    <string name="pwa_empty">Noch keine Web-Apps installiert. Entdecke hier eine App oder öffne eine HTTPS-Website und wähle Web-App installieren im Menü.</string>
     <string name="pwa_open">Öffnen</string>
     <string name="pwa_remove">Entfernen</string>
     <string name="pwa_remove_title">%1$s entfernen?</string>
