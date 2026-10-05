@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pwa_install_action">वेब ऐप इंस्टॉल करें</string>
+    <string name="pwa_install_requested">वेब ऐप Midori में जोड़ दिया गया। संकेत मिलने पर होम स्क्रीन शॉर्टकट की पुष्टि करें।</string>
+    <string name="pwa_install_failed">यह वेब ऐप इंस्टॉल नहीं किया जा सका।</string>
+    <string name="pwa_shortcut_requested">संकेत मिलने पर होम स्क्रीन शॉर्टकट की पुष्टि करें।</string>
+    <string name="pwa_shortcut_failed">शॉर्टकट नहीं जोड़ा जा सका।</string>
+    <string name="pwa_manage_title">वेब ऐप्स</string>
+    <string name="pwa_installed_tab">इंस्टॉल किए गए</string>
+    <string name="pwa_discover_tab">खोजें</string>
+    <string name="pwa_installed_badge">इंस्टॉल किया गया</string>
+    <string name="pwa_enabled">सक्रिय</string>
+    <string name="pwa_install_explanation">अलग विंडो में खुलता है। ऑफलाइन सुविधा वेबसाइट पर निर्भर करती है।</string>
+    <string name="pwa_manage_summary">इंस्टॉल किए गए वेब ऐप्स खोलें और प्रबंधित करें</string>
+    <string name="pwa_offline_explanation">वेबसाइट के समर्थन पर वेब ऐप्स ऑफलाइन काम कर सकते हैं।</string>
+    <string name="pwa_empty">अभी कोई वेब ऐप इंस्टॉल नहीं है। वेबसाइट खोलें और मेनू से वेब ऐप इंस्टॉल करें चुनें।</string>
+    <string name="pwa_open">खोलें</string>
+    <string name="pwa_remove">हटाएँ</string>
+    <string name="pwa_remove_title">%1$s हटाएँ?</string>
+    <string name="pwa_remove_explanation">Midori से वेब ऐप हटेगा। होम स्क्रीन पर शॉर्टकट बचा हो तो उसे भी हटाएँ।</string>
+    <string name="pwa_cancel">रद्द करें</string>
+    <string name="pwa_disabled_message">यह वेब ऐप Midori में बंद है।</string>
+    <string name="pwa_enable_app">%1$s सक्रिय करें</string>
+    <string name="pwa_clear_data">डेटा मिटाएँ</string>
+    <string name="pwa_clear_data_title">%1$s का डेटा मिटाएँ?</string>
+    <string name="pwa_clear_data_explanation">कुकीज़, ऑफलाइन फ़ाइलें और साइट डेटा हट जाएगा। आपको फिर से साइन इन करना पड़ सकता है।</string>
+    <string name="pwa_clear_data_failed">साइट डेटा नहीं मिटाया जा सका।</string>
+    <string name="pwa_clear_data_done">साइट डेटा मिटा दिया गया।</string>
+</resources>

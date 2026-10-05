@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pwa_install_action">Installer une application web</string>
+    <string name="pwa_install_requested">Application web ajoutée à Midori. Confirmez le raccourci si demandé.</string>
+    <string name="pwa_install_failed">Impossible d’installer cette application web.</string>
+    <string name="pwa_shortcut_requested">Confirmez le raccourci si demandé.</string>
+    <string name="pwa_shortcut_failed">Impossible d’ajouter ce raccourci.</string>
+    <string name="pwa_manage_title">Applications web</string>
+    <string name="pwa_installed_tab">Installées</string>
+    <string name="pwa_discover_tab">Découvrir</string>
+    <string name="pwa_installed_badge">Installée</string>
+    <string name="pwa_enabled">Activée</string>
+    <string name="pwa_install_explanation">S’ouvre dans sa propre fenêtre. Le mode hors ligne dépend du site.</string>
+    <string name="pwa_manage_summary">Ouvrir et gérer les applications web installées</string>
+    <string name="pwa_offline_explanation">Les applications web peuvent fonctionner hors ligne si le site le permet.</string>
+    <string name="pwa_empty">Aucune application web installée. Ouvrez un site et choisissez Installer une application web dans le menu.</string>
+    <string name="pwa_open">Ouvrir</string>
+    <string name="pwa_remove">Supprimer</string>
+    <string name="pwa_remove_title">Supprimer %1$s ?</string>
+    <string name="pwa_remove_explanation">Supprime cette application web de Midori. Si son raccourci reste sur l’écran d’accueil, supprimez-le aussi.</string>
+    <string name="pwa_cancel">Annuler</string>
+    <string name="pwa_disabled_message">Cette application web est désactivée dans Midori.</string>
+    <string name="pwa_enable_app">Activer %1$s</string>
+    <string name="pwa_clear_data">Effacer les données</string>
+    <string name="pwa_clear_data_title">Effacer les données de %1$s ?</string>
+    <string name="pwa_clear_data_explanation">Les cookies, fichiers hors ligne et données du site seront supprimés. Une nouvelle connexion peut être nécessaire.</string>
+    <string name="pwa_clear_data_failed">Impossible d’effacer les données du site.</string>
+    <string name="pwa_clear_data_done">Données du site effacées.</string>
+</resources>

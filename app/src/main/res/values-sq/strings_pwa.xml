@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pwa_install_action">Instalo aplikacionin web</string>
+    <string name="pwa_install_requested">Aplikacioni web u shtua në Midori. Konfirmo shkurtoren në ekranin kryesor nëse kërkohet.</string>
+    <string name="pwa_install_failed">Aplikacioni web nuk mund të instalohej.</string>
+    <string name="pwa_shortcut_requested">Konfirmo shkurtoren në ekranin kryesor nëse kërkohet.</string>
+    <string name="pwa_shortcut_failed">Shkurtorja nuk mund të shtohej.</string>
+    <string name="pwa_manage_title">Aplikacione web</string>
+    <string name="pwa_installed_tab">Të instaluara</string>
+    <string name="pwa_discover_tab">Zbulo</string>
+    <string name="pwa_installed_badge">I instaluar</string>
+    <string name="pwa_enabled">Aktiv</string>
+    <string name="pwa_install_explanation">Hapet në dritare më vete. Përdorimi pa internet varet nga sajti.</string>
+    <string name="pwa_manage_summary">Hap dhe menaxho aplikacionet web të instaluara</string>
+    <string name="pwa_offline_explanation">Aplikacionet web mund të punojnë pa internet kur sajti e mbështet.</string>
+    <string name="pwa_empty">Ende nuk ka aplikacione web të instaluara. Hap një sajt dhe zgjidh Instalo aplikacionin web nga menuja.</string>
+    <string name="pwa_open">Hap</string>
+    <string name="pwa_remove">Hiq</string>
+    <string name="pwa_remove_title">Të hiqet %1$s?</string>
+    <string name="pwa_remove_explanation">Heq aplikacionin web nga Midori. Nëse shkurtorja mbetet në ekranin kryesor, hiqe edhe atje.</string>
+    <string name="pwa_cancel">Anulo</string>
+    <string name="pwa_disabled_message">Ky aplikacion web është çaktivizuar në Midori.</string>
+    <string name="pwa_enable_app">Aktivizo %1$s</string>
+    <string name="pwa_clear_data">Pastro të dhënat</string>
+    <string name="pwa_clear_data_title">Të pastrohen të dhënat e %1$s?</string>
+    <string name="pwa_clear_data_explanation">Kukit, skedarët pa internet dhe të dhënat e sajtit do të hiqen. Mund të duhet të identifikohesh sërish.</string>
+    <string name="pwa_clear_data_failed">Të dhënat e sajtit nuk mund të pastroheshin.</string>
+    <string name="pwa_clear_data_done">Të dhënat e sajtit u pastruan.</string>
+</resources>

@@ -6,6 +6,11 @@
     <string name="pwa_shortcut_requested">Confirma el acceso directo si el sistema lo solicita.</string>
     <string name="pwa_shortcut_failed">No se pudo añadir este acceso directo.</string>
     <string name="pwa_manage_title">Aplicaciones web</string>
+    <string name="pwa_installed_tab">Instaladas</string>
+    <string name="pwa_discover_tab">Descubrir</string>
+    <string name="pwa_installed_badge">Instalada</string>
+    <string name="pwa_enabled">Activada</string>
+    <string name="pwa_install_explanation">Se abre en su propia ventana. El acceso sin conexión depende del sitio web.</string>
     <string name="pwa_manage_summary">Abrir y gestionar aplicaciones web instaladas</string>
     <string name="pwa_offline_explanation">Las aplicaciones web funcionan sin conexión cuando el sitio ofrece esa función.</string>
     <string name="pwa_empty">Aún no hay aplicaciones web instaladas. Abre un sitio compatible y elige Instalar aplicación web en el menú.</string>

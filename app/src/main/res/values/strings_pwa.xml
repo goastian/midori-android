@@ -6,6 +6,11 @@
     <string name="pwa_shortcut_requested">Confirm the home screen shortcut if prompted.</string>
     <string name="pwa_shortcut_failed">Could not add this shortcut.</string>
     <string name="pwa_manage_title">Web apps</string>
+    <string name="pwa_installed_tab">Installed</string>
+    <string name="pwa_discover_tab">Discover</string>
+    <string name="pwa_installed_badge">Installed</string>
+    <string name="pwa_enabled">Enabled</string>
+    <string name="pwa_install_explanation">Opens in its own window. Offline access depends on the website.</string>
     <string name="pwa_manage_summary">Open and manage installed web apps</string>
     <string name="pwa_offline_explanation">Web apps can work offline when their websites provide offline support.</string>
     <string name="pwa_empty">No web apps installed yet. Open a supported site and choose Install web app from the menu.</string>

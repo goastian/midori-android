@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pwa_install_action">安装网页应用</string>
+    <string name="pwa_install_requested">网页应用已添加到 Midori。如有提示，请确认主屏幕快捷方式。</string>
+    <string name="pwa_install_failed">无法安装此网页应用。</string>
+    <string name="pwa_shortcut_requested">如有提示，请确认主屏幕快捷方式。</string>
+    <string name="pwa_shortcut_failed">无法添加此快捷方式。</string>
+    <string name="pwa_manage_title">网页应用</string>
+    <string name="pwa_installed_tab">已安装</string>
+    <string name="pwa_discover_tab">发现</string>
+    <string name="pwa_installed_badge">已安装</string>
+    <string name="pwa_enabled">已启用</string>
+    <string name="pwa_install_explanation">将在独立窗口中打开。离线访问取决于网站是否支持。</string>
+    <string name="pwa_manage_summary">打开和管理已安装的网页应用</string>
+    <string name="pwa_offline_explanation">如果网站支持，网页应用可以离线使用。</string>
+    <string name="pwa_empty">尚未安装网页应用。打开网站并从菜单中选择安装网页应用。</string>
+    <string name="pwa_open">打开</string>
+    <string name="pwa_remove">移除</string>
+    <string name="pwa_remove_title">移除 %1$s？</string>
+    <string name="pwa_remove_explanation">这会从 Midori 中移除网页应用。如果主屏幕上仍有快捷方式，请在那里将其移除。</string>
+    <string name="pwa_cancel">取消</string>
+    <string name="pwa_disabled_message">此网页应用已在 Midori 中停用。</string>
+    <string name="pwa_enable_app">启用 %1$s</string>
+    <string name="pwa_clear_data">清除数据</string>
+    <string name="pwa_clear_data_title">清除 %1$s 的数据？</string>
+    <string name="pwa_clear_data_explanation">Cookie、离线文件和网站数据将被移除。你可能需要重新登录。</string>
+    <string name="pwa_clear_data_failed">无法清除网站数据。</string>
+    <string name="pwa_clear_data_done">网站数据已清除。</string>
+</resources>

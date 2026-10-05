@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pwa_install_action">Web-App installieren</string>
+    <string name="pwa_install_requested">Web-App zu Midori hinzugefügt. Bestätige die Verknüpfung, falls du gefragt wirst.</string>
+    <string name="pwa_install_failed">Diese Web-App konnte nicht installiert werden.</string>
+    <string name="pwa_shortcut_requested">Bestätige die Verknüpfung, falls du gefragt wirst.</string>
+    <string name="pwa_shortcut_failed">Die Verknüpfung konnte nicht hinzugefügt werden.</string>
+    <string name="pwa_manage_title">Web-Apps</string>
+    <string name="pwa_installed_tab">Installiert</string>
+    <string name="pwa_discover_tab">Entdecken</string>
+    <string name="pwa_installed_badge">Installiert</string>
+    <string name="pwa_enabled">Aktiviert</string>
+    <string name="pwa_install_explanation">Wird in einem eigenen Fenster geöffnet. Offlinezugriff hängt von der Website ab.</string>
+    <string name="pwa_manage_summary">Installierte Web-Apps öffnen und verwalten</string>
+    <string name="pwa_offline_explanation">Web-Apps können offline funktionieren, wenn die Website dies unterstützt.</string>
+    <string name="pwa_empty">Noch keine Web-Apps installiert. Öffne eine Website und wähle Web-App installieren im Menü.</string>
+    <string name="pwa_open">Öffnen</string>
+    <string name="pwa_remove">Entfernen</string>
+    <string name="pwa_remove_title">%1$s entfernen?</string>
+    <string name="pwa_remove_explanation">Entfernt die Web-App aus Midori. Entferne eine verbleibende Verknüpfung auf dem Startbildschirm dort.</string>
+    <string name="pwa_cancel">Abbrechen</string>
+    <string name="pwa_disabled_message">Diese Web-App ist in Midori deaktiviert.</string>
+    <string name="pwa_enable_app">%1$s aktivieren</string>
+    <string name="pwa_clear_data">Daten löschen</string>
+    <string name="pwa_clear_data_title">Daten von %1$s löschen?</string>
+    <string name="pwa_clear_data_explanation">Cookies, Offlinedateien und Website-Daten werden gelöscht. Du musst dich möglicherweise erneut anmelden.</string>
+    <string name="pwa_clear_data_failed">Website-Daten konnten nicht gelöscht werden.</string>
+    <string name="pwa_clear_data_done">Website-Daten gelöscht.</string>
+</resources>

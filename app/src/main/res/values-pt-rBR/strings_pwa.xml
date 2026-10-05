@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pwa_install_action">Instalar app da web</string>
+    <string name="pwa_install_requested">App da web adicionado ao Midori. Confirme o atalho na tela inicial se solicitado.</string>
+    <string name="pwa_install_failed">Não foi possível instalar este app da web.</string>
+    <string name="pwa_shortcut_requested">Confirme o atalho na tela inicial se solicitado.</string>
+    <string name="pwa_shortcut_failed">Não foi possível adicionar o atalho.</string>
+    <string name="pwa_manage_title">Apps da web</string>
+    <string name="pwa_installed_tab">Instalados</string>
+    <string name="pwa_discover_tab">Descobrir</string>
+    <string name="pwa_installed_badge">Instalado</string>
+    <string name="pwa_enabled">Ativado</string>
+    <string name="pwa_install_explanation">Abre em uma janela própria. O acesso offline depende do site.</string>
+    <string name="pwa_manage_summary">Abrir e gerenciar apps da web instalados</string>
+    <string name="pwa_offline_explanation">Apps da web podem funcionar offline quando o site oferece suporte.</string>
+    <string name="pwa_empty">Nenhum app da web instalado. Abra um site e escolha Instalar app da web no menu.</string>
+    <string name="pwa_open">Abrir</string>
+    <string name="pwa_remove">Remover</string>
+    <string name="pwa_remove_title">Remover %1$s?</string>
+    <string name="pwa_remove_explanation">Remove o app da web do Midori. Se o atalho permanecer na tela inicial, remova-o por lá.</string>
+    <string name="pwa_cancel">Cancelar</string>
+    <string name="pwa_disabled_message">Este app da web está desativado no Midori.</string>
+    <string name="pwa_enable_app">Ativar %1$s</string>
+    <string name="pwa_clear_data">Limpar dados</string>
+    <string name="pwa_clear_data_title">Limpar dados de %1$s?</string>
+    <string name="pwa_clear_data_explanation">Cookies, arquivos offline e dados do site serão removidos. Talvez seja necessário entrar novamente.</string>
+    <string name="pwa_clear_data_failed">Não foi possível limpar os dados do site.</string>
+    <string name="pwa_clear_data_done">Dados do site limpos.</string>
+</resources>

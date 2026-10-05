@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pwa_install_action">Установить веб-приложение</string>
+    <string name="pwa_install_requested">Веб-приложение добавлено в Midori. Подтвердите ярлык на главном экране, если потребуется.</string>
+    <string name="pwa_install_failed">Не удалось установить веб-приложение.</string>
+    <string name="pwa_shortcut_requested">Подтвердите ярлык на главном экране, если потребуется.</string>
+    <string name="pwa_shortcut_failed">Не удалось добавить ярлык.</string>
+    <string name="pwa_manage_title">Веб-приложения</string>
+    <string name="pwa_installed_tab">Установленные</string>
+    <string name="pwa_discover_tab">Обзор</string>
+    <string name="pwa_installed_badge">Установлено</string>
+    <string name="pwa_enabled">Включено</string>
+    <string name="pwa_install_explanation">Открывается в отдельном окне. Работа без сети зависит от сайта.</string>
+    <string name="pwa_manage_summary">Открыть и настроить установленные веб-приложения</string>
+    <string name="pwa_offline_explanation">Веб-приложения могут работать без сети, если сайт это поддерживает.</string>
+    <string name="pwa_empty">Веб-приложений пока нет. Откройте сайт и выберите Установить веб-приложение в меню.</string>
+    <string name="pwa_open">Открыть</string>
+    <string name="pwa_remove">Удалить</string>
+    <string name="pwa_remove_title">Удалить %1$s?</string>
+    <string name="pwa_remove_explanation">Веб-приложение будет удалено из Midori. Если ярлык останется на главном экране, удалите его там.</string>
+    <string name="pwa_cancel">Отмена</string>
+    <string name="pwa_disabled_message">Это веб-приложение отключено в Midori.</string>
+    <string name="pwa_enable_app">Включить %1$s</string>
+    <string name="pwa_clear_data">Очистить данные</string>
+    <string name="pwa_clear_data_title">Очистить данные %1$s?</string>
+    <string name="pwa_clear_data_explanation">Файлы cookie, автономные файлы и данные сайта будут удалены. Возможно, потребуется войти снова.</string>
+    <string name="pwa_clear_data_failed">Не удалось очистить данные сайта.</string>
+    <string name="pwa_clear_data_done">Данные сайта очищены.</string>
+</resources>

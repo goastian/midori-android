@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pwa_install_action">ウェブアプリをインストール</string>
+    <string name="pwa_install_requested">ウェブアプリを Midori に追加しました。求められた場合はホーム画面のショートカットを確認してください。</string>
+    <string name="pwa_install_failed">このウェブアプリをインストールできませんでした。</string>
+    <string name="pwa_shortcut_requested">求められた場合はホーム画面のショートカットを確認してください。</string>
+    <string name="pwa_shortcut_failed">ショートカットを追加できませんでした。</string>
+    <string name="pwa_manage_title">ウェブアプリ</string>
+    <string name="pwa_installed_tab">インストール済み</string>
+    <string name="pwa_discover_tab">見つける</string>
+    <string name="pwa_installed_badge">インストール済み</string>
+    <string name="pwa_enabled">有効</string>
+    <string name="pwa_install_explanation">専用のウィンドウで開きます。オフライン利用はサイトの対応状況によります。</string>
+    <string name="pwa_manage_summary">インストール済みウェブアプリを開いて管理</string>
+    <string name="pwa_offline_explanation">サイトが対応していれば、ウェブアプリはオフラインでも動作します。</string>
+    <string name="pwa_empty">ウェブアプリはまだありません。サイトを開き、メニューからウェブアプリをインストールを選んでください。</string>
+    <string name="pwa_open">開く</string>
+    <string name="pwa_remove">削除</string>
+    <string name="pwa_remove_title">%1$s を削除しますか？</string>
+    <string name="pwa_remove_explanation">Midori からウェブアプリを削除します。ホーム画面にショートカットが残った場合は、そこで削除してください。</string>
+    <string name="pwa_cancel">キャンセル</string>
+    <string name="pwa_disabled_message">このウェブアプリは Midori で無効です。</string>
+    <string name="pwa_enable_app">%1$s を有効にする</string>
+    <string name="pwa_clear_data">データを消去</string>
+    <string name="pwa_clear_data_title">%1$s のデータを消去しますか？</string>
+    <string name="pwa_clear_data_explanation">Cookie、オフラインファイル、サイトデータを削除します。再ログインが必要になる場合があります。</string>
+    <string name="pwa_clear_data_failed">サイトデータを消去できませんでした。</string>
+    <string name="pwa_clear_data_done">サイトデータを消去しました。</string>
+</resources>
