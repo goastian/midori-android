@@ -17,12 +17,12 @@ fun BoxScope.EngineViewFeatures(
     engineView: EngineView,
     viewModel: BrowserScreenViewModel = hiltViewModel(),
 ) {
-    val canGoBack by viewModel.canGoBack.collectAsStateWithLifecycle()
+    val canGoBack by viewModel.canGoBackInPage.collectAsStateWithLifecycle()
     SessionFeature(
         engineView = engineView,
         store = viewModel.store,
         canGoBack = canGoBack,
-        goBackUseCase = viewModel.goBack,
+        goBackUseCase = viewModel.sessionUseCases.goBack,
         goForwardUseCase = viewModel.goForward,
         backEnabled = { !viewModel.toolbarState.hasFocus }
     )

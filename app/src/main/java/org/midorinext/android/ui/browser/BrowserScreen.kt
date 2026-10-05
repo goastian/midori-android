@@ -71,6 +71,7 @@ fun BrowserScreen(
     val newTabState by viewModel.newTabState.collectAsStateWithLifecycle()
     val isMidoriPrivacyActionAvailable by viewModel.isMidoriPrivacyActionAvailable.collectAsStateWithLifecycle()
     val readerModeStatus by viewModel.readerModeStatus.collectAsStateWithLifecycle()
+    val hasParentTab by viewModel.hasParentTab.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val readerViewFeature = rememberReaderViewFeature(
         store = viewModel.store,
@@ -152,6 +153,12 @@ fun BrowserScreen(
                 }
             }
         )
+    }
+
+    // Register before the engine handler so page history and text selection take priority.
+    // A tab opened by a site returns to its opener when it has no history of its own.
+    BackHandler(enabled = hasParentTab) {
+        viewModel.returnToParentTab()
     }
 
     Column(Modifier.fillMaxSize()) {

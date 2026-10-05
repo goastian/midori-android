@@ -315,8 +315,33 @@ class BrowserScreenViewModel @Inject constructor(
         }
     }
 
-    val canGoBack = store.flow()
+    val canGoBackInPage = store.flow()
         .map { state -> state.selectedTab?.content?.canGoBack ?: false }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = false
+        )
+
+    val hasParentTab = store.flow()
+        .map { state ->
+            val parentId = state.selectedTab?.parentId
+            parentId != null && state.tabs.any { it.id == parentId }
+        }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = false
+        )
+
+    val canGoBack = store.flow()
+        .map { state ->
+            val tab = state.selectedTab
+            tab?.content?.canGoBack == true ||
+                (tab?.parentId != null && state.tabs.any { it.id == tab.parentId })
+        }
+        .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
@@ -389,7 +414,21 @@ class BrowserScreenViewModel @Inject constructor(
 
     val reloadUrl = sessionUseCases.reload
     val stopLoading = sessionUseCases.stopLoading
-    val goBack = sessionUseCases.goBack
+    fun goBack() {
+        val tab = store.state.selectedTab ?: return
+        if (tab.content.canGoBack) {
+            sessionUseCases.goBack(tab.id)
+        } else {
+            returnToParentTab()
+        }
+    }
+
+    fun returnToParentTab() {
+        val tab = store.state.selectedTab ?: return
+        if (tab.parentId != null && store.state.tabs.any { it.id == tab.parentId }) {
+            tabsUseCases.removeTab(tab.id, selectParentIfExists = true)
+        }
+    }
     val goForward = sessionUseCases.goForward
     val requestDesktopSite = sessionUseCases.requestDesktopSite
 
