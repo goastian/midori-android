@@ -190,6 +190,7 @@ private fun BrowserMenuContent(
             currentUrl = currentUrl,
             showPageActions = showPageActions,
             viewModel = viewModel,
+            applicationViewModel = applicationViewModel,
             onDismissRequest = onDismissRequest,
             onTranslateClick = onTranslateClick,
         )
@@ -214,6 +215,7 @@ private fun BrowserMenuContent(
             currentUrl = currentUrl,
             showPageActions = showPageActions,
             viewModel = viewModel,
+            applicationViewModel = applicationViewModel,
             onDismissRequest = onDismissRequest,
             onTranslateClick = onTranslateClick,
         )
@@ -259,6 +261,7 @@ private fun BrowserPageShortcuts(
     currentUrl: String?,
     showPageActions: Boolean,
     viewModel: BrowserScreenViewModel,
+    applicationViewModel: MidoriApplicationViewModel,
     onDismissRequest: () -> Unit,
     onTranslateClick: () -> Unit,
 ) {
@@ -267,7 +270,6 @@ private fun BrowserPageShortcuts(
     PrivateTabAction(viewModel, onDismissRequest)
     if (showPageActions && !currentUrl.isNullOrBlank()) {
         if (canInstallWebApp) {
-            val context = LocalContext.current
             val installed = stringResource(R.string.pwa_install_requested)
             val failed = stringResource(R.string.pwa_install_failed)
             DropdownItem(
@@ -275,9 +277,7 @@ private fun BrowserPageShortcuts(
                 icon = R.drawable.icons_add_screen,
                 onClick = {
                     viewModel.installCurrentPageAsWebApp { success ->
-                        val message = if (success) installed else failed
-                        android.widget.Toast.makeText(context, message,
-                            android.widget.Toast.LENGTH_SHORT).show()
+                        applicationViewModel.showSnackbar(if (success) installed else failed)
                     }
                     onDismissRequest()
                 },
