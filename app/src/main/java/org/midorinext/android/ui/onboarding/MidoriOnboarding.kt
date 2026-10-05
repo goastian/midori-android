@@ -75,6 +75,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.view.WindowCompat
 import org.midorinext.android.R
+import org.midorinext.android.adblock.BlockingLevel
 import org.midorinext.android.ext.openDefaultAppsSystemSettings
 import org.midorinext.android.preferences.app.ToolbarPosition
 import org.midorinext.android.ui.theme.OnboardingBorder
@@ -89,11 +90,13 @@ import org.midorinext.android.ui.theme.OnboardingPaperRaised
 import org.midorinext.android.ui.animation.reduceMotionRequested
 import org.midorinext.android.widget.WidgetProvider
 
-private const val OnboardingPageCount = 4
+private const val OnboardingPageCount = 5
 
 @Composable
 fun MidoriOnboarding(
     onToolbarPositionSelected: (ToolbarPosition) -> Unit,
+    blockingLevel: BlockingLevel,
+    onBlockingLevelSelected: (BlockingLevel) -> Unit,
     onComplete: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -120,6 +123,7 @@ fun MidoriOnboarding(
                 requestPinnedWidget(context)
                 advance()
             }
+            3 -> advance()
             else -> onComplete()
         }
     }
@@ -161,7 +165,7 @@ fun MidoriOnboarding(
                 0 -> WelcomePage()
                 1 -> DefaultBrowserPage()
                 2 -> WidgetPage()
-                else -> ToolbarPage(
+                3 -> ToolbarPage(
                     toolbarAtBottom = toolbarAtBottom,
                     onToolbarPositionSelected = { selectedBottom ->
                         toolbarAtBottom = selectedBottom
@@ -170,6 +174,7 @@ fun MidoriOnboarding(
                         )
                     }
                 )
+                else -> AdBlockPage(blockingLevel, onBlockingLevelSelected)
             }
         }
 
@@ -177,6 +182,55 @@ fun MidoriOnboarding(
             page = page,
             onPrimary = handlePrimaryAction,
             onSkip = advance,
+        )
+    }
+}
+
+@Composable
+private fun AdBlockPage(level: BlockingLevel, onSelected: (BlockingLevel) -> Unit) {
+    PageColumn(verticalArrangement = Arrangement.SpaceBetween) {
+        PageTitle(
+            title = stringResource(R.string.onboarding_adblock_title),
+            description = stringResource(R.string.onboarding_adblock_description),
+        )
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            BlockingLevel.entries.forEach { option ->
+                val label = when (option) {
+                    BlockingLevel.OFF -> R.string.adblock_level_off
+                    BlockingLevel.TRACKERS -> R.string.adblock_level_trackers
+                    BlockingLevel.TRACKERS_AND_ADS -> R.string.adblock_level_trackers_ads
+                }
+                Surface(
+                    modifier = Modifier.fillMaxWidth().selectable(
+                        selected = level == option,
+                        role = Role.RadioButton,
+                        onClick = { onSelected(option) },
+                    ),
+                    shape = RoundedCornerShape(18.dp),
+                    color = OnboardingPaperRaised,
+                    border = androidx.compose.foundation.BorderStroke(
+                        if (level == option) 2.dp else 1.dp,
+                        if (level == option) OnboardingGreen else OnboardingBorder,
+                    ),
+                ) {
+                    Row(
+                        modifier = Modifier.padding(18.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        androidx.compose.material3.RadioButton(
+                            selected = level == option,
+                            onClick = { onSelected(option) },
+                        )
+                        Text(stringResource(label), style = MaterialTheme.typography.titleMedium, color = OnboardingInk)
+                    }
+                }
+            }
+        }
+        Text(
+            text = stringResource(R.string.onboarding_adblock_hint),
+            style = MaterialTheme.typography.bodyMedium,
+            color = OnboardingMutedInk,
         )
     }
 }
@@ -539,6 +593,7 @@ private fun OnboardingActions(
         0 -> stringResource(R.string.onboarding_welcome_continue)
         1 -> stringResource(R.string.onboarding_default_set)
         2 -> stringResource(R.string.onboarding_widget_add)
+        3 -> stringResource(R.string.onboarding_welcome_continue)
         else -> stringResource(R.string.onboarding_finish)
     }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
