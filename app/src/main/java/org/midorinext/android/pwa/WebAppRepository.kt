@@ -12,7 +12,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.withContext
 import mozilla.components.browser.icons.BrowserIcons
-import mozilla.components.browser.icons.extension.toIconRequest
+import mozilla.components.browser.icons.Icon
+import mozilla.components.browser.icons.IconRequest
 import mozilla.components.browser.state.state.SessionState
 import mozilla.components.concept.engine.manifest.WebAppManifest
 import mozilla.components.feature.pwa.ManifestStorage
@@ -39,18 +40,57 @@ class WebAppRepository @Inject constructor(
     suspend fun manifest(startUrl: String): WebAppManifest? = manifestStorage.loadManifest(startUrl)
 
     suspend fun install(session: SessionState, manifest: WebAppManifest) {
+        install(manifest, session.content.icon)
+    }
+
+    suspend fun installSite(url: String, name: String, fallbackIcon: Bitmap? = null) {
+        val address = URI(url)
+        require(address.scheme.equals("https", ignoreCase = true) && !address.host.isNullOrBlank())
+        val origin = origin(url)
+        install(
+            WebAppManifest(
+                name = name.ifBlank { URI(url).host ?: url },
+                startUrl = url,
+                display = WebAppManifest.DisplayMode.STANDALONE,
+                scope = defaultScope(url),
+                icons = listOf(WebAppManifest.Icon(src = "$origin/favicon.ico")),
+            ),
+            fallbackIcon,
+        )
+    }
+
+    private suspend fun install(manifest: WebAppManifest, fallbackIcon: Bitmap?) {
         val previous = dao.get(manifest.startUrl)
         manifestStorage.saveManifest(manifest)
         dao.put(manifest.toInstalledApp(previous).copy(enabled = true))
-        val icon = loadManifestIcon(manifest) ?: session.content.icon
+        val icon = loadIcon(manifest.startUrl) ?: fallbackIcon
         runCatching { pinShortcut(manifest, icon) }
+    }
+
+    suspend fun loadIcon(url: String): Bitmap? {
+        val manifest = manifestStorage.loadManifest(url)
+        val origin = origin(url)
+        val resources = buildList {
+            manifest?.icons?.forEach { icon ->
+                add(IconRequest.Resource(URI(url).resolve(icon.src).toString(),
+                    IconRequest.Resource.Type.MANIFEST_ICON))
+            }
+            add(IconRequest.Resource("$origin/apple-touch-icon.png", IconRequest.Resource.Type.APPLE_TOUCH_ICON))
+            add(IconRequest.Resource("$origin/favicon.ico", IconRequest.Resource.Type.FAVICON))
+        }
+        return withTimeoutOrNull(5_000) {
+            runCatching {
+                icons.loadIcon(IconRequest(url, size = IconRequest.Size.LAUNCHER, resources = resources)).await()
+            }
+                .getOrNull()?.takeUnless { it.source == Icon.Source.GENERATOR }?.bitmap
+        }
     }
 
     suspend fun updateManifest(manifest: WebAppManifest) {
         val previous = dao.get(manifest.startUrl) ?: return
         manifestStorage.updateManifest(manifest)
         dao.put(manifest.toInstalledApp(previous))
-        val icon = loadManifestIcon(manifest)
+        val icon = loadIcon(manifest.startUrl)
         withContext(Dispatchers.Main) {
             runCatching { ShortcutManagerCompat.updateShortcuts(context, listOf(buildShortcut(manifest, icon))) }
         }
@@ -88,10 +128,6 @@ class WebAppRepository @Inject constructor(
             .build()
     }
 
-    private suspend fun loadManifestIcon(manifest: WebAppManifest): Bitmap? = withTimeoutOrNull(3_000) {
-        runCatching { icons.loadIcon(manifest.toIconRequest()).await().bitmap }.getOrNull()
-    }
-
     private fun WebAppManifest.toInstalledApp(previous: InstalledWebApp?): InstalledWebApp =
         InstalledWebApp(
             startUrl = startUrl,
@@ -103,6 +139,10 @@ class WebAppRepository @Inject constructor(
         )
 
     companion object {
+        private fun origin(url: String): String = URI(url).let {
+            "${it.scheme}://${it.host}${if (it.port >= 0) ":${it.port}" else ""}"
+        }
+
         fun defaultScope(startUrl: String): String = URI(startUrl).resolve(".").toString()
 
         fun isWithinScope(url: String, scope: String): Boolean = try {

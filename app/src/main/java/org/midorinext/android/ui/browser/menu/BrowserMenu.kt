@@ -262,9 +262,27 @@ private fun BrowserPageShortcuts(
     onDismissRequest: () -> Unit,
     onTranslateClick: () -> Unit,
 ) {
+    val canInstallWebApp by viewModel.canInstallWebApp.collectAsStateWithLifecycle()
     NewTabAction(viewModel, onDismissRequest)
     PrivateTabAction(viewModel, onDismissRequest)
     if (showPageActions && !currentUrl.isNullOrBlank()) {
+        if (canInstallWebApp) {
+            val context = LocalContext.current
+            val installed = stringResource(R.string.pwa_install_requested)
+            val failed = stringResource(R.string.pwa_install_failed)
+            DropdownItem(
+                text = stringResource(R.string.pwa_install_action),
+                icon = R.drawable.icons_add_screen,
+                onClick = {
+                    viewModel.installCurrentPageAsWebApp { success ->
+                        val message = if (success) installed else failed
+                        android.widget.Toast.makeText(context, message,
+                            android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                    onDismissRequest()
+                },
+            )
+        }
         ShareAction(url = currentUrl, onDismissRequest = onDismissRequest)
         TranslateAction(
             viewModel = viewModel,
@@ -495,6 +513,14 @@ fun AppNavigation(
             navigateTo(NavDestination.Bookmarks)
         }
     )
+    DropdownItem(
+        text = stringResource(R.string.pwa_manage_title),
+        icon = R.drawable.icons_add_screen,
+        onClick = {
+            onDismissRequest()
+            navigateTo(NavDestination.WebApps)
+        }
+    )
     if (BuildConfig.FLAVOR_target != "canaltoys") {
         DropdownItem(
             text = stringResource(id = R.string.browser_downloads),
@@ -534,7 +560,6 @@ fun PageActions(
     onDismissRequest: () -> Unit,
 ) {
     val currentUrl by viewModel.currentUrl.collectAsStateWithLifecycle()
-    val installableWebApp by viewModel.installableWebApp.collectAsStateWithLifecycle()
     val isUrlBookmarked by viewModel.isUrlBookmarked.collectAsStateWithLifecycle()
     val desktopSite by viewModel.desktopMode.collectAsStateWithLifecycle()
     val onDesktopSiteClicked = { checked: Boolean ->
@@ -560,20 +585,11 @@ fun PageActions(
                 onDismissRequest()
             }
         )
-        if (viewModel.isShortcutSupported || installableWebApp != null) {
-            val addedMessage = stringResource(
-                if (installableWebApp != null) R.string.pwa_install_requested
-                else R.string.pwa_shortcut_requested
-            )
-            val failedMessage = stringResource(
-                if (installableWebApp != null) R.string.pwa_install_failed
-                else R.string.pwa_shortcut_failed
-            )
+        if (viewModel.isShortcutSupported) {
+            val addedMessage = stringResource(R.string.pwa_shortcut_requested)
+            val failedMessage = stringResource(R.string.pwa_shortcut_failed)
             DropdownItem(
-                text = stringResource(
-                    if (installableWebApp != null) R.string.pwa_install_action
-                    else R.string.menu_add_to_homescreen
-                ),
+                text = stringResource(R.string.menu_add_to_homescreen),
                 icon = R.drawable.icons_add_screen,
                 onClick = {
                     viewModel.addShortcutToHomeScreen { success ->

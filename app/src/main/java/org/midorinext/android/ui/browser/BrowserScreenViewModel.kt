@@ -409,29 +409,48 @@ class BrowserScreenViewModel @Inject constructor(
 
     val isShortcutSupported = webAppUseCases.isPinningSupported()
 
-    val installableWebApp = store.flow()
+    val canInstallWebApp = store.flow()
         .map { state ->
-            state.selectedTab?.takeUnless { it.content.private }?.installableManifest()
+            state.selectedTab?.let {
+                !it.content.private && it.content.url.startsWith("https://", ignoreCase = true)
+            } == true
         }
         .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = null,
+            initialValue = false,
         )
 
     fun addShortcutToHomeScreen(onResult: (Boolean) -> Unit = {}) {
         viewModelScope.launch {
-            val session = store.state.selectedTab ?: return@launch
-            val manifest = session.takeUnless { it.content.private }?.installableManifest()
-            runCatching {
+            runCatching { webAppUseCases.addToHomescreen() }
+                .onSuccess { onResult(true) }
+                .onFailure { onResult(false) }
+        }
+    }
+
+    fun installCurrentPageAsWebApp(onResult: (Boolean) -> Unit = {}) {
+        viewModelScope.launch {
+            val session = store.state.selectedTab
+            if (session == null || session.content.private ||
+                !session.content.url.startsWith("https://", ignoreCase = true)) {
+                onResult(false)
+                return@launch
+            }
+            val manifest = session.installableManifest()
+            val success = runCatching {
                 if (manifest != null) {
                     webAppRepository.install(session, manifest)
                 } else {
-                    webAppUseCases.addToHomescreen()
+                    webAppRepository.installSite(
+                        session.content.url,
+                        session.content.title.ifBlank { java.net.URI(session.content.url).host ?: session.content.url },
+                        session.content.icon,
+                    )
                 }
-            }.onSuccess { onResult(true) }
-                .onFailure { onResult(false) }
+            }.isSuccess
+            onResult(success)
         }
     }
 
