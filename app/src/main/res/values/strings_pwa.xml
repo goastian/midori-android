@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pwa_install_action">Install web app</string>
+    <string name="pwa_install_requested">Web app added to Midori. Confirm the home screen shortcut if prompted.</string>
+    <string name="pwa_install_failed">Could not install this web app.</string>
+    <string name="pwa_shortcut_requested">Confirm the home screen shortcut if prompted.</string>
+    <string name="pwa_shortcut_failed">Could not add this shortcut.</string>
+    <string name="pwa_manage_title">Web apps</string>
+    <string name="pwa_manage_summary">Open and manage installed web apps</string>
+    <string name="pwa_offline_explanation">Web apps can work offline when their websites provide offline support.</string>
+    <string name="pwa_empty">No web apps installed yet. Open a supported site and choose Install web app from the menu.</string>
+    <string name="pwa_open">Open</string>
+    <string name="pwa_remove">Remove</string>
+    <string name="pwa_remove_title">Remove %1$s?</string>
+    <string name="pwa_remove_explanation">This removes the web app from Midori. If its shortcut remains on your home screen, remove that icon there.</string>
+    <string name="pwa_cancel">Cancel</string>
+    <string name="pwa_disabled_message">This web app is disabled in Midori.</string>
+    <string name="pwa_enable_app">Enable %1$s</string>
+    <string name="pwa_clear_data">Clear data</string>
+    <string name="pwa_clear_data_title">Clear data for %1$s?</string>
+    <string name="pwa_clear_data_explanation">Cookies, offline files, and site storage for this website will be removed. You may need to sign in again.</string>
+    <string name="pwa_clear_data_failed">Could not clear this site’s data.</string>
+    <string name="pwa_clear_data_done">Site data cleared.</string>
+</resources>
