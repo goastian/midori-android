@@ -13,7 +13,7 @@
     <string name="adblock_ad_sources">広告用ソースを管理</string>
     <string name="adblock_strict">厳格なブロック</string>
     <string name="adblock_strict_description">より強い追跡防止を使用します。一部のサイトが正常に動作しない場合があります。</string>
-    <string name="adblock_scope_note">内蔵の追跡防止には GeckoView を使用します。Midori Desktop のルールとカスタムリストは第三者フレームをブロックします。</string>
+    <string name="adblock_scope_note">公式リストとカスタムリストは対応する第三者フレームのリクエストをブロックします。GeckoView は独自の追跡防止を使用します。</string>
     <string name="adblock_add_site">サイトを追加</string>
     <string name="adblock_no_sites">例外はまだありません</string>
     <string name="adblock_remove">削除</string>
@@ -22,7 +22,7 @@
     <string name="adblock_add">追加</string>
     <string name="adblock_cancel">キャンセル</string>
     <string name="adblock_add_source">新しいソースを追加</string>
-    <string name="adblock_gecko_source">GeckoView + EasyPrivacy</string>
+    <string name="adblock_gecko_source">GeckoView</string>
     <string name="adblock_gecko_source_description">内蔵の追跡防止</string>
     <string name="adblock_midori_source">Midori Desktop EasyList</string>
     <string name="adblock_midori_source_description">Midori に同梱されたホストルール</string>
@@ -31,10 +31,15 @@
     <string name="adblock_refresh">更新</string>
     <string name="adblock_source_url">ソースの HTTPS URL</string>
     <string name="adblock_invalid_source">重複しない HTTPS URL を入力</string>
-    <string name="adblock_source_format">||host^ と @@||host^ のルールに対応します。他の形式は無視されます。</string>
+    <string name="adblock_source_format">ドメインとパスのネットワークルールに対応します。装飾ルールとスクリプトレットは無視されます。</string>
     <string name="onboarding_adblock_title">保護を選択</string>
     <string name="onboarding_adblock_description">Midori でトラッカーと広告をブロックしますか？</string>
     <string name="onboarding_adblock_hint">後から設定で変更できます。</string>
     <string name="adblock_source_disabled">無効</string>
     <string name="adblock_source_failed">更新できませんでした。「更新」をタップして再試行してください。</string>
+    <string name="adblock_core_sources">基本リスト</string>
+    <string name="adblock_regional_sources">地域別リスト</string>
+    <string name="adblock_custom_sources">カスタムリスト</string>
+    <string name="adblock_update_all_sources">すべてのソースを更新</string>
+    <string name="adblock_source_rules">対応ルール: %1$d</string>
 </resources>

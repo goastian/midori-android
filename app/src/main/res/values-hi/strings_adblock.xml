@@ -13,7 +13,7 @@
     <string name="adblock_ad_sources">विज्ञापन स्रोत प्रबंधित करें</string>
     <string name="adblock_strict">सख्त अवरोधन</string>
     <string name="adblock_strict_description">अधिक सख्त ट्रैकर सुरक्षा इस्तेमाल करें। कुछ साइटें ठीक से काम नहीं कर सकतीं।</string>
-    <string name="adblock_scope_note">अंतर्निहित ट्रैकर सुरक्षा GeckoView का उपयोग करती है। Midori Desktop और कस्टम सूची तीसरे पक्ष के फ़्रेम रोकती हैं।</string>
+    <string name="adblock_scope_note">आधिकारिक और कस्टम सूचियाँ समर्थित तीसरे पक्ष के फ़्रेम अनुरोध रोकती हैं। GeckoView अपनी ट्रैकर सुरक्षा का उपयोग करता है।</string>
     <string name="adblock_add_site">साइट जोड़ें</string>
     <string name="adblock_no_sites">अभी कोई अपवाद नहीं</string>
     <string name="adblock_remove">हटाएँ</string>
@@ -22,7 +22,7 @@
     <string name="adblock_add">जोड़ें</string>
     <string name="adblock_cancel">रद्द करें</string>
     <string name="adblock_add_source">नया स्रोत जोड़ें</string>
-    <string name="adblock_gecko_source">GeckoView + EasyPrivacy</string>
+    <string name="adblock_gecko_source">GeckoView</string>
     <string name="adblock_gecko_source_description">अंतर्निहित ट्रैकर सुरक्षा</string>
     <string name="adblock_midori_source">Midori Desktop EasyList</string>
     <string name="adblock_midori_source_description">Midori के साथ दिए गए होस्ट नियम</string>
@@ -31,10 +31,15 @@
     <string name="adblock_refresh">अपडेट करें</string>
     <string name="adblock_source_url">स्रोत का HTTPS URL</string>
     <string name="adblock_invalid_source">अलग HTTPS URL डालें</string>
-    <string name="adblock_source_format">||host^ और @@||host^ नियम समर्थित हैं। बाकी नियम अनदेखे होंगे।</string>
+    <string name="adblock_source_format">डोमेन और पथ नेटवर्क नियम समर्थित हैं। कॉस्मेटिक नियम और स्क्रिप्टलेट अनदेखे होंगे।</string>
     <string name="onboarding_adblock_title">अपनी सुरक्षा चुनें</string>
     <string name="onboarding_adblock_description">क्या Midori ट्रैकर और विज्ञापन रोके?</string>
     <string name="onboarding_adblock_hint">इसे बाद में सेटिंग में बदल सकते हैं।</string>
     <string name="adblock_source_disabled">बंद</string>
     <string name="adblock_source_failed">अपडेट नहीं हो सका। फिर से कोशिश करने के लिए अपडेट करें।</string>
+    <string name="adblock_core_sources">मुख्य सूचियाँ</string>
+    <string name="adblock_regional_sources">क्षेत्रीय सूचियाँ</string>
+    <string name="adblock_custom_sources">कस्टम सूचियाँ</string>
+    <string name="adblock_update_all_sources">सभी स्रोत अपडेट करें</string>
+    <string name="adblock_source_rules">संगत नियम: %1$d</string>
 </resources>

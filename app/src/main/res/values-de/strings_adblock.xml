@@ -13,7 +13,7 @@
     <string name="adblock_ad_sources">Werbequellen verwalten</string>
     <string name="adblock_strict">Strenge Blockierung</string>
     <string name="adblock_strict_description">Stärkeren Trackerschutz verwenden. Manche Websites funktionieren möglicherweise nicht richtig.</string>
-    <string name="adblock_scope_note">Der integrierte Trackerschutz verwendet GeckoView. Midori-Desktop-Regeln und eigene Listen blockieren Drittanbieter-Frames.</string>
+    <string name="adblock_scope_note">Offizielle und eigene Listen blockieren unterstützte Anfragen von Drittanbieter-Frames. GeckoView verwaltet seinen eigenen Trackerschutz.</string>
     <string name="adblock_add_site">Website hinzufügen</string>
     <string name="adblock_no_sites">Noch keine Ausnahmen</string>
     <string name="adblock_remove">Entfernen</string>
@@ -22,7 +22,7 @@
     <string name="adblock_add">Hinzufügen</string>
     <string name="adblock_cancel">Abbrechen</string>
     <string name="adblock_add_source">Neue Quelle hinzufügen</string>
-    <string name="adblock_gecko_source">GeckoView + EasyPrivacy</string>
+    <string name="adblock_gecko_source">GeckoView</string>
     <string name="adblock_gecko_source_description">Integrierter Trackerschutz</string>
     <string name="adblock_midori_source">Midori Desktop EasyList</string>
     <string name="adblock_midori_source_description">Mit Midori gelieferte Host-Regeln</string>
@@ -31,10 +31,15 @@
     <string name="adblock_refresh">Aktualisieren</string>
     <string name="adblock_source_url">HTTPS-Quell-URL</string>
     <string name="adblock_invalid_source">Eindeutige HTTPS-URL eingeben</string>
-    <string name="adblock_source_format">Unterstützt ||host^- und @@||host^-Regeln. Andere Syntax wird ignoriert.</string>
+    <string name="adblock_source_format">Unterstützt Netzwerkregeln für Domains und Pfade. Kosmetische Regeln und Scriptlets werden ignoriert.</string>
     <string name="onboarding_adblock_title">Schutz wählen</string>
     <string name="onboarding_adblock_description">Soll Midori Tracker und Werbung blockieren?</string>
     <string name="onboarding_adblock_hint">Sie können dies später in den Einstellungen ändern.</string>
     <string name="adblock_source_disabled">Deaktiviert</string>
     <string name="adblock_source_failed">Aktualisierung fehlgeschlagen. Tippen Sie zum Wiederholen auf Aktualisieren.</string>
+    <string name="adblock_core_sources">Kernlisten</string>
+    <string name="adblock_regional_sources">Regionale Listen</string>
+    <string name="adblock_custom_sources">Eigene Listen</string>
+    <string name="adblock_update_all_sources">Alle Quellen aktualisieren</string>
+    <string name="adblock_source_rules">Kompatible Regeln: %1$d</string>
 </resources>

@@ -13,7 +13,7 @@
     <string name="adblock_ad_sources">Источники блокировки рекламы</string>
     <string name="adblock_strict">Строгая блокировка</string>
     <string name="adblock_strict_description">Усиленная защита от трекеров. Некоторые сайты могут работать неправильно.</string>
-    <string name="adblock_scope_note">Встроенная защита использует GeckoView. Правила Midori Desktop и пользовательские списки блокируют сторонние фреймы.</string>
+    <string name="adblock_scope_note">Официальные и пользовательские списки блокируют поддерживаемые запросы сторонних фреймов. GeckoView использует собственную защиту от трекеров.</string>
     <string name="adblock_add_site">Добавить сайт</string>
     <string name="adblock_no_sites">Исключений пока нет</string>
     <string name="adblock_remove">Удалить</string>
@@ -22,7 +22,7 @@
     <string name="adblock_add">Добавить</string>
     <string name="adblock_cancel">Отмена</string>
     <string name="adblock_add_source">Добавить источник</string>
-    <string name="adblock_gecko_source">GeckoView + EasyPrivacy</string>
+    <string name="adblock_gecko_source">GeckoView</string>
     <string name="adblock_gecko_source_description">Встроенная защита от трекеров</string>
     <string name="adblock_midori_source">Midori Desktop EasyList</string>
     <string name="adblock_midori_source_description">Правила для доменов в составе Midori</string>
@@ -31,10 +31,15 @@
     <string name="adblock_refresh">Обновить</string>
     <string name="adblock_source_url">HTTPS-адрес источника</string>
     <string name="adblock_invalid_source">Введите уникальный HTTPS-адрес</string>
-    <string name="adblock_source_format">Поддерживаются правила ||host^ и @@||host^. Другие правила игнорируются.</string>
+    <string name="adblock_source_format">Поддерживаются сетевые правила для доменов и путей. Косметические правила и скриптлеты игнорируются.</string>
     <string name="onboarding_adblock_title">Выберите защиту</string>
     <string name="onboarding_adblock_description">Блокировать трекеры и рекламу в Midori?</string>
     <string name="onboarding_adblock_hint">Позже это можно изменить в настройках.</string>
     <string name="adblock_source_disabled">Отключено</string>
     <string name="adblock_source_failed">Не удалось обновить. Нажмите «Обновить», чтобы повторить.</string>
+    <string name="adblock_core_sources">Основные списки</string>
+    <string name="adblock_regional_sources">Региональные списки</string>
+    <string name="adblock_custom_sources">Пользовательские списки</string>
+    <string name="adblock_update_all_sources">Обновить все источники</string>
+    <string name="adblock_source_rules">Совместимых правил: %1$d</string>
 </resources>
