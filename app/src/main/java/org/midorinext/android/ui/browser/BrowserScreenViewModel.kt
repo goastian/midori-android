@@ -6,7 +6,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import org.midorinext.android.contentBlocker.ContentBlockerState
-import org.midorinext.android.adblock.MidoriPrivacyFeature
+import org.midorinext.android.adblock.DesktopHostFilter
+import org.midorinext.android.adblock.BlockingLevel
+import org.midorinext.android.adblock.hostOf
 import org.midorinext.android.mozac.pdf.PdfSaveEvents
 import org.midorinext.android.mozac.media.BackgroundPlaybackFeature
 import org.midorinext.android.pwa.WebAppRepository
@@ -72,6 +74,7 @@ class BrowserScreenViewModel @Inject constructor(
     val pdfSaveEvents: PdfSaveEvents,
     private val backgroundPlaybackFeature: BackgroundPlaybackFeature,
     private val webAppRepository: WebAppRepository,
+    private val desktopHostFilter: DesktopHostFilter,
 ): ViewModel() {
     data class TranslationSheetState(
         val enabled: Boolean = false,
@@ -221,6 +224,22 @@ class BrowserScreenViewModel @Inject constructor(
                     }
                     .mapTo(mutableSetOf()) { tab -> tab.id }
                 tabsWithUserNavigationInFlight.retainAll(replaceableTabIds)
+            }
+        }
+        viewModelScope.launch {
+            combine(store.flow(), desktopHostFilter.settings.state) { state, config ->
+                state.tabs.mapNotNull { tab ->
+                    val session = tab.engineState.engineSession ?: return@mapNotNull null
+                    val host = hostOf(tab.content.url) ?: return@mapNotNull null
+                    val shouldIgnore = config.siteLevels[host] == BlockingLevel.OFF
+                    if (shouldIgnore == tab.trackingProtection.ignoredOnTrackingProtection) null
+                    else Triple(session, tab.content.private, shouldIgnore)
+                }
+            }.distinctUntilChanged().collect { changes ->
+                changes.forEach { (session, private, shouldIgnore) ->
+                    if (shouldIgnore) engine.trackingProtectionExceptionStore.add(session, private)
+                    else engine.trackingProtectionExceptionStore.remove(session)
+                }
             }
         }
     }
@@ -380,17 +399,40 @@ class BrowserScreenViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    val isMidoriPrivacyActionAvailable = store.flow()
-        .map { state ->
-            val extension = state.extensions[MidoriPrivacyFeature.EXTENSION_ID]
-            extension?.enabled == true && extension.browserAction?.enabled != false
+    val nativeBlockerState = combine(store.flow(), desktopHostFilter.changes) { state, _ ->
+            state.selectedTab?.let { tab ->
+                NativeBlockerState(
+                    blockedCount = tab.trackingProtection.blockedTrackers.size +
+                        desktopHostFilter.blockedCount(tab.engineState.engineSession),
+                    level = desktopHostFilter.settings.current.levelFor(tab.content.url),
+                )
+            } ?: NativeBlockerState()
         }
         .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = false,
+            initialValue = NativeBlockerState(),
         )
+
+    data class NativeBlockerState(
+        val blockedCount: Int = 0,
+        val level: BlockingLevel = BlockingLevel.TRACKERS_AND_ADS,
+    )
+
+    fun setNativeBlockerLevelForSite(level: BlockingLevel?) {
+        val tab = store.state.selectedTab ?: return
+        val session = tab.engineState.engineSession ?: return
+        val exceptions = engine.trackingProtectionExceptionStore
+        val host = hostOf(tab.content.url) ?: return
+        desktopHostFilter.settings.setSiteLevel(host, level)
+        if ((level ?: desktopHostFilter.settings.current.level) == BlockingLevel.OFF) {
+            exceptions.add(session, tab.content.private)
+        } else {
+            exceptions.remove(session)
+        }
+        sessionUseCases.reload(tab.id)
+    }
 
     val isMidoriVpnActionAvailable = store.flow()
         .map { state ->

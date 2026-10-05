@@ -7,6 +7,7 @@ import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoRuntimeSettings
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 import org.midorinext.android.preferences.app.TrackingProtectionLevel
+import org.midorinext.android.adblock.BlockingLevel
 import org.midorinext.android.preferences.app.AppTrackingProtectionMode
 import org.midorinext.android.preferences.app.HttpsOnlyLevel
 import org.midorinext.android.preferences.app.DoHProvider
@@ -30,6 +31,8 @@ object GeckoPreferences {
         val cookiePartitioning: Boolean,
         val strictTrackingProtection: Boolean,
         val trackingProtectionLevel: TrackingProtectionLevel,
+        val adBlockLevel: BlockingLevel = BlockingLevel.TRACKERS_AND_ADS,
+        val trackerSourceEnabled: Boolean = true,
         val httpsOnlyLevel: HttpsOnlyLevel = HttpsOnlyLevel.ALL_TABS,
         val dohProvider: DoHProvider = DoHProvider.DOH_DEFAULT,
         val appTrackingProtectionMode: AppTrackingProtectionMode = AppTrackingProtectionMode.BROWSER_FIRST
@@ -83,6 +86,7 @@ object GeckoPreferences {
     }
 
     private fun applyContentBlockingSettings(runtime: GeckoRuntime, settings: UserSettings) {
+        val trackersEnabled = settings.adBlockLevel != BlockingLevel.OFF && settings.trackerSourceEnabled
         val hybridSystemModeSelected = settings.appTrackingProtectionMode == AppTrackingProtectionMode.HYBRID_SYSTEM
         val appTrackingProtectionEnabled =
             settings.strictTrackingProtection || settings.trackingProtectionLevel == TrackingProtectionLevel.STRICT
@@ -98,27 +102,36 @@ object GeckoPreferences {
 
         runtime.settings.getContentBlocking()
             // Anti-tracking profile changes with user setting.
-            .setAntiTracking(when (effectiveTrackingProtectionLevel) {
+            .setAntiTracking(when {
+                !trackersEnabled -> ContentBlocking.AntiTracking.NONE
+                else -> when (effectiveTrackingProtectionLevel) {
                 TrackingProtectionLevel.STRICT -> ContentBlocking.AntiTracking.STRICT
                 TrackingProtectionLevel.STANDARD, TrackingProtectionLevel.CUSTOM -> ContentBlocking.AntiTracking.DEFAULT
                 else -> ContentBlocking.AntiTracking.DEFAULT
+                }
             })
             // Block third-party tracker cookies in normal mode
-            .setCookieBehavior(ContentBlocking.CookieBehavior.ACCEPT_NON_TRACKERS)
+            .setCookieBehavior(
+                if (trackersEnabled) ContentBlocking.CookieBehavior.ACCEPT_NON_TRACKERS
+                else ContentBlocking.CookieBehavior.ACCEPT_ALL
+            )
             // Block all third-party cookies in private mode
             .setCookieBehaviorPrivateMode(ContentBlocking.CookieBehavior.ACCEPT_NONE)
             // ETP level follows the tracking protection level.
             .setEnhancedTrackingProtectionLevel(
-                when (effectiveTrackingProtectionLevel) {
+                when {
+                    !trackersEnabled -> ContentBlocking.EtpLevel.NONE
+                    else -> when (effectiveTrackingProtectionLevel) {
                     TrackingProtectionLevel.STANDARD -> ContentBlocking.EtpLevel.DEFAULT
                     TrackingProtectionLevel.STRICT -> ContentBlocking.EtpLevel.STRICT
                     TrackingProtectionLevel.CUSTOM -> ContentBlocking.EtpLevel.DEFAULT
                     else -> ContentBlocking.EtpLevel.DEFAULT
+                    }
                 }
             )
             // Block cross-site tracking via social media
             .setStrictSocialTrackingProtection(
-                appTrackingProtectionEnabled
+                trackersEnabled && appTrackingProtectionEnabled
             )
     }
 

@@ -7,6 +7,7 @@ import org.midorinext.android.ext.isMidoriUrl
 import org.midorinext.android.ext.isMidoriUrlValid
 import org.midorinext.android.ext.urlDecode
 import org.midorinext.android.preferences.app.AppPreferencesRepository
+import org.midorinext.android.adblock.DesktopHostFilter
 import org.midorinext.android.usecases.MidoriUseCases
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.MainScope
@@ -31,7 +32,8 @@ import javax.inject.Singleton
 class AppRequestInterceptor @Inject constructor(
     @ApplicationContext private val context: Context,
     private val appPreferencesRepository: AppPreferencesRepository,
-    private val MidoriUseCases: MidoriUseCases
+    private val MidoriUseCases: MidoriUseCases,
+    private val desktopHostFilter: DesktopHostFilter,
 ) : RequestInterceptor {
     private val coroutineScope = MainScope()
     private var openLinksInApp = false
@@ -62,6 +64,10 @@ class AppRequestInterceptor @Inject constructor(
         isDirectNavigation: Boolean,
         isSubframeRequest: Boolean
     ): RequestInterceptor.InterceptionResponse? {
+        if (!isSubframeRequest && !isRedirect) {
+            desktopHostFilter.beginPage(engineSession, uri)
+        }
+
         if (uri.isMidoriUrl()) {
             if (!uri.isMidoriUrlValid()) {
                 val path = try {
@@ -82,6 +88,10 @@ class AppRequestInterceptor @Inject constructor(
                 )
                 return RequestInterceptor.InterceptionResponse.Url(redirectUrl)
             }
+        }
+
+        if (isSubframeRequest && desktopHostFilter.blocksSubframe(engineSession, uri, isSameDomain)) {
+            return RequestInterceptor.InterceptionResponse.Deny
         }
 
         return appLinksInterceptor.onLoadRequest(

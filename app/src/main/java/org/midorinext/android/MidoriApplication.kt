@@ -4,6 +4,9 @@ import android.app.Application
 import androidx.work.Configuration
 import org.midorinext.android.migration.MigrationUtility
 import org.midorinext.android.mozac.GeckoPreferences
+import org.midorinext.android.adblock.AdBlockSettings
+import org.midorinext.android.adblock.AdBlockUpdateWorker
+import org.midorinext.android.adblock.AdBlockConfiguration
 import org.midorinext.android.mozac.media.BackgroundPlaybackFeature
 import org.midorinext.android.preferences.app.AppPreferences
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
@@ -54,6 +57,7 @@ class MidoriApplication : Application(), Configuration.Provider {
     @Inject lateinit var appTrackingProtectionController: dagger.Lazy<AppTrackingProtectionController>
     @Inject lateinit var geckoRuntime: dagger.Lazy<GeckoRuntime>
     @Inject lateinit var appPreferencesRepository: dagger.Lazy<AppPreferencesRepository>
+    @Inject lateinit var adBlockSettings: dagger.Lazy<AdBlockSettings>
     @Inject lateinit var autofillPreferenceState: dagger.Lazy<AutofillPreferenceState>
     @Inject lateinit var historyRepository: dagger.Lazy<HistoryRepository>
     @Inject lateinit var midoriVpnFeature: dagger.Lazy<MidoriVpnFeature>
@@ -85,13 +89,15 @@ class MidoriApplication : Application(), Configuration.Provider {
         RustHttpConfig.setClient(lazy { client.get() })
 
         // Apply safe defaults immediately; persisted settings are applied below without blocking startup.
-        GeckoPreferences.initialize(geckoRuntime.get(), AppPreferencesSerializer.defaultValue.toGeckoSettings())
+        GeckoPreferences.initialize(geckoRuntime.get(), AppPreferencesSerializer.defaultValue.toGeckoSettings(adBlockSettings.get().current))
 
         // Watch for preference changes and apply them without requiring restart
         applicationScope.launch(Dispatchers.IO) {
-            appPreferencesRepository.get().flow.collect { prefs ->
+            kotlinx.coroutines.flow.combine(appPreferencesRepository.get().flow, adBlockSettings.get().state) { prefs, adBlock ->
+                prefs to adBlock
+            }.collect { (prefs, adBlock) ->
                 autofillPreferenceState.get().update(prefs)
-                GeckoPreferences.initialize(geckoRuntime.get(), prefs.toGeckoSettings())
+                GeckoPreferences.initialize(geckoRuntime.get(), prefs.toGeckoSettings(adBlock))
 
                 val shouldRunSystemProtection =
                     prefs.appTrackingProtectionMode == AppTrackingProtectionMode.HYBRID_SYSTEM &&
@@ -145,6 +151,8 @@ class MidoriApplication : Application(), Configuration.Provider {
             return
         }
 
+        AdBlockUpdateWorker.schedule(this)
+
         applicationScope.launch {
             engine.get().warmUp()
             // VPN is an optional action. Register it after the UI is visible so extension
@@ -183,12 +191,14 @@ class MidoriApplication : Application(), Configuration.Provider {
     }
 }
 
-private fun AppPreferences.toGeckoSettings() = GeckoPreferences.UserSettings(
+private fun AppPreferences.toGeckoSettings(adBlock: AdBlockConfiguration) = GeckoPreferences.UserSettings(
     globalPrivacyControl = privacyGlobalPrivacyControl,
     fingerprintingProtection = privacyFingerprintingProtection,
     cookiePartitioning = privacyCookiePartitioning,
-    strictTrackingProtection = privacyStrictTrackingProtection,
+    strictTrackingProtection = adBlock.strict,
     trackingProtectionLevel = trackingProtectionLevel,
+    adBlockLevel = adBlock.level,
+    trackerSourceEnabled = adBlock.builtInTrackers,
     httpsOnlyLevel = httpsOnlyLevel,
     dohProvider = dohProvider,
     appTrackingProtectionMode = appTrackingProtectionMode

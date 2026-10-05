@@ -25,7 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.midorinext.android.R
 import org.midorinext.android.adblock.AdBlockerAction
-import org.midorinext.android.adblock.MidoriPrivacyFeature
+import org.midorinext.android.adblock.BlockingLevel
+import org.midorinext.android.ui.preferences.BlockingLevelRow
 import org.midorinext.android.ext.*
 import org.midorinext.android.contentBlocker.ContentBlockerOverlay
 import org.midorinext.android.contentBlocker.ContentBlockerState
@@ -69,7 +70,7 @@ fun BrowserScreen(
     val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
     val private by appViewModel.isPrivate.collectAsStateWithLifecycle()
     val newTabState by viewModel.newTabState.collectAsStateWithLifecycle()
-    val isMidoriPrivacyActionAvailable by viewModel.isMidoriPrivacyActionAvailable.collectAsStateWithLifecycle()
+    val nativeBlockerState by viewModel.nativeBlockerState.collectAsStateWithLifecycle()
     val readerModeStatus by viewModel.readerModeStatus.collectAsStateWithLifecycle()
     val hasParentTab by viewModel.hasParentTab.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -82,6 +83,7 @@ fun BrowserScreen(
 
     var engineViewHolder: EngineView? by remember { mutableStateOf(null) }
     var pageSummary by remember { mutableStateOf<String?>(null) }
+    var showBlockerDialog by remember { mutableStateOf(false) }
 
     // Navigation to the tab tray disposes the browser surface. Reassert background media after
     // that surface is released so the playing tab remains active without keeping the UI alive.
@@ -155,6 +157,38 @@ fun BrowserScreen(
         )
     }
 
+    if (showBlockerDialog) {
+        AlertDialog(
+            onDismissRequest = { showBlockerDialog = false },
+            title = { Text(stringResource(R.string.native_blocker_title)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.native_blocker_blocked_count, nativeBlockerState.blockedCount))
+                    BlockingLevel.entries.forEach { level ->
+                        BlockingLevelRow(level, nativeBlockerState.level) {
+                            viewModel.setNativeBlockerLevelForSite(level)
+                            showBlockerDialog = false
+                        }
+                    }
+                    Text(stringResource(R.string.adblock_scope_note), style = MaterialTheme.typography.bodySmall)
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.setNativeBlockerLevelForSite(null)
+                    showBlockerDialog = false
+                }) {
+                    Text(stringResource(R.string.adblock_default_level))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showBlockerDialog = false }) {
+                    Text(stringResource(R.string.summary_done))
+                }
+            },
+        )
+    }
+
     // Register before the engine handler so page history and text selection take priority.
     // A tab opened by a site returns to its opener when it has no history of its own.
     BackHandler(enabled = hasParentTab) {
@@ -184,8 +218,8 @@ fun BrowserScreen(
                     browserIcons = viewModel.browserIcons,
                     beforeTextField = {
                         if (!readerModeStatus.isActive) {
-                            AdBlockerAction(enabled = isMidoriPrivacyActionAvailable) {
-                                viewModel.triggerInstalledExtensionAction(MidoriPrivacyFeature.EXTENSION_ID)
+                            AdBlockerAction(protectionEnabled = nativeBlockerState.level != BlockingLevel.OFF) {
+                                showBlockerDialog = true
                             }
                         }
                     },

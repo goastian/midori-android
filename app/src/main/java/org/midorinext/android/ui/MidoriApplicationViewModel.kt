@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import org.midorinext.android.cookies.MidoriCookieState
 import org.midorinext.android.preferences.app.AppPreferencesRepository
+import org.midorinext.android.adblock.AdBlockSettings
+import org.midorinext.android.adblock.BlockingLevel
 import org.midorinext.android.preferences.app.Appearance
 import org.midorinext.android.preferences.app.ToolbarPosition
 import org.midorinext.android.storage.history.HistoryRepository
@@ -32,9 +34,13 @@ class MidoriApplicationViewModel @Inject constructor(
     store: BrowserStore,
     historyRepository: HistoryRepository,
     private val appPreferencesRepository: AppPreferencesRepository,
+    private val adBlockSettings: AdBlockSettings,
     clearDataUseCase: ClearDataUseCase,
     val cookieState: MidoriCookieState,
 ) : ViewModel() {
+    val adBlockConfiguration = adBlockSettings.state
+
+    fun updateBlockingLevel(level: BlockingLevel) = adBlockSettings.setLevel(level)
     private val privacyMode = MutableStateFlow(PrivacyMode.SELECTED_TAB_PRIVACY)
 
     private val selectedTabPrivacy = store.flow()

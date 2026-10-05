@@ -23,6 +23,7 @@ import org.midorinext.android.preferences.app.ToolbarPosition
 import androidx.preference.PreferenceManager
 import org.midorinext.android.R
 import org.midorinext.android.ui.onboarding.MidoriOnboarding
+import org.midorinext.android.adblock.BlockingLevel
 import org.midorinext.android.ui.zap.ZapFeature
 
 @Composable
@@ -42,6 +43,7 @@ fun MidoriBrowserApp(
     val isPrivate by applicationViewModel.isPrivate.collectAsStateWithLifecycle()
     val appearance by applicationViewModel.appearance.collectAsStateWithLifecycle()
     val toolbarPosition by applicationViewModel.toolbarPosition.collectAsStateWithLifecycle()
+    val adBlockConfiguration by applicationViewModel.adBlockConfiguration.collectAsStateWithLifecycle()
 
     // Protobuf returns UNRECOGNIZED for enum values written by a newer or older app
     // version. Never hand that sentinel to Compose as a remember key: its generated
@@ -74,6 +76,8 @@ fun MidoriBrowserApp(
         if (showOnboarding) {
             MidoriOnboarding(
                 onToolbarPositionSelected = applicationViewModel::updateToolbarPosition,
+                blockingLevel = adBlockConfiguration.level,
+                onBlockingLevelSelected = applicationViewModel::updateBlockingLevel,
                 onComplete = {
                     onboardingPreferences.edit().putBoolean(onboardingKey, false).apply()
                     showOnboarding = false

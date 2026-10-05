@@ -39,6 +39,9 @@ import org.midorinext.android.ui.preferences.SavedAutofillScreen
 import org.midorinext.android.ui.preferences.SavedPasswordsScreen
 import org.midorinext.android.ui.preferences.AppTrackingProtectionReportScreen
 import org.midorinext.android.ui.preferences.PrivacyScreen
+import org.midorinext.android.ui.preferences.AdBlockSettingsScreen
+import org.midorinext.android.ui.preferences.AdBlockSitesScreen
+import org.midorinext.android.ui.preferences.AdBlockSourcesScreen
 import org.midorinext.android.ui.tabs.TabsScreen
 import org.midorinext.android.ui.animation.reduceMotionRequested
 
@@ -217,6 +220,16 @@ fun MidoriNavHost(
                 }
             )
         }
+        composable(NavDestination.AdBlockSettings.match) {
+            AdBlockSettingsScreen(
+                onSites = { navController.navigate(NavDestination.AdBlockSites.route()) },
+                onTrackerSources = { navController.navigate(NavDestination.AdBlockTrackerSources.route()) },
+                onAdSources = { navController.navigate(NavDestination.AdBlockAdSources.route()) },
+            )
+        }
+        composable(NavDestination.AdBlockSites.match) { AdBlockSitesScreen() }
+        composable(NavDestination.AdBlockTrackerSources.match) { AdBlockSourcesScreen(tracker = true) }
+        composable(NavDestination.AdBlockAdSources.match) { AdBlockSourcesScreen(tracker = false) }
         composable(NavDestination.AppTrackingReport.match) {
             AppTrackingProtectionReportScreen()
         }
