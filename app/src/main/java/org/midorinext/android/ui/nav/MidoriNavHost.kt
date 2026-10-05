@@ -22,6 +22,7 @@ import org.midorinext.android.ui.extensions.AddonDetailScreen
 import org.midorinext.android.ui.extensions.ExtensionListScreen
 import org.midorinext.android.ui.extensions.ExtensionViewModel
 import org.midorinext.android.ui.history.HistoryScreen
+import org.midorinext.android.pwa.WebAppsScreen
 import org.midorinext.android.ui.preferences.AccessibilitySettingsScreen
 import org.midorinext.android.ui.preferences.AutofillSettingsScreen
 import org.midorinext.android.ui.preferences.CustomizeSettingsScreen
@@ -153,6 +154,9 @@ fun MidoriNavHost(
         }
         composable(NavDestination.Downloads.match) {
             DownloadsScreen(onClose = onBrowse)
+        }
+        composable(NavDestination.WebApps.match) {
+            WebAppsScreen()
         }
         composable(NavDestination.Preferences.match) {
             PreferencesScreen(

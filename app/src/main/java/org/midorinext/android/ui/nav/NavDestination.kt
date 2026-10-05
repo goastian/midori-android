@@ -27,6 +27,7 @@ sealed class NavDestination(
     object Tabs : NavDestination(match = "tabs")
     object Bookmarks : NavDestination(match = "bookmarks")
     object Downloads : NavDestination(match = "downloads")
+    object WebApps : NavDestination(match = "web_apps")
     object Preferences : NavDestination(match = "preferences")
     object SearchSettings : NavDestination(match = "settings/search")
     object DefaultSearchEngineSettings : NavDestination(match = "settings/search/default")

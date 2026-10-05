@@ -57,6 +57,13 @@
         </activity>
 
         <activity
+            android:name=".pwa.WebAppActivity"
+            android:exported="true"
+            android:documentLaunchMode="intoExisting"
+            android:theme="@style/Theme.MidoriBrowserCompose"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".intent.IntentReceiverActivity"
             android:exported="true">
 

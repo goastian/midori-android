@@ -9,6 +9,7 @@ import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.adblock.MidoriPrivacyFeature
 import org.midorinext.android.mozac.pdf.PdfSaveEvents
 import org.midorinext.android.mozac.media.BackgroundPlaybackFeature
+import org.midorinext.android.pwa.WebAppRepository
 import org.midorinext.android.vpn.MidoriVpnFeature
 import org.midorinext.android.ext.isLegacyMidoriHomeUrl
 import org.midorinext.android.preferences.app.AppPreferencesRepository
@@ -40,6 +41,7 @@ import mozilla.components.feature.downloads.DownloadsUseCases
 import mozilla.components.feature.downloads.FileSizeFormatter
 import mozilla.components.feature.downloads.manager.DownloadManager
 import mozilla.components.feature.pwa.WebAppUseCases
+import mozilla.components.feature.pwa.ext.installableManifest
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.lib.state.ext.flow
@@ -69,6 +71,7 @@ class BrowserScreenViewModel @Inject constructor(
     val contentBlockerState: ContentBlockerState,
     val pdfSaveEvents: PdfSaveEvents,
     private val backgroundPlaybackFeature: BackgroundPlaybackFeature,
+    private val webAppRepository: WebAppRepository,
 ): ViewModel() {
     data class TranslationSheetState(
         val enabled: Boolean = false,
@@ -406,9 +409,29 @@ class BrowserScreenViewModel @Inject constructor(
 
     val isShortcutSupported = webAppUseCases.isPinningSupported()
 
-    fun addShortcutToHomeScreen() {
+    val installableWebApp = store.flow()
+        .map { state ->
+            state.selectedTab?.takeUnless { it.content.private }?.installableManifest()
+        }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = null,
+        )
+
+    fun addShortcutToHomeScreen(onResult: (Boolean) -> Unit = {}) {
         viewModelScope.launch {
-            webAppUseCases.addToHomescreen()
+            val session = store.state.selectedTab ?: return@launch
+            val manifest = session.takeUnless { it.content.private }?.installableManifest()
+            runCatching {
+                if (manifest != null) {
+                    webAppRepository.install(session, manifest)
+                } else {
+                    webAppUseCases.addToHomescreen()
+                }
+            }.onSuccess { onResult(true) }
+                .onFailure { onResult(false) }
         }
     }
 

@@ -153,7 +153,7 @@ private fun BrowserMenuContent(
 
     if (showMoreOptions && showPageActions) {
         if (toolbarAtBottom) {
-            PageActions(viewModel, onDismissRequest)
+            PageActions(viewModel, applicationViewModel, onDismissRequest)
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
         }
         DropdownItem(
@@ -163,7 +163,7 @@ private fun BrowserMenuContent(
         )
         if (!toolbarAtBottom) {
             HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
-            PageActions(viewModel, onDismissRequest)
+            PageActions(viewModel, applicationViewModel, onDismissRequest)
         }
         return
     }
@@ -530,9 +530,11 @@ private fun ExtensionsSection(
 @Composable
 fun PageActions(
     viewModel: BrowserScreenViewModel,
+    applicationViewModel: MidoriApplicationViewModel,
     onDismissRequest: () -> Unit,
 ) {
     val currentUrl by viewModel.currentUrl.collectAsStateWithLifecycle()
+    val installableWebApp by viewModel.installableWebApp.collectAsStateWithLifecycle()
     val isUrlBookmarked by viewModel.isUrlBookmarked.collectAsStateWithLifecycle()
     val desktopSite by viewModel.desktopMode.collectAsStateWithLifecycle()
     val onDesktopSiteClicked = { checked: Boolean ->
@@ -558,12 +560,25 @@ fun PageActions(
                 onDismissRequest()
             }
         )
-        if (viewModel.isShortcutSupported) {
+        if (viewModel.isShortcutSupported || installableWebApp != null) {
+            val addedMessage = stringResource(
+                if (installableWebApp != null) R.string.pwa_install_requested
+                else R.string.pwa_shortcut_requested
+            )
+            val failedMessage = stringResource(
+                if (installableWebApp != null) R.string.pwa_install_failed
+                else R.string.pwa_shortcut_failed
+            )
             DropdownItem(
-                text = stringResource(id = R.string.menu_add_to_homescreen),
+                text = stringResource(
+                    if (installableWebApp != null) R.string.pwa_install_action
+                    else R.string.menu_add_to_homescreen
+                ),
                 icon = R.drawable.icons_add_screen,
                 onClick = {
-                    viewModel.addShortcutToHomeScreen()
+                    viewModel.addShortcutToHomeScreen { success ->
+                        applicationViewModel.showSnackbar(if (success) addedMessage else failedMessage)
+                    }
                     onDismissRequest()
                 }
             )

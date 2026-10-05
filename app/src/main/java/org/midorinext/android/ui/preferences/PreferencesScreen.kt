@@ -144,6 +144,11 @@ fun PreferencesScreen(
                 description = stringResource(R.string.settings_downloads_summary),
                 onClicked = { navigateTo(NavDestination.DownloadSettings) }
             )
+            SettingsNavRow(
+                label = R.string.pwa_manage_title,
+                description = stringResource(R.string.pwa_manage_summary),
+                onClicked = { navigateTo(NavDestination.WebApps) }
+            )
 
             PreferenceGroupLabel(label = R.string.settings_group_privacy)
 
