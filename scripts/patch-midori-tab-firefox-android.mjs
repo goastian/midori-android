@@ -8,7 +8,22 @@ if (!extensionRoot || !fs.statSync(extensionRoot).isDirectory()) {
   throw new Error('Expected the extracted Midori Tab Firefox extension directory');
 }
 
-const ANDROID_COMPATIBILITY_REVISION = 6;
+const ANDROID_COMPATIBILITY_REVISION = 7;
+
+function replacePrivacyWidget() {
+  const assetsDir = extensionPath('assets');
+  const widgets = fs.readdirSync(assetsDir).filter((name) => /^PrivacyWidget-[\w-]+\.js$/.test(name));
+  if (widgets.length !== 1) {
+    throw new Error(`Expected one PrivacyWidget bundle, found ${widgets.length}`);
+  }
+  const widgetPath = path.join(assetsDir, widgets[0]);
+  const original = fs.readFileSync(widgetPath, 'utf8');
+  const vendor = original.match(/from"(\.\/vendor-[\w-]+\.js)"/);
+  if (!vendor || !original.includes('get-stats-summary')) {
+    throw new Error('PrivacyWidget no longer has the expected extension bridge');
+  }
+  fs.writeFileSync(widgetPath, `import{d as i}from"../index.js";import{c as n,o,b as l}from"${vendor[1]}";const W={name:"PrivacyWidget",data:()=>({i18n:i()}),render(){return o(),n("div",{class:"privacy-widget"},[l("div",{class:"pw-header"},this.i18n.$t("privacy.title")),l("p",{class:"pw-empty-text","data-native-protection-note":""},"Protection is managed with the shield in the browser toolbar.")])}};export{W as default};\n`);
+}
 
 function extensionPath(relativePath) {
   return path.join(extensionRoot, relativePath);
@@ -285,6 +300,8 @@ replaceExact(
   "  return /^(?:f|ht)tps?\\:\\/\\//.test(url) ? url : 'http://' + url;",
   "  return /^(?:f|ht)tps?\\:\\/\\//.test(url) ? url : 'https://' + url;",
 );
+
+replacePrivacyWidget();
 
 console.log(
   `Patched Midori Tab ${sourceVersion} for Android as ${manifest.version}`,

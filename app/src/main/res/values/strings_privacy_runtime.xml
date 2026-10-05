@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="native_blocker_title">Midori blocker</string>
+    <string name="native_blocker_blocked_count">Blocked on this page: %1$d</string>
+    <string name="native_blocker_site_on">Protection is on for this site.</string>
+    <string name="native_blocker_site_off">Protection is off for this site.</string>
+    <string name="native_blocker_enable_site">Enable for this site</string>
+    <string name="native_blocker_disable_site">Disable for this site</string>
     <!-- Privacy/Security runtime options -->
     <string name="privacy_setting_app_tracking_protection_label">App tracking protection</string>
     <string name="privacy_setting_app_tracking_protection_desc">Blocks more trackers across browsing sessions.</string>

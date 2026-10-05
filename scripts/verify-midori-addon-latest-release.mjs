@@ -8,10 +8,6 @@ const profiles = {
     repository: 'https://github.com/goastian/midori-tab',
     assetName: (version) => `midori-tab-${version}-firefox.zip`,
   },
-  'midori-privacy': {
-    repository: 'https://github.com/goastian/midori-privacy',
-    assetName: (version) => `midori-privacy-${version}-firefox.zip`,
-  },
   'midori-vpn': {
     repository: 'https://github.com/goastian/midorivpn-extension',
     assetName: (version) => `midorivpn-extension-${version}.zip`,
@@ -21,7 +17,7 @@ const profile = profiles[addon];
 
 if (!profile || !metadataFile) {
   throw new Error(
-    'Usage: verify-midori-addon-latest-release.mjs <midori-tab|midori-privacy|midori-vpn> <upstream.json>',
+    'Usage: verify-midori-addon-latest-release.mjs <midori-tab|midori-vpn> <upstream.json>',
   );
 }
 

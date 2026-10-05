@@ -30,7 +30,7 @@ class MidoriNewTabFeatureTest {
         assertTrue(!manifest.has("chrome_url_overrides"))
         assertTrue(!manifest.has("commands"))
         assertEquals(manifest.getString("version"), metadata.getString("version"))
-        assertEquals(6, metadata.getInt("compatibilityRevision"))
+        assertEquals(7, metadata.getInt("compatibilityRevision"))
         assertEquals(
             "${metadata.getString("sourceVersion")}.${metadata.getInt("compatibilityRevision")}",
             metadata.getString("version"),
@@ -64,6 +64,13 @@ class MidoriNewTabFeatureTest {
         assertTrue(background.contains("chrome.history?.search"))
         assertTrue(background.contains("chrome.bookmarks?.search"))
         assertTrue(background.contains("'https://' + url"))
+        val privacyWidget = File("src/main/assets/extensions/midori_newtab/assets")
+            .listFiles()
+            .orEmpty()
+            .single { it.name.startsWith("PrivacyWidget-") && it.extension == "js" }
+            .readText()
+        assertTrue(privacyWidget.contains("data-native-protection-note"))
+        assertTrue(!privacyWidget.contains("get-stats-summary"))
         assertTrue(asset("LICENSE.upstream").readText().contains("GNU AFFERO GENERAL PUBLIC LICENSE"))
     }
 

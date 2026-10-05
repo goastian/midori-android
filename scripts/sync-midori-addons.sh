@@ -32,15 +32,6 @@ configure_addon() {
             asset_name_suffix="-firefox.zip"
             required_files=(manifest.json index.html index.js background.js)
             ;;
-        midori-privacy)
-            repository="goastian/midori-privacy"
-            target_dir="$repo_root/app/src/main/assets/extensions/midori_privacy"
-            patch_script="$repo_root/scripts/patch-midori-privacy-firefox-android.mjs"
-            extension_id="midori-protection@astian.org"
-            asset_name_prefix="midori-privacy-"
-            asset_name_suffix="-firefox.zip"
-            required_files=(manifest.json background.html js/start.js js/midori-stats.js LICENSE.txt)
-            ;;
         midori-vpn)
             repository="goastian/midorivpn-extension"
             target_dir="$repo_root/app/src/main/assets/extensions/midori_vpn"
@@ -52,7 +43,7 @@ configure_addon() {
             ;;
         *)
             echo "Unknown addon: $addon" >&2
-            echo "Usage: $0 [midori-tab] [midori-privacy] [midori-vpn]" >&2
+            echo "Usage: $0 [midori-tab] [midori-vpn]" >&2
             exit 1
             ;;
     esac
@@ -174,9 +165,6 @@ apply_android_compatibility() {
         curl --fail --location --silent --show-error \
             -o "$staging_dir/LICENSE.upstream" \
             "https://raw.githubusercontent.com/$repository/$release_tag/LICENSE"
-    elif [[ "$addon" == "midori-privacy" ]]; then
-        node --check "$staging_dir/js/midori-stats.js"
-        cp "$staging_dir/LICENSE.txt" "$staging_dir/LICENSE.upstream"
     else
         node --check "$staging_dir/background.js"
         curl --fail --location --silent --show-error \
@@ -251,7 +239,7 @@ sync_addon() {
 require_commands
 
 if [[ "$#" -eq 0 ]]; then
-    requested_addons=(midori-tab midori-privacy)
+    requested_addons=(midori-tab)
 else
     requested_addons=("$@")
 fi

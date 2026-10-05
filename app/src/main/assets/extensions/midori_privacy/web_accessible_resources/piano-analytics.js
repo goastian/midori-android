@@ -1,6 +1,0 @@
-self.pa = {
-    getVisitorId() {
-    },
-    sendEvent() {
-    },
-};
