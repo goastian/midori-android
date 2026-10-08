@@ -1,0 +1,12 @@
+:root { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+.boot-shell { box-sizing: border-box; min-height: 100vh; display: grid; align-content: center; justify-items: center; gap: 2rem; padding: 2rem; background: var(--color-bg, #eff8f3); color: var(--color-text, #142a24); font-family: system-ui, sans-serif; }
+:root[data-theme="dark"] .boot-shell { background: var(--color-bg, #07150d); color: var(--color-text, #eaf3f2); }
+.boot-shell__title { margin: 0; color: var(--color-primary, #0eae5b); font-size: clamp(2rem, 5vw, 3.5rem); }
+.boot-shell__form { width: min(100%, 42rem); }
+.boot-shell__label { display: block; margin-bottom: .65rem; font-size: .95rem; font-weight: 600; }
+.boot-shell__row { display: flex; gap: .5rem; }
+.boot-shell__row input { box-sizing: border-box; min-width: 0; flex: 1; padding: .9rem 1rem; border: 1px solid #75a88e; border-radius: .7rem; background: var(--surface-raised, #fff); color: inherit; font: inherit; }
+.boot-shell__row input:focus-visible, .boot-shell__button:focus-visible { outline: 3px solid var(--color-primary, #0eae5b); outline-offset: 2px; }
+.boot-shell__button { padding: .7rem 1rem; border: 0; border-radius: .7rem; background: var(--color-primary, #0eae5b); color: #082416; font: inherit; font-weight: 700; cursor: pointer; }
+@media (max-width: 450px) { .boot-shell__row { flex-direction: column; } }
