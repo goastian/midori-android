@@ -2,6 +2,7 @@ package org.midorinext.android.ui.tabs
 
 import androidx.compose.runtime.saveable.listSaver
 import mozilla.components.browser.state.state.TabSessionState
+import org.midorinext.android.preferences.app.TabsViewOption
 
 enum class TabsPage(val isPrivate: Boolean) {
     NORMAL(isPrivate = false),
@@ -148,4 +149,24 @@ fun SmartTabsState.forPageAndQuery(page: TabsPage, rawQuery: String): SmartTabsS
         inactiveTabs = inactiveTabs.filter { pageTabs(it) && matchesQuery(it) },
         groups = filteredGroups,
     )
+}
+
+internal fun SmartTabsState.selectedItemIndex(
+    selectedTabId: String?,
+    tabsViewOption: TabsViewOption,
+): Int {
+    if (selectedTabId == null) return -1
+    val groupIndex = groups.indexOfFirst { group -> group.tabs.any { it.id == selectedTabId } }
+    if (groupIndex >= 0) return groupIndex
+
+    val hasActiveHeader = activeTabs.isNotEmpty() && when (tabsViewOption) {
+        TabsViewOption.LIST -> groups.isNotEmpty() || inactiveTabs.isNotEmpty()
+        else -> groups.isEmpty()
+    }
+    val activeStart = groups.size + if (hasActiveHeader) 1 else 0
+    val activeIndex = activeTabs.indexOfFirst { it.id == selectedTabId }
+    if (activeIndex >= 0) return activeStart + activeIndex
+
+    val inactiveIndex = inactiveTabs.indexOfFirst { it.id == selectedTabId }
+    return if (inactiveIndex >= 0) activeStart + activeTabs.size + 1 + inactiveIndex else -1
 }

@@ -70,6 +70,9 @@ enum SearchEnginePreference {
   ECOSIA = 1;
   QWANT = 2;
   STARTPAGE = 3;
+  BING = 4;
+  GOOGLE = 5;
+  DUCKDUCKGO = 6;
 }
 
 message AppPreferences {
@@ -141,6 +144,7 @@ message AppPreferences {
   string custom_default_search_engine_id = 67;
   string custom_private_search_engine_id = 68;
   bool show_tab_strip = 69;
+  bool close_tabs_on_exit = 70;
 }
 
 message CustomSearchEngine {

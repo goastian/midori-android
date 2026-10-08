@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.work.Configuration
 import org.midorinext.android.migration.MigrationUtility
 import org.midorinext.android.mozac.GeckoPreferences
+import org.midorinext.android.mozac.BrowserSessionLifecycle
 import org.midorinext.android.adblock.AdBlockSettings
 import org.midorinext.android.adblock.AdBlockUpdateWorker
 import org.midorinext.android.adblock.AdBlockConfiguration
@@ -64,6 +65,15 @@ class MidoriApplication : Application(), Configuration.Provider {
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val postFirstFrameWorkStarted = AtomicBoolean(false)
+    private var browserStateRestoration: Job? = null
+    private val browserSessionLifecycle by lazy {
+        BrowserSessionLifecycle(
+            preferences = appPreferencesRepository.get().flow,
+            store = store.get(),
+            clearSavedSession = { withContext(Dispatchers.IO) { sessionStorage.get().clear() } },
+            restoreSavedSession = { tabsUseCases.get().restore(sessionStorage.get()) },
+        )
+    }
 
     /** Lazily initializes WorkManager when Mozilla's add-on updater first schedules work. */
     override val workManagerConfiguration: Configuration
@@ -112,7 +122,7 @@ class MidoriApplication : Application(), Configuration.Provider {
             }
         }
 
-        restoreBrowserState()
+        browserStateRestoration = restoreBrowserState()
 
         // TODO
         //  Should be removed in futur version, once mozilla has fully migrated
@@ -173,14 +183,19 @@ class MidoriApplication : Application(), Configuration.Provider {
 
     private fun restoreBrowserState() = applicationScope.launch(Dispatchers.Main) {
         migrateLegacyTabGroups(this@MidoriApplication, engine.get().name(), appPreferencesRepository.get())
+        browserSessionLifecycle.restore()
         sessionStorage.get().let {
-            tabsUseCases.get().restore(it)
             // Now that we have restored our previous state (if there's one) let's setup auto saving the state while the app is used.
             it.autoSave(store.get())
                 .periodicallyInForeground(interval = 30, unit = TimeUnit.SECONDS)
                 .whenGoingToBackground()
                 .whenSessionsChange()
         }
+    }
+
+    fun onBrowserClosed() = applicationScope.launch {
+        browserStateRestoration?.join()
+        browserSessionLifecycle.close()
     }
 
     override fun onTrimMemory(level: Int) {

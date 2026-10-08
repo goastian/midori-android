@@ -129,13 +129,23 @@ class MidoriApplicationViewModel @Inject constructor(
         }
     }
 
-    val zapOnQuit = appPreferencesRepository.flow
-        .map { it.clearDataOnQuit }
+    val showQuitApp = appPreferencesRepository.flow
+        .map { it.clearDataOnQuit || it.closeTabsOnExit }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
             initialValue = false
         )
+
+    fun quit(then: () -> Unit) {
+        viewModelScope.launch {
+            if (appPreferencesRepository.flow.first().clearDataOnQuit) {
+                zap(skipConfirmation = true) { success -> if (success) then() }
+            } else {
+                then()
+            }
+        }
+    }
 
     val zapState: ZapState = ZapState(clearDataUseCase, viewModelScope, cookieState)
     fun zap(

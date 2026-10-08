@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -84,11 +85,16 @@ fun BrowserScreen(
     var engineViewHolder: EngineView? by remember { mutableStateOf(null) }
     var pageSummary by remember { mutableStateOf<String?>(null) }
     var showBlockerDialog by remember { mutableStateOf(false) }
+    var newTabIntentConsumed by rememberSaveable(openNewTab) { mutableStateOf(false) }
 
     // Navigation to the tab tray disposes the browser surface. Reassert background media after
     // that surface is released so the playing tab remains active without keeping the UI alive.
     DisposableEffect(Unit) {
-        onDispose { viewModel.keepPlayingMediaWhileSurfaceIsHidden() }
+        onDispose {
+            viewModel.toolbarState.updateFocus(false)
+            context.activity?.forceHideKeyboard()
+            viewModel.keepPlayingMediaWhileSurfaceIsHidden()
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -96,10 +102,13 @@ fun BrowserScreen(
     }
 
     LaunchedEffect(openNewTab) {
-        when (openNewTab) {
-            TabOpening.NORMAL -> viewModel.openNewMidoriTab(private = false)
-            TabOpening.PRIVATE -> viewModel.openNewMidoriTab(private = true)
-            else -> {}
+        if (!newTabIntentConsumed) {
+            newTabIntentConsumed = true
+            when (openNewTab) {
+                TabOpening.NORMAL -> viewModel.openNewMidoriTab(private = false)
+                TabOpening.PRIVATE -> viewModel.openNewMidoriTab(private = true)
+                else -> {}
+            }
         }
     }
     LaunchedEffect(restoreComplete, tabCount) {
@@ -187,6 +196,10 @@ fun BrowserScreen(
                 }
             },
         )
+    }
+
+    BackHandler(enabled = appPrefs.closeTabsOnExit) {
+        appViewModel.quit { context.activity?.quit() }
     }
 
     // Register before the engine handler so page history and text selection take priority.
@@ -501,21 +514,10 @@ private fun ToolbarShortcutAction(
 fun ExitButton(
     appViewModel: MidoriApplicationViewModel
 ) {
-    val shouldZapOnQuit by appViewModel.zapOnQuit.collectAsStateWithLifecycle()
     val activity = LocalContext.current.activity
 
     ToolbarAction(onClick = {
-        if (shouldZapOnQuit) {
-            appViewModel.zap(skipConfirmation = true) { success ->
-                if (success) {
-                    activity?.quit()
-                } else {
-                    // TODO handle clear on quit fails
-                }
-            }
-        } else {
-            activity?.quit()
-        }
+        appViewModel.quit { activity?.quit() }
     }) {
         Icon(
             painter = painterResource(id = R.drawable.icons_close),

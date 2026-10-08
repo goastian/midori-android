@@ -56,6 +56,9 @@ class MidoriSuggestProvider @Inject constructor(
             "qwant" -> ("https://api.qwant.com/v3/suggest?client=opensearch&locale=%s&version=2&q=%s")
                 .format(context.selectedLocale().toString(), encoded)
             "startpage" -> "https://www.startpage.com/osuggestions?q=$encoded"
+            "bing" -> "https://www.bing.com/osjson.aspx?query=$encoded"
+            "google" -> "https://www.google.com/complete/search?client=firefox&q=$encoded"
+            "duckduckgo" -> "https://ac.duckduckgo.com/ac/?type=list&q=$encoded"
             else -> custom?.suggestionUrlTemplate
                 ?.takeIf { SearchEngines.isValidTemplate(it) }
                 ?.replace("%s", encoded)

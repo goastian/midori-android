@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items as gridItems
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -570,6 +571,8 @@ fun TabGroupTabsSheet(
     onTabSelected: (TabSessionState) -> Unit,
     onTabDeleted: (TabSessionState) -> Unit,
 ) {
+    val selectedIndex = group.tabs.indexOfFirst { it.id == selectedTabId }.coerceAtLeast(0)
+    val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = selectedIndex)
     ModalBottomSheet(onDismissRequest = onDismissRequest) {
         Column(
             modifier = Modifier
@@ -592,6 +595,7 @@ fun TabGroupTabsSheet(
                 }
             }
             LazyVerticalGrid(
+                state = gridState,
                 columns = GridCells.Adaptive(minSize = 150.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),

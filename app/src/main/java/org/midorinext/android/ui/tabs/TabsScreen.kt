@@ -2,6 +2,7 @@ package org.midorinext.android.ui.tabs
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -17,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.collect
 import org.midorinext.android.R
 import org.midorinext.android.preferences.app.TabsViewOption
 import org.midorinext.android.ui.MidoriApplicationViewModel
@@ -649,6 +651,43 @@ fun AnimatedTabList(
         val pageState = remember(smartTabs, targetPage, searchQuery) {
             smartTabs.forPageAndQuery(targetPage, searchQuery)
         }
+        val listState = when {
+            searchActive && targetPage.isPrivate -> privateSearchListState
+            searchActive -> normalSearchListState
+            targetPage.isPrivate -> privateListState
+            else -> normalListState
+        }
+        val gridState = when {
+            searchActive && targetPage.isPrivate -> privateSearchGridState
+            searchActive -> normalSearchGridState
+            targetPage.isPrivate -> privateGridState
+            else -> normalGridState
+        }
+        val selectedIndex = remember(pageState, selectedTabId, tabsViewOption) {
+            pageState.selectedItemIndex(selectedTabId, tabsViewOption)
+        }
+        var userHasScrolled by remember(selectedTabId, tabsViewOption, searchActive, selectionMode) {
+            mutableStateOf(false)
+        }
+        LaunchedEffect(selectedTabId, tabsViewOption, searchActive, selectionMode) {
+            val interactionSource = if (tabsViewOption == TabsViewOption.LIST) {
+                listState.interactionSource
+            } else {
+                gridState.interactionSource
+            }
+            interactionSource.interactions.collect { interaction ->
+                if (interaction is DragInteraction.Start) userHasScrolled = true
+            }
+        }
+        LaunchedEffect(selectedTabId, tabsViewOption, selectedIndex, searchActive, selectionMode) {
+            if (!searchActive && !selectionMode && !userHasScrolled && selectedIndex >= 0) {
+                if (tabsViewOption == TabsViewOption.LIST) {
+                    listState.scrollToItem(selectedIndex)
+                } else {
+                    gridState.scrollToItem(selectedIndex)
+                }
+            }
+        }
         val onTabSelected = { tab: SessionState ->
             if (selectionMode && !targetPage.isPrivate) {
                 onTabSelectionChange(tab.id)
@@ -671,18 +710,8 @@ fun AnimatedTabList(
                 selectedTabId = selectedTabId,
                 thumbnailStorage = tabsViewModel.thumbnailStorage,
                 browserIcons = tabsViewModel.browserIcons,
-                listState = when {
-                    searchActive && targetPage.isPrivate -> privateSearchListState
-                    searchActive -> normalSearchListState
-                    targetPage.isPrivate -> privateListState
-                    else -> normalListState
-                },
-                gridState = when {
-                    searchActive && targetPage.isPrivate -> privateSearchGridState
-                    searchActive -> normalSearchGridState
-                    targetPage.isPrivate -> privateGridState
-                    else -> normalGridState
-                },
+                listState = listState,
+                gridState = gridState,
                 modifier = Modifier.fillMaxHeight(),
                 onTabSelected = onTabSelected,
                 onTabDeleted = onTabDeleted,

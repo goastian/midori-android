@@ -17,6 +17,9 @@ object SearchEngines {
         SearchEnginePreference.ECOSIA,
         SearchEnginePreference.QWANT,
         SearchEnginePreference.STARTPAGE,
+        SearchEnginePreference.BING,
+        SearchEnginePreference.GOOGLE,
+        SearchEnginePreference.DUCKDUCKGO,
     )
 
     fun id(engine: SearchEnginePreference): String = engine.name.lowercase()
@@ -67,6 +70,9 @@ object SearchEngines {
             SearchEnginePreference.ECOSIA -> "https://www.ecosia.org/search?q=$encoded"
             SearchEnginePreference.QWANT -> "https://www.qwant.com/?q=$encoded"
             SearchEnginePreference.STARTPAGE -> "https://www.startpage.com/sp/search?query=$encoded"
+            SearchEnginePreference.BING -> "https://www.bing.com/search?q=$encoded"
+            SearchEnginePreference.GOOGLE -> "https://www.google.com/search?q=$encoded"
+            SearchEnginePreference.DUCKDUCKGO -> "https://duckduckgo.com/?q=$encoded"
             SearchEnginePreference.ASTIANGO, SearchEnginePreference.UNRECOGNIZED -> astianGoUrl()
         }
     }

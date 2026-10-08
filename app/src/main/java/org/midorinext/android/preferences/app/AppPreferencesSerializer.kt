@@ -13,6 +13,7 @@ object AppPreferencesSerializer : Serializer<AppPreferences> {
         .setToolbarPosition(ToolbarPosition.BOTTOM)
         .setHideToolbarOnScroll(true)
         .setTabsView(TabsViewOption.GRID)
+        .setCloseTabsOnExit(false)
         .setOpenLinksInApp(true)
         .setClearDataOnQuit(false)
         .setClearDataHistory(true)

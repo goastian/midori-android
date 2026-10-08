@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -139,6 +140,17 @@ class BrowserToolbarState @AssistedInject constructor(
             started = SharingStarted.Eagerly,
             initialValue = ""
         )
+
+    init {
+        store.flow()
+            .map { it.selectedTabId }
+            .distinctUntilChanged()
+            .onEach {
+                updateFocus(false)
+                updateVisibility(true)
+            }
+            .launchIn(coroutineScope)
+    }
 
     override fun updateFocus(hasFocus: Boolean) {
         super.updateFocus(hasFocus)

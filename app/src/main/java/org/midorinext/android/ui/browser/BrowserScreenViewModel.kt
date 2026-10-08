@@ -631,26 +631,14 @@ class BrowserScreenViewModel @Inject constructor(
         }
     }
 
-    fun openNewMidoriTab(private: Boolean = false, focusToolbar: Boolean = true) {
-        val previousSelectedTabId = store.state.selectedTabId
+    fun openNewMidoriTab(private: Boolean = false) {
+        toolbarState.updateFocus(false)
         if (private) {
             MidoriUseCases.openPrivatePage()
         } else if (!MidoriUseCases.isNewTabEnabled && openBlankNewTab) {
             tabsUseCases.addTab("", selectTab = true, private = false)
         } else {
             MidoriUseCases.openMidoriPage(private = false)
-        }
-        if (!focusToolbar || store.state.selectedTabId != previousSelectedTabId) {
-            toolbarState.updateFocus(focusToolbar)
-        } else {
-            // Store dispatch can complete asynchronously. Observe the actual selected-tab change
-            // instead of guessing when navigation is ready with a fixed delay.
-            viewModelScope.launch {
-                store.flow()
-                    .map { state -> state.selectedTabId }
-                    .first { selectedTabId -> selectedTabId != previousSelectedTabId }
-                toolbarState.updateFocus(true)
-            }
         }
     }
 
@@ -716,7 +704,7 @@ class BrowserScreenViewModel @Inject constructor(
 
         safetyTabOpening = true
         try {
-            openNewMidoriTab(focusToolbar = false)
+            openNewMidoriTab()
         } finally {
             safetyTabOpening = false
         }

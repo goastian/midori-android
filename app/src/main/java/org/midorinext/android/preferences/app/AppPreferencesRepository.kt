@@ -175,6 +175,10 @@ class AppPreferencesRepository @Inject constructor(
         }
     }
 
+    suspend fun updateCloseTabsOnExit(enabled: Boolean) {
+        datastore.updateData { it.toBuilder().setCloseTabsOnExit(enabled).build() }
+    }
+
     suspend fun updateTabGroupColor(groupId: String, color: Int) {
         datastore.updateData { preferences ->
             preferences.toBuilder()

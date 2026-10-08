@@ -5,8 +5,31 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 
 class AppPreferencesSerializerTest {
+    @Test
+    fun closeTabsOnExitRequiresOptInForNewAndExistingProfiles() {
+        assertFalse(AppPreferencesSerializer.defaultValue.closeTabsOnExit)
+        assertFalse(AppPreferences.parseFrom(byteArrayOf()).closeTabsOnExit)
+    }
+
+    @Test
+    fun persistsCloseTabsOnExitWithoutEnablingDataDeletion() = runBlocking {
+        val preferences = AppPreferencesSerializer.defaultValue.toBuilder()
+            .setCloseTabsOnExit(true)
+            .build()
+        val output = ByteArrayOutputStream()
+
+        AppPreferencesSerializer.writeTo(preferences, output)
+        val restored = AppPreferencesSerializer.readFrom(ByteArrayInputStream(output.toByteArray()))
+
+        assertTrue(restored.closeTabsOnExit)
+        assertFalse(restored.clearDataOnQuit)
+        assertEquals(preferences, restored)
+    }
+
     @Test
     fun newTabHomeIsShownByDefault() {
         assertFalse(AppPreferencesSerializer.defaultValue.openBlankNewTab)

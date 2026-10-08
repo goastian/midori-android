@@ -140,6 +140,10 @@ class PreferencesViewModel @Inject constructor(
         viewModelScope.launch { appPreferencesRepository.updateShowTabStrip(enabled) }
     }
 
+    fun updateCloseTabsOnExit(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateCloseTabsOnExit(enabled) }
+    }
+
     fun updateOpenLinksInApp(openInApp: Boolean) {
         viewModelScope.launch { appPreferencesRepository.updateOpenLinksInApp(openInApp) }
     }

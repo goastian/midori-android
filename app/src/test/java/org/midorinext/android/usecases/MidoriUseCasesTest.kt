@@ -36,9 +36,51 @@ class MidoriUseCasesTest {
             SearchEngines.url(SearchEnginePreference.STARTPAGE, query) { "https://astiango.com" },
         )
         assertEquals(
+            "https://www.bing.com/search?q=$encoded",
+            SearchEngines.url(SearchEnginePreference.BING, query) { "https://astiango.com" },
+        )
+        assertEquals(
+            "https://www.google.com/search?q=$encoded",
+            SearchEngines.url(SearchEnginePreference.GOOGLE, query) { "https://astiango.com" },
+        )
+        assertEquals(
+            "https://duckduckgo.com/?q=$encoded",
+            SearchEngines.url(SearchEnginePreference.DUCKDUCKGO, query) { "https://astiango.com" },
+        )
+        assertEquals(
             "https://astiango.com",
             SearchEngines.url(SearchEnginePreference.ASTIANGO, query) { "https://astiango.com" },
         )
+    }
+
+    @Test
+    fun newSearchEnginesAreAvailableAndPersistForNormalAndPrivateBrowsing() {
+        val engines = listOf(
+            SearchEnginePreference.BING to "https://www.bing.com/search?q=privacy",
+            SearchEnginePreference.GOOGLE to "https://www.google.com/search?q=privacy",
+            SearchEnginePreference.DUCKDUCKGO to "https://duckduckgo.com/?q=privacy",
+        )
+        engines.forEach { (engine, expectedUrl) ->
+            val saved = AppPreferences.newBuilder()
+                .setSearchEngine(engine)
+                .setPrivateSearchEngine(engine)
+                .setUseSeparatePrivateSearchEngine(true)
+                .build()
+            val restored = AppPreferences.parseFrom(saved.toByteArray())
+            assertEquals(engine, restored.searchEngine)
+            assertEquals(engine, restored.privateSearchEngine)
+            val id = SearchEngines.id(engine)
+            assertEquals(true, SearchEngines.options(restored).any { it.id == id })
+            listOf(false, true).forEach { private ->
+                assertEquals(id, SearchEngines.selectedId(restored, private))
+                assertEquals(
+                    expectedUrl,
+                    SearchEngines.url(restored, SearchEngines.selectedId(restored, private), "privacy") {
+                        error("The selected search engine should handle the query")
+                    },
+                )
+            }
+        }
     }
 
     @Test

@@ -243,6 +243,9 @@ internal fun searchEngineNameResource(engine: SearchEnginePreference): Int = whe
     SearchEnginePreference.ECOSIA -> R.string.search_engine_ecosia
     SearchEnginePreference.QWANT -> R.string.search_engine_qwant
     SearchEnginePreference.STARTPAGE -> R.string.search_engine_startpage
+    SearchEnginePreference.BING -> R.string.search_engine_bing
+    SearchEnginePreference.GOOGLE -> R.string.search_engine_google
+    SearchEnginePreference.DUCKDUCKGO -> R.string.search_engine_duckduckgo
     SearchEnginePreference.ASTIANGO, SearchEnginePreference.UNRECOGNIZED -> R.string.search_engine_current_midori
 }
 
@@ -333,6 +336,12 @@ fun CustomizeSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
             description = R.string.tab_strip_description,
             value = appPrefs.showTabStrip,
             onValueChange = viewModel::updateShowTabStrip
+        )
+        PreferenceToggle(
+            label = R.string.close_tabs_on_exit_label,
+            description = R.string.close_tabs_on_exit_description,
+            value = appPrefs.closeTabsOnExit,
+            onValueChange = viewModel::updateCloseTabsOnExit
         )
 
         PreferenceGroupLabel(label = R.string.settings_customize_shortcut)

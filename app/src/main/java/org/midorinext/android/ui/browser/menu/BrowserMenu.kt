@@ -147,7 +147,7 @@ private fun BrowserMenuContent(
     onTranslateClick: () -> Unit,
 ) {
     val isMidoriVpnActionAvailable by viewModel.isMidoriVpnActionAvailable.collectAsStateWithLifecycle()
-    val showQuitApp by applicationViewModel.zapOnQuit.collectAsStateWithLifecycle()
+    val showQuitApp by applicationViewModel.showQuitApp.collectAsStateWithLifecycle()
 
     val toolbarAtBottom = toolbarPosition == ToolbarPosition.BOTTOM
 
@@ -350,11 +350,7 @@ private fun BrowserMenuSettings(
             text = stringResource(id = R.string.menu_quit_app),
             icon = R.drawable.icons_close,
             onClick = {
-                applicationViewModel.zap(skipConfirmation = true) { success ->
-                    if (success) {
-                        activity?.quit()
-                    }
-                }
+                applicationViewModel.quit { activity?.quit() }
             },
         )
     }

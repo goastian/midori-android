@@ -115,7 +115,7 @@ fun ToolbarInput(
                 // Entering edit mode moves the toolbar into a full-screen composition. The old
                 // text field reports focus loss while it is disposed, so only promote focus here;
                 // all exit paths explicitly clear the toolbar state.
-                if (it.hasFocus) {
+                if (it.hasFocus && !toolbarState.hasFocus) {
                     toolbarState.updateFocus(true)
                 }
             }

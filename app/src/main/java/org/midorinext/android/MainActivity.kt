@@ -58,4 +58,11 @@ class MainActivity : MidoriActivity() {
         super.onResume()
         backgroundPlaybackFeature.onBrowserActivityResumed()
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (isFinishing) {
+            (application as MidoriApplication).onBrowserClosed()
+        }
+    }
 }

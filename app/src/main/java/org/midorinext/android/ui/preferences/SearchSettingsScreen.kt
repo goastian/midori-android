@@ -269,6 +269,9 @@ private fun SearchEngineIcon(option: SearchEngineOption, modifier: Modifier = Mo
         SearchEnginePreference.ECOSIA -> "https://www.ecosia.org/favicon.ico"
         SearchEnginePreference.QWANT -> "https://www.qwant.com/favicon.ico"
         SearchEnginePreference.STARTPAGE -> "https://www.startpage.com/favicon.ico"
+        SearchEnginePreference.BING -> "https://www.bing.com/favicon.ico"
+        SearchEnginePreference.GOOGLE -> "https://www.google.com/favicon.ico"
+        SearchEnginePreference.DUCKDUCKGO -> "https://duckduckgo.com/favicon.ico"
         else -> null
     }
     if (iconUrl != null) {
