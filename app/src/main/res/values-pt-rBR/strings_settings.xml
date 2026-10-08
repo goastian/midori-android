@@ -17,6 +17,8 @@
     <string name="tabs_view_label">Configurações da guia</string>
     <string name="tab_strip_label">Mostrar barra de guias</string>
     <string name="tab_strip_description">Mostra as guias abertas na parte superior do navegador.</string>
+    <string name="close_tabs_on_exit_label">Fechar abas ao sair</string>
+    <string name="close_tabs_on_exit_description">Fecha todas as abas ao sair do Midori ou removê-lo dos aplicativos recentes. Ao voltar, uma nova aba será aberta.</string>
     <string name="available_tabs_view_grid">Grade</string>
     <string name="available_tabs_view_list">Lista</string>
     <string name="show_new_tab_home_label">Usar a tela Nova guia</string>

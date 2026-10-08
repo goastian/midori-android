@@ -17,6 +17,8 @@
     <string name="tabs_view_label">Настройки вкладки</string>
     <string name="tab_strip_label">Показывать панель вкладок</string>
     <string name="tab_strip_description">Показывать открытые вкладки в верхней части браузера.</string>
+    <string name="close_tabs_on_exit_label">Закрывать вкладки при выходе</string>
+    <string name="close_tabs_on_exit_description">Закрывать все вкладки при выходе из Midori или удалении его из списка недавних приложений. При следующем запуске откроется новая вкладка.</string>
     <string name="available_tabs_view_grid">Сетка</string>
     <string name="available_tabs_view_list">Список</string>
     <string name="show_new_tab_home_label">Использовать экран новой вкладки</string>

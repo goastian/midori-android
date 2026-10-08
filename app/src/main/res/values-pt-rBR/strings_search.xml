@@ -34,6 +34,9 @@
     <string name="search_engine_ecosia">Ecosia</string>
     <string name="search_engine_qwant">Qwant</string>
     <string name="search_engine_startpage">Startpage</string>
+    <string name="search_engine_bing">Bing</string>
+    <string name="search_engine_google">Google</string>
+    <string name="search_engine_duckduckgo">DuckDuckGo</string>
     <string name="settings_bookmarks_current_tab">Abrir favoritos na aba atual</string>
     <string name="settings_bookmarks_current_tab_summary">Usar a aba atual ao tocar em um favorito</string>
     <string name="download_file_name">Nome do arquivo</string>

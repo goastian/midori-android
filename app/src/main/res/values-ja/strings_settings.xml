@@ -17,6 +17,8 @@
     <string name="tabs_view_label">タブの設定</string>
     <string name="tab_strip_label">タブバーを表示</string>
     <string name="tab_strip_description">開いているタブをブラウザーの上部に表示します。</string>
+    <string name="close_tabs_on_exit_label">終了時にタブを閉じる</string>
+    <string name="close_tabs_on_exit_description">Midori を終了するか、最近使ったアプリから削除すると、すべてのタブを閉じます。次回起動時は新しいタブが開きます。</string>
     <string name="available_tabs_view_grid">グリッド</string>
     <string name="available_tabs_view_list">リスト</string>
     <string name="show_new_tab_home_label">新しいタブ画面を使用する</string>

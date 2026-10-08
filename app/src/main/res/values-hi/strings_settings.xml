@@ -17,6 +17,8 @@
     <string name="tabs_view_label">टैब सेटिंग्स</string>
     <string name="tab_strip_label">टैब बार दिखाएँ</string>
     <string name="tab_strip_description">खुले टैब ब्राउज़र के ऊपर दिखाएँ।</string>
+    <string name="close_tabs_on_exit_label">बाहर निकलने पर टैब बंद करें</string>
+    <string name="close_tabs_on_exit_description">Midori से बाहर निकलने या उसे हाल के ऐप्लिकेशन से हटाने पर सभी टैब बंद करें। अगली बार एक नया टैब खुलेगा।</string>
     <string name="available_tabs_view_grid">ग्रिड</string>
     <string name="available_tabs_view_list">सूची</string>
     <string name="show_new_tab_home_label">नई टैब स्क्रीन का उपयोग करें</string>

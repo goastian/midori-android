@@ -19,6 +19,8 @@
     <string name="tabs_view_label">Impostazioni della scheda</string>
     <string name="tab_strip_label">Mostra la barra delle schede</string>
     <string name="tab_strip_description">Mostra le schede aperte nella parte superiore del browser.</string>
+    <string name="close_tabs_on_exit_label">Chiudi le schede all’uscita</string>
+    <string name="close_tabs_on_exit_description">Chiudi tutte le schede quando esci da Midori o lo rimuovi dalle app recenti. Al prossimo avvio si aprirà una nuova scheda.</string>
     <string name="available_tabs_view_grid">Griglia</string>
     <string name="available_tabs_view_list">Elenco</string>
 

@@ -20,6 +20,8 @@
     <string name="tabs_view_label">Tabeinstellungen</string>
     <string name="tab_strip_label">Tableiste anzeigen</string>
     <string name="tab_strip_description">Offene Tabs oben im Browser anzeigen.</string>
+    <string name="close_tabs_on_exit_label">Tabs beim Beenden schließen</string>
+    <string name="close_tabs_on_exit_description">Alle Tabs schließen, wenn du Midori beendest oder aus den zuletzt verwendeten Apps entfernst. Beim nächsten Start wird ein neuer Tab geöffnet.</string>
     <string name="available_tabs_view_grid">Raster</string>
     <string name="available_tabs_view_list">Liste</string>
 

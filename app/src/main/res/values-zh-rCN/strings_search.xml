@@ -34,6 +34,9 @@
     <string name="search_engine_ecosia">Ecosia</string>
     <string name="search_engine_qwant">Qwant</string>
     <string name="search_engine_startpage">Startpage</string>
+    <string name="search_engine_bing">Bing</string>
+    <string name="search_engine_google">Google</string>
+    <string name="search_engine_duckduckgo">DuckDuckGo</string>
     <string name="settings_bookmarks_current_tab">在当前标签页中打开书签</string>
     <string name="settings_bookmarks_current_tab_summary">点按书签时使用当前标签页</string>
     <string name="download_file_name">文件名</string>

@@ -16,6 +16,8 @@
     <string name="tabs_view_label">Paramètres des onglets</string>
     <string name="tab_strip_label">Afficher la barre d’onglets</string>
     <string name="tab_strip_description">Afficher les onglets ouverts en haut du navigateur.</string>
+    <string name="close_tabs_on_exit_label">Fermer les onglets en quittant</string>
+    <string name="close_tabs_on_exit_description">Fermez tous les onglets en quittant Midori ou en le retirant des applications récentes. Au prochain lancement, un nouvel onglet s’ouvrira.</string>
     <string name="available_tabs_view_grid">Grille</string>
     <string name="available_tabs_view_list">Liste</string>
 

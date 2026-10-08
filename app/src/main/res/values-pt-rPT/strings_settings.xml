@@ -17,6 +17,8 @@
     <string name="tabs_view_label">Configurações da guia</string>
     <string name="tab_strip_label">Mostrar barra de separadores</string>
     <string name="tab_strip_description">Mostra os separadores abertos na parte superior do navegador.</string>
+    <string name="close_tabs_on_exit_label">Fechar separadores ao sair</string>
+    <string name="close_tabs_on_exit_description">Fecha todos os separadores ao sair do Midori ou ao removê-lo das aplicações recentes. Ao voltar, será aberto um novo separador.</string>
     <string name="available_tabs_view_grid">Grade</string>
     <string name="available_tabs_view_list">Lista</string>
     <string name="show_new_tab_home_label">Utilizar o ecrã Nova guia</string>

@@ -17,6 +17,8 @@
     <string name="tabs_view_label">Tab settings</string>
     <string name="tab_strip_label">Shfaq shiritin e skedave</string>
     <string name="tab_strip_description">Shfaq skedat e hapura në krye të shfletuesit.</string>
+    <string name="close_tabs_on_exit_label">Mbyll skedat në dalje</string>
+    <string name="close_tabs_on_exit_description">Mbyll të gjitha skedat kur dilni nga Midori ose e hiqni nga aplikacionet e fundit. Herën tjetër do të hapet një skedë e re.</string>
     <string name="available_tabs_view_grid">Grid</string>
     <string name="available_tabs_view_list">List</string>
     <string name="show_new_tab_home_label">Use New Tab screen</string>

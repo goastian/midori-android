@@ -28,6 +28,8 @@
     <string name="tabs_view_label">Tab settings</string>
     <string name="tab_strip_label">Show tab bar</string>
     <string name="tab_strip_description">Show open tabs in a bar at the top of the browser.</string>
+    <string name="close_tabs_on_exit_label">Close tabs on exit</string>
+    <string name="close_tabs_on_exit_description">Close all tabs when you quit Midori or remove it from recent apps. Start with a new tab next time.</string>
     <string name="available_tabs_view_grid">Grid</string>
     <string name="available_tabs_view_list">List</string>
     <string name="show_new_tab_home_label">Use New Tab screen</string>
@@ -163,6 +165,9 @@
     <string name="search_engine_ecosia">Ecosia</string>
     <string name="search_engine_qwant">Qwant</string>
     <string name="search_engine_startpage">Startpage</string>
+    <string name="search_engine_bing">Bing</string>
+    <string name="search_engine_google">Google</string>
+    <string name="search_engine_duckduckgo">DuckDuckGo</string>
     <string name="settings_bookmarks_current_tab">Open bookmarks in current tab</string>
     <string name="settings_bookmarks_current_tab_summary">Use the current tab when tapping a bookmark</string>
     <string name="download_file_name">File name</string>
