@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_search_title">Choisissez votre moteur de recherche</string>
+    <string name="onboarding_search_description">Sélectionnez le moteur de recherche par défaut pour la barre d’adresse.</string>
+    <string name="onboarding_search_hint">Vous pourrez le modifier plus tard dans les paramètres.</string>
+</resources>

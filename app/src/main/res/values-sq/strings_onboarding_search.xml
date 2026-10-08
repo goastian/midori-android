@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_search_title">Zgjidh motorin e kërkimit</string>
+    <string name="onboarding_search_description">Zgjidh motorin e parazgjedhur të kërkimit për shiritin e adresave.</string>
+    <string name="onboarding_search_hint">Mund ta ndryshosh më vonë te Cilësimet.</string>
+</resources>

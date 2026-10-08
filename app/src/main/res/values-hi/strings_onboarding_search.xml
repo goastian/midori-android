@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_search_title">अपना खोज इंजन चुनें</string>
+    <string name="onboarding_search_description">पता बार के लिए डिफ़ॉल्ट खोज इंजन चुनें।</string>
+    <string name="onboarding_search_hint">आप इसे बाद में सेटिंग में बदल सकते हैं।</string>
+</resources>

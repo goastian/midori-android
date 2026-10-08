@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_search_title">検索エンジンを選択</string>
+    <string name="onboarding_search_description">アドレスバーで使う既定の検索エンジンを選択してください。</string>
+    <string name="onboarding_search_hint">後から設定で変更できます。</string>
+</resources>

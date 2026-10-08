@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_search_title">Elige tu buscador</string>
+    <string name="onboarding_search_description">Selecciona el buscador predeterminado para la barra de direcciones.</string>
+    <string name="onboarding_search_hint">Puedes cambiarlo después en Ajustes.</string>
+</resources>

@@ -22,6 +22,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +44,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -77,7 +80,9 @@ import androidx.core.view.WindowCompat
 import org.midorinext.android.R
 import org.midorinext.android.adblock.BlockingLevel
 import org.midorinext.android.ext.openDefaultAppsSystemSettings
+import org.midorinext.android.preferences.app.SearchEnginePreference
 import org.midorinext.android.preferences.app.ToolbarPosition
+import org.midorinext.android.ui.preferences.searchEngineName
 import org.midorinext.android.ui.theme.OnboardingBorder
 import org.midorinext.android.ui.theme.OnboardingGreen
 import org.midorinext.android.ui.theme.OnboardingGreenDeep
@@ -89,14 +94,17 @@ import org.midorinext.android.ui.theme.OnboardingPaper
 import org.midorinext.android.ui.theme.OnboardingPaperRaised
 import org.midorinext.android.ui.animation.reduceMotionRequested
 import org.midorinext.android.widget.WidgetProvider
+import org.midorinext.android.usecases.SearchEngines
 
-private const val OnboardingPageCount = 5
+private const val OnboardingPageCount = 6
 
 @Composable
 fun MidoriOnboarding(
     onToolbarPositionSelected: (ToolbarPosition) -> Unit,
     blockingLevel: BlockingLevel,
     onBlockingLevelSelected: (BlockingLevel) -> Unit,
+    searchEngine: SearchEnginePreference,
+    onSearchEngineSelected: (SearchEnginePreference) -> Unit,
     onComplete: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -123,7 +131,7 @@ fun MidoriOnboarding(
                 requestPinnedWidget(context)
                 advance()
             }
-            3 -> advance()
+            3, 4 -> advance()
             else -> onComplete()
         }
     }
@@ -174,6 +182,7 @@ fun MidoriOnboarding(
                         )
                     }
                 )
+                4 -> SearchEnginePage(searchEngine, onSearchEngineSelected)
                 else -> AdBlockPage(blockingLevel, onBlockingLevelSelected)
             }
         }
@@ -182,6 +191,66 @@ fun MidoriOnboarding(
             page = page,
             onPrimary = handlePrimaryAction,
             onSkip = advance,
+        )
+    }
+}
+
+@Composable
+private fun SearchEnginePage(
+    selectedEngine: SearchEnginePreference,
+    onSelected: (SearchEnginePreference) -> Unit,
+) {
+    PageColumn(verticalArrangement = Arrangement.spacedBy(24.dp)) {
+        PageTitle(
+            title = stringResource(R.string.onboarding_search_title),
+            description = stringResource(R.string.onboarding_search_description),
+        )
+        Column(
+            modifier = Modifier.selectableGroup(),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            SearchEngines.builtInEngines.forEach { engine ->
+                val selected = selectedEngine == engine
+                Surface(
+                    modifier = Modifier.fillMaxWidth().selectable(
+                        selected = selected,
+                        role = Role.RadioButton,
+                        onClick = { onSelected(engine) },
+                    ),
+                    shape = RoundedCornerShape(18.dp),
+                    color = OnboardingPaperRaised,
+                    border = androidx.compose.foundation.BorderStroke(
+                        if (selected) 2.dp else 1.dp,
+                        if (selected) OnboardingGreen else OnboardingBorder,
+                    ),
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        RadioButton(
+                            selected = selected,
+                            onClick = null,
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = OnboardingGreenDeep,
+                                unselectedColor = OnboardingMutedInk,
+                            ),
+                        )
+                        Text(
+                            text = searchEngineName(engine),
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = OnboardingInk,
+                        )
+                    }
+                }
+            }
+        }
+        Text(
+            text = stringResource(R.string.onboarding_search_hint),
+            style = MaterialTheme.typography.bodyMedium,
+            color = OnboardingMutedInk,
         )
     }
 }
@@ -594,6 +663,7 @@ private fun OnboardingActions(
         1 -> stringResource(R.string.onboarding_default_set)
         2 -> stringResource(R.string.onboarding_widget_add)
         3 -> stringResource(R.string.onboarding_welcome_continue)
+        4 -> stringResource(R.string.welcome_continue)
         else -> stringResource(R.string.onboarding_finish)
     }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {

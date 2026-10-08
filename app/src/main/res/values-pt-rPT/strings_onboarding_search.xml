@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_search_title">Escolhe o teu motor de pesquisa</string>
+    <string name="onboarding_search_description">Seleciona o motor de pesquisa predefinido para a barra de endereço.</string>
+    <string name="onboarding_search_hint">Podes alterá-lo mais tarde nas Definições.</string>
+</resources>

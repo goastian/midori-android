@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_search_title">选择搜索引擎</string>
+    <string name="onboarding_search_description">选择地址栏使用的默认搜索引擎。</string>
+    <string name="onboarding_search_hint">你可以稍后在设置中更改。</string>
+</resources>

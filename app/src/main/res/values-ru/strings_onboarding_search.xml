@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_search_title">Выберите поисковую систему</string>
+    <string name="onboarding_search_description">Выберите поисковую систему по умолчанию для адресной строки.</string>
+    <string name="onboarding_search_hint">Вы сможете изменить её позже в настройках.</string>
+</resources>

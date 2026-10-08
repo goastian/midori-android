@@ -10,6 +10,7 @@ import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.adblock.AdBlockSettings
 import org.midorinext.android.adblock.BlockingLevel
 import org.midorinext.android.preferences.app.Appearance
+import org.midorinext.android.preferences.app.SearchEnginePreference
 import org.midorinext.android.preferences.app.ToolbarPosition
 import org.midorinext.android.storage.history.HistoryRepository
 import org.midorinext.android.ui.zap.ZapState
@@ -126,6 +127,26 @@ class MidoriApplicationViewModel @Inject constructor(
     fun updateToolbarPosition(position: ToolbarPosition) {
         viewModelScope.launch {
             appPreferencesRepository.updateToolbarPosition(position)
+        }
+    }
+
+    val searchEngine = appPreferencesRepository.flow
+        .map { preferences ->
+            if (preferences.searchEngine == SearchEnginePreference.UNRECOGNIZED) {
+                SearchEnginePreference.ASTIANGO
+            } else {
+                preferences.searchEngine
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = SearchEnginePreference.ASTIANGO,
+        )
+
+    fun updateSearchEngine(engine: SearchEnginePreference) {
+        viewModelScope.launch {
+            appPreferencesRepository.updateSearchEngine(engine)
         }
     }
 

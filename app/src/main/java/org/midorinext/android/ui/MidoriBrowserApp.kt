@@ -74,10 +74,13 @@ fun MidoriBrowserApp(
         privacy = isPrivate
     ) {
         if (showOnboarding) {
+            val searchEngine by applicationViewModel.searchEngine.collectAsStateWithLifecycle()
             MidoriOnboarding(
                 onToolbarPositionSelected = applicationViewModel::updateToolbarPosition,
                 blockingLevel = adBlockConfiguration.level,
                 onBlockingLevelSelected = applicationViewModel::updateBlockingLevel,
+                searchEngine = searchEngine,
+                onSearchEngineSelected = applicationViewModel::updateSearchEngine,
                 onComplete = {
                     onboardingPreferences.edit().putBoolean(onboardingKey, false).apply()
                     showOnboarding = false

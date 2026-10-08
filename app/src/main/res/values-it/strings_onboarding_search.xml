@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_search_title">Scegli il tuo motore di ricerca</string>
+    <string name="onboarding_search_description">Seleziona il motore di ricerca predefinito per la barra degli indirizzi.</string>
+    <string name="onboarding_search_hint">Puoi cambiarlo in seguito nelle Impostazioni.</string>
+</resources>

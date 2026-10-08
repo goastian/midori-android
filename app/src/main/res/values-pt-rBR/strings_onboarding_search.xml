@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_search_title">Escolha seu mecanismo de pesquisa</string>
+    <string name="onboarding_search_description">Selecione o mecanismo de pesquisa padrão para a barra de endereços.</string>
+    <string name="onboarding_search_hint">Você pode alterá-lo depois nas Configurações.</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_search_title">Wähle deine Suchmaschine</string>
+    <string name="onboarding_search_description">Wähle die Standardsuchmaschine für die Adressleiste.</string>
+    <string name="onboarding_search_hint">Du kannst sie später in den Einstellungen ändern.</string>
+</resources>
