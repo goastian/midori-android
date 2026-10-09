@@ -89,6 +89,7 @@ class DesktopHostFilter @Inject constructor(
     private val sources: NativeFilterSources,
 ) {
     private val counts = WeakHashMap<EngineSession, Int>()
+    private val networkCounts = WeakHashMap<EngineSession, Int>()
     private val sessionHosts = WeakHashMap<EngineSession, String>()
     private val countsRevision = MutableStateFlow(0L)
     val changes = countsRevision.asStateFlow()
@@ -107,13 +108,23 @@ class DesktopHostFilter @Inject constructor(
     fun beginPage(session: EngineSession, url: String) {
         synchronized(counts) {
             if (counts.remove(session) != null) countsRevision.update { it + 1 }
+            if (networkCounts.remove(session) != null) countsRevision.update { it + 1 }
             sessionHosts.remove(session)
             hostOf(url)?.let { sessionHosts[session] = it }
         }
     }
 
     fun blockedCount(session: EngineSession?): Int =
-        if (session == null) 0 else synchronized(counts) { counts[session] ?: 0 }
+        if (session == null) 0 else synchronized(counts) { (counts[session] ?: 0) + (networkCounts[session] ?: 0) }
+
+    fun updateNetworkCount(session: EngineSession, count: Int) {
+        synchronized(counts) {
+            val next = count.coerceIn(0, 1_000_000)
+            if (networkCounts[session] == next) return
+            networkCounts[session] = next
+            countsRevision.update { it + 1 }
+        }
+    }
 
     fun blocksSubframe(session: EngineSession, url: String, isSameDomain: Boolean): Boolean {
         if (isSameDomain) return false

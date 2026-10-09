@@ -50,7 +50,7 @@ class CookieBannerPolicyTest {
         assertTrue("qwant-cookie-android@qwant.com" in LegacyBlockerMigration.LEGACY_IDS)
         assertFalse(File("src/main/assets/midori_cookies/manifest.json").exists())
         val manifest = JSONObject(File("src/main/assets/adblock/content/manifest.json").readText())
-        assertEquals(CookieBannerFeature.EXTENSION_ID,
+        assertEquals(NativeContentBlockingFeature.EXTENSION_ID,
             manifest.getJSONObject("browser_specific_settings").getJSONObject("gecko").getString("id"))
         val permissions = manifest.getJSONArray("permissions")
         assertFalse((0 until permissions.length()).map(permissions::getString).any { it == "cookies" || it == "storage" })

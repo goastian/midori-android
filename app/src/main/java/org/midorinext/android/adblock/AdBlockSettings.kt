@@ -31,6 +31,11 @@ data class AdBlockConfiguration(
 ) {
     fun levelFor(url: String): BlockingLevel = hostOf(url)?.let(siteLevels::get) ?: level
 
+    internal fun hasBlockingSites(): Boolean = level != BlockingLevel.OFF || siteLevels.values.any { it != BlockingLevel.OFF }
+
+    internal fun hasAdBlockingSites(): Boolean = level == BlockingLevel.TRACKERS_AND_ADS ||
+        BlockingLevel.TRACKERS_AND_ADS in siteLevels.values
+
     fun rejectsCookieBannersFor(url: String): Boolean =
         rejectCookieBanners && levelFor(url) != BlockingLevel.OFF &&
             runCatching { URI(url).scheme in setOf("http", "https") && hostOf(url) != null }.getOrDefault(false)

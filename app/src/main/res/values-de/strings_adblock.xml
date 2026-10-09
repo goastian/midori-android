@@ -15,7 +15,7 @@
     <string name="adblock_ad_sources">Werbequellen verwalten</string>
     <string name="adblock_strict">Strenge Blockierung</string>
     <string name="adblock_strict_description">Stärkeren Trackerschutz verwenden. Manche Websites funktionieren möglicherweise nicht richtig.</string>
-    <string name="adblock_scope_note">Offizielle und eigene Listen blockieren unterstützte Anfragen von Drittanbieter-Frames. GeckoView verwaltet seinen eigenen Trackerschutz.</string>
+    <string name="adblock_scope_note">Blockiert passende Seitenanfragen und übliche Werbeflächen. Ausnahmen pro Website werden berücksichtigt.</string>
     <string name="adblock_add_site">Website hinzufügen</string>
     <string name="adblock_no_sites">Noch keine Ausnahmen</string>
     <string name="adblock_remove">Entfernen</string>
@@ -33,7 +33,7 @@
     <string name="adblock_refresh">Aktualisieren</string>
     <string name="adblock_source_url">HTTPS-Quell-URL</string>
     <string name="adblock_invalid_source">Eindeutige HTTPS-URL eingeben</string>
-    <string name="adblock_source_format">Unterstützt Netzwerkregeln für Domains und Pfade. Kosmetische Regeln und Scriptlets werden ignoriert.</string>
+    <string name="adblock_source_format">Unterstützt Regeln für Domains, Pfade, Websites und Ressourcentypen. Eigene kosmetische Regeln und Scriptlets werden ignoriert.</string>
     <string name="onboarding_adblock_title">Schutz wählen</string>
     <string name="onboarding_adblock_description">Soll Midori Tracker und Werbung blockieren?</string>
     <string name="onboarding_adblock_hint">Sie können dies später in den Einstellungen ändern.</string>

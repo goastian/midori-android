@@ -15,7 +15,7 @@
     <string name="adblock_ad_sources">広告用ソースを管理</string>
     <string name="adblock_strict">厳格なブロック</string>
     <string name="adblock_strict_description">より強い追跡防止を使用します。一部のサイトが正常に動作しない場合があります。</string>
-    <string name="adblock_scope_note">公式リストとカスタムリストは対応する第三者フレームのリクエストをブロックします。GeckoView は独自の追跡防止を使用します。</string>
+    <string name="adblock_scope_note">ルールに一致するページのリクエストと一般的な広告枠をブロックします。サイトごとの例外を適用します。</string>
     <string name="adblock_add_site">サイトを追加</string>
     <string name="adblock_no_sites">例外はまだありません</string>
     <string name="adblock_remove">削除</string>
@@ -33,7 +33,7 @@
     <string name="adblock_refresh">更新</string>
     <string name="adblock_source_url">ソースの HTTPS URL</string>
     <string name="adblock_invalid_source">重複しない HTTPS URL を入力</string>
-    <string name="adblock_source_format">ドメインとパスのネットワークルールに対応します。装飾ルールとスクリプトレットは無視されます。</string>
+    <string name="adblock_source_format">ドメイン、パス、サイト、リソースの種類によるルールに対応します。カスタムの要素非表示ルールとスクリプトレットは無視されます。</string>
     <string name="onboarding_adblock_title">保護を選択</string>
     <string name="onboarding_adblock_description">Midori でトラッカーと広告をブロックしますか？</string>
     <string name="onboarding_adblock_hint">後から設定で変更できます。</string>

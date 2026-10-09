@@ -15,7 +15,7 @@
     <string name="adblock_ad_sources">Gestionar fuentes de anuncios</string>
     <string name="adblock_strict">Bloqueo estricto</string>
     <string name="adblock_strict_description">Usar una protección más estricta contra rastreadores. Algunos sitios pueden fallar.</string>
-    <string name="adblock_scope_note">Las listas oficiales y personalizadas bloquean solicitudes compatibles de marcos de terceros. GeckoView gestiona su propia protección contra rastreadores.</string>
+    <string name="adblock_scope_note">Bloquea solicitudes de la página y espacios publicitarios habituales. Respeta las excepciones por sitio.</string>
     <string name="adblock_add_site">Añadir sitio</string>
     <string name="adblock_no_sites">Aún no hay excepciones</string>
     <string name="adblock_remove">Eliminar</string>
@@ -33,7 +33,7 @@
     <string name="adblock_refresh">Actualizar</string>
     <string name="adblock_source_url">URL HTTPS de la fuente</string>
     <string name="adblock_invalid_source">Introduce una URL HTTPS única</string>
-    <string name="adblock_source_format">Admite reglas de red por dominio y ruta. Se ignoran las reglas cosméticas y los scriptlets.</string>
+    <string name="adblock_source_format">Admite reglas por dominio, ruta, sitio y tipo de recurso. Se ignoran las reglas cosméticas personalizadas y los scriptlets.</string>
     <string name="onboarding_adblock_title">Elige tu protección</string>
     <string name="onboarding_adblock_description">¿Quieres que Midori bloquee rastreadores y anuncios?</string>
     <string name="onboarding_adblock_hint">Puedes cambiarlo después en Ajustes.</string>

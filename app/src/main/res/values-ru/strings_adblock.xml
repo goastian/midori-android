@@ -15,7 +15,7 @@
     <string name="adblock_ad_sources">Источники блокировки рекламы</string>
     <string name="adblock_strict">Строгая блокировка</string>
     <string name="adblock_strict_description">Усиленная защита от трекеров. Некоторые сайты могут работать неправильно.</string>
-    <string name="adblock_scope_note">Официальные и пользовательские списки блокируют поддерживаемые запросы сторонних фреймов. GeckoView использует собственную защиту от трекеров.</string>
+    <string name="adblock_scope_note">Блокирует соответствующие запросы страницы и типичные рекламные блоки. Учитывает исключения для сайтов.</string>
     <string name="adblock_add_site">Добавить сайт</string>
     <string name="adblock_no_sites">Исключений пока нет</string>
     <string name="adblock_remove">Удалить</string>
@@ -33,7 +33,7 @@
     <string name="adblock_refresh">Обновить</string>
     <string name="adblock_source_url">HTTPS-адрес источника</string>
     <string name="adblock_invalid_source">Введите уникальный HTTPS-адрес</string>
-    <string name="adblock_source_format">Поддерживаются сетевые правила для доменов и путей. Косметические правила и скриптлеты игнорируются.</string>
+    <string name="adblock_source_format">Поддерживаются правила по домену, пути, сайту и типу ресурса. Пользовательские косметические правила и скриптлеты игнорируются.</string>
     <string name="onboarding_adblock_title">Выберите защиту</string>
     <string name="onboarding_adblock_description">Блокировать трекеры и рекламу в Midori?</string>
     <string name="onboarding_adblock_hint">Позже это можно изменить в настройках.</string>

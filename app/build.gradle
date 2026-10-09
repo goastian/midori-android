@@ -553,6 +553,7 @@ dependencies {
     implementation libs.mozac.support.utils
     implementation libs.mozac.support.ktx
     implementation libs.mozac.support.appservices
+    implementation libs.mozac.lib.publicsuffixlist
     implementation libs.mozac.service.sync.logins
     implementation libs.mozac.service.sync.autofill
     implementation libs.mozac.support.webextensions

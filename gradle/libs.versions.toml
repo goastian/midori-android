@@ -108,6 +108,7 @@ mozac-feature-addons = { group = "org.mozilla.components", name = "feature-addon
 mozac-ui-widgets = { group = "org.mozilla.components", name = "ui-widgets", version.ref = "mozac" }
 mozac-ui-icons = { group = "org.mozilla.components", name = "ui-icons", version.ref = "mozac" }
 mozac-lib-fetch-httpurlconnection = { group = "org.mozilla.components", name = "lib-fetch-httpurlconnection", version.ref = "mozac" }
+mozac-lib-publicsuffixlist = { group = "org.mozilla.components", name = "lib-publicsuffixlist", version.ref = "mozac" }
 # Testing
 junit-main = { group = "junit", name = "junit", version.ref = "junit" }
 junit-androidx = { group = "androidx.test.ext", name = "junit", version.ref = "junit-androidx" }

@@ -3,7 +3,16 @@ package org.midorinext.android.adblock
 import java.net.URI
 import java.util.Locale
 
-internal enum class RuleDecision { NONE, BLOCK, ALLOW }
+internal enum class RuleDecision { NONE, BLOCK, ALLOW, IMPORTANT_BLOCK, IMPORTANT_ALLOW }
+
+internal fun resourceType(type: String): String = when (type) {
+    "main_frame" -> "document"
+    "sub_frame" -> "subdocument"
+    "xhr" -> "xmlhttprequest"
+    "imageset" -> "image"
+    "object_subrequest" -> "object"
+    else -> type
+}
 
 /** Safe subset of ABP network rules. Cosmetic, scriptlet and redirect rules are ignored. */
 internal class NativeFilterRules(
@@ -11,7 +20,12 @@ internal class NativeFilterRules(
     private val scoped: Map<String, List<ScopedRule>>,
     val supportedCount: Int,
 ) {
-    fun decision(url: String, siteHost: String?): RuleDecision {
+    fun decision(
+        url: String,
+        siteHost: String?,
+        type: String = "subdocument",
+        thirdParty: Boolean = true,
+    ): RuleDecision {
         val uri = runCatching { URI(url) }.getOrNull() ?: return RuleDecision.NONE
         if (uri.scheme != "http" && uri.scheme != "https") return RuleDecision.NONE
         val host = uri.host?.lowercase(Locale.ROOT) ?: return RuleDecision.NONE
@@ -22,11 +36,18 @@ internal class NativeFilterRules(
         val hostDecision = hosts.decision(url)
         var blocked = hostDecision == RuleDecision.BLOCK
         var allowed = hostDecision == RuleDecision.ALLOW
+        var importantBlock = false
+        var importantAllow = false
         var suffix = host
         while (true) {
             scoped[suffix]?.forEach { rule ->
-                if (rule.matches(target, siteHost)) {
-                    if (rule.allow) allowed = true else blocked = true
+                if (rule.matches(target, siteHost, resourceType(type), thirdParty)) {
+                    when {
+                        rule.important && rule.allow -> importantAllow = true
+                        rule.important -> importantBlock = true
+                        rule.allow -> allowed = true
+                        else -> blocked = true
+                    }
                 }
             }
             val dot = suffix.indexOf('.')
@@ -34,13 +55,16 @@ internal class NativeFilterRules(
             suffix = suffix.substring(dot + 1)
         }
         return when {
+            importantAllow -> RuleDecision.IMPORTANT_ALLOW
+            importantBlock -> RuleDecision.IMPORTANT_BLOCK
             allowed -> RuleDecision.ALLOW
             blocked -> RuleDecision.BLOCK
             else -> RuleDecision.NONE
         }
     }
 
-    fun blocks(url: String, siteHost: String? = null) = decision(url, siteHost) == RuleDecision.BLOCK
+    fun blocks(url: String, siteHost: String? = null, type: String = "subdocument", thirdParty: Boolean = true) =
+        decision(url, siteHost, type, thirdParty) in setOf(RuleDecision.BLOCK, RuleDecision.IMPORTANT_BLOCK)
 
     companion object {
         fun bundled(blocked: String, allowed: String): NativeFilterRules = NativeFilterRules(
@@ -54,8 +78,15 @@ internal data class ScopedRule(
     val path: Regex?,
     val includeSites: Set<String>,
     val excludeSites: Set<String>,
+    val includeTypes: Set<String>,
+    val excludeTypes: Set<String>,
+    val thirdParty: Boolean?,
+    val important: Boolean,
 ) {
-    fun matches(target: String, siteHost: String?): Boolean {
+    fun matches(target: String, siteHost: String?, type: String, requestIsThirdParty: Boolean): Boolean {
+        if (thirdParty != null && thirdParty != requestIsThirdParty) return false
+        if (includeTypes.isNotEmpty() && type !in includeTypes) return false
+        if (type in excludeTypes) return false
         if (path != null && !path.containsMatchIn(target)) return false
         if (includeSites.isNotEmpty() && (siteHost == null || includeSites.none { siteHost.isDomainOrSubdomainOf(it) })) return false
         if (siteHost != null && excludeSites.any { siteHost.isDomainOrSubdomainOf(it) }) return false
@@ -90,12 +121,14 @@ internal fun parseHostSource(text: String, onAcceptedRule: ((String) -> Unit)? =
             else -> return@forEach
         }
         val path = pathText?.let(::abpPathRegex) ?: if (pathText != null) return@forEach else null
-        if (path == null && conditions.first.isEmpty() && conditions.second.isEmpty()) {
+        if (path == null && conditions == RuleConditions()) {
             (if (exception) allowed else blocked).add(host)
         } else {
             scoped.getOrPut(host) { mutableListOf() } += ScopedRule(
                 allow = exception, path = path,
-                includeSites = conditions.first, excludeSites = conditions.second,
+                includeSites = conditions.includeSites, excludeSites = conditions.excludeSites,
+                includeTypes = conditions.includeTypes, excludeTypes = conditions.excludeTypes,
+                thirdParty = conditions.thirdParty, important = conditions.important,
             )
         }
         supported++
@@ -109,23 +142,38 @@ internal fun parseHostSource(text: String, onAcceptedRule: ((String) -> Unit)? =
     return NativeFilterRules(hostRules, scoped, supported)
 }
 
-private fun parseOptions(raw: String): Pair<Set<String>, Set<String>>? {
+private data class RuleConditions(
+    val includeSites: Set<String> = emptySet(),
+    val excludeSites: Set<String> = emptySet(),
+    val includeTypes: Set<String> = emptySet(),
+    val excludeTypes: Set<String> = emptySet(),
+    val thirdParty: Boolean? = null,
+    val important: Boolean = false,
+)
+
+private fun parseOptions(raw: String): RuleConditions? {
     val included = mutableSetOf<String>()
     val excluded = mutableSetOf<String>()
+    val includeTypes = mutableSetOf<String>()
+    val excludeTypes = mutableSetOf<String>()
     val contentTypes = setOf("script", "image", "stylesheet", "font", "media", "object", "xhr", "xmlhttprequest", "ping", "websocket", "other", "subdocument", "document")
-    var positiveType = false
-    var allowsSubdocument = false
-    if (raw.isEmpty()) return included to excluded
+    var thirdParty: Boolean? = null
+    var important = false
+    if (raw.isEmpty()) return RuleConditions()
     for (option in raw.split(',')) {
         val normalized = option.lowercase(Locale.ROOT)
         when {
-            normalized == "third-party" || normalized == "3p" || normalized == "~first-party" || normalized == "~1p" -> Unit
-            normalized == "first-party" || normalized == "1p" || normalized == "~third-party" || normalized == "~3p" -> return null
-            normalized == "important" -> Unit
-            normalized == "subdocument" -> { positiveType = true; allowsSubdocument = true }
-            normalized == "~subdocument" || normalized == "document" -> return null
-            normalized in contentTypes -> positiveType = true
-            normalized.startsWith('~') && normalized.drop(1) in contentTypes -> Unit
+            normalized in setOf("third-party", "3p", "~first-party", "~1p") -> {
+                if (thirdParty == false) return null
+                thirdParty = true
+            }
+            normalized in setOf("first-party", "1p", "~third-party", "~3p") -> {
+                if (thirdParty == true) return null
+                thirdParty = false
+            }
+            normalized == "important" -> important = true
+            normalized in contentTypes -> includeTypes += resourceType(normalized)
+            normalized.startsWith('~') && normalized.drop(1) in contentTypes -> excludeTypes += resourceType(normalized.drop(1))
             normalized.startsWith("domain=") -> {
                 normalized.removePrefix("domain=").split('|').forEach { domain ->
                     val value = domain.removePrefix("~")
@@ -136,8 +184,7 @@ private fun parseOptions(raw: String): Pair<Set<String>, Set<String>>? {
             else -> return null
         }
     }
-    if (positiveType && !allowsSubdocument) return null
-    return included to excluded
+    return RuleConditions(included, excluded, includeTypes, excludeTypes, thirdParty, important)
 }
 
 private fun validDomain(value: String): Boolean = value.contains('.') &&

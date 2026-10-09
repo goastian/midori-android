@@ -8,7 +8,7 @@ import org.midorinext.android.mozac.BrowserSessionLifecycle
 import org.midorinext.android.adblock.AdBlockSettings
 import org.midorinext.android.adblock.AdBlockUpdateWorker
 import org.midorinext.android.adblock.AdBlockConfiguration
-import org.midorinext.android.adblock.CookieBannerFeature
+import org.midorinext.android.adblock.NativeContentBlockingFeature
 import org.midorinext.android.mozac.media.BackgroundPlaybackFeature
 import org.midorinext.android.preferences.app.AppPreferences
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
@@ -60,7 +60,7 @@ class MidoriApplication : Application(), Configuration.Provider {
     @Inject lateinit var geckoRuntime: dagger.Lazy<GeckoRuntime>
     @Inject lateinit var appPreferencesRepository: dagger.Lazy<AppPreferencesRepository>
     @Inject lateinit var adBlockSettings: dagger.Lazy<AdBlockSettings>
-    @Inject lateinit var cookieBannerFeature: dagger.Lazy<CookieBannerFeature>
+    @Inject lateinit var nativeContentBlockingFeature: dagger.Lazy<NativeContentBlockingFeature>
     @Inject lateinit var autofillPreferenceState: dagger.Lazy<AutofillPreferenceState>
     @Inject lateinit var historyRepository: dagger.Lazy<HistoryRepository>
     @Inject lateinit var midoriVpnFeature: dagger.Lazy<MidoriVpnFeature>
@@ -124,7 +124,7 @@ class MidoriApplication : Application(), Configuration.Provider {
             }
         }
 
-        cookieBannerFeature.get().start()
+        nativeContentBlockingFeature.get().start()
         browserStateRestoration = restoreBrowserState()
 
         // TODO

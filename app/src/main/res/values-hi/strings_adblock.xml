@@ -15,7 +15,7 @@
     <string name="adblock_ad_sources">विज्ञापन स्रोत प्रबंधित करें</string>
     <string name="adblock_strict">सख्त अवरोधन</string>
     <string name="adblock_strict_description">अधिक सख्त ट्रैकर सुरक्षा इस्तेमाल करें। कुछ साइटें ठीक से काम नहीं कर सकतीं।</string>
-    <string name="adblock_scope_note">आधिकारिक और कस्टम सूचियाँ समर्थित तीसरे पक्ष के फ़्रेम अनुरोध रोकती हैं। GeckoView अपनी ट्रैकर सुरक्षा का उपयोग करता है।</string>
+    <string name="adblock_scope_note">नियमों से मेल खाने वाले पेज अनुरोध और आम विज्ञापन स्थान रोकता है। साइट के अपवाद लागू होते हैं।</string>
     <string name="adblock_add_site">साइट जोड़ें</string>
     <string name="adblock_no_sites">अभी कोई अपवाद नहीं</string>
     <string name="adblock_remove">हटाएँ</string>
@@ -33,7 +33,7 @@
     <string name="adblock_refresh">अपडेट करें</string>
     <string name="adblock_source_url">स्रोत का HTTPS URL</string>
     <string name="adblock_invalid_source">अलग HTTPS URL डालें</string>
-    <string name="adblock_source_format">डोमेन और पथ नेटवर्क नियम समर्थित हैं। कॉस्मेटिक नियम और स्क्रिप्टलेट अनदेखे होंगे।</string>
+    <string name="adblock_source_format">डोमेन, पथ, साइट और संसाधन प्रकार के नियम समर्थित हैं। कस्टम कॉस्मेटिक नियम और स्क्रिप्टलेट अनदेखे होंगे।</string>
     <string name="onboarding_adblock_title">अपनी सुरक्षा चुनें</string>
     <string name="onboarding_adblock_description">क्या Midori ट्रैकर और विज्ञापन रोके?</string>
     <string name="onboarding_adblock_hint">इसे बाद में सेटिंग में बदल सकते हैं।</string>

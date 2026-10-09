@@ -15,7 +15,7 @@
     <string name="adblock_ad_sources">Gestisci le fonti degli annunci</string>
     <string name="adblock_strict">Blocco rigoroso</string>
     <string name="adblock_strict_description">Usa una protezione più forte. Alcuni siti potrebbero non funzionare correttamente.</string>
-    <string name="adblock_scope_note">Le liste ufficiali e personalizzate bloccano le richieste supportate dei frame di terze parti. GeckoView gestisce la propria protezione tracker.</string>
+    <string name="adblock_scope_note">Blocca le richieste corrispondenti della pagina e gli spazi pubblicitari comuni. Rispetta le eccezioni per sito.</string>
     <string name="adblock_add_site">Aggiungi sito</string>
     <string name="adblock_no_sites">Nessuna eccezione</string>
     <string name="adblock_remove">Rimuovi</string>
@@ -33,7 +33,7 @@
     <string name="adblock_refresh">Aggiorna</string>
     <string name="adblock_source_url">URL HTTPS della fonte</string>
     <string name="adblock_invalid_source">Inserisci un URL HTTPS univoco</string>
-    <string name="adblock_source_format">Supporta regole di rete per domini e percorsi. Le regole cosmetiche e gli scriptlet vengono ignorati.</string>
+    <string name="adblock_source_format">Supporta regole per dominio, percorso, sito e tipo di risorsa. Le regole cosmetiche personalizzate e gli scriptlet vengono ignorati.</string>
     <string name="onboarding_adblock_title">Scegli la protezione</string>
     <string name="onboarding_adblock_description">Vuoi che Midori blocchi tracker e annunci?</string>
     <string name="onboarding_adblock_hint">Puoi cambiarlo in seguito nelle impostazioni.</string>

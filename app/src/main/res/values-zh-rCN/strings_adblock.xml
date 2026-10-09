@@ -15,7 +15,7 @@
     <string name="adblock_ad_sources">管理广告来源</string>
     <string name="adblock_strict">严格拦截</string>
     <string name="adblock_strict_description">使用更强的跟踪防护。部分网站可能无法正常工作。</string>
-    <string name="adblock_scope_note">官方和自定义列表可拦截受支持的第三方框架请求。GeckoView 使用自己的跟踪防护。</string>
+    <string name="adblock_scope_note">拦截匹配规则的页面请求并隐藏常见广告位。遵循各网站的例外设置。</string>
     <string name="adblock_add_site">添加网站</string>
     <string name="adblock_no_sites">暂无网站例外</string>
     <string name="adblock_remove">移除</string>
@@ -33,7 +33,7 @@
     <string name="adblock_refresh">更新</string>
     <string name="adblock_source_url">来源的 HTTPS 地址</string>
     <string name="adblock_invalid_source">请输入唯一的 HTTPS 地址</string>
-    <string name="adblock_source_format">支持域名和路径网络规则。装饰规则和脚本片段会被忽略。</string>
+    <string name="adblock_source_format">支持按域名、路径、网站和资源类型设置规则。忽略自定义元素隐藏规则和脚本片段。</string>
     <string name="onboarding_adblock_title">选择防护级别</string>
     <string name="onboarding_adblock_description">是否让 Midori 拦截跟踪器和广告？</string>
     <string name="onboarding_adblock_hint">稍后可在设置中更改。</string>

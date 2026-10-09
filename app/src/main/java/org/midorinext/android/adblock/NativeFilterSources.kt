@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,9 +42,15 @@ class NativeFilterSources @Inject constructor(
     val failedSources = mutableFailures.asStateFlow()
     private val mutableRuleCounts = MutableStateFlow<Map<String, Int>>(emptyMap())
     val ruleCounts = mutableRuleCounts.asStateFlow()
+    internal val ready = CompletableDeferred<Unit>()
 
     init {
         scope.launch {
+            if (metadata.getInt("format_version", 0) != CACHE_FORMAT_VERSION) {
+                File(context.filesDir, "adblock-sources").listFiles().orEmpty()
+                    .filter { it.extension == "txt" || it.extension == "tmp" }.forEach { it.delete() }
+                metadata.edit().putInt("format_version", CACHE_FORMAT_VERSION).apply()
+            }
             OfficialFilterCatalog.all.filter { it.fallbackAsset != null }.forEach { source ->
                 runCatching {
                     val prefix = source.fallbackAsset!!
@@ -52,13 +59,15 @@ class NativeFilterSources @Inject constructor(
                     putRules(source.id, NativeFilterRules.bundled(blocked, allowed))
                 }.onFailure { Log.e(TAG, "Could not load bundled ${source.id}", it) }
             }
+            enabledSources(settings.current, includeAds = true).forEach { (key, url, _) ->
+                if (cacheFile(url).exists()) loadCache(key, url)
+            }
+            ready.complete(Unit)
             settings.state.collectLatest { config ->
-                if (config.level == BlockingLevel.OFF) return@collectLatest
+                if (!config.hasBlockingSites()) return@collectLatest
                 enabledSources(config).forEach { (key, url, updatedAt) ->
                     if (key !in loadedCacheKeys && cacheFile(url).exists()) loadCache(key, url)
-                    if (System.currentTimeMillis() - updatedAt >= UPDATE_INTERVAL_MS ||
-                        (!cacheFile(url).exists() && OfficialFilterCatalog.get(key)?.fallbackAsset == null)
-                    ) {
+                    if (!cacheFile(url).exists() || System.currentTimeMillis() - updatedAt >= UPDATE_INTERVAL_MS) {
                         refreshStaleAsync(key)
                     }
                 }
@@ -67,28 +76,50 @@ class NativeFilterSources @Inject constructor(
         }
     }
 
-    internal fun decision(config: AdBlockConfiguration, level: BlockingLevel, url: String, siteHost: String?): RuleDecision {
+    internal fun decision(
+        config: AdBlockConfiguration,
+        level: BlockingLevel,
+        url: String,
+        siteHost: String?,
+        type: String = "subdocument",
+        thirdParty: Boolean = true,
+    ): RuleDecision {
         if (level == BlockingLevel.OFF) return RuleDecision.NONE
         val snapshot = rules
         var blocked = false
+        var allowed = false
+        var importantBlock = false
         for (source in OfficialFilterCatalog.all) {
             if (source.id !in config.officialEnabled || (!source.tracker && level != BlockingLevel.TRACKERS_AND_ADS)) continue
-            when (snapshot[source.id]?.decision(url, siteHost)) {
-                RuleDecision.ALLOW -> return RuleDecision.ALLOW
+            when (snapshot[source.id]?.decision(url, siteHost, type, thirdParty)) {
+                RuleDecision.IMPORTANT_ALLOW -> return RuleDecision.ALLOW
+                RuleDecision.IMPORTANT_BLOCK -> importantBlock = true
+                RuleDecision.ALLOW -> allowed = true
                 RuleDecision.BLOCK -> blocked = true
                 else -> Unit
             }
         }
         for (source in config.sources) {
             if (!source.enabled || (!source.tracker && level != BlockingLevel.TRACKERS_AND_ADS)) continue
-            when (snapshot[source.url]?.decision(url, siteHost)) {
-                RuleDecision.ALLOW -> return RuleDecision.ALLOW
+            when (snapshot[source.url]?.decision(url, siteHost, type, thirdParty)) {
+                RuleDecision.IMPORTANT_ALLOW -> return RuleDecision.ALLOW
+                RuleDecision.IMPORTANT_BLOCK -> importantBlock = true
+                RuleDecision.ALLOW -> allowed = true
                 RuleDecision.BLOCK -> blocked = true
                 else -> Unit
             }
         }
-        return if (blocked) RuleDecision.BLOCK else RuleDecision.NONE
+        return when {
+            importantBlock -> RuleDecision.BLOCK
+            allowed -> RuleDecision.ALLOW
+            blocked -> RuleDecision.BLOCK
+            else -> RuleDecision.NONE
+        }
     }
+
+    internal fun hasAdSources(config: AdBlockConfiguration): Boolean =
+        OfficialFilterCatalog.all.any { !it.tracker && it.id in config.officialEnabled && rules[it.id] != null } ||
+            config.sources.any { !it.tracker && it.enabled && rules[it.url] != null }
 
     fun refreshAsync(key: String) {
         scope.launch { refresh(key, force = true) }
@@ -107,7 +138,7 @@ class NativeFilterSources @Inject constructor(
 
     suspend fun updateEnabled(force: Boolean = false): Boolean = withContext(Dispatchers.IO) {
         val config = settings.current
-        if (config.level == BlockingLevel.OFF && !force) return@withContext true
+        if (!config.hasBlockingSites() && !force) return@withContext true
         enabledSources(config, includeAds = force).map { (key, url, updatedAt) ->
             if (force || !cacheFile(url).exists() || System.currentTimeMillis() - updatedAt >= UPDATE_INTERVAL_MS) refresh(key, force)
             else true
@@ -115,6 +146,7 @@ class NativeFilterSources @Inject constructor(
     }
 
     suspend fun refresh(key: String, force: Boolean = false): Boolean = withContext(Dispatchers.IO) {
+        ready.await()
         val source = sourceFor(key) ?: return@withContext false
         val mutex = locks.getOrPut(key) { Mutex() }
         mutex.withLock {
@@ -145,10 +177,10 @@ class NativeFilterSources @Inject constructor(
 
     private fun enabledSources(config: AdBlockConfiguration, includeAds: Boolean = false): List<Triple<String, String, Long>> =
         OfficialFilterCatalog.all.filter {
-            it.id in config.officialEnabled && (it.tracker || includeAds || config.level == BlockingLevel.TRACKERS_AND_ADS)
+            it.id in config.officialEnabled && (it.tracker || includeAds || config.hasAdBlockingSites())
         }
             .map { Triple(it.id, it.url, config.officialUpdatedAt[it.id] ?: 0L) } +
-            config.sources.filter { it.enabled && (it.tracker || includeAds || config.level == BlockingLevel.TRACKERS_AND_ADS) }
+            config.sources.filter { it.enabled && (it.tracker || includeAds || config.hasAdBlockingSites()) }
                 .map { Triple(it.url, it.url, it.updatedAt) }
 
     private fun sourceFor(key: String): String? = OfficialFilterCatalog.get(key)?.url
@@ -251,6 +283,7 @@ class NativeFilterSources @Inject constructor(
 
     private companion object {
         const val TAG = "NativeFilterSources"
+        const val CACHE_FORMAT_VERSION = 2
         const val MAX_SOURCE_BYTES = 20_000_000L
         const val UPDATE_INTERVAL_MS = 4L * 24 * 60 * 60 * 1000
         const val RETRY_INTERVAL_MS = 60L * 60 * 1000
