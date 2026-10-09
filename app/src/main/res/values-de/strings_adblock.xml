@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="adblock_cookie_banners">Optionale Cookies ablehnen</string>
+    <string name="adblock_cookie_banners_description">Lehnt Cookies in unterstützten Cookie-Hinweisen automatisch ab. Websites mit deaktivierter Blockierung sind ausgenommen.</string>
     <string name="adblock_settings_title">Tracker- und Werbeblockierung</string>
     <string name="adblock_settings_summary">Wählen Sie, was Midori blockiert</string>
     <string name="adblock_default_level">Standard-Blockierstufe</string>

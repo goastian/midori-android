@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="adblock_cookie_banners">Refuser les cookies facultatifs</string>
+    <string name="adblock_cookie_banners_description">Refuse automatiquement les avis de cookies compatibles. Les sites dont le blocage est désactivé sont exclus.</string>
     <string name="adblock_settings_title">Blocage des traqueurs et publicités</string>
     <string name="adblock_settings_summary">Choisissez ce que Midori bloque</string>
     <string name="adblock_default_level">Niveau de blocage par défaut</string>

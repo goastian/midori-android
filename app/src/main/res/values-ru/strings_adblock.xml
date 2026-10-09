@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="adblock_cookie_banners">Отклонять необязательные cookie</string>
+    <string name="adblock_cookie_banners_description">Автоматически отклонять cookie в поддерживаемых уведомлениях. Сайты с отключённой блокировкой исключены.</string>
     <string name="adblock_settings_title">Блокировка трекеров и рекламы</string>
     <string name="adblock_settings_summary">Выберите, что блокирует Midori</string>
     <string name="adblock_default_level">Уровень блокировки по умолчанию</string>

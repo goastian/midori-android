@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="adblock_cookie_banners">Rifiuta i cookie facoltativi</string>
+    <string name="adblock_cookie_banners_description">Rifiuta automaticamente i cookie negli avvisi compatibili. I siti con il blocco disattivato sono esclusi.</string>
     <string name="adblock_settings_title">Blocco tracker e annunci</string>
     <string name="adblock_settings_summary">Scegli cosa blocca Midori</string>
     <string name="adblock_default_level">Livello di blocco predefinito</string>

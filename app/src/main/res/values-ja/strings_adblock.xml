@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="adblock_cookie_banners">任意の Cookie を拒否</string>
+    <string name="adblock_cookie_banners_description">対応する Cookie 通知で自動的に拒否します。ブロックが無効なサイトは対象外です。</string>
     <string name="adblock_settings_title">トラッカーと広告のブロック</string>
     <string name="adblock_settings_summary">Midori がブロックする内容を選択</string>
     <string name="adblock_default_level">標準のブロックレベル</string>

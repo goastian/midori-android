@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="adblock_cookie_banners">拒绝非必要 Cookie</string>
+    <string name="adblock_cookie_banners_description">自动拒绝支持的 Cookie 提示中的非必要 Cookie。已停用拦截的网站除外。</string>
     <string name="adblock_settings_title">跟踪器和广告拦截</string>
     <string name="adblock_settings_summary">选择 Midori 拦截的内容</string>
     <string name="adblock_default_level">默认拦截级别</string>

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="adblock_cookie_banners">वैकल्पिक कुकी अस्वीकार करें</string>
+    <string name="adblock_cookie_banners_description">समर्थित कुकी सूचनाओं में अपने आप अस्वीकार करें। जिन साइटों पर अवरोधन बंद है, वे शामिल नहीं हैं।</string>
     <string name="adblock_settings_title">ट्रैकर और विज्ञापन अवरोधन</string>
     <string name="adblock_settings_summary">चुनें कि Midori क्या रोके</string>
     <string name="adblock_default_level">डिफ़ॉल्ट अवरोधन स्तर</string>

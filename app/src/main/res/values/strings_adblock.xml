@@ -3,6 +3,8 @@
     <string name="adblock_settings_title">Tracker and Ad Blocking</string>
     <string name="adblock_settings_summary">Choose what Midori blocks</string>
     <string name="adblock_default_level">Default blocking level</string>
+    <string name="adblock_cookie_banners">Reject optional cookies</string>
+    <string name="adblock_cookie_banners_description">Automatically reject compatible cookie notices. Sites with blocking disabled are excluded.</string>
     <string name="adblock_level_off">No blocking</string>
     <string name="adblock_level_trackers">Block trackers</string>
     <string name="adblock_level_trackers_ads">Block trackers and ads</string>

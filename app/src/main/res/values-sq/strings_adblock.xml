@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="adblock_cookie_banners">Refuzo cookie opsionale</string>
+    <string name="adblock_cookie_banners_description">Refuzon automatikisht njoftimet e përputhshme për cookie. Përjashtohen sajtet me bllokim të çaktivizuar.</string>
     <string name="adblock_settings_title">Bllokimi i gjurmuesve dhe reklamave</string>
     <string name="adblock_settings_summary">Zgjidhni çfarë bllokon Midori</string>
     <string name="adblock_default_level">Niveli i parazgjedhur i bllokimit</string>
