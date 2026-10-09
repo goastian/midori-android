@@ -29,6 +29,7 @@ class LegacyBlockerMigration @Inject constructor() {
             "easy-adblocker@easybrowser.local",
             "midori-vip-android@astian.org",
             "qwant-vip-android@qwant.com",
+            "qwant-cookie-android@qwant.com",
         )
     }
 }

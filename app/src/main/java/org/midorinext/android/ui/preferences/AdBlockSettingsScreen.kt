@@ -58,6 +58,12 @@ fun AdBlockSettingsScreen(
         BlockingLevel.entries.forEach { level ->
             BlockingLevelRow(level, config.level) { viewModel.settings.setLevel(level) }
         }
+        PreferenceToggle(
+            label = R.string.adblock_cookie_banners,
+            description = R.string.adblock_cookie_banners_description,
+            value = config.rejectCookieBanners,
+            onValueChange = viewModel.settings::setRejectCookieBanners,
+        )
         PreferenceGroupLabel(label = R.string.adblock_exceptions)
         PreferenceRow(label = R.string.adblock_manage_sites, onClicked = onSites)
         PreferenceGroupLabel(label = R.string.adblock_sources)

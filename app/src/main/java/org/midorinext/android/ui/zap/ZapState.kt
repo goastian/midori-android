@@ -3,7 +3,6 @@ package org.midorinext.android.ui.zap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import org.midorinext.android.cookies.MidoriCookieState
 import org.midorinext.android.usecases.ClearDataUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
@@ -14,7 +13,6 @@ import kotlinx.coroutines.launch
 class ZapState(
     private val clearDataUseCase: ClearDataUseCase,
     private val coroutineScope: CoroutineScope = MainScope(),
-    private val cookieState: MidoriCookieState
 ) {
     internal enum class RequestStatus { Zapping, Confirm, Waiting, Error }
     internal enum class AnimationStatus { Idle, In, Wait, Out }
@@ -60,11 +58,7 @@ class ZapState(
             coroutineScope.launch {
                 delay(300) // Wait for animation to cover the whole screen
                 clearDataUseCase { success ->
-                    coroutineScope.launch {
-                        cookieState.restoreCookies {
-                            waitAnimationAndFinish(success)
-                        }
-                    }
+                    waitAnimationAndFinish(success)
                 }
             }
         } else {

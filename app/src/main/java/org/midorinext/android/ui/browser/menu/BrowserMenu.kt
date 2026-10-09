@@ -306,7 +306,7 @@ private fun BrowserMenuDestinations(
     if (BuildConfig.FLAVOR_version == "original" &&
         LocalContext.current.selectedLocale().language == "fr"
     ) {
-        QwantAccount(viewModel, applicationViewModel, onDismissRequest)
+        MidoriAccount(viewModel, onDismissRequest)
         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
     }
     AppNavigation(navigateTo, onDismissRequest)
@@ -357,15 +357,12 @@ private fun BrowserMenuSettings(
 }
 
 @Composable
-fun QwantAccount(
+fun MidoriAccount(
     viewModel: BrowserScreenViewModel,
-    appViewModel: MidoriApplicationViewModel,
     onDismissRequest: () -> Unit
 ) {
-    val isAccountConnected = appViewModel.cookieState.isConnected
-
     DropdownItem(
-        text = stringResource(if (isAccountConnected) R.string.menu_account else R.string.menu_login),
+        text = stringResource(R.string.menu_account),
         icon = R.drawable.icons_account,
         onClick = {
             onDismissRequest()

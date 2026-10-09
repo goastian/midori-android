@@ -115,8 +115,8 @@ object GeckoPreferences {
                 if (trackersEnabled) ContentBlocking.CookieBehavior.ACCEPT_NON_TRACKERS
                 else ContentBlocking.CookieBehavior.ACCEPT_ALL
             )
-            // Block all third-party cookies in private mode
-            .setCookieBehaviorPrivateMode(ContentBlocking.CookieBehavior.ACCEPT_NONE)
+            // Keep first-party consent and login cookies for the lifetime of the private session.
+            .setCookieBehaviorPrivateMode(privateCookieBehavior(trackersEnabled))
             // ETP level follows the tracking protection level.
             .setEnhancedTrackingProtectionLevel(
                 when {
@@ -134,6 +134,10 @@ object GeckoPreferences {
                 trackersEnabled && appTrackingProtectionEnabled
             )
     }
+
+    internal fun privateCookieBehavior(trackersEnabled: Boolean): Int =
+        if (trackersEnabled) ContentBlocking.CookieBehavior.ACCEPT_FIRST_PARTY
+        else ContentBlocking.CookieBehavior.ACCEPT_ALL
 
     private fun applyHttpsSettings(runtime: GeckoRuntime, settings: UserSettings) {
         val allowInsecureConnections = when (settings.httpsOnlyLevel) {

@@ -27,8 +27,13 @@ data class AdBlockConfiguration(
     val sources: List<BlockingSource> = emptyList(),
     val officialEnabled: Set<String> = emptySet(),
     val officialUpdatedAt: Map<String, Long> = emptyMap(),
+    val rejectCookieBanners: Boolean = true,
 ) {
     fun levelFor(url: String): BlockingLevel = hostOf(url)?.let(siteLevels::get) ?: level
+
+    fun rejectsCookieBannersFor(url: String): Boolean =
+        rejectCookieBanners && levelFor(url) != BlockingLevel.OFF &&
+            runCatching { URI(url).scheme in setOf("http", "https") && hostOf(url) != null }.getOrDefault(false)
 }
 
 internal fun hostOf(url: String): String? = runCatching {
@@ -57,6 +62,9 @@ class AdBlockSettings @Inject constructor(@ApplicationContext private val contex
 
     @Synchronized
     fun setStrict(enabled: Boolean) = update { it.copy(strict = enabled) }
+
+    @Synchronized
+    fun setRejectCookieBanners(enabled: Boolean) = update { it.copy(rejectCookieBanners = enabled) }
 
     @Synchronized
     fun setBuiltInTrackers(enabled: Boolean) = update { it.copy(builtInTrackers = enabled) }
@@ -114,6 +122,7 @@ class AdBlockSettings @Inject constructor(@ApplicationContext private val contex
         preferences.edit()
             .putString("level", next.level.name)
             .putBoolean("strict", next.strict)
+            .putBoolean("reject_cookie_banners", next.rejectCookieBanners)
             .putBoolean("built_in_trackers", next.builtInTrackers)
             .putBoolean("built_in_ads", next.builtInAds)
             .putStringSet("site_levels", next.siteLevels.map { "${it.key}|${it.value.name}" }.toSet())
@@ -158,6 +167,7 @@ class AdBlockSettings @Inject constructor(@ApplicationContext private val contex
         return AdBlockConfiguration(
             level = level,
             strict = preferences.getBoolean("strict", false),
+            rejectCookieBanners = preferences.getBoolean("reject_cookie_banners", true),
             builtInTrackers = preferences.getBoolean("built_in_trackers", true),
             builtInAds = preferences.getBoolean("built_in_ads", true),
             siteLevels = sites,

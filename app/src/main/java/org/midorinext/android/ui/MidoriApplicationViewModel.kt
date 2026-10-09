@@ -5,7 +5,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import org.midorinext.android.cookies.MidoriCookieState
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.adblock.AdBlockSettings
 import org.midorinext.android.adblock.BlockingLevel
@@ -37,7 +36,6 @@ class MidoriApplicationViewModel @Inject constructor(
     private val appPreferencesRepository: AppPreferencesRepository,
     private val adBlockSettings: AdBlockSettings,
     clearDataUseCase: ClearDataUseCase,
-    val cookieState: MidoriCookieState,
 ) : ViewModel() {
     val adBlockConfiguration = adBlockSettings.state
 
@@ -168,7 +166,7 @@ class MidoriApplicationViewModel @Inject constructor(
         }
     }
 
-    val zapState: ZapState = ZapState(clearDataUseCase, viewModelScope, cookieState)
+    val zapState: ZapState = ZapState(clearDataUseCase, viewModelScope)
     fun zap(
         from: String = "Toolbar",
         skipConfirmation: Boolean = false,
