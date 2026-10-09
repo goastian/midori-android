@@ -123,7 +123,7 @@ android {
         minSdk 26
         targetSdk 36
         versionCode configuredPlaystoreVersionCode
-        versionName "11.9.3.1"
+        versionName "11.9.3.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -478,6 +478,7 @@ tasks.matching { task -> task.name == "testOriginalPlaystoreDebugUnitTest" }.con
     // The asset-contract tests read the bundled extensions directly. Declare them as
     // inputs so Gradle and CI cannot reuse a stale test result after a release sync.
     inputs.dir(midoriNewTabAssets)
+    inputs.dir(file("src/main/assets/adblock/content"))
 }
 
 
