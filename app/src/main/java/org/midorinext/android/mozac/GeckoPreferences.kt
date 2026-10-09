@@ -22,7 +22,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 object GeckoPreferences {
 
     private const val LOG_TAG = "MIDORI_GECKO_MEDIA"
+    private const val JPEG_XL_ENABLED_PREF = "image.jxl.enabled"
     private const val BACKGROUND_VIDEO_SUSPEND_PREF = "media.suspend-background-video.enabled"
+    private val jpegXlConfigured = AtomicBoolean(false)
     private val backgroundVideoSuspensionConfigured = AtomicBoolean(false)
 
     data class UserSettings(
@@ -43,7 +45,26 @@ object GeckoPreferences {
         applyContentBlockingSettings(runtime, settings)
         applyHttpsSettings(runtime, settings)
         applyDnsSettings(runtime, settings.dohProvider)
+        enableJpegXl()
         disableBackgroundVideoSuspension()
+    }
+
+    private fun enableJpegXl() {
+        if (!jpegXlConfigured.compareAndSet(false, true)) return
+
+        runOnUiThread {
+            GeckoPreferenceController.setGeckoPref(
+                JPEG_XL_ENABLED_PREF,
+                true,
+                GeckoPreferenceController.PREF_BRANCH_USER,
+            ).accept(
+                { Log.d(LOG_TAG, "Enabled native JPEG XL decoding") },
+                { error ->
+                    jpegXlConfigured.set(false)
+                    Log.e(LOG_TAG, "Could not enable native JPEG XL decoding", error)
+                },
+            )
+        }
     }
 
     /**
