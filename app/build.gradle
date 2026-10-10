@@ -9,20 +9,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.protobuf)
     alias(libs.plugins.ksp)
-}
-
-// Mozac 151+: geckoview-omni bundles glean-native as a capability, causing a conflict
-// with the standalone glean-native pulled by support-appservices → errorsupport → glean.
-// Tell Gradle to always pick geckoview-omni as the provider for that capability.
-configurations.configureEach {
-    resolutionStrategy {
-        capabilitiesResolution {
-            withCapability('org.mozilla.telemetry:glean-native') { details ->
-                def toSelect = details.candidates.find { it.id.module == 'geckoview-omni' }
-                if (toSelect) details.select(toSelect)
-            }
-        }
-    }
+    id 'midori.without-telemetry'
 }
 
 def readConfigValue = { String key, String fallback = null ->
