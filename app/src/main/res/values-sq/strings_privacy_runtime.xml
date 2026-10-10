@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="native_blocker_title">Bllokuesi Midori</string>
+    <string name="native_blocker_blocked_count">Elemente të bllokuara në këtë faqe: %1$d</string>
+    <string name="native_blocker_site_on">Mbrojtja është aktive për këtë sajt.</string>
+    <string name="native_blocker_site_off">Mbrojtja është e çaktivizuar për këtë sajt.</string>
+    <string name="native_blocker_enable_site">Aktivizo për këtë sajt</string>
+    <string name="native_blocker_disable_site">Çaktivizo për këtë sajt</string>
     <string name="privacy_setting_app_tracking_protection_label">Mbrojtja e gjurmimit të aplikacionit</string>
     <string name="privacy_setting_app_tracking_protection_desc">Bllokon më shumë gjurmues gjatë seancave të shfletimit.</string>
     <string name="privacy_setting_app_tracking_protection_mode_label">Modaliteti i mbrojtjes së ndjekjes së aplik</string>

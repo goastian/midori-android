@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="native_blocker_title">मिडोरी ब्लॉकर</string>
+    <string name="native_blocker_blocked_count">इस पेज पर ब्लॉक किए गए आइटम: %1$d</string>
+    <string name="native_blocker_site_on">इस साइट के लिए सुरक्षा चालू है।</string>
+    <string name="native_blocker_site_off">इस साइट के लिए सुरक्षा बंद है।</string>
+    <string name="native_blocker_enable_site">इस साइट के लिए चालू करें</string>
+    <string name="native_blocker_disable_site">इस साइट के लिए बंद करें</string>
     <string name="privacy_setting_app_tracking_protection_label">ऐप ट्रैकिंग सुरक्षा</string>
     <string name="privacy_setting_app_tracking_protection_desc">ब्राउज़िंग सत्रों में अधिक ट्रैकर्स को ब्लॉक करता है।</string>
     <string name="privacy_setting_app_tracking_protection_mode_label">ऐप ट्रैकिंग सुरक्षा मोड</string>

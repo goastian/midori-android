@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="native_blocker_title">Blocco contenuti di Midori</string>
+    <string name="native_blocker_blocked_count">Elementi bloccati su questa pagina: %1$d</string>
+    <string name="native_blocker_site_on">La protezione è attiva per questo sito.</string>
+    <string name="native_blocker_site_off">La protezione è disattivata per questo sito.</string>
+    <string name="native_blocker_enable_site">Attiva per questo sito</string>
+    <string name="native_blocker_disable_site">Disattiva per questo sito</string>
     <string name="privacy_setting_app_tracking_protection_label">Protezione dal tracciamento delle app</string>
     <string name="privacy_setting_app_tracking_protection_desc">Blocca più tracker durante le sessioni di navigazione.</string>
     <string name="privacy_setting_app_tracking_protection_mode_label">Modalità di protezione dal tracciamento delle app</string>

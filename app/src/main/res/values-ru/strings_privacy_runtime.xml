@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="native_blocker_title">Блокировщик Midori</string>
+    <string name="native_blocker_blocked_count">Заблокировано на этой странице: %1$d</string>
+    <string name="native_blocker_site_on">Защита включена для этого сайта.</string>
+    <string name="native_blocker_site_off">Защита отключена для этого сайта.</string>
+    <string name="native_blocker_enable_site">Включить для этого сайта</string>
+    <string name="native_blocker_disable_site">Отключить для этого сайта</string>
     <string name="privacy_setting_app_tracking_protection_label">Защита от отслеживания приложений</string>
     <string name="privacy_setting_app_tracking_protection_desc">Блокирует больше трекеров во время сеансов просмотра.</string>
     <string name="privacy_setting_app_tracking_protection_mode_label">Режим защиты от отслеживания приложений</string>

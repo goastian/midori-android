@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="native_blocker_title">Midori 拦截器</string>
+    <string name="native_blocker_blocked_count">此页面已拦截：%1$d</string>
+    <string name="native_blocker_site_on">此网站的保护已开启。</string>
+    <string name="native_blocker_site_off">此网站的保护已关闭。</string>
+    <string name="native_blocker_enable_site">为此网站开启保护</string>
+    <string name="native_blocker_disable_site">为此网站关闭保护</string>
     <string name="privacy_setting_app_tracking_protection_label">App tracking protection</string>
     <string name="privacy_setting_app_tracking_protection_desc">Blocks more trackers across browsing sessions.</string>
     <string name="privacy_setting_app_tracking_protection_mode_label">App tracking protection mode</string>

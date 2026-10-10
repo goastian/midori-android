@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="native_blocker_title">Midori ブロッカー</string>
+    <string name="native_blocker_blocked_count">このページのブロック数：%1$d</string>
+    <string name="native_blocker_site_on">このサイトの保護は有効です。</string>
+    <string name="native_blocker_site_off">このサイトの保護は無効です。</string>
+    <string name="native_blocker_enable_site">このサイトで有効にする</string>
+    <string name="native_blocker_disable_site">このサイトで無効にする</string>
     <string name="privacy_setting_app_tracking_protection_label">アプリ追跡保護</string>
     <string name="privacy_setting_app_tracking_protection_desc">閲覧セッション全体でより多くのトラッカーをブロックします。</string>
     <string name="privacy_setting_app_tracking_protection_mode_label">アプリ追跡保護モード</string>
