@@ -26,8 +26,10 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import mozilla.components.browser.session.storage.SessionStorage
 import mozilla.components.browser.state.action.SystemAction
+import mozilla.components.browser.state.action.TranslationsAction
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
 import mozilla.components.concept.fetch.Client
@@ -186,6 +188,8 @@ class MidoriApplication : Application(), Configuration.Provider {
         applicationScope.launch {
             val contentDrawn = awaitInitialBrowserContent(store.get().flow())
             StartupTiming.mark(if (contentDrawn) "initial_content_loaded" else "maintenance_timeout")
+            val preferences = withContext(Dispatchers.IO) { appPreferencesRepository.get().flow.first() }
+            store.get().dispatch(TranslationsAction.SetTranslationsEnabledAction(!preferences.translationsDisabled))
             // VPN registration is optional and can wait until the initial document is visible.
             midoriVpnFeature.get().install(geckoRuntime.get())
             withContext(Dispatchers.IO) {

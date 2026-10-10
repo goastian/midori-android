@@ -38,7 +38,7 @@ class WidgetViewModel @Inject constructor(
     appPreferencesRepository: AppPreferencesRepository,
 )  : ViewModel() {
     val toolbarState: ToolbarState = ToolbarState(
-        browserIcons, datahub, listOf(clipboardProvider, midoriSuggestProvider, domainProvider),
+        browserIcons, lazy { datahub }, lazy { listOf(clipboardProvider, midoriSuggestProvider, domainProvider) },
         viewModelScope, appPreferencesRepository.flow,
     )
 

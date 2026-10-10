@@ -1,11 +1,11 @@
 package org.midorinext.android.usecases
 
 import org.midorinext.android.preferences.app.AppPreferencesRepository
-import org.midorinext.android.preferences.app.ClearDataPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import mozilla.components.browser.state.action.TabListAction
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
@@ -20,21 +20,12 @@ class ClearDataUseCase @Inject constructor(
     private val historyStorage: HistoryStorage
 ) {
     private val coroutineScope: CoroutineScope = MainScope()
-    private var prefs : ClearDataPreferences? = null
-
-    init {
-        coroutineScope.launch {
-            appPrefs.clearDataPreferencesFlow.collect {
-                prefs = it
-            }
-        }
+    operator fun invoke(then: (success: Boolean) -> Unit = {}) {
+        coroutineScope.launch { clear(then) }
     }
 
-    operator fun invoke(then: (success: Boolean) -> Unit = {}) {
-        val p = prefs ?: run {
-            then(false)
-            return
-        }
+    internal suspend fun clear(then: (success: Boolean) -> Unit) {
+        val p = appPrefs.clearDataPreferencesFlow.first()
         val historyJob: Job? = if (p.history) {
             coroutineScope.launch {
                 historyStorage.deleteEverything()
@@ -63,7 +54,8 @@ class ClearDataUseCase @Inject constructor(
                 onError = { onBrowsingDataComplete(false) }
             )
         } else {
-            onBrowsingDataComplete(true)
+            historyJob?.join()
+            then(true)
         }
     }
 }

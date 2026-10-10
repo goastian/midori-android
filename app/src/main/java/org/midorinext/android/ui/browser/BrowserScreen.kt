@@ -61,22 +61,26 @@ fun BrowserScreen(
     val currentUrl by viewModel.currentUrl.collectAsStateWithLifecycle()
     val selectedTabSnapshot by viewModel.selectedTabSnapshot.collectAsStateWithLifecycle()
     val tabCount by viewModel.tabCount.collectAsStateWithLifecycle()
-    val tabStripTabs by viewModel.tabStripTabs.collectAsStateWithLifecycle()
     val isFullScreen by viewModel.isFullScreen.collectAsStateWithLifecycle()
     val restoreComplete by viewModel.restoreComplete.collectAsStateWithLifecycle()
     val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
+    val tabStripTabs = if (appPrefs.showTabStrip) {
+        viewModel.tabStripTabs.collectAsStateWithLifecycle().value
+    } else emptyList()
     val private by appViewModel.isPrivate.collectAsStateWithLifecycle()
     val newTabState by viewModel.newTabState.collectAsStateWithLifecycle()
     val nativeBlockerState by viewModel.nativeBlockerState.collectAsStateWithLifecycle()
     val readerModeStatus by viewModel.readerModeStatus.collectAsStateWithLifecycle()
     val hasParentTab by viewModel.hasParentTab.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val readerViewFeature = rememberReaderViewFeature(
-        store = viewModel.store,
-        engine = viewModel.engine,
-    )
-
-    ComposeFeatureWrapper(readerViewFeature)
+    val restoredReaderPage = currentUrl?.let { url ->
+        url.startsWith("moz-extension://", ignoreCase = true) &&
+            url.substringBefore('?').substringBefore('#').endsWith("/readerview.html", ignoreCase = true)
+    } == true
+    val readerViewFeature = if (readerModeStatus.isAvailable || readerModeStatus.isActive || restoredReaderPage) {
+        rememberReaderViewFeature(store = viewModel.store, engine = viewModel.engine)
+    } else null
+    readerViewFeature?.let { ComposeFeatureWrapper(it) }
 
     var engineViewHolder: EngineView? by remember { mutableStateOf(null) }
     var pageSummary by remember { mutableStateOf<String?>(null) }
@@ -245,9 +249,9 @@ fun BrowserScreen(
                             active = readerModeStatus.isActive,
                             onClick = {
                                 if (readerModeStatus.isActive) {
-                                    readerViewFeature.hideReaderView()
+                                    readerViewFeature?.hideReaderView()
                                 } else {
-                                    readerViewFeature.showReaderView()
+                                    readerViewFeature?.showReaderView()
                                 }
                             },
                         )
@@ -337,7 +341,7 @@ fun BrowserScreen(
 
     // Register after the engine session handler so Back exits Reader View before navigating away.
     BackHandler(enabled = readerModeStatus.isActive) {
-        readerViewFeature.onBackPressed()
+        readerViewFeature?.onBackPressed()
     }
 }
 

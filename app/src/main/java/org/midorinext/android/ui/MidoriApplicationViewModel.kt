@@ -32,10 +32,10 @@ enum class PrivacyMode {
 @HiltViewModel
 class MidoriApplicationViewModel @Inject constructor(
     store: BrowserStore,
-    historyRepository: HistoryRepository,
+    historyRepository: dagger.Lazy<HistoryRepository>,
     private val appPreferencesRepository: AppPreferencesRepository,
     private val adBlockSettings: AdBlockSettings,
-    clearDataUseCase: ClearDataUseCase,
+    clearDataUseCase: dagger.Lazy<ClearDataUseCase>,
 ) : ViewModel() {
     val adBlockConfiguration = adBlockSettings.state
 
@@ -45,7 +45,8 @@ class MidoriApplicationViewModel @Inject constructor(
     private val selectedTabPrivacy = store.flow()
         .map { state -> state.selectedTab?.content?.private ?: false }
 
-    val hasHistory = historyRepository.hasHistoryFlow
+    val hasHistory = flow { emitAll(historyRepository.get().hasHistoryFlow) }
+        .flowOn(kotlinx.coroutines.Dispatchers.IO)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
@@ -166,7 +167,7 @@ class MidoriApplicationViewModel @Inject constructor(
         }
     }
 
-    val zapState: ZapState = ZapState(clearDataUseCase, viewModelScope)
+    val zapState: ZapState = ZapState({ then -> clearDataUseCase.get()(then) }, viewModelScope)
     fun zap(
         from: String = "Toolbar",
         skipConfirmation: Boolean = false,

@@ -54,16 +54,16 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class BrowserScreenViewModel @Inject constructor(
-    private val bookmarksRepository: BookmarksRepository,
-    private val webAppUseCases: WebAppUseCases,
+    bookmarksRepositoryProvider: dagger.Lazy<BookmarksRepository>,
+    webAppUseCasesProvider: dagger.Lazy<WebAppUseCases>,
     val sessionUseCases: SessionUseCases,
     val tabsUseCases: TabsUseCases,
     val contextMenuUseCases: ContextMenuUseCases,
     val downloadUseCases: DownloadsUseCases,
     val fileSizeFormatter: FileSizeFormatter,
-    val permissionStorage: GeckoSitePermissionsStorage,
+    permissionStorageProvider: dagger.Lazy<GeckoSitePermissionsStorage>,
     val browserIcons: BrowserIcons,
-    val downloadManager: DownloadManager,
+    downloadManagerProvider: dagger.Lazy<DownloadManager>,
     val store: BrowserStore,
     val engine: Engine,
     val client: Client,
@@ -71,9 +71,14 @@ class BrowserScreenViewModel @Inject constructor(
     private val appPreferencesRepository: AppPreferencesRepository,
     val pdfSaveEvents: PdfSaveEvents,
     private val backgroundPlaybackFeature: BackgroundPlaybackFeature,
-    private val webAppRepository: WebAppRepository,
+    webAppRepositoryProvider: dagger.Lazy<WebAppRepository>,
     private val desktopHostFilter: DesktopHostFilter,
 ): ViewModel() {
+    private val bookmarksRepository by lazy { bookmarksRepositoryProvider.get() }
+    private val webAppUseCases by lazy { webAppUseCasesProvider.get() }
+    private val webAppRepository by lazy { webAppRepositoryProvider.get() }
+    val permissionStorage by lazy { permissionStorageProvider.get() }
+    val downloadManager by lazy { downloadManagerProvider.get() }
     data class TranslationSheetState(
         val enabled: Boolean = false,
         val sourceLanguage: String? = null,
@@ -114,7 +119,9 @@ class BrowserScreenViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = 0
+            initialValue = store.state.tabs.count {
+                it.content.private == store.state.selectedTab?.content?.private
+            }
         )
 
     val tabStripTabs = store.flow()
@@ -125,7 +132,9 @@ class BrowserScreenViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = emptyList()
+            initialValue = store.state.tabs.filter {
+                it.content.private == (store.state.selectedTab?.content?.private == true)
+            }
         )
 
     val isFullScreen = store.flow()
@@ -153,7 +162,7 @@ class BrowserScreenViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = null
+            initialValue = store.state.selectedTab?.content?.url
         )
 
     val restoreComplete = store.flow()
@@ -161,7 +170,7 @@ class BrowserScreenViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = false,
+            initialValue = store.state.restoreComplete,
         )
 
     val selectedTabSnapshot = store.flow()
@@ -174,7 +183,9 @@ class BrowserScreenViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = null,
+            initialValue = store.state.selectedTab?.let {
+                SelectedTabSnapshot(it.id, it.content.url)
+            },
         )
 
     val readerModeStatus = store.flow()
@@ -441,7 +452,7 @@ class BrowserScreenViewModel @Inject constructor(
     var showFindInPage by mutableStateOf(false)
         private set
 
-    val isShortcutSupported = webAppUseCases.isPinningSupported()
+    val isShortcutSupported by lazy { webAppUseCases.isPinningSupported() }
 
     val canInstallWebApp = store.flow()
         .map { state ->

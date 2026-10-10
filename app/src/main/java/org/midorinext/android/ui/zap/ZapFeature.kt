@@ -46,6 +46,8 @@ import org.midorinext.android.ui.animation.reduceMotionRequested
 fun ZapFeature(
     state: ZapState
 ) {
+    if (state.animationStatus == ZapState.AnimationStatus.Idle &&
+        state.requestStatus == ZapState.RequestStatus.Waiting) return
     ZapAnimation(state)
 
     when (state.requestStatus) {

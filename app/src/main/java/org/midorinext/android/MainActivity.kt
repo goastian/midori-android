@@ -14,6 +14,7 @@ import org.midorinext.android.ui.MidoriBrowserApp
 import dagger.hilt.android.AndroidEntryPoint
 import mozilla.components.support.base.android.NotificationsDelegate
 import javax.inject.Inject
+import mozilla.components.browser.state.action.AppLifecycleAction
 
 @AndroidEntryPoint
 class MainActivity : MidoriActivity() {
@@ -40,6 +41,7 @@ class MainActivity : MidoriActivity() {
 
     override fun onPause() {
         backgroundPlaybackFeature.onBrowserActivityPaused()
+        (application as MidoriApplication).store.get().dispatch(AppLifecycleAction.PauseAction)
         super.onPause()
     }
 
@@ -53,6 +55,7 @@ class MainActivity : MidoriActivity() {
     override fun onResume() {
         super.onResume()
         backgroundPlaybackFeature.onBrowserActivityResumed()
+        (application as MidoriApplication).store.get().dispatch(AppLifecycleAction.ResumeAction)
     }
 
     override fun onDestroy() {

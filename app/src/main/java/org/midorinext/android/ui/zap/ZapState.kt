@@ -3,15 +3,13 @@ package org.midorinext.android.ui.zap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import org.midorinext.android.usecases.ClearDataUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-// TODO zap state could old clear data config (and clean use case) ?
 class ZapState(
-    private val clearDataUseCase: ClearDataUseCase,
+    private val clearDataUseCase: ((Boolean) -> Unit) -> Unit,
     private val coroutineScope: CoroutineScope = MainScope(),
 ) {
     internal enum class RequestStatus { Zapping, Confirm, Waiting, Error }

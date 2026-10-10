@@ -6,8 +6,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import org.midorinext.android.preferences.app.AppPreferencesRepository
+import org.midorinext.android.mozac.TabResourceMiddleware
 import org.midorinext.android.mozac.downloads.DownloadLocationProvider
 import org.midorinext.android.mozac.downloads.DownloadService
 import org.midorinext.android.mozac.media.MediaSessionService
@@ -21,7 +21,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.session.storage.SessionStorage
-import mozilla.components.browser.state.action.TranslationsAction
 import mozilla.components.browser.state.engine.EngineMiddleware
 import mozilla.components.browser.state.engine.middleware.TranslationsMiddleware
 import mozilla.components.browser.state.store.BrowserStore
@@ -84,26 +83,17 @@ object MozacComponentHiltModule {
                 UndoMiddleware(clearAfterMillis = 15_000),
                 LastMediaAccessMiddleware(),
                 RecordingDevicesMiddleware(context, notificationsDelegate),
+                TabResourceMiddleware(),
                 ReaderViewMiddleware(),
-            ) + EngineMiddleware.create(engine) + TranslationsMiddleware(
+            ) + EngineMiddleware.create(engine, trimMemoryAutomatically = false) + TranslationsMiddleware(
                 engine = engine,
+                automaticallyInitialize = false,
                 // The browser store is application-scoped, so its translation coordinator must
                 // outlive individual screens and sessions.
                 scope = translationsScope,
                 isTranslationsEnabled = { !appPreferencesRepository.flow.first().translationsDisabled }
             )
-        ).also { store ->
-            // TranslationsMiddleware only sends this command after a user toggles the setting.
-            // Send it once at startup as well; otherwise the preference can say "enabled" while
-            // GeckoView's native AI feature stays disabled and ignores TranslateAction requests.
-            translationsScope.launch {
-                store.dispatch(
-                    TranslationsAction.SetTranslationsEnabledAction(
-                        !appPreferencesRepository.flow.first().translationsDisabled
-                    )
-                )
-            }
-        }
+        )
     }
 
     @Singleton

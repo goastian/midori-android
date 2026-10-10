@@ -27,12 +27,13 @@ import mozilla.components.browser.icons.BrowserIcons
 
 open class ToolbarState(
     val browserIcons: BrowserIcons,
-    val datahub: Datahub,
-    suggestionProviders: List<SuggestionProvider>,
+    datahub: Lazy<Datahub>,
+    private val suggestionProviders: Lazy<List<SuggestionProvider>>,
     coroutineScope: CoroutineScope = MainScope(),
     preferences: Flow<AppPreferences> = flowOf(AppPreferences.getDefaultInstance()),
     privateMode: Flow<Boolean> = flowOf(false),
 ) {
+    val datahub by datahub
     var text by mutableStateOf(TextFieldValue(""))
         internal set
 
@@ -47,7 +48,7 @@ open class ToolbarState(
     val voiceSearchEnabled = preferences.map { !it.disableVoiceSearch }
         .stateIn(coroutineScope, SharingStarted.WhileSubscribed(5000L), true)
 
-    private val emptySuggestions = suggestionProviders.associateWith { emptyList<Suggestion>() }
+    private val emptySuggestions = emptyMap<SuggestionProvider, List<Suggestion>>()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val suggestions = combine(snapshotFlow {
@@ -63,7 +64,7 @@ open class ToolbarState(
             delay(100)
             if (query.hasFocus && (!query.isPrefilled || query.text.isBlank())) {
                 runProvidersInParallel {
-                    suggestionProviders
+                    suggestionProviders.value
                         .filter { provider ->
                             (query.text.isNotBlank() || provider.supportsEmptyQuery) &&
                                 provider.isEnabled(prefs, isPrivate)

@@ -42,13 +42,13 @@ interface BrowserToolbarStateFactory {
 class BrowserToolbarState @AssistedInject constructor(
     store: BrowserStore,
     appPreferencesRepository: AppPreferencesRepository,
-    suggestionProviders: @JvmSuppressWildcards List<SuggestionProvider>,
+    suggestionProviders: dagger.Lazy<@JvmSuppressWildcards List<SuggestionProvider>>,
     browserIcons: BrowserIcons,
-    datahub: Datahub,
+    datahub: dagger.Lazy<Datahub>,
     private val newTabFeature: MidoriNewTabFeature,
     @Assisted private val coroutineScope: CoroutineScope = MainScope()
 ): ToolbarState(
-    browserIcons, datahub, suggestionProviders, coroutineScope,
+    browserIcons, lazy { datahub.get() }, lazy { suggestionProviders.get() }, coroutineScope,
     appPreferencesRepository.flow,
     store.flow().map { it.selectedTab?.content?.private == true },
 ) {
