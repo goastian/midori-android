@@ -5,11 +5,27 @@
     <link rel="icon" type="image/png" href="/icons/48.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Midori</title>
+    <script src="/boot-shell.js"></script>
+    <link rel="stylesheet" href="/boot-shell.css" />
     <script type="module" crossorigin src="/index.js"></script>
-    <link rel="modulepreload" crossorigin href="/assets/vendor-BtTSCww5.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-BdG8HQM3.css">
+    <link rel="modulepreload" crossorigin href="/assets/vendor-BtWkUpZE.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-CURgaAPk.css">
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <main class="boot-shell">
+        <h1 class="boot-shell__title">Midori</h1>
+        <form class="boot-shell__form" action="https://astiango.com/" method="get" role="search">
+          <input type="hidden" name="client" value="midoritab" />
+          <input type="hidden" name="omnibar" value="1" />
+          <input type="hidden" name="qbc" value="1" />
+          <label class="boot-shell__label" for="midori-boot-search">Search the web</label>
+          <div class="boot-shell__row">
+            <input id="midori-boot-search" name="q" type="search" autocomplete="off" spellcheck="false" placeholder="Search the web" />
+            <button class="boot-shell__button" type="submit">Search</button>
+          </div>
+        </form>
+      </main>
+    </div>
   </body>
 </html>

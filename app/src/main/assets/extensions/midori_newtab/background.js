@@ -947,8 +947,28 @@ async function executeOmniItem(message) {
   }
 }
 
+// ─── Native blocker stats ───────────────────────────────────────────────────
+// Answers the PrivacyWidget `get-stats-summary` protocol with stats from the
+// native Midori blocker (see experiment-apis/midoriBlocker). Returns null when
+// the API is unavailable so callers fall back to the legacy companion IDs.
+async function getMidoriBlockerStatsSummary(senderTabId) {
+  try {
+    const api =
+      globalThis.browser?.midoriBlocker || globalThis.chrome?.midoriBlocker;
+    if (api?.getStatsSummary) {
+      return await api.getStatsSummary(Number(senderTabId) || 0);
+    }
+  } catch (error) {
+    return { error: String((error && error.message) || error) };
+  }
+  return null;
+}
+
 // ─── Message Handler ─────────────────────────────────────────────────────────
-async function handleMessage(message) {
+async function handleMessage(message, senderTabId) {
+  if (message && message.action === 'get-stats-summary') {
+    return getMidoriBlockerStatsSummary(senderTabId);
+  }
   switch (message.request) {
     case 'get-data': {
       return collectOmniData();
@@ -1052,8 +1072,8 @@ async function handleMessage(message) {
   }
 }
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  handleMessage(message)
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  handleMessage(message, sender?.tab?.id)
     .then((result) => sendResponse(result ?? {}))
     .catch((err) => {
       console.error('[Midori Omni background] Error handling message:', message.request, err);
@@ -1062,8 +1082,22 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   return true; // keep port open for async response
 });
 
+const midoriBlockerOnMessageExternal =
+  chrome.runtime?.onMessageExternal || globalThis.browser?.runtime?.onMessageExternal;
+
+midoriBlockerOnMessageExternal?.addListener?.((message, sender, sendResponse) => {
+  if (!message || message.action !== 'get-stats-summary') {
+    return undefined;
+  }
+  getMidoriBlockerStatsSummary(sender?.tab?.id).then((result) =>
+    sendResponse(result ?? {})
+  );
+  return true; // keep port open for async response
+});
+
 globalThis.__midoriOmniBackground = {
   collectOmniData,
+  queryOmni,
   ensureStaticActions,
   ensureTabsCache,
   pruneTabsCache,

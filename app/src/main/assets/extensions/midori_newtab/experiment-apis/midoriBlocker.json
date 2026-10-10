@@ -1,0 +1,22 @@
+[
+  {
+    "namespace": "midoriBlocker",
+    "description": "Native Midori blocker stats for the Midori new-tab page",
+    "functions": [
+      {
+        "name": "getStatsSummary",
+        "type": "function",
+        "description": "Stats summary shaped like the legacy blocker extension protocol",
+        "async": true,
+        "parameters": [
+          {
+            "name": "tabId",
+            "type": "integer",
+            "optional": true,
+            "description": "Extension tab id used to resolve per-page stats"
+          }
+        ]
+      }
+    ]
+  }
+]
