@@ -13,8 +13,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -23,16 +24,17 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.GeolocationPermissions;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.ComponentActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.textfield.TextInputEditText;
@@ -46,6 +48,9 @@ import org.mozilla.geckoview.BuildConfig;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
@@ -81,6 +86,10 @@ public class Assist extends AppCompatActivity {
 
 
     ArrayList<String> suggestItems = new ArrayList<>();
+    private final ExecutorService suggestionsExecutor = Executors.newSingleThreadExecutor();
+    private final Handler suggestionsHandler = new Handler(Looper.getMainLooper());
+    private Future<?> suggestionsTask;
+    private int suggestionsGeneration;
 
     @SuppressLint({"SetJavaScriptEnabled"})
     @Override
@@ -108,16 +117,14 @@ public class Assist extends AppCompatActivity {
         // Maps settings
         webview.getSettings().setGeolocationEnabled(true);
         webview.getSettings().setBuiltInZoomControls(true);
-        // Local storage emulation
-        // webview.getSettings().setAppCacheEnabled(true);
-        webview.getSettings().setDatabaseEnabled(true);
         webview.getSettings().setDomStorageEnabled(true);
 
         webview.setWebViewClient(new WebViewClient() {
             // If we get out of astiango.org, it opens in the browser, else stay in webview
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                Uri uri = Uri.parse(url);
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                if (!request.isForMainFrame()) return false;
+                Uri uri = request.getUrl();
                 String host = uri.getHost();
                 if (host != null && host.contains("astiango.org")) {
                     return false;
@@ -213,13 +220,14 @@ public class Assist extends AppCompatActivity {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void afterTextChanged(Editable s) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                cancelSuggestions();
                 String newSearch = s.toString().trim();
                 if (newSearch.length() == 0) {
                     cancel_cross.setVisibility(View.INVISIBLE);
                     webview.setVisibility(View.INVISIBLE);
                     suggest_recyclerview.setVisibility(View.INVISIBLE);
                 } else {
-                    new RefreshSuggestionsTask(suggestItems, suggest_adapter).execute(newSearch);
+                    refreshSuggestions(newSearch);
                     cancel_cross.setVisibility(View.VISIBLE);
                     webview.setVisibility(View.INVISIBLE);
                     suggest_recyclerview.setVisibility(View.VISIBLE);
@@ -240,6 +248,26 @@ public class Assist extends AppCompatActivity {
             }
         });
 
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (suggest_recyclerview.getVisibility() == View.VISIBLE) {
+                    suggest_recyclerview.setVisibility(View.INVISIBLE);
+                    if (back_to_webview) {
+                        webview.setVisibility(View.VISIBLE);
+                    }
+                } else if (webview.getVisibility() == View.VISIBLE) {
+                    webview.setVisibility(View.INVISIBLE);
+                    back_to_webview = false;
+                    reset_searchbar();
+                } else {
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                    setEnabled(true);
+                }
+            }
+        });
+
         reset_searchbar();
     }
 
@@ -249,26 +277,34 @@ public class Assist extends AppCompatActivity {
         if (launchSearch) launch_search();
     }
 
-    private static class RefreshSuggestionsTask extends AsyncTask<String, ArrayList<String>, ArrayList<String>> {
-        ArrayList<String> data;
-        SuggestAdapter adapter;
-        String search_terms;
+    private void refreshSuggestions(String query) {
+        int generation = suggestionsGeneration;
+        suggestionsTask = suggestionsExecutor.submit(() -> {
+            ArrayList<String> result = SuggestRequest.getSuggestions(query);
+            if (Thread.currentThread().isInterrupted()) return;
+            suggestionsHandler.post(() -> {
+                if (generation != suggestionsGeneration || isDestroyed() || isFinishing()) return;
+                suggestItems.clear();
+                suggestItems.addAll(result);
+                suggest_adapter.notifyChange(query);
+            });
+        });
+    }
 
-        RefreshSuggestionsTask(ArrayList<String> suggest_data, SuggestAdapter adapter) {
-            this.data = suggest_data;
-            this.adapter = adapter;
+    private void cancelSuggestions() {
+        suggestionsGeneration++;
+        if (suggestionsTask != null) {
+            suggestionsTask.cancel(true);
+            suggestionsTask = null;
         }
+    }
 
-        protected ArrayList<String> doInBackground(String... search_strings) {
-            search_terms = (search_strings.length > 0) ? search_strings[0] : "";
-            return SuggestRequest.getSuggestions(search_terms);
-        }
-
-        protected void onPostExecute(ArrayList<String> result) {
-            data.clear();
-            data.addAll(result);
-            adapter.notifyChange(search_terms);
-        }
+    @Override
+    protected void onDestroy() {
+        cancelSuggestions();
+        suggestionsExecutor.shutdownNow();
+        suggestionsHandler.removeCallbacksAndMessages(null);
+        super.onDestroy();
     }
 
     @Override
@@ -299,21 +335,6 @@ public class Assist extends AppCompatActivity {
     @Override protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         reset_searchbar();
-    }
-
-    @Override public void onBackPressed() {
-        if (suggest_recyclerview.getVisibility() == View.VISIBLE) {
-            suggest_recyclerview.setVisibility(View.INVISIBLE);
-            if (back_to_webview) {
-                webview.setVisibility(View.VISIBLE);
-            }
-        } else if (webview.getVisibility() == View.VISIBLE) {
-            webview.setVisibility(View.INVISIBLE);
-            back_to_webview = false;
-            reset_searchbar();
-        } else {
-            super.onBackPressed();
-        }
     }
 
     void reset_searchbar() {

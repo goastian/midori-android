@@ -18,6 +18,8 @@ class SuggestRequest {
     private static InputStream getHttpStream(URL url) throws Exception {
         try {
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setConnectTimeout(5_000);
+            urlConnection.setReadTimeout(5_000);
             urlConnection.connect();
             if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 return urlConnection.getInputStream();
