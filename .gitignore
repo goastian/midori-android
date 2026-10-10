@@ -6,6 +6,8 @@
 /fastlane/report.xml
 /.kotlin/
 /build/
+/buildSrc/.gradle/
+/buildSrc/build/
 upload-keystore.jks
 upload_certificate.pem
 deployment_cert.der
