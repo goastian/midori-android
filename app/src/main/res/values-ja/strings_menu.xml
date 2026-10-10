@@ -11,4 +11,7 @@
     <string name="menu_midori_vpn">みどりVPN</string>
     <string name="menu_more_options">その他のオプション</string>
     <string name="menu_back_to_main">主な取り組み</string>
+    <string name="menu_customize_homepage">ホームページをカスタマイズ</string>
+    <string name="menu_dismiss_default_prompt">既定のブラウザーの提案を閉じる</string>
+    <string name="menu_default_browser_description">高速、プライベート、あなたのためのブラウザー。</string>
 </resources>

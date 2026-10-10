@@ -1,0 +1,24 @@
+<resources>
+    <string name="home_shortcuts">快捷方式</string>
+    <string name="home_show_all">查看全部</string>
+    <string name="home_add_shortcut">添加快捷方式</string>
+    <string name="home_edit_shortcut">编辑快捷方式</string>
+    <string name="home_continue">继续浏览</string>
+    <string name="home_start_browsing">开始浏览</string>
+    <string name="home_continue_empty">最近打开的页面将显示在这里。</string>
+    <string name="home_recent_visits">最近访问</string>
+    <string name="home_recent_empty">访问过的页面将显示在这里。</string>
+    <string name="home_stories">新闻</string>
+    <string name="home_all_stories">全部新闻</string>
+    <string name="home_stories_loading">正在加载新闻…</string>
+    <string name="home_stories_unavailable">新闻暂不可用。连接网络后重试。</string>
+    <string name="home_private">打开隐私浏览</string>
+    <string name="home_shortcut_title">名称</string>
+    <string name="home_shortcut_url">网站地址</string>
+    <string name="home_shortcut_invalid">请输入名称和有效的HTTP或HTTPS地址。</string>
+    <string name="home_move_left">向左移动</string>
+    <string name="home_move_right">向右移动</string>
+    <string name="home_blocked">已在打开的标签页中拦截%1$d次</string>
+    <string name="home_blank_tab">打开新的空白标签页</string>
+    <string name="home_stories_source">标题来自BBC News；西班牙语使用BBC Mundo。</string>
+</resources>

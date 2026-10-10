@@ -1,0 +1,24 @@
+<resources>
+    <string name="home_shortcuts">Ярлыки</string>
+    <string name="home_show_all">Показать все</string>
+    <string name="home_add_shortcut">Добавить ярлык</string>
+    <string name="home_edit_shortcut">Изменить ярлык</string>
+    <string name="home_continue">Продолжить</string>
+    <string name="home_start_browsing">Начать просмотр</string>
+    <string name="home_continue_empty">Здесь появится последняя открытая страница.</string>
+    <string name="home_recent_visits">Недавно посещённые</string>
+    <string name="home_recent_empty">Здесь появятся посещённые страницы.</string>
+    <string name="home_stories">Новости</string>
+    <string name="home_all_stories">Все новости</string>
+    <string name="home_stories_loading">Загрузка новостей…</string>
+    <string name="home_stories_unavailable">Новости недоступны. Повторите при подключении.</string>
+    <string name="home_private">Открыть приватный просмотр</string>
+    <string name="home_shortcut_title">Название</string>
+    <string name="home_shortcut_url">Адрес сайта</string>
+    <string name="home_shortcut_invalid">Введите название и корректный адрес HTTP или HTTPS.</string>
+    <string name="home_move_left">Переместить влево</string>
+    <string name="home_move_right">Переместить вправо</string>
+    <string name="home_blocked">%1$d блокировок в открытых вкладках</string>
+    <string name="home_blank_tab">Открывать новую пустую вкладку</string>
+    <string name="home_stories_source">Заголовки BBC News; для испанского — BBC Mundo.</string>
+</resources>

@@ -1,0 +1,24 @@
+<resources>
+    <string name="home_shortcuts">Scorciatoie</string>
+    <string name="home_show_all">Mostra tutto</string>
+    <string name="home_add_shortcut">Aggiungi scorciatoia</string>
+    <string name="home_edit_shortcut">Modifica scorciatoia</string>
+    <string name="home_continue">Continua</string>
+    <string name="home_start_browsing">Inizia a navigare</string>
+    <string name="home_continue_empty">La tua ultima pagina aperta apparirà qui.</string>
+    <string name="home_recent_visits">Visitati di recente</string>
+    <string name="home_recent_empty">Le pagine visitate appariranno qui.</string>
+    <string name="home_stories">Notizie</string>
+    <string name="home_all_stories">Tutte le notizie</string>
+    <string name="home_stories_loading">Caricamento delle notizie…</string>
+    <string name="home_stories_unavailable">Notizie non disponibili. Riprova quando sei connesso.</string>
+    <string name="home_private">Apri navigazione privata</string>
+    <string name="home_shortcut_title">Nome</string>
+    <string name="home_shortcut_url">Indirizzo del sito</string>
+    <string name="home_shortcut_invalid">Inserisci un nome e un indirizzo HTTP o HTTPS valido.</string>
+    <string name="home_move_left">Sposta a sinistra</string>
+    <string name="home_move_right">Sposta a destra</string>
+    <string name="home_blocked">%1$d blocchi nelle schede aperte</string>
+    <string name="home_blank_tab">Apri una nuova scheda vuota</string>
+    <string name="home_stories_source">Titoli da BBC News; BBC Mundo in spagnolo.</string>
+</resources>

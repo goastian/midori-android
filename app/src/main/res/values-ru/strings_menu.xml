@@ -11,4 +11,7 @@
     <string name="menu_midori_vpn">МидориVPN</string>
     <string name="menu_more_options">Больше возможностей</string>
     <string name="menu_back_to_main">Основные действия</string>
+    <string name="menu_customize_homepage">Настроить домашнюю страницу</string>
+    <string name="menu_dismiss_default_prompt">Закрыть предложение браузера по умолчанию</string>
+    <string name="menu_default_browser_description">Быстрый, приватный и созданный для вас.</string>
 </resources>

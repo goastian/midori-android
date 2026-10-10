@@ -11,4 +11,7 @@
     <string name="menu_midori_vpn">MidoriVPN</string>
     <string name="menu_more_options">More options</string>
     <string name="menu_back_to_main">Main actions</string>
+    <string name="menu_customize_homepage">Customize homepage</string>
+    <string name="menu_dismiss_default_prompt">Dismiss default browser suggestion</string>
+    <string name="menu_default_browser_description">Fast, private, and made for you.</string>
 </resources>

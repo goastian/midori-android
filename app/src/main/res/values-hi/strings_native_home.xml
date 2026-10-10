@@ -1,0 +1,24 @@
+<resources>
+    <string name="home_shortcuts">शॉर्टकट</string>
+    <string name="home_show_all">सभी दिखाएँ</string>
+    <string name="home_add_shortcut">शॉर्टकट जोड़ें</string>
+    <string name="home_edit_shortcut">शॉर्टकट संपादित करें</string>
+    <string name="home_continue">जारी रखें</string>
+    <string name="home_start_browsing">ब्राउज़िंग शुरू करें</string>
+    <string name="home_continue_empty">आपका पिछला खुला पेज यहाँ दिखाई देगा।</string>
+    <string name="home_recent_visits">हाल ही में देखे गए</string>
+    <string name="home_recent_empty">आपके देखे गए पेज यहाँ दिखाई देंगे।</string>
+    <string name="home_stories">समाचार</string>
+    <string name="home_all_stories">सभी समाचार</string>
+    <string name="home_stories_loading">समाचार लोड हो रहे हैं…</string>
+    <string name="home_stories_unavailable">समाचार उपलब्ध नहीं हैं। इंटरनेट से जुड़कर फिर कोशिश करें।</string>
+    <string name="home_private">निजी ब्राउज़िंग खोलें</string>
+    <string name="home_shortcut_title">नाम</string>
+    <string name="home_shortcut_url">वेबसाइट का पता</string>
+    <string name="home_shortcut_invalid">नाम और मान्य HTTP या HTTPS पता दर्ज करें।</string>
+    <string name="home_move_left">बाएँ ले जाएँ</string>
+    <string name="home_move_right">दाएँ ले जाएँ</string>
+    <string name="home_blocked">खुले टैब में %1$d अवरोध</string>
+    <string name="home_blank_tab">नया खाली टैब खोलें</string>
+    <string name="home_stories_source">BBC News के शीर्षक; स्पेनिश में BBC Mundo।</string>
+</resources>

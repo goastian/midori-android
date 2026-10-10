@@ -1,0 +1,24 @@
+<resources>
+    <string name="home_shortcuts">Atalhos</string>
+    <string name="home_show_all">Mostrar todos</string>
+    <string name="home_add_shortcut">Adicionar atalho</string>
+    <string name="home_edit_shortcut">Editar atalho</string>
+    <string name="home_continue">Continuar</string>
+    <string name="home_start_browsing">Comece a navegar</string>
+    <string name="home_continue_empty">Sua última página aberta aparecerá aqui.</string>
+    <string name="home_recent_visits">Visitados recentemente</string>
+    <string name="home_recent_empty">As páginas que você visitar aparecerão aqui.</string>
+    <string name="home_stories">Notícias</string>
+    <string name="home_all_stories">Todas as notícias</string>
+    <string name="home_stories_loading">Carregando notícias…</string>
+    <string name="home_stories_unavailable">Notícias indisponíveis. Tente novamente com conexão.</string>
+    <string name="home_private">Abrir navegação privativa</string>
+    <string name="home_shortcut_title">Nome</string>
+    <string name="home_shortcut_url">Endereço do site</string>
+    <string name="home_shortcut_invalid">Digite um nome e um endereço HTTP ou HTTPS válido.</string>
+    <string name="home_move_left">Mover para a esquerda</string>
+    <string name="home_move_right">Mover para a direita</string>
+    <string name="home_blocked">%1$d bloqueios nas abas abertas</string>
+    <string name="home_blank_tab">Abrir uma nova aba vazia</string>
+    <string name="home_stories_source">Manchetes da BBC News; BBC Mundo em espanhol.</string>
+</resources>
