@@ -37,6 +37,13 @@
     } catch { return "OFF"; }
   }
 
+  function isWebPage(siteUrl) {
+    try {
+      const protocol = new URL(siteUrl).protocol;
+      return protocol === "http:" || protocol === "https:";
+    } catch { return false; }
+  }
+
   async function intercept(details) {
     if (details.tabId < 0) return {};
     if (details.type === "main_frame") {
@@ -52,6 +59,7 @@
       try { siteUrl = (await browser.tabs.get(details.tabId)).url; }
       catch { return {}; }
     }
+    if (!isWebPage(siteUrl)) return {};
     const state = stateFor(details.tabId, siteUrl);
     if (!policy) await deadline(ready, 2000, null);
     if (levelFor(siteUrl) === "OFF") return {};

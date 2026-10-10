@@ -22,6 +22,9 @@ import org.midorinext.android.usecases.MidoriUseCases
 import org.midorinext.android.vpn.MidoriVpnFeature
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import mozilla.components.browser.session.storage.SessionStorage
 import mozilla.components.browser.state.action.SystemAction
 import mozilla.components.browser.state.store.BrowserStore
@@ -105,11 +108,13 @@ class MidoriApplication : Application(), Configuration.Provider {
 
         // Watch for preference changes and apply them without requiring restart
         applicationScope.launch(Dispatchers.IO) {
-            kotlinx.coroutines.flow.combine(appPreferencesRepository.get().flow, adBlockSettings.get().state) { prefs, adBlock ->
-                prefs to adBlock
-            }.collect { (prefs, adBlock) ->
+            geckoSettingsChanges(appPreferencesRepository.get().flow, adBlockSettings.get().state)
+                .collect { settings -> GeckoPreferences.initialize(geckoRuntime.get(), settings) }
+        }
+
+        applicationScope.launch(Dispatchers.IO) {
+            appPreferencesRepository.get().flow.collect { prefs ->
                 autofillPreferenceState.get().update(prefs)
-                GeckoPreferences.initialize(geckoRuntime.get(), prefs.toGeckoSettings(adBlock))
 
                 val shouldRunSystemProtection =
                     prefs.appTrackingProtectionMode == AppTrackingProtectionMode.HYBRID_SYSTEM &&
@@ -164,8 +169,6 @@ class MidoriApplication : Application(), Configuration.Provider {
             return
         }
 
-        AdBlockUpdateWorker.schedule(this)
-
         applicationScope.launch {
             engine.get().warmUp()
             // VPN is an optional action. Register it after the UI is visible so extension
@@ -176,6 +179,7 @@ class MidoriApplication : Application(), Configuration.Provider {
         }
 
         applicationScope.launch(Dispatchers.IO) {
+            AdBlockUpdateWorker.schedule(this@MidoriApplication)
             // Reading Mode and its Room database have been removed. Delete any data left by
             // earlier versions without doing file-system work before the first frame.
             deleteDatabase(READING_LIST_DATABASE_NAME)
@@ -208,6 +212,13 @@ class MidoriApplication : Application(), Configuration.Provider {
         }
     }
 }
+
+internal fun geckoSettingsChanges(
+    preferences: Flow<AppPreferences>,
+    adBlock: Flow<AdBlockConfiguration>,
+): Flow<GeckoPreferences.UserSettings> = combine(preferences, adBlock) { prefs, blocking ->
+    prefs.toGeckoSettings(blocking)
+}.distinctUntilChanged()
 
 private fun AppPreferences.toGeckoSettings(adBlock: AdBlockConfiguration) = GeckoPreferences.UserSettings(
     globalPrivacyControl = privacyGlobalPrivacyControl,
