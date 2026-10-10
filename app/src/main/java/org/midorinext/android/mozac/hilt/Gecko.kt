@@ -1,6 +1,7 @@
 package org.midorinext.android.mozac.hilt
 
 import android.content.Context
+import org.midorinext.android.StartupTiming
 import org.midorinext.android.adblock.LegacyBlockerMigration
 import org.midorinext.android.newtab.MidoriNewTabFeature
 import dagger.Module
@@ -35,8 +36,10 @@ object GeckoHiltModule {
         autocompleteStorageDelegate: Autocomplete.StorageDelegate,
     ): GeckoRuntime {
         assert(context.isMainProcess())
-        return GeckoRuntime.create(context, settings).apply {
-            setAutocompleteStorageDelegate(autocompleteStorageDelegate)
+        return StartupTiming.measure("gecko_runtime") {
+            GeckoRuntime.create(context, settings).apply {
+                setAutocompleteStorageDelegate(autocompleteStorageDelegate)
+            }
         }
     }
 
@@ -49,10 +52,12 @@ object GeckoHiltModule {
         legacyBlockerMigration: LegacyBlockerMigration,
         newTabFeature: MidoriNewTabFeature,
     ): Engine {
-        return GeckoEngine(context, settings, runtime).also {
-            legacyBlockerMigration.uninstall(runtime)
-            newTabFeature.install(runtime)
-            WebCompatFeature.install(it)
+        return StartupTiming.measure("browser_engine") {
+            GeckoEngine(context, settings, runtime).also {
+                legacyBlockerMigration.uninstall(runtime)
+                newTabFeature.install(runtime)
+                WebCompatFeature.install(it)
+            }
         }
     }
 

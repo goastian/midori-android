@@ -59,32 +59,32 @@ object SecureAutofillModule {
     @Singleton
     fun provideLoginsStorage(
         @ApplicationContext context: Context,
-        securePreferences: SecureAbove22Preferences,
-    ): SyncableLoginsStorage = SyncableLoginsStorage(context, lazy { securePreferences })
+        securePreferences: dagger.Lazy<SecureAbove22Preferences>,
+    ): SyncableLoginsStorage = SyncableLoginsStorage(context, lazy { securePreferences.get() })
 
     @Provides
     @Singleton
     fun provideAutofillStorage(
         @ApplicationContext context: Context,
-        securePreferences: SecureAbove22Preferences,
+        securePreferences: dagger.Lazy<SecureAbove22Preferences>,
     ): AutofillCreditCardsAddressesStorage =
-        AutofillCreditCardsAddressesStorage(context, lazy { securePreferences })
+        AutofillCreditCardsAddressesStorage(context, lazy { securePreferences.get() })
 
     @Provides
     @Singleton
     fun provideAutocompleteStorageDelegate(
-        loginsStorage: SyncableLoginsStorage,
-        autofillStorage: AutofillCreditCardsAddressesStorage,
+        loginsStorage: dagger.Lazy<SyncableLoginsStorage>,
+        autofillStorage: dagger.Lazy<AutofillCreditCardsAddressesStorage>,
         preferenceState: AutofillPreferenceState,
     ): Autocomplete.StorageDelegate {
         val autofillDelegate = GeckoCreditCardsAddressesStorageDelegate(
-            storage = lazy { autofillStorage },
+            storage = lazy { autofillStorage.get() },
             isCreditCardAutofillEnabled = { preferenceState.cardAutofillEnabled },
             isAddressAutofillEnabled = { preferenceState.addressAutofillEnabled },
         )
         return SafeAutocompleteStorageDelegate(
             creditCardsAddressesDelegate = autofillDelegate,
-            loginsStorage = loginsStorage,
+            loginsStorage = lazy { loginsStorage.get() },
             preferenceState = preferenceState,
         )
     }
@@ -97,7 +97,7 @@ object SecureAutofillModule {
  */
 internal class SafeAutocompleteStorageDelegate(
     private val creditCardsAddressesDelegate: CreditCardsAddressesStorageDelegate,
-    private val loginsStorage: LoginsStorage,
+    private val loginsStorage: Lazy<LoginsStorage>,
     private val preferenceState: AutofillPreferenceState,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
 ) : Autocomplete.StorageDelegate {
@@ -143,7 +143,7 @@ internal class SafeAutocompleteStorageDelegate(
             if (!preferenceState.passwordAutofillEnabled) {
                 emptyArray()
             } else {
-                loginsStorage.getByBaseDomain(domain)
+                loginsStorage.value.getByBaseDomain(domain)
                     .map { it.toLoginEntry() }
                     .toTypedArray()
             }
@@ -152,7 +152,7 @@ internal class SafeAutocompleteStorageDelegate(
     override fun onLoginSave(login: Autocomplete.LoginEntry) {
         if (!preferenceState.savePasswordsEnabled) return
         launchSafely("saving a login") {
-            loginsStorage.addOrUpdate(login.toLoginEntry())
+            loginsStorage.value.addOrUpdate(login.toLoginEntry())
         }
     }
 

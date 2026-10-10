@@ -5,6 +5,7 @@ import androidx.work.Configuration
 import org.midorinext.android.migration.MigrationUtility
 import org.midorinext.android.mozac.GeckoPreferences
 import org.midorinext.android.mozac.BrowserSessionLifecycle
+import org.midorinext.android.mozac.awaitInitialBrowserContent
 import org.midorinext.android.adblock.AdBlockSettings
 import org.midorinext.android.adblock.AdBlockUpdateWorker
 import org.midorinext.android.adblock.AdBlockConfiguration
@@ -33,6 +34,7 @@ import mozilla.components.concept.fetch.Client
 import mozilla.components.feature.media.MediaSessionFeature
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.tabs.TabsUseCases
+import mozilla.components.lib.state.ext.flow
 import mozilla.components.support.AppServicesInitializer
 import mozilla.components.support.base.log.Log
 import mozilla.components.support.base.log.sink.AndroidLogSink
@@ -95,16 +97,22 @@ class MidoriApplication : Application(), Configuration.Provider {
             return
         }
 
-        AppServicesInitializer.init(
-            AppServicesInitializer.Config(
-                crashReporting = null,
-                logLevel = if (BuildConfig.DEBUG) Log.Priority.DEBUG else Log.Priority.INFO,
-            ),
-        )
+        StartupTiming.mark("application_create (${BuildConfig.VERSION_NAME}, ${BuildConfig.BUILD_TYPE})")
+        StartupTiming.measure("app_services") {
+            AppServicesInitializer.init(
+                AppServicesInitializer.Config(
+                    crashReporting = null,
+                    logLevel = if (BuildConfig.DEBUG) Log.Priority.DEBUG else Log.Priority.INFO,
+                ),
+            )
+        }
         RustHttpConfig.setClient(lazy { client.get() })
 
         // Apply safe defaults immediately; persisted settings are applied below without blocking startup.
-        GeckoPreferences.initialize(geckoRuntime.get(), AppPreferencesSerializer.defaultValue.toGeckoSettings(adBlockSettings.get().current))
+        StartupTiming.measure("initial_gecko_settings") {
+            GeckoPreferences.initialize(geckoRuntime.get(), AppPreferencesSerializer.defaultValue.toGeckoSettings(adBlockSettings.get().current))
+        }
+        StartupTiming.measure("gecko_warm_up") { geckoRuntime.get().warmUp() }
 
         // Watch for preference changes and apply them without requiring restart
         applicationScope.launch(Dispatchers.IO) {
@@ -129,7 +137,7 @@ class MidoriApplication : Application(), Configuration.Provider {
             }
         }
 
-        nativeContentBlockingFeature.get().start()
+        StartupTiming.measure("native_blocker") { nativeContentBlockingFeature.get().start() }
         browserStateRestoration = restoreBrowserState()
 
         // TODO
@@ -157,34 +165,37 @@ class MidoriApplication : Application(), Configuration.Provider {
             },
             onExtensionsLoaded = {}
         )
+        StartupTiming.mark("application_ready")
     }
 
     /**
      * Starts work that is useful for an active browser session but is not required to draw the
-     * first frame. Firefox uses the same visual-completeness boundary to keep maintenance,
-     * warm-up and secondary services out of the critical startup path.
+     * first frame. Maintenance and secondary services wait for the initial document to load.
      */
     fun onFirstFrameDrawn() {
         if (!postFirstFrameWorkStarted.compareAndSet(false, true)) {
             return
         }
+        StartupTiming.mark("first_frame")
 
         applicationScope.launch {
-            engine.get().warmUp()
-            // VPN is an optional action. Register it after the UI is visible so extension
-            // discovery and manifest I/O do not compete with the first frame.
-            midoriVpnFeature.get().install(geckoRuntime.get())
             mediaFeature.get().start()
             backgroundPlaybackFeature.get().start()
         }
 
-        applicationScope.launch(Dispatchers.IO) {
-            AdBlockUpdateWorker.schedule(this@MidoriApplication)
-            // Reading Mode and its Room database have been removed. Delete any data left by
-            // earlier versions without doing file-system work before the first frame.
-            deleteDatabase(READING_LIST_DATABASE_NAME)
-            migrationUtility.get().checkMigrations()
-            historyRepository.get().runMaintenance(0U)
+        applicationScope.launch {
+            val contentDrawn = awaitInitialBrowserContent(store.get().flow())
+            StartupTiming.mark(if (contentDrawn) "initial_content_loaded" else "maintenance_timeout")
+            // VPN registration is optional and can wait until the initial document is visible.
+            midoriVpnFeature.get().install(geckoRuntime.get())
+            withContext(Dispatchers.IO) {
+                AdBlockUpdateWorker.schedule(this@MidoriApplication)
+                // Reading Mode and its Room database have been removed. Delete any data left by
+                // earlier versions without doing file-system work before the first frame.
+                deleteDatabase(READING_LIST_DATABASE_NAME)
+                migrationUtility.get().checkMigrations()
+                historyRepository.get().runMaintenance(0U)
+            }
         }
     }
 

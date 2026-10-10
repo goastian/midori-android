@@ -33,8 +33,7 @@ class MainActivity : MidoriActivity() {
         setContentView(v)
         this.bindRootView(v.rootView)
         v.doOnPreDraw {
-            // Posting from pre-draw ensures the first frame reaches the renderer before optional
-            // browser warm-up, migrations and media observers begin competing for resources.
+            // Post from pre-draw so deferred work starts after the first traversal.
             v.post { (application as MidoriApplication).onFirstFrameDrawn() }
         }
     }
