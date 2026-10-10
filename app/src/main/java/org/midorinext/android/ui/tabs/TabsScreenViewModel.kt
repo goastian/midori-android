@@ -1,6 +1,5 @@
 package org.midorinext.android.ui.tabs
 
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import org.midorinext.android.preferences.app.AppPreferencesRepository
@@ -20,7 +19,6 @@ import javax.inject.Inject
 import java.util.UUID
 
 private const val INACTIVE_TAB_AGE_MS = 14L * 24L * 60L * 60L * 1000L
-private const val MAX_RECENTLY_CLOSED = 10
 
 @HiltViewModel
 class TabsScreenViewModel @Inject constructor(
@@ -91,10 +89,9 @@ class TabsScreenViewModel @Inject constructor(
             initialValue = false
         )
 
-    private val recentlyClosedTabs = MutableStateFlow<List<ClosedTabSnapshot>>(emptyList())
+    private val recentlyClosedTabs = RecentlyClosedTabs(tabsUseCases)
 
-    val recentlyClosedCount: StateFlow<Int> = recentlyClosedTabs
-        .map { it.size }
+    val recentlyClosedCount: StateFlow<Int> = recentlyClosedTabs.count
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
@@ -169,17 +166,7 @@ class TabsScreenViewModel @Inject constructor(
         }
     }
 
-    fun reopenRecentlyClosed(): Boolean {
-        val closed = recentlyClosedTabs.value.firstOrNull() ?: return false
-        tabsUseCases.addTab(
-            url = closed.url,
-            selectTab = true,
-            title = closed.title,
-            private = closed.private
-        )
-        recentlyClosedTabs.value = recentlyClosedTabs.value.drop(1)
-        return true
-    }
+    fun reopenRecentlyClosed(): Boolean = recentlyClosedTabs.reopen()
 
     fun closeDuplicateTabs(private: Boolean): Int {
         val duplicates = store.state.tabs
@@ -345,27 +332,7 @@ class TabsScreenViewModel @Inject constructor(
     }
 
     private fun rememberClosedTabs(tabs: List<mozilla.components.browser.state.state.TabSessionState>) {
-        if (tabs.isEmpty()) {
-            return
-        }
-
-        val snapshots = tabs
-            .filter { it.content.url.isNotBlank() }
-            .map { tab ->
-                ClosedTabSnapshot(
-                    title = tab.content.title,
-                    url = tab.content.url,
-                    private = tab.content.private
-                )
-            }
-
-        if (snapshots.isEmpty()) {
-            return
-        }
-
-        recentlyClosedTabs.value = (snapshots + recentlyClosedTabs.value)
-            .distinctBy { "${it.private}:${canonicalUrl(it.url)}" }
-            .take(MAX_RECENTLY_CLOSED)
+        recentlyClosedTabs.remember(tabs)
     }
 }
 
@@ -427,33 +394,9 @@ enum class TabGroupColor(val value: Int) {
     }
 }
 
-private data class ClosedTabSnapshot(
-    val title: String,
-    val url: String,
-    val private: Boolean
-)
-
 private fun mozilla.components.browser.state.state.TabSessionState.isInactive(): Boolean {
     val lastActiveTime = maxOf(lastAccess, createdAt)
     return System.currentTimeMillis() - lastActiveTime > INACTIVE_TAB_AGE_MS
-}
-
-private fun canonicalUrl(url: String): String {
-    val uri = runCatching { Uri.parse(url) }.getOrNull() ?: return url.trim()
-    val scheme = uri.scheme?.lowercase().orEmpty()
-    val host = uri.host?.lowercase()?.removePrefix("www.").orEmpty()
-    val path = uri.path.orEmpty().trimEnd('/')
-    val query = uri.query.orEmpty()
-    return buildString {
-        append(scheme)
-        append("://")
-        append(host)
-        append(path)
-        if (query.isNotBlank()) {
-            append('?')
-            append(query)
-        }
-    }.ifBlank { url.trim() }
 }
 
 private fun List<mozilla.components.browser.state.state.TabSessionState>.hasSameTrayContentAs(
