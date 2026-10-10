@@ -71,8 +71,6 @@
     <string name="browser_suggest_clipboard_text">Скопированный текст</string>
     <string name="browser_brand_suggest_ad">Объявление</string>
     <string name="browser_brand_suggest_information">Это поисковое предложение является рекламой %1$s. Вы будете перенаправлены на сайт рекламодателя\': %2$s.</string>
-    <string name="browser_permission_geoloc_blocked">Midori Kids защищает вашу конфиденциальность и предотвращает автоматическую передачу вашего точного местоположения.</string>
-    <string name="browser_understood">понял</string>
     <string name="download_wifi_only">Только загрузка через Wi-Fi</string>
     <string name="download_wifi_only_summary">Начинайте загрузку только тогда, когда устройство подключено к Wi-Fi.</string>
     <string name="download_wifi_only_waiting">Подключитесь к Wi-Fi, чтобы начать загрузку.</string>

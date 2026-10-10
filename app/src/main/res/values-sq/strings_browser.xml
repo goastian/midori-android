@@ -71,8 +71,6 @@
     <string name="browser_suggest_clipboard_text">Teksti i kopjuar</string>
     <string name="browser_brand_suggest_ad">Ad</string>
     <string name="browser_brand_suggest_information">Ky sugjerim kërkimi është një reklamë për %1$s. Do të ridrejtoheni në faqen e internetit të reklamuesit\': %2$s</string>
-    <string name="browser_permission_geoloc_blocked">Midori Kids mbron privatësinë tuaj dhe parandalon që vendndodhjen tuaj të saktë të ndahet automatikisht.</string>
-    <string name="browser_understood">E kuptova</string>
     <string name="download_wifi_only">Shkarkime vetëm me Wi-Fi</string>
     <string name="download_wifi_only_summary">Nisni shkarkimet vetëm kur pajisja është e lidhur me Wi-Fi.</string>
     <string name="download_wifi_only_waiting">Lidhu me Wi-Fi për të nisur këtë shkarkim.</string>

@@ -21,8 +21,6 @@
     <string name="close_tabs_on_exit_description">Fecha todas as abas ao sair do Midori ou removê-lo dos aplicativos recentes. Ao voltar, uma nova aba será aberta.</string>
     <string name="available_tabs_view_grid">Grade</string>
     <string name="available_tabs_view_list">Lista</string>
-    <string name="show_new_tab_home_label">Usar a tela Nova guia</string>
-    <string name="show_new_tab_home_description">Desligue para abrir novas guias em branco.</string>
     <string name="settings_all">Todas as configurações</string>
     <string name="settings_on">Ligado</string>
     <string name="settings_off">Desligado</string>
@@ -31,10 +29,6 @@
     <string name="settings_homepage_sections">Nova aba Midori</string>
     <string name="settings_homepage_midori_tab">Personalize sua nova guia</string>
     <string name="settings_homepage_midori_tab_description">Abra uma nova guia e use o botão Configurações para gerenciar atalhos, widgets, espaços, idioma, tema e plano de fundo. Suas escolhas permanecem neste dispositivo.</string>
-    <string name="settings_homepage_opening_screen">Tela de abertura</string>
-    <string name="settings_homepage_open_homepage">Nova guia</string>
-    <string name="settings_homepage_open_last_tab">Última guia</string>
-    <string name="settings_homepage_open_after_four_hours">Nova guia após quatro horas</string>
     <string name="settings_customize_title">Personalizar</string>
     <string name="settings_customize_summary">Tema, barra de ferramentas, guias e gestos</string>
     <string name="settings_customize_gestures">Gestos</string>

@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.sp
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 import org.midorinext.android.R
-import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.ext.toCleanHost
 import org.midorinext.android.ui.browser.home.HomePrivateBrowsingContent
 
@@ -47,7 +46,6 @@ fun TabRow(
     thumbnailStorage: ThumbnailStorage,
     onSelected: (tab: TabSessionState) -> Unit,
     onDeleted: (tab: TabSessionState) -> Unit,
-    contentBlockerState: ContentBlockerState,
     selectionMode: Boolean = false,
     isSelectedForGrouping: Boolean = false,
     groupId: String? = null,
@@ -61,7 +59,6 @@ fun TabRow(
     onDragCancelled: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val isTabBlocked = contentBlockerState.getStatusForTab(tab.id) != ContentBlockerState.Status.ALLOWED
     val isPrivateBrowsingHome = tab.content.private && tab.content.url.isBlank()
     val coordinates = remember { mutableStateOf<LayoutCoordinates?>(null) }
 
@@ -145,7 +142,6 @@ fun TabRow(
                     tabId = tab.id,
                     private = tab.content.private,
                     thumbnailStorage = thumbnailStorage,
-                    contentBlockerState = contentBlockerState,
                 )
             }
         }
@@ -154,8 +150,7 @@ fun TabRow(
             .weight(2f)
             .padding(start = 12.dp)) {
             Text(
-                text = if (isTabBlocked) stringResource(id = R.string.blocked_website)
-                        else if (isPrivateBrowsingHome) stringResource(id = R.string.browser_new_tab_private)
+                text = if (isPrivateBrowsingHome) stringResource(id = R.string.browser_new_tab_private)
                         else tab.content.title,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,

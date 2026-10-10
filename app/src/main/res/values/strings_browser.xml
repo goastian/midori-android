@@ -80,9 +80,6 @@
     <string name="browser_brand_suggest_ad">Ad</string>
     <string name="browser_brand_suggest_information">This search suggestion is an advertisement for %1$s. You will be redirected to the advertiser\'s website: %2$s</string>
 
-    <string name="browser_permission_geoloc_blocked">Midori Kids protects your privacy and prevents your exact location from being shared automatically.</string>
-    <string name="browser_understood">Got it</string>
-
     <string name="download_wifi_only">Wi-Fi only downloads</string>
     <string name="download_wifi_only_summary">Start downloads only when the device is connected to Wi-Fi.</string>
     <string name="download_wifi_only_waiting">Connect to Wi-Fi to start this download.</string>

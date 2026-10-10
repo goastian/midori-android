@@ -1,15 +1,9 @@
 /.gradle/
 /tests.MD
 /app/release/
-/app/sfr/
-/app/playstore/
-/app/genymobile/
-/app/logicom/
 /.idea
-/qwantcompanion/genymobile/
 /local.properties
 /fastlane/report.xml
-/qwantcompanion/logicom/
 /.kotlin/
 /build/
 upload-keystore.jks

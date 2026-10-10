@@ -367,7 +367,6 @@ fun TabsScreen(
                     selectedTabId = tabsViewModel.selectedTabId.collectAsStateWithLifecycle().value,
                     thumbnailStorage = tabsViewModel.thumbnailStorage,
                     browserIcons = tabsViewModel.browserIcons,
-                    contentBlockerState = tabsViewModel.contentBlockerState,
                     onDismissRequest = { groupBeingOpened = null },
                     onTabSelected = { tab ->
                         tabsViewModel.selectTab(tab.id)
@@ -715,7 +714,6 @@ fun AnimatedTabList(
                 modifier = Modifier.fillMaxHeight(),
                 onTabSelected = onTabSelected,
                 onTabDeleted = onTabDeleted,
-                contentBlockerState = tabsViewModel.contentBlockerState,
                 tabsViewOption = tabsViewOption,
                 selectionMode = selectionMode,
                 selectedTabIds = selectedTabIds,

@@ -31,9 +31,6 @@ import org.midorinext.android.ui.widgets.Dropdown
 import org.midorinext.android.ui.widgets.DropdownItem
 import org.midorinext.android.vpn.MidoriVpnFeature
 
-// TODO replace canaltoys exception with either specific source file
-//  or buildconfig field regarding android capabilities
-
 @Composable
 fun BrowserMenu(
     expanded: Boolean,
@@ -303,9 +300,7 @@ private fun BrowserMenuDestinations(
     onShowMoreOptionsChange: (Boolean) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
-    if (BuildConfig.FLAVOR_version == "original" &&
-        LocalContext.current.selectedLocale().language == "fr"
-    ) {
+    if (LocalContext.current.selectedLocale().language == "fr") {
         MidoriAccount(viewModel, onDismissRequest)
         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
     }
@@ -343,7 +338,7 @@ private fun BrowserMenuSettings(
             navigateTo(NavDestination.Preferences)
         },
     )
-    if (showQuitApp && BuildConfig.FLAVOR_target != "canaltoys") {
+    if (showQuitApp) {
         val activity = LocalContext.current.activity
         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
         DropdownItem(
@@ -514,16 +509,14 @@ fun AppNavigation(
             navigateTo(NavDestination.WebApps)
         }
     )
-    if (BuildConfig.FLAVOR_target != "canaltoys") {
-        DropdownItem(
-            text = stringResource(id = R.string.browser_downloads),
-            icon = R.drawable.icons_download,
-            onClick = {
-                onDismissRequest()
-                navigateTo(NavDestination.Downloads)
-            }
-        )
-    }
+    DropdownItem(
+        text = stringResource(id = R.string.browser_downloads),
+        icon = R.drawable.icons_download,
+        onClick = {
+            onDismissRequest()
+            navigateTo(NavDestination.Downloads)
+        }
+    )
 }
 
 @Composable
@@ -559,39 +552,37 @@ fun PageActions(
         viewModel.requestDesktopSite(checked)
     }
 
-    if (BuildConfig.FLAVOR_target != "canaltoys") {
+    DropdownItem(
+        text = stringResource(
+            id = if (isUrlBookmarked) {
+                R.string.bookmark_remove_current
+            } else {
+                R.string.bookmark_add_current
+            }
+        ),
+        icon = if (isUrlBookmarked) R.drawable.icons_delete_bookmark else R.drawable.icons_add_bookmark,
+        onClick = {
+            if (isUrlBookmarked) {
+                viewModel.removeBookmark()
+            } else {
+                viewModel.addBookmark()
+            }
+            onDismissRequest()
+        }
+    )
+    if (viewModel.isShortcutSupported) {
+        val addedMessage = stringResource(R.string.pwa_shortcut_requested)
+        val failedMessage = stringResource(R.string.pwa_shortcut_failed)
         DropdownItem(
-            text = stringResource(
-                id = if (isUrlBookmarked) {
-                    R.string.bookmark_remove_current
-                } else {
-                    R.string.bookmark_add_current
-                }
-            ),
-            icon = if (isUrlBookmarked) R.drawable.icons_delete_bookmark else R.drawable.icons_add_bookmark,
+            text = stringResource(R.string.menu_add_to_homescreen),
+            icon = R.drawable.icons_add_screen,
             onClick = {
-                if (isUrlBookmarked) {
-                    viewModel.removeBookmark()
-                } else {
-                    viewModel.addBookmark()
+                viewModel.addShortcutToHomeScreen { success ->
+                    applicationViewModel.showSnackbar(if (success) addedMessage else failedMessage)
                 }
                 onDismissRequest()
             }
         )
-        if (viewModel.isShortcutSupported) {
-            val addedMessage = stringResource(R.string.pwa_shortcut_requested)
-            val failedMessage = stringResource(R.string.pwa_shortcut_failed)
-            DropdownItem(
-                text = stringResource(R.string.menu_add_to_homescreen),
-                icon = R.drawable.icons_add_screen,
-                onClick = {
-                    viewModel.addShortcutToHomeScreen { success ->
-                        applicationViewModel.showSnackbar(if (success) addedMessage else failedMessage)
-                    }
-                    onDismissRequest()
-                }
-            )
-        }
     }
     DropdownItem(
         text = stringResource(id = R.string.menu_request_desktop_site),

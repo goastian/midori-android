@@ -71,8 +71,6 @@
     <string name="browser_suggest_clipboard_text">कॉपी किया गया पाठ</string>
     <string name="browser_brand_suggest_ad">विज्ञापन</string>
     <string name="browser_brand_suggest_information">यह खोज सुझाव %1$s के लिए एक विज्ञापन है। आपको विज्ञापनदाता\' की वेबसाइट पर पुनः निर्देशित किया जाएगा: %2$s</string>
-    <string name="browser_permission_geoloc_blocked">मिडोरी किड्स आपकी गोपनीयता की रक्षा करता है और आपके सटीक स्थान को स्वचालित रूप से साझा होने से रोकता है।</string>
-    <string name="browser_understood">समझ गया</string>
     <string name="download_wifi_only">वाई-फ़ाई से केवल डाउनलोड होता है</string>
     <string name="download_wifi_only_summary">डाउनलोड तभी प्रारंभ करें जब डिवाइस वाई-फाई से कनेक्ट हो।</string>
     <string name="download_wifi_only_waiting">इस डाउनलोड को शुरू करने के लिए वाई-फाई से कनेक्ट करें।</string>

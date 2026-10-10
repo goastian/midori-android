@@ -213,18 +213,6 @@ class AppPreferencesRepository @Inject constructor(
         }
     }
 
-    suspend fun updateShowNewTabHome(show: Boolean) {
-        datastore.updateData { preferences ->
-            preferences.toBuilder().setOpenBlankNewTab(!show).build()
-        }
-    }
-
-    suspend fun updateHomepageOpeningScreen(screen: HomepageOpeningScreen) {
-        datastore.updateData { preferences ->
-            preferences.toBuilder().setHomepageOpeningScreen(screen).build()
-        }
-    }
-
     suspend fun updatePullToRefreshEnabled(enabled: Boolean) {
         datastore.updateData { preferences ->
             preferences.toBuilder().setPullToRefreshEnabled(enabled).build()

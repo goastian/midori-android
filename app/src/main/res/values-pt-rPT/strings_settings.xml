@@ -21,8 +21,6 @@
     <string name="close_tabs_on_exit_description">Fecha todos os separadores ao sair do Midori ou ao removê-lo das aplicações recentes. Ao voltar, será aberto um novo separador.</string>
     <string name="available_tabs_view_grid">Grade</string>
     <string name="available_tabs_view_list">Lista</string>
-    <string name="show_new_tab_home_label">Utilizar o ecrã Nova guia</string>
-    <string name="show_new_tab_home_description">Desligue para abrir novos separadores em branco.</string>
     <string name="settings_all">Todas as configurações</string>
     <string name="settings_on">Ligado</string>
     <string name="settings_off">Desligado</string>
@@ -31,10 +29,6 @@
     <string name="settings_homepage_sections">Nova aba Midori</string>
     <string name="settings_homepage_midori_tab">Personalize a sua nova guia</string>
     <string name="settings_homepage_midori_tab_description">Abra um novo separador e utilize o botão Definições para gerir atalhos, widgets, espaços, idioma, tema e fundo. As suas escolhas permanecem neste dispositivo.</string>
-    <string name="settings_homepage_opening_screen">Ecrã de abertura</string>
-    <string name="settings_homepage_open_homepage">Nova guia</string>
-    <string name="settings_homepage_open_last_tab">Última guia</string>
-    <string name="settings_homepage_open_after_four_hours">Nova guia após quatro horas</string>
     <string name="settings_customize_title">Personalizar</string>
     <string name="settings_customize_summary">Tema, barra de ferramentas, separadores e gestos</string>
     <string name="settings_customize_gestures">Gestos</string>

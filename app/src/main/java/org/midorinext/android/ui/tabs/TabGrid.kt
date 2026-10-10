@@ -38,7 +38,6 @@ import androidx.compose.ui.unit.sp
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 import org.midorinext.android.R
-import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.ui.browser.ToolbarAction
 import org.midorinext.android.ui.browser.home.HomePrivateBrowsingContent
 import org.midorinext.android.ui.widgets.MidoriIconOnBackground
@@ -58,7 +57,6 @@ fun TabGrid(
     browserIcons: BrowserIcons,
     onTabSelected: (tab: TabSessionState) -> Unit,
     onTabDeleted: (tab: TabSessionState) -> Unit,
-    contentBlockerState: ContentBlockerState,
     modifier: Modifier = Modifier,
     selectionMode: Boolean = false,
     selectedTabIds: Set<String> = emptySet(),
@@ -87,7 +85,6 @@ fun TabGrid(
                 browserIcons = browserIcons,
                 onSelected = onTabSelected,
                 onDeleted = onTabDeleted,
-                contentBlockerState = contentBlockerState,
                 selectionMode = selectionMode,
                 isSelectedForGrouping = tab.id in selectedTabIds,
                 onLongPressed = onTabLongPressed,
@@ -105,7 +102,6 @@ fun TabCard(
     browserIcons: BrowserIcons,
     onSelected: (tab: TabSessionState) -> Unit,
     onDeleted: (tab: TabSessionState) -> Unit,
-    contentBlockerState: ContentBlockerState,
     selectionMode: Boolean = false,
     isSelectedForGrouping: Boolean = false,
     groupId: String? = null,
@@ -132,8 +128,6 @@ fun TabCard(
         },
         label = "tabSwipeScale",
     )
-
-    val isTabBlocked = contentBlockerState.getStatusForTab(tab.id) != ContentBlockerState.Status.ALLOWED
     val isPrivateBrowsingHome = tab.content.private && tab.content.url.isBlank()
     var coordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
 
@@ -208,7 +202,7 @@ fun TabCard(
                     .padding(start = 10.dp)
                     .size(18.dp)
                 ) {
-                    if (isTabBlocked || isPrivateBrowsingHome) {
+                    if (isPrivateBrowsingHome) {
                         MidoriIconOnBackground(shape = RoundedCornerShape(4.dp))
                     } else {
                         tab.content.icon?.let {
@@ -225,8 +219,7 @@ fun TabCard(
                 }
 
                 Text(
-                    text = if (isTabBlocked) stringResource(id = R.string.blocked_website)
-                            else if (isPrivateBrowsingHome) stringResource(id = R.string.browser_new_tab_private)
+                    text = if (isPrivateBrowsingHome) stringResource(id = R.string.browser_new_tab_private)
                             else tab.content.title,
                     fontSize = 14.sp,
                     lineHeight = 18.sp,
@@ -288,7 +281,6 @@ fun TabCard(
                         tabId = tab.id,
                         private = tab.content.private,
                         thumbnailStorage = thumbnailStorage,
-                        contentBlockerState = contentBlockerState
                     )
                 }
             }

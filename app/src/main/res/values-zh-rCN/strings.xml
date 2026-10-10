@@ -335,7 +335,6 @@
     <string name="take_me_there">Take me there</string>
     <string name="all_fields_required">All fields are required</string>
     <string name="permission_permanently_refused">You permanently refused permissions. You need to enable them through system settings now</string>
-    <string name="blocked_website">Blocked website</string>
     <string name="context_menu_copy_link">Copy link URL</string>
     <string name="context_menu_copy_link_text">Copy link text</string>
     <string name="context_menu_copy_link_and_text">Copy link text and URL</string>

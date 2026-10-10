@@ -3,7 +3,6 @@ package org.midorinext.android.mozac.hilt
 import android.content.Context
 import org.midorinext.android.adblock.LegacyBlockerMigration
 import org.midorinext.android.newtab.MidoriNewTabFeature
-import org.midorinext.android.youtubeRestrictedExtension.YoutubeRestrictedFeature
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -53,7 +52,6 @@ object GeckoHiltModule {
         return GeckoEngine(context, settings, runtime).also {
             legacyBlockerMigration.uninstall(runtime)
             newTabFeature.install(runtime)
-            YoutubeRestrictedFeature.install(runtime)
             WebCompatFeature.install(it)
         }
     }

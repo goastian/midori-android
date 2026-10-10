@@ -71,8 +71,6 @@
     <string name="browser_suggest_clipboard_text">コピーされたテキスト</string>
     <string name="browser_brand_suggest_ad">広告</string>
     <string name="browser_brand_suggest_information">この検索候補は %1$s の広告です。広告主\' のウェブサイト: %2$s にリダイレクトされます。</string>
-    <string name="browser_permission_geoloc_blocked">ミドリキッズはあなたのプライバシーを保護し、あなたの正確な位置が自動的に共有されるのを防ぎます。</string>
-    <string name="browser_understood">分かりました</string>
     <string name="download_wifi_only">Wi-Fiのみでダウンロード可能</string>
     <string name="download_wifi_only_summary">デバイスが Wi-Fi に接続されている場合にのみダウンロードを開始します。</string>
     <string name="download_wifi_only_waiting">Wi-Fi に接続してこのダウンロードを開始します。</string>

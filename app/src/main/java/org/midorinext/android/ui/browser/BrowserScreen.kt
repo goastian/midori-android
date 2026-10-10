@@ -15,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -29,8 +28,6 @@ import org.midorinext.android.adblock.AdBlockerAction
 import org.midorinext.android.adblock.BlockingLevel
 import org.midorinext.android.ui.preferences.BlockingLevelRow
 import org.midorinext.android.ext.*
-import org.midorinext.android.contentBlocker.ContentBlockerOverlay
-import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.newtab.MidoriNewTabFeature
 import org.midorinext.android.ui.MidoriApplicationViewModel
 import org.midorinext.android.ui.browser.home.HomePrivateBrowsing
@@ -46,7 +43,6 @@ import org.midorinext.android.ui.widgets.TabCounter
 import mozilla.components.support.ktx.android.content.share
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.ui.icons.R as iconsR
-import org.midorinext.android.BuildConfig
 
 enum class TabOpening {
     NONE, NORMAL, PRIVATE
@@ -120,7 +116,7 @@ fun BrowserScreen(
     LaunchedEffect(selectedTabSnapshot, newTabState) {
         val selectedTab = selectedTabSnapshot ?: return@LaunchedEffect
         when {
-            selectedTab.url.isLegacyMidoriHomeUrl() && viewModel.isNewTabEnabled -> {
+            selectedTab.url.isLegacyMidoriHomeUrl() -> {
                 viewModel.replaceTabWithNewTab(selectedTab.id, selectedTab.url)
             }
             viewModel.isNewTabLoadingUrl(selectedTab.url) &&
@@ -320,23 +316,12 @@ fun BrowserScreen(
                         },
                         modifier = modifier
                     ) {
-                        val contentBlockerStatus = viewModel.contentBlockerState.status
-                        if (contentBlockerStatus != ContentBlockerState.Status.ALLOWED) {
-                            ContentBlockerOverlay(
-                                contentBlockerStatus,
-                                viewModel.contentBlockerState.blockReason,
-                                imageModifier = Modifier.width(300.dp),
-                                imageScale = ContentScale.FillWidth,
-                                alignment = Alignment.TopCenter
-                            )
-                        } else {
-                            EngineView(
-                                engine = viewModel.engine,
-                                modifier = Modifier.fillMaxSize()
-                            ) { engineView ->
-                                engineViewHolder = engineView
-                                EngineViewFeatures(engineView, viewModel)
-                            }
+                        EngineView(
+                            engine = viewModel.engine,
+                            modifier = Modifier.fillMaxSize()
+                        ) { engineView ->
+                            engineViewHolder = engineView
+                            EngineViewFeatures(engineView, viewModel)
                         }
                     }
                 }
@@ -424,36 +409,6 @@ fun AfterActions(
     onSummarize: () -> Unit,
 ) {
     Row {
-        if (BuildConfig.FLAVOR_target == "canaltoys") {
-            val canGoBack by viewModel.canGoBack.collectAsStateWithLifecycle()
-            val canGoForward by viewModel.canGoForward.collectAsStateWithLifecycle()
-            IconButton(
-                onClick = { viewModel.goBack() },
-                enabled = canGoBack,
-                modifier = Modifier
-                    .width(ToolbarActionWidth)
-                    .fillMaxHeight()
-                    .padding(8.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.icons_arrow_backward),
-                    contentDescription = stringResource(R.string.nav_back),
-                )
-            }
-            IconButton(
-                onClick = { viewModel.goForward() },
-                enabled = canGoForward,
-                modifier = Modifier
-                    .width(ToolbarActionWidth)
-                    .fillMaxHeight()
-                    .padding(8.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.icons_arrow_forward),
-                    contentDescription = stringResource(R.string.nav_forward),
-                )
-            }
-        }
         ToolbarShortcutAction(
             shortcut = toolbarShortcut,
             viewModel = viewModel,
@@ -461,9 +416,6 @@ fun AfterActions(
         )
         TabsButton(navigateTo, viewModel)
         BrowserMenuButton(navigateTo, viewModel, appViewModel)
-        if (BuildConfig.FLAVOR_target == "canaltoys") {
-            ExitButton(appViewModel = appViewModel)
-        }
     }
 }
 
@@ -510,22 +462,6 @@ private fun ToolbarShortcutAction(
     }
 }
 
-@Composable
-fun ExitButton(
-    appViewModel: MidoriApplicationViewModel
-) {
-    val activity = LocalContext.current.activity
-
-    ToolbarAction(onClick = {
-        appViewModel.quit { activity?.quit() }
-    }) {
-        Icon(
-            painter = painterResource(id = R.drawable.icons_close),
-            contentDescription = stringResource(R.string.menu_quit_app),
-            modifier = Modifier.fillMaxSize()
-        )
-    }
-}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

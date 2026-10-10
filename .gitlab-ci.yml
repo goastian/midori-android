@@ -34,27 +34,13 @@ build:
       when: always
   # no artifacts needed
 
-  # build project for all features branches (except main and dev) without artifacts to speed up
-build_junior:
-  stage: build
-  extends: .android
-  interruptible: true
-  script:
-    - ./gradlew --console=plain --no-configuration-cache --no-build-cache assembleJuniorPlaystoreDebug
-  rules:
-    - if: '$GITLAB_USER_NAME == "ci-bot-mobile"'
-      when: never
-    - if: '$CI_COMMIT_BRANCH != $CI_DEVELOP_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH'
-      when: always
-  # no artifacts needed
-
 # Run unit tests on all branches, if any fails, interrupt the pipeline
 unit_test:
   stage: test
   extends: .android
   interruptible: true
   script:
-    - ./gradlew -Pci --console=plain :app:testOriginalPlaystoreDebug
+    - ./gradlew -Pci --console=plain :app:testOriginalPlaystoreDebugUnitTest
   allow_failure: false
   rules:
     - if: '$GITLAB_USER_NAME == "ci-bot-mobile"'
@@ -118,40 +104,6 @@ deploy_internal_app_bundle:
     - if: '$CI_COMMIT_BRANCH == $CI_DEVELOP_BRANCH'
       when: always
 
-#  build project for dev branch and upload to internal play store
-#  see: https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html#bot-users-for-projects
-# deploy_internal_app_bundle_junior:
-#   stage: deploy
-#   extends: .android
-#   variables:
-#     GIT_STRATEGY: none
-#   script:
-#     - git config --global user.name "ci-bot-mobile"
-#     - git config --global user.email "ci-bot-mobile@qwant.com"
-#     - git config --global http.sslCAInfo "/workspace/ca/ca.crt"
-#
-#     - git clone "https://ci-bot-mobile:${CI_BOT_MOBILE_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}"
-#     - cd $CI_PROJECT_NAME
-#     - git checkout $CI_COMMIT_BRANCH
-#
-#     - cp -f /usr/local/src/Gemfile* .
-#     - cp -rf /usr/local/src/fastlane .
-#
-#     # Copy keystore file to the current directory and export path for signing
-#     - echo -n "$keystore_playstore_junior" | base64 -d > keystore_playstore_junior.jks
-#     - export keystore_playstore_junior_path=$(realpath keystore_playstore_junior.jks)
-#
-#     # Copy PlayStore json file to the fastlane directory in order to push to PlayStore
-#     - echo -n "$playstore_json_base64" | base64 -d > fastlane/playstore.json
-#     - bundle exec fastlane upload_to_internal_junior
-#   needs:
-#     - bump_version
-#   rules:
-#     - if: '$GITLAB_USER_NAME == "ci-bot-mobile"'
-#       when: never
-#     - if: '$CI_COMMIT_BRANCH == $CI_DEVELOP_BRANCH'
-#       when: always
-#
 # # Create a release when a merge happens in main branch
 # release_job:
 #   stage: release

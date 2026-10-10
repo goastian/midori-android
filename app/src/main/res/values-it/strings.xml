@@ -16,8 +16,6 @@
     <string name="permission_permanently_refused">Has rechazado permanentemente los permisos. Ahora debes habilitarlos a través de la configuración del sistema</string>
     <string name="take_me_there">Portami lì</string>
 
-    <string name="blocked_website">Sito web bloccato</string>
-
     <string name="toolbar_hint">Cerca o inserisci l\'indirizzo</string>
     <string name="menu_action_add_tab">Aggiungi nuova scheda</string>
     <string name="menu_action_close_tabs">Chiudi tutte le schede</string>

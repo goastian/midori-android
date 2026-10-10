@@ -71,8 +71,6 @@
     <string name="browser_suggest_clipboard_text">Texto copiado</string>
     <string name="browser_brand_suggest_ad">Anúncio</string>
     <string name="browser_brand_suggest_information">Esta sugestão de pesquisa é um anúncio de %1$s. Será redirecionado para o site do anunciante\': %2$s</string>
-    <string name="browser_permission_geoloc_blocked">O Midori Kids protege a sua privacidade e evita que a sua localização exata seja partilhada automaticamente.</string>
-    <string name="browser_understood">Entendi</string>
     <string name="download_wifi_only">Downloads apenas por Wi-Fi</string>
     <string name="download_wifi_only_summary">Inicie os downloads apenas quando o dispositivo estiver ligado ao Wi-Fi.</string>
     <string name="download_wifi_only_waiting">Ligue-se ao Wi-Fi para iniciar este download.</string>

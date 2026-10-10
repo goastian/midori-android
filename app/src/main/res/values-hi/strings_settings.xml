@@ -21,8 +21,6 @@
     <string name="close_tabs_on_exit_description">Midori से बाहर निकलने या उसे हाल के ऐप्लिकेशन से हटाने पर सभी टैब बंद करें। अगली बार एक नया टैब खुलेगा।</string>
     <string name="available_tabs_view_grid">ग्रिड</string>
     <string name="available_tabs_view_list">सूची</string>
-    <string name="show_new_tab_home_label">नई टैब स्क्रीन का उपयोग करें</string>
-    <string name="show_new_tab_home_description">रिक्त नए टैब खोलने के लिए बंद करें.</string>
     <string name="settings_all">सभी सेटिंग्स</string>
     <string name="settings_on">पर</string>
     <string name="settings_off">बंद</string>
@@ -31,10 +29,6 @@
     <string name="settings_homepage_sections">मिडोरी नया टैब</string>
     <string name="settings_homepage_midori_tab">अपने नए टैब को वैयक्तिकृत करें</string>
     <string name="settings_homepage_midori_tab_description">एक नया टैब खोलें और शॉर्टकट, विजेट, स्पेस, भाषा, थीम और पृष्ठभूमि को प्रबंधित करने के लिए इसके सेटिंग्स बटन का उपयोग करें। आपकी पसंद इस डिवाइस पर रहती है.</string>
-    <string name="settings_homepage_opening_screen">स्क्रीन खुल रही है</string>
-    <string name="settings_homepage_open_homepage">नया टैब</string>
-    <string name="settings_homepage_open_last_tab">अंतिम टैब</string>
-    <string name="settings_homepage_open_after_four_hours">चार घंटे बाद नया टैब</string>
     <string name="settings_customize_title">अनुकूलित करें</string>
     <string name="settings_customize_summary">थीम, टूलबार, टैब और जेस्चर</string>
     <string name="settings_customize_gestures">इशारे</string>

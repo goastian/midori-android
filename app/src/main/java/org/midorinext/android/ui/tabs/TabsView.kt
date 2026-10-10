@@ -36,7 +36,6 @@ import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 import org.midorinext.android.R
-import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.ui.widgets.Dropdown
 import org.midorinext.android.ui.widgets.DropdownItem
 
@@ -49,7 +48,6 @@ fun SmartTabView(
     browserIcons: BrowserIcons,
     onTabSelected: (tab: TabSessionState) -> Unit,
     onTabDeleted: (tab: TabSessionState) -> Unit,
-    contentBlockerState: ContentBlockerState,
     listState: LazyListState,
     gridState: LazyGridState,
     modifier: Modifier = Modifier,
@@ -135,7 +133,6 @@ fun SmartTabView(
             browserIcons = browserIcons,
             onTabSelected = onTabSelected,
             onTabDeleted = onTabDeleted,
-            contentBlockerState = contentBlockerState,
             listState = listState,
             gridState = gridState,
             modifier = modifier,
@@ -158,7 +155,6 @@ fun SmartTabView(
             browserIcons = browserIcons,
             onTabSelected = onTabSelected,
             onTabDeleted = onTabDeleted,
-            contentBlockerState = contentBlockerState,
             gridState = gridState,
             modifier = modifier,
             selectionMode = selectionMode,
@@ -191,7 +187,6 @@ fun SmartTabView(
             browserIcons = browserIcons,
             onTabSelected = onTabSelected,
             onTabDeleted = onTabDeleted,
-            contentBlockerState = contentBlockerState,
             listState = listState,
             gridState = gridState,
             modifier = modifier,
@@ -219,7 +214,6 @@ fun SmartTabView(
                     group = group,
                     selected = group.tabs.any { it.id == selectedTabId },
                     thumbnailStorage = thumbnailStorage,
-                    contentBlockerState = contentBlockerState,
                     onOpen = { onOpenGroup(group) },
                     onEdit = { onEditGroup(group) },
                     onAddTabs = { onAddTabsToGroup(group) },
@@ -248,7 +242,6 @@ fun SmartTabView(
                     thumbnailStorage = thumbnailStorage,
                     onSelected = onTabSelected,
                     onDeleted = onTabDeleted,
-                    contentBlockerState = contentBlockerState,
                     selectionMode = selectionMode,
                     isSelectedForGrouping = tab.id in selectedTabIds,
                     onLongPressed = onTabLongPressed,
@@ -280,7 +273,6 @@ fun SmartTabView(
                     thumbnailStorage = thumbnailStorage,
                     onSelected = onTabSelected,
                     onDeleted = onTabDeleted,
-                    contentBlockerState = contentBlockerState,
                     selectionMode = selectionMode,
                     isSelectedForGrouping = tab.id in selectedTabIds,
                     onLongPressed = onTabLongPressed,
@@ -307,7 +299,6 @@ private fun SmartTabsGrid(
     browserIcons: BrowserIcons,
     onTabSelected: (TabSessionState) -> Unit,
     onTabDeleted: (TabSessionState) -> Unit,
-    contentBlockerState: ContentBlockerState,
     gridState: LazyGridState,
     modifier: Modifier,
     selectionMode: Boolean,
@@ -349,7 +340,6 @@ private fun SmartTabsGrid(
                     group = group,
                     selected = group.tabs.any { it.id == selectedTabId },
                     thumbnailStorage = thumbnailStorage,
-                    contentBlockerState = contentBlockerState,
                     onOpen = { onOpenGroup(group) },
                     onEdit = { onEditGroup(group) },
                     onAddTabs = { onAddTabsToGroup(group) },
@@ -385,7 +375,6 @@ private fun SmartTabsGrid(
                     browserIcons = browserIcons,
                     onSelected = onTabSelected,
                     onDeleted = onTabDeleted,
-                    contentBlockerState = contentBlockerState,
                     selectionMode = selectionMode,
                     isSelectedForGrouping = tab.id in selectedTabIds,
                     onLongPressed = onTabLongPressed,
@@ -422,7 +411,6 @@ private fun SmartTabsGrid(
                     browserIcons = browserIcons,
                     onSelected = onTabSelected,
                     onDeleted = onTabDeleted,
-                    contentBlockerState = contentBlockerState,
                     selectionMode = selectionMode,
                     isSelectedForGrouping = tab.id in selectedTabIds,
                     onLongPressed = onTabLongPressed,
@@ -443,7 +431,6 @@ private fun TabGroupCard(
     group: SmartTabGroup,
     selected: Boolean,
     thumbnailStorage: ThumbnailStorage,
-    contentBlockerState: ContentBlockerState,
     onOpen: () -> Unit,
     onEdit: () -> Unit,
     onAddTabs: () -> Unit,
@@ -541,7 +528,6 @@ private fun TabGroupCard(
                             tabId = tab.id,
                             private = tab.content.private,
                             thumbnailStorage = thumbnailStorage,
-                            contentBlockerState = contentBlockerState
                         )
                     }
                 }
@@ -566,7 +552,6 @@ fun TabGroupTabsSheet(
     selectedTabId: String?,
     thumbnailStorage: ThumbnailStorage,
     browserIcons: BrowserIcons,
-    contentBlockerState: ContentBlockerState,
     onDismissRequest: () -> Unit,
     onTabSelected: (TabSessionState) -> Unit,
     onTabDeleted: (TabSessionState) -> Unit,
@@ -616,7 +601,6 @@ fun TabGroupTabsSheet(
                         browserIcons = browserIcons,
                         onSelected = onTabSelected,
                         onDeleted = onTabDeleted,
-                        contentBlockerState = contentBlockerState
                     )
                 }
             }
@@ -658,7 +642,6 @@ fun TabView(
     browserIcons: BrowserIcons,
     onTabSelected: (tab: TabSessionState) -> Unit,
     onTabDeleted: (tab: TabSessionState) -> Unit,
-    contentBlockerState: ContentBlockerState,
     listState: LazyListState,
     gridState: LazyGridState,
     modifier: Modifier = Modifier,
@@ -677,7 +660,6 @@ fun TabView(
                 thumbnailStorage = thumbnailStorage,
                 onTabSelected = onTabSelected,
                 onTabDeleted = onTabDeleted,
-                contentBlockerState = contentBlockerState,
                 modifier = modifier,
                 selectionMode = selectionMode,
                 selectedTabIds = selectedTabIds,
@@ -692,7 +674,6 @@ fun TabView(
                 browserIcons = browserIcons,
                 onTabSelected = onTabSelected,
                 onTabDeleted = onTabDeleted,
-                contentBlockerState = contentBlockerState,
                 modifier = modifier,
                 selectionMode = selectionMode,
                 selectedTabIds = selectedTabIds,

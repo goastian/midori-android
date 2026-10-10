@@ -16,8 +16,6 @@
     <string name="permission_permanently_refused">Sie haben die Berechtigung dauerhaft abgelehnt. Sie können sie nun in den Android-Einstellungen aktivieren.</string>
     <string name="take_me_there">Bring mich dorthin</string>
 
-    <string name="blocked_website">Blockierte Website</string>
-
     <string name="toolbar_hint">Adresse suchen oder eingeben</string>
     <string name="menu_action_add_tab">Neue Registerkarte hinzufügen</string>
     <string name="menu_action_close_tabs">Alle Tabs schließen</string>

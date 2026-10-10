@@ -133,8 +133,6 @@
 
     <string name="rate_us_label">Valuta questa app</string>
 
-    <string name="show_new_tab_home_label">Utilizza la schermata Nuova scheda</string>
-    <string name="show_new_tab_home_description">Disattiva per aprire nuove schede vuote.</string>
     <string name="settings_all">Tutte le impostazioni</string>
     <string name="settings_on">Su</string>
     <string name="settings_off">Spento</string>
@@ -143,10 +141,6 @@
     <string name="settings_homepage_sections">Nuova scheda Midori</string>
     <string name="settings_homepage_midori_tab">Personalizza la tua Nuova scheda</string>
     <string name="settings_homepage_midori_tab_description">Apri una nuova scheda e utilizza il pulsante Impostazioni per gestire scorciatoie, widget, spazi, lingua, tema e sfondo. Le tue scelte rimangono su questo dispositivo.</string>
-    <string name="settings_homepage_opening_screen">Schermata di apertura</string>
-    <string name="settings_homepage_open_homepage">Nuova scheda</string>
-    <string name="settings_homepage_open_last_tab">Ultima scheda</string>
-    <string name="settings_homepage_open_after_four_hours">Nuova scheda dopo quattro ore</string>
     <string name="settings_customize_title">Personalizza</string>
     <string name="settings_customize_summary">Tema, barra degli strumenti, schede e gesti</string>
     <string name="settings_customize_gestures">Gesti</string>

@@ -94,7 +94,7 @@ class MidoriUseCases @Inject constructor(
     ) {
         @SuppressLint("ApplySharedPref")
         operator fun invoke(search: String? = null, private: Boolean = false, selectIfExists: Boolean = false) {
-            val usesLocalNewTab = search == null && !private && newTabFeature.isEnabled
+            val usesLocalNewTab = search == null && !private
             val url = if (usesLocalNewTab) {
                 newTabFeature.currentOrLoadingUrl()
             } else {
@@ -116,11 +116,7 @@ class MidoriUseCases @Inject constructor(
         private val sessionUseCases: SessionUseCases,
     ) {
         operator fun invoke(tabId: String, replaceCurrent: Boolean = false) {
-            val url = if (newTabFeature.isEnabled) {
-                newTabFeature.currentOrLoadingUrl()
-            } else {
-                midoriUrl()
-            }
+            val url = newTabFeature.currentOrLoadingUrl()
             sessionUseCases.loadUrl(
                 url = url,
                 flags = loadFlags(replaceCurrent),
@@ -211,8 +207,6 @@ class MidoriUseCases @Inject constructor(
     fun isNewTabUrl(url: String?): Boolean = newTabFeature.isNewTabUrl(url)
 
     fun isNewTabLoadingUrl(url: String?): Boolean = newTabFeature.isLoadingUrl(url)
-
-    val isNewTabEnabled: Boolean get() = newTabFeature.isEnabled
 
     val newTabState: StateFlow<MidoriNewTabFeature.InstallState> get() = newTabFeature.state
 

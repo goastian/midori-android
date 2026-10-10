@@ -5,7 +5,6 @@ import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.midorinext.android.BuildConfig
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.WebExtension
@@ -24,18 +23,12 @@ class MidoriNewTabFeature @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
     sealed interface InstallState {
-        data object Disabled : InstallState
         data object Installing : InstallState
         data class Ready(val pageUrl: String) : InstallState
         data object Failed : InstallState
     }
 
-    val isEnabled: Boolean =
-        BuildConfig.FLAVOR_version == "original" && BuildConfig.FLAVOR_target == "playstore"
-
-    private val _state = MutableStateFlow<InstallState>(
-        if (isEnabled) InstallState.Installing else InstallState.Disabled,
-    )
+    private val _state = MutableStateFlow<InstallState>(InstallState.Installing)
     val state: StateFlow<InstallState> = _state.asStateFlow()
 
     private val _pageUrl = MutableStateFlow<String?>(null)
@@ -53,7 +46,7 @@ class MidoriNewTabFeature @Inject constructor(
     }
 
     fun install(runtime: GeckoRuntime) {
-        if (!isEnabled || state.value is InstallState.Ready || installRequested) return
+        if (state.value is InstallState.Ready || installRequested) return
 
         installRequested = true
         _state.value = InstallState.Installing
@@ -81,10 +74,10 @@ class MidoriNewTabFeature @Inject constructor(
 
     fun currentOrLoadingUrl(): String = currentPageUrl() ?: LOADING_URL
 
-    fun isLoadingUrl(url: String?): Boolean = isEnabled && url == LOADING_URL
+    fun isLoadingUrl(url: String?): Boolean = url == LOADING_URL
 
     fun isNewTabUrl(url: String?): Boolean {
-        if (!isEnabled || url == null) return false
+        if (url == null) return false
         if (isLoadingUrl(url)) return true
         return currentPageUrl()?.let(url::startsWith) == true
     }

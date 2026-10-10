@@ -28,4 +28,3 @@ dependencyResolutionManagement {
 }
 rootProject.name = "MidoriBrowserCompose"
 include ':app'
-include ':midoricompanion'

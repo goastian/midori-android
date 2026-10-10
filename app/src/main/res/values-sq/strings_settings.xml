@@ -21,8 +21,6 @@
     <string name="close_tabs_on_exit_description">Mbyll të gjitha skedat kur dilni nga Midori ose e hiqni nga aplikacionet e fundit. Herën tjetër do të hapet një skedë e re.</string>
     <string name="available_tabs_view_grid">Grid</string>
     <string name="available_tabs_view_list">List</string>
-    <string name="show_new_tab_home_label">Use New Tab screen</string>
-    <string name="show_new_tab_home_description">Turn off to open blank new tabs.</string>
     <string name="settings_all">All settings</string>
     <string name="settings_on">On</string>
     <string name="settings_off">Off</string>
@@ -31,10 +29,6 @@
     <string name="settings_homepage_sections">Midori New Tab</string>
     <string name="settings_homepage_midori_tab">Personalize your New Tab</string>
     <string name="settings_homepage_midori_tab_description">Open a new tab and use its Settings button to manage shortcuts, widgets, spaces, language, theme and background. Your choices stay on this device.</string>
-    <string name="settings_homepage_opening_screen">Opening screen</string>
-    <string name="settings_homepage_open_homepage">New Tab</string>
-    <string name="settings_homepage_open_last_tab">Last tab</string>
-    <string name="settings_homepage_open_after_four_hours">New Tab after four hours</string>
     <string name="settings_customize_title">Customize</string>
     <string name="settings_customize_summary">Theme, toolbar, tabs and gestures</string>
     <string name="settings_customize_gestures">Gestures</string>

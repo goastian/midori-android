@@ -8,7 +8,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.ui.browser.BrowserScreenViewModel
 import mozilla.components.concept.engine.EngineView
 
@@ -27,12 +26,10 @@ fun BoxScope.EngineViewFeatures(
         backEnabled = { !viewModel.toolbarState.hasFocus }
     )
 
-    if (viewModel.contentBlockerState.status == ContentBlockerState.Status.ALLOWED) {
-        ThumbnailFeature(
-            engineView = engineView,
-            store = viewModel.store
-        )
-    }
+    ThumbnailFeature(
+        engineView = engineView,
+        store = viewModel.store
+    )
 
     FindInPageFeature(
         engineView = engineView,

@@ -333,7 +333,6 @@
     <string name="take_me_there">そこに連れて行って</string>
     <string name="all_fields_required">すべてのフィールドは必須です</string>
     <string name="permission_permanently_refused">あなたは許可を永久に拒否しました。今すぐシステム設定を通じてそれらを有効にする必要があります</string>
-    <string name="blocked_website">ブロックされた Web サイト</string>
     <string name="context_menu_copy_link">リンクURLをコピーする</string>
     <string name="context_menu_copy_link_text">リンクテキストをコピーする</string>
     <string name="context_menu_copy_link_and_text">リンクテキストとURLをコピーする</string>

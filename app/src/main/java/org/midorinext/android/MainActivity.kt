@@ -9,7 +9,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnPreDraw
-import org.midorinext.android.storage.MidoriClientProvider
 import org.midorinext.android.mozac.media.BackgroundPlaybackFeature
 import org.midorinext.android.ui.MidoriBrowserApp
 import dagger.hilt.android.AndroidEntryPoint
@@ -19,13 +18,11 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : MidoriActivity() {
     @Inject lateinit var notificationsDelegate: NotificationsDelegate
-    @Inject lateinit var clientProvider: MidoriClientProvider
     @Inject lateinit var backgroundPlaybackFeature: BackgroundPlaybackFeature
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        clientProvider.bindToActivity(this)
         notificationsDelegate.bindToActivity(this)
 
         val v = ComposeView(this).apply {

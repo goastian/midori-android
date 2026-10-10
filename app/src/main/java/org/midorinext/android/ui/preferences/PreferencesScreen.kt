@@ -89,11 +89,7 @@ fun PreferencesScreen(
 
             SettingsNavRow(
                 label = R.string.settings_homepage_title,
-                description = if (BuildConfig.FLAVOR_version == "original") {
-                    stringResource(R.string.settings_homepage_summary)
-                } else {
-                    openingScreenDescription(appPrefs.homepageOpeningScreen)
-                },
+                description = stringResource(R.string.settings_homepage_summary),
                 onClicked = { navigateTo(NavDestination.HomepageSettings) }
             )
             SettingsNavRow(
@@ -254,46 +250,13 @@ internal fun searchEngineName(engine: SearchEnginePreference): String =
     stringResource(searchEngineNameResource(engine))
 
 @Composable
-fun HomepageSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
-    val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
+fun HomepageSettingsScreen() {
     PreferenceScreenScaffold(title = stringResource(R.string.settings_homepage_title)) {
         PreferenceGroupLabel(label = R.string.settings_homepage_sections)
-        if (BuildConfig.FLAVOR_version == "original") {
-            PreferenceRow(
-                label = R.string.settings_homepage_midori_tab,
-                description = stringResource(R.string.settings_homepage_midori_tab_description),
-            )
-        } else {
-            PreferenceToggle(
-                label = R.string.show_new_tab_home_label,
-                description = R.string.show_new_tab_home_description,
-                value = !appPrefs.openBlankNewTab,
-                onValueChange = viewModel::updateShowNewTabHome
-            )
-
-            PreferenceGroupLabel(label = R.string.settings_homepage_opening_screen)
-            PreferenceRadioSelectionPopupWithDescription(
-                label = R.string.settings_homepage_opening_screen,
-                options = remember {
-                    listOf(
-                        RadioButtonOptionWithDescription(
-                            HomepageOpeningScreen.HOMEPAGE,
-                            R.string.settings_homepage_open_homepage,
-                        ),
-                        RadioButtonOptionWithDescription(
-                            HomepageOpeningScreen.LAST_TAB,
-                            R.string.settings_homepage_open_last_tab,
-                        ),
-                        RadioButtonOptionWithDescription(
-                            HomepageOpeningScreen.HOMEPAGE_AFTER_FOUR_HOURS,
-                            R.string.settings_homepage_open_after_four_hours,
-                        )
-                    )
-                },
-                value = appPrefs.homepageOpeningScreen,
-                onValueChange = viewModel::updateHomepageOpeningScreen
-            )
-        }
+        PreferenceRow(
+            label = R.string.settings_homepage_midori_tab,
+            description = stringResource(R.string.settings_homepage_midori_tab_description),
+        )
     }
 }
 
@@ -907,17 +870,6 @@ internal fun SettingsNavRow(
     )
 }
 
-@Composable
-private fun openingScreenDescription(value: HomepageOpeningScreen): String {
-    return stringResource(
-        when (value) {
-            HomepageOpeningScreen.HOMEPAGE -> R.string.settings_homepage_open_homepage
-            HomepageOpeningScreen.LAST_TAB -> R.string.settings_homepage_open_last_tab
-            HomepageOpeningScreen.HOMEPAGE_AFTER_FOUR_HOURS,
-            HomepageOpeningScreen.UNRECOGNIZED -> R.string.settings_homepage_open_after_four_hours
-        }
-    )
-}
 
 @Composable
 private fun passwordSummary(appPrefs: AppPreferences): String {

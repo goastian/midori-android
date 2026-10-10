@@ -148,14 +148,6 @@ class PreferencesViewModel @Inject constructor(
         viewModelScope.launch { appPreferencesRepository.updateOpenLinksInApp(openInApp) }
     }
 
-    fun updateShowNewTabHome(show: Boolean) {
-        viewModelScope.launch { appPreferencesRepository.updateShowNewTabHome(show) }
-    }
-
-    fun updateHomepageOpeningScreen(screen: HomepageOpeningScreen) {
-        viewModelScope.launch { appPreferencesRepository.updateHomepageOpeningScreen(screen) }
-    }
-
     fun updatePullToRefreshEnabled(enabled: Boolean) {
         viewModelScope.launch { appPreferencesRepository.updatePullToRefreshEnabled(enabled) }
     }

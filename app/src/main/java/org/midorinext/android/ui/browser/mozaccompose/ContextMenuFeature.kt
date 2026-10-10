@@ -9,7 +9,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.style.TextOverflow
-import org.midorinext.android.BuildConfig
 import org.midorinext.android.ui.MidoriApplicationViewModel
 import org.midorinext.android.ui.widgets.Dropdown
 import org.midorinext.android.ui.widgets.DropdownItem
@@ -115,10 +114,7 @@ fun ContextMenuFeature(
     val validCandidates: List<ContextMenuCandidate> by remember(tab, hitResult) { mutableStateOf(
         tab?.let { session ->
             hitResult?.let { hit ->
-                val baseCandidates = candidates.filter { candidate -> candidate.showFor(session, hit) }
-                if (BuildConfig.FLAVOR_target == "canaltoys") {
-                    baseCandidates.filter { candidate -> !candidate.id.startsWith("mozac.feature.contextmenu.share") }
-                } else baseCandidates
+                candidates.filter { candidate -> candidate.showFor(session, hit) }
             }
         } ?: listOf()
     )}

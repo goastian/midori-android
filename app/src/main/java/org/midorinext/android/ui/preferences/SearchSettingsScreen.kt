@@ -39,7 +39,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.runtime.DisposableEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.midorinext.android.BuildConfig
 import org.midorinext.android.R
 import org.midorinext.android.preferences.app.AppPreferences
 import org.midorinext.android.preferences.app.SearchEnginePreference
@@ -92,17 +91,15 @@ fun SearchSettingsScreen(
             !prefs.disableRecentSearches,
         ) { viewModel.updateSearchSetting(SearchSetting.RECENT, it) }
 
-        if (BuildConfig.FLAVOR_version == "original") {
-            PreferenceGroupLabel(R.string.settings_address_bar_suggest_group)
-            SearchSwitchRow(R.string.settings_search_history, !prefs.disableHistorySuggestions) {
-                viewModel.updateSearchSetting(SearchSetting.HISTORY, it)
-            }
-            SearchSwitchRow(R.string.settings_search_bookmarks, !prefs.disableBookmarkSuggestions) {
-                viewModel.updateSearchSetting(SearchSetting.BOOKMARKS, it)
-            }
-            SearchSwitchRow(R.string.settings_search_open_tabs, !prefs.disableTabSuggestions) {
-                viewModel.updateSearchSetting(SearchSetting.TABS, it)
-            }
+        PreferenceGroupLabel(R.string.settings_address_bar_suggest_group)
+        SearchSwitchRow(R.string.settings_search_history, !prefs.disableHistorySuggestions) {
+            viewModel.updateSearchSetting(SearchSetting.HISTORY, it)
+        }
+        SearchSwitchRow(R.string.settings_search_bookmarks, !prefs.disableBookmarkSuggestions) {
+            viewModel.updateSearchSetting(SearchSetting.BOOKMARKS, it)
+        }
+        SearchSwitchRow(R.string.settings_search_open_tabs, !prefs.disableTabSuggestions) {
+            viewModel.updateSearchSetting(SearchSetting.TABS, it)
         }
 
         PreferenceGroupLabel(R.string.settings_address_bar_preferences_group)

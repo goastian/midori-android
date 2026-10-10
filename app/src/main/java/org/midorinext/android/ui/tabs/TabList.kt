@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import org.midorinext.android.contentBlocker.ContentBlockerState
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 
@@ -19,7 +18,6 @@ fun TabList(
     thumbnailStorage: ThumbnailStorage,
     onTabSelected: (tab: TabSessionState) -> Unit,
     onTabDeleted: (tab: TabSessionState) -> Unit,
-    contentBlockerState: ContentBlockerState,
     modifier: Modifier = Modifier,
     selectionMode: Boolean = false,
     selectedTabIds: Set<String> = emptySet(),
@@ -41,7 +39,6 @@ fun TabList(
                 thumbnailStorage = thumbnailStorage,
                 onSelected = onTabSelected,
                 onDeleted = onTabDeleted,
-                contentBlockerState = contentBlockerState,
                 selectionMode = selectionMode,
                 isSelectedForGrouping = tab.id in selectedTabIds,
                 onLongPressed = onTabLongPressed

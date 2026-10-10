@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.matcher.ViewMatchers.assertThat
-import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.storage.history.HistoryDatabase
 import org.midorinext.android.storage.history.HistoryRepository
 import kotlinx.coroutines.test.runTest
@@ -28,7 +27,7 @@ class HistoryRepositoryTest {
     fun createDb() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(context, HistoryDatabase::class.java).build()
-        repository = HistoryRepository(db, ContentBlockerState())
+        repository = HistoryRepository(db)
     }
 
     @After

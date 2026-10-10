@@ -333,7 +333,6 @@
     <string name="take_me_there">मुझे वहां ले चलो</string>
     <string name="all_fields_required">सभी फ़ील्ड आवश्यक हैं</string>
     <string name="permission_permanently_refused">आपने स्थायी रूप से अनुमतियाँ अस्वीकार कर दीं. अब आपको उन्हें सिस्टम सेटिंग्स के माध्यम से सक्षम करने की आवश्यकता है</string>
-    <string name="blocked_website">ब्लॉक की गई वेबसाइट</string>
     <string name="context_menu_copy_link">लिंक यूआरएल कॉपी करें</string>
     <string name="context_menu_copy_link_text">लिंक टेक्स्ट कॉपी करें</string>
     <string name="context_menu_copy_link_and_text">लिंक टेक्स्ट और यूआरएल कॉपी करें</string>

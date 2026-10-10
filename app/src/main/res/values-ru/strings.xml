@@ -333,7 +333,6 @@
     <string name="take_me_there">Отвези меня туда</string>
     <string name="all_fields_required">Все поля обязательны для заполнения</string>
     <string name="permission_permanently_refused">Вы навсегда отказали в разрешениях. Вам необходимо включить их через настройки системы сейчас.</string>
-    <string name="blocked_website">Заблокированный сайт</string>
     <string name="context_menu_copy_link">Скопировать URL-адрес ссылки</string>
     <string name="context_menu_copy_link_text">Скопировать текст ссылки</string>
     <string name="context_menu_copy_link_and_text">Скопируйте текст ссылки и URL-адрес</string>

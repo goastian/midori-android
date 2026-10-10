@@ -17,8 +17,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import kotlinx.coroutines.CancellationException
-import org.midorinext.android.contentBlocker.ContentBlockerOverlay
-import org.midorinext.android.contentBlocker.ContentBlockerState
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 import mozilla.components.concept.base.images.ImageLoadRequest
 
@@ -27,10 +25,8 @@ fun TabThumbnail(
     tabId: String,
     private: Boolean,
     thumbnailStorage: ThumbnailStorage,
-    contentBlockerState: ContentBlockerState,
     modifier: Modifier = Modifier
 ) {
-    val contentBlockerStatus = contentBlockerState.getStatusForTab(tabId)
     var pixelSize by remember(tabId) { mutableIntStateOf(0) }
 
     Box(
@@ -38,13 +34,6 @@ fun TabThumbnail(
             .fillMaxSize()
             .onSizeChanged { size -> pixelSize = maxOf(size.width, size.height) },
     ) {
-        if (contentBlockerStatus != ContentBlockerState.Status.ALLOWED) {
-            ContentBlockerOverlay(
-                status = contentBlockerStatus,
-                blockReason = contentBlockerState.getBlockReasonForTab(tabId),
-            )
-            return@Box
-        }
 
         var loadedImage: Bitmap? by remember(tabId, private) { mutableStateOf(null) }
 

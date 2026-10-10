@@ -333,7 +333,6 @@
     <string name="take_me_there">Leve-me lá</string>
     <string name="all_fields_required">Todos os campos são obrigatórios</string>
     <string name="permission_permanently_refused">Você recusou permissões permanentemente. Você precisa habilitá-los através das configurações do sistema agora</string>
-    <string name="blocked_website">Site bloqueado</string>
     <string name="context_menu_copy_link">Copiar URL do link</string>
     <string name="context_menu_copy_link_text">Copiar texto do link</string>
     <string name="context_menu_copy_link_and_text">Copiar texto e URL do link</string>

@@ -1,6 +1,5 @@
 package org.midorinext.android.storage.history
 
-import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.ext.isMidoriUrl
 import org.midorinext.android.suggest.Suggestion
 import org.midorinext.android.suggest.SuggestionProvider
@@ -23,7 +22,6 @@ import javax.inject.Singleton
 @Singleton
 class HistoryRepository @Inject constructor(
     private val db: HistoryDatabase,
-    private val contentBlockerState: ContentBlockerState
 ): HistoryStorage, SuggestionProvider {
     private val dao = db.historyDao()
 
@@ -31,7 +29,6 @@ class HistoryRepository @Inject constructor(
 
     override fun canAddUri(uri: String): Boolean =
         !uri.isMidoriUrl() && !uri.startsWith("moz-extension://") && !uri.startsWith("about:blank")
-                && contentBlockerState.status == ContentBlockerState.Status.ALLOWED
 
     override suspend fun recordVisit(uri: String, visit: PageVisit) = withContext(Dispatchers.IO) {
         dao.insertIfNeeded(Page(uri))

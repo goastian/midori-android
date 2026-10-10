@@ -16,8 +16,6 @@
     <string name="permission_permanently_refused">Vous avez refusé la permission de manière permanente. Vous pouvez l’activer depuis les paramètres Android maintenant.</string>
     <string name="take_me_there">Y aller</string>
 
-    <string name="blocked_website">Site bloqué</string>
-
     <string name="toolbar_hint">Rechercher ou saisir une adresse</string>
     <string name="menu_action_add_tab">Ajouter un nouvel onglet</string>
     <string name="menu_action_close_tabs">Fermer tous les onglets</string>

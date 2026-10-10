@@ -3,7 +3,6 @@ package org.midorinext.android.ui.tabs
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.SavedTabGroup
 import org.midorinext.android.preferences.app.TabsViewOption
@@ -31,7 +30,6 @@ class TabsScreenViewModel @Inject constructor(
     private val midoriUseCases: MidoriUseCases,
     val thumbnailStorage: ThumbnailStorage,
     val browserIcons: BrowserIcons,
-    val contentBlockerState: ContentBlockerState
 ): ViewModel() {
     val tabs = store.flow()
         .map { state -> state.tabs }
@@ -139,14 +137,6 @@ class TabsScreenViewModel @Inject constructor(
             initialValue = TabsViewOption.GRID
         )
 
-    private val openBlankNewTab = appPreferencesRepository.flow
-        .map { prefs -> prefs.openBlankNewTab }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = false
-        )
-
     fun updateTabsViewOption(option: TabsViewOption) {
         viewModelScope.launch { appPreferencesRepository.updateTabsView(option) }
     }
@@ -174,8 +164,6 @@ class TabsScreenViewModel @Inject constructor(
     fun openNewTab(private: Boolean) {
         if (private) {
             tabsUseCases.addTab("", selectTab = true, private = true)
-        } else if (!midoriUseCases.isNewTabEnabled && openBlankNewTab.value) {
-            tabsUseCases.addTab("", selectTab = true, private = false)
         } else {
             midoriUseCases.openMidoriPage(private = false)
         }

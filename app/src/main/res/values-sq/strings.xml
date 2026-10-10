@@ -333,7 +333,6 @@
     <string name="take_me_there">Më çoni atje</string>
     <string name="all_fields_required">Të gjitha fushat janë të nevojshme</string>
     <string name="permission_permanently_refused">Refuzove përgjithmonë lejet. Ju duhet t\'i aktivizoni ato përmes cilësimeve të sistemit tani</string>
-    <string name="blocked_website">Uebsajti i bllokuar</string>
     <string name="context_menu_copy_link">Kopjo URL-në e lidhjes</string>
     <string name="context_menu_copy_link_text">Kopjoni tekstin e lidhjes</string>
     <string name="context_menu_copy_link_and_text">Kopjoni tekstin dhe URL-në e lidhjes</string>

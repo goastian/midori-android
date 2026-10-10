@@ -21,8 +21,6 @@
     <string name="close_tabs_on_exit_description">Закрывать все вкладки при выходе из Midori или удалении его из списка недавних приложений. При следующем запуске откроется новая вкладка.</string>
     <string name="available_tabs_view_grid">Сетка</string>
     <string name="available_tabs_view_list">Список</string>
-    <string name="show_new_tab_home_label">Использовать экран новой вкладки</string>
-    <string name="show_new_tab_home_description">Выключите, чтобы открывать пустые новые вкладки.</string>
     <string name="settings_all">Все настройки</string>
     <string name="settings_on">Вкл.</string>
     <string name="settings_off">Выкл.</string>
@@ -31,10 +29,6 @@
     <string name="settings_homepage_sections">Новая вкладка Мидори</string>
     <string name="settings_homepage_midori_tab">Персонализируйте свою новую вкладку</string>
     <string name="settings_homepage_midori_tab_description">Откройте новую вкладку и используйте кнопку «Настройки» для управления ярлыками, виджетами, пространствами, языком, темой и фоном. Ваш выбор останется на этом устройстве.</string>
-    <string name="settings_homepage_opening_screen">Начальный экран</string>
-    <string name="settings_homepage_open_homepage">Новая вкладка</string>
-    <string name="settings_homepage_open_last_tab">Последняя вкладка</string>
-    <string name="settings_homepage_open_after_four_hours">Новая вкладка через четыре часа</string>
     <string name="settings_customize_title">Настроить</string>
     <string name="settings_customize_summary">Тема, панель инструментов, вкладки и жесты</string>
     <string name="settings_customize_gestures">Жесты</string>

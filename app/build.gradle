@@ -103,17 +103,9 @@ android {
     def isBundleBuild = requestedTasks.any { taskName ->
         taskName.substring(taskName.lastIndexOf(':') + 1).startsWith("bundle")
     }
-    def isDebugApkBuild = requestedTasks.any { it.contains("debug") }
-    def isOriginalPlaystoreApkBuild = requestedTasks.any {
-        it.contains("originalplaystore") && !it.contains("bundle")
-    }
-    // Original Play Store APK builds always publish a space-efficient x86_64 artifact beside
-    // the universal APK. Keep the existing ARM splits so current distribution stays compatible.
     def splitAbis = (project.findProperty("fullAbiBuild") == "true")
             ? ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"]
-            : ((isDebugApkBuild || isOriginalPlaystoreApkBuild)
-                ? ["armeabi-v7a", "arm64-v8a", "x86_64"]
-                : ["armeabi-v7a", "arm64-v8a"])
+            : ["armeabi-v7a", "arm64-v8a", "x86_64"]
 
     namespace 'org.midorinext.android'
     compileSdk 37
@@ -137,7 +129,6 @@ android {
         resourceConfigurations += [
             "en", "fr", "de", "es", "it", "ru", "pt-rPT", "pt-rBR", "zh-rCN", "ja", "sq", "hi"
         ]
-        buildConfigField("String", "COMPANION_ID", "\"${rootProject.ext.companion_id}\"")
     }
 
     bundle {
@@ -159,9 +150,7 @@ android {
                 reset()
                 include(*splitAbis)
             }
-            // Release/OEM builds keep their universal APK. Original Play Store debug also emits
-            // one so its debug and release artifact sets have the same universal + x86_64 pair.
-            universalApk !isDebugApkBuild || isOriginalPlaystoreApkBuild
+            universalApk true
         }
     }
 
@@ -190,49 +179,17 @@ android {
 
     flavorDimensions += ["version", "target"]
     productFlavors {
-        def addConstantTo = {target, constantName, constantValue ->
-            target.manifestPlaceholders += [ (constantName):constantValue ]
-            target.buildConfigField "String", "${constantName}", "\"${constantValue}\""
-        }
         original {
             dimension "version"
             getIsDefault().set(true)
             buildConfigField("String", "QWANT_BASE_URL", '"https://astiango.com"')
             buildConfigField("String", "QWANT_API_BASE_URL", '"https://api.qwant.com/v3"')
-            addConstantTo(owner, "WIDGET_ACTION", "org.midorinext.android.intent.action.WIDGET")
-        }
-        kids {
-            dimension "version"
-            applicationId "com.midorikids.mobile"
-            buildConfigField("String", "QWANT_BASE_URL", '"https://www.astiangojunior.com"')
-            buildConfigField("String", "QWANT_API_BASE_URL", '"https://api.qwant.com/v3/egp/search"')
-            addConstantTo(owner, "WIDGET_ACTION", "org.midorinext.android.intent.action.WIDGET_JUNIOR")
+            manifestPlaceholders += [WIDGET_ACTION: "org.midorinext.android.intent.action.WIDGET"]
+            buildConfigField("String", "WIDGET_ACTION", '"org.midorinext.android.intent.action.WIDGET"')
         }
 
         playstore {
             getIsDefault().set(true)
-            dimension "target"
-        }
-        sfr {
-            dimension "target"
-            versionCode = 100000 + (android.defaultConfig.versionCode ?: 0)
-        }
-        genymobile {
-            dimension "target"
-        }
-        canaltoys {
-            dimension "target"
-        }
-        logicom {
-            dimension "target"
-        }
-        unowhy {
-            dimension "target"
-        }
-        smarteen {
-            dimension "target"
-        }
-        orange {
             dimension "target"
         }
     }
@@ -272,19 +229,10 @@ android {
     aaptOptions {
         ignoreAssetsPattern  '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
     }
-    sourceSets {
-        kids {
-            assets {
-                srcDirs 'src/junior/assets', 'src/test/assets'
-            }
-        }
-    }
     testOptions {
         unitTests.returnDefaultValues = true
     }
 
-    applicationVariants.configureEach { variant ->
-    }
 }
 
 tasks.register("verifyLocalizedStrings") {

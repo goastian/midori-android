@@ -4,7 +4,6 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -74,13 +73,6 @@ fun Context.openAppStorePage() = startActivity(
 @RequiresApi(Build.VERSION_CODES.N)
 fun Context.openDefaultAppsSystemSettings() {
     startActivity(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
-}
-
-fun Context.isPackageInstalled(packageToFind: String) = try {
-    this.packageManager.getPackageInfo(packageToFind, 0)
-    true
-} catch (e: PackageManager.NameNotFoundException) {
-    false
 }
 
 fun Context.selectedLocale(): Locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

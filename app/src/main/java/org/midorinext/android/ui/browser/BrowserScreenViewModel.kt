@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import org.midorinext.android.contentBlocker.ContentBlockerState
 import org.midorinext.android.adblock.DesktopHostFilter
 import org.midorinext.android.adblock.BlockingLevel
 import org.midorinext.android.adblock.hostOf
@@ -70,7 +69,6 @@ class BrowserScreenViewModel @Inject constructor(
     val client: Client,
     val MidoriUseCases: MidoriUseCases,
     private val appPreferencesRepository: AppPreferencesRepository,
-    val contentBlockerState: ContentBlockerState,
     val pdfSaveEvents: PdfSaveEvents,
     private val backgroundPlaybackFeature: BackgroundPlaybackFeature,
     private val webAppRepository: WebAppRepository,
@@ -206,15 +204,9 @@ class BrowserScreenViewModel @Inject constructor(
             initialValue = AppPreferencesSerializer.defaultValue
         )
 
-    private var openBlankNewTab by mutableStateOf(false)
     private val tabsWithUserNavigationInFlight = mutableSetOf<String>()
 
     init {
-        viewModelScope.launch {
-            appPreferencesRepository.flow.collect { prefs ->
-                openBlankNewTab = prefs.openBlankNewTab
-            }
-        }
         viewModelScope.launch {
             store.flow().collect { state ->
                 val replaceableTabIds = state.tabs
@@ -635,8 +627,6 @@ class BrowserScreenViewModel @Inject constructor(
         toolbarState.updateFocus(false)
         if (private) {
             MidoriUseCases.openPrivatePage()
-        } else if (!MidoriUseCases.isNewTabEnabled && openBlankNewTab) {
-            tabsUseCases.addTab("", selectTab = true, private = false)
         } else {
             MidoriUseCases.openMidoriPage(private = false)
         }
@@ -692,8 +682,6 @@ class BrowserScreenViewModel @Inject constructor(
     fun isNewTabUrl(url: String?): Boolean = MidoriUseCases.isNewTabUrl(url)
 
     fun isNewTabLoadingUrl(url: String?): Boolean = MidoriUseCases.isNewTabLoadingUrl(url)
-
-    val isNewTabEnabled: Boolean get() = MidoriUseCases.isNewTabEnabled
 
     private var safetyTabOpening = false
 

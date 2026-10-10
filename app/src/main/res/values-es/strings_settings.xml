@@ -23,8 +23,6 @@
     <string name="close_tabs_on_exit_description">Cierra todas las pestañas al salir de Midori o quitarlo de las aplicaciones recientes. Al volver, se abrirá una pestaña nueva.</string>
     <string name="available_tabs_view_grid">Red</string>
     <string name="available_tabs_view_list">Lista</string>
-    <string name="show_new_tab_home_label">Usar pantalla New Tab</string>
-    <string name="show_new_tab_home_description">Desactívalo para abrir pestañas nuevas en blanco.</string>
     <string name="settings_all">Todos los ajustes</string>
     <string name="settings_on">Activado</string>
     <string name="settings_off">Desactivado</string>
@@ -33,10 +31,6 @@
     <string name="settings_homepage_sections">Nueva pestaña de Midori</string>
     <string name="settings_homepage_midori_tab">Personaliza tu nueva pestaña</string>
     <string name="settings_homepage_midori_tab_description">Abre una pestaña nueva y usa su botón de Configuración para administrar accesos, widgets, espacios, idioma, tema y fondo. Tus elecciones se guardan en este dispositivo.</string>
-    <string name="settings_homepage_opening_screen">Pantalla inicial</string>
-    <string name="settings_homepage_open_homepage">Nueva pestaña</string>
-    <string name="settings_homepage_open_last_tab">Última pestaña</string>
-    <string name="settings_homepage_open_after_four_hours">Nueva pestaña después de cuatro horas</string>
     <string name="settings_customize_title">Personalizar</string>
     <string name="settings_customize_summary">Tema, barra, pestañas y gestos</string>
     <string name="settings_customize_gestures">Gestos</string>

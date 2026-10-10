@@ -26,9 +26,6 @@
     <string name="browser_brand_suggest_ad">Annonce</string>
     <string name="browser_brand_suggest_information">Cette suggestion de recherche est une publicité pour %1$s, vous serez redirigé(e) vers le site de l’annonceur : %2$s</string>
 
-    <string name="browser_permission_geoloc_blocked">Midori Kids protège ta vie privée et empêche le partage de ta position exacte automatiquement.</string>
-    <string name="browser_understood">J\'ai compris</string>
-
     <string name="browser_active_tabs">Onglets actifs</string>
     <string name="browser_inactive_tabs">Onglets inactifs</string>
     <string name="browser_inactive_tabs_summary">Onglets non utilisés au cours des 14 derniers jours</string>

@@ -8,11 +8,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import org.midorinext.android.BuildConfig
 import org.midorinext.android.R
 import org.midorinext.android.legacy.ClFeature
 import org.midorinext.android.mozac.downloads.openDownloadedFile
-import org.midorinext.android.contentBlocker.ContentBlockerObserver
 import org.midorinext.android.ui.MidoriApplicationViewModel
 import org.midorinext.android.ui.browser.BrowserScreenViewModel
 import org.midorinext.android.ui.browser.mozaccompose.downloads.DownloadFeature
@@ -66,12 +64,8 @@ fun GlobalFeatures(
             if (status == DownloadState.Status.COMPLETED) {
                 appViewModel.showSnackbar(
                     completedDownloadText,
-                    if (BuildConfig.FLAVOR_target != "canaltoys") {
-                        MidoriApplicationViewModel.SnackbarAction("Open") {
-                            context.openDownloadedFile(state.filePath, state.contentType)
-                        }
-                    } else {
-                        null
+                    MidoriApplicationViewModel.SnackbarAction("Open") {
+                        context.openDownloadedFile(state.filePath, state.contentType)
                     }
                 )
             } else if (status == DownloadState.Status.FAILED) {
@@ -105,11 +99,6 @@ fun GlobalFeatures(
     val session by viewModel.currentEngineSession.collectAsStateWithLifecycle()
     ToolbarAlwaysVisibleWhenScrolledToTopFeature(
         toolbarState = viewModel.toolbarState,
-        session = session
-    )
-
-    ContentBlockerObserver(
-        contentBlockerState = viewModel.contentBlockerState,
         session = session
     )
 }
