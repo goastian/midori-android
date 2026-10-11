@@ -18,7 +18,7 @@
     <string name="home_shortcut_invalid">Geben Sie einen Namen und eine gültige HTTP- oder HTTPS-Adresse ein.</string>
     <string name="home_move_left">Nach links verschieben</string>
     <string name="home_move_right">Nach rechts verschieben</string>
-    <string name="home_blocked">%1$d Blockierungen in offenen Tabs</string>
+    <string name="home_blocked">%1$d Anzeigen und Tracker blockiert</string>
     <string name="home_blank_tab">Neuen leeren Tab öffnen</string>
     <string name="home_stories_source">Schlagzeilen von BBC News; auf Spanisch von BBC Mundo.</string>
 </resources>

@@ -18,7 +18,7 @@
     <string name="home_shortcut_invalid">Saisissez un nom et une adresse HTTP ou HTTPS valide.</string>
     <string name="home_move_left">Déplacer à gauche</string>
     <string name="home_move_right">Déplacer à droite</string>
-    <string name="home_blocked">%1$d blocages dans les onglets ouverts</string>
+    <string name="home_blocked">%1$d publicités et traqueurs bloqués</string>
     <string name="home_blank_tab">Ouvrir un nouvel onglet vide</string>
     <string name="home_stories_source">Titres de BBC News ; BBC Mundo pour l’espagnol.</string>
 </resources>

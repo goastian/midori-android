@@ -18,7 +18,7 @@
     <string name="home_shortcut_invalid">Введите название и корректный адрес HTTP или HTTPS.</string>
     <string name="home_move_left">Переместить влево</string>
     <string name="home_move_right">Переместить вправо</string>
-    <string name="home_blocked">%1$d блокировок в открытых вкладках</string>
+    <string name="home_blocked">Реклама и трекеры заблокированы: %1$d</string>
     <string name="home_blank_tab">Открывать новую пустую вкладку</string>
     <string name="home_stories_source">Заголовки BBC News; для испанского — BBC Mundo.</string>
 </resources>

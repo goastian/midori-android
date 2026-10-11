@@ -18,7 +18,7 @@
     <string name="home_shortcut_invalid">请输入名称和有效的HTTP或HTTPS地址。</string>
     <string name="home_move_left">向左移动</string>
     <string name="home_move_right">向右移动</string>
-    <string name="home_blocked">已在打开的标签页中拦截%1$d次</string>
+    <string name="home_blocked">已拦截%1$d个广告和跟踪器</string>
     <string name="home_blank_tab">打开新的空白标签页</string>
     <string name="home_stories_source">标题来自BBC News；西班牙语使用BBC Mundo。</string>
 </resources>

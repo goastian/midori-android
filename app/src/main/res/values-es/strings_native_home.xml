@@ -18,7 +18,7 @@
     <string name="home_shortcut_invalid">Introduce un nombre y una dirección HTTP o HTTPS válida.</string>
     <string name="home_move_left">Mover a la izquierda</string>
     <string name="home_move_right">Mover a la derecha</string>
-    <string name="home_blocked">%1$d bloqueos en pestañas abiertas</string>
+    <string name="home_blocked">%1$d anuncios y rastreadores bloqueados</string>
     <string name="home_blank_tab">Abrir una nueva pestaña vacía</string>
     <string name="home_stories_source">Titulares de BBC Mundo; otros idiomas usan BBC News.</string>
 </resources>

@@ -18,7 +18,7 @@
     <string name="home_shortcut_invalid">名前と有効なHTTPまたはHTTPSアドレスを入力してください。</string>
     <string name="home_move_left">左に移動</string>
     <string name="home_move_right">右に移動</string>
-    <string name="home_blocked">開いているタブで%1$d件ブロック</string>
+    <string name="home_blocked">広告とトラッカーを%1$d件ブロック</string>
     <string name="home_blank_tab">新しい空のタブを開く</string>
     <string name="home_stories_source">BBC Newsの見出し。スペイン語はBBC Mundo。</string>
 </resources>

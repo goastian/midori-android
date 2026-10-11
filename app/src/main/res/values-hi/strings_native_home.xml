@@ -18,7 +18,7 @@
     <string name="home_shortcut_invalid">नाम और मान्य HTTP या HTTPS पता दर्ज करें।</string>
     <string name="home_move_left">बाएँ ले जाएँ</string>
     <string name="home_move_right">दाएँ ले जाएँ</string>
-    <string name="home_blocked">खुले टैब में %1$d अवरोध</string>
+    <string name="home_blocked">%1$d विज्ञापन और ट्रैकर अवरोधित</string>
     <string name="home_blank_tab">नया खाली टैब खोलें</string>
     <string name="home_stories_source">BBC News के शीर्षक; स्पेनिश में BBC Mundo।</string>
 </resources>

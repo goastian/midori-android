@@ -18,7 +18,7 @@
     <string name="home_shortcut_invalid">Enter a name and a valid HTTP or HTTPS address.</string>
     <string name="home_move_left">Move left</string>
     <string name="home_move_right">Move right</string>
-    <string name="home_blocked">%1$d blocks in open tabs</string>
+    <string name="home_blocked">%1$d ads and trackers blocked</string>
     <string name="home_blank_tab">Open a blank new tab</string>
     <string name="home_stories_source">Headlines from BBC News; Spanish uses BBC Mundo.</string>
 </resources>

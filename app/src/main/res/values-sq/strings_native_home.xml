@@ -18,7 +18,7 @@
     <string name="home_shortcut_invalid">Vendosni një emër dhe një adresë të vlefshme HTTP ose HTTPS.</string>
     <string name="home_move_left">Zhvendos majtas</string>
     <string name="home_move_right">Zhvendos djathtas</string>
-    <string name="home_blocked">%1$d bllokime në skedat e hapura</string>
+    <string name="home_blocked">%1$d reklama dhe gjurmues të bllokuar</string>
     <string name="home_blank_tab">Hap një skedë të re bosh</string>
     <string name="home_stories_source">Tituj nga BBC News; BBC Mundo për spanjishten.</string>
 </resources>
