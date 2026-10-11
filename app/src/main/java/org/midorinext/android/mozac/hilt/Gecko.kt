@@ -55,7 +55,7 @@ object GeckoHiltModule {
         return StartupTiming.measure("browser_engine") {
             GeckoEngine(context, settings, runtime).also {
                 legacyBlockerMigration.uninstall(runtime)
-                newTabFeature.install(runtime)
+                newTabFeature.registerLegacyOrigins(runtime)
                 WebCompatFeature.install(it)
             }
         }

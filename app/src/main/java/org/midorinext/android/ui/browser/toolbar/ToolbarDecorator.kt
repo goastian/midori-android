@@ -88,7 +88,7 @@ fun ToolbarDecorator(
                     text = when (state) {
                         is BrowserToolbarState -> {
                             val currentUrl by state.currentUrl.collectAsStateWithLifecycle()
-                            if (currentUrl?.isNotBlank() == true &&
+                            if (!state.onMidori && currentUrl?.isNotBlank() == true &&
                                 currentUrl?.startsWith("http://") == false &&
                                 currentUrl?.startsWith("https://") == false &&
                                 currentUrl?.startsWith("moz-extension://") == false

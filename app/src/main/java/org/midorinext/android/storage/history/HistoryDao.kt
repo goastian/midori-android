@@ -99,4 +99,9 @@ interface HistoryDao {
 
     @Query("SELECT EXISTS (SELECT * FROM pages)")
     fun hasHistoryFlow() : Flow<Boolean>
+
+    @Query("SELECT pages.* FROM pages JOIN visits ON pages.uri = visits.pageUri " +
+        "WHERE pages.uri LIKE 'https://%' OR pages.uri LIKE 'http://%' " +
+        "GROUP BY pages.uri ORDER BY MAX(visits.time) DESC LIMIT :limit")
+    fun recentPagesFlow(limit: Int): Flow<List<Page>>
 }

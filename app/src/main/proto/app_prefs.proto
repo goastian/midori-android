@@ -145,6 +145,20 @@ message AppPreferences {
   string custom_private_search_engine_id = 68;
   bool show_tab_strip = 69;
   bool close_tabs_on_exit = 70;
+  reserved 71 to 78;
+  repeated HomeShortcut home_shortcuts = 79;
+  bool home_shortcuts_initialized = 80;
+  bool hide_home_shortcuts = 81;
+  bool hide_home_continue = 82;
+  bool hide_home_recent_visits = 83;
+  bool hide_home_stories = 84;
+  bool hide_home_privacy = 85;
+}
+
+message HomeShortcut {
+  string id = 1;
+  string title = 2;
+  string url = 3;
 }
 
 message CustomSearchEngine {

@@ -23,15 +23,6 @@ configure_addon() {
     addon="$1"
 
     case "$addon" in
-        midori-tab)
-            repository="goastian/midori-tab"
-            target_dir="$repo_root/app/src/main/assets/extensions/midori_newtab"
-            patch_script="$repo_root/scripts/patch-midori-tab-firefox-android.mjs"
-            extension_id="midoritabs@astian.org"
-            asset_name_prefix="midori-tab-"
-            asset_name_suffix="-firefox.zip"
-            required_files=(manifest.json index.html index.js background.js)
-            ;;
         midori-vpn)
             repository="goastian/midorivpn-extension"
             target_dir="$repo_root/app/src/main/assets/extensions/midori_vpn"
@@ -43,7 +34,7 @@ configure_addon() {
             ;;
         *)
             echo "Unknown addon: $addon" >&2
-            echo "Usage: $0 [midori-tab] [midori-vpn]" >&2
+            echo "Usage: $0 [midori-vpn]" >&2
             exit 1
             ;;
     esac
@@ -160,17 +151,10 @@ apply_android_compatibility() {
         exit 1
     fi
 
-    if [[ "$addon" == "midori-tab" ]]; then
-        node --check "$staging_dir/background.js"
-        curl --fail --location --silent --show-error \
-            -o "$staging_dir/LICENSE.upstream" \
-            "https://raw.githubusercontent.com/$repository/$release_tag/LICENSE"
-    else
-        node --check "$staging_dir/background.js"
-        curl --fail --location --silent --show-error \
-            -o "$staging_dir/LICENSE.upstream" \
-            "https://raw.githubusercontent.com/$repository/$release_tag/LICENSE"
-    fi
+    node --check "$staging_dir/background.js"
+    curl --fail --location --silent --show-error \
+        -o "$staging_dir/LICENSE.upstream" \
+        "https://raw.githubusercontent.com/$repository/$release_tag/LICENSE"
 }
 
 write_metadata() {
@@ -239,7 +223,7 @@ sync_addon() {
 require_commands
 
 if [[ "$#" -eq 0 ]]; then
-    requested_addons=(midori-tab)
+    requested_addons=(midori-vpn)
 else
     requested_addons=("$@")
 fi

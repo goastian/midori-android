@@ -1,126 +1,52 @@
 package org.midorinext.android.newtab
 
 import android.content.Context
-import android.util.Log
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
-import org.mozilla.geckoview.GeckoRuntime
-import org.mozilla.geckoview.WebExtension
-import org.json.JSONObject
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import org.midorinext.android.ext.isLegacyMidoriHomeUrl
+import org.mozilla.geckoview.GeckoRuntime
+import java.net.URI
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Installs the official Midori Tab bundle as a built-in WebExtension and exposes its
- * runtime URL to the browser. The extension URL is assigned by Gecko, so callers must
- * wait for installation instead of persisting or guessing a moz-extension UUID.
- */
 @Singleton
-class MidoriNewTabFeature @Inject constructor(
-    @ApplicationContext private val context: Context,
-) {
-    sealed interface InstallState {
-        data object Installing : InstallState
-        data class Ready(val pageUrl: String) : InstallState
-        data object Failed : InstallState
-    }
+class MidoriNewTabFeature @Inject constructor(@ApplicationContext context: Context) {
+    private val preferences = context.getSharedPreferences("native_home_origins", Context.MODE_PRIVATE)
+    private val origins = MutableStateFlow(preferences.getStringSet("legacy", emptySet()).orEmpty().toSet())
+    val legacyOrigins = origins.asStateFlow()
 
-    private val _state = MutableStateFlow<InstallState>(InstallState.Installing)
-    val state: StateFlow<InstallState> = _state.asStateFlow()
+    fun currentPageUrl(): String = NATIVE_HOME_URL
 
-    private val _pageUrl = MutableStateFlow<String?>(null)
-    val pageUrl: StateFlow<String?> = _pageUrl.asStateFlow()
+    fun currentOrLoadingUrl(): String = NATIVE_HOME_URL
 
-    private var installRequested = false
-    private val bundledVersion: String? by lazy {
-        runCatching {
-            context.assets.open(ASSET_MANIFEST_PATH)
-                .bufferedReader()
-                .use { reader -> JSONObject(reader.readText()).getString("version") }
-        }.onFailure { error ->
-            Log.e(TAG, "Could not read the bundled Midori New Tab version", error)
-        }.getOrNull()
-    }
+    fun isLoadingUrl(url: String?): Boolean = url == LEGACY_NEW_TAB_URL
 
-    fun install(runtime: GeckoRuntime) {
-        if (state.value is InstallState.Ready || installRequested) return
+    fun isNewTabUrl(url: String?): Boolean = isNativeHomeUrl(url) || isLegacyUrl(url)
 
-        installRequested = true
-        _state.value = InstallState.Installing
-        val controller = runtime.webExtensionController
-        controller.ensureBuiltIn(LOCATION, EXTENSION_ID).accept({ extension ->
-            if (extension == null) {
-                Log.e(TAG, "Midori New Tab installation returned no extension")
-                runOnUiThread(::publishFailure)
-            } else if (needsReinstall(extension.metaData.version, bundledVersion)) {
-                Log.i(
-                    TAG,
-                    "Updating bundled Midori New Tab ${extension.metaData.version} -> $bundledVersion",
-                )
-                controller.installBuiltIn(LOCATION).accept(
-                    ::publishInstalledExtension,
-                    ::publishInstallError,
-                )
-            } else {
-                publishInstalledExtension(extension)
+    fun isLegacyUrl(url: String?): Boolean = url != null &&
+        (url == LEGACY_NEW_TAB_URL || url == LEGACY_NATIVE_HOME_URL || url.isLegacyMidoriHomeUrl() || isLegacyExtensionHome(url, origins.value))
+
+    fun registerLegacyOrigins(runtime: GeckoRuntime) {
+        runtime.webExtensionController.list().accept({ extensions ->
+            val registered = extensions.orEmpty().filter { it.id == EXTENSION_ID }
+                .mapNotNull { it.metaData.baseUrl }.toSet()
+            if (registered.isNotEmpty()) {
+                origins.value = origins.value + registered
+                preferences.edit().putStringSet("legacy", origins.value).apply()
             }
-        }, ::publishInstallError)
-    }
-
-    fun currentPageUrl(): String? = pageUrl.value
-
-    fun currentOrLoadingUrl(): String = currentPageUrl() ?: LOADING_URL
-
-    fun isLoadingUrl(url: String?): Boolean = url == LOADING_URL
-
-    fun isNewTabUrl(url: String?): Boolean {
-        if (url == null) return false
-        if (isLoadingUrl(url)) return true
-        return currentPageUrl()?.let(url::startsWith) == true
-    }
-
-    private fun publishInstalledExtension(extension: WebExtension?) {
-        val baseUrl = extension?.metaData?.baseUrl
-        if (baseUrl.isNullOrBlank()) {
-            Log.e(TAG, "Midori New Tab installed without a base URL")
-            runOnUiThread(::publishFailure)
-            return
-        }
-        runOnUiThread { publishReadyUrl(baseUrl) }
-    }
-
-    private fun publishInstallError(error: Throwable?) {
-        Log.e(TAG, "Failed to install Midori New Tab", error)
-        runOnUiThread(::publishFailure)
-    }
-
-    private fun publishReadyUrl(baseUrl: String) {
-        val readyUrl = pageUrl(baseUrl)
-        _pageUrl.value = readyUrl
-        _state.value = InstallState.Ready(readyUrl)
-    }
-
-    private fun publishFailure() {
-        installRequested = false
-        _pageUrl.value = null
-        _state.value = InstallState.Failed
+        }, { _ -> })
     }
 
     companion object {
-        private const val TAG = "MidoriNewTab"
         const val EXTENSION_ID = "midoritabs@astian.org"
-        const val LOCATION = "resource://android/assets/extensions/midori_newtab/"
-        const val LOADING_URL = "about:blank#midori-newtab"
-        private const val ASSET_MANIFEST_PATH = "extensions/midori_newtab/manifest.json"
+        const val LOADING_URL = LEGACY_NEW_TAB_URL
 
-        internal fun normalizedBaseUrl(baseUrl: String): String = "${baseUrl.trimEnd('/')}/"
-
-        internal fun pageUrl(baseUrl: String): String = "${normalizedBaseUrl(baseUrl)}index.html"
-
-        internal fun needsReinstall(installedVersion: String?, bundledVersion: String?): Boolean =
-            !bundledVersion.isNullOrBlank() && installedVersion != bundledVersion
+        internal fun isLegacyExtensionHome(url: String, origins: Set<String>): Boolean = runCatching {
+            val candidate = URI(url)
+            candidate.scheme == "moz-extension" && candidate.rawQuery == null &&
+                candidate.path in listOf("", "/", "/index.html") &&
+                origins.any { URI(it).host == candidate.host }
+        }.getOrDefault(false)
     }
 }

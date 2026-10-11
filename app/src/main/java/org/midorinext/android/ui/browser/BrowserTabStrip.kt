@@ -37,6 +37,7 @@ import mozilla.components.browser.icons.compose.Placeholder
 import mozilla.components.browser.icons.compose.WithIcon
 import mozilla.components.browser.state.state.TabSessionState
 import org.midorinext.android.R
+import org.midorinext.android.newtab.isNativeHomeUrl
 
 @Composable
 fun BrowserTabStrip(
@@ -91,7 +92,9 @@ fun BrowserTabStrip(
                                 contentDescription = null,
                             )
                         } else {
-                            tab.content.icon?.let { icon ->
+                            if (isNativeHomeUrl(tab.content.url)) {
+                                Image(painterResource(R.mipmap.ic_launcher_foreground), null)
+                            } else tab.content.icon?.let { icon ->
                                 Image(bitmap = icon.asImageBitmap(), contentDescription = null)
                             } ?: browserIcons.Loader(url = tab.content.url, isPrivate = tab.content.private) {
                                 WithIcon { icon ->
@@ -107,7 +110,8 @@ fun BrowserTabStrip(
                         }
                     }
                     Text(
-                        text = tab.content.title.ifBlank {
+                        text = if (isNativeHomeUrl(tab.content.url)) stringResource(R.string.browser_new_tab)
+                        else tab.content.title.ifBlank {
                             stringResource(
                                 if (tab.content.private) R.string.browser_new_tab_private
                                 else R.string.browser_new_tab

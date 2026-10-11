@@ -10,6 +10,7 @@ import org.midorinext.android.apptracking.AppTrackingProtectionController
 import org.midorinext.android.apptracking.AppTrackingRuntimeState
 import org.midorinext.android.preferences.app.*
 import org.midorinext.android.usecases.MidoriUseCases
+import org.midorinext.android.newtab.HomeSection
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -90,6 +91,14 @@ class PreferencesViewModel @Inject constructor(
 
     fun updateToolbarPosition(position: ToolbarPosition) {
         viewModelScope.launch { appPreferencesRepository.updateToolbarPosition(position) }
+    }
+
+    fun updateHomeSection(section: HomeSection, visible: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateHomeSection(section, visible) }
+    }
+
+    fun updateOpenBlankNewTab(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateOpenBlankNewTab(enabled) }
     }
 
     fun updateSearchEngine(engine: SearchEnginePreference) {

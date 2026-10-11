@@ -94,11 +94,12 @@ class MidoriUseCases @Inject constructor(
     ) {
         @SuppressLint("ApplySharedPref")
         operator fun invoke(search: String? = null, private: Boolean = false, selectIfExists: Boolean = false) {
-            val usesLocalNewTab = search == null && !private
+            val usesLocalNewTab = search == null
             val url = if (usesLocalNewTab) {
-                newTabFeature.currentOrLoadingUrl()
+                if (private) "" else if (searchPreferences.value.openBlankNewTab) "about:blank"
+                else newTabFeature.currentPageUrl()
             } else {
-                search?.let { searchUrl(it, private = private) } ?: midoriUrl()
+                searchUrl(search, private = private)
             }
             if (selectIfExists) {
                 tabsUseCases.selectOrAddTab.invoke(url, private = private)
@@ -106,6 +107,7 @@ class MidoriUseCases @Inject constructor(
                 tabsUseCases.addTab.invoke(
                     url,
                     selectTab = true,
+                    startLoading = !usesLocalNewTab,
                     private = private
                 )
             }
@@ -208,9 +210,9 @@ class MidoriUseCases @Inject constructor(
 
     fun isNewTabLoadingUrl(url: String?): Boolean = newTabFeature.isLoadingUrl(url)
 
-    val newTabState: StateFlow<MidoriNewTabFeature.InstallState> get() = newTabFeature.state
+    fun isLegacyNewTabUrl(url: String?): Boolean = newTabFeature.isLegacyUrl(url)
 
-    val newTabPageUrl: StateFlow<String?> get() = newTabFeature.pageUrl
+    val legacyNewTabOrigins: StateFlow<Set<String>> get() = newTabFeature.legacyOrigins
 
     companion object {
         internal fun encodeQueryValue(value: String): String =

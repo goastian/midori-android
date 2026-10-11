@@ -127,7 +127,7 @@ class BrowserToolbarState @AssistedInject constructor(
         .distinctUntilChanged()
 
     val currentUrl = selectedUrl
-        .combine(newTabFeature.pageUrl) { url, _ -> url }
+        .combine(newTabFeature.legacyOrigins) { url, _ -> url }
         .onEach {
             if (!hasFocus) {
                 updateTextWithUrl(it ?: "")

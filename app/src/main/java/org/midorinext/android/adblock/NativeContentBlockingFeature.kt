@@ -1,6 +1,8 @@
 package org.midorinext.android.adblock
 
 import android.util.Log
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -8,16 +10,17 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import mozilla.components.browser.engine.gecko.webextension.GeckoWebExtension
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.EngineSession
+import mozilla.components.concept.engine.content.blocking.Tracker
 import mozilla.components.concept.engine.webextension.MessageHandler
 import mozilla.components.concept.engine.webextension.Port
 import mozilla.components.lib.state.ext.flow
 import org.json.JSONObject
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 import org.mozilla.geckoview.GeckoRuntime
-import org.mozilla.geckoview.GeckoResult
 import org.mozilla.geckoview.WebExtension
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -31,14 +34,18 @@ class NativeContentBlockingFeature @Inject constructor(
     private val sources: NativeFilterSources,
     private val networkBlocker: NativeNetworkBlocker,
     private val filter: DesktopHostFilter,
+    private val statistics: dagger.Lazy<BlockingStatistics>,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val ports = mutableMapOf<EngineSession, Port>()
     private val adPorts = mutableMapOf<EngineSession, Port>()
     private var backgroundPort: WebExtension.Port? = null
     private var registeredSessions = emptySet<EngineSession>()
+    private val trackingObservers = mutableMapOf<EngineSession, EngineSession.Observer>()
     private var extension: GeckoWebExtension? = null
     private var started = false
+    private val bridgeReady = CompletableDeferred<Unit>()
+    val ready: Deferred<Unit> = bridgeReady
 
     private val messageHandler = object : MessageHandler {
         override fun onPortConnected(port: Port) {
@@ -84,7 +91,17 @@ class NativeContentBlockingFeature @Inject constructor(
             backgroundPort = port
             port.setDelegate(object : WebExtension.PortDelegate {
                 override fun onPortMessage(message: Any, port: WebExtension.Port) {
-                    if (message is JSONObject && message.optString("type") == "ready") sendNetworkPolicy()
+                    if (message !is JSONObject) return
+                    when (message.optString("type")) {
+                        "ready" -> sendNetworkPolicy()
+                        "network_request" -> handleNetworkRequest(message, port)
+                        "network_policy_applied" -> {
+                            if (message.optLong("revision", -1) == sources.revision.value &&
+                                sources.ready.isCompleted && networkBlocker.ready.isCompleted) bridgeReady.complete(Unit)
+                        }
+                        "blocked_total" -> statistics.get().recordNetworkSnapshot(
+                            message.optString("reportId"), message.optLong("count", -1))
+                    }
                 }
 
                 override fun onDisconnect(port: WebExtension.Port) {
@@ -92,22 +109,31 @@ class NativeContentBlockingFeature @Inject constructor(
                 }
             })
         }
+    }
 
-        override fun onMessage(nativeApp: String, message: Any, sender: WebExtension.MessageSender): GeckoResult<Any>? {
-            if (message !is JSONObject || message.optString("type") != "network_request" ||
-                sender.webExtension.id != EXTENSION_ID || sender.environmentType != WebExtension.MessageSender.ENV_TYPE_EXTENSION) return null
-            val result = GeckoResult<Any>()
-            scope.launch(Dispatchers.Default) {
-                val blocked = runCatching { networkBlocker.blocks(message) }.getOrDefault(false)
-                result.complete(JSONObject().put("cancel", blocked))
+    private fun handleNetworkRequest(message: JSONObject, port: WebExtension.Port) {
+        val requestId = message.optLong("requestId", -1)
+        if (requestId <= 0) return
+        scope.launch {
+            val blocked = withContext(Dispatchers.Default) {
+                runCatching { networkBlocker.blocks(message) }.getOrDefault(false)
             }
-            return result
+            if (backgroundPort !== port) return@launch
+            runCatching {
+                port.postMessage(JSONObject().put("type", "network_response")
+                    .put("requestId", requestId).put("cancel", blocked))
+            }.onFailure { Log.w(TAG, "Could not send network decision", it) }
         }
     }
 
     fun start() {
         if (started) return
         started = true
+        scope.launch {
+            sources.ready.await()
+            networkBlocker.ready.await()
+            sendNetworkPolicy()
+        }
         scope.launch {
             combine(
                 store.flow().map { state ->
@@ -150,6 +176,21 @@ class NativeContentBlockingFeature @Inject constructor(
     }
 
     private fun registerSessions(sessions: Set<EngineSession>) {
+        val state = store.state
+        val regularSessions = (state.tabs + state.customTabs).filterNot { it.content.private }
+            .mapNotNull { it.engineState.engineSession }.toSet()
+        (trackingObservers.keys - regularSessions).forEach { session ->
+            trackingObservers.remove(session)?.let(session::unregister)
+        }
+        (regularSessions - trackingObservers.keys).forEach { session ->
+            val observer = object : EngineSession.Observer {
+                override fun onTrackerBlocked(tracker: Tracker) {
+                    statistics.get().recordBlocked()
+                }
+            }
+            trackingObservers[session] = observer
+            session.register(observer)
+        }
         val installed = extension ?: return
         (sessions - registeredSessions).forEach { session ->
             installed.registerContentMessageHandler(session, NATIVE_APP, messageHandler)
@@ -165,7 +206,7 @@ class NativeContentBlockingFeature @Inject constructor(
     }
 
     private fun sendNetworkPolicy() {
-        if (!sources.ready.isCompleted) return
+        if (!sources.ready.isCompleted || !networkBlocker.ready.isCompleted) return
         val port = backgroundPort ?: return
         val config = settings.current
         runCatching {
@@ -206,6 +247,6 @@ class NativeContentBlockingFeature @Inject constructor(
         private const val NATIVE_APP = "midori_adblock"
         private const val AD_APP = "midori_content_blocking"
         private const val NETWORK_APP = "midori_network"
-        private const val BUNDLE_VERSION = "1.2"
+        private const val BUNDLE_VERSION = "1.7"
     }
 }

@@ -3,6 +3,7 @@ package org.midorinext.android.ui.tabs
 import android.net.Uri
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import org.midorinext.android.newtab.isNativeHomeUrl
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.feature.tabs.TabsUseCases
 
@@ -15,7 +16,7 @@ internal class RecentlyClosedTabs(private val tabsUseCases: TabsUseCases) {
 
     fun remember(tabs: List<TabSessionState>) {
         val closed = tabs
-            .filter { !it.content.private && it.content.url.isNotBlank() }
+            .filter { !it.content.private && it.content.url.isNotBlank() && !isNativeHomeUrl(it.content.url) }
             .map { ClosedTabSnapshot(title = it.content.title, url = it.content.url) }
         if (closed.isEmpty()) return
 

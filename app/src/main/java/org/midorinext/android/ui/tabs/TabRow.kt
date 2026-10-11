@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 import org.midorinext.android.R
+import org.midorinext.android.newtab.isNativeHomeUrl
 import org.midorinext.android.ext.toCleanHost
 import org.midorinext.android.ui.browser.home.HomePrivateBrowsingContent
 
@@ -60,6 +61,7 @@ fun TabRow(
     modifier: Modifier = Modifier
 ) {
     val isPrivateBrowsingHome = tab.content.private && tab.content.url.isBlank()
+    val isNativeHome = isNativeHomeUrl(tab.content.url)
     val coordinates = remember { mutableStateOf<LayoutCoordinates?>(null) }
 
     Row(
@@ -137,6 +139,8 @@ fun TabRow(
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize().padding(16.dp)
                 )
+            } else if (isNativeHome) {
+                Image(painterResource(R.mipmap.ic_launcher_foreground), null, Modifier.fillMaxSize().padding(16.dp))
             } else {
                 TabThumbnail(
                     tabId = tab.id,
@@ -151,6 +155,7 @@ fun TabRow(
             .padding(start = 12.dp)) {
             Text(
                 text = if (isPrivateBrowsingHome) stringResource(id = R.string.browser_new_tab_private)
+                        else if (isNativeHome) stringResource(R.string.browser_new_tab)
                         else tab.content.title,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
@@ -158,7 +163,7 @@ fun TabRow(
                 lineHeight = 20.sp
             )
             Text(
-                tab.content.url.toCleanHost(),
+                if (isNativeHome) "Midori" else tab.content.url.toCleanHost(),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 fontSize = 14.sp,

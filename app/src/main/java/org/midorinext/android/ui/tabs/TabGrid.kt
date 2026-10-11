@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 import org.midorinext.android.R
+import org.midorinext.android.newtab.isNativeHomeUrl
 import org.midorinext.android.ui.browser.ToolbarAction
 import org.midorinext.android.ui.browser.home.HomePrivateBrowsingContent
 import org.midorinext.android.ui.widgets.MidoriIconOnBackground
@@ -202,7 +203,7 @@ fun TabCard(
                     .padding(start = 10.dp)
                     .size(18.dp)
                 ) {
-                    if (isPrivateBrowsingHome) {
+                    if (isPrivateBrowsingHome || isNativeHomeUrl(tab.content.url)) {
                         MidoriIconOnBackground(shape = RoundedCornerShape(4.dp))
                     } else {
                         tab.content.icon?.let {
@@ -220,6 +221,7 @@ fun TabCard(
 
                 Text(
                     text = if (isPrivateBrowsingHome) stringResource(id = R.string.browser_new_tab_private)
+                            else if (isNativeHomeUrl(tab.content.url)) stringResource(R.string.browser_new_tab)
                             else tab.content.title,
                     fontSize = 14.sp,
                     lineHeight = 18.sp,
@@ -276,6 +278,8 @@ fun TabCard(
                         textLineHeight = 12.sp,
                         modifier = Modifier.padding(8.dp)
                     )
+                } else if (isNativeHomeUrl(tab.content.url)) {
+                    Image(painterResource(R.mipmap.ic_launcher_foreground), null, Modifier.fillMaxSize().padding(48.dp))
                 } else {
                     TabThumbnail(
                         tabId = tab.id,

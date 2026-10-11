@@ -3,15 +3,55 @@
 
   const tabs = new Map();
   let policy = null;
+  let nativePort = null;
+  const reportId = crypto.randomUUID();
+  let totalBlocked = 0;
+  let totalTimer = null;
+  let nextRequestId = 0;
+  let decisionReceived = false;
+  const requests = new Map();
   let ready;
   let markReady;
   function resetReady() { ready = new Promise(resolve => { markReady = resolve; }); }
   resetReady();
 
+  function reportTotal() {
+    try { nativePort?.postMessage({ type: "blocked_total", reportId, count: totalBlocked }); }
+    catch {}
+  }
+
+  function recordTotal(details) {
+    if (details.incognito !== false) return;
+    totalBlocked++;
+    if (totalTimer !== null) return;
+    totalTimer = setTimeout(() => {
+      totalTimer = null;
+      reportTotal();
+    }, 75);
+  }
+
   function deadline(promise, milliseconds, fallback) {
     let timer;
     return Promise.race([promise, new Promise(resolve => { timer = setTimeout(() => resolve(fallback), milliseconds); })])
       .finally(() => clearTimeout(timer));
+  }
+
+  async function requestDecision(message) {
+    const port = nativePort;
+    if (!port) return null;
+    const requestId = ++nextRequestId;
+    const response = new Promise(resolve => { requests.set(requestId, resolve); });
+    try {
+      port.postMessage({ type: "network_request", requestId, ...message });
+      const result = await deadline(response, decisionReceived ? 1500 : 4000, null);
+      if (typeof result?.cancel === "boolean") decisionReceived = true;
+      return result;
+    } catch { return null; }
+    finally { requests.delete(requestId); }
+  }
+
+  function policyKey(value) {
+    return JSON.stringify([value?.level, value?.revision, Object.entries(value?.siteLevels || {}).sort()]);
   }
 
   function stateFor(tabId, siteUrl) {
@@ -70,9 +110,7 @@
     let cancel = state.cache.get(key);
     if (cancel === undefined) {
       try {
-        const response = await deadline(browser.runtime.sendNativeMessage("midori_network", {
-          type: "network_request", url: details.url, siteUrl, originUrl, resourceType: details.type,
-        }), 1500, null);
+        const response = await requestDecision({ url: details.url, siteUrl, originUrl, resourceType: details.type });
         if (policy !== requestPolicy || tabs.get(details.tabId) !== state) return {};
         if (typeof response?.cancel !== "boolean") return {};
         cancel = response.cancel;
@@ -82,6 +120,7 @@
     }
     if (cancel && tabs.get(details.tabId) === state) {
       state.count++;
+      recordTotal(details);
       notifyCount(details.tabId, state);
     }
     return cancel ? { cancel: true } : {};
@@ -90,19 +129,34 @@
   function connect() {
     try {
       const port = browser.runtime.connectNative("midori_network");
+      nativePort = port;
       port.onMessage.addListener(message => {
+        if (nativePort !== port) return;
+        if (message?.type === "network_response") {
+          requests.get(message.requestId)?.(message);
+          return;
+        }
         if (message?.type !== "network_policy") return;
-        policy = message;
-        for (const state of tabs.values()) state.cache.clear();
+        if (policyKey(policy) !== policyKey(message)) {
+          policy = message;
+          for (const state of tabs.values()) state.cache.clear();
+        }
         markReady();
+        port.postMessage({ type: "network_policy_applied", revision: message.revision });
       });
       port.onDisconnect.addListener(() => {
+        if (nativePort !== port) return;
+        nativePort = null;
+        decisionReceived = false;
+        for (const resolve of requests.values()) resolve(null);
+        requests.clear();
         policy = null;
         markReady();
         resetReady();
         setTimeout(connect, 1000);
       });
       port.postMessage({ type: "ready" });
+      reportTotal();
     } catch { setTimeout(connect, 1000); }
   }
   connect();

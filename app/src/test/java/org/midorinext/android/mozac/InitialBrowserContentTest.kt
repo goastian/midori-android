@@ -12,6 +12,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.midorinext.android.newtab.MidoriNewTabFeature
+import org.midorinext.android.newtab.NATIVE_HOME_URL
 
 class InitialBrowserContentTest {
     @Test
@@ -55,6 +56,17 @@ class InitialBrowserContentTest {
         assertFalse(ready.isCompleted)
 
         states.value = state(url = "moz-extension://runtime-id/index.html")
+        assertTrue(ready.await())
+    }
+
+    @Test
+    fun nativeHomeReleasesMaintenanceAfterItsComposeFrameWithoutWaitingForGeckoPaint() = runBlocking {
+        val painted = MutableStateFlow(false)
+        val states = MutableStateFlow(state(url = NATIVE_HOME_URL, painted = false, loading = true))
+        val ready = async(start = CoroutineStart.UNDISPATCHED) { awaitInitialBrowserContent(states, nativeHomePainted = painted) }
+        yield()
+        assertFalse(ready.isCompleted)
+        painted.value = true
         assertTrue(ready.await())
     }
 

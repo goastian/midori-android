@@ -2,13 +2,14 @@ package org.midorinext.android.integration
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.midorinext.android.R
+import org.midorinext.android.newtab.NATIVE_HOME_URL
+import org.midorinext.android.newtab.isNativeHomeUrl
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.preferences.app.HomepageOpeningScreen
 import org.midorinext.android.preferences.app.HttpsOnlyLevel
@@ -60,26 +61,12 @@ class NavigationTest {
     }
 
     @Test
-    fun officialMidoriNewTabBundleIsPackaged() {
+    fun newTabUsesNativeResourcesWithoutTheRetiredWebBundle() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val manifest = context.assets.open("extensions/midori_newtab/manifest.json")
-            .bufferedReader()
-            .use { it.readText() }
-        val metadata = context.assets.open("extensions/midori_newtab/upstream.json")
-            .bufferedReader()
-            .use { it.readText() }
-        val index = context.assets.open("extensions/midori_newtab/index.html")
-            .bufferedReader()
-            .use { it.readText() }
-
-        assertTrue(manifest.contains("midoritabs@astian.org"))
-        assertFalse(manifest.contains("chrome_url_overrides"))
-        assertFalse(manifest.contains("\"commands\""))
-        assertTrue(metadata.contains("goastian/midori-tab"))
-        assertTrue(metadata.contains("\"sourceVersion\""))
-        assertTrue(metadata.contains("\"release\""))
-        assertTrue(metadata.contains("\"firefoxAsset\""))
-        assertTrue(index.contains("/index.js"))
+        assertTrue(isNativeHomeUrl(NATIVE_HOME_URL))
+        assertFalse(context.assets.list("extensions").orEmpty().contains("midori_newtab"))
+        assertTrue(context.getString(R.string.home_shortcuts).isNotBlank())
+        assertTrue(context.getString(R.string.home_recent_visits).isNotBlank())
     }
 
 

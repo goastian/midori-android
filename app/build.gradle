@@ -1,4 +1,3 @@
-import groovy.json.JsonSlurper
 import groovy.xml.XmlSlurper
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -269,150 +268,27 @@ tasks.named("check").configure {
     dependsOn(tasks.named("verifyLocalizedStrings"))
 }
 
-def midoriNewTabAssets = file("src/main/assets/extensions/midori_newtab")
-
-def isMidoriAddonMetadataValid = { metadata, manifest, addon, repository, compatibilityRevision ->
-    def sourceVersion = metadata.sourceVersion?.toString()
-    def tag = "v${sourceVersion}"
-    def assetName = "${addon}-${sourceVersion}-firefox.zip"
-    def release = metadata.release
-    def asset = release?.firefoxAsset
-
-    metadata.keySet().toSet() == [
-            "sourceRepository", "sourceVersion", "version",
-            "compatibilityRevision", "bundleSha256", "release",
-    ].toSet() &&
-            release instanceof Map &&
-            release.keySet().toSet() == ["tag", "url", "firefoxAsset"].toSet() &&
-            asset instanceof Map &&
-            asset.keySet().toSet() == ["name", "url", "sha256"].toSet() &&
-            metadata.sourceRepository == repository &&
-            sourceVersion ==~ /[0-9]+\.[0-9]+\.[0-9]+/ &&
-            metadata.compatibilityRevision == compatibilityRevision &&
-            metadata.version == "${sourceVersion}.${compatibilityRevision}" &&
-            metadata.version == manifest.version &&
-            metadata.bundleSha256 ==~ /[0-9a-f]{64}/ &&
-            release.tag == tag &&
-            release.url == "${repository}/releases/tag/${tag}" &&
-            asset.name == assetName &&
-            asset.url == "${repository}/releases/download/${tag}/${assetName}" &&
-            asset.sha256 ==~ /[0-9a-f]{64}/
-}
-
-tasks.register("verifyMidoriNewTabBundle") {
+tasks.register("verifyNativeHome") {
     group = "verification"
-    description = "Verifies the bundled goastian/midori-tab Firefox artifact."
-    inputs.dir(midoriNewTabAssets)
-
+    description = "Verifies that the native New Tab screen is packaged without the retired web bundle."
+    def homeSource = file("src/main/java/org/midorinext/android/ui/browser/home/NativeHomeScreen.kt")
+    inputs.file(homeSource)
+    inputs.dir(file("src/main/assets"))
     doLast {
-        def manifestFile = new File(midoriNewTabAssets, "manifest.json")
-        def metadataFile = new File(midoriNewTabAssets, "upstream.json")
-        def requiredFiles = [
-                manifestFile,
-                metadataFile,
-                new File(midoriNewTabAssets, "index.html"),
-                new File(midoriNewTabAssets, "index.js"),
-                new File(midoriNewTabAssets, "background.js"),
-                new File(midoriNewTabAssets, "LICENSE.upstream"),
-        ]
-        def missing = requiredFiles.findAll { !it.isFile() }
-        if (!missing.isEmpty()) {
-            throw new GradleException("Midori New Tab bundle is incomplete: ${missing*.name.join(', ')}")
+        if (!homeSource.isFile() || !homeSource.getText("UTF-8").contains("fun NativeHomeScreen(")) {
+            throw new GradleException("The native New Tab screen is missing")
         }
-
-        def manifest = new JsonSlurper().parse(manifestFile)
-        def metadata = new JsonSlurper().parse(metadataFile)
-        def expectedPermissions = [
-                "storage", "tabs", "activeTab", "browsingData", "https://api.rss2json.com/*",
-                "https://api.unsplash.com/*", "https://api.github.com/*",
-                "https://api.open-meteo.com/*", "https://geocoding-api.open-meteo.com/*",
-                "https://ipwho.is/*", "https://nominatim.openstreetmap.org/*",
-                "https://duckduckgo.com/*", "https://astiango.com/*",
-                "https://marketplace.astian.org/*", "https://open.er-api.com/*",
-                "https://ads.astian.org/*",
-        ]
-        if (manifest.manifest_version != 2 ||
-                manifest.browser_specific_settings?.gecko?.id != "midoritabs@astian.org" ||
-                manifest.containsKey("chrome_url_overrides") ||
-                manifest.containsKey("commands") ||
-                manifest.permissions != expectedPermissions) {
-            throw new GradleException("Midori New Tab has an incompatible Firefox manifest")
-        }
-        def backgroundScript = new File(midoriNewTabAssets, "background.js").getText("UTF-8")
-        def privacyWidget = fileTree(new File(midoriNewTabAssets, "assets"))
-                .matching { include("PrivacyWidget-*.js") }
-                .singleFile
-                .getText("UTF-8")
-        if (!privacyWidget.contains("data-native-protection-note") ||
-                privacyWidget.contains("get-stats-summary") ||
-                !backgroundScript.contains("ANDROID_UNSUPPORTED_ACTIONS") ||
-                !backgroundScript.contains("chrome.windows?.onFocusChanged?.addListener") ||
-                !backgroundScript.contains("chrome.commands?.onCommand?.addListener")) {
-            throw new GradleException("Midori New Tab Android compatibility contract is incomplete")
-        }
-        if (!isMidoriAddonMetadataValid(
-                metadata,
-                manifest,
-                "midori-tab",
-                "https://github.com/goastian/midori-tab",
-                7,
-        )) {
-            throw new GradleException("Midori New Tab upstream metadata does not match its bundle")
-        }
-
-        def bundlePath = midoriNewTabAssets.toPath()
-        def entries = java.nio.file.Files.walk(bundlePath)
-        try {
-            def unexpectedEntry = entries
-                    .filter { path -> path != bundlePath }
-                    .filter { path ->
-                        !java.nio.file.Files.isDirectory(path, java.nio.file.LinkOption.NOFOLLOW_LINKS) &&
-                                !java.nio.file.Files.isRegularFile(path, java.nio.file.LinkOption.NOFOLLOW_LINKS)
-                    }
-                    .findFirst()
-            if (unexpectedEntry.isPresent()) {
-                throw new GradleException("Midori New Tab contains a non-regular entry: ${unexpectedEntry.get()}")
-            }
-        } finally {
-            entries.close()
-        }
-
-        def sha256 = { byte[] content ->
-            java.security.MessageDigest.getInstance("SHA-256")
-                    .digest(content)
-                    .encodeHex()
-                    .toString()
-        }
-        def bundleRecords = fileTree(midoriNewTabAssets)
-                .matching { exclude("upstream.json") }
-                .files
-                .sort { first, second ->
-                    midoriNewTabAssets.toPath().relativize(first.toPath()).toString() <=>
-                            midoriNewTabAssets.toPath().relativize(second.toPath()).toString()
-                }
-                .collect { bundledFile ->
-                    def relativePath = midoriNewTabAssets.toPath()
-                            .relativize(bundledFile.toPath())
-                            .toString()
-                            .replace('\\', '/')
-                    "${sha256(bundledFile.bytes)}  ./${relativePath}\n"
-                }
-                .join("")
-        def actualBundleSha256 = sha256(bundleRecords.getBytes(java.nio.charset.StandardCharsets.UTF_8))
-        if (actualBundleSha256 != metadata.bundleSha256) {
-            throw new GradleException("Midori New Tab bundle checksum does not match upstream.json")
+        if (file("src/main/assets/extensions/midori_newtab").exists()) {
+            throw new GradleException("The retired Midori New Tab web bundle must not be packaged")
         }
     }
 }
 
-tasks.matching { task -> task.name == "preOriginalPlaystoreReleaseBuild" }.configureEach {
-    dependsOn("verifyMidoriNewTabBundle")
+tasks.matching { task -> task.name.startsWith("pre") && task.name.endsWith("Build") }.configureEach {
+    dependsOn("verifyNativeHome")
 }
 
 tasks.matching { task -> task.name == "testOriginalPlaystoreDebugUnitTest" }.configureEach {
-    // The asset-contract tests read the bundled extensions directly. Declare them as
-    // inputs so Gradle and CI cannot reuse a stale test result after a release sync.
-    inputs.dir(midoriNewTabAssets)
     inputs.dir(file("src/main/assets/adblock/content"))
 }
 

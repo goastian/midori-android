@@ -16,6 +16,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -28,9 +30,10 @@ import org.midorinext.android.adblock.AdBlockerAction
 import org.midorinext.android.adblock.BlockingLevel
 import org.midorinext.android.ui.preferences.BlockingLevelRow
 import org.midorinext.android.ext.*
-import org.midorinext.android.newtab.MidoriNewTabFeature
+import org.midorinext.android.MidoriApplication
 import org.midorinext.android.ui.MidoriApplicationViewModel
 import org.midorinext.android.ui.browser.home.HomePrivateBrowsing
+import org.midorinext.android.ui.browser.home.NativeHomeScreen
 import org.midorinext.android.ui.browser.menu.BrowserMenu
 import org.midorinext.android.ui.browser.mozaccompose.*
 import org.midorinext.android.ui.browser.pullToRefresh.PullToRefreshBox
@@ -68,7 +71,8 @@ fun BrowserScreen(
         viewModel.tabStripTabs.collectAsStateWithLifecycle().value
     } else emptyList()
     val private by appViewModel.isPrivate.collectAsStateWithLifecycle()
-    val newTabState by viewModel.newTabState.collectAsStateWithLifecycle()
+    val legacyNewTabOrigins by viewModel.legacyNewTabOrigins.collectAsStateWithLifecycle()
+    val nativeHome = currentUrl?.let(viewModel::isNewTabUrl) == true && !private
     val nativeBlockerState by viewModel.nativeBlockerState.collectAsStateWithLifecycle()
     val readerModeStatus by viewModel.readerModeStatus.collectAsStateWithLifecycle()
     val hasParentTab by viewModel.hasParentTab.collectAsStateWithLifecycle()
@@ -86,6 +90,7 @@ fun BrowserScreen(
     var pageSummary by remember { mutableStateOf<String?>(null) }
     var showBlockerDialog by remember { mutableStateOf(false) }
     var newTabIntentConsumed by rememberSaveable(openNewTab) { mutableStateOf(false) }
+    var nativeHomeReady by remember(selectedTabSnapshot?.id) { mutableStateOf(false) }
 
     // Navigation to the tab tray disposes the browser surface. Reassert background media after
     // that surface is released so the playing tab remains active without keeping the UI alive.
@@ -117,16 +122,15 @@ fun BrowserScreen(
         }
     }
 
-    LaunchedEffect(selectedTabSnapshot, newTabState) {
+    LaunchedEffect(selectedTabSnapshot, legacyNewTabOrigins) {
         val selectedTab = selectedTabSnapshot ?: return@LaunchedEffect
-        when {
-            selectedTab.url.isLegacyMidoriHomeUrl() -> {
-                viewModel.replaceTabWithNewTab(selectedTab.id, selectedTab.url)
-            }
-            viewModel.isNewTabLoadingUrl(selectedTab.url) &&
-                newTabState is MidoriNewTabFeature.InstallState.Ready -> {
-                viewModel.replaceTabWithNewTab(selectedTab.id, selectedTab.url)
-            }
+        viewModel.replaceTabWithNewTab(selectedTab.id, selectedTab.url)
+    }
+
+    LaunchedEffect(nativeHome) {
+        if (nativeHome) {
+            engineViewHolder = null
+            viewModel.toolbarState.updateVisibility(true)
         }
     }
 
@@ -299,10 +303,30 @@ fun BrowserScreen(
             },
             engineView = engineViewHolder,
             modifier = Modifier.fillMaxWidth().weight(1f),
-            lock = { viewModel.showFindInPage }
+            lock = { viewModel.showFindInPage || nativeHome }
         ) { modifier ->
             if (currentUrl != null) {
-                if (currentUrl == "" && private) {
+                if (nativeHome) {
+                    if (nativeHomeReady) GlobalFeatures(appViewModel, viewModel)
+                    val canGoBack by viewModel.canGoBackInPage.collectAsStateWithLifecycle()
+                    BackHandler(enabled = canGoBack && !viewModel.toolbarState.hasFocus) {
+                        viewModel.sessionUseCases.goBack()
+                    }
+                    NativeHomeScreen(
+                        tabId = selectedTabSnapshot?.id,
+                        onOpenUrl = viewModel::openHomeUrl,
+                        onSelectTab = viewModel::selectTab,
+                        onPrivateBrowsing = { viewModel.openNewMidoriTab(private = true) },
+                        onSearch = { viewModel.toolbarState.updateFocus(true) },
+                        onFirstFrameDrawn = { tabId ->
+                            nativeHomeReady = true
+                            (context.applicationContext as MidoriApplication).onNativeHomeFrameDrawn()
+                            viewModel.prepareNativeHomeSession(tabId)
+                        },
+                        navigateTo = navigateTo,
+                        modifier = modifier,
+                    )
+                } else if ((currentUrl == "" || viewModel.isNewTabUrl(currentUrl)) && private) {
                     HomePrivateBrowsing(modifier)
                 } else {
                     GlobalFeatures(appViewModel, viewModel)
@@ -565,10 +589,15 @@ fun BrowserMenuButton(
     viewModel: BrowserScreenViewModel,
     appViewModel: MidoriApplicationViewModel
 ) {
+    val focusManager = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
     Box {
-        var showMenu by remember { mutableStateOf(false) }
+        var showMenu by rememberSaveable { mutableStateOf(false) }
 
         ToolbarAction(onClick = {
+            viewModel.toolbarState.updateFocus(false)
+            focusManager.clearFocus(force = true)
+            keyboard?.hide()
             showMenu = true
         }) {
             Icon(

@@ -4,10 +4,6 @@ import fs from 'node:fs';
 
 const [addon, metadataFile] = process.argv.slice(2);
 const profiles = {
-  'midori-tab': {
-    repository: 'https://github.com/goastian/midori-tab',
-    assetName: (version) => `midori-tab-${version}-firefox.zip`,
-  },
   'midori-vpn': {
     repository: 'https://github.com/goastian/midorivpn-extension',
     assetName: (version) => `midorivpn-extension-${version}.zip`,
@@ -17,7 +13,7 @@ const profile = profiles[addon];
 
 if (!profile || !metadataFile) {
   throw new Error(
-    'Usage: verify-midori-addon-latest-release.mjs <midori-tab|midori-vpn> <upstream.json>',
+    'Usage: verify-midori-addon-latest-release.mjs <midori-vpn> <upstream.json>',
   );
 }
 

@@ -24,6 +24,7 @@ import org.midorinext.android.vpn.MidoriVpnFeature
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
@@ -74,6 +75,11 @@ class MidoriApplication : Application(), Configuration.Provider {
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val postFirstFrameWorkStarted = AtomicBoolean(false)
+    private val nativeHomeFrameDrawn = MutableStateFlow(false)
+
+    fun onNativeHomeFrameDrawn() {
+        nativeHomeFrameDrawn.value = true
+    }
     private var browserStateRestoration: Job? = null
     private val browserSessionLifecycle by lazy {
         BrowserSessionLifecycle(
@@ -186,7 +192,7 @@ class MidoriApplication : Application(), Configuration.Provider {
         }
 
         applicationScope.launch {
-            val contentDrawn = awaitInitialBrowserContent(store.get().flow())
+            val contentDrawn = awaitInitialBrowserContent(store.get().flow(), nativeHomePainted = nativeHomeFrameDrawn)
             StartupTiming.mark(if (contentDrawn) "initial_content_loaded" else "maintenance_timeout")
             val preferences = withContext(Dispatchers.IO) { appPreferencesRepository.get().flow.first() }
             store.get().dispatch(TranslationsAction.SetTranslationsEnabledAction(!preferences.translationsDisabled))

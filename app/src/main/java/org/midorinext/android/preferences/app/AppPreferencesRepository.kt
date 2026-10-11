@@ -2,6 +2,9 @@ package org.midorinext.android.preferences.app
 
 import android.util.Log
 import androidx.datastore.core.DataStore
+import org.midorinext.android.newtab.HomeSection
+import org.midorinext.android.newtab.defaultHomeShortcuts
+import org.midorinext.android.newtab.publicHomeUrl
 import kotlinx.coroutines.flow.*
 import mozilla.components.concept.engine.Engine
 import java.io.IOException
@@ -23,6 +26,61 @@ data class ClearDataPreferences(
 class AppPreferencesRepository @Inject constructor(
     private val datastore: DataStore<AppPreferences>
 ) {
+    suspend fun ensureHomeShortcuts() {
+        datastore.updateData { prefs ->
+            if (prefs.homeShortcutsInitialized) prefs else prefs.toBuilder()
+                .addAllHomeShortcuts(defaultHomeShortcuts()).setHomeShortcutsInitialized(true).build()
+        }
+    }
+
+    suspend fun saveHomeShortcut(id: String?, title: String, url: String): Boolean {
+        val normalized = publicHomeUrl(url) ?: return false
+        if (title.isBlank()) return false
+        datastore.updateData { prefs ->
+            val sites = prefs.homeShortcutsList.toMutableList()
+            val index = sites.indexOfFirst { it.id == id }
+            val shortcut = HomeShortcut.newBuilder().setId(id ?: UUID.randomUUID().toString())
+                .setTitle(title.trim()).setUrl(normalized).build()
+            if (index >= 0) sites[index] = shortcut else sites.add(shortcut)
+            prefs.toBuilder().clearHomeShortcuts().addAllHomeShortcuts(sites)
+                .setHomeShortcutsInitialized(true).build()
+        }
+        return true
+    }
+
+    suspend fun deleteHomeShortcut(id: String) {
+        datastore.updateData { prefs -> prefs.toBuilder().clearHomeShortcuts()
+            .addAllHomeShortcuts(prefs.homeShortcutsList.filterNot { it.id == id }).build() }
+    }
+
+    suspend fun moveHomeShortcut(id: String, offset: Int) {
+        datastore.updateData { prefs ->
+            val sites = prefs.homeShortcutsList.toMutableList()
+            val index = sites.indexOfFirst { it.id == id }
+            if (index < 0 || sites.isEmpty()) prefs else {
+                val target = (index + offset).coerceIn(0, sites.lastIndex)
+                sites.add(target, sites.removeAt(index))
+                prefs.toBuilder().clearHomeShortcuts().addAllHomeShortcuts(sites).build()
+            }
+        }
+    }
+
+    suspend fun updateHomeSection(section: HomeSection, visible: Boolean) {
+        datastore.updateData { prefs -> prefs.toBuilder().apply {
+            when (section) {
+                HomeSection.SHORTCUTS -> setHideHomeShortcuts(!visible)
+                HomeSection.CONTINUE -> setHideHomeContinue(!visible)
+                HomeSection.RECENT_VISITS -> setHideHomeRecentVisits(!visible)
+                HomeSection.STORIES -> setHideHomeStories(!visible)
+                HomeSection.PRIVACY -> setHideHomePrivacy(!visible)
+            }
+        }.build() }
+    }
+
+    suspend fun updateOpenBlankNewTab(enabled: Boolean) {
+        datastore.updateData { it.toBuilder().setOpenBlankNewTab(enabled).build() }
+    }
+
     suspend fun updateSearchEngine(engine: SearchEnginePreference) {
         datastore.updateData { it.toBuilder().setSearchEngine(engine).clearCustomDefaultSearchEngineId().build() }
     }

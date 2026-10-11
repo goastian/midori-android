@@ -250,12 +250,34 @@ internal fun searchEngineName(engine: SearchEnginePreference): String =
     stringResource(searchEngineNameResource(engine))
 
 @Composable
-fun HomepageSettingsScreen() {
+fun HomepageSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
+    val preferences by viewModel.appPreferences.collectAsStateWithLifecycle()
     PreferenceScreenScaffold(title = stringResource(R.string.settings_homepage_title)) {
         PreferenceGroupLabel(label = R.string.settings_homepage_sections)
-        PreferenceRow(
-            label = R.string.settings_homepage_midori_tab,
-            description = stringResource(R.string.settings_homepage_midori_tab_description),
+        PreferenceToggle(
+            label = R.string.home_shortcuts, value = !preferences.hideHomeShortcuts,
+            onValueChange = { viewModel.updateHomeSection(org.midorinext.android.newtab.HomeSection.SHORTCUTS, it) },
+        )
+        PreferenceToggle(
+            label = R.string.home_continue, value = !preferences.hideHomeContinue,
+            onValueChange = { viewModel.updateHomeSection(org.midorinext.android.newtab.HomeSection.CONTINUE, it) },
+        )
+        PreferenceToggle(
+            label = R.string.home_recent_visits, value = !preferences.hideHomeRecentVisits,
+            onValueChange = { viewModel.updateHomeSection(org.midorinext.android.newtab.HomeSection.RECENT_VISITS, it) },
+        )
+        PreferenceToggle(
+            label = R.string.native_blocker_title, value = !preferences.hideHomePrivacy,
+            onValueChange = { viewModel.updateHomeSection(org.midorinext.android.newtab.HomeSection.PRIVACY, it) },
+        )
+        PreferenceToggle(
+            label = R.string.home_stories, value = !preferences.hideHomeStories,
+            description = R.string.home_stories_source,
+            onValueChange = { viewModel.updateHomeSection(org.midorinext.android.newtab.HomeSection.STORIES, it) },
+        )
+        PreferenceToggle(
+            label = R.string.home_blank_tab, value = preferences.openBlankNewTab,
+            onValueChange = viewModel::updateOpenBlankNewTab,
         )
     }
 }

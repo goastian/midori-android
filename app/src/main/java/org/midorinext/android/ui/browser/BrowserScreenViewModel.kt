@@ -12,7 +12,7 @@ import org.midorinext.android.mozac.pdf.PdfSaveEvents
 import org.midorinext.android.mozac.media.BackgroundPlaybackFeature
 import org.midorinext.android.pwa.WebAppRepository
 import org.midorinext.android.vpn.MidoriVpnFeature
-import org.midorinext.android.ext.isLegacyMidoriHomeUrl
+import org.midorinext.android.newtab.NATIVE_HOME_URL
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.storage.bookmarks.BookmarksRepository
@@ -28,6 +28,8 @@ import mozilla.components.browser.engine.gecko.permission.GeckoSitePermissionsSt
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.action.TranslationsAction
+import mozilla.components.browser.state.action.EngineAction
+import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.state.WebExtensionState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
@@ -94,6 +96,7 @@ class BrowserScreenViewModel @Inject constructor(
     data class SelectedTabSnapshot(
         val id: String,
         val url: String,
+        val engineReady: Boolean,
     )
 
     data class ReaderModeStatus(
@@ -176,7 +179,8 @@ class BrowserScreenViewModel @Inject constructor(
     val selectedTabSnapshot = store.flow()
         .map { state ->
             state.selectedTab?.let { tab ->
-                SelectedTabSnapshot(id = tab.id, url = tab.content.url)
+                SelectedTabSnapshot(tab.id, tab.content.url,
+                    tab.engineState.engineSession != null && !tab.engineState.initializing && !tab.content.loading)
             }
         }
         .distinctUntilChanged()
@@ -184,7 +188,8 @@ class BrowserScreenViewModel @Inject constructor(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
             initialValue = store.state.selectedTab?.let {
-                SelectedTabSnapshot(it.id, it.content.url)
+                SelectedTabSnapshot(it.id, it.content.url,
+                    it.engineState.engineSession != null && !it.engineState.initializing && !it.content.loading)
             },
         )
 
@@ -222,8 +227,7 @@ class BrowserScreenViewModel @Inject constructor(
             store.flow().collect { state ->
                 val replaceableTabIds = state.tabs
                     .filter { tab ->
-                        tab.content.url.isLegacyMidoriHomeUrl() ||
-                            MidoriUseCases.isNewTabLoadingUrl(tab.content.url)
+                        MidoriUseCases.isLegacyNewTabUrl(tab.content.url)
                     }
                     .mapTo(mutableSetOf()) { tab -> tab.id }
                 tabsWithUserNavigationInFlight.retainAll(replaceableTabIds)
@@ -247,9 +251,20 @@ class BrowserScreenViewModel @Inject constructor(
         }
     }
 
-    val newTabState = MidoriUseCases.newTabState
+    val legacyNewTabOrigins = MidoriUseCases.legacyNewTabOrigins
 
-    val newTabPageUrl = MidoriUseCases.newTabPageUrl
+    fun prepareNativeHomeSession(tabId: String?) {
+        val tab = store.state.tabs.firstOrNull { it.id == tabId } ?: return
+        if (MidoriUseCases.isNewTabUrl(tab.content.url) && tab.engineState.engineSession == null) {
+            store.dispatch(EngineAction.CreateEngineSessionAction(tab.id))
+        }
+    }
+
+    fun openHomeUrl(url: String) {
+        markSelectedNewTabAsUserNavigation()
+        toolbarState.updateFocus(false)
+        sessionUseCases.loadUrl(url)
+    }
 
     fun keepPlayingMediaActive() {
         backgroundPlaybackFeature.reassertPlayingSession()
@@ -670,20 +685,21 @@ class BrowserScreenViewModel @Inject constructor(
 
     fun replaceTabWithNewTab(tabId: String, expectedUrl: String) {
         if (tabId in tabsWithUserNavigationInFlight) return
-        val actualUrl = store.state.tabs
-            .firstOrNull { tab -> tab.id == tabId }
-            ?.content
-            ?.url
-        if (actualUrl != expectedUrl) return
-        if (!actualUrl.isLegacyMidoriHomeUrl() && !MidoriUseCases.isNewTabLoadingUrl(actualUrl)) return
+        val tab = store.state.tabs.firstOrNull { it.id == tabId } ?: return
+        if (tab.content.url != expectedUrl || !MidoriUseCases.isLegacyNewTabUrl(tab.content.url)) return
+        if (tab.engineState.initializing || tab.content.loading) return
+        if (tab.engineState.engineSession == null && tab.engineState.engineSessionState == null) {
+            store.dispatch(ContentAction.UpdateUrlAction(tabId, NATIVE_HOME_URL))
+            return
+        }
+        if (tab.engineState.engineSession == null) return
 
         MidoriUseCases.loadNewTabPage(tabId, replaceCurrent = true)
     }
 
     private fun markSelectedNewTabAsUserNavigation(): String? {
         val tab = store.state.selectedTab ?: return null
-        val isReplaceable = tab.content.url.isLegacyMidoriHomeUrl() ||
-            MidoriUseCases.isNewTabLoadingUrl(tab.content.url)
+        val isReplaceable = MidoriUseCases.isLegacyNewTabUrl(tab.content.url)
         if (!isReplaceable) return null
 
         tabsWithUserNavigationInFlight += tab.id

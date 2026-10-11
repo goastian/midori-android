@@ -62,16 +62,17 @@ class NativeFilterSources @Inject constructor(
             enabledSources(settings.current, includeAds = true).forEach { (key, url, _) ->
                 if (cacheFile(url).exists()) loadCache(key, url)
             }
-            ready.complete(Unit)
             settings.state.collectLatest { config ->
-                if (!config.hasBlockingSites()) return@collectLatest
-                enabledSources(config).forEach { (key, url, updatedAt) ->
-                    if (key !in loadedCacheKeys && cacheFile(url).exists()) loadCache(key, url)
-                    if (!cacheFile(url).exists() || System.currentTimeMillis() - updatedAt >= UPDATE_INTERVAL_MS) {
-                        refreshStaleAsync(key)
+                if (config.hasBlockingSites()) {
+                    enabledSources(config).forEach { (key, url, updatedAt) ->
+                        if (key !in loadedCacheKeys && cacheFile(url).exists()) loadCache(key, url)
+                        if (!cacheFile(url).exists() || System.currentTimeMillis() - updatedAt >= UPDATE_INTERVAL_MS) {
+                            refreshStaleAsync(key)
+                        }
                     }
+                    mutableRevision.update { it + 1 }
                 }
-                mutableRevision.update { it + 1 }
+                ready.complete(Unit)
             }
         }
     }

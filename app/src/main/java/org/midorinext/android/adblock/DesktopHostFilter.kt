@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import mozilla.components.concept.engine.EngineSession
+import mozilla.components.browser.state.store.BrowserStore
 import java.net.URI
 import java.util.Locale
 import java.util.WeakHashMap
@@ -87,6 +88,8 @@ internal class DesktopHostRules(blocked: String, allowed: String) {
 class DesktopHostFilter @Inject constructor(
     val settings: AdBlockSettings,
     private val sources: NativeFilterSources,
+    private val statistics: dagger.Lazy<BlockingStatistics>,
+    private val store: dagger.Lazy<BrowserStore>,
 ) {
     private val counts = WeakHashMap<EngineSession, Int>()
     private val networkCounts = WeakHashMap<EngineSession, Int>()
@@ -135,6 +138,10 @@ class DesktopHostFilter @Inject constructor(
         synchronized(counts) {
             counts[session] = (counts[session] ?: 0) + 1
             countsRevision.update { it + 1 }
+        }
+        val state = store.get().state
+        if ((state.tabs + state.customTabs).any { it.engineState.engineSession === session && !it.content.private }) {
+            statistics.get().recordBlocked()
         }
         return true
     }

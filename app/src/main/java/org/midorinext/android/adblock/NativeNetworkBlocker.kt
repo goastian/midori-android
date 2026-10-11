@@ -17,6 +17,7 @@ class NativeNetworkBlocker @Inject constructor(
     private val sources: NativeFilterSources,
 ) {
     private val suffixes = PublicSuffixList(context, Dispatchers.Default)
+    internal val ready = suffixes.prefetch()
     private val domains = LruCache<String, String>(512)
 
     internal suspend fun blocks(message: JSONObject): Boolean = withTimeoutOrNull(1_200L) {

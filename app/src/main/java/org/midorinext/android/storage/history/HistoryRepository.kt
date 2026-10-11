@@ -1,6 +1,7 @@
 package org.midorinext.android.storage.history
 
 import org.midorinext.android.ext.isMidoriUrl
+import org.midorinext.android.newtab.isNativeHomeUrl
 import org.midorinext.android.suggest.Suggestion
 import org.midorinext.android.suggest.SuggestionProvider
 import kotlinx.coroutines.Dispatchers
@@ -26,9 +27,10 @@ class HistoryRepository @Inject constructor(
     private val dao = db.historyDao()
 
     val hasHistoryFlow = dao.hasHistoryFlow().flowOn(Dispatchers.IO)
+    val recentPagesFlow = dao.recentPagesFlow(12).flowOn(Dispatchers.IO)
 
     override fun canAddUri(uri: String): Boolean =
-        !uri.isMidoriUrl() && !uri.startsWith("moz-extension://") && !uri.startsWith("about:blank")
+        !isNativeHomeUrl(uri) && !uri.isMidoriUrl() && !uri.startsWith("moz-extension://") && !uri.startsWith("about:blank")
 
     override suspend fun recordVisit(uri: String, visit: PageVisit) = withContext(Dispatchers.IO) {
         dao.insertIfNeeded(Page(uri))
