@@ -21,6 +21,8 @@ import org.midorinext.android.storage.autofill.AutofillPreferenceState
 import org.midorinext.android.storage.history.HistoryRepository
 import org.midorinext.android.usecases.MidoriUseCases
 import org.midorinext.android.vpn.MidoriVpnFeature
+import org.midorinext.android.newtab.HomeFaviconRepository
+import mozilla.components.browser.icons.BrowserIcons
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
@@ -72,6 +74,8 @@ class MidoriApplication : Application(), Configuration.Provider {
     @Inject lateinit var autofillPreferenceState: dagger.Lazy<AutofillPreferenceState>
     @Inject lateinit var historyRepository: dagger.Lazy<HistoryRepository>
     @Inject lateinit var midoriVpnFeature: dagger.Lazy<MidoriVpnFeature>
+    @Inject lateinit var browserIcons: dagger.Lazy<BrowserIcons>
+    @Inject lateinit var homeFavicons: dagger.Lazy<HomeFaviconRepository>
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val postFirstFrameWorkStarted = AtomicBoolean(false)
@@ -229,6 +233,8 @@ class MidoriApplication : Application(), Configuration.Provider {
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
         runOnlyInMainProcess {
+            browserIcons.get().onTrimMemory(level)
+            homeFavicons.get().onTrimMemory(level)
             store.get().dispatch(SystemAction.LowMemoryAction(level))
         }
     }

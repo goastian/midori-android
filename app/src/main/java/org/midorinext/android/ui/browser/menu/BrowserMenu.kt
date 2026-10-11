@@ -14,6 +14,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -47,6 +49,13 @@ fun BrowserMenu(
         val showQuitApp by applicationViewModel.showQuitApp.collectAsStateWithLifecycle()
         val extensions by viewModel.installedMenuExtensions.collectAsStateWithLifecycle()
         val context = LocalContext.current
+        val focusManager = LocalFocusManager.current
+        val keyboard = LocalSoftwareKeyboardController.current
+        LaunchedEffect(Unit) {
+            viewModel.toolbarState.updateFocus(false)
+            focusManager.clearFocus()
+            keyboard?.hide()
+        }
         var showMoreOptions by rememberSaveable { mutableStateOf(false) }
         val roleManager = remember(context) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) context.getSystemService(RoleManager::class.java) else null

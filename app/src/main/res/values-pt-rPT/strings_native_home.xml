@@ -12,7 +12,8 @@
     <string name="home_all_stories">Todas as notícias</string>
     <string name="home_stories_loading">A carregar notícias…</string>
     <string name="home_stories_unavailable">Notícias indisponíveis. Tente novamente com ligação.</string>
-    <string name="home_private">Abrir navegação privada</string>
+    <string name="home_private">Mudar para navegação privada</string>
+    <string name="home_normal">Mudar para navegação normal</string>
     <string name="home_shortcut_title">Nome</string>
     <string name="home_shortcut_url">Endereço do site</string>
     <string name="home_shortcut_invalid">Introduza um nome e um endereço HTTP ou HTTPS válido.</string>

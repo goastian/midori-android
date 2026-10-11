@@ -31,6 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 import org.midorinext.android.R
@@ -49,7 +52,7 @@ fun NativeHomeScreen(
     tabId: String?,
     onOpenUrl: (String) -> Unit,
     onSelectTab: (String) -> Unit,
-    onPrivateBrowsing: () -> Unit,
+    onSwitchBrowsingMode: () -> Unit,
     onSearch: () -> Unit,
     onFirstFrameDrawn: (String?) -> Unit,
     navigateTo: (NavDestination) -> Unit,
@@ -58,9 +61,6 @@ fun NativeHomeScreen(
 ) {
     val preferences by viewModel.preferences.collectAsStateWithLifecycle()
     var dataReady by remember(tabId) { mutableStateOf(false) }
-    DisposableEffect(viewModel) {
-        onDispose { viewModel.stopStories() }
-    }
     LaunchedEffect(tabId) {
         withFrameNanos { }
         withFrameNanos { }
@@ -78,12 +78,21 @@ fun NativeHomeScreen(
         viewModel.blockedCount.collectAsStateWithLifecycle().value
     } else 0L
     val language = LocalConfiguration.current.locales[0].language
-    LaunchedEffect(dataReady, preferences.hideHomeStories, language) {
-        if (dataReady && !preferences.hideHomeStories) viewModel.loadStories(language)
-        else viewModel.stopStories()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(dataReady, preferences.hideHomeStories, language, lifecycleOwner) {
+        if (dataReady && !preferences.hideHomeStories) {
+            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                try {
+                    viewModel.loadStories(language).join()
+                    kotlinx.coroutines.awaitCancellation()
+                } finally {
+                    viewModel.stopStories()
+                }
+            }
+        }
     }
     val stories by viewModel.stories.collectAsStateWithLifecycle()
-    val shortcuts = if (preferences.homeShortcutsInitialized) preferences.homeShortcutsList else defaultHomeShortcuts()
+    val shortcuts = if (preferences.homeShortcutsInitialized) preferences.homeShortcutsList else remember { defaultHomeShortcuts() }
     val scope = rememberCoroutineScope()
     var shortcutEditor by remember { mutableStateOf<HomeShortcut?>(null) }
     var showShortcutEditor by rememberSaveable { mutableStateOf(false) }
@@ -104,17 +113,7 @@ fun NativeHomeScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item(key = "header") {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                val logo = painterResource(R.drawable.logomidori)
-                Image(logo, "Midori", Modifier.height(28.dp)
-                    .aspectRatio(logo.intrinsicSize.width / logo.intrinsicSize.height)
-                    .testTag("native_home_brand"))
-                Spacer(Modifier.weight(1f))
-                IconButton(onClick = onPrivateBrowsing, modifier = Modifier.testTag("native_home_private")) {
-                    Icon(painterResource(R.drawable.icons_privacy_mask), stringResource(R.string.home_private),
-                        modifier = Modifier.size(22.dp))
-                }
-            }
+            NativeHomeHeader(private = false, onSwitchBrowsingMode = onSwitchBrowsingMode)
         }
         if (!preferences.hideHomeShortcuts) {
             item(key = "shortcuts") {
@@ -356,7 +355,9 @@ private fun HomeShortcutTile(title: String, url: String?, color: Color, modifier
 
 @Composable
 private fun HomeFavicon(url: String?, viewModel: NativeHomeViewModel, enabled: Boolean, modifier: Modifier = Modifier) {
-    val icon = if (enabled && url != null) viewModel.favicon(url).collectAsStateWithLifecycle().value else null
+    val icon = if (enabled && url != null) {
+        remember(viewModel, url) { viewModel.favicon(url) }.collectAsStateWithLifecycle(initialValue = null).value
+    } else null
     if (icon != null) {
         Image(icon.bitmap.asImageBitmap(), null, modifier.testTag("home_favicon:${homeIconOrigin(url!!)}"))
     } else if (url == null) {

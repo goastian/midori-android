@@ -3,13 +3,17 @@ package org.midorinext.android.newtab
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import mozilla.components.concept.fetch.Client
+import mozilla.components.concept.fetch.Request
+import mozilla.components.concept.fetch.isSuccess
 import org.xml.sax.InputSource
 import java.io.File
-import java.io.ByteArrayOutputStream
 import java.io.StringReader
-import java.net.HttpURLConnection
-import java.net.URL
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.xml.parsers.DocumentBuilderFactory
@@ -36,50 +40,64 @@ internal fun parseHomeStories(xml: String, publisher: String): List<HomeStory> {
 }
 
 @Singleton
-class HomeStoriesRepository @Inject constructor(@ApplicationContext private val context: Context) {
+class HomeStoriesRepository @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val clientProvider: dagger.Lazy<Client>,
+) {
+    private val refreshLock = Mutex()
+
     suspend fun cached(language: String): List<HomeStory> = withContext(Dispatchers.IO) {
         val cache = cache(language)
-        if (!cache.isFile) emptyList() else runCatching {
+        if (!cache.isFile || cache.length() > MAX_FEED_SIZE) emptyList() else runCatching {
             parseHomeStories(cache.readText(), publisher(language))
         }.getOrDefault(emptyList())
     }
 
     suspend fun refresh(language: String, force: Boolean = false): List<HomeStory> = withContext(Dispatchers.IO) {
-        val cache = cache(language)
-        if (!force && cache.isFile && System.currentTimeMillis() - cache.lastModified() < 3_600_000) {
-            val stories = parseHomeStories(cache.readText(), publisher(language))
-            if (stories.isNotEmpty()) return@withContext stories
-        }
-        val feed = if (language == "es") "https://feeds.bbci.co.uk/mundo/rss.xml"
-            else "https://feeds.bbci.co.uk/news/world/rss.xml"
-        val connection = URL(feed).openConnection() as HttpURLConnection
-        try {
-            connection.connectTimeout = 5_000
-            connection.readTimeout = 5_000
-            check(connection.responseCode == HttpURLConnection.HTTP_OK)
-            val bytes = connection.inputStream.use { input ->
-                val output = ByteArrayOutputStream()
-                val buffer = ByteArray(8_192)
-                while (true) {
-                    val count = input.read(buffer)
-                    if (count == -1) break
-                    check(output.size() + count <= 1_048_576)
-                    output.write(buffer, 0, count)
-                }
-                output.toByteArray()
+        refreshLock.withLock {
+            val cache = cache(language)
+            if (!force && cache.isFile && cache.length() <= MAX_FEED_SIZE && System.currentTimeMillis() - cache.lastModified() < 3_600_000) {
+                val stories = runCatching { parseHomeStories(cache.readText(), publisher(language)) }.getOrDefault(emptyList())
+                if (stories.isNotEmpty()) return@withLock stories
             }
-            val xml = bytes.toString(Charsets.UTF_8)
+            val feed = if (language == "es") "https://feeds.bbci.co.uk/mundo/rss.xml"
+                else "https://feeds.bbci.co.uk/news/world/rss.xml"
+            val request = Request(feed, connectTimeout = 5L to TimeUnit.SECONDS, readTimeout = 5L to TimeUnit.SECONDS,
+                cookiePolicy = Request.CookiePolicy.OMIT)
+            val xml = clientProvider.get().fetch(request).use { response ->
+                check(response.isSuccess)
+                response.body.useBufferedReader { reader ->
+                    val text = StringBuilder()
+                    val buffer = CharArray(8_192)
+                    while (true) {
+                        ensureActive()
+                        val count = reader.read(buffer)
+                        if (count == -1) break
+                        check(text.length + count <= MAX_FEED_SIZE)
+                        text.append(buffer, 0, count)
+                    }
+                    text.toString()
+                }
+            }
+            ensureActive()
             val stories = parseHomeStories(xml, publisher(language))
             check(stories.isNotEmpty())
             val pending = File.createTempFile("home-stories-", ".pending", context.cacheDir)
-            pending.writeText(xml)
-            check(pending.renameTo(cache))
-            stories
-        } finally {
-            connection.disconnect()
+            try {
+                pending.writeText(xml)
+                ensureActive()
+                check(pending.renameTo(cache))
+                stories
+            } finally {
+                pending.delete()
+            }
         }
     }
 
     private fun cache(language: String) = File(context.cacheDir, "home-stories-${if (language == "es") "es" else "en"}.xml")
     private fun publisher(language: String) = if (language == "es") "BBC Mundo" else "BBC News"
+
+    private companion object {
+        const val MAX_FEED_SIZE = 1_048_576L
+    }
 }

@@ -34,6 +34,8 @@ class BrowserMenuSheetTest {
                 }
             }
         }
+        compose.onNodeWithTag("browser_menu_sheet").performTouchInput { swipeUp(durationMillis = 300) }
+        compose.waitForIdle()
         compose.onNodeWithTag("browser_menu_vpn").assertIsNotEnabled().performClick()
         assertFalse(vpnClicked)
         compose.onNodeWithTag("browser_menu_passwords").performScrollTo().assertIsDisplayed().performClick()

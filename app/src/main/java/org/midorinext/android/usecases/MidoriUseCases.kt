@@ -6,8 +6,10 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import org.midorinext.android.BuildConfig
 import org.midorinext.android.newtab.MidoriNewTabFeature
+import org.midorinext.android.newtab.newTabUrl
 import org.midorinext.android.preferences.app.AppPreferencesRepository
-import org.midorinext.android.preferences.app.SearchEnginePreference
+import org.midorinext.android.preferences.app.AppPreferencesSerializer
+import org.midorinext.android.preferences.app.AppPreferences
 import org.midorinext.android.storage.MidoriClientProvider
 import dagger.Lazy
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -16,8 +18,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import mozilla.components.browser.state.store.BrowserStore
+import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.tabs.TabsUseCases
@@ -31,13 +36,14 @@ class MidoriUseCases @Inject constructor(
     @ApplicationContext val context: Context,
     private val clientProvider: MidoriClientProvider,
     private val newTabFeature: MidoriNewTabFeature,
-    appPreferencesRepository: AppPreferencesRepository,
+    private val appPreferencesRepository: AppPreferencesRepository,
 ) {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val searchPreferences = appPreferencesRepository.flow
         .stateIn(
-            CoroutineScope(SupervisorJob() + Dispatchers.Default),
+            scope,
             SharingStarted.Eagerly,
-            org.midorinext.android.preferences.app.AppPreferences.getDefaultInstance(),
+            AppPreferencesSerializer.defaultValue,
         )
 
     private fun searchUrl(
@@ -46,9 +52,10 @@ class MidoriUseCases @Inject constructor(
         widget: Boolean = false,
         private: Boolean = false,
         engineOverride: String? = null,
+        preferences: AppPreferences = searchPreferences.value,
     ): String = SearchEngines.url(
-        searchPreferences.value,
-        engineOverride ?: SearchEngines.selectedId(searchPreferences.value, private),
+        preferences,
+        engineOverride ?: SearchEngines.selectedId(preferences, private),
         search,
     ) {
         midoriUrl(search = search, category = category, widget = widget)
@@ -56,6 +63,7 @@ class MidoriUseCases @Inject constructor(
     // TODO Use constructor injection for those. lazy init the usecase itself if needed
     @Inject lateinit var sessionUseCases: Lazy<SessionUseCases>
     @Inject lateinit var tabsUseCases: Lazy<TabsUseCases>
+    @Inject lateinit var store: Lazy<BrowserStore>
 
     // TODO find a different way of handling fs=1 one time parameter
     val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
@@ -93,16 +101,26 @@ class MidoriUseCases @Inject constructor(
         private val tabsUseCases: TabsUseCases,
     ) {
         @SuppressLint("ApplySharedPref")
-        operator fun invoke(search: String? = null, private: Boolean = false, selectIfExists: Boolean = false) {
+        operator fun invoke(
+            search: String? = null,
+            private: Boolean = false,
+            selectIfExists: Boolean = false,
+            onlyIfEmpty: Boolean = false,
+        ) = scope.launch {
+            val preferences = appPreferencesRepository.flow.first()
+            if (onlyIfEmpty && store.get().state.tabs.isNotEmpty()) return@launch
             val usesLocalNewTab = search == null
             val url = if (usesLocalNewTab) {
-                if (private) "" else if (searchPreferences.value.openBlankNewTab) "about:blank"
-                else newTabFeature.currentPageUrl()
+                newTabUrl(preferences, private)
             } else {
-                searchUrl(search, private = private)
+                searchUrl(search, private = private, preferences = preferences)
             }
-            if (selectIfExists) {
-                tabsUseCases.selectOrAddTab.invoke(url, private = private)
+            val existing = if (selectIfExists) store.get().state.tabs.asSequence()
+                .filter { it.content.url == url && it.content.private == private }
+                .maxByOrNull { maxOf(it.lastAccess, it.createdAt) }
+            else null
+            if (existing != null) {
+                tabsUseCases.selectTab(existing.id)
             } else {
                 tabsUseCases.addTab.invoke(
                     url,
@@ -117,8 +135,22 @@ class MidoriUseCases @Inject constructor(
     inner class LoadNewTabPageUseCase internal constructor(
         private val sessionUseCases: SessionUseCases,
     ) {
-        operator fun invoke(tabId: String, replaceCurrent: Boolean = false) {
-            val url = newTabFeature.currentOrLoadingUrl()
+        operator fun invoke(
+            tabId: String,
+            replaceCurrent: Boolean = false,
+            expectedUrl: String? = null,
+            canReplace: () -> Boolean = { true },
+        ) = scope.launch {
+            val preferences = appPreferencesRepository.flow.first()
+            if (replaceCurrent && !canReplace()) return@launch
+            val tab = store.get().state.tabs.firstOrNull { it.id == tabId } ?: return@launch
+            if (expectedUrl != null && tab.content.url != expectedUrl) return@launch
+            val url = newTabUrl(preferences, tab.content.private)
+            if (tab.content.url == url && !replaceCurrent) return@launch
+            if (replaceCurrent && tab.engineState.engineSession == null && tab.engineState.engineSessionState == null) {
+                store.get().dispatch(ContentAction.UpdateUrlAction(tabId, url))
+                return@launch
+            }
             sessionUseCases.loadUrl(
                 url = url,
                 flags = loadFlags(replaceCurrent),
@@ -149,20 +181,20 @@ class MidoriUseCases @Inject constructor(
             private: Boolean = false,
             engineOverride: String? = null,
         ) {
-            sessionUseCases.loadUrl(searchUrl(search, category, private = private, engineOverride = engineOverride))
+            val tabId = store.get().state.selectedTabId ?: return
+            scope.launch {
+                val preferences = appPreferencesRepository.flow.first()
+                if (store.get().state.tabs.none { it.id == tabId }) return@launch
+                sessionUseCases.loadUrl(
+                    searchUrl(search, category, private = private, engineOverride = engineOverride, preferences = preferences),
+                    sessionId = tabId,
+                )
+            }
         }
     }
 
-    class OpenPrivatePageUseCase internal constructor(
-        private val tabsUseCases: TabsUseCases
-    ) {
-        operator fun invoke() {
-            tabsUseCases.addTab(
-                "",
-                selectTab = true,
-                private = true
-            )
-        }
+    inner class OpenPrivatePageUseCase internal constructor() {
+        operator fun invoke() = openMidoriPage(private = true)
     }
 
     class OpenTestPageUseCase internal constructor(
@@ -200,7 +232,7 @@ class MidoriUseCases @Inject constructor(
         LoadSERPPageUseCase(sessionUseCases.get())
     }
     val openPrivatePage: OpenPrivatePageUseCase by lazy {
-        OpenPrivatePageUseCase(tabsUseCases.get())
+        OpenPrivatePageUseCase()
     }
     val openTestPageUseCase: OpenTestPageUseCase by lazy {
         OpenTestPageUseCase(context, tabsUseCases.get(), sessionUseCases.get())

@@ -12,7 +12,8 @@
     <string name="home_all_stories">Все новости</string>
     <string name="home_stories_loading">Загрузка новостей…</string>
     <string name="home_stories_unavailable">Новости недоступны. Повторите при подключении.</string>
-    <string name="home_private">Открыть приватный просмотр</string>
+    <string name="home_private">Переключиться на приватный просмотр</string>
+    <string name="home_normal">Переключиться на обычный просмотр</string>
     <string name="home_shortcut_title">Название</string>
     <string name="home_shortcut_url">Адрес сайта</string>
     <string name="home_shortcut_invalid">Введите название и корректный адрес HTTP или HTTPS.</string>

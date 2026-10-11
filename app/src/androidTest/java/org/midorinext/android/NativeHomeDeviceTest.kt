@@ -14,6 +14,7 @@ import java.io.File
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import mozilla.components.browser.state.action.TabListAction
+import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.concept.storage.PageObservation
 import mozilla.components.concept.storage.PageVisit
 import mozilla.components.concept.storage.VisitType
@@ -26,6 +27,7 @@ import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.withTimeout
 import org.midorinext.android.ui.browser.home.NativeHomeViewModel
 import org.midorinext.android.ui.browser.BrowserScreenViewModel
+import org.midorinext.android.ui.MidoriApplicationViewModel
 import mozilla.components.concept.engine.EngineSession
 import java.net.InetAddress
 import java.net.ServerSocket
@@ -170,15 +172,87 @@ class NativeHomeDeviceTest {
     }
 
     @Test
-    fun privateHomeDoesNotComposeNormalHistoryOrShortcuts() {
-        compose.onNodeWithTag("native_home_private").performClick()
+    fun newTabAndHomeActionsRespectBlankPreferenceAndPrivateSessions(): Unit = runBlocking {
+        lateinit var browser: BrowserScreenViewModel
+        scenario.onActivity { browser = ViewModelProvider(it)[BrowserScreenViewModel::class.java] }
+        val repository = app.appPreferencesRepository.get()
+        repository.updateOpenBlankNewTab(true)
+        app.MidoriUseCases.get().openMidoriPage().join()
         compose.waitUntil(20_000) { app.store.get().state.selectedTabId != homeId }
-        fixtures += app.store.get().state.selectedTabId!!
+        val blankId = app.store.get().state.selectedTabId!!
+        fixtures += blankId
+        compose.onNodeWithTag("native_blank_home").assertIsDisplayed()
+        assertNoWebSurface()
+        assertNull(app.store.get().state.tabs.first { it.id == blankId }.engineState.engineSession)
+        scenario.onActivity { browser.goToHomepage() }
+        compose.waitForIdle()
+        assertEquals("about:blank", app.store.get().state.tabs.first { it.id == blankId }.content.url)
+        assertNull(app.store.get().state.tabs.first { it.id == blankId }.engineState.engineSession)
+
+        app.MidoriUseCases.get().openPrivatePage().join()
+        compose.waitUntil(20_000) { app.store.get().state.selectedTabId != blankId }
+        val privateId = app.store.get().state.selectedTabId!!
+        fixtures += privateId
+        compose.waitUntil(20_000) { app.store.get().state.tabs.first { it.id == privateId }.let {
+            it.content.title == "Midori" && !it.content.loading
+        } }
+        instrumentation.runOnMainSync {
+            app.sessionUseCases.get().loadUrl("data:text/html,<title>Private home policy fixture</title><h1>Ready</h1>", sessionId = privateId)
+        }
+        compose.waitUntil(20_000) { app.store.get().state.tabs.first { it.id == privateId }.content.title == "Private home policy fixture" }
+        scenario.onActivity { browser.goToHomepage() }
+        compose.waitUntil(20_000) { app.store.get().state.tabs.first { it.id == privateId }.content.url == NATIVE_HOME_URL }
+        assertTrue(app.store.get().state.tabs.first { it.id == privateId }.content.private)
         compose.onNodeWithTag("native_home").assertDoesNotExist()
         compose.onNodeWithText("Native home history fixture").assertDoesNotExist()
-        compose.onNodeWithText("Google").assertDoesNotExist()
-        assertTrue(app.store.get().state.tabs.first { it.id == app.store.get().state.selectedTabId }.content.private)
         assertNoWebSurface()
+
+        repository.updateOpenBlankNewTab(false)
+        instrumentation.runOnMainSync { app.tabsUseCases.get().selectTab(blankId) }
+        compose.waitUntil(20_000) { app.store.get().state.selectedTabId == blankId }
+        scenario.onActivity { browser.goToHomepage() }
+        compose.waitUntil(20_000) { app.store.get().state.tabs.first { it.id == blankId }.content.url == NATIVE_HOME_URL }
+        compose.onNodeWithTag("native_home").assertIsDisplayed()
+        assertFalse(app.store.get().state.tabs.first { it.id == blankId }.content.private)
+        assertNoWebSurface()
+    }
+
+    @Test
+    fun homeIconSwitchesBothModesWithoutDuplicatingTabsOrShowingNormalData(): Unit = runBlocking {
+        lateinit var applicationViewModel: MidoriApplicationViewModel
+        scenario.onActivity { applicationViewModel = ViewModelProvider(it)[MidoriApplicationViewModel::class.java] }
+        val originalIds = app.store.get().state.tabs.map { it.id }.toSet()
+        compose.onNodeWithTag("native_home_private").assertIsOff()
+        compose.onNodeWithTag("native_home_private").performClick()
+        compose.waitUntil(20_000) { app.store.get().state.selectedTab?.content?.private == true && applicationViewModel.isPrivate.value }
+        val privateId = app.store.get().state.selectedTabId!!
+        if (privateId !in originalIds) fixtures += privateId
+        val switchedIds = app.store.get().state.tabs.map { it.id }.toSet()
+        compose.onNodeWithTag("native_home").assertDoesNotExist()
+        compose.onNodeWithTag("native_private_home").assertIsDisplayed()
+        compose.onNodeWithTag("native_home_normal").assertIsOn()
+        compose.onNodeWithText("Native home history fixture").assertDoesNotExist()
+        compose.onNodeWithText("Google").assertDoesNotExist()
+        assertNoWebSurface()
+
+        app.appPreferencesRepository.get().updateToolbarPosition(ToolbarPosition.BOTTOM)
+        scenario.recreate()
+        compose.waitForIdle()
+        compose.onNodeWithTag("native_home_normal").assertIsDisplayed().performClick()
+        compose.waitUntil(20_000) { app.store.get().state.selectedTabId == homeId && !applicationViewModel.isPrivate.value }
+        compose.onNodeWithTag("native_home").assertIsDisplayed()
+        compose.onNodeWithTag("native_private_home").assertDoesNotExist()
+        assertNoWebSurface()
+
+        repeat(2) {
+            compose.onNodeWithTag("native_home_private").performClick()
+            compose.waitUntil(20_000) { app.store.get().state.selectedTabId == privateId && applicationViewModel.isPrivate.value }
+            compose.onNodeWithTag("native_home_normal").performClick()
+            compose.waitUntil(20_000) { app.store.get().state.selectedTabId == homeId && !applicationViewModel.isPrivate.value }
+        }
+        assertEquals(switchedIds, app.store.get().state.tabs.map { it.id }.toSet())
+        assertFalse(app.store.get().state.tabs.first { it.id == homeId }.content.private)
+        assertTrue(app.store.get().state.tabs.first { it.id == privateId }.content.private)
     }
 
     @Test

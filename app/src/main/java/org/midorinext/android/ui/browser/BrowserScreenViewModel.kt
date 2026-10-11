@@ -12,7 +12,6 @@ import org.midorinext.android.mozac.pdf.PdfSaveEvents
 import org.midorinext.android.mozac.media.BackgroundPlaybackFeature
 import org.midorinext.android.pwa.WebAppRepository
 import org.midorinext.android.vpn.MidoriVpnFeature
-import org.midorinext.android.newtab.NATIVE_HOME_URL
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.storage.bookmarks.BookmarksRepository
@@ -29,7 +28,6 @@ import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.action.TranslationsAction
 import mozilla.components.browser.state.action.EngineAction
-import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.state.WebExtensionState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
@@ -97,6 +95,7 @@ class BrowserScreenViewModel @Inject constructor(
         val id: String,
         val url: String,
         val engineReady: Boolean,
+        val private: Boolean,
     )
 
     data class ReaderModeStatus(
@@ -180,7 +179,8 @@ class BrowserScreenViewModel @Inject constructor(
         .map { state ->
             state.selectedTab?.let { tab ->
                 SelectedTabSnapshot(tab.id, tab.content.url,
-                    tab.engineState.engineSession != null && !tab.engineState.initializing && !tab.content.loading)
+                    tab.engineState.engineSession != null && !tab.engineState.initializing && !tab.content.loading,
+                    tab.content.private)
             }
         }
         .distinctUntilChanged()
@@ -189,7 +189,8 @@ class BrowserScreenViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000L),
             initialValue = store.state.selectedTab?.let {
                 SelectedTabSnapshot(it.id, it.content.url,
-                    it.engineState.engineSession != null && !it.engineState.initializing && !it.content.loading)
+                    it.engineState.engineSession != null && !it.engineState.initializing && !it.content.loading,
+                    it.content.private)
             },
         )
 
@@ -225,6 +226,7 @@ class BrowserScreenViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             store.flow().collect { state ->
+                if (tabsWithUserNavigationInFlight.isEmpty()) return@collect
                 val replaceableTabIds = state.tabs
                     .filter { tab ->
                         MidoriUseCases.isLegacyNewTabUrl(tab.content.url)
@@ -651,11 +653,12 @@ class BrowserScreenViewModel @Inject constructor(
 
     fun openNewMidoriTab(private: Boolean = false) {
         toolbarState.updateFocus(false)
-        if (private) {
-            MidoriUseCases.openPrivatePage()
-        } else {
-            MidoriUseCases.openMidoriPage(private = false)
-        }
+        MidoriUseCases.openMidoriPage(private = private)
+    }
+
+    fun switchBrowsingMode(private: Boolean) {
+        toolbarState.updateFocus(false)
+        MidoriUseCases.openMidoriPage(private = private, selectIfExists = true)
     }
 
     fun goToHomepage() {
@@ -688,13 +691,10 @@ class BrowserScreenViewModel @Inject constructor(
         val tab = store.state.tabs.firstOrNull { it.id == tabId } ?: return
         if (tab.content.url != expectedUrl || !MidoriUseCases.isLegacyNewTabUrl(tab.content.url)) return
         if (tab.engineState.initializing || tab.content.loading) return
-        if (tab.engineState.engineSession == null && tab.engineState.engineSessionState == null) {
-            store.dispatch(ContentAction.UpdateUrlAction(tabId, NATIVE_HOME_URL))
-            return
-        }
-        if (tab.engineState.engineSession == null) return
+        if (tab.engineState.engineSession == null && tab.engineState.engineSessionState != null) return
 
-        MidoriUseCases.loadNewTabPage(tabId, replaceCurrent = true)
+        MidoriUseCases.loadNewTabPage(tabId, replaceCurrent = true, expectedUrl = expectedUrl,
+            canReplace = { tabId !in tabsWithUserNavigationInFlight })
     }
 
     private fun markSelectedNewTabAsUserNavigation(): String? {
@@ -718,10 +718,13 @@ class BrowserScreenViewModel @Inject constructor(
         }
 
         safetyTabOpening = true
-        try {
-            openNewMidoriTab()
-        } finally {
-            safetyTabOpening = false
+        viewModelScope.launch {
+            try {
+                toolbarState.updateFocus(false)
+                MidoriUseCases.openMidoriPage(onlyIfEmpty = true).join()
+            } finally {
+                safetyTabOpening = false
+            }
         }
     }
 

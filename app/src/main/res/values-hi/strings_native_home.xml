@@ -12,7 +12,8 @@
     <string name="home_all_stories">सभी समाचार</string>
     <string name="home_stories_loading">समाचार लोड हो रहे हैं…</string>
     <string name="home_stories_unavailable">समाचार उपलब्ध नहीं हैं। इंटरनेट से जुड़कर फिर कोशिश करें।</string>
-    <string name="home_private">निजी ब्राउज़िंग खोलें</string>
+    <string name="home_private">निजी ब्राउज़िंग पर जाएँ</string>
+    <string name="home_normal">सामान्य ब्राउज़िंग पर जाएँ</string>
     <string name="home_shortcut_title">नाम</string>
     <string name="home_shortcut_url">वेबसाइट का पता</string>
     <string name="home_shortcut_invalid">नाम और मान्य HTTP या HTTPS पता दर्ज करें।</string>

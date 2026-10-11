@@ -12,7 +12,8 @@
     <string name="home_all_stories">Të gjitha lajmet</string>
     <string name="home_stories_loading">Duke ngarkuar lajmet…</string>
     <string name="home_stories_unavailable">Lajmet nuk janë të disponueshme. Provo me lidhje interneti.</string>
-    <string name="home_private">Hap shfletimin privat</string>
+    <string name="home_private">Kalo te shfletimi privat</string>
+    <string name="home_normal">Kalo te shfletimi normal</string>
     <string name="home_shortcut_title">Emri</string>
     <string name="home_shortcut_url">Adresa e faqes</string>
     <string name="home_shortcut_invalid">Vendosni një emër dhe një adresë të vlefshme HTTP ose HTTPS.</string>

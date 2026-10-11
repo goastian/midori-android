@@ -16,6 +16,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -34,6 +35,8 @@ import org.midorinext.android.MidoriApplication
 import org.midorinext.android.ui.MidoriApplicationViewModel
 import org.midorinext.android.ui.browser.home.HomePrivateBrowsing
 import org.midorinext.android.ui.browser.home.NativeHomeScreen
+import org.midorinext.android.newtab.BrowserSurface
+import org.midorinext.android.newtab.browserSurface
 import org.midorinext.android.ui.browser.menu.BrowserMenu
 import org.midorinext.android.ui.browser.mozaccompose.*
 import org.midorinext.android.ui.browser.pullToRefresh.PullToRefreshBox
@@ -61,8 +64,8 @@ fun BrowserScreen(
     viewModel: BrowserScreenViewModel = hiltViewModel(),
     openNewTab: TabOpening = TabOpening.NONE
 ) {
-    val currentUrl by viewModel.currentUrl.collectAsStateWithLifecycle()
     val selectedTabSnapshot by viewModel.selectedTabSnapshot.collectAsStateWithLifecycle()
+    val currentUrl = selectedTabSnapshot?.url
     val tabCount by viewModel.tabCount.collectAsStateWithLifecycle()
     val isFullScreen by viewModel.isFullScreen.collectAsStateWithLifecycle()
     val restoreComplete by viewModel.restoreComplete.collectAsStateWithLifecycle()
@@ -72,11 +75,21 @@ fun BrowserScreen(
     } else emptyList()
     val private by appViewModel.isPrivate.collectAsStateWithLifecycle()
     val legacyNewTabOrigins by viewModel.legacyNewTabOrigins.collectAsStateWithLifecycle()
-    val nativeHome = currentUrl?.let(viewModel::isNewTabUrl) == true && !private
+    val surface = currentUrl?.let { browserSurface(it, selectedTabSnapshot?.private == true, viewModel.isNewTabUrl(it)) }
+    val nativeHome = surface == BrowserSurface.HOME
+    val privateHome = surface == BrowserSurface.PRIVATE_HOME
+    val blankPage = surface == BrowserSurface.BLANK
     val nativeBlockerState by viewModel.nativeBlockerState.collectAsStateWithLifecycle()
     val readerModeStatus by viewModel.readerModeStatus.collectAsStateWithLifecycle()
     val hasParentTab by viewModel.hasParentTab.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
+    val switchBrowsingMode: (Boolean) -> Unit = { privateMode ->
+        focusManager.clearFocus()
+        keyboard?.hide()
+        viewModel.switchBrowsingMode(privateMode)
+    }
     val restoredReaderPage = currentUrl?.let { url ->
         url.startsWith("moz-extension://", ignoreCase = true) &&
             url.substringBefore('?').substringBefore('#').endsWith("/readerview.html", ignoreCase = true)
@@ -127,10 +140,19 @@ fun BrowserScreen(
         viewModel.replaceTabWithNewTab(selectedTab.id, selectedTab.url)
     }
 
-    LaunchedEffect(nativeHome) {
-        if (nativeHome) {
+    LaunchedEffect(nativeHome, privateHome, blankPage) {
+        if (nativeHome || privateHome || blankPage) {
             engineViewHolder = null
             viewModel.toolbarState.updateVisibility(true)
+        }
+    }
+
+    LaunchedEffect(privateHome, blankPage, selectedTabSnapshot?.id) {
+        if (privateHome || blankPage) {
+            withFrameNanos { }
+            withFrameNanos { }
+            (context.applicationContext as MidoriApplication).onNativeHomeFrameDrawn()
+            if (privateHome) viewModel.prepareNativeHomeSession(selectedTabSnapshot?.id)
         }
     }
 
@@ -303,7 +325,7 @@ fun BrowserScreen(
             },
             engineView = engineViewHolder,
             modifier = Modifier.fillMaxWidth().weight(1f),
-            lock = { viewModel.showFindInPage || nativeHome }
+            lock = { viewModel.showFindInPage || nativeHome || privateHome || blankPage }
         ) { modifier ->
             if (currentUrl != null) {
                 if (nativeHome) {
@@ -316,7 +338,7 @@ fun BrowserScreen(
                         tabId = selectedTabSnapshot?.id,
                         onOpenUrl = viewModel::openHomeUrl,
                         onSelectTab = viewModel::selectTab,
-                        onPrivateBrowsing = { viewModel.openNewMidoriTab(private = true) },
+                        onSwitchBrowsingMode = { switchBrowsingMode(true) },
                         onSearch = { viewModel.toolbarState.updateFocus(true) },
                         onFirstFrameDrawn = { tabId ->
                             nativeHomeReady = true
@@ -326,8 +348,16 @@ fun BrowserScreen(
                         navigateTo = navigateTo,
                         modifier = modifier,
                     )
-                } else if ((currentUrl == "" || viewModel.isNewTabUrl(currentUrl)) && private) {
-                    HomePrivateBrowsing(modifier)
+                } else if (privateHome || blankPage) {
+                    val canGoBack by viewModel.canGoBackInPage.collectAsStateWithLifecycle()
+                    BackHandler(enabled = canGoBack && !viewModel.toolbarState.hasFocus) {
+                        viewModel.sessionUseCases.goBack()
+                    }
+                    if (privateHome) HomePrivateBrowsing(
+                        onSwitchBrowsingMode = { switchBrowsingMode(false) },
+                        modifier = modifier,
+                    )
+                    else Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).testTag("native_blank_home"))
                 } else {
                     GlobalFeatures(appViewModel, viewModel)
 

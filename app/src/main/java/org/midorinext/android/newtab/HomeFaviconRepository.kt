@@ -5,6 +5,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
@@ -96,7 +97,12 @@ class HomeFaviconRepository @Inject constructor(
     private val clientProvider: dagger.Lazy<Client>,
 ) {
     private val downloads = Semaphore(3)
-    private val icons by lazy { BrowserIcons(context, clientProvider.get(), preparers = emptyList()) }
+    private val iconLoader = lazy { BrowserIcons(context, clientProvider.get(), preparers = emptyList()) }
+    private val icons by iconLoader
+
+    fun onTrimMemory(level: Int) {
+        if (iconLoader.isInitialized()) icons.onTrimMemory(level)
+    }
 
     suspend fun load(url: String): Icon? = withContext(Dispatchers.IO) {
         val origin = homeIconOrigin(url) ?: return@withContext null
@@ -123,7 +129,7 @@ class HomeFaviconRepository @Inject constructor(
         }
     }
 
-    private fun resources(url: String, origin: String): List<IconRequest.Resource> {
+    private suspend fun resources(url: String, origin: String): List<IconRequest.Resource> {
         val directory = File(context.cacheDir, "home-favicon-links").apply { mkdirs() }
         val key = MessageDigest.getInstance("SHA-256").digest(origin.toByteArray()).joinToString("") { "%02x".format(it) }
         val cache = File(directory, "$key.json")
@@ -152,6 +158,7 @@ class HomeFaviconRepository @Inject constructor(
                 resource.sizes.any { it.minLength >= 96 } || resource.mimeType == "image/svg+xml"
         }
         val resources = (discovered + cached + if (hasLargeIcon) fallbacks.takeLast(1) else fallbacks).distinctBy { it.url }
+        currentCoroutineContext().ensureActive()
         if (discovered.isNotEmpty() || cached.isEmpty()) runCatching {
             val json = JSONObject().put("discovered", discovered.isNotEmpty()).put("icons", JSONArray(resources.map { resource -> JSONObject()
                 .put("src", resource.url).put("sizes", resource.sizes.joinToString(" ")).put("iconType", resource.type.name)
@@ -165,7 +172,8 @@ class HomeFaviconRepository @Inject constructor(
         return resources
     }
 
-    private fun fetchText(url: String): Pair<String, String> {
+    private suspend fun fetchText(url: String): Pair<String, String> {
+        val coroutineContext = currentCoroutineContext()
         val request = Request(url, connectTimeout = 2L to TimeUnit.SECONDS, readTimeout = 4L to TimeUnit.SECONDS,
             cookiePolicy = Request.CookiePolicy.OMIT)
         return clientProvider.get().fetch(request).use { response ->
@@ -174,6 +182,7 @@ class HomeFaviconRepository @Inject constructor(
                 val buffer = CharArray(4096)
                 val text = StringBuilder()
                 while (text.length < 262_144) {
+                    coroutineContext.ensureActive()
                     val count = reader.read(buffer, 0, minOf(buffer.size, 262_144 - text.length))
                     if (count == -1) break
                     text.append(buffer, 0, count)

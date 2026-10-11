@@ -3,21 +3,23 @@ package org.midorinext.android.ui.browser.home
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.LocalContentColor
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -29,11 +31,13 @@ import org.midorinext.android.R
 
 @Composable
 fun HomePrivateBrowsing(
-    modifier: Modifier = Modifier
+    onSwitchBrowsingMode: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val focusManager = LocalFocusManager.current
     Surface(modifier = modifier
         .fillMaxSize()
+        .testTag("native_private_home")
         .clickable(
             interactionSource = remember { MutableInteractionSource() },
             indication = null
@@ -41,7 +45,14 @@ fun HomePrivateBrowsing(
             focusManager.clearFocus()
         })
     {
-        HomePrivateBrowsingContent(Modifier.padding(24.dp))
+        Column(
+            modifier = Modifier.verticalScroll(rememberScrollState())
+                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            NativeHomeHeader(private = true, onSwitchBrowsingMode = onSwitchBrowsingMode)
+            HomePrivateBrowsingContent(Modifier.padding(horizontal = 8.dp))
+        }
     }
 }
 
@@ -59,7 +70,7 @@ fun HomePrivateBrowsingContent(
     Column(modifier = modifier) {
         Image(
             painter = painterResource(id = R.drawable.icons_privacy_mask_small),
-            contentDescription = "private browsing image",
+            contentDescription = null,
             colorFilter = ColorFilter.tint(color = iconColor),
             modifier = Modifier
                 .size(width = 80.dp * iconScale, height = 100.dp * iconScale)

@@ -14,7 +14,6 @@ import mozilla.components.lib.state.ext.flow
 import org.midorinext.android.adblock.BlockingStatistics
 import org.midorinext.android.newtab.HomeStoriesRepository
 import org.midorinext.android.newtab.HomeFaviconRepository
-import org.midorinext.android.newtab.homeIconOrigin
 import org.midorinext.android.newtab.HomeStory
 import org.midorinext.android.newtab.publicHomeUrl
 import org.midorinext.android.preferences.app.AppPreferencesRepository
@@ -56,22 +55,14 @@ class NativeHomeViewModel @Inject constructor(
     val blockedCount by lazy { statisticsProvider.get().totalBlocked }
 
     val thumbnailStorage get() = thumbnailProvider.get()
-    private val favicons = mutableMapOf<String, MutableStateFlow<Icon?>>()
-
-    fun favicon(url: String): StateFlow<Icon?> {
-        val origin = homeIconOrigin(url) ?: url
-        return favicons.getOrPut(origin) {
-            MutableStateFlow<Icon?>(null).also { state ->
-                viewModelScope.launch { state.value = faviconProvider.get().load(url) }
-            }
-        }
-    }
+    fun favicon(url: String): Flow<Icon?> = flow { emit(faviconProvider.get().load(url)) }
     private val mutableStories = MutableStateFlow(HomeStoriesState())
     val stories = mutableStories.asStateFlow()
     private var storiesJob: Job? = null
 
     fun stopStories() {
         storiesJob?.cancel()
+        storiesJob = null
         mutableStories.value = mutableStories.value.copy(loading = false)
     }
 
@@ -79,9 +70,9 @@ class NativeHomeViewModel @Inject constructor(
         viewModelScope.launch { preferencesRepository.ensureHomeShortcuts() }
     }
 
-    fun loadStories(language: String, force: Boolean = false) {
+    fun loadStories(language: String, force: Boolean = false): Job {
         storiesJob?.cancel()
-        storiesJob = viewModelScope.launch {
+        val job = viewModelScope.launch {
             mutableStories.value = HomeStoriesState(storiesProvider.get().cached(language), loading = true)
             try {
                 mutableStories.value = HomeStoriesState(storiesProvider.get().refresh(language, force))
@@ -91,5 +82,7 @@ class NativeHomeViewModel @Inject constructor(
                 mutableStories.value = mutableStories.value.copy(loading = false, failed = true)
             }
         }
+        storiesJob = job
+        return job
     }
 }

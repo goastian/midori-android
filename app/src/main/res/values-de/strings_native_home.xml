@@ -12,7 +12,8 @@
     <string name="home_all_stories">Alle Nachrichten</string>
     <string name="home_stories_loading">Nachrichten werden geladen…</string>
     <string name="home_stories_unavailable">Nachrichten nicht verfügbar. Mit Verbindung erneut versuchen.</string>
-    <string name="home_private">Privates Surfen öffnen</string>
+    <string name="home_private">Zum privaten Surfen wechseln</string>
+    <string name="home_normal">Zum normalen Surfen wechseln</string>
     <string name="home_shortcut_title">Name</string>
     <string name="home_shortcut_url">Website-Adresse</string>
     <string name="home_shortcut_invalid">Geben Sie einen Namen und eine gültige HTTP- oder HTTPS-Adresse ein.</string>

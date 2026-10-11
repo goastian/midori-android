@@ -12,7 +12,8 @@
     <string name="home_all_stories">All stories</string>
     <string name="home_stories_loading">Loading stories…</string>
     <string name="home_stories_unavailable">Stories are unavailable. Try again when connected.</string>
-    <string name="home_private">Open private browsing</string>
+    <string name="home_private">Switch to private browsing</string>
+    <string name="home_normal">Switch to normal browsing</string>
     <string name="home_shortcut_title">Name</string>
     <string name="home_shortcut_url">Website address</string>
     <string name="home_shortcut_invalid">Enter a name and a valid HTTP or HTTPS address.</string>

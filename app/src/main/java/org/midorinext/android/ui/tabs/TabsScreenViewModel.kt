@@ -159,11 +159,7 @@ class TabsScreenViewModel @Inject constructor(
     }
 
     fun openNewTab(private: Boolean) {
-        if (private) {
-            tabsUseCases.addTab("", selectTab = true, private = true)
-        } else {
-            midoriUseCases.openMidoriPage(private = false)
-        }
+        midoriUseCases.openMidoriPage(private = private)
     }
 
     fun reopenRecentlyClosed(): Boolean = recentlyClosedTabs.reopen()
