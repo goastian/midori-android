@@ -12,4 +12,3 @@ upload-keystore.jks
 upload_certificate.pem
 deployment_cert.der
 /app/src/main/assets/extensions/
-/app/src/main/assets/extensions/midori_newtab

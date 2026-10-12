@@ -85,7 +85,8 @@ fun GlobalFeatures(
     PromptFeature(
         store = viewModel.store,
         exitFullscreenUseCase = viewModel.sessionUseCases.exitFullscreen,
-        appPreferences = appPreferences
+        appPreferences = appPreferences,
+        loginRepository = viewModel.loginRepository,
     )
 
     ClFeature()

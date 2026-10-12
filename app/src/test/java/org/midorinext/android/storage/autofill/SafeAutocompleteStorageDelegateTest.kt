@@ -3,6 +3,9 @@ package org.midorinext.android.storage.autofill
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.runBlocking
+import mozilla.components.browser.engine.gecko.ext.toLoginEntry
 import mozilla.components.concept.storage.CreditCardsAddressesStorageDelegate
 import mozilla.components.concept.storage.Login
 import mozilla.components.concept.storage.LoginEntry
@@ -17,7 +20,7 @@ class SafeAutocompleteStorageDelegateTest {
     @Test
     fun creatingGeckoDelegateAndDisabledSavesDoNotInitializeStorage() {
         val delegate = SecureAutofillModule.provideAutocompleteStorageDelegate(
-            loginsStorage = dagger.Lazy { error("Password storage must stay lazy") },
+            loginRepository = LoginAutofillRepository(lazy { error("Password storage must stay lazy") }),
             autofillStorage = dagger.Lazy { error("Autofill storage must stay lazy") },
             preferenceState = AutofillPreferenceState(),
         )
@@ -27,7 +30,7 @@ class SafeAutocompleteStorageDelegateTest {
     }
 
     @Test
-    fun savingEnabledPasswordsInitializesStorageOnceAndPreservesFields() {
+    fun savingEnabledPasswordsInitializesStorageOnceAndPreservesFields() = runBlocking {
         val state = passwordPreferences(enabled = true)
         val saved = mutableListOf<LoginEntry>()
         var initialized = 0
@@ -35,11 +38,17 @@ class SafeAutocompleteStorageDelegateTest {
             initialized++
             loginStorage(saved)
         }
-        val delegate = delegate(storage, state)
+        val repository = LoginAutofillRepository(storage)
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+        val delegate = delegate(repository, state, scope)
         assertEquals(0, initialized)
 
+        repository.authorizeSave(login().toLoginEntry())
         delegate.onLoginSave(login())
+        scope.coroutineContext[kotlinx.coroutines.Job]!!.children.toList().joinAll()
+        repository.authorizeSave(login().toLoginEntry())
         delegate.onLoginSave(login())
+        scope.coroutineContext[kotlinx.coroutines.Job]!!.children.toList().joinAll()
 
         assertEquals(1, initialized)
         assertEquals(2, saved.size)
@@ -49,45 +58,73 @@ class SafeAutocompleteStorageDelegateTest {
     }
 
     @Test
-    fun disablingPasswordSavingStopsAccessToAnExistingStorage() {
+    fun disablingPasswordSavingStopsAccessToAnExistingStorage() = runBlocking {
         val state = passwordPreferences(enabled = true)
         val saved = mutableListOf<LoginEntry>()
-        val delegate = delegate(lazy { loginStorage(saved) }, state)
+        val repository = LoginAutofillRepository(lazy { loginStorage(saved) })
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+        val delegate = delegate(repository, state, scope)
+        repository.authorizeSave(login().toLoginEntry())
         delegate.onLoginSave(login())
+        scope.coroutineContext[kotlinx.coroutines.Job]!!.children.toList().joinAll()
 
         state.update(AppPreferencesSerializer.defaultValue.toBuilder().setSavePasswordsEnabled(false).build())
+        repository.authorizeSave(login().toLoginEntry())
         delegate.onLoginSave(login())
 
         assertEquals(1, saved.size)
     }
 
     @Test
-    fun failureDuringLazyStorageInitializationIsStillSupervised() {
+    fun failureDuringLazyStorageInitializationIsStillSupervised() = runBlocking {
         var attempts = 0
-        val delegate = delegate(
-            lazy {
+        val repository = LoginAutofillRepository(lazy {
                 attempts++
                 error("Encrypted storage is unavailable")
-            },
+            })
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+        val delegate = delegate(
+            repository,
             passwordPreferences(enabled = true),
+            scope,
         )
 
+        repository.authorizeSave(login().toLoginEntry())
         delegate.onLoginSave(login())
+        scope.coroutineContext[kotlinx.coroutines.Job]!!.children.toList().joinAll()
+        repository.authorizeSave(login().toLoginEntry())
         delegate.onLoginSave(login())
+        scope.coroutineContext[kotlinx.coroutines.Job]!!.children.toList().joinAll()
 
         assertEquals(2, attempts)
     }
 
-    private fun delegate(storage: Lazy<LoginsStorage>, state: AutofillPreferenceState) =
+    @Test
+    fun unconfirmedOrRepeatedSaveCallbacksCannotWritePasswords() = runBlocking {
+        val saved = mutableListOf<LoginEntry>()
+        val repository = LoginAutofillRepository(lazy { loginStorage(saved) })
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined)
+        val delegate = delegate(repository, passwordPreferences(enabled = true), scope)
+
+        delegate.onLoginSave(login())
+        repository.authorizeSave(login().toLoginEntry())
+        delegate.onLoginSave(login())
+        delegate.onLoginSave(login())
+        scope.coroutineContext[kotlinx.coroutines.Job]!!.children.toList().joinAll()
+
+        assertEquals(1, saved.size)
+    }
+
+    private fun delegate(repository: LoginAutofillRepository, state: AutofillPreferenceState, scope: CoroutineScope) =
         SafeAutocompleteStorageDelegate(
             creditCardsAddressesDelegate = Proxy.newProxyInstance(
                 CreditCardsAddressesStorageDelegate::class.java.classLoader,
                 arrayOf(CreditCardsAddressesStorageDelegate::class.java),
             ) { _, _, _ -> error("Password saving must not access credit cards or addresses") }
                 as CreditCardsAddressesStorageDelegate,
-            loginsStorage = storage,
+            loginRepository = repository,
             preferenceState = state,
-            scope = CoroutineScope(SupervisorJob() + Dispatchers.Unconfined),
+            scope = scope,
         )
 
     private fun loginStorage(saved: MutableList<LoginEntry>) = Proxy.newProxyInstance(

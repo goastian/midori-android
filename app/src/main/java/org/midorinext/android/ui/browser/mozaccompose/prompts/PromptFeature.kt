@@ -2,22 +2,29 @@ package org.midorinext.android.ui.browser.mozaccompose.prompts
 
 import android.security.KeyChain
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.graphics.toColorInt
+import androidx.core.content.ContextCompat
 import org.midorinext.android.R
 import org.midorinext.android.ext.activity
 import org.midorinext.android.preferences.app.AppPreferences
+import org.midorinext.android.storage.autofill.LoginAutofillRepository
 import org.midorinext.android.ui.browser.mozaccompose.prompts.dialog.AlertDialog
 import org.midorinext.android.ui.browser.mozaccompose.prompts.dialog.AuthenticationDialog
+import org.midorinext.android.ui.browser.mozaccompose.prompts.dialog.AutofillPicker
 import org.midorinext.android.ui.browser.mozaccompose.prompts.dialog.ChoiceDialog
 import org.midorinext.android.ui.browser.mozaccompose.prompts.dialog.ConfirmDialog
 import org.midorinext.android.ui.browser.mozaccompose.prompts.dialog.PromptDialog
 import org.midorinext.android.ui.browser.mozaccompose.prompts.dialog.RepostDialog
+import org.midorinext.android.ui.browser.mozaccompose.prompts.dialog.LoginPicker
+import org.midorinext.android.ui.browser.mozaccompose.prompts.dialog.SaveLoginDialog
 import org.midorinext.android.ui.browser.mozaccompose.prompts.dialog.internalcopy.PromptAbuserDetector
 import org.midorinext.android.ui.browser.mozaccompose.prompts.input.colorpicker.ColorPicker
 import org.midorinext.android.ui.browser.mozaccompose.prompts.input.DateTimePicker
@@ -25,9 +32,11 @@ import org.midorinext.android.ui.browser.mozaccompose.prompts.input.FilePicker
 import org.midorinext.android.ui.browser.mozaccompose.prompts.input.colorpicker.rememberColorPickerState
 import org.midorinext.android.ui.widgets.YesNoDialog
 import mozilla.components.browser.state.action.ContentAction
+import mozilla.components.browser.state.selector.findTabOrCustomTab
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.prompt.PromptRequest
+import mozilla.components.concept.storage.LoginHint
 import mozilla.components.feature.prompts.share.DefaultShareDelegate
 import mozilla.components.feature.prompts.share.ShareDelegate
 import mozilla.components.feature.session.SessionUseCases
@@ -46,27 +55,24 @@ fun PromptFeature(
     store: BrowserStore,
     exitFullscreenUseCase: SessionUseCases.ExitFullScreenUseCase,
     appPreferences: AppPreferences,
+    loginRepository: LoginAutofillRepository,
     shareDelegate: ShareDelegate = rememberDefaultShareDelegate()
 ) {
     val context = LocalContext.current
 
     val promptAbuserDetector = remember { PromptAbuserDetector() }
 
-    val sessionId by store.observeAsComposableState { state ->
-        state.selectedTab?.id
+    val promptState by store.observeAsComposableState { state ->
+        state.selectedTab?.let { PromptState(it.id, it.content.loading, it.content.promptRequests) }
     }
-    val loading by store.observeAsComposableState { state ->
-        state.selectedTab?.content?.loading
-    }
-    val lastRequest by store.observeAsComposableState { state ->
-        state.selectedTab?.content?.promptRequests?.lastOrNull()
-    }
+    val loading = promptState?.loading
+    val lastRequest = promptState?.requests?.activePrompt()
 
     LaunchedEffect(true) {
         promptAbuserDetector.resetJSAlertAbuseState()
     }
 
-    LaunchedEffect(loading) {
+    LaunchedEffect(promptState?.sessionId, loading) {
         if (loading == false) {
             promptAbuserDetector.resetJSAlertAbuseState()
         }
@@ -76,19 +82,34 @@ fun PromptFeature(
         lastRequest?.executeIfWindowedPrompt { exitFullscreenUseCase() }
     }
 
-    sessionId?.let { session -> lastRequest?.let { request ->
-        val consume: () -> Unit = { store.consumeRequest(session, request) }
-        val consumeAfter: (() -> Unit) -> Unit = { block ->
-            store.consumeRequest(session, request, block)
+    LaunchedEffect(promptState) {
+        promptState?.sessionId?.let { dismissObsoleteAutofillRequests(store, it) }
+    }
+
+    val session = promptState?.sessionId ?: return
+    val request = lastRequest ?: return
+    key(session, request.uid) {
+        val response = remember { PromptResponse(store, session, request) }
+        val consume: () -> Unit = { response.respond() }
+        val consumeAfter: (() -> Unit) -> Unit = response::respond
+
+        DisposableEffect(request.uid) {
+            onDispose {
+                if (request is PromptRequest.SelectLoginPrompt || request is PromptRequest.SelectCreditCard ||
+                    request is PromptRequest.SelectAddress || request is PromptRequest.SaveLoginPrompt
+                ) response.dismiss()
+            }
         }
 
         when (request) {
-            is PromptRequest.Share -> shareDelegate.showShareSheet(
-                context = context,
-                shareData = request.data,
-                onDismiss = { consumeAfter { request.onDismiss() } },
-                onSuccess = { consumeAfter { request.onSuccess() } }
-            )
+            is PromptRequest.Share -> LaunchedEffect(request.uid) {
+                shareDelegate.showShareSheet(
+                    context = context,
+                    shareData = request.data,
+                    onDismiss = { consumeAfter { request.onDismiss() } },
+                    onSuccess = { consumeAfter { request.onSuccess() } }
+                )
+            }
 
             is PromptRequest.File -> FilePicker(request, consume)
             is PromptRequest.TimeSelection -> DateTimePicker(request, consume) // TODO report to mozilla that datetime is not opening when clicking on time component
@@ -200,51 +221,47 @@ fun PromptFeature(
             )
 
             is PromptRequest.CertificateRequest -> {
-                context.activity?.let { activity ->
-                    KeyChain.choosePrivateKeyAlias(
-                        activity,
-                        { alias -> request.onComplete(alias) },
-                        arrayOf("RSA", "EC"), // keyTypes
-                        null, // issuers - currently not supported
-                        request.host, // the host that requested the certificate
-                        -1, // specify the default port to simplify the UI
-                        null // alias - leave null for now to not preselect a certificate
-                    )
-                } ?: ConsumePromptEffect(request.uid) {
-                    consumeAfter { request.onComplete(null) }
+                LaunchedEffect(request.uid) {
+                    context.activity?.let { activity ->
+                        KeyChain.choosePrivateKeyAlias(
+                            activity,
+                            { alias -> ContextCompat.getMainExecutor(context).execute { consumeAfter { request.onComplete(alias) } } },
+                            arrayOf("RSA", "EC"), // keyTypes
+                            null, // issuers - currently not supported
+                            request.host, // the host that requested the certificate
+                            -1, // specify the default port to simplify the UI
+                            null // alias - leave null for now to not preselect a certificate
+                        )
+                    } ?: run {
+                        consumeAfter { request.onComplete(null) }
+                    }
                 }
             }
 
             is PromptRequest.SaveLoginPrompt -> {
-                val login = request.logins.singleOrNull()
+                val login = request.logins.firstOrNull()
                 if (appPreferences.savePasswordsEnabled && login != null) {
-                    YesNoDialog(
-                        onDismissRequest = { consumeAfter { request.onDismiss() } },
-                        onYes = { consumeAfter { request.onConfirm(login) } },
-                        onNo = { consumeAfter { request.onDismiss() } },
-                        title = stringResource(R.string.prompt_save_login_title),
-                        description = stringResource(
-                            R.string.prompt_save_login_description,
-                            login.username.ifBlank { login.origin }
-                        )
+                    SaveLoginDialog(
+                        login = login,
+                        repository = loginRepository,
+                        onSave = { entry, existingGuid -> consumeAfter {
+                            loginRepository.authorizeSave(entry, existingGuid)
+                            request.onConfirm(entry)
+                        } },
+                        onDismiss = response::dismiss,
                     )
                 } else {
                     ConsumePromptEffect(request.uid) { consumeAfter { request.onDismiss() } }
                 }
             }
             is PromptRequest.SelectLoginPrompt -> {
-                val login = request.logins.singleOrNull()
-                if (appPreferences.passwordAutofillEnabled && login != null) {
-                    YesNoDialog(
-                        onDismissRequest = { consumeAfter { request.onDismiss() } },
-                        onYes = { consumeAfter { request.onConfirm(login) } },
-                        onNo = { consumeAfter { request.onDismiss() } },
-                        title = stringResource(R.string.prompt_fill_login_title),
-                        description = stringResource(
-                            R.string.prompt_fill_login_description,
-                            login.username.ifBlank { login.origin }
-                        ),
-                        yesText = stringResource(R.string.prompt_fill)
+                val logins = request.logins.filter { it.hint != LoginHint.EMAIL_MASK }
+                if (appPreferences.passwordAutofillEnabled && logins.isNotEmpty()) {
+                    LoginPicker(
+                        logins = logins,
+                        repository = loginRepository,
+                        onSelect = { login -> consumeAfter { request.onConfirm(login) } },
+                        onDismiss = response::dismiss,
                     )
                 } else {
                     ConsumePromptEffect(request.uid) { consumeAfter { request.onDismiss() } }
@@ -267,39 +284,45 @@ fun PromptFeature(
                 }
             }
             is PromptRequest.SelectCreditCard -> {
-                val creditCard = request.creditCards.singleOrNull()
-                if (appPreferences.autofillCardsEnabled && creditCard != null) {
-                    YesNoDialog(
-                        onDismissRequest = { consumeAfter { request.onDismiss() } },
-                        onYes = { consumeAfter { request.onConfirm(creditCard) } },
-                        onNo = { consumeAfter { request.onDismiss() } },
+                if (appPreferences.autofillCardsEnabled && request.creditCards.isNotEmpty()) {
+                    AutofillPicker(
                         title = stringResource(R.string.prompt_fill_card_title),
-                        description = stringResource(
-                            R.string.prompt_fill_card_description,
-                            creditCard.obfuscatedCardNumber
-                        ),
-                        yesText = stringResource(R.string.prompt_fill)
+                        options = request.creditCards,
+                        label = { it.obfuscatedCardNumber },
+                        detail = { it.name },
+                        onSelect = { creditCard -> consumeAfter { request.onConfirm(creditCard) } },
+                        onDismiss = response::dismiss,
                     )
                 } else {
                     ConsumePromptEffect(request.uid) { consumeAfter { request.onDismiss() } }
                 }
             }
             is PromptRequest.SelectAddress -> {
-                val address = request.addresses.singleOrNull()
-                if (appPreferences.autofillAddressesEnabled && address != null) {
-                    YesNoDialog(
-                        onDismissRequest = { consumeAfter { request.onDismiss() } },
-                        onYes = { consumeAfter { request.onConfirm(address) } },
-                        onNo = { consumeAfter { request.onDismiss() } },
+                if (appPreferences.autofillAddressesEnabled && request.addresses.isNotEmpty()) {
+                    AutofillPicker(
                         title = stringResource(R.string.prompt_fill_address_title),
-                        description = stringResource(
-                            R.string.prompt_fill_address_description,
-                            address.addressLabel
-                        ),
-                        yesText = stringResource(R.string.prompt_fill)
+                        options = request.addresses,
+                        label = { it.addressLabel },
+                        detail = { it.name },
+                        onSelect = { address -> consumeAfter { request.onConfirm(address) } },
+                        onDismiss = response::dismiss,
                     )
                 } else {
                     ConsumePromptEffect(request.uid) { consumeAfter { request.onDismiss() } }
+                }
+            }
+            is PromptRequest.SaveAddress -> {
+                if (appPreferences.autofillAddressesEnabled) {
+                    YesNoDialog(
+                        onDismissRequest = response::dismiss,
+                        onYes = { consumeAfter { request.onConfirm(request.address) } },
+                        onNo = response::dismiss,
+                        title = stringResource(mozacR.string.mozac_feature_prompts_save_address_prompt_title),
+                        description = request.address.addressLabel,
+                        yesText = stringResource(mozacR.string.mozac_feature_prompt_save_confirmation),
+                    )
+                } else {
+                    ConsumePromptEffect(request.uid, response::dismiss)
                 }
             }
             is PromptRequest.FolderUploadPrompt -> YesNoDialog(
@@ -331,7 +354,22 @@ fun PromptFeature(
                 consumeAfter { (request as? PromptRequest.Dismissible)?.onDismiss?.invoke() }
             }
         }
-    }}
+    }
+}
+
+private data class PromptState(val sessionId: String, val loading: Boolean, val requests: List<PromptRequest>)
+
+private val PromptRequest.isAutofillSelection: Boolean
+    get() = this is PromptRequest.SelectLoginPrompt || this is PromptRequest.SelectCreditCard || this is PromptRequest.SelectAddress
+
+private fun List<PromptRequest>.activePrompt(): PromptRequest? = lastOrNull { !it.isAutofillSelection } ?: lastOrNull()
+
+internal fun dismissObsoleteAutofillRequests(store: BrowserStore, sessionId: String) {
+    val session = store.state.findTabOrCustomTab(sessionId) ?: return
+    val activeUid = session.content.promptRequests.activePrompt()?.uid
+    session.content.promptRequests.filter {
+        it.isAutofillSelection && (session.content.loading || it.uid != activeUid)
+    }.forEach { PromptResponse(store, sessionId, it).dismiss() }
 }
 
 @Composable
@@ -364,6 +402,9 @@ internal inline fun <reified T> T.executeIfWindowedPrompt(
 }
 
 fun BrowserStore.consumeRequest(sessionId: String, request: PromptRequest, consume: () -> Unit = {}) {
-    consume()
-    dispatch(ContentAction.ConsumePromptRequestAction(sessionId, request))
+    try {
+        consume()
+    } finally {
+        dispatch(ContentAction.ConsumePromptRequestAction(sessionId, request))
+    }
 }

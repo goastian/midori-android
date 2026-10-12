@@ -33,6 +33,7 @@ import org.midorinext.android.R
 import org.midorinext.android.intent.IntentReceiverActivity
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
+import org.midorinext.android.storage.autofill.LoginAutofillRepository
 import org.midorinext.android.ui.browser.mozaccompose.EngineView
 import org.midorinext.android.ui.browser.mozaccompose.SessionFeature
 import org.midorinext.android.ui.browser.mozaccompose.WindowFeature
@@ -48,6 +49,7 @@ class WebAppActivity : AppCompatActivity() {
     @Inject lateinit var engine: Engine
     @Inject lateinit var preferences: AppPreferencesRepository
     @Inject lateinit var permissionsStorage: GeckoSitePermissionsStorage
+    @Inject lateinit var loginRepository: LoginAutofillRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,6 +82,7 @@ class WebAppActivity : AppCompatActivity() {
                             repository = repository,
                             preferences = preferences,
                             permissionsStorage = permissionsStorage,
+                            loginRepository = loginRepository,
                             onOpenInBrowser = { url ->
                                 openInBrowser(url)
                                 finish()
@@ -107,6 +110,7 @@ private fun WebAppPage(
     repository: WebAppRepository,
     preferences: AppPreferencesRepository,
     permissionsStorage: GeckoSitePermissionsStorage,
+    loginRepository: LoginAutofillRepository,
     onOpenInBrowser: (String) -> Unit,
 ) {
     val store = remember(app.startUrl, engine) {
@@ -149,7 +153,7 @@ private fun WebAppPage(
     }
 
     WindowFeature(store = store, tabsUseCases = tabs)
-    PromptFeature(store = store, exitFullscreenUseCase = sessions.exitFullscreen, appPreferences = appPreferences)
+    PromptFeature(store = store, exitFullscreenUseCase = sessions.exitFullscreen, appPreferences = appPreferences, loginRepository = loginRepository)
     PermissionsFeature(store = store, storage = permissionsStorage)
 
     EngineView(engine = engine, modifier = Modifier.fillMaxSize().safeDrawingPadding()) { engineView ->

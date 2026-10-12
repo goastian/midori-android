@@ -32,7 +32,7 @@ fun EngineSettingsFeature(
             Appearance.DARK -> PreferredColorScheme.Dark
             else -> PreferredColorScheme.System
         }
-        engine.settings.loginAutofillEnabled = appPreferences.passwordAutofillEnabled
+        engine.settings.loginAutofillEnabled = false
         engine.settings.forceUserScalableContent = appPreferences.accessibilityForceZoomEnabled
         engine.settings.automaticFontSizeAdjustment =
             appPreferences.accessibilityAutomaticFontSizing

@@ -4,11 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import mozilla.components.concept.storage.Address
 import mozilla.components.concept.storage.CreditCard
@@ -17,7 +20,7 @@ import mozilla.components.concept.storage.Login
 import mozilla.components.concept.storage.NewCreditCardFields
 import mozilla.components.concept.storage.UpdatableAddressFields
 import mozilla.components.service.sync.autofill.AutofillCreditCardsAddressesStorage
-import mozilla.components.service.sync.logins.SyncableLoginsStorage
+import org.midorinext.android.storage.autofill.LoginAutofillRepository
 import javax.inject.Inject
 
 data class SecureDataUiState(
@@ -41,33 +44,41 @@ data class AddressForm(
 
 @HiltViewModel
 class SecureDataViewModel @Inject constructor(
-    private val loginsStorage: SyncableLoginsStorage,
+    private val loginsStorage: LoginAutofillRepository,
     private val autofillStorage: AutofillCreditCardsAddressesStorage,
 ) : ViewModel() {
     private val _state = MutableStateFlow(SecureDataUiState())
     val state: StateFlow<SecureDataUiState> = _state.asStateFlow()
+    private val operationMutex = Mutex()
 
-    fun loadPasswords() = launchOperation {
+    fun loadPasswords() = launchOperation { refreshPasswords() }
+
+    private suspend fun refreshPasswords() {
         val logins = loginsStorage.list().sortedBy { it.origin.lowercase() }
         _state.update { it.copy(logins = logins) }
     }
 
-    fun loadAutofill() = launchOperation {
+    fun loadAutofill() = launchOperation { refreshAutofill() }
+
+    private suspend fun refreshAutofill() {
         val cards = autofillStorage.getAllCreditCards()
         val addresses = autofillStorage.getAllAddresses()
         _state.update { it.copy(cards = cards, addresses = addresses) }
     }
 
-    fun deleteLogin(guid: String) = launchOperation(reload = ::loadPasswords) {
+    fun deleteLogin(guid: String) = launchOperation {
         loginsStorage.delete(guid)
+        refreshPasswords()
     }
 
-    fun deleteCard(guid: String) = launchOperation(reload = ::loadAutofill) {
+    fun deleteCard(guid: String) = launchOperation {
         autofillStorage.deleteCreditCard(guid)
+        refreshAutofill()
     }
 
-    fun deleteAddress(guid: String) = launchOperation(reload = ::loadAutofill) {
+    fun deleteAddress(guid: String) = launchOperation {
         autofillStorage.deleteAddress(guid)
+        refreshAutofill()
     }
 
     fun addCard(
@@ -75,7 +86,7 @@ class SecureDataViewModel @Inject constructor(
         number: String,
         expiryMonth: Int,
         expiryYear: Int,
-    ) = launchOperation(reload = ::loadAutofill) {
+    ) = launchOperation {
         val digits = number.filter(Char::isDigit)
         autofillStorage.addCreditCard(
             NewCreditCardFields(
@@ -87,9 +98,10 @@ class SecureDataViewModel @Inject constructor(
                 cardType = cardType(digits),
             ),
         )
+        refreshAutofill()
     }
 
-    fun addAddress(form: AddressForm) = launchOperation(reload = ::loadAutofill) {
+    fun addAddress(form: AddressForm) = launchOperation {
         autofillStorage.addAddress(
             UpdatableAddressFields(
                 name = form.name.trim(),
@@ -104,26 +116,28 @@ class SecureDataViewModel @Inject constructor(
                 email = form.email.trim(),
             ),
         )
+        refreshAutofill()
     }
 
     fun clearError() = _state.update { it.copy(error = null) }
 
     private fun launchOperation(
-        reload: (() -> Unit)? = null,
         operation: suspend () -> Unit,
     ) {
         viewModelScope.launch {
-            _state.update { it.copy(loading = true, error = null) }
-            runCatching { withContext(Dispatchers.IO) { operation() } }
-                .onSuccess {
-                    _state.update { it.copy(loading = false) }
-                    reload?.invoke()
-                }
-                .onFailure { error ->
-                    _state.update {
-                        it.copy(loading = false, error = error.message ?: "Unable to update secure data")
+            operationMutex.withLock {
+                _state.update { it.copy(loading = true, error = null) }
+                runCatching { withContext(Dispatchers.IO) { operation() } }
+                    .onSuccess {
+                        _state.update { it.copy(loading = false) }
                     }
-                }
+                    .onFailure { error ->
+                        if (error is CancellationException) throw error
+                        _state.update {
+                            it.copy(loading = false, error = error.message ?: "Unable to update secure data")
+                        }
+                    }
+            }
         }
     }
 }

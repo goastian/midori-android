@@ -345,6 +345,7 @@ dependencies {
     // Mozac
     implementation libs.mozac.concept.engine
     implementation libs.mozac.browser.engine.gecko
+    implementation libs.mozac.browser.errorpages
     implementation libs.mozac.browser.state
     implementation libs.mozac.browser.session.storage
     implementation libs.mozac.browser.thumbnails

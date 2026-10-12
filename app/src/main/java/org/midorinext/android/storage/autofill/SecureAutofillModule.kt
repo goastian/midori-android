@@ -8,14 +8,15 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import mozilla.components.browser.engine.gecko.ext.toAutocompleteAddress
+import mozilla.components.browser.engine.gecko.ext.toAddress
 import mozilla.components.browser.engine.gecko.ext.toCreditCardEntry
 import mozilla.components.browser.engine.gecko.ext.toLoginEntry
 import mozilla.components.concept.storage.CreditCardsAddressesStorageDelegate
-import mozilla.components.concept.storage.LoginsStorage
 import mozilla.components.lib.dataprotect.SecureAbove22Preferences
 import mozilla.components.service.sync.autofill.AutofillCreditCardsAddressesStorage
 import mozilla.components.service.sync.autofill.GeckoCreditCardsAddressesStorageDelegate
@@ -23,6 +24,7 @@ import mozilla.components.service.sync.logins.SyncableLoginsStorage
 import org.midorinext.android.preferences.app.AppPreferences
 import org.mozilla.geckoview.Autocomplete
 import org.mozilla.geckoview.GeckoResult
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -64,6 +66,12 @@ object SecureAutofillModule {
 
     @Provides
     @Singleton
+    fun provideLoginAutofillRepository(
+        loginsStorage: dagger.Lazy<SyncableLoginsStorage>,
+    ): LoginAutofillRepository = LoginAutofillRepository(lazy { loginsStorage.get() })
+
+    @Provides
+    @Singleton
     fun provideAutofillStorage(
         @ApplicationContext context: Context,
         securePreferences: dagger.Lazy<SecureAbove22Preferences>,
@@ -73,7 +81,7 @@ object SecureAutofillModule {
     @Provides
     @Singleton
     fun provideAutocompleteStorageDelegate(
-        loginsStorage: dagger.Lazy<SyncableLoginsStorage>,
+        loginRepository: LoginAutofillRepository,
         autofillStorage: dagger.Lazy<AutofillCreditCardsAddressesStorage>,
         preferenceState: AutofillPreferenceState,
     ): Autocomplete.StorageDelegate {
@@ -84,20 +92,18 @@ object SecureAutofillModule {
         )
         return SafeAutocompleteStorageDelegate(
             creditCardsAddressesDelegate = autofillDelegate,
-            loginsStorage = lazy { loginsStorage.get() },
+            loginRepository = loginRepository,
             preferenceState = preferenceState,
         )
     }
 }
 
 /**
- * Gecko's stock autocomplete bridge launches storage work in global coroutines. An exception while
- * opening encrypted storage can therefore terminate the app as soon as Gecko detects a form. This
- * bridge keeps every storage boundary supervised and always completes Gecko's pending result.
+ * Keeps storage failures supervised and completes Gecko's pending results even on cancellation.
  */
 internal class SafeAutocompleteStorageDelegate(
     private val creditCardsAddressesDelegate: CreditCardsAddressesStorageDelegate,
-    private val loginsStorage: Lazy<LoginsStorage>,
+    private val loginRepository: LoginAutofillRepository,
     private val preferenceState: AutofillPreferenceState,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
 ) : Autocomplete.StorageDelegate {
@@ -138,35 +144,57 @@ internal class SafeAutocompleteStorageDelegate(
         }
     }
 
+    override fun onAddressSave(address: Autocomplete.Address) {
+        if (!preferenceState.addressAutofillEnabled) return
+        launchSafely("saving an address") {
+            if (preferenceState.addressAutofillEnabled) creditCardsAddressesDelegate.onAddressSave(address.toAddress())
+        }
+    }
+
+    override fun onLoginUsed(login: Autocomplete.LoginEntry, usedFields: Int) {
+        val guid = login.guid?.takeIf { it.isNotEmpty() } ?: return
+        if (!preferenceState.passwordAutofillEnabled) return
+        launchSafely("recording login usage") { loginRepository.markUsed(guid) }
+    }
+
     override fun onLoginFetch(domain: String): GeckoResult<Array<Autocomplete.LoginEntry>> =
         geckoResult(emptyArray()) {
             if (!preferenceState.passwordAutofillEnabled) {
                 emptyArray()
             } else {
-                loginsStorage.value.getByBaseDomain(domain)
+                loginRepository.fetch(domain)
+                    .takeIf { preferenceState.passwordAutofillEnabled }.orEmpty()
                     .map { it.toLoginEntry() }
                     .toTypedArray()
             }
         }
 
     override fun onLoginSave(login: Autocomplete.LoginEntry) {
+        val authorization = loginRepository.takeSaveAuthorization(login.toLoginEntry()) ?: return
         if (!preferenceState.savePasswordsEnabled) return
         launchSafely("saving a login") {
-            loginsStorage.value.addOrUpdate(login.toLoginEntry())
+            if (preferenceState.savePasswordsEnabled) loginRepository.save(authorization)
         }
     }
 
     private fun <T> geckoResult(fallback: T, operation: suspend () -> T): GeckoResult<T> {
         val result = GeckoResult<T>()
-        scope.launch {
+        val completed = AtomicBoolean()
+        fun complete(value: T) {
+            if (completed.compareAndSet(false, true)) result.complete(value)
+        }
+        val job = scope.launch {
             val value = try {
                 operation()
+            } catch (error: CancellationException) {
+                throw error
             } catch (error: Throwable) {
                 Log.e(TAG, "Autocomplete storage operation failed", error)
                 fallback
             }
-            result.complete(value)
+            complete(value)
         }
+        job.invokeOnCompletion { error -> if (error != null) complete(fallback) }
         return result
     }
 
@@ -174,6 +202,8 @@ internal class SafeAutocompleteStorageDelegate(
         scope.launch {
             try {
                 operation()
+            } catch (error: CancellationException) {
+                throw error
             } catch (error: Throwable) {
                 Log.e(TAG, "Failed while $operationName", error)
             }

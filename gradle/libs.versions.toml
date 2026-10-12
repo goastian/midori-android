@@ -82,6 +82,7 @@ room-testing = { group = "androidx.room", name = "room-testing", version.ref = "
 # Mozilla android components
 mozac-concept-engine = { group = "org.mozilla.components", name = "concept-engine", version.ref = "mozac" }
 mozac-browser-engine-gecko = { group = "org.mozilla.components", name = "browser-engine-gecko", version.ref = "mozac" }
+mozac-browser-errorpages = { group = "org.mozilla.components", name = "browser-errorpages", version.ref = "mozac" }
 mozac-browser-state = { group = "org.mozilla.components", name = "browser-state", version.ref = "mozac" }
 mozac-browser-session-storage = { group = "org.mozilla.components", name = "browser-session-storage", version.ref = "mozac" }
 mozac-browser-thumbnails = { group = "org.mozilla.components", name = "browser-thumbnails", version.ref = "mozac" }

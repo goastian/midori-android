@@ -34,6 +34,7 @@ object GeckoSettingsHiltModule {
         builder.consoleOutput(debugEnabled)
         builder.debugLogging(debugEnabled)
         builder.remoteDebuggingEnabled(debugEnabled)
+        builder.loginAutofillEnabled(false)
 
         return builder.build()
     }

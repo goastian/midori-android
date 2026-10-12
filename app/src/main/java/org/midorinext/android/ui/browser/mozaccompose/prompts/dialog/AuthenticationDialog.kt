@@ -1,6 +1,7 @@
 package org.midorinext.android.ui.browser.mozaccompose.prompts.dialog
 
 import androidx.compose.material3.TextField
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,7 +31,7 @@ fun AuthenticationDialog(
             if (!request.onlyShowPassword) {
                 TextField(value = login, onValueChange = { login = it })
             }
-            TextField(value = password, onValueChange = { password = it })
+            TextField(value = password, onValueChange = { password = it }, visualTransformation = PasswordVisualTransformation())
         }
     )
 }

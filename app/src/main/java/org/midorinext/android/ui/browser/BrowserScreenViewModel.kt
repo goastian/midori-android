@@ -15,6 +15,7 @@ import org.midorinext.android.vpn.MidoriVpnFeature
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.storage.bookmarks.BookmarksRepository
+import org.midorinext.android.storage.autofill.LoginAutofillRepository
 import org.midorinext.android.ui.browser.toolbar.BrowserToolbarState
 import org.midorinext.android.ui.browser.toolbar.BrowserToolbarStateFactory
 import org.midorinext.android.usecases.MidoriUseCases
@@ -70,6 +71,7 @@ class BrowserScreenViewModel @Inject constructor(
     val MidoriUseCases: MidoriUseCases,
     private val appPreferencesRepository: AppPreferencesRepository,
     val pdfSaveEvents: PdfSaveEvents,
+    val loginRepository: LoginAutofillRepository,
     private val backgroundPlaybackFeature: BackgroundPlaybackFeature,
     webAppRepositoryProvider: dagger.Lazy<WebAppRepository>,
     private val desktopHostFilter: DesktopHostFilter,
