@@ -11,6 +11,7 @@ enum ToolbarPosition {
 enum TabsViewOption {
   GRID = 0;
   LIST = 1;
+  CAROUSEL = 2;
 }
 
 enum ToolbarShortcut {
