@@ -93,6 +93,47 @@ class LoginAutofillRepositoryTest {
     }
 
     @Test
+    fun updatingChosenAccountDoesNotOverwriteAnotherAccountWithNewUsername() = runBlocking {
+        val fixture = Fixture()
+        val other = fixture.original.copy(
+            guid = "other-guid", origin = "https://app.example.org", formActionOrigin = "https://app.example.org",
+            username = "other-user", password = "other-password",
+        )
+        fixture.rows[other.guid] = other
+        val entry = fixture.original.toEntry().copy(username = other.username, password = "updated-password")
+
+        assertTrue(fixture.repository.saveConfirmed(entry, fixture.original.guid))
+
+        assertEquals("updated-password", fixture.rows.getValue(fixture.original.guid).password)
+        assertEquals(other, fixture.rows.getValue(other.guid))
+    }
+
+    @Test
+    fun sameUsernameOnNestedSubdomainCreatesIndependentLogin() = runBlocking {
+        val fixture = Fixture()
+        val entry = fixture.original.toEntry().copy(
+            origin = "https://accounts.mail.example.org",
+            formActionOrigin = "https://accounts.mail.example.org",
+            password = "subdomain-password",
+        )
+
+        assertEquals(LoginSaveDecision.Create, fixture.repository.validate(entry))
+        assertTrue(fixture.repository.saveConfirmed(entry, null))
+
+        assertEquals(fixture.original, fixture.rows.getValue(fixture.original.guid))
+        assertEquals(entry, fixture.repository.list().first { it.guid != fixture.original.guid }.toEntry())
+    }
+
+    @Test
+    fun deletedUpdateTargetCannotBeRecreatedByDirectConfirmation() = runBlocking {
+        val fixture = Fixture()
+        fixture.repository.delete(fixture.original.guid)
+
+        assertEquals(false, fixture.repository.saveConfirmed(fixture.original.toEntry(), fixture.original.guid))
+        assertTrue(fixture.rows.isEmpty())
+    }
+
+    @Test
     fun authorizationMustMatchCredentialsAndCanOnlyBeUsedOnce() {
         val fixture = Fixture()
         val entry = fixture.original.toEntry()
@@ -123,9 +164,15 @@ class LoginAutofillRepositoryTest {
                 "findLoginToUpdate" -> (args!![0] as LoginEntry).let { entry ->
                     rows.values.firstOrNull { it.origin == entry.origin && it.username == entry.username }
                 }
-                "addOrUpdate" -> (args!![0] as LoginEntry).let { entry ->
-                    val guid = rows.values.firstOrNull { it.origin == entry.origin && it.username == entry.username }?.guid ?: "new-guid"
-                    original.copy(guid = guid, username = entry.username, password = entry.password).also { rows[guid] = it }
+                "add" -> (args!![0] as LoginEntry).let { entry ->
+                    Login("new-guid", entry.username, entry.password, entry.origin, entry.formActionOrigin, entry.httpRealm)
+                        .also { rows[it.guid] = it }
+                }
+                "update" -> (args!![1] as LoginEntry).let { entry ->
+                    rows.getValue(args[0] as String).copy(
+                        username = entry.username, password = entry.password, origin = entry.origin,
+                        formActionOrigin = entry.formActionOrigin, httpRealm = entry.httpRealm,
+                    ).also { rows[it.guid] = it }
                 }
                 else -> error("Unexpected operation: ${method.name}")
             }

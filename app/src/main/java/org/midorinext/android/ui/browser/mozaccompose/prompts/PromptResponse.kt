@@ -12,6 +12,10 @@ internal class PromptResponse(
 ) {
     private val completed = AtomicBoolean()
 
+    val isPending: Boolean
+        get() = !completed.get() && store.state.selectedTabId == sessionId &&
+            store.state.findTabOrCustomTab(sessionId)?.content?.promptRequests?.any { it.uid == request.uid } == true
+
     fun respond(block: () -> Unit = {}) {
         val requiresSelectedTab = request is PromptRequest.SelectLoginPrompt || request is PromptRequest.SelectCreditCard ||
             request is PromptRequest.SelectAddress || request is PromptRequest.SaveLoginPrompt

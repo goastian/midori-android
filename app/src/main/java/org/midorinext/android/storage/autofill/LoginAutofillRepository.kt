@@ -28,7 +28,7 @@ class LoginAutofillRepository(private val storage: Lazy<LoginsStorage>) {
         if (login.guid.isEmpty()) return null
         return withStorage {
             get(login.guid)?.takeIf {
-                it.origin == login.origin && it.httpRealm == login.httpRealm &&
+                sameLoginOrigin(it.origin, login.origin) && it.httpRealm == login.httpRealm &&
                     it.username == login.username && it.password == login.password
             }?.let { login }
         }
@@ -50,18 +50,31 @@ class LoginAutofillRepository(private val storage: Lazy<LoginsStorage>) {
         }
     }
 
+    suspend fun saveConfirmed(entry: LoginEntry, existingGuid: String?): Boolean {
+        val authorization = synchronized(authorizationLock) {
+            SaveAuthorization(entry, existingGuid, revisions[entry.identity()] ?: 0L)
+        }
+        return save(authorization)
+    }
+
     internal fun takeSaveAuthorization(entry: LoginEntry): SaveAuthorization? = synchronized(authorizationLock) {
         val identity = entry.identity()
         pendingSaves[identity]?.takeIf { it.entry == entry }?.also { pendingSaves.remove(identity) }
     }
 
-    internal suspend fun save(authorization: SaveAuthorization) = withStorage {
+    internal suspend fun save(authorization: SaveAuthorization): Boolean = withStorage {
         val current = synchronized(authorizationLock) {
             (revisions[authorization.entry.identity()] ?: 0L) == authorization.revision
         }
-        if (current && (authorization.existingGuid == null || get(authorization.existingGuid) != null)) {
-            addOrUpdate(authorization.entry)
+        if (!current) return@withStorage false
+        val guid = authorization.existingGuid
+        if (guid == null) {
+            add(authorization.entry)
+        } else {
+            if (get(guid) == null) return@withStorage false
+            update(guid, authorization.entry)
         }
+        true
     }
 
     suspend fun delete(guid: String): Unit = withStorage {

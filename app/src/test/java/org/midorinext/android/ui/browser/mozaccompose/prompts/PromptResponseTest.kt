@@ -94,6 +94,17 @@ class PromptResponseTest {
         assertEquals(listOf(save), fixture.store.state.tabs.single().content.promptRequests)
     }
 
+    @Test
+    fun loadingPageDoesNotDiscardLatestValidSuggestion() {
+        val fixture = Fixture()
+        fixture.store.dispatch(ContentAction.UpdateLoadingStateAction(fixture.tabId, true))
+
+        dismissObsoleteAutofillRequests(fixture.store, fixture.tabId)
+
+        assertEquals(0, fixture.dismissed)
+        assertEquals(listOf(fixture.request), fixture.store.state.tabs.single().content.promptRequests)
+    }
+
     private class Fixture {
         var confirmed = 0
         var dismissed = 0

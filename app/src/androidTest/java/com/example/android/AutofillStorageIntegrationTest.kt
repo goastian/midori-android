@@ -16,6 +16,34 @@ import org.midorinext.android.storage.autofill.LoginAutofillRepository
 @RunWith(AndroidJUnit4::class)
 class AutofillStorageIntegrationTest {
     @Test
+    fun rootAndNestedSubdomainsKeepIndependentPasswordsForSameUsername() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
+        val securePreferences = SecureAbove22Preferences(context, "midori_secure_storage_keys")
+        val storage = SyncableLoginsStorage(context, lazy { securePreferences })
+        val repository = LoginAutofillRepository(lazy { storage })
+        val root = LoginEntry(TEST_ORIGIN, TEST_ORIGIN, username = "subdomains-integration-test", password = "root-password")
+        val nestedOrigin = "https://accounts.mail.$TEST_DOMAIN"
+        val nested = root.copy(origin = nestedOrigin, formActionOrigin = nestedOrigin, password = "nested-password")
+        val savedRoot = storage.addOrUpdate(root)
+        val savedNested = storage.addOrUpdate(nested)
+        try {
+            val rootDecision = repository.validate(root.copy(password = "root-updated"))
+            val nestedDecision = repository.validate(nested.copy(password = "nested-updated"))
+            assertEquals(org.midorinext.android.storage.autofill.LoginSaveDecision.Update(savedRoot.guid), rootDecision)
+            assertEquals(org.midorinext.android.storage.autofill.LoginSaveDecision.Update(savedNested.guid), nestedDecision)
+
+            assertTrue(repository.saveConfirmed(nested.copy(password = "nested-updated"), savedNested.guid))
+
+            assertEquals(root.password, storage.get(savedRoot.guid)!!.password)
+            assertEquals("nested-updated", storage.get(savedNested.guid)!!.password)
+            assertTrue(repository.fetch(TEST_DOMAIN).map { it.guid }.containsAll(listOf(savedRoot.guid, savedNested.guid)))
+        } finally {
+            storage.delete(savedRoot.guid)
+            storage.delete(savedNested.guid)
+        }
+    }
+
+    @Test
     fun deletingEncryptedLoginPreventsLateSaveFromRestoringIt() = runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
         val securePreferences = SecureAbove22Preferences(context, "midori_secure_storage_keys")

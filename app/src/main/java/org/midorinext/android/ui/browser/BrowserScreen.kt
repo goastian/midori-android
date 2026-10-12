@@ -329,7 +329,7 @@ fun BrowserScreen(
         ) { modifier ->
             if (currentUrl != null) {
                 if (nativeHome) {
-                    if (nativeHomeReady) GlobalFeatures(appViewModel, viewModel)
+                    if (nativeHomeReady) GlobalFeatures(appViewModel, viewModel, onManageLogins = { navigateTo(NavDestination.SavedPasswords) })
                     val canGoBack by viewModel.canGoBackInPage.collectAsStateWithLifecycle()
                     BackHandler(enabled = canGoBack && !viewModel.toolbarState.hasFocus) {
                         viewModel.sessionUseCases.goBack()
@@ -359,7 +359,7 @@ fun BrowserScreen(
                     )
                     else Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).testTag("native_blank_home"))
                 } else {
-                    GlobalFeatures(appViewModel, viewModel)
+                    GlobalFeatures(appViewModel, viewModel, onManageLogins = { navigateTo(NavDestination.SavedPasswords) })
 
                     PullToRefreshBox(
                         onRefresh = { viewModel.reloadUrl() },

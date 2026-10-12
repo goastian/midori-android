@@ -170,6 +170,7 @@ internal class SafeAutocompleteStorageDelegate(
         }
 
     override fun onLoginSave(login: Autocomplete.LoginEntry) {
+        // The prompt persists before confirming Gecko; repeated callbacks must not recreate deleted records.
         val authorization = loginRepository.takeSaveAuthorization(login.toLoginEntry()) ?: return
         if (!preferenceState.savePasswordsEnabled) return
         launchSafely("saving a login") {

@@ -10,12 +10,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import androidx.core.content.ContextCompat
 import org.midorinext.android.R
 import org.midorinext.android.ext.activity
 import org.midorinext.android.preferences.app.AppPreferences
 import org.midorinext.android.storage.autofill.LoginAutofillRepository
+import org.midorinext.android.storage.autofill.loginOptions
 import org.midorinext.android.ui.browser.mozaccompose.prompts.dialog.AlertDialog
 import org.midorinext.android.ui.browser.mozaccompose.prompts.dialog.AuthenticationDialog
 import org.midorinext.android.ui.browser.mozaccompose.prompts.dialog.AutofillPicker
@@ -36,7 +39,6 @@ import mozilla.components.browser.state.selector.findTabOrCustomTab
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.prompt.PromptRequest
-import mozilla.components.concept.storage.LoginHint
 import mozilla.components.feature.prompts.share.DefaultShareDelegate
 import mozilla.components.feature.prompts.share.ShareDelegate
 import mozilla.components.feature.session.SessionUseCases
@@ -56,6 +58,9 @@ fun PromptFeature(
     exitFullscreenUseCase: SessionUseCases.ExitFullScreenUseCase,
     appPreferences: AppPreferences,
     loginRepository: LoginAutofillRepository,
+    onManageLogins: (() -> Unit)? = null,
+    hideAutofillSuggestions: Boolean = false,
+    autofillBottomPadding: Dp = 0.dp,
     shareDelegate: ShareDelegate = rememberDefaultShareDelegate()
 ) {
     val context = LocalContext.current
@@ -63,7 +68,7 @@ fun PromptFeature(
     val promptAbuserDetector = remember { PromptAbuserDetector() }
 
     val promptState by store.observeAsComposableState { state ->
-        state.selectedTab?.let { PromptState(it.id, it.content.loading, it.content.promptRequests) }
+        state.selectedTab?.let { PromptState(it.id, it.content.url, it.content.loading, it.content.promptRequests) }
     }
     val loading = promptState?.loading
     val lastRequest = promptState?.requests?.activePrompt()
@@ -244,10 +249,16 @@ fun PromptFeature(
                     SaveLoginDialog(
                         login = login,
                         repository = loginRepository,
-                        onSave = { entry, existingGuid -> consumeAfter {
-                            loginRepository.authorizeSave(entry, existingGuid)
-                            request.onConfirm(entry)
-                        } },
+                        onSave = { entry, existingGuid ->
+                            if (response.isPending) {
+                                loginRepository.saveConfirmed(entry, existingGuid).also { saved ->
+                                    if (saved) consumeAfter { request.onConfirm(entry) }
+                                }
+                            } else {
+                                response.dismiss()
+                                false
+                            }
+                        },
                         onDismiss = response::dismiss,
                     )
                 } else {
@@ -255,13 +266,16 @@ fun PromptFeature(
                 }
             }
             is PromptRequest.SelectLoginPrompt -> {
-                val logins = request.logins.filter { it.hint != LoginHint.EMAIL_MASK }
-                if (appPreferences.passwordAutofillEnabled && logins.isNotEmpty()) {
+                val pageUrl = promptState?.url.orEmpty()
+                if (!hideAutofillSuggestions && appPreferences.passwordAutofillEnabled && loginOptions(request.logins, pageUrl).isNotEmpty()) {
                     LoginPicker(
-                        logins = logins,
+                        logins = request.logins,
+                        pageUrl = pageUrl,
+                        bottomPadding = autofillBottomPadding,
                         repository = loginRepository,
                         onSelect = { login -> consumeAfter { request.onConfirm(login) } },
                         onDismiss = response::dismiss,
+                        onManageLogins = onManageLogins?.let { manage -> { response.dismiss(); manage() } },
                     )
                 } else {
                     ConsumePromptEffect(request.uid) { consumeAfter { request.onDismiss() } }
@@ -284,10 +298,11 @@ fun PromptFeature(
                 }
             }
             is PromptRequest.SelectCreditCard -> {
-                if (appPreferences.autofillCardsEnabled && request.creditCards.isNotEmpty()) {
+                if (!hideAutofillSuggestions && appPreferences.autofillCardsEnabled && request.creditCards.isNotEmpty()) {
                     AutofillPicker(
                         title = stringResource(R.string.prompt_fill_card_title),
                         options = request.creditCards,
+                        bottomPadding = autofillBottomPadding,
                         label = { it.obfuscatedCardNumber },
                         detail = { it.name },
                         onSelect = { creditCard -> consumeAfter { request.onConfirm(creditCard) } },
@@ -298,10 +313,11 @@ fun PromptFeature(
                 }
             }
             is PromptRequest.SelectAddress -> {
-                if (appPreferences.autofillAddressesEnabled && request.addresses.isNotEmpty()) {
+                if (!hideAutofillSuggestions && appPreferences.autofillAddressesEnabled && request.addresses.isNotEmpty()) {
                     AutofillPicker(
                         title = stringResource(R.string.prompt_fill_address_title),
                         options = request.addresses,
+                        bottomPadding = autofillBottomPadding,
                         label = { it.addressLabel },
                         detail = { it.name },
                         onSelect = { address -> consumeAfter { request.onConfirm(address) } },
@@ -357,7 +373,7 @@ fun PromptFeature(
     }
 }
 
-private data class PromptState(val sessionId: String, val loading: Boolean, val requests: List<PromptRequest>)
+private data class PromptState(val sessionId: String, val url: String, val loading: Boolean, val requests: List<PromptRequest>)
 
 private val PromptRequest.isAutofillSelection: Boolean
     get() = this is PromptRequest.SelectLoginPrompt || this is PromptRequest.SelectCreditCard || this is PromptRequest.SelectAddress
@@ -368,7 +384,7 @@ internal fun dismissObsoleteAutofillRequests(store: BrowserStore, sessionId: Str
     val session = store.state.findTabOrCustomTab(sessionId) ?: return
     val activeUid = session.content.promptRequests.activePrompt()?.uid
     session.content.promptRequests.filter {
-        it.isAutofillSelection && (session.content.loading || it.uid != activeUid)
+        it.isAutofillSelection && it.uid != activeUid
     }.forEach { PromptResponse(store, sessionId, it).dismiss() }
 }
 

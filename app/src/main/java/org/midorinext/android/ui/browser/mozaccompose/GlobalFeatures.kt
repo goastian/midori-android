@@ -7,12 +7,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.midorinext.android.R
 import org.midorinext.android.legacy.ClFeature
 import org.midorinext.android.mozac.downloads.openDownloadedFile
 import org.midorinext.android.ui.MidoriApplicationViewModel
 import org.midorinext.android.ui.browser.BrowserScreenViewModel
+import org.midorinext.android.ui.browser.toolbar.ToolbarHeight
+import org.midorinext.android.preferences.app.ToolbarPosition
 import org.midorinext.android.ui.browser.mozaccompose.downloads.DownloadFeature
 import org.midorinext.android.ui.browser.mozaccompose.permissions.PermissionsFeature
 import org.midorinext.android.ui.browser.mozaccompose.prompts.PromptFeature
@@ -24,6 +27,7 @@ import mozilla.components.feature.downloads.R as mozacR
 fun GlobalFeatures(
     appViewModel: MidoriApplicationViewModel = hiltViewModel(),
     viewModel: BrowserScreenViewModel = hiltViewModel(),
+    onManageLogins: (() -> Unit)? = null,
 ) {
     FullScreenFeature(
         store = viewModel.store,
@@ -82,11 +86,18 @@ fun GlobalFeatures(
     }
 
     val appPreferences by viewModel.appPreferences.collectAsStateWithLifecycle()
+    val toolbarPosition by viewModel.toolbarState.toolbarPosition.collectAsStateWithLifecycle()
+    val hideToolbarOnScroll by viewModel.toolbarState.shouldHideOnScroll.collectAsStateWithLifecycle()
     PromptFeature(
         store = viewModel.store,
         exitFullscreenUseCase = viewModel.sessionUseCases.exitFullscreen,
         appPreferences = appPreferences,
         loginRepository = viewModel.loginRepository,
+        onManageLogins = onManageLogins,
+        hideAutofillSuggestions = viewModel.toolbarState.hasFocus,
+        autofillBottomPadding = if (toolbarPosition == ToolbarPosition.BOTTOM &&
+            (!hideToolbarOnScroll || viewModel.toolbarState.visible)
+        ) ToolbarHeight else 0.dp,
     )
 
     ClFeature()

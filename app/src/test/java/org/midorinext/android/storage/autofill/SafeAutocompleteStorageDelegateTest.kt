@@ -131,7 +131,7 @@ class SafeAutocompleteStorageDelegateTest {
         LoginsStorage::class.java.classLoader,
         arrayOf(LoginsStorage::class.java),
     ) { _, method, arguments ->
-        check(method.name == "addOrUpdate")
+        check(method.name == "add")
         val entry = arguments!![0] as LoginEntry
         saved += entry
         Login(guid = "saved-login", username = entry.username, password = entry.password, origin = entry.origin)
