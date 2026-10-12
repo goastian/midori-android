@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="available_tabs_view_carousel">Carosello</string>
+    <string name="tab_tray_view_mode">Vista delle schede</string>
+    <string name="tab_tray_done">Fine</string>
+    <string name="tab_tray_select_tabs">Seleziona schede</string>
+    <string name="tab_tray_close_selected">Chiudi selezionate</string>
+    <string name="browser_tab_carousel_position">%1$d di %2$d</string>
+    <string name="tab_tray_switch_view">Passa alla vista %1$s</string>
+</resources>

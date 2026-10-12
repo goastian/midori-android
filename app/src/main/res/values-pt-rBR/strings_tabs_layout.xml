@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="available_tabs_view_carousel">Carrossel</string>
+    <string name="tab_tray_view_mode">Visualização de abas</string>
+    <string name="tab_tray_done">Concluído</string>
+    <string name="tab_tray_select_tabs">Selecionar abas</string>
+    <string name="tab_tray_close_selected">Fechar selecionadas</string>
+    <string name="browser_tab_carousel_position">%1$d de %2$d</string>
+    <string name="tab_tray_switch_view">Alterar para a visualização %1$s</string>
+</resources>

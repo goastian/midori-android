@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="available_tabs_view_carousel">Carrousel</string>
+    <string name="tab_tray_view_mode">Affichage des onglets</string>
+    <string name="tab_tray_done">Terminé</string>
+    <string name="tab_tray_select_tabs">Sélectionner des onglets</string>
+    <string name="tab_tray_close_selected">Fermer la sélection</string>
+    <string name="browser_tab_carousel_position">%1$d sur %2$d</string>
+    <string name="tab_tray_switch_view">Passer à la vue %1$s</string>
+</resources>

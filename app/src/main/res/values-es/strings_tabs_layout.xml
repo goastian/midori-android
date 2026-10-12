@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="available_tabs_view_carousel">Carrusel</string>
+    <string name="tab_tray_view_mode">Vista de pestañas</string>
+    <string name="tab_tray_done">Listo</string>
+    <string name="tab_tray_select_tabs">Seleccionar pestañas</string>
+    <string name="tab_tray_close_selected">Cerrar seleccionadas</string>
+    <string name="browser_tab_carousel_position">%1$d de %2$d</string>
+    <string name="tab_tray_switch_view">Cambiar vista de pestañas a %1$s</string>
+</resources>

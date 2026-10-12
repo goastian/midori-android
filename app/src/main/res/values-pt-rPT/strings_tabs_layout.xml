@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="available_tabs_view_carousel">Carrossel</string>
+    <string name="tab_tray_view_mode">Vista dos separadores</string>
+    <string name="tab_tray_done">Concluído</string>
+    <string name="tab_tray_select_tabs">Selecionar separadores</string>
+    <string name="tab_tray_close_selected">Fechar selecionados</string>
+    <string name="browser_tab_carousel_position">%1$d de %2$d</string>
+    <string name="tab_tray_switch_view">Mudar para a vista %1$s</string>
+</resources>

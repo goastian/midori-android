@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="available_tabs_view_carousel">कैरसेल</string>
+    <string name="tab_tray_view_mode">टैब दृश्य</string>
+    <string name="tab_tray_done">हो गया</string>
+    <string name="tab_tray_select_tabs">टैब चुनें</string>
+    <string name="tab_tray_close_selected">चुने हुए टैब बंद करें</string>
+    <string name="browser_tab_carousel_position">%2$d में से %1$d</string>
+    <string name="tab_tray_switch_view">टैब दृश्य %1$s में बदलें</string>
+</resources>

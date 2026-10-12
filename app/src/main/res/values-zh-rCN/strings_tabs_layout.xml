@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="available_tabs_view_carousel">轮播</string>
+    <string name="tab_tray_view_mode">标签页视图</string>
+    <string name="tab_tray_done">完成</string>
+    <string name="tab_tray_select_tabs">选择标签页</string>
+    <string name="tab_tray_close_selected">关闭所选标签页</string>
+    <string name="browser_tab_carousel_position">第 %1$d 个，共 %2$d 个</string>
+    <string name="tab_tray_switch_view">切换为%1$s标签页视图</string>
+</resources>

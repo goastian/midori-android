@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="available_tabs_view_carousel">Karusel</string>
+    <string name="tab_tray_view_mode">Pamja e skedave</string>
+    <string name="tab_tray_done">U krye</string>
+    <string name="tab_tray_select_tabs">Zgjidhni skedat</string>
+    <string name="tab_tray_close_selected">Mbyll të zgjedhurat</string>
+    <string name="browser_tab_carousel_position">%1$d nga %2$d</string>
+    <string name="tab_tray_switch_view">Ndrysho pamjen e skedave në %1$s</string>
+</resources>

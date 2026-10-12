@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="available_tabs_view_carousel">Karussell</string>
+    <string name="tab_tray_view_mode">Tab-Ansicht</string>
+    <string name="tab_tray_done">Fertig</string>
+    <string name="tab_tray_select_tabs">Tabs auswählen</string>
+    <string name="tab_tray_close_selected">Ausgewählte schließen</string>
+    <string name="browser_tab_carousel_position">%1$d von %2$d</string>
+    <string name="tab_tray_switch_view">Zur Tab-Ansicht %1$s wechseln</string>
+</resources>

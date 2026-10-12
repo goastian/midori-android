@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="available_tabs_view_carousel">Карусель</string>
+    <string name="tab_tray_view_mode">Вид вкладок</string>
+    <string name="tab_tray_done">Готово</string>
+    <string name="tab_tray_select_tabs">Выбрать вкладки</string>
+    <string name="tab_tray_close_selected">Закрыть выбранные</string>
+    <string name="browser_tab_carousel_position">%1$d из %2$d</string>
+    <string name="tab_tray_switch_view">Переключить вид вкладок на «%1$s»</string>
+</resources>
