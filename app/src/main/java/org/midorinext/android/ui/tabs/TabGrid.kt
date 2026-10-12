@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -24,23 +25,24 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.Dp
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 import org.midorinext.android.R
 import org.midorinext.android.newtab.isNativeHomeUrl
-import org.midorinext.android.ui.browser.ToolbarAction
-import org.midorinext.android.ui.browser.home.HomePrivateBrowsingContent
+import org.midorinext.android.ext.toCleanHost
 import org.midorinext.android.ui.widgets.MidoriIconOnBackground
 import org.midorinext.android.ui.animation.reduceMotionRequested
 import mozilla.components.browser.icons.BrowserIcons
@@ -71,6 +73,7 @@ fun TabGrid(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier
+            .testTag("tabs_grid")
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
@@ -114,6 +117,7 @@ fun TabCard(
     onDragPositionChanged: (Offset) -> Unit = {},
     onDragFinished: () -> Unit = {},
     onDragCancelled: () -> Unit = {},
+    previewHeight: Dp = 180.dp,
     modifier: Modifier = Modifier
 ) {
     var deleting by remember { mutableStateOf(false) }
@@ -130,13 +134,31 @@ fun TabCard(
         label = "tabSwipeScale",
     )
     val isPrivateBrowsingHome = tab.content.private && tab.content.url.isBlank()
+    val isNativeHome = isNativeHomeUrl(tab.content.url)
+    val domain = remember(tab.content.url) { tab.content.url.toCleanHost() }
+    val title = when {
+        isPrivateBrowsingHome -> stringResource(R.string.browser_new_tab_private)
+        isNativeHome -> stringResource(R.string.browser_new_tab)
+        else -> tab.content.title.ifBlank { domain }
+    }
+    val highlighted = if (selectionMode) isSelectedForGrouping else selected
+    val shape = RoundedCornerShape(16.dp)
     var coordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
 
     Column(modifier = modifier
+        .testTag("tab_card:${tab.id}")
+        .fillMaxWidth()
         .scale(scale)
         .alpha(if (isBeingDragged) 0.42f else 1f)
         .onGloballyPositioned { coordinates = it }
-        .clip(MaterialTheme.shapes.extraSmall)
+        .semantics { this.selected = highlighted }
+        .border(
+            width = if (highlighted) 2.dp else 1.dp,
+            color = if (highlighted) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.outline,
+            shape = shape
+        )
+        .clip(shape)
         .then(
             if (dragEnabled) {
                 // Drag and selection must share the same long-press stream. A combinedClickable
@@ -187,23 +209,22 @@ fun TabCard(
             }
         )
         .background(
-            if (selected || isSelectedForGrouping) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.secondaryContainer
+            if (highlighted) MaterialTheme.colorScheme.secondaryContainer
+            else MaterialTheme.colorScheme.tertiaryContainer
         )
     ) {
-        CompositionLocalProvider(LocalContentColor provides
-            if (selected || isSelectedForGrouping) MaterialTheme.colorScheme.onPrimary
-            else MaterialTheme.colorScheme.onSecondaryContainer)
+        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface)
         {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp)
             ) {
                 Box(modifier = Modifier
                     .padding(start = 10.dp)
                     .size(18.dp)
                 ) {
-                    if (isPrivateBrowsingHome || isNativeHomeUrl(tab.content.url)) {
+                    if (isPrivateBrowsingHome || isNativeHome) {
                         MidoriIconOnBackground(shape = RoundedCornerShape(4.dp))
                     } else {
                         tab.content.icon?.let {
@@ -219,32 +240,43 @@ fun TabCard(
                     }
                 }
 
-                Text(
-                    text = if (isPrivateBrowsingHome) stringResource(id = R.string.browser_new_tab_private)
-                            else if (isNativeHomeUrl(tab.content.url)) stringResource(R.string.browser_new_tab)
-                            else tab.content.title,
-                    fontSize = 14.sp,
-                    lineHeight = 18.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(2f)
-                )
+                Column(modifier = Modifier.weight(1f).padding(vertical = 8.dp)) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.labelLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (domain.isNotBlank()) {
+                        Text(
+                            text = domain,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
                 if (selectionMode) {
                     Checkbox(
                         checked = isSelectedForGrouping,
                         onCheckedChange = { onSelected(tab) }
                     )
                 } else if (groupId != null) {
-                    ToolbarAction(onClick = { onRemoveFromGroup(groupId, tab.id) }) {
+                    IconButton(
+                        onClick = { onRemoveFromGroup(groupId, tab.id) },
+                        modifier = Modifier.size(48.dp)
+                    ) {
                         Icon(
                             painterResource(id = R.drawable.icons_folder),
                             contentDescription = stringResource(R.string.browser_remove_tab_from_group)
                         )
                     }
                 } else {
-                    ToolbarAction(
+                    IconButton(
                         onClick = { deleting = true },
-                    ) { // TODO rename ToolbarAction to "SmallButton" and put it in widgets
+                        modifier = Modifier.size(48.dp)
+                    ) {
                         Icon(
                             painterResource(id = R.drawable.icons_close),
                             contentDescription = stringResource(R.string.tab_tray_close_tab),
@@ -253,9 +285,9 @@ fun TabCard(
                 }
             }
             Box(modifier = Modifier
-                .defaultMinSize(150.dp, 175.dp)
-                .padding(top = 0.dp, bottom = 4.dp, start = 4.dp, end = 4.dp)
-                .height(175.dp)
+                .fillMaxWidth()
+                .padding(bottom = 4.dp, start = 4.dp, end = 4.dp)
+                .height(previewHeight)
                 .clip(
                     RoundedCornerShape(
                         topStart = 4.dp,
@@ -263,22 +295,18 @@ fun TabCard(
                         bottomStart = 12.dp,
                         bottomEnd = 12.dp
                     )
-                ),
+                )
+                .background(MaterialTheme.colorScheme.surfaceVariant),
                 propagateMinConstraints = true
             ) {
-                // TODO size equal to calculated size ?
                 if (isPrivateBrowsingHome) {
-                    HomePrivateBrowsingContent(
-                        iconColor = LocalContentColor.current,
-                        iconScale = 0.5f,
-                        iconPaddingBottom = 8.dp,
-                        titleFontSize = 16.sp,
-                        titleLineHeight = 16.sp,
-                        textFontSize = 10.sp,
-                        textLineHeight = 12.sp,
-                        modifier = Modifier.padding(8.dp)
+                    Icon(
+                        painter = painterResource(R.drawable.icons_privacy_mask),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(48.dp)
                     )
-                } else if (isNativeHomeUrl(tab.content.url)) {
+                } else if (isNativeHome) {
                     Image(painterResource(R.mipmap.ic_launcher_foreground), null, Modifier.fillMaxSize().padding(48.dp))
                 } else {
                     TabThumbnail(

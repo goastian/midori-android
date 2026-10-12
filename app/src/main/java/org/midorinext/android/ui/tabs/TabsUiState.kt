@@ -39,12 +39,11 @@ sealed interface TabsUiAction {
 }
 
 fun TabsUiState.reduce(action: TabsUiAction): TabsUiState = when (action) {
-    is TabsUiAction.SelectPage -> copy(
-        page = action.page,
-        // Selection only applies to the page where it started. Search is intentionally retained
-        // so users can compare the same query between normal and private tabs.
-        mode = if (mode is TabsMode.Selecting) TabsMode.Browsing else mode,
-    )
+    is TabsUiAction.SelectPage -> if (page == action.page) {
+        this
+    } else {
+        copy(page = action.page, mode = TabsMode.Browsing)
+    }
 
     TabsUiAction.ToggleSearch -> copy(
         mode = if (mode is TabsMode.Searching) TabsMode.Browsing else TabsMode.Searching(),
@@ -161,6 +160,7 @@ internal fun SmartTabsState.selectedItemIndex(
 
     val hasActiveHeader = activeTabs.isNotEmpty() && when (tabsViewOption) {
         TabsViewOption.LIST -> groups.isNotEmpty() || inactiveTabs.isNotEmpty()
+        TabsViewOption.CAROUSEL -> false
         else -> groups.isEmpty()
     }
     val activeStart = groups.size + if (hasActiveHeader) 1 else 0
@@ -168,5 +168,10 @@ internal fun SmartTabsState.selectedItemIndex(
     if (activeIndex >= 0) return activeStart + activeIndex
 
     val inactiveIndex = inactiveTabs.indexOfFirst { it.id == selectedTabId }
-    return if (inactiveIndex >= 0) activeStart + activeTabs.size + 1 + inactiveIndex else -1
+    val inactiveHeaderCount = if (tabsViewOption == TabsViewOption.CAROUSEL) 0 else 1
+    return if (inactiveIndex >= 0) {
+        activeStart + activeTabs.size + inactiveHeaderCount + inactiveIndex
+    } else {
+        -1
+    }
 }

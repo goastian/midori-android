@@ -227,6 +227,12 @@ class AppPreferencesRepository @Inject constructor(
         }
     }
 
+    suspend fun cycleTabsView() {
+        datastore.updateData { preferences ->
+            preferences.toBuilder().setTabsView(preferences.tabsView.nextTabsViewOption()).build()
+        }
+    }
+
     suspend fun updateShowTabStrip(enabled: Boolean) {
         datastore.updateData { preferences ->
             preferences.toBuilder().setShowTabStrip(enabled).build()

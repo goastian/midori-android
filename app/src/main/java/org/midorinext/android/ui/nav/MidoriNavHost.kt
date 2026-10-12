@@ -2,15 +2,21 @@ package org.midorinext.android.ui.nav
 
 import android.os.Build
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import org.midorinext.android.ext.navigateSingleTopTo
 import org.midorinext.android.ui.MidoriApplicationViewModel
@@ -43,6 +49,8 @@ import org.midorinext.android.ui.preferences.AdBlockSettingsScreen
 import org.midorinext.android.ui.preferences.AdBlockSitesScreen
 import org.midorinext.android.ui.preferences.AdBlockSourcesScreen
 import org.midorinext.android.ui.tabs.TabsScreen
+import org.midorinext.android.ui.theme.LocalMidoriTheme
+import org.midorinext.android.ui.theme.MidoriBrowserTheme
 import org.midorinext.android.ui.animation.reduceMotionRequested
 
 @Composable
@@ -50,9 +58,13 @@ fun MidoriNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
     appViewModel: MidoriApplicationViewModel = hiltViewModel(),
+    onTabsPrivacyChanged: (Boolean) -> Unit = {},
 ) {
     val onBrowse = { navController.navigateSingleTopTo(NavDestination.Browser.route()) }
     val transitionTimeMs = if (reduceMotionRequested()) 0 else 250
+    val trayTransitionTimeMs = if (reduceMotionRequested()) 0 else 160
+    val currentDestination by navController.currentBackStackEntryAsState()
+    val selectedTabIsPrivate by appViewModel.isPrivate.collectAsStateWithLifecycle()
 
     // The browser surface is an AndroidView.  Keep the navigation host constrained to the
     // padded area provided by Scaffold so Gecko never measures against the full window and
@@ -91,25 +103,29 @@ fun MidoriNavHost(
             route = NavDestination.Browser.match,
             arguments = NavDestination.Browser.arguments,
             enterTransition = {
-                slideIntoContainer(
+                if (initialState.destination.route == NavDestination.Tabs.match) EnterTransition.None
+                else slideIntoContainer(
                     towards = AnimatedContentTransitionScope.SlideDirection.Start,
                     animationSpec = tween(durationMillis = transitionTimeMs)
                 )
             },
             popEnterTransition = {
-                slideIntoContainer(
+                if (initialState.destination.route == NavDestination.Tabs.match) EnterTransition.None
+                else slideIntoContainer(
                     towards = AnimatedContentTransitionScope.SlideDirection.End,
                     animationSpec = tween(durationMillis = transitionTimeMs)
                 )
             },
             exitTransition = {
-                slideOutOfContainer(
+                if (targetState.destination.route == NavDestination.Tabs.match) ExitTransition.None
+                else slideOutOfContainer(
                     towards = AnimatedContentTransitionScope.SlideDirection.Start,
                     animationSpec = tween(durationMillis = transitionTimeMs)
                 )
             },
             popExitTransition = {
-                slideOutOfContainer(
+                if (targetState.destination.route == NavDestination.Tabs.match) ExitTransition.None
+                else slideOutOfContainer(
                     towards = AnimatedContentTransitionScope.SlideDirection.End,
                     animationSpec = tween(durationMillis = transitionTimeMs)
                 )
@@ -125,23 +141,37 @@ fun MidoriNavHost(
                     TabOpening.NONE
                 }
             }
-            BrowserScreen(
-                navigateTo = { destination ->
-                    if (destination == NavDestination.Tabs) {
-                        navController.navigate(destination.route()) {
-                            launchSingleTop = true
+            MidoriBrowserTheme(
+                darkTheme = LocalMidoriTheme.current.dark,
+                privacy = selectedTabIsPrivate,
+                updateSystemBars = false,
+            ) {
+                BrowserScreen(
+                    navigateTo = { destination ->
+                        if (destination == NavDestination.Tabs) {
+                            navController.navigate(destination.route()) {
+                                launchSingleTop = true
+                            }
+                        } else {
+                            navController.navigateSingleTopTo(destination.route())
                         }
-                    } else {
-                        navController.navigateSingleTopTo(destination.route())
-                    }
-                },
-                appViewModel = appViewModel,
-                openNewTab = openNewTab
-            )
+                    },
+                    appViewModel = appViewModel,
+                    openNewTab = openNewTab
+                )
+            }
         }
-        composable(NavDestination.Tabs.match) {
+        composable(
+            route = NavDestination.Tabs.match,
+            enterTransition = { fadeIn(tween(trayTransitionTimeMs)) },
+            exitTransition = { fadeOut(tween(trayTransitionTimeMs)) },
+            popEnterTransition = { fadeIn(tween(trayTransitionTimeMs)) },
+            popExitTransition = { fadeOut(tween(trayTransitionTimeMs)) },
+        ) {
             TabsScreen(
                 appViewModel = appViewModel,
+                isCurrentDestination = currentDestination?.destination?.route == NavDestination.Tabs.match,
+                onPrivacyChanged = onTabsPrivacyChanged,
                 onClose = {
                     if (!navController.popBackStack()) {
                         navController.navigateSingleTopTo(NavDestination.Browser.route())

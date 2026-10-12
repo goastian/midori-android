@@ -121,21 +121,23 @@ fun ColorScheme.animatedColors(reduceMotion: Boolean) = copy(
 fun MidoriBrowserTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     privacy: Boolean = false,
+    updateSystemBars: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val reduceMotion = systemReduceMotionRequested()
-    val colorScheme = when {
+    val targetColors = when {
         privacy -> privateColorScheme
         darkTheme -> darkColorScheme
         else -> lightColorScheme
-    }.animatedColors(reduceMotion)
+    }
+    val colorScheme = key(privacy) { targetColors.animatedColors(reduceMotion) }
 
     val icons = if (privacy || darkTheme) darkAndPrivateIcons else lightIcons
 
     // TODO: This prevents previews from rendering with the qwant theme. Maybe this could be extracted in its own component.
     val view = LocalView.current
-    val window = (view.context as Activity).window
-    if (!view.isInEditMode) {
+    if (updateSystemBars && !view.isInEditMode) {
+        val window = (view.context as Activity).window
         SideEffect {
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {

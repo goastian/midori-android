@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import mozilla.components.browser.icons.BrowserIcons
+import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 import mozilla.components.feature.tabs.TabsUseCases
@@ -38,7 +39,7 @@ class TabsScreenViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = listOf()
+            initialValue = store.state.tabs
         )
 
     private val tabGroups = appPreferencesRepository.tabGroupsFlow
@@ -55,7 +56,7 @@ class TabsScreenViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = false
+            initialValue = store.state.restoreComplete
         )
 
     init {
@@ -98,15 +99,19 @@ class TabsScreenViewModel @Inject constructor(
             initialValue = 0
         )
 
-    val smartTabs = combine(tabs, tabGroups, appPreferencesRepository.tabGroupColorsFlow) {
-            allTabs, groups, colors ->
+    val smartTabs: StateFlow<SmartTabsState?> = combine(
+        tabs,
+        appPreferencesRepository.flow
+            .map { it.tabGroupsList to it.tabGroupColorsMap }
+            .distinctUntilChanged(),
+    ) { allTabs, (groups, colors) ->
         buildSmartTabs(allTabs, groups, colors)
     }
         .flowOn(Dispatchers.Default)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = SmartTabsState()
+            initialValue = null
         )
 
     val selectedTabId = store.flow()
@@ -115,27 +120,28 @@ class TabsScreenViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = null
+            initialValue = store.state.selectedTabId
         )
 
-    val tabsViewOption = appPreferencesRepository.flow
+    val tabsViewOption: StateFlow<TabsViewOption?> = appPreferencesRepository.flow
         // Protobuf exposes unknown persisted enum values as UNRECOGNIZED. That enum
         // cannot be used by Compose state saving (its getNumber() throws), so fall
         // back to the default before it reaches the UI.
         .map { prefs ->
             when (prefs.tabsView) {
                 TabsViewOption.LIST -> TabsViewOption.LIST
+                TabsViewOption.CAROUSEL -> TabsViewOption.CAROUSEL
                 else -> TabsViewOption.GRID
             }
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = TabsViewOption.GRID
+            initialValue = null
         )
 
-    fun updateTabsViewOption(option: TabsViewOption) {
-        viewModelScope.launch { appPreferencesRepository.updateTabsView(option) }
+    fun cycleTabsViewOption() {
+        viewModelScope.launch { appPreferencesRepository.cycleTabsView() }
     }
 
     fun removeTabs(private: Boolean = false) {
@@ -153,6 +159,14 @@ class TabsScreenViewModel @Inject constructor(
         store.state.tabs.firstOrNull { it.id == tabId }?.let { rememberClosedTabs(listOf(it)) }
         tabsUseCases.removeTab(tabId)
     }
+
+    fun removeSelectedTabs(tabIds: Set<String>, private: Boolean): Int = closeSelectedTabs(
+        store = store,
+        tabsUseCases = tabsUseCases,
+        tabIds = tabIds,
+        private = private,
+        rememberClosedTabs = ::rememberClosedTabs,
+    )
 
     fun undoLastClose() {
         tabsUseCases.undo()
@@ -298,7 +312,9 @@ class TabsScreenViewModel @Inject constructor(
     ): SmartTabsState {
         val tabsById = allTabs.associateBy { it.id }
         val visibleGroups = groups.mapIndexedNotNull { index, group ->
-            val groupTabs = group.tabIdsList.mapNotNull { tabsById[it] }
+            val groupTabs = group.tabIdsList.mapNotNull { id ->
+                tabsById[id]?.takeUnless { it.content.private }
+            }
             if (groupTabs.size > 1) {
                 SmartTabGroup(
                     id = group.id,
@@ -330,6 +346,23 @@ class TabsScreenViewModel @Inject constructor(
     private fun rememberClosedTabs(tabs: List<mozilla.components.browser.state.state.TabSessionState>) {
         recentlyClosedTabs.remember(tabs)
     }
+}
+
+internal fun closeSelectedTabs(
+    store: BrowserStore,
+    tabsUseCases: TabsUseCases,
+    tabIds: Set<String>,
+    private: Boolean,
+    rememberClosedTabs: (List<TabSessionState>) -> Unit,
+): Int {
+    val selectedTabs = store.state.tabs.filter { tab ->
+        tab.id in tabIds && tab.content.private == private
+    }
+    if (selectedTabs.isEmpty()) return 0
+
+    rememberClosedTabs(selectedTabs)
+    tabsUseCases.removeTabs(selectedTabs.map { it.id })
+    return selectedTabs.size
 }
 
 private fun List<SavedTabGroup>.withoutTabIds(

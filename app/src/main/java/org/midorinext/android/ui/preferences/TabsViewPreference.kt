@@ -10,7 +10,8 @@ import org.midorinext.android.ui.preferences.widgets.RadioButtonOption
 
 val tabsViewOptions = mapOf(
     TabsViewOption.GRID to R.string.available_tabs_view_grid,
-    TabsViewOption.LIST to R.string.available_tabs_view_list
+    TabsViewOption.LIST to R.string.available_tabs_view_list,
+    TabsViewOption.CAROUSEL to R.string.available_tabs_view_carousel
 )
 
 @Composable

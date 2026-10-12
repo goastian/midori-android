@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -26,10 +27,14 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import org.midorinext.android.preferences.app.TabsViewOption
 import org.midorinext.android.ui.widgets.EmptyPagePlaceholder
 import mozilla.components.browser.icons.BrowserIcons
@@ -62,7 +67,8 @@ fun SmartTabView(
     onDeleteGroup: (SmartTabGroup) -> Unit = {},
     onOpenGroup: (SmartTabGroup) -> Unit = {},
     onTabsDroppedOnGroup: (SmartTabGroup, Set<String>) -> Unit = { _, _ -> },
-    onRemoveTabFromGroup: (String, String) -> Unit = { _, _ -> }
+    onRemoveTabFromGroup: (String, String) -> Unit = { _, _ -> },
+    carouselState: LazyListState = rememberLazyListState()
 ) {
     // TabsScreen already scopes and searches the immutable state once. Do not allocate another
     // three filtered collections on every tray recomposition.
@@ -135,12 +141,47 @@ fun SmartTabView(
             onTabDeleted = onTabDeleted,
             listState = listState,
             gridState = gridState,
+            carouselState = carouselState,
             modifier = modifier,
             tabsViewOption = tabsViewOption,
             selectionMode = selectionMode,
             selectedTabIds = selectedTabIds,
             onTabSelectionChange = onTabSelectionChange,
             onTabLongPressed = onTabLongPressed
+        )
+    }
+
+    if (tabsViewOption == TabsViewOption.CAROUSEL) {
+        if (groups.isEmpty() && activeTabs.isEmpty() && inactiveTabs.isEmpty()) {
+            EmptyTabsPlaceholder(private)
+            return
+        }
+        return TabCarousel(
+            tabs = activeTabs,
+            inactiveTabs = inactiveTabs,
+            groups = groups,
+            state = carouselState,
+            selectedTabId = selectedTabId,
+            thumbnailStorage = thumbnailStorage,
+            browserIcons = browserIcons,
+            onTabSelected = onTabSelected,
+            onTabDeleted = onTabDeleted,
+            modifier = modifier,
+            selectionMode = selectionMode,
+            selectedTabIds = selectedTabIds,
+            onTabLongPressed = onTabLongPressed,
+            onOpenGroup = onOpenGroup,
+            onEditGroup = onEditGroup,
+            onAddTabsToGroup = onAddTabsToGroup,
+            onDeleteGroup = onDeleteGroup,
+            dragEnabled = false,
+            draggingTabId = draggingTabId,
+            dropTargetId = dropTarget?.id,
+            onGroupBoundsChanged = { groupId, bounds -> groupBounds[groupId] = bounds },
+            onTabDragStarted = beginTabDrag,
+            onTabDragPositionChanged = updateTabDrag,
+            onTabDragFinished = finishTabDrag,
+            onTabDragCancelled = cancelTabDrag
         )
     }
 
@@ -189,6 +230,7 @@ fun SmartTabView(
             onTabDeleted = onTabDeleted,
             listState = listState,
             gridState = gridState,
+            carouselState = carouselState,
             modifier = modifier,
             tabsViewOption = tabsViewOption,
             selectionMode = selectionMode,
@@ -205,7 +247,8 @@ fun SmartTabView(
 
     LazyColumn(
         state = listState,
-        modifier = modifier,
+        contentPadding = PaddingValues(vertical = 8.dp),
+        modifier = modifier.testTag("tabs_list"),
         userScrollEnabled = draggingTabId == null
     ) {
         groups.forEach { group ->
@@ -219,7 +262,9 @@ fun SmartTabView(
                     onAddTabs = { onAddTabsToGroup(group) },
                     onDelete = { onDeleteGroup(group) },
                     isDropTarget = dropTarget?.id == group.id,
-                    onBoundsChanged = { bounds -> groupBounds[group.id] = bounds }
+                    onBoundsChanged = { bounds -> groupBounds[group.id] = bounds },
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                    compact = true
                 )
             }
         }
@@ -332,6 +377,7 @@ private fun SmartTabsGrid(
         userScrollEnabled = !isDragInProgress,
         modifier = modifier
             .fillMaxWidth()
+            .testTag("tabs_grid")
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         groups.forEach { group ->
@@ -427,7 +473,7 @@ private fun SmartTabsGrid(
 }
 
 @Composable
-private fun TabGroupCard(
+internal fun TabGroupCard(
     group: SmartTabGroup,
     selected: Boolean,
     thumbnailStorage: ThumbnailStorage,
@@ -436,109 +482,141 @@ private fun TabGroupCard(
     onAddTabs: () -> Unit,
     onDelete: () -> Unit,
     isDropTarget: Boolean,
-    onBoundsChanged: (Rect) -> Unit
+    onBoundsChanged: (Rect) -> Unit,
+    modifier: Modifier = Modifier,
+    previewHeight: Dp = 180.dp,
+    compact: Boolean = false
 ) {
     var showMenu by remember { mutableStateOf(false) }
-    val shape = RoundedCornerShape(16.dp)
+    val shape = RoundedCornerShape(if (compact) 14.dp else 16.dp)
     val color = group.color.toComposeColor()
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
+            .testTag("tab_group:${group.id}")
             .onGloballyPositioned { onBoundsChanged(it.boundsInWindow()) }
-            .border(if (selected || isDropTarget) 4.dp else 3.dp, color, shape)
+            .semantics { this.selected = selected }
+            .border(
+                width = if (selected || isDropTarget) 2.dp else 1.dp,
+                color = when {
+                    isDropTarget -> color
+                    selected -> MaterialTheme.colorScheme.primary
+                    else -> MaterialTheme.colorScheme.outline
+                },
+                shape = shape
+            )
             .clip(shape)
             .clickable(onClick = onOpen),
         shape = shape,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(
+            containerColor = if (isDropTarget) color.copy(alpha = 0.14f)
+                else MaterialTheme.colorScheme.tertiaryContainer
+        )
     ) {
-        Column {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color)
-                    .padding(start = 12.dp, end = 4.dp, top = 8.dp, bottom = 8.dp)
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = group.name,
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = stringResource(R.string.browser_tab_group_count, group.tabs.size),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.82f)
-                    )
-                }
-                IconButton(onClick = onAddTabs, modifier = Modifier.size(36.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(min = if (compact) 88.dp else 64.dp)
+                .padding(start = if (compact) 10.dp else 12.dp)
+        ) {
+            if (compact) {
+                TabGroupPreview(
+                    group = group,
+                    thumbnailStorage = thumbnailStorage,
+                    modifier = Modifier.width(72.dp).height(64.dp).clip(RoundedCornerShape(10.dp))
+                )
+            }
+            Box(Modifier.size(10.dp).background(color, CircleShape))
+            Column(modifier = Modifier.weight(1f).padding(vertical = 8.dp)) {
+                Text(
+                    text = group.name,
+                    style = if (compact) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.labelLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = stringResource(R.string.browser_tab_group_count, group.tabs.size),
+                    style = if (compact) MaterialTheme.typography.bodySmall else MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Box {
+                IconButton(onClick = { showMenu = true }, modifier = Modifier.size(48.dp)) {
                     Icon(
-                        painter = painterResource(R.drawable.icons_folder_add),
-                        contentDescription = stringResource(R.string.browser_add_tabs_to_group),
-                        tint = MaterialTheme.colorScheme.onPrimary
+                        painter = painterResource(R.drawable.icons_more_vertical),
+                        contentDescription = stringResource(R.string.browser_manage_tab_group)
                     )
                 }
-                Box {
-                    IconButton(onClick = { showMenu = true }, modifier = Modifier.size(36.dp)) {
-                        Icon(
-                            painter = painterResource(R.drawable.icons_more_vertical),
-                            contentDescription = stringResource(R.string.browser_manage_tab_group),
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                    Dropdown(expanded = showMenu, onDismissRequest = { showMenu = false }) {
-                        DropdownItem(
-                            text = stringResource(R.string.browser_edit_tab_group),
-                            icon = R.drawable.icons_edit,
-                            onClick = {
-                                showMenu = false
-                                onEdit()
-                            }
-                        )
-                        DropdownItem(
-                            text = stringResource(R.string.browser_delete_tab_group),
-                            icon = R.drawable.icons_close,
-                            onClick = {
-                                showMenu = false
-                                onDelete()
-                            }
-                        )
-                    }
+                Dropdown(expanded = showMenu, onDismissRequest = { showMenu = false }) {
+                    DropdownItem(
+                        text = stringResource(R.string.browser_add_tabs_to_group),
+                        icon = R.drawable.icons_folder_add,
+                        onClick = {
+                            showMenu = false
+                            onAddTabs()
+                        }
+                    )
+                    DropdownItem(
+                        text = stringResource(R.string.browser_edit_tab_group),
+                        icon = R.drawable.icons_edit,
+                        onClick = {
+                            showMenu = false
+                            onEdit()
+                        }
+                    )
+                    DropdownItem(
+                        text = stringResource(R.string.browser_delete_tab_group),
+                        icon = R.drawable.icons_close,
+                        onClick = {
+                            showMenu = false
+                            onDelete()
+                        }
+                    )
                 }
             }
+        }
+        if (!compact) {
+            TabGroupPreview(
+                group = group,
+                thumbnailStorage = thumbnailStorage,
+                modifier = Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
+                    .height(previewHeight)
+            )
+        }
+    }
+}
+
+@Composable
+private fun TabGroupPreview(
+    group: SmartTabGroup,
+    thumbnailStorage: ThumbnailStorage,
+    modifier: Modifier = Modifier
+) {
+    val rows = ((group.tabs.size.coerceAtMost(4) + 1) / 2).coerceAtLeast(1)
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        repeat(rows) { row ->
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(if (isDropTarget) 142.dp else 132.dp)
-                    .padding(4.dp),
+                modifier = Modifier.weight(1f).fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                group.tabs.take(2).forEach { tab ->
+                repeat(2) { column ->
+                    val tab = group.tabs.getOrNull(row * 2 + column)
                     Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
+                        modifier = Modifier.weight(1f).fillMaxHeight()
                             .clip(RoundedCornerShape(8.dp))
                             .background(MaterialTheme.colorScheme.surfaceVariant)
                     ) {
-                        TabThumbnail(
-                            tabId = tab.id,
-                            private = tab.content.private,
-                            thumbnailStorage = thumbnailStorage,
-                        )
+                        if (tab != null) {
+                            TabThumbnail(
+                                tabId = tab.id,
+                                private = tab.content.private,
+                                thumbnailStorage = thumbnailStorage
+                            )
+                        }
                     }
-                }
-                repeat((2 - group.tabs.size.coerceAtMost(2)).coerceAtLeast(0)) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                    )
                 }
             }
         }
@@ -555,10 +633,17 @@ fun TabGroupTabsSheet(
     onDismissRequest: () -> Unit,
     onTabSelected: (TabSessionState) -> Unit,
     onTabDeleted: (TabSessionState) -> Unit,
+    selectionMode: Boolean = false,
+    selectedTabIds: Set<String> = emptySet(),
+    onTabLongPressed: (TabSessionState) -> Unit = {},
 ) {
     val selectedIndex = group.tabs.indexOfFirst { it.id == selectedTabId }.coerceAtLeast(0)
     val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = selectedIndex)
-    ModalBottomSheet(onDismissRequest = onDismissRequest) {
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        modifier = Modifier.testTag("tab_group_sheet"),
+        containerColor = MaterialTheme.colorScheme.background,
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -570,13 +655,22 @@ fun TabGroupTabsSheet(
                         .size(10.dp)
                         .background(group.color.toComposeColor(), CircleShape)
                 )
-                Column(modifier = Modifier.padding(start = 10.dp)) {
+                Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
                     Text(group.name, style = MaterialTheme.typography.titleMedium)
                     Text(
-                        stringResource(R.string.browser_tab_group_count, group.tabs.size),
+                        text = if (selectionMode) {
+                            stringResource(R.string.browser_group_tabs_selected, group.tabs.count { it.id in selectedTabIds })
+                        } else {
+                            stringResource(R.string.browser_tab_group_count, group.tabs.size)
+                        },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+                if (selectionMode) {
+                    TextButton(onClick = onDismissRequest) {
+                        Text(stringResource(R.string.tab_tray_done))
+                    }
                 }
             }
             LazyVerticalGrid(
@@ -601,6 +695,9 @@ fun TabGroupTabsSheet(
                         browserIcons = browserIcons,
                         onSelected = onTabSelected,
                         onDeleted = onTabDeleted,
+                        selectionMode = selectionMode,
+                        isSelectedForGrouping = tab.id in selectedTabIds,
+                        onLongPressed = onTabLongPressed,
                     )
                 }
             }
@@ -649,7 +746,8 @@ fun TabView(
     selectionMode: Boolean = false,
     selectedTabIds: Set<String> = emptySet(),
     onTabSelectionChange: (String) -> Unit = {},
-    onTabLongPressed: (TabSessionState) -> Unit = {}
+    onTabLongPressed: (TabSessionState) -> Unit = {},
+    carouselState: LazyListState = rememberLazyListState()
 ) {
     if (tabs.isNotEmpty()) {
         when (tabsViewOption) {
@@ -678,6 +776,19 @@ fun TabView(
                 selectionMode = selectionMode,
                 selectedTabIds = selectedTabIds,
                 onTabSelectionChange = onTabSelectionChange,
+                onTabLongPressed = onTabLongPressed
+            )
+            TabsViewOption.CAROUSEL -> TabCarousel(
+                tabs = tabs,
+                state = carouselState,
+                selectedTabId = selectedTabId,
+                thumbnailStorage = thumbnailStorage,
+                browserIcons = browserIcons,
+                onTabSelected = onTabSelected,
+                onTabDeleted = onTabDeleted,
+                modifier = modifier,
+                selectionMode = selectionMode,
+                selectedTabIds = selectedTabIds,
                 onTabLongPressed = onTabLongPressed
             )
             TabsViewOption.UNRECOGNIZED -> {}

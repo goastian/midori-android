@@ -10,7 +10,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import org.midorinext.android.ui.nav.MidoriNavHost
+import org.midorinext.android.ui.nav.NavDestination
 import org.midorinext.android.ui.theme.MidoriBrowserTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -31,6 +33,9 @@ fun MidoriBrowserApp(
     applicationViewModel: MidoriApplicationViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
+    val currentDestination by navController.currentBackStackEntryAsState()
+    val trayIsVisible = currentDestination?.destination?.route == NavDestination.Tabs.match
+    var trayPrivacy by remember(currentDestination?.id) { mutableStateOf<Boolean?>(null) }
     val context = LocalContext.current
     val onboardingKey = stringResource(R.string.pref_key_show_onboarding)
     val onboardingPreferences = remember(context) {
@@ -71,7 +76,8 @@ fun MidoriBrowserApp(
 
     MidoriBrowserTheme(
         darkTheme = darkTheme,
-        privacy = isPrivate
+        privacy = if (trayIsVisible) trayPrivacy ?: isPrivate else isPrivate,
+        updateSystemBars = !trayIsVisible,
     ) {
         if (showOnboarding) {
             val searchEngine by applicationViewModel.searchEngine.collectAsStateWithLifecycle()
@@ -101,6 +107,7 @@ fun MidoriBrowserApp(
                 MidoriNavHost(
                     navController = navController,
                     appViewModel = applicationViewModel,
+                    onTabsPrivacyChanged = { trayPrivacy = it },
                     modifier = Modifier.padding(scaffoldPadding)
                 )
                 ZapFeature(state = applicationViewModel.zapState)

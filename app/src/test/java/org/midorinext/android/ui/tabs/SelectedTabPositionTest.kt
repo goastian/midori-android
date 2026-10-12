@@ -37,7 +37,7 @@ class SelectedTabPositionTest {
     fun groupedTabRevealsItsGroupCard() {
         val state = SmartTabsState(groups = groups, activeTabs = activeTabs, inactiveTabs = inactiveTabs)
 
-        for (view in listOf(TabsViewOption.LIST, TabsViewOption.GRID)) {
+        for (view in listOf(TabsViewOption.LIST, TabsViewOption.GRID, TabsViewOption.CAROUSEL)) {
             assertEquals(1, state.selectedItemIndex(groups.last().tabs.last().id, view))
         }
     }
@@ -84,12 +84,32 @@ class SelectedTabPositionTest {
 
         assertEquals(7, state.selectedItemIndex(privateTabs.last().id, TabsViewOption.LIST))
         assertEquals(8, state.selectedItemIndex(privateTabs.last().id, TabsViewOption.GRID))
+        assertEquals(7, state.selectedItemIndex(privateTabs.last().id, TabsViewOption.CAROUSEL))
         assertEquals(-1, state.selectedItemIndex(activeTabs.last().id, TabsViewOption.GRID))
     }
 
     @Test
+    fun carouselHasOnePagePerGroupOrTabWithoutSectionHeaders() {
+        val state = SmartTabsState(groups = groups, activeTabs = activeTabs, inactiveTabs = inactiveTabs)
+
+        assertEquals(0, state.selectedItemIndex(groups.first().tabs.first().id, TabsViewOption.CAROUSEL))
+        assertEquals(2, state.selectedItemIndex(activeTabs.first().id, TabsViewOption.CAROUSEL))
+        assertEquals(13, state.selectedItemIndex(activeTabs.last().id, TabsViewOption.CAROUSEL))
+        assertEquals(14, state.selectedItemIndex(inactiveTabs.first().id, TabsViewOption.CAROUSEL))
+        assertEquals(17, state.selectedItemIndex(inactiveTabs.last().id, TabsViewOption.CAROUSEL))
+    }
+
+    @Test
+    fun carouselWithOnlyInactiveTabsStartsAtFirstPage() {
+        val state = SmartTabsState(inactiveTabs = inactiveTabs)
+
+        assertEquals(0, state.selectedItemIndex(inactiveTabs.first().id, TabsViewOption.CAROUSEL))
+        assertEquals(3, state.selectedItemIndex(inactiveTabs.last().id, TabsViewOption.CAROUSEL))
+    }
+
+    @Test
     fun missingSelectionWaitsForTabsToLoad() {
-        for (view in listOf(TabsViewOption.LIST, TabsViewOption.GRID)) {
+        for (view in listOf(TabsViewOption.LIST, TabsViewOption.GRID, TabsViewOption.CAROUSEL)) {
             assertEquals(-1, SmartTabsState().selectedItemIndex(activeTabs.last().id, view))
             assertEquals(-1, SmartTabsState(activeTabs = activeTabs).selectedItemIndex(null, view))
             assertEquals(-1, SmartTabsState(activeTabs = activeTabs).selectedItemIndex("missing", view))
