@@ -1,6 +1,8 @@
 package org.midorinext.android.ui.tabs
 
 import android.graphics.Bitmap
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,20 +15,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.testTag
 import kotlinx.coroutines.CancellationException
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 import mozilla.components.concept.base.images.ImageLoadRequest
+import org.midorinext.android.ui.animation.reduceMotionRequested
 
 @Composable
 fun TabThumbnail(
     tabId: String,
     private: Boolean,
     thumbnailStorage: ThumbnailStorage,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    contentScale: ContentScale = ContentScale.FillWidth,
+    placeholder: (@Composable () -> Unit)? = null,
 ) {
     val cache = LocalTabThumbnailCache.current
     var pixelSize by remember(tabId) { mutableIntStateOf(0) }
@@ -34,6 +41,7 @@ fun TabThumbnail(
     Box(
         modifier = modifier
             .fillMaxSize()
+            .clipToBounds()
             .testTag("tab_thumbnail:$tabId")
             .onSizeChanged { size -> pixelSize = maxOf(size.width, size.height) },
     ) {
@@ -74,13 +82,20 @@ fun TabThumbnail(
             }
         }
 
+        val imageAlpha by animateFloatAsState(
+            targetValue = if (loadedImage == null) 0f else 1f,
+            animationSpec = tween(if (reduceMotionRequested()) 0 else 120),
+            label = "thumbnail appearance",
+        )
+        placeholder?.invoke()
         loadedImage?.let {
             Image(
                 bitmap = it.asImageBitmap(),
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
+                contentScale = contentScale,
                 alignment = Alignment.TopCenter,
-                modifier = Modifier.fillMaxSize().testTag("tab_thumbnail_loaded:$tabId"),
+                modifier = Modifier.fillMaxSize().graphicsLayer { alpha = imageAlpha }
+                    .testTag("tab_thumbnail_loaded:$tabId"),
             )
         }
     }

@@ -1,5 +1,6 @@
 package org.midorinext.android.ui.tabs
 
+import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -22,6 +23,7 @@ import kotlinx.coroutines.withTimeout
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.action.TabListAction
 import mozilla.components.concept.base.images.ImageSaveRequest
+import mozilla.components.concept.base.images.ImageLoadRequest
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -125,6 +127,65 @@ class TabsLayoutsDeviceTest {
         PreferenceManager.getDefaultSharedPreferences(app).edit()
             .putBoolean(app.getString(R.string.pref_key_show_onboarding), onboardingEnabled).commit()
         if (::scenario.isInitialized) scenario.close()
+    }
+
+    @Test
+    fun nativeHomeIsCapturedAndDisplayedInGridAndCarousel(): Unit = runBlocking {
+        compose.onNode(
+            hasText(app.getString(R.string.browser_new_tab)) and
+                !hasAnyAncestor(hasTestTag("tabs_grid"))
+        ).performClick()
+        compose.waitUntil(20_000) {
+            compose.onAllNodesWithTag("native_home").fetchSemanticsNodes().isNotEmpty()
+        }
+        val homeId = checkNotNull(app.store.get().state.selectedTabId)
+        fixtureIds += homeId
+        compose.waitUntil(15_000) {
+            runBlocking {
+                tabsViewModel.thumbnailStorage.loadThumbnail(ImageLoadRequest(homeId, 64, false)).await()
+                    ?.let { it.recycle(); true } ?: false
+            }
+        }
+        for (orientation in listOf(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)) {
+            scenario.onActivity { it.requestedOrientation = orientation }
+            compose.waitUntil(15_000) {
+                runBlocking {
+                    tabsViewModel.thumbnailStorage.loadThumbnail(ImageLoadRequest(homeId, 64, false)).await()
+                        ?.let { bitmap ->
+                            val landscape = bitmap.width > bitmap.height
+                            bitmap.recycle()
+                            landscape == (orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+                        } ?: false
+                }
+            }
+        }
+        openTray(private = false)
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("tab_thumbnail_loaded:$homeId", useUnmergedTree = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithTag("tab_card:$homeId").assertIsDisplayed()
+        capture("tabs-home-preview-grid.png")
+        cycleLayoutTo(TabsViewOption.CAROUSEL)
+        compose.onNodeWithTag("tab_card:$homeId").assertIsDisplayed()
+        capture("tabs-home-preview-carousel.png")
+    }
+
+    @Test
+    fun carouselPreviewsNavigateWithoutChangingTheActiveSession(): Unit = runBlocking {
+        val selectedId = app.store.get().state.selectedTabId
+        val ids = app.store.get().state.tabs.map { it.id }
+        cycleLayoutTo(TabsViewOption.CAROUSEL)
+        val targetId = fixtureIds[2]
+        val strip = compose.onNodeWithTag("tabs_carousel_previews")
+        strip.performScrollToNode(hasTestTag("tabs_carousel_preview:$targetId"))
+        compose.onNodeWithTag("tabs_carousel_preview:$targetId").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("tabs_carousel_preview:$targetId").assertIsSelected()
+        compose.onNodeWithTag("tab_card:$targetId").assertIsDisplayed()
+        assertEquals(selectedId, app.store.get().state.selectedTabId)
+        assertEquals(ids, app.store.get().state.tabs.map { it.id })
+        capture("tabs-carousel-previews.png")
     }
 
     @Test

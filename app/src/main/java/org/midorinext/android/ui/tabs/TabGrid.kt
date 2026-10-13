@@ -1,16 +1,20 @@
 package org.midorinext.android.ui.tabs
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -21,11 +25,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.input.pointer.pointerInput
@@ -117,23 +120,19 @@ fun TabCard(
     onDragPositionChanged: (Offset) -> Unit = {},
     onDragFinished: () -> Unit = {},
     onDragCancelled: () -> Unit = {},
-    previewHeight: Dp = 180.dp,
+    previewHeight: Dp? = null,
     modifier: Modifier = Modifier
 ) {
-    var deleting by remember { mutableStateOf(false) }
+    val dismissal = rememberTabDismissal(tab.id) { onDeleted(tab) }
     val animationsEnabled = !reduceMotionRequested()
-    val scale by animateFloatAsState(
-        targetValue = if (deleting) 0f else 1f,
-        animationSpec = if (animationsEnabled) tween(durationMillis = 140) else snap(),
-        finishedListener = {
-            if (it == 0f) {
-                onDeleted(tab)
-                deleting = false
-            }
-        },
-        label = "tabSwipeScale",
+    val interactionSource = remember(tab.id) { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+    val pressScale by animateFloatAsState(
+        targetValue = if (pressed) 0.985f else 1f,
+        animationSpec = if (animationsEnabled) tween(100) else snap(),
+        label = "tab press",
     )
-    val isPrivateBrowsingHome = tab.content.private && tab.content.url.isBlank()
+    val isPrivateBrowsingHome = tab.content.private && (tab.content.url.isBlank() || isNativeHomeUrl(tab.content.url))
     val isNativeHome = isNativeHomeUrl(tab.content.url)
     val domain = remember(tab.content.url) { tab.content.url.toCleanHost() }
     val title = when {
@@ -142,20 +141,32 @@ fun TabCard(
         else -> tab.content.title.ifBlank { domain }
     }
     val highlighted = if (selectionMode) isSelectedForGrouping else selected
+    val surfaceColor by animateColorAsState(
+        if (highlighted) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerLow,
+        tween(if (animationsEnabled) 140 else 0), label = "tab surface",
+    )
+    val borderColor by animateColorAsState(
+        if (highlighted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+        tween(if (animationsEnabled) 140 else 0), label = "tab outline",
+    )
     val shape = RoundedCornerShape(16.dp)
     var coordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
 
     Column(modifier = modifier
         .testTag("tab_card:${tab.id}")
         .fillMaxWidth()
-        .scale(scale)
-        .alpha(if (isBeingDragged) 0.42f else 1f)
+        .graphicsLayer {
+            val progress = dismissal.progress.value
+            scaleX = pressScale * (1f - 0.06f * progress)
+            scaleY = scaleX
+            translationY = if (animationsEnabled) -24.dp.toPx() * progress else 0f
+            alpha = (1f - progress) * if (isBeingDragged) 0.42f else 1f
+        }
         .onGloballyPositioned { coordinates = it }
         .semantics { this.selected = highlighted }
         .border(
             width = if (highlighted) 2.dp else 1.dp,
-            color = if (highlighted) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.outline,
+            color = borderColor,
             shape = shape
         )
         .clip(shape)
@@ -163,9 +174,17 @@ fun TabCard(
             if (dragEnabled) {
                 // Drag and selection must share the same long-press stream. A combinedClickable
                 // long-click consumes it before the drag detector can receive movement.
-                Modifier.clickable(onClick = { onSelected(tab) })
+                Modifier.clickable(
+                    interactionSource = interactionSource,
+                    indication = LocalIndication.current,
+                    enabled = !dismissal.requested,
+                    onClick = { onSelected(tab) },
+                )
             } else {
                 Modifier.combinedClickable(
+                    interactionSource = interactionSource,
+                    indication = LocalIndication.current,
+                    enabled = !dismissal.requested,
                     onClick = { onSelected(tab) },
                     onLongClick = { onLongPressed(tab) }
                 )
@@ -208,23 +227,22 @@ fun TabCard(
                 Modifier
             }
         )
-        .background(
-            if (highlighted) MaterialTheme.colorScheme.secondaryContainer
-            else MaterialTheme.colorScheme.tertiaryContainer
-        )
+        .background(surfaceColor)
     ) {
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface)
         {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp)
+                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)
             ) {
                 Box(modifier = Modifier
                     .padding(start = 10.dp)
                     .size(18.dp)
                 ) {
-                    if (isPrivateBrowsingHome || isNativeHome) {
+                    if (isPrivateBrowsingHome) {
+                        Icon(painterResource(R.drawable.icons_privacy_mask), null, tint = MaterialTheme.colorScheme.primary)
+                    } else if (isNativeHome) {
                         MidoriIconOnBackground(shape = RoundedCornerShape(4.dp))
                     } else {
                         tab.content.icon?.let {
@@ -274,7 +292,8 @@ fun TabCard(
                     }
                 } else {
                     IconButton(
-                        onClick = { deleting = true },
+                        onClick = dismissal::dismiss,
+                        enabled = !dismissal.requested,
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(
@@ -287,7 +306,7 @@ fun TabCard(
             Box(modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 4.dp, start = 4.dp, end = 4.dp)
-                .height(previewHeight)
+                .then(previewHeight?.let { Modifier.height(it) } ?: Modifier.aspectRatio(0.76f))
                 .clip(
                     RoundedCornerShape(
                         topStart = 4.dp,
@@ -296,25 +315,10 @@ fun TabCard(
                         bottomEnd = 12.dp
                     )
                 )
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .background(MaterialTheme.colorScheme.surface),
                 propagateMinConstraints = true
             ) {
-                if (isPrivateBrowsingHome) {
-                    Icon(
-                        painter = painterResource(R.drawable.icons_privacy_mask),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(48.dp)
-                    )
-                } else if (isNativeHome) {
-                    Image(painterResource(R.mipmap.ic_launcher_foreground), null, Modifier.fillMaxSize().padding(48.dp))
-                } else {
-                    TabThumbnail(
-                        tabId = tab.id,
-                        private = tab.content.private,
-                        thumbnailStorage = thumbnailStorage,
-                    )
-                }
+                TabPreview(tab, thumbnailStorage, Modifier.fillMaxSize())
             }
         }
     }

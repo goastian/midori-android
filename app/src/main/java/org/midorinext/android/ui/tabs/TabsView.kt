@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -43,6 +44,7 @@ import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 import org.midorinext.android.R
 import org.midorinext.android.ui.widgets.Dropdown
 import org.midorinext.android.ui.widgets.DropdownItem
+import org.midorinext.android.ui.animation.reduceMotionRequested
 
 @Composable
 fun SmartTabView(
@@ -75,6 +77,7 @@ fun SmartTabView(
     val activeTabs = state.activeTabs
     val inactiveTabs = state.inactiveTabs
     val groups = state.groups
+    val animationsEnabled = !reduceMotionRequested()
     val groupBounds = remember { mutableStateMapOf<String, Rect>() }
     var draggingTabId by remember { mutableStateOf<String?>(null) }
     var draggedTabIds by remember { mutableStateOf(emptySet<String>()) }
@@ -263,7 +266,8 @@ fun SmartTabView(
                     onDelete = { onDeleteGroup(group) },
                     isDropTarget = dropTarget?.id == group.id,
                     onBoundsChanged = { bounds -> groupBounds[group.id] = bounds },
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                    modifier = (if (animationsEnabled) Modifier.animateItem() else Modifier)
+                        .padding(horizontal = 16.dp, vertical = 4.dp),
                     compact = true
                 )
             }
@@ -295,7 +299,8 @@ fun SmartTabView(
                     onDragStarted = beginTabDrag,
                     onDragPositionChanged = updateTabDrag,
                     onDragFinished = finishTabDrag,
-                    onDragCancelled = cancelTabDrag
+                    onDragCancelled = cancelTabDrag,
+                    modifier = if (animationsEnabled) Modifier.animateItem() else Modifier,
                 )
             }
         }
@@ -326,7 +331,8 @@ fun SmartTabView(
                     onDragStarted = beginTabDrag,
                     onDragPositionChanged = updateTabDrag,
                     onDragFinished = finishTabDrag,
-                    onDragCancelled = cancelTabDrag
+                    onDragCancelled = cancelTabDrag,
+                    modifier = if (animationsEnabled) Modifier.animateItem() else Modifier,
                 )
             }
         }
@@ -368,6 +374,7 @@ private fun SmartTabsGrid(
         EmptyTabsPlaceholder(private)
         return
     }
+    val animationsEnabled = !reduceMotionRequested()
 
     LazyVerticalGrid(
         state = gridState,
@@ -391,7 +398,8 @@ private fun SmartTabsGrid(
                     onAddTabs = { onAddTabsToGroup(group) },
                     onDelete = { onDeleteGroup(group) },
                     isDropTarget = dropTargetId == group.id,
-                    onBoundsChanged = { bounds -> onGroupBoundsChanged(group.id, bounds) }
+                    onBoundsChanged = { bounds -> onGroupBoundsChanged(group.id, bounds) },
+                    modifier = if (animationsEnabled) Modifier.animateItem() else Modifier,
                 )
             }
         }
@@ -429,7 +437,8 @@ private fun SmartTabsGrid(
                     onDragStarted = onTabDragStarted,
                     onDragPositionChanged = onTabDragPositionChanged,
                     onDragFinished = onTabDragFinished,
-                    onDragCancelled = onTabDragCancelled
+                    onDragCancelled = onTabDragCancelled,
+                    modifier = if (animationsEnabled) Modifier.animateItem() else Modifier,
                 )
             }
         }
@@ -465,7 +474,8 @@ private fun SmartTabsGrid(
                     onDragStarted = onTabDragStarted,
                     onDragPositionChanged = onTabDragPositionChanged,
                     onDragFinished = onTabDragFinished,
-                    onDragCancelled = onTabDragCancelled
+                    onDragCancelled = onTabDragCancelled,
+                    modifier = if (animationsEnabled) Modifier.animateItem() else Modifier,
                 )
             }
         }
@@ -484,7 +494,7 @@ internal fun TabGroupCard(
     isDropTarget: Boolean,
     onBoundsChanged: (Rect) -> Unit,
     modifier: Modifier = Modifier,
-    previewHeight: Dp = 180.dp,
+    previewHeight: Dp? = null,
     compact: Boolean = false
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -502,7 +512,7 @@ internal fun TabGroupCard(
                 color = when {
                     isDropTarget -> color
                     selected -> MaterialTheme.colorScheme.primary
-                    else -> MaterialTheme.colorScheme.outline
+                    else -> MaterialTheme.colorScheme.outlineVariant
                 },
                 shape = shape
             )
@@ -511,13 +521,13 @@ internal fun TabGroupCard(
         shape = shape,
         colors = CardDefaults.cardColors(
             containerColor = if (isDropTarget) color.copy(alpha = 0.14f)
-                else MaterialTheme.colorScheme.tertiaryContainer
+                else MaterialTheme.colorScheme.surfaceContainerLow
         )
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth().heightIn(min = if (compact) 88.dp else 64.dp)
+            modifier = Modifier.fillMaxWidth().heightIn(min = if (compact) 88.dp else 56.dp)
                 .padding(start = if (compact) 10.dp else 12.dp)
         ) {
             if (compact) {
@@ -583,14 +593,14 @@ internal fun TabGroupCard(
                 group = group,
                 thumbnailStorage = thumbnailStorage,
                 modifier = Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, bottom = 4.dp)
-                    .height(previewHeight)
+                    .then(previewHeight?.let { Modifier.height(it) } ?: Modifier.aspectRatio(0.76f))
             )
         }
     }
 }
 
 @Composable
-private fun TabGroupPreview(
+internal fun TabGroupPreview(
     group: SmartTabGroup,
     thumbnailStorage: ThumbnailStorage,
     modifier: Modifier = Modifier
@@ -610,11 +620,7 @@ private fun TabGroupPreview(
                             .background(MaterialTheme.colorScheme.surfaceVariant)
                     ) {
                         if (tab != null) {
-                            TabThumbnail(
-                                tabId = tab.id,
-                                private = tab.content.private,
-                                thumbnailStorage = thumbnailStorage
-                            )
+                            TabPreview(tab, thumbnailStorage, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                         }
                     }
                 }
@@ -639,6 +645,7 @@ fun TabGroupTabsSheet(
 ) {
     val selectedIndex = group.tabs.indexOfFirst { it.id == selectedTabId }.coerceAtLeast(0)
     val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = selectedIndex)
+    val animationsEnabled = !reduceMotionRequested()
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         modifier = Modifier.testTag("tab_group_sheet"),
@@ -698,6 +705,7 @@ fun TabGroupTabsSheet(
                         selectionMode = selectionMode,
                         isSelectedForGrouping = tab.id in selectedTabIds,
                         onLongPressed = onTabLongPressed,
+                        modifier = if (animationsEnabled) Modifier.animateItem() else Modifier,
                     )
                 }
             }

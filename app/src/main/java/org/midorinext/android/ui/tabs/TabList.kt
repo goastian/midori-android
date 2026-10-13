@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
+import org.midorinext.android.ui.animation.reduceMotionRequested
 
 
 @Composable
@@ -26,6 +27,7 @@ fun TabList(
     onTabSelectionChange: (String) -> Unit = {},
     onTabLongPressed: (TabSessionState) -> Unit = {}
 ) {
+    val animationsEnabled = !reduceMotionRequested()
     LazyColumn(
         state = state,
         contentPadding = PaddingValues(vertical = 8.dp),
@@ -44,7 +46,8 @@ fun TabList(
                 onDeleted = onTabDeleted,
                 selectionMode = selectionMode,
                 isSelectedForGrouping = tab.id in selectedTabIds,
-                onLongPressed = onTabLongPressed
+                onLongPressed = onTabLongPressed,
+                modifier = if (animationsEnabled) Modifier.animateItem() else Modifier,
             )
 
         }

@@ -1,5 +1,6 @@
 package org.midorinext.android.ui.browser.home
 
+import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -8,6 +9,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import mozilla.components.browser.state.store.BrowserStore
+import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.icons.Icon
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
 import mozilla.components.lib.state.ext.flow
@@ -16,6 +18,7 @@ import org.midorinext.android.newtab.HomeStoriesRepository
 import org.midorinext.android.newtab.HomeFaviconRepository
 import org.midorinext.android.newtab.HomeStory
 import org.midorinext.android.newtab.publicHomeUrl
+import org.midorinext.android.newtab.isNativeHomeUrl
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.storage.history.HistoryRepository
@@ -55,6 +58,13 @@ class NativeHomeViewModel @Inject constructor(
     val blockedCount by lazy { statisticsProvider.get().totalBlocked }
 
     val thumbnailStorage get() = thumbnailProvider.get()
+    fun updateThumbnail(tabId: String, bitmap: Bitmap) {
+        val tab = store.state.tabs.firstOrNull { it.id == tabId } ?: return
+        if (!tab.content.private && isNativeHomeUrl(tab.content.url)) {
+            store.dispatch(ContentAction.UpdateThumbnailAction(tabId, bitmap))
+        }
+    }
+
     fun favicon(url: String): Flow<Icon?> = flow { emit(faviconProvider.get().load(url)) }
     private val mutableStories = MutableStateFlow(HomeStoriesState())
     val stories = mutableStories.asStateFlow()

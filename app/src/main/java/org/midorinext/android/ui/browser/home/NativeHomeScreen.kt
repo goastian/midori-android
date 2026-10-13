@@ -77,7 +77,9 @@ fun NativeHomeScreen(
     val blocked = if (dataReady && !preferences.hideHomePrivacy) {
         viewModel.blockedCount.collectAsStateWithLifecycle().value
     } else 0L
-    val language = LocalConfiguration.current.locales[0].language
+    val configuration = LocalConfiguration.current
+    val windowSize = LocalWindowInfo.current.containerSize
+    val language = configuration.locales[0].language
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(dataReady, preferences.hideHomeStories, language, lifecycleOwner) {
         if (dataReady && !preferences.hideHomeStories) {
@@ -102,13 +104,22 @@ fun NativeHomeScreen(
     val background = if (LocalMidoriTheme.current.dark) colors.surface else Color(0xFFF5F8F5)
     val cardColor = if (LocalMidoriTheme.current.dark) colors.surfaceContainer else Color.White
     val insetColor = if (LocalMidoriTheme.current.dark) colors.surfaceContainerHigh else Color(0xFFE8F0E8)
-    val shortcutColumns = (LocalWindowInfo.current.containerSize.width / LocalDensity.current.density / 80)
+    val shortcutColumns = (windowSize.width / LocalDensity.current.density / 80)
         .toInt().coerceIn(3, 6)
     val listState = rememberLazyListState()
+    val thumbnailContent = remember(preferences, recent, continuation, blocked, stories, background, configuration, windowSize) {
+        listOf(preferences, recent, continuation, blocked, stories, background, configuration, windowSize)
+    }
+    val thumbnailModifier = rememberNativeHomeThumbnail(
+        tabId = tabId.takeIf { dataReady },
+        contentKey = thumbnailContent,
+        scrolling = listState.isScrollInProgress,
+        onThumbnail = viewModel::updateThumbnail,
+    )
 
     LazyColumn(
         state = listState,
-        modifier = modifier.fillMaxSize().background(background).testTag("native_home"),
+        modifier = modifier.fillMaxSize().then(thumbnailModifier).background(background).testTag("native_home"),
         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
