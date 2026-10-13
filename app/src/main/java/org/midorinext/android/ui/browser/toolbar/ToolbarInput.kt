@@ -35,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -44,6 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.midorinext.android.R
 import org.midorinext.android.ext.activity
@@ -93,33 +93,7 @@ fun ToolbarInput(
         }
     }
 
-    BasicTextField(
-        value = toolbarState.text,
-        onValueChange = { toolbarState.updateTextFromUser(it) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go),
-        keyboardActions = KeyboardActions(
-            onGo = {
-                onCommit(toolbarState.text.text)
-                toolbarState.updateFocus(false)
-                focusManager.clearFocus()
-                activity?.forceHideKeyboard()
-            }
-        ),
-        singleLine = true,
-        enabled = true,
-        textStyle = mergedStyle,
-        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-        modifier = modifier
-            .focusRequester(focusRequester)
-            .onFocusChanged {
-                // Entering edit mode moves the toolbar into a full-screen composition. The old
-                // text field reports focus loss while it is disposed, so only promote focus here;
-                // all exit paths explicitly clear the toolbar state.
-                if (it.hasFocus && !toolbarState.hasFocus) {
-                    toolbarState.updateFocus(true)
-                }
-            }
-    ) { innerTextField ->
+    val decorationBox: @Composable (@Composable () -> Unit) -> Unit = { innerTextField ->
         ToolbarDecorator(
             state = toolbarState,
             hintColor = mergedStyle.color.copy(alpha = 0.6f),
@@ -158,6 +132,37 @@ fun ToolbarInput(
             leadingContent = leadingContent,
             onMidoriIconClicked = onMidoriIconClicked
         )
+    }
+    if (toolbarState.hasFocus) {
+        BasicTextField(
+            value = toolbarState.text,
+            onValueChange = { if (toolbarState.hasFocus) toolbarState.updateTextFromUser(it) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go),
+            keyboardActions = KeyboardActions(
+                onGo = {
+                    onCommit(toolbarState.text.text)
+                    toolbarState.updateFocus(false)
+                    focusManager.clearFocus()
+                    activity?.forceHideKeyboard()
+                }
+            ),
+            singleLine = true,
+            textStyle = mergedStyle,
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            modifier = modifier.focusRequester(focusRequester),
+            decorationBox = decorationBox,
+        )
+    } else {
+        Box(modifier = modifier.clickable { toolbarState.updateFocus(true) }) {
+            decorationBox {
+                Text(
+                    text = toolbarState.text.text,
+                    style = mergedStyle,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
     }
     if (showVoiceUnavailable) {
         AlertDialog(

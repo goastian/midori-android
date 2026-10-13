@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -40,7 +39,7 @@ interface BrowserToolbarStateFactory {
 }
 
 class BrowserToolbarState @AssistedInject constructor(
-    store: BrowserStore,
+    private val store: BrowserStore,
     appPreferencesRepository: AppPreferencesRepository,
     suggestionProviders: dagger.Lazy<@JvmSuppressWildcards List<SuggestionProvider>>,
     browserIcons: BrowserIcons,
@@ -55,7 +54,9 @@ class BrowserToolbarState @AssistedInject constructor(
     var visible by mutableStateOf(true)
         private set
 
-    var onMidori by mutableStateOf(true)
+    var onMidori by mutableStateOf(
+        store.state.selectedTab?.content?.url?.let { it.isMidoriUrl() || newTabFeature.isNewTabUrl(it) } ?: true
+    )
         private set
 
     var showSiteSecurity by mutableStateOf(false)
@@ -122,54 +123,53 @@ class BrowserToolbarState @AssistedInject constructor(
             initialValue = null
         )
 
-    private val selectedUrl = store.flow()
-        .map { state -> state.selectedTab?.content?.url }
+    private var selectedTabId = store.state.selectedTabId
+
+    private val selectedPage = store.flow()
+        .map { state -> state.selectedTab?.let { SelectedPage(it.id, it.content.url) } }
         .distinctUntilChanged()
 
-    val currentUrl = selectedUrl
-        .combine(newTabFeature.legacyOrigins) { url, _ -> url }
-        .onEach {
+    val currentUrl = selectedPage
+        .combine(newTabFeature.legacyOrigins) { page, _ -> page }
+        .onEach { page ->
+            if (page?.tabId != selectedTabId) {
+                selectedTabId = page?.tabId
+                updateFocus(false)
+            }
             if (!hasFocus) {
-                updateTextWithUrl(it ?: "")
+                updateTextWithUrl(page?.url.orEmpty())
                 updateVisibility(true)
             }
-            onMidori = it?.let { url -> url.isMidoriUrl() || newTabFeature.isNewTabUrl(url) } ?: true
+            onMidori = page?.url?.let { it.isMidoriUrl() || newTabFeature.isNewTabUrl(it) } ?: true
         }
+        .map { it?.url }
         .stateIn(
             scope = coroutineScope,
             started = SharingStarted.Eagerly,
-            initialValue = ""
+            initialValue = store.state.selectedTab?.content?.url
         )
 
     init {
-        store.flow()
-            .map { it.selectedTabId }
-            .distinctUntilChanged()
-            .onEach {
-                updateFocus(false)
-                updateVisibility(true)
-            }
-            .launchIn(coroutineScope)
+        updateTextWithUrl(store.state.selectedTab?.content?.url.orEmpty())
     }
 
     override fun updateFocus(hasFocus: Boolean) {
+        if (hasFocus == this.hasFocus) return
         super.updateFocus(hasFocus)
         if (!hasFocus) searchEngineOverride = null
         if (hasFocus) {
             updateVisibility(true)
         }
-        // Focus state is the source of truth for text formatting. Updating in the same snapshot
-        // removes the timing race previously hidden behind a fixed coroutine delay.
-        updateTextWithUrl(currentUrl.value ?: "")
+        updateTextWithUrl(store.state.selectedTab?.content?.url.orEmpty())
     }
 
     private fun updateTextWithUrl(url: String) {
         text = if (newTabFeature.isNewTabUrl(url)) {
             TextFieldValue("")
         } else if (url.isMidoriUrl()) {
-            url.getMidoriSERPSearch()?.let { search ->
-                if (hasFocus) TextFieldValue(search.urlDecode(), selection = TextRange(0, search.length))
-                else TextFieldValue(search.urlDecode())
+            url.getMidoriSERPSearch()?.urlDecode()?.let { search ->
+                if (hasFocus) TextFieldValue(search, selection = TextRange(0, search.length))
+                else TextFieldValue(search)
             } ?: TextFieldValue("")
         } else if (!hasFocus) {
             TextFieldValue(url.toCleanHost())
@@ -190,4 +190,6 @@ class BrowserToolbarState @AssistedInject constructor(
     internal fun updateTrueHeightPx(height: Int) {
         trueHeightPx = height
     }
+
+    private data class SelectedPage(val tabId: String, val url: String)
 }
