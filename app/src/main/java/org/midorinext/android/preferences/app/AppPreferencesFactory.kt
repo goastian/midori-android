@@ -15,6 +15,7 @@ object AppPreferencesFactory {
             migrations = listOf(
                 AppPreferencesMigration.create(context),
                 HttpsOnlyAllTabsMigration,
+                HomeShortcutIdsMigration,
             ),
         )
     }

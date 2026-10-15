@@ -21,9 +21,14 @@ fun publicHomeUrl(value: String): String? = runCatching {
 }.getOrNull()
 
 fun defaultHomeShortcuts(): List<HomeShortcut> = listOf(
-    Triple("google", "Google", "https://www.google.com/"),
-    Triple("wikipedia", "Wikipedia", "https://www.wikipedia.org/"),
-    Triple("midori", "Midori", "https://astian.org/midori-browser/"),
+    Triple("kayak", "Kayak", "https://www.kayak.com/in?a=kan_318921_594075&lc=en&url=%2Fflights/"),
+    Triple("amazon", "Amazon", "https://amzn.to/47IiNIO"),
+    Triple("aliexpress", "AliExpress", "https://s.click.aliexpress.com/e/_Dlf1B1R/"),
+    Triple("ebay", "Ebay", "https://ebay.us/gW9r3z/"),
+    Triple("kayak-hotels", "Hotels", "https://www.kayak.com/in?a=kan_318921_594075&lc=en&url=%2Fhotels"),
+    Triple("p2pme", "P2P.me", "https://app.p2p.me/recommend?address=0xB3082b37cC95a9d4e6B1aEC19719a00c37D47597&nonce=215422&signature=0x161f733dab2a16e55bc8b2000a2a22be178c884d932916cf62a72c96154c059c163b749bd522672fbb7dccefa56f9127c14c7d747335ddbb10d65cc2ed33344f1b"),
+    Triple("kayak-cars", "Cars", "https://www.kayak.com/in?a=kan_318921_594075&lc=en&url=%2Fcars"),
+    Triple("temu", "Temu", "https://temu.to/k/gxr990d7ytg"),
 ).map { (id, title, url) ->
     HomeShortcut.newBuilder().setId(id).setTitle(title).setUrl(url).build()
 }

@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.first
 import org.junit.Assert.*
 import org.junit.Test
 import org.midorinext.android.newtab.HomeSection
+import org.midorinext.android.newtab.defaultHomeShortcuts
 
 class HomePreferencesTest {
     @Test
@@ -18,13 +19,14 @@ class HomePreferencesTest {
         val repository = AppPreferencesRepository(store)
         try {
             repository.ensureHomeShortcuts()
-            assertEquals(listOf("google", "wikipedia", "midori"), store.data.first().homeShortcutsList.map { it.id })
-            assertTrue(repository.saveHomeShortcut("google", "Search", "example.org"))
+            val defaults = defaultHomeShortcuts()
+            assertEquals(defaults, store.data.first().homeShortcutsList)
+            assertTrue(repository.saveHomeShortcut(defaults.first().id, "Search", "example.org"))
             repository.ensureHomeShortcuts()
             assertEquals("Search", store.data.first().homeShortcutsList.first().title)
             assertFalse(repository.saveHomeShortcut(null, "Unsafe", "javascript:alert(1)"))
-            repository.moveHomeShortcut("midori", -2)
-            assertEquals("midori", AppPreferences.parseFrom(file.readBytes()).homeShortcutsList.first().id)
+            repository.moveHomeShortcut(defaults.last().id, -defaults.lastIndex)
+            assertEquals(defaults.last().id, AppPreferences.parseFrom(file.readBytes()).homeShortcutsList.first().id)
             store.data.first().homeShortcutsList.forEach { repository.deleteHomeShortcut(it.id) }
             repository.ensureHomeShortcuts()
             assertTrue(AppPreferences.parseFrom(file.readBytes()).homeShortcutsList.isEmpty())
