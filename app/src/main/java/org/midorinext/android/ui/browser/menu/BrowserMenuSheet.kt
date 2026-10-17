@@ -31,7 +31,7 @@ internal fun BrowserMenuSheet(
     onDismissRequest: () -> Unit,
     content: @Composable ColumnScope.(dismiss: () -> Unit) -> Unit,
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     val dismiss = {
         scope.launch {
