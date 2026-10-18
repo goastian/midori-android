@@ -18,7 +18,7 @@ class AdBlockConfigurationTest {
     }
 
     @Test
-    fun customSourceAcceptsOnlySupportedHostRules() {
+    fun customSourceAcceptsNetworkAndCosmeticRules() {
         val rules = parseHostSource("""
             ! Comment
             ||ads.example^
@@ -31,7 +31,8 @@ class AdBlockConfigurationTest {
         assertTrue(rules.blocks("https://tracker.example/frame"))
         assertFalse(rules.blocks("https://safe.ads.example/frame"))
         assertFalse(rules.blocks("https://example.org/frame"))
-        assertThrows(IllegalArgumentException::class.java) { parseHostSource("example.org##.banner") }
+        assertEquals(".banner", rules.cosmetics.forHost("example.org").single().selector)
+        assertThrows(IllegalArgumentException::class.java) { parseHostSource("! Only a comment") }
     }
 
     @Test

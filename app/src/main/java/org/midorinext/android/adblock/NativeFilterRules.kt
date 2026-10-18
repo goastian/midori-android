@@ -14,12 +14,22 @@ internal fun resourceType(type: String): String = when (type) {
     else -> type
 }
 
-/** Safe subset of ABP network rules. Cosmetic, scriptlet and redirect rules are ignored. */
+/** Network and CSS filtering; executable filters and response rewriting are excluded. */
 internal class NativeFilterRules(
     private val hosts: DesktopHostRules,
     private val scoped: Map<String, List<ScopedRule>>,
     val supportedCount: Int,
+    private val indexed: Map<String, List<ScopedRule>> = emptyMap(),
+    private val unindexed: List<ScopedRule> = emptyList(),
+    val cosmetics: CosmeticFilterRules = CosmeticFilterRules(emptyList()),
+    private val pageExceptions: List<ScopedRule> = emptyList(),
 ) {
+    fun pageException(url: String, type: String): Boolean {
+        val host = runCatching { URI(url).host?.lowercase(Locale.ROOT) }.getOrNull() ?: return false
+        val lowercase = url.lowercase(Locale.ROOT)
+        return pageExceptions.any { it.matches(url, lowercase, host, type, false) }
+    }
+
     fun decision(
         url: String,
         siteHost: String?,
@@ -29,31 +39,35 @@ internal class NativeFilterRules(
         val uri = runCatching { URI(url) }.getOrNull() ?: return RuleDecision.NONE
         if (uri.scheme != "http" && uri.scheme != "https") return RuleDecision.NONE
         val host = uri.host?.lowercase(Locale.ROOT) ?: return RuleDecision.NONE
-        val target = buildString {
-            append(uri.rawPath?.takeIf { it.isNotEmpty() } ?: "/")
-            uri.rawQuery?.let { append('?'); append(it) }
-        }.lowercase(Locale.ROOT)
+        val lowercaseUrl = url.lowercase(Locale.ROOT)
         val hostDecision = hosts.decision(url)
         var blocked = hostDecision == RuleDecision.BLOCK
         var allowed = hostDecision == RuleDecision.ALLOW
         var importantBlock = false
         var importantAllow = false
-        var suffix = host
-        while (true) {
-            scoped[suffix]?.forEach { rule ->
-                if (rule.matches(target, siteHost, resourceType(type), thirdParty)) {
-                    when {
-                        rule.important && rule.allow -> importantAllow = true
-                        rule.important -> importantBlock = true
-                        rule.allow -> allowed = true
-                        else -> blocked = true
-                    }
+        fun evaluate(rule: ScopedRule) {
+            if (rule.matches(url, lowercaseUrl, siteHost, resourceType(type), thirdParty)) {
+                when {
+                    rule.important && rule.allow -> importantAllow = true
+                    rule.important -> importantBlock = true
+                    rule.allow -> allowed = true
+                    else -> blocked = true
                 }
             }
+        }
+        var suffix = host
+        while (true) {
+            scoped[suffix]?.forEach(::evaluate)
             val dot = suffix.indexOf('.')
             if (dot < 0) break
             suffix = suffix.substring(dot + 1)
         }
+        val seen = HashSet<String>()
+        for (offset in 0..lowercaseUrl.length - NetworkPattern.INDEX_LENGTH) {
+            val key = lowercaseUrl.substring(offset, offset + NetworkPattern.INDEX_LENGTH)
+            if (seen.add(key)) indexed[key]?.forEach(::evaluate)
+        }
+        unindexed.forEach(::evaluate)
         return when {
             importantAllow -> RuleDecision.IMPORTANT_ALLOW
             importantBlock -> RuleDecision.IMPORTANT_BLOCK
@@ -75,7 +89,7 @@ internal class NativeFilterRules(
 
 internal data class ScopedRule(
     val allow: Boolean,
-    val path: Regex?,
+    val pattern: NetworkPattern?,
     val includeSites: Set<String>,
     val excludeSites: Set<String>,
     val includeTypes: Set<String>,
@@ -83,11 +97,11 @@ internal data class ScopedRule(
     val thirdParty: Boolean?,
     val important: Boolean,
 ) {
-    fun matches(target: String, siteHost: String?, type: String, requestIsThirdParty: Boolean): Boolean {
+    fun matches(url: String, lowercaseUrl: String, siteHost: String?, type: String, requestIsThirdParty: Boolean): Boolean {
         if (thirdParty != null && thirdParty != requestIsThirdParty) return false
         if (includeTypes.isNotEmpty() && type !in includeTypes) return false
         if (type in excludeTypes) return false
-        if (path != null && !path.containsMatchIn(target)) return false
+        if (pattern != null && !pattern.matches(url, lowercaseUrl)) return false
         if (includeSites.isNotEmpty() && (siteHost == null || includeSites.none { siteHost.isDomainOrSubdomainOf(it) })) return false
         if (siteHost != null && excludeSites.any { siteHost.isDomainOrSubdomainOf(it) }) return false
         return true
@@ -100,46 +114,72 @@ internal fun parseHostSource(text: String, onAcceptedRule: ((String) -> Unit)? =
     val blocked = sortedSetOf<String>()
     val allowed = sortedSetOf<String>()
     val scoped = mutableMapOf<String, MutableList<ScopedRule>>()
+    val indexed = mutableMapOf<String, MutableList<ScopedRule>>()
+    val unindexed = mutableListOf<ScopedRule>()
+    val cosmetics = mutableListOf<CosmeticRule>()
+    val pageExceptions = mutableListOf<ScopedRule>()
     var supported = 0
     val anchored = Regex("^\\|\\|([a-z0-9](?:[a-z0-9.-]*[a-z0-9]))(.*)$", RegexOption.IGNORE_CASE)
+    val disabled = text.lineSequence().mapNotNull { raw ->
+        val line = raw.trim()
+        val options = line.substringAfter('$', "").split(',')
+        if ("badfilter" !in options) null else line.substringBefore('$') +
+            options.filterNot { it == "badfilter" }.joinToString(",").let { if (it.isEmpty()) "" else "$$it" }
+    }.toSet()
     text.lineSequence().forEach { raw ->
         val line = raw.trim()
-        if (line.length > 4096 || line.startsWith('!') || line.startsWith('#') || line.startsWith('[')) return@forEach
-        val exception = line.startsWith("@@")
-        val match = anchored.matchEntire(if (exception) line.drop(2) else line) ?: return@forEach
-        val host = match.groupValues[1].lowercase(Locale.ROOT)
-        if (!host.contains('.') || host.contains("..")) return@forEach
-        val remainder = match.groupValues[2]
-        val optionIndex = remainder.indexOf('$')
-        val pattern = if (optionIndex >= 0) remainder.substring(0, optionIndex) else remainder
-        val options = if (optionIndex >= 0) remainder.substring(optionIndex + 1) else ""
-        if (pattern.isNotEmpty() && pattern[0] != '^' && pattern[0] != '/') return@forEach
-        val conditions = parseOptions(options) ?: return@forEach
-        val pathText = when {
-            pattern.isEmpty() || pattern == "^" -> null
-            pattern.startsWith('/') -> pattern
-            else -> return@forEach
+        if (line.isEmpty() || line.length > 4096 || line.startsWith('!') || line.startsWith('[') || line in disabled) return@forEach
+        parseCosmeticRule(line)?.let {
+            cosmetics += it
+            supported++
+            onAcceptedRule?.invoke(line)
+            return@forEach
         }
-        val path = pathText?.let(::abpPathRegex) ?: if (pathText != null) return@forEach else null
-        if (path == null && conditions == RuleConditions()) {
-            (if (exception) allowed else blocked).add(host)
+        if (line.startsWith('#') || line.contains("##") || line.contains("#@#") || line.contains("#?#") || line.contains("#$#")) return@forEach
+        val exception = line.startsWith("@@")
+        val body = if (exception) line.drop(2) else line
+        val optionIndex = body.indexOf('$')
+        val patternText = if (optionIndex >= 0) body.substring(0, optionIndex) else body
+        val options = if (optionIndex >= 0) body.substring(optionIndex + 1) else ""
+        if (patternText.isEmpty() || patternText.length > 512 || patternText.any { it.isWhitespace() || it in "<>{}" } ||
+            patternText.startsWith('/') && patternText.endsWith('/')) return@forEach
+        val conditions = parseOptions(options) ?: return@forEach
+        if (!exception && conditions.includeTypes.any { it in setOf("elemhide", "generichide") }) return@forEach
+        val match = anchored.matchEntire(patternText)
+        val host = match?.groupValues?.get(1)?.lowercase(Locale.ROOT)?.takeIf(::validDomain)
+        val remainder = match?.groupValues?.get(2)
+        val hostOnly = host != null && remainder == "^" && !conditions.matchCase
+        val scopedHost = host?.takeIf { remainder == "^" || remainder?.startsWith('/') == true || remainder?.startsWith('^') == true }
+        if (hostOnly && conditions == RuleConditions()) {
+            (if (exception) allowed else blocked).add(host!!)
         } else {
-            scoped.getOrPut(host) { mutableListOf() } += ScopedRule(
-                allow = exception, path = path,
+            val pattern = if (hostOnly && !exception) null else NetworkPattern(patternText, conditions.matchCase)
+            val rule = ScopedRule(
+                allow = exception, pattern = pattern,
                 includeSites = conditions.includeSites, excludeSites = conditions.excludeSites,
                 includeTypes = conditions.includeTypes, excludeTypes = conditions.excludeTypes,
                 thirdParty = conditions.thirdParty, important = conditions.important,
             )
+            if (exception && conditions.includeTypes.any { it in setOf("document", "elemhide", "generichide") }) {
+                pageExceptions += rule
+            }
+            when {
+                scopedHost != null -> scoped.getOrPut(scopedHost) { mutableListOf() } += rule
+                else -> {
+                    val key = pattern!!.indexKeys().minByOrNull { indexed[it]?.size ?: 0 }
+                    if (key == null) unindexed += rule else indexed.getOrPut(key) { mutableListOf() } += rule
+                }
+            }
         }
         supported++
         onAcceptedRule?.invoke(line)
     }
-    require(supported > 0) { "No supported network rules" }
+    require(supported > 0) { "No supported filter rules" }
     val hostRules = DesktopHostRules(
         blocked.joinToString("\n", postfix = if (blocked.isEmpty()) "" else "\n"),
         allowed.joinToString("\n", postfix = if (allowed.isEmpty()) "" else "\n"),
     )
-    return NativeFilterRules(hostRules, scoped, supported)
+    return NativeFilterRules(hostRules, scoped, supported, indexed, unindexed, CosmeticFilterRules(cosmetics), pageExceptions)
 }
 
 private data class RuleConditions(
@@ -149,6 +189,7 @@ private data class RuleConditions(
     val excludeTypes: Set<String> = emptySet(),
     val thirdParty: Boolean? = null,
     val important: Boolean = false,
+    val matchCase: Boolean = false,
 )
 
 private fun parseOptions(raw: String): RuleConditions? {
@@ -156,9 +197,10 @@ private fun parseOptions(raw: String): RuleConditions? {
     val excluded = mutableSetOf<String>()
     val includeTypes = mutableSetOf<String>()
     val excludeTypes = mutableSetOf<String>()
-    val contentTypes = setOf("script", "image", "stylesheet", "font", "media", "object", "xhr", "xmlhttprequest", "ping", "websocket", "other", "subdocument", "document")
+    val contentTypes = setOf("script", "image", "stylesheet", "font", "media", "object", "xhr", "xmlhttprequest", "ping", "websocket", "other", "subdocument", "document", "elemhide", "generichide")
     var thirdParty: Boolean? = null
     var important = false
+    var matchCase = false
     if (raw.isEmpty()) return RuleConditions()
     for (option in raw.split(',')) {
         val normalized = option.lowercase(Locale.ROOT)
@@ -172,6 +214,7 @@ private fun parseOptions(raw: String): RuleConditions? {
                 thirdParty = false
             }
             normalized == "important" -> important = true
+            normalized == "match-case" -> matchCase = true
             normalized in contentTypes -> includeTypes += resourceType(normalized)
             normalized.startsWith('~') && normalized.drop(1) in contentTypes -> excludeTypes += resourceType(normalized.drop(1))
             normalized.startsWith("domain=") -> {
@@ -184,26 +227,9 @@ private fun parseOptions(raw: String): RuleConditions? {
             else -> return null
         }
     }
-    return RuleConditions(included, excluded, includeTypes, excludeTypes, thirdParty, important)
+    return RuleConditions(included, excluded, includeTypes, excludeTypes, thirdParty, important, matchCase)
 }
 
 private fun validDomain(value: String): Boolean = value.contains('.') &&
     value.matches(Regex("[a-z0-9.-]+")) && !value.contains("..")
 
-private fun abpPathRegex(pattern: String): Regex? {
-    if (pattern.length > 512 || pattern.any { it == '\n' || it == '\r' }) return null
-    val exact = pattern.endsWith('|')
-    val body = if (exact) pattern.dropLast(1) else pattern
-    val regex = buildString {
-        append('^')
-        body.forEach { char ->
-            when (char) {
-                '*' -> append(".*")
-                '^' -> append("(?:[^a-zA-Z0-9_.%-]|$)")
-                else -> append(Regex.escape(char.toString()))
-            }
-        }
-        if (exact) append('$')
-    }
-    return runCatching { Regex(regex, RegexOption.IGNORE_CASE) }.getOrNull()
-}

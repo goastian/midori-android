@@ -9,8 +9,15 @@ internal object AdPlacementPolicy {
         "[id^='div-gpt-ad']", "[data-ad-slot][data-ad-client^='ca-pub-']",
     )
 
-    fun message(enabled: Boolean): JSONObject = JSONObject()
-        .put("type", "ad_placement_policy")
-        .put("enabled", enabled)
-        .put("selectors", JSONArray(selectors))
+    fun message(enabled: Boolean, selection: CosmeticSelection = CosmeticSelection()): JSONObject {
+        val active = enabled && selection.enabled
+        val exceptions = selection.rules.filter { it.exception }.mapTo(HashSet()) { it.selector }
+        val hidden = ((if (selection.genericEnabled) selectors else emptyList()) + selection.rules
+            .filter { !it.exception && (selection.genericEnabled || it.included.isNotEmpty()) }
+            .map { it.selector }).distinct() - exceptions
+        return JSONObject()
+            .put("type", "ad_placement_policy")
+            .put("enabled", active)
+            .put("selectors", JSONArray(if (active) hidden else emptyList()))
+    }
 }

@@ -54,9 +54,8 @@ class NativeFilterSources @Inject constructor(
             OfficialFilterCatalog.all.filter { it.fallbackAsset != null }.forEach { source ->
                 runCatching {
                     val prefix = source.fallbackAsset!!
-                    val blocked = context.assets.open("adblock/$prefix.txt").bufferedReader().use { it.readText() }
-                    val allowed = context.assets.open("adblock/${prefix}_exceptions.txt").bufferedReader().use { it.readText() }
-                    putRules(source.id, NativeFilterRules.bundled(blocked, allowed))
+                    val text = context.assets.open("adblock/$prefix.txt").bufferedReader().use { it.readText() }
+                    putRules(source.id, parseHostSource(text))
                 }.onFailure { Log.e(TAG, "Could not load bundled ${source.id}", it) }
             }
             enabledSources(settings.current, includeAds = true).forEach { (key, url, _) ->
@@ -84,6 +83,7 @@ class NativeFilterSources @Inject constructor(
         siteHost: String?,
         type: String = "subdocument",
         thirdParty: Boolean = true,
+        documentUrl: String? = null,
     ): RuleDecision {
         if (level == BlockingLevel.OFF) return RuleDecision.NONE
         val snapshot = rules
@@ -92,6 +92,7 @@ class NativeFilterSources @Inject constructor(
         var importantBlock = false
         for (source in OfficialFilterCatalog.all) {
             if (source.id !in config.officialEnabled || (!source.tracker && level != BlockingLevel.TRACKERS_AND_ADS)) continue
+            if (documentUrl != null && snapshot[source.id]?.pageException(documentUrl, "document") == true) return RuleDecision.ALLOW
             when (snapshot[source.id]?.decision(url, siteHost, type, thirdParty)) {
                 RuleDecision.IMPORTANT_ALLOW -> return RuleDecision.ALLOW
                 RuleDecision.IMPORTANT_BLOCK -> importantBlock = true
@@ -102,6 +103,7 @@ class NativeFilterSources @Inject constructor(
         }
         for (source in config.sources) {
             if (!source.enabled || (!source.tracker && level != BlockingLevel.TRACKERS_AND_ADS)) continue
+            if (documentUrl != null && snapshot[source.url]?.pageException(documentUrl, "document") == true) return RuleDecision.ALLOW
             when (snapshot[source.url]?.decision(url, siteHost, type, thirdParty)) {
                 RuleDecision.IMPORTANT_ALLOW -> return RuleDecision.ALLOW
                 RuleDecision.IMPORTANT_BLOCK -> importantBlock = true
@@ -121,6 +123,22 @@ class NativeFilterSources @Inject constructor(
     internal fun hasAdSources(config: AdBlockConfiguration): Boolean =
         OfficialFilterCatalog.all.any { !it.tracker && it.id in config.officialEnabled && rules[it.id] != null } ||
             config.sources.any { !it.tracker && it.enabled && rules[it.url] != null }
+
+    internal fun cosmeticRules(config: AdBlockConfiguration, url: String, level: BlockingLevel = config.levelFor(url)): CosmeticSelection {
+        val host = hostOf(url) ?: return CosmeticSelection(enabled = false)
+        if (level != BlockingLevel.TRACKERS_AND_ADS) return CosmeticSelection(enabled = false)
+        val snapshot = rules
+        val keys = OfficialFilterCatalog.all.filter { !it.tracker && it.id in config.officialEnabled }.map { it.id } +
+            config.sources.filter { !it.tracker && it.enabled }.map { it.url }
+        val active = keys.mapNotNull(snapshot::get)
+        if (active.any { it.pageException(url, "document") || it.pageException(url, "elemhide") }) {
+            return CosmeticSelection(enabled = false)
+        }
+        return CosmeticSelection(
+            rules = active.flatMap { it.cosmetics.forHost(host).toList() },
+            genericEnabled = active.none { it.pageException(url, "generichide") },
+        )
+    }
 
     fun refreshAsync(key: String) {
         scope.launch { refresh(key, force = true) }
@@ -240,12 +258,9 @@ class NativeFilterSources @Inject constructor(
                         output.toByteArray()
                     }
                     val body = bytes.toString(Charsets.UTF_8)
-                    val supportedText = StringBuilder()
-                    val parsed = parseHostSource(body) { line ->
-                        supportedText.append(line).append('\n')
-                    }
+                    val parsed = parseHostSource(body)
                     val temporary = File(cache.parentFile, "${cache.name}.tmp")
-                    temporary.writeText(supportedText.toString())
+                    temporary.writeText(body)
                     require(temporary.renameTo(cache))
                     synchronized(this) { putRules(key, parsed) }
                     loadedCacheKeys.add(key)
@@ -284,7 +299,7 @@ class NativeFilterSources @Inject constructor(
 
     private companion object {
         const val TAG = "NativeFilterSources"
-        const val CACHE_FORMAT_VERSION = 2
+        const val CACHE_FORMAT_VERSION = 3
         const val MAX_SOURCE_BYTES = 20_000_000L
         const val UPDATE_INTERVAL_MS = 4L * 24 * 60 * 60 * 1000
         const val RETRY_INTERVAL_MS = 60L * 60 * 1000

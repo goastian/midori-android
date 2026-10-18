@@ -38,7 +38,7 @@ class NativeContentBlockingFeature @Inject constructor(
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val ports = mutableMapOf<EngineSession, Port>()
-    private val adPorts = mutableMapOf<EngineSession, Port>()
+    private val adPorts = mutableSetOf<Port>()
     private var backgroundPort: WebExtension.Port? = null
     private var registeredSessions = emptySet<EngineSession>()
     private val trackingObservers = mutableMapOf<EngineSession, EngineSession.Observer>()
@@ -64,8 +64,7 @@ class NativeContentBlockingFeature @Inject constructor(
 
     private val adMessageHandler = object : MessageHandler {
         override fun onPortConnected(port: Port) {
-            val session = port.engineSession ?: return
-            adPorts[session] = port
+            if (port.engineSession != null) adPorts.add(port)
         }
 
         override fun onPortMessage(message: Any, port: Port) {
@@ -82,7 +81,7 @@ class NativeContentBlockingFeature @Inject constructor(
         }
 
         override fun onPortDisconnected(port: Port) {
-            if (adPorts[port.engineSession] === port) adPorts.remove(port.engineSession)
+            adPorts.remove(port)
         }
     }
 
@@ -146,7 +145,7 @@ class NativeContentBlockingFeature @Inject constructor(
                 .collect { (sessions, _, _) ->
                     registerSessions(sessions)
                     ports.values.toList().forEach(::sendPolicy)
-                    adPorts.values.toList().forEach(::sendAdPolicy)
+                    adPorts.toList().forEach(::sendAdPolicy)
                     sendNetworkPolicy()
                 }
         }
@@ -200,7 +199,7 @@ class NativeContentBlockingFeature @Inject constructor(
             installed.disconnectPort(NATIVE_APP, session)
             installed.disconnectPort(AD_APP, session)
             ports.remove(session)
-            adPorts.remove(session)
+            adPorts.removeAll { it.engineSession === session }
         }
         registeredSessions = sessions
     }
@@ -220,12 +219,26 @@ class NativeContentBlockingFeature @Inject constructor(
 
     private fun sendAdPolicy(port: Port) {
         val config = settings.current
-        val enabled = config.levelFor(port.senderUrl()) == BlockingLevel.TRACKERS_AND_ADS && sources.hasAdSources(config)
-        runCatching { port.postMessage(AdPlacementPolicy.message(enabled)) }
-            .onFailure {
-                adPorts.remove(port.engineSession)
+        val frameUrl = port.senderUrl()
+        val topUrl = (store.state.tabs + store.state.customTabs)
+            .find { it.engineState.engineSession === port.engineSession }?.content?.url ?: frameUrl
+        val level = config.levelFor(topUrl)
+        val enabled = level == BlockingLevel.TRACKERS_AND_ADS && sources.hasAdSources(config)
+        scope.launch {
+            val policy = withContext(Dispatchers.Default) {
+                val top = sources.cosmeticRules(config, topUrl, level)
+                val frame = if (frameUrl == topUrl) top else sources.cosmeticRules(config, frameUrl, level)
+                AdPlacementPolicy.message(enabled, frame.copy(
+                    enabled = top.enabled && frame.enabled,
+                    genericEnabled = top.genericEnabled && frame.genericEnabled,
+                ))
+            }
+            if (port !in adPorts || config != settings.current) return@launch
+            runCatching { port.postMessage(policy) }.onFailure {
+                adPorts.remove(port)
                 Log.w(TAG, "Could not update ad placement policy", it)
             }
+        }
     }
 
     private fun sendPolicy(port: Port) {
@@ -247,6 +260,6 @@ class NativeContentBlockingFeature @Inject constructor(
         private const val NATIVE_APP = "midori_adblock"
         private const val AD_APP = "midori_content_blocking"
         private const val NETWORK_APP = "midori_network"
-        private const val BUNDLE_VERSION = "1.7"
+        private const val BUNDLE_VERSION = "1.8"
     }
 }

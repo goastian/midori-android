@@ -18,13 +18,13 @@ data class OfficialFilter(
 object OfficialFilterCatalog {
     val all = listOf(
         OfficialFilter("easyprivacy", "EasyPrivacy", "https://easylist.to/easylist/easyprivacy.txt", true,
-            defaultEnabled = true, fallbackAsset = "trackers"),
+            defaultEnabled = true, fallbackAsset = "easyprivacy"),
         OfficialFilter("ubo-privacy", "uBlock Origin · Privacy",
             "https://ublockorigin.github.io/uAssetsCDN/filters/privacy.min.txt", true, defaultEnabled = true),
         OfficialFilter("adguard-tracking", "AdGuard · Tracking Protection",
             "https://filters.adtidy.org/extension/chromium/filters/3.txt", true, defaultEnabled = true),
         OfficialFilter("easylist", "EasyList", "https://easylist.to/easylist/easylist.txt", false,
-            defaultEnabled = true, fallbackAsset = "ads"),
+            defaultEnabled = true, fallbackAsset = "easylist"),
         OfficialFilter("ubo-ads", "uBlock Origin · Ads",
             "https://ublockorigin.github.io/uAssetsCDN/filters/filters.min.txt", false, defaultEnabled = true),
         OfficialFilter("ubo-unbreak", "uBlock Origin · Unbreak",

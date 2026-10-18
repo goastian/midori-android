@@ -8,6 +8,74 @@ import java.io.File
 
 class NetworkFilterRulesTest {
     @Test
+    fun genericPathsWildcardsAndAbsoluteUrlsWorkAcrossUnrelatedPublishers() {
+        val rules = parseHostSource("""
+            /advertising/*${'$'}script,third-party
+            /banners/*.png${'$'}image
+            ^adslot^${'$'}xmlhttprequest
+            |https://static.example/promotions/*|${'$'}image
+            ||ad*.network.example^${'$'}script
+            @@/banners/editorial.png|${'$'}image
+        """.trimIndent())
+        for (publisher in listOf("news.example", "shop.example", "forum.example")) {
+            assertTrue(rules.blocks("https://cdn.$publisher/advertising/delivery.js", publisher, "script"))
+            assertFalse(rules.blocks("https://cdn.$publisher/advertising/delivery.js", publisher, "script", false))
+            assertTrue(rules.blocks("https://$publisher/banners/sale.png", publisher, "image", false))
+            assertFalse(rules.blocks("https://$publisher/banners/editorial.png", publisher, "image", false))
+            assertFalse(rules.blocks("https://$publisher/articles/sale.png", publisher, "image", false))
+            assertTrue(rules.blocks("https://api.$publisher/serve?adslot=top", publisher, "xmlhttprequest"))
+            assertFalse(rules.blocks("https://api.$publisher/serve?myadslot=top", publisher, "xmlhttprequest"))
+        }
+        assertTrue(rules.blocks("https://static.example/promotions/top.png", type = "image"))
+        assertFalse(rules.blocks("https://other.example/?url=https://static.example/promotions/top.png", type = "image"))
+        assertTrue(rules.blocks("https://ads12.network.example/banner.js", type = "script"))
+        assertFalse(rules.blocks("https://network.example/assets/ads12.network.example/banner.js", type = "script"))
+    }
+
+    @Test
+    fun caseSensitiveRulesAndBadfilterDoNotBroadenBlocking() {
+        val text = """
+            /Banner*.js${'$'}script,match-case
+            ||disabled.example^${'$'}image
+            ||disabled.example^${'$'}image,badfilter
+            ||active.example^${'$'}image
+        """.trimIndent()
+        val rules = parseHostSource(text)
+        assertTrue(rules.blocks("https://cdn.example/Banner42.js", type = "script"))
+        assertFalse(rules.blocks("https://cdn.example/banner42.js", type = "script"))
+        assertFalse(rules.blocks("https://disabled.example/banner.png", type = "image"))
+        assertTrue(rules.blocks("https://active.example/banner.png", type = "image"))
+        assertFalse(parseHostSource(text).blocks("https://disabled.example/banner.png", type = "image"))
+    }
+
+    @Test
+    fun documentAndCosmeticExceptionsApplyOnlyToTheirOwnPage() {
+        val rules = parseHostSource("""
+            @@||safe.example^${'$'}document
+            @@||reader.example/articles/*${'$'}generichide
+            @@||accessible.example^${'$'}elemhide
+        """.trimIndent())
+        assertTrue(rules.pageException("https://safe.example/page", "document"))
+        assertFalse(rules.pageException("https://other.example/page", "document"))
+        assertFalse(rules.pageException("https://safe.example.evil.test/page", "document"))
+        assertTrue(rules.pageException("https://reader.example/articles/story", "generichide"))
+        assertFalse(rules.pageException("https://reader.example/home", "generichide"))
+        assertTrue(rules.pageException("https://accessible.example/page", "elemhide"))
+        assertFalse(rules.pageException("https://accessible.example/page", "document"))
+    }
+
+    @Test
+    fun fullBundledListsIncludeGenericNetworkAndCosmeticRulesBeforeDownloading() {
+        val root = File("src/main/assets/adblock")
+        val rules = parseHostSource(File(root, "easylist.txt").readText())
+        assertTrue(rules.supportedCount > 60_000)
+        assertTrue(rules.blocks("https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js", "publisher.example", "script"))
+        assertTrue(rules.cosmetics.forHost("publisher.example").count() > 1_000)
+        assertFalse(rules.blocks("https://publisher.example/articles/todays-news.html", "publisher.example", "subdocument", false))
+        assertTrue(parseHostSource(File(root, "easyprivacy.txt").readText()).supportedCount > 40_000)
+    }
+
+    @Test
     fun bundledRulesBlockGoogleAndOtherNetworksAcrossResourceTypes() {
         val root = File("src/main/assets/adblock")
         val rules = NativeFilterRules.bundled(File(root, "ads.txt").readText(), File(root, "ads_exceptions.txt").readText())

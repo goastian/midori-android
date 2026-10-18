@@ -33,7 +33,7 @@ class NativeNetworkBlocker @Inject constructor(
         if (level == BlockingLevel.OFF) return@withTimeoutOrNull false
         sources.ready.await()
         val thirdParty = domain(targetHost) != domain(originHost)
-        sources.decision(config, level, url, originHost, type, thirdParty) == RuleDecision.BLOCK
+        sources.decision(config, level, url, originHost, type, thirdParty, message.optString("originUrl").ifBlank { siteUrl }) == RuleDecision.BLOCK
     } ?: false
 
     private suspend fun domain(host: String): String {

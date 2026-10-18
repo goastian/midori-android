@@ -55,7 +55,7 @@
   }
 
   function stateFor(tabId, siteUrl) {
-    if (!tabs.has(tabId)) tabs.set(tabId, { siteUrl, count: 0, cache: new Map(), timer: null, css: "", cssTask: Promise.resolve() });
+    if (!tabs.has(tabId)) tabs.set(tabId, { siteUrl, count: 0, cache: new Map(), timer: null, frames: new Map() });
     return tabs.get(tabId);
   }
 
@@ -164,20 +164,24 @@
   function updatePlacements(message, sender) {
     const tabId = sender.tab.id;
     const state = stateFor(tabId, sender.tab.url);
-    state.cssTask = state.cssTask.catch(() => {}).then(async () => {
+    const frameId = sender.frameId;
+    if (!state.frames.has(frameId)) state.frames.set(frameId, { css: "", task: Promise.resolve(), url: sender.url });
+    const frame = state.frames.get(frameId);
+    if (frame.url !== sender.url) { frame.url = sender.url; frame.css = ""; }
+    frame.task = frame.task.catch(() => {}).then(async () => {
       if (tabs.get(tabId) !== state) return;
-      if (message.siteUrl?.split("#")[0] !== state.siteUrl?.split("#")[0]) return;
+      if (message.siteUrl?.split("#")[0] !== (sender.url || sender.tab.url)?.split("#")[0]) return;
       const code = message.enabled === true && Array.isArray(message.selectors) && message.selectors.length
-        ? `${message.selectors.join(",")} { display: none !important; }` : "";
-      if (code === state.css) return;
-      if (state.css) await browser.tabs.removeCSS(tabId, { code: state.css, cssOrigin: "user", frameId: 0 });
-      state.css = "";
+        ? message.selectors.map(selector => `${selector} { display: none !important; }`).join("\n") : "";
+      if (code === frame.css) return;
+      if (frame.css) await browser.tabs.removeCSS(tabId, { code: frame.css, cssOrigin: "user", frameId });
+      frame.css = "";
       if (code) {
-        await browser.tabs.insertCSS(tabId, { code, cssOrigin: "user", frameId: 0, runAt: "document_start" });
-        state.css = code;
+        await browser.tabs.insertCSS(tabId, { code, cssOrigin: "user", frameId, runAt: "document_start" });
+        frame.css = code;
       }
     });
-    return state.cssTask;
+    return frame.task;
   }
 
   browser.webRequest.onBeforeRequest.addListener(intercept, { urls: ["http://*/*", "https://*/*"] }, ["blocking"]);
@@ -192,8 +196,9 @@
     }
   });
   browser.runtime.onMessage.addListener((message, sender) => {
-    if (sender.frameId !== 0 || !sender.tab) return undefined;
+    if (!sender.tab) return undefined;
     if (message?.type === "ad_placement_policy") return updatePlacements(message, sender);
+    if (sender.frameId !== 0) return undefined;
     if (message?.type !== "get_blocked_count") return undefined;
     const state = tabs.get(sender.tab.id);
     return Promise.resolve({ type: "blocked_count", count: state?.count || 0, siteUrl: state?.siteUrl || sender.tab.url });

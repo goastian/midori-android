@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Midori Native Content Blocking",
-  "version": "1.7",
+  "version": "1.8",
   "description": "Internal page bridge for Midori's native blocker",
   "browser_specific_settings": {
     "gecko": { "id": "midori-native-adblock@astian.org" }
@@ -13,7 +13,7 @@
       "matches": ["http://*/*", "https://*/*"],
       "js": ["ad-placements.js"],
       "run_at": "document_start",
-      "all_frames": false
+      "all_frames": true
     },
     {
       "matches": ["http://*/*", "https://*/*"],

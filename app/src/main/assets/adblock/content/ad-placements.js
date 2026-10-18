@@ -24,11 +24,14 @@
 
   port.onMessage.addListener(message => {
     if (message?.type !== "ad_placement_policy") return;
-    browser.runtime.sendMessage({ ...message, siteUrl: location.href }).catch(() => {});
+    const selectors = Array.isArray(message.selectors) ? message.selectors.filter(selector =>
+      typeof selector === "string" && !/[{}\r\n]/.test(selector) && CSS.supports(`selector(${selector})`)
+    ) : [];
+    browser.runtime.sendMessage({ ...message, selectors, siteUrl: location.href }).catch(() => {});
     enabled = message.enabled === true;
     observer.disconnect();
     if (enabled) {
-      style.textContent = `${message.selectors.join(",")} { display: none !important; }`;
+      style.textContent = selectors.map(selector => `${selector} { display: none !important; }`).join("\n");
       observer.observe(document, { childList: true, subtree: true });
       attachStyle();
     } else {
@@ -41,7 +44,9 @@
     style.remove();
     browser.runtime.sendMessage({ type: "ad_placement_policy", enabled: false, siteUrl: location.href }).catch(() => {});
   });
-  browser.runtime.onMessage.addListener(reportCount);
-  browser.runtime.sendMessage({ type: "get_blocked_count" }).then(reportCount).catch(() => {});
+  if (window === window.top) {
+    browser.runtime.onMessage.addListener(reportCount);
+    browser.runtime.sendMessage({ type: "get_blocked_count" }).then(reportCount).catch(() => {});
+  }
   port.postMessage({ type: "ready" });
 })();
