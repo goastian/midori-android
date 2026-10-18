@@ -174,6 +174,7 @@ fun TabCarousel(
                             onDragFinished = onTabDragFinished,
                             onDragCancelled = onTabDragCancelled,
                             previewHeight = previewHeight,
+                            dismissVertically = true,
                             modifier = (if (reduceMotion) Modifier else Modifier.animateItem())
                                 .then(pageMotion("carousel-$prefix-${tab.id}"))
                         )

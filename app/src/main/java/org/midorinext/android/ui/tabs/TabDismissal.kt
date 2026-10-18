@@ -8,6 +8,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
@@ -15,6 +16,7 @@ import org.midorinext.android.ui.animation.reduceMotionRequested
 
 internal class TabDismissal {
     val progress = Animatable(0f)
+    var dragOffset by mutableFloatStateOf(0f)
     var requested by mutableStateOf(false)
         private set
     private var committed = false

@@ -89,9 +89,11 @@ fun TabRow(
             .heightIn(min = 88.dp)
             .graphicsLayer {
                 val progress = dismissal.progress.value
-                translationX = if (animationsEnabled) 24.dp.toPx() * progress else 0f
+                val offset = dismissal.dragOffset
+                translationX = offset + if (animationsEnabled) ((if (offset < 0) -size.width else size.width) - offset) * progress else 0f
                 alpha = (1f - progress) * if (isBeingDragged) 0.42f else 1f
             }
+            .tabSwipeToDismiss(dismissal, enabled = !selectionMode && !isBeingDragged && !dismissal.requested)
             .onGloballyPositioned { coordinates.value = it }
             .semantics { this.selected = highlighted }
             .border(

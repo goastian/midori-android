@@ -219,6 +219,7 @@ class NativeContentBlockingFeature @Inject constructor(
 
     private fun sendAdPolicy(port: Port) {
         val config = settings.current
+        val revision = sources.revision.value
         val frameUrl = port.senderUrl()
         val topUrl = (store.state.tabs + store.state.customTabs)
             .find { it.engineState.engineSession === port.engineSession }?.content?.url ?: frameUrl
@@ -233,7 +234,7 @@ class NativeContentBlockingFeature @Inject constructor(
                     genericEnabled = top.genericEnabled && frame.genericEnabled,
                 ))
             }
-            if (port !in adPorts || config != settings.current) return@launch
+            if (port !in adPorts || config != settings.current || revision != sources.revision.value) return@launch
             runCatching { port.postMessage(policy) }.onFailure {
                 adPorts.remove(port)
                 Log.w(TAG, "Could not update ad placement policy", it)

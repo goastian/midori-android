@@ -121,6 +121,7 @@ fun TabCard(
     onDragFinished: () -> Unit = {},
     onDragCancelled: () -> Unit = {},
     previewHeight: Dp? = null,
+    dismissVertically: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val dismissal = rememberTabDismissal(tab.id) { onDeleted(tab) }
@@ -159,9 +160,15 @@ fun TabCard(
             val progress = dismissal.progress.value
             scaleX = pressScale * (1f - 0.06f * progress)
             scaleY = scaleX
-            translationY = if (animationsEnabled) -24.dp.toPx() * progress else 0f
+            val offset = dismissal.dragOffset
+            if (dismissVertically) {
+                translationY = offset + if (animationsEnabled) (-size.height - offset) * progress else 0f
+            } else {
+                translationX = offset + if (animationsEnabled) ((if (offset < 0) -size.width else size.width) - offset) * progress else 0f
+            }
             alpha = (1f - progress) * if (isBeingDragged) 0.42f else 1f
         }
+        .tabSwipeToDismiss(dismissal, enabled = !selectionMode && !isBeingDragged && !dismissal.requested, vertical = dismissVertically)
         .onGloballyPositioned { coordinates = it }
         .semantics { this.selected = highlighted }
         .border(
