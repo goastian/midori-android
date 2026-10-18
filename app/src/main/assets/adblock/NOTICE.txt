@@ -12,3 +12,12 @@ The extraction keeps EasyList advertising hosts and EasyPrivacy tracking hosts
 separate. It includes only plain ||host^ network rules and plain @@||host^
 exceptions. It does not include cosmetic, scriptlet, option-bearing, or URL
 pattern rules.
+
+easylist.txt and easyprivacy.txt are complete upstream snapshots downloaded from
+https://easylist.to/easylist/easylist.txt and
+https://easylist.to/easylist/easyprivacy.txt on 2026-10-18.
+Both snapshots identify version 202610181704 and retain their upstream headers.
+They are distributed under the same CC BY-SA 3.0 license linked above.
+Midori loads supported network and CSS rules from these snapshots before the
+first online update. Unsupported syntax remains in the snapshots for attribution
+and future parser upgrades; it is not executed.

@@ -101,6 +101,7 @@
     }
     if (!isWebPage(siteUrl)) return {};
     const state = stateFor(details.tabId, siteUrl);
+    if (details.type === "sub_frame") state.frames.delete(details.frameId);
     if (!policy) await deadline(ready, 2000, null);
     if (levelFor(siteUrl) === "OFF") return {};
     const requestPolicy = policy;
@@ -170,6 +171,7 @@
     if (frame.url !== sender.url) { frame.url = sender.url; frame.css = ""; }
     frame.task = frame.task.catch(() => {}).then(async () => {
       if (tabs.get(tabId) !== state) return;
+      if (state.frames.get(frameId) !== frame || frame.url !== sender.url) return;
       if (message.siteUrl?.split("#")[0] !== (sender.url || sender.tab.url)?.split("#")[0]) return;
       const code = message.enabled === true && Array.isArray(message.selectors) && message.selectors.length
         ? message.selectors.map(selector => `${selector} { display: none !important; }`).join("\n") : "";

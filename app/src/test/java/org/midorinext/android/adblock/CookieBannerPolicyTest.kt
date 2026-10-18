@@ -54,6 +54,7 @@ class CookieBannerPolicyTest {
             manifest.getJSONObject("browser_specific_settings").getJSONObject("gecko").getString("id"))
         val permissions = manifest.getJSONArray("permissions")
         assertFalse((0 until permissions.length()).map(permissions::getString).any { it == "cookies" || it == "storage" })
-        assertFalse(manifest.getJSONArray("content_scripts").getJSONObject(0).getBoolean("all_frames"))
+        assertTrue(manifest.getJSONArray("content_scripts").getJSONObject(0).getBoolean("all_frames"))
+        assertFalse(manifest.getJSONArray("content_scripts").getJSONObject(1).getBoolean("all_frames"))
     }
 }
