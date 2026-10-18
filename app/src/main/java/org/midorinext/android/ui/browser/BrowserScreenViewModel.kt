@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import org.midorinext.android.adblock.DesktopHostFilter
 import org.midorinext.android.adblock.BlockingLevel
+import org.midorinext.android.adblock.NativeContentBlockingFeature
 import org.midorinext.android.adblock.hostOf
 import org.midorinext.android.mozac.pdf.PdfSaveEvents
 import org.midorinext.android.mozac.media.BackgroundPlaybackFeature
@@ -75,6 +76,7 @@ class BrowserScreenViewModel @Inject constructor(
     private val backgroundPlaybackFeature: BackgroundPlaybackFeature,
     webAppRepositoryProvider: dagger.Lazy<WebAppRepository>,
     private val desktopHostFilter: DesktopHostFilter,
+    private val contentBlocking: NativeContentBlockingFeature,
 ): ViewModel() {
     private val bookmarksRepository by lazy { bookmarksRepositoryProvider.get() }
     private val webAppUseCases by lazy { webAppUseCasesProvider.get() }
@@ -453,7 +455,13 @@ class BrowserScreenViewModel @Inject constructor(
         } else {
             exceptions.remove(session)
         }
-        sessionUseCases.reload(tab.id)
+        val config = desktopHostFilter.settings.current
+        viewModelScope.launch {
+            contentBlocking.awaitConfiguration(config)
+            if (desktopHostFilter.settings.current == config && store.state.tabs.any { it.id == tab.id && it.content.url == tab.content.url }) {
+                sessionUseCases.reload(tab.id)
+            }
+        }
     }
 
     val isMidoriVpnActionAvailable = store.flow()

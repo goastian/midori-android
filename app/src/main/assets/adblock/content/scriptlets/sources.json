@@ -1,0 +1,19 @@
+{
+  "adguard": {
+    "version": "2.5.1",
+    "url": "https://registry.npmjs.org/@adguard/scriptlets/-/scriptlets-2.5.1.tgz",
+    "sha256": "347c98bb6557e982ab2a4427a620446727b850dd286e1f98b7b27d7afd0ba12f",
+    "integrity": "sha512-008B4qm6mXU4mqHOl1HE/jfRa0D/LUX2Lx4k00G45csiBF/fnIGzVivPsT1Q+Uhp9C+zj5tKoekkL39W8HqjzA=="
+  },
+  "ublock": {
+    "commit": "c61688e27a53f9b07e07b34170a5e3e5029c35ac",
+    "url": "https://codeload.github.com/gorhill/uBlock/tar.gz/c61688e27a53f9b07e07b34170a5e3e5029c35ac",
+    "sha256": "fdff6eee7d7079827feded45e92e2bfb06c33bad3bb9aed1a99f72ebe61c532a"
+  },
+  "publicSuffixList": {
+    "commit": "52b71b3c4576ff77450cc7ebcfc7f34a916af3f9",
+    "url": "https://raw.githubusercontent.com/publicsuffix/list/52b71b3c4576ff77450cc7ebcfc7f34a916af3f9/public_suffix_list.dat",
+    "sha256": "3d92f70d719426d7e82dc4aee181058d0ad570d2559f0ea3ece8e731a25e5f33",
+    "license": "MPL-2.0"
+  }
+}

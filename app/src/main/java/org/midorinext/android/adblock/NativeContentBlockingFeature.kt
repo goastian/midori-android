@@ -9,8 +9,11 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import mozilla.components.browser.engine.gecko.webextension.GeckoWebExtension
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.EngineSession
@@ -24,6 +27,7 @@ import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.WebExtension
 import javax.inject.Inject
 import javax.inject.Singleton
+import org.midorinext.android.BuildConfig
 
 /** GeckoView 157 requires a content-script bridge for DOM access; policy stays in the native blocker. */
 @Singleton
@@ -45,6 +49,9 @@ class NativeContentBlockingFeature @Inject constructor(
     private var extension: GeckoWebExtension? = null
     private var started = false
     private val bridgeReady = CompletableDeferred<Unit>()
+    private val appliedPolicy = MutableStateFlow<Pair<AdBlockConfiguration, Long>?>(null)
+    private val sentPolicies = linkedMapOf<Long, AdBlockConfiguration>()
+    private var policySequence = 0L
     val ready: Deferred<Unit> = bridgeReady
 
     private val messageHandler = object : MessageHandler {
@@ -88,23 +95,35 @@ class NativeContentBlockingFeature @Inject constructor(
     private val backgroundDelegate = object : WebExtension.MessageDelegate {
         override fun onConnect(port: WebExtension.Port) {
             backgroundPort = port
+            if (BuildConfig.DEBUG) Log.d(TAG, "Network background connected")
             port.setDelegate(object : WebExtension.PortDelegate {
                 override fun onPortMessage(message: Any, port: WebExtension.Port) {
                     if (message !is JSONObject) return
+                    if (BuildConfig.DEBUG && message.optString("type") != "network_request") {
+                        Log.d(TAG, "Background message: ${message.optString("type")}")
+                    }
                     when (message.optString("type")) {
                         "ready" -> sendNetworkPolicy()
                         "network_request" -> handleNetworkRequest(message, port)
                         "network_policy_applied" -> {
-                            if (message.optLong("revision", -1) == sources.revision.value &&
-                                sources.ready.isCompleted && networkBlocker.ready.isCompleted) bridgeReady.complete(Unit)
+                            val config = sentPolicies.remove(message.optLong("policyId", -1))
+                            if (config == settings.current && message.optLong("revision", -1) == sources.revision.value &&
+                                sources.ready.isCompleted && networkBlocker.ready.isCompleted) {
+                                appliedPolicy.value = config to sources.revision.value
+                                bridgeReady.complete(Unit)
+                            }
                         }
+                        "scriptlet_policy_failed" -> Log.e(TAG, "Could not register bundled scriptlets: ${message.optString("error")}")
                         "blocked_total" -> statistics.get().recordNetworkSnapshot(
                             message.optString("reportId"), message.optLong("count", -1))
                     }
                 }
 
                 override fun onDisconnect(port: WebExtension.Port) {
-                    if (backgroundPort === port) backgroundPort = null
+                    if (backgroundPort === port) {
+                        backgroundPort = null
+                        appliedPolicy.value = null
+                    }
                 }
             })
         }
@@ -208,14 +227,29 @@ class NativeContentBlockingFeature @Inject constructor(
         if (!sources.ready.isCompleted || !networkBlocker.ready.isCompleted) return
         val port = backgroundPort ?: return
         val config = settings.current
-        runCatching {
-            port.postMessage(JSONObject()
-                .put("type", "network_policy")
-                .put("level", config.level.name)
-                .put("siteLevels", JSONObject(config.siteLevels.mapValues { it.value.name }))
-                .put("revision", sources.revision.value))
-        }.onFailure { Log.w(TAG, "Could not update network policy", it) }
+        val revision = sources.revision.value
+        scope.launch {
+            val scriptlets = withContext(Dispatchers.Default) { sources.scriptletPolicy(config) }
+            if (backgroundPort !== port || config != settings.current || revision != sources.revision.value) return@launch
+            val policyId = ++policySequence
+            if (BuildConfig.DEBUG) Log.d(TAG, "Sending policy $policyId, revision $revision, ${scriptlets.getJSONArray("rules").length()} scriptlet rules")
+            sentPolicies[policyId] = config
+            while (sentPolicies.size > 8) sentPolicies.remove(sentPolicies.keys.first())
+            runCatching {
+                port.postMessage(JSONObject()
+                    .put("type", "network_policy")
+                    .put("level", config.level.name)
+                    .put("siteLevels", JSONObject(config.siteLevels.mapValues { it.value.name }))
+                    .put("revision", revision).put("policyId", policyId).put("scriptlets", scriptlets))
+            }.onFailure { Log.w(TAG, "Could not update network policy", it) }
+        }
     }
+
+    suspend fun awaitConfiguration(config: AdBlockConfiguration = settings.current): Boolean =
+        withTimeoutOrNull(5_000) {
+            appliedPolicy.first { it != null && it.first == config && it.second == sources.revision.value }
+            true
+        } ?: false
 
     private fun sendAdPolicy(port: Port) {
         val config = settings.current
@@ -261,6 +295,6 @@ class NativeContentBlockingFeature @Inject constructor(
         private const val NATIVE_APP = "midori_adblock"
         private const val AD_APP = "midori_content_blocking"
         private const val NETWORK_APP = "midori_network"
-        private const val BUNDLE_VERSION = "1.8"
+        private const val BUNDLE_VERSION = "1.9"
     }
 }

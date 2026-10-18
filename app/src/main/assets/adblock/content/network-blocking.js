@@ -9,6 +9,8 @@
   let totalTimer = null;
   let nextRequestId = 0;
   let decisionReceived = false;
+  let policyApplied = false;
+  let policyTask = Promise.resolve();
   const requests = new Map();
   let ready;
   let markReady;
@@ -51,7 +53,7 @@
   }
 
   function policyKey(value) {
-    return JSON.stringify([value?.level, value?.revision, Object.entries(value?.siteLevels || {}).sort()]);
+    return JSON.stringify([value?.level, value?.revision, Object.entries(value?.siteLevels || {}).sort(), value?.scriptlets]);
   }
 
   function stateFor(tabId, siteUrl) {
@@ -87,6 +89,7 @@
   async function intercept(details) {
     if (details.tabId < 0) return {};
     if (details.type === "main_frame") {
+      await deadline(ready, 4000, null);
       clearTimeout(tabs.get(details.tabId)?.timer);
       tabs.delete(details.tabId);
       stateFor(details.tabId, details.url);
@@ -101,7 +104,6 @@
     }
     if (!isWebPage(siteUrl)) return {};
     const state = stateFor(details.tabId, siteUrl);
-    if (details.type === "sub_frame") state.frames.delete(details.frameId);
     if (!policy) await deadline(ready, 2000, null);
     if (levelFor(siteUrl) === "OFF") return {};
     const requestPolicy = policy;
@@ -139,11 +141,21 @@
         }
         if (message?.type !== "network_policy") return;
         if (policyKey(policy) !== policyKey(message)) {
+          if (policyApplied) resetReady();
+          policyApplied = false;
           policy = message;
           for (const state of tabs.values()) state.cache.clear();
         }
-        markReady();
-        port.postMessage({ type: "network_policy_applied", revision: message.revision });
+        const applying = policy;
+        policyTask = policyTask.catch(() => {}).then(async () => {
+          try {
+            if (message.scriptlets) await MidoriScriptlets.update(message.scriptlets);
+            if (policy === applying) { policyApplied = true; markReady(); }
+            port.postMessage({ type: "network_policy_applied", revision: message.revision, policyId: message.policyId });
+          } catch (error) {
+            port.postMessage({ type: "scriptlet_policy_failed", error: String(error) });
+          }
+        });
       });
       port.onDisconnect.addListener(() => {
         if (nativePort !== port) return;
@@ -152,6 +164,7 @@
         for (const resolve of requests.values()) resolve(null);
         requests.clear();
         policy = null;
+        policyApplied = false;
         markReady();
         resetReady();
         setTimeout(connect, 1000);
@@ -166,7 +179,9 @@
     const tabId = sender.tab.id;
     const state = stateFor(tabId, sender.tab.url);
     const frameId = sender.frameId;
-    if (!state.frames.has(frameId)) state.frames.set(frameId, { css: "", task: Promise.resolve(), url: sender.url });
+    if (!state.frames.has(frameId) || state.frames.get(frameId).documentId !== message.documentId) {
+      state.frames.set(frameId, { css: "", task: Promise.resolve(), url: sender.url, documentId: message.documentId });
+    }
     const frame = state.frames.get(frameId);
     if (frame.url !== sender.url) { frame.url = sender.url; frame.css = ""; }
     frame.task = frame.task.catch(() => {}).then(async () => {

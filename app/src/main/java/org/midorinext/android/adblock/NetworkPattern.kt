@@ -2,7 +2,8 @@ package org.midorinext.android.adblock
 
 import java.util.Locale
 
-internal class NetworkPattern(pattern: String, private val matchCase: Boolean = false) {
+internal class NetworkPattern(pattern: String, val matchCase: Boolean = false) {
+    val source = pattern
     private val domainAnchor = pattern.startsWith("||")
     private val startAnchor = domainAnchor || pattern.startsWith('|')
     private val endAnchor = pattern.endsWith('|')

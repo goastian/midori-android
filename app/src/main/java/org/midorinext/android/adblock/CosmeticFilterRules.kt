@@ -2,6 +2,9 @@ package org.midorinext.android.adblock
 
 import java.util.Locale
 
+private val unsupportedCosmeticOperator = Regex(":(?:has-text|contains|matches-[\\w-]+|upward|xpath|remove|style|watch-attr|others|if|if-not)\\(")
+private val cosmeticDomain = Regex("[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?")
+
 internal data class CosmeticSelection(
     val rules: List<CosmeticRule> = emptyList(),
     val enabled: Boolean = true,
@@ -17,7 +20,7 @@ internal data class CosmeticRule(
     fun matches(host: String) = excluded.none { host == it || host.endsWith(".$it") }
 }
 
-internal class CosmeticFilterRules(rules: List<CosmeticRule>) {
+internal class CosmeticFilterRules(val rules: List<CosmeticRule>) {
     private val generic = rules.filter { it.included.isEmpty() }
     private val scoped = buildMap<String, MutableList<CosmeticRule>> {
         rules.forEach { rule -> rule.included.forEach { getOrPut(it) { mutableListOf() }.add(rule) } }
@@ -43,14 +46,14 @@ internal fun parseCosmeticRule(line: String): CosmeticRule? {
     val selector = line.substring(index + marker.length).trim()
     if (selector.isEmpty() || selector.startsWith("+js(") || selector.startsWith('^') ||
         selector.any { it in "{}\r\n" } ||
-        Regex(":(?:has-text|contains|matches-[\\w-]+|upward|xpath|remove|style|watch-attr|others|if|if-not)\\(").containsMatchIn(selector)) return null
+        unsupportedCosmeticOperator.containsMatchIn(selector)) return null
     val included = mutableSetOf<String>()
     val excluded = mutableSetOf<String>()
     val scope = line.substring(0, index)
     if (scope.isNotEmpty()) {
         for (entry in scope.split(',')) {
             val domain = entry.removePrefix("~").lowercase(Locale.ROOT)
-            if (!domain.matches(Regex("[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?")) || domain.contains("..")) return null
+            if (!cosmeticDomain.matches(domain) || domain.contains("..")) return null
             (if (entry.startsWith('~')) excluded else included).add(domain)
         }
     }

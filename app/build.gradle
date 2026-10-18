@@ -289,7 +289,16 @@ tasks.matching { task -> task.name.startsWith("pre") && task.name.endsWith("Buil
 }
 
 tasks.matching { task -> task.name == "testOriginalPlaystoreDebugUnitTest" }.configureEach {
-    inputs.dir(file("src/main/assets/adblock/content"))
+    inputs.dir(file("src/main/assets/adblock"))
+}
+
+tasks.register("generateBundledFilters", JavaExec) {
+    group = "verification"
+    description = "Compiles the bundled filter snapshots with the native parser for fast Android startup."
+    dependsOn("compileOriginalPlaystoreDebugUnitTestKotlin", "compileOriginalPlaystoreDebugUnitTestJavaWithJavac")
+    mainClass = "org.midorinext.android.adblock.GenerateBundledFilters"
+    classpath = tasks.named("testOriginalPlaystoreDebugUnitTest").get().classpath
+    args(file("src/main/assets/adblock").absolutePath)
 }
 
 

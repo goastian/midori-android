@@ -2,6 +2,7 @@
   "use strict";
 
   const port = browser.runtime.connectNative("midori_content_blocking");
+  const documentId = Array.from(crypto.getRandomValues(new Uint32Array(4)), value => value.toString(16)).join("-");
   const style = document.createElement("style");
   let enabled = false;
   const observer = new MutationObserver(attachStyle);
@@ -27,7 +28,7 @@
     const selectors = Array.isArray(message.selectors) ? message.selectors.filter(selector =>
       typeof selector === "string" && !/[{}\r\n]/.test(selector) && CSS.supports(`selector(${selector})`)
     ) : [];
-    browser.runtime.sendMessage({ ...message, selectors, siteUrl: location.href }).catch(() => {});
+    browser.runtime.sendMessage({ ...message, selectors, documentId, siteUrl: location.href }).catch(() => {});
     enabled = message.enabled === true;
     observer.disconnect();
     if (enabled) {
@@ -42,7 +43,7 @@
     enabled = false;
     observer.disconnect();
     style.remove();
-    browser.runtime.sendMessage({ type: "ad_placement_policy", enabled: false, siteUrl: location.href }).catch(() => {});
+    browser.runtime.sendMessage({ type: "ad_placement_policy", enabled: false, documentId, siteUrl: location.href }).catch(() => {});
   });
   if (window === window.top) {
     browser.runtime.onMessage.addListener(reportCount);

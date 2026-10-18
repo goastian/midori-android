@@ -23,6 +23,8 @@ import java.security.MessageDigest
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
+import org.json.JSONArray
+import org.json.JSONObject
 
 @Singleton
 class NativeFilterSources @Inject constructor(
@@ -33,6 +35,8 @@ class NativeFilterSources @Inject constructor(
     private val metadata = context.getSharedPreferences("native_adblock_http", Context.MODE_PRIVATE)
     private val locks = ConcurrentHashMap<String, Mutex>()
     private val downloadMutex = Mutex()
+    private val cacheWarmupMutex = Mutex()
+    private val loadingCacheKeys = ConcurrentHashMap.newKeySet<String>()
     private val loadedCacheKeys = ConcurrentHashMap.newKeySet<String>()
     private val lastAttempt = ConcurrentHashMap<String, Long>()
     @Volatile private var rules: Map<String, NativeFilterRules> = emptyMap()
@@ -53,18 +57,27 @@ class NativeFilterSources @Inject constructor(
             }
             OfficialFilterCatalog.all.filter { it.fallbackAsset != null }.forEach { source ->
                 runCatching {
+                    val startedAt = android.os.SystemClock.elapsedRealtime()
                     val prefix = source.fallbackAsset!!
-                    val text = context.assets.open("adblock/$prefix.txt").bufferedReader().use { it.readText() }
-                    putRules(source.id, parseHostSource(text))
+                    val compiled = runCatching {
+                        context.assets.open("adblock/compiled/${source.id}.json").bufferedReader().use { NativeFilterRules.fromCompiled(it.readText()) }
+                    }.getOrNull()
+                    val parsed = compiled ?: context.assets.open("adblock/$prefix.txt").bufferedReader().use {
+                        parseHostSource(it.readText(), trusted = true)
+                    }
+                    putRules(source.id, parsed)
+                    if (org.midorinext.android.BuildConfig.DEBUG) {
+                        Log.d(TAG, "Loaded bundled ${source.id} in ${android.os.SystemClock.elapsedRealtime() - startedAt} ms")
+                    }
                 }.onFailure { Log.e(TAG, "Could not load bundled ${source.id}", it) }
             }
             enabledSources(settings.current, includeAds = true).forEach { (key, url, _) ->
-                if (cacheFile(url).exists()) loadCache(key, url)
+                if (cacheFile(url).exists()) loadCacheIfFast(key, url)
             }
             settings.state.collectLatest { config ->
                 if (config.hasBlockingSites()) {
                     enabledSources(config).forEach { (key, url, updatedAt) ->
-                        if (key !in loadedCacheKeys && cacheFile(url).exists()) loadCache(key, url)
+                        if (key !in loadedCacheKeys && cacheFile(url).exists()) loadCacheIfFast(key, url)
                         if (!cacheFile(url).exists() || System.currentTimeMillis() - updatedAt >= UPDATE_INTERVAL_MS) {
                             refreshStaleAsync(key)
                         }
@@ -123,6 +136,22 @@ class NativeFilterSources @Inject constructor(
     internal fun hasAdSources(config: AdBlockConfiguration): Boolean =
         OfficialFilterCatalog.all.any { !it.tracker && it.id in config.officialEnabled && rules[it.id] != null } ||
             config.sources.any { !it.tracker && it.enabled && rules[it.url] != null }
+
+    internal fun scriptletPolicy(config: AdBlockConfiguration): JSONObject {
+        val snapshot = rules
+        val active = OfficialFilterCatalog.all.filter { it.id in config.officialEnabled }
+            .map { it.id to it.tracker } + config.sources.filter { it.enabled }.map { it.url to it.tracker }
+        val scriptlets = JSONArray()
+        val exceptions = JSONArray()
+        for ((key, tracker) in active) {
+            val source = snapshot[key] ?: continue
+            source.scriptlets.forEach { scriptlets.put(it.toJson(tracker)) }
+            source.documentExceptions(tracker).forEach(exceptions::put)
+        }
+        return JSONObject().put("level", config.level.name)
+            .put("siteLevels", JSONObject(config.siteLevels.mapValues { it.value.name }))
+            .put("rules", scriptlets).put("documentExceptions", exceptions)
+    }
 
     internal fun cosmeticRules(config: AdBlockConfiguration, url: String, level: BlockingLevel = config.levelFor(url)): CosmeticSelection {
         val host = hostOf(url) ?: return CosmeticSelection(enabled = false)
@@ -187,6 +216,7 @@ class NativeFilterSources @Inject constructor(
     fun removeCustom(url: String) {
         settings.removeSource(url)
         cacheFile(url).delete()
+        compiledCacheFile(url).delete()
         loadedCacheKeys.remove(url)
         synchronized(this) { rules = rules - url }
         mutableRuleCounts.update { it - url }
@@ -212,15 +242,50 @@ class NativeFilterSources @Inject constructor(
     private fun loadCache(key: String, url: String) {
         val file = cacheFile(url)
         if (!file.exists()) return
-        runCatching { parseHostSource(file.readText()) }
+        val compiled = compiledCacheFile(url)
+        runCatching {
+            val cached = if (compiled.exists()) runCatching { NativeFilterRules.fromCompiled(compiled.readText()) }.getOrNull() else null
+            cached ?: parseHostSource(file.readText(), trusted = OfficialFilterCatalog.get(key) != null)
+                .also { writeCompiledCache(url, it) }
+        }
             .onSuccess {
                 putRules(key, it)
                 loadedCacheKeys.add(key)
             }
             .onFailure {
                 file.delete()
+                compiled.delete()
                 Log.w(TAG, "Ignoring invalid filter cache $key", it)
             }
+    }
+
+    private fun loadCacheIfFast(key: String, url: String) {
+        if (compiledCacheFile(url).exists()) {
+            loadCache(key, url)
+            return
+        }
+        if (!loadingCacheKeys.add(key)) return
+        scope.launch {
+            try {
+                ready.await()
+                cacheWarmupMutex.withLock {
+                    locks.getOrPut(key) { Mutex() }.withLock {
+                        if (key !in loadedCacheKeys) loadCache(key, url)
+                    }
+                }
+            } finally { loadingCacheKeys.remove(key) }
+        }
+    }
+
+    private fun compiledCacheFile(url: String): File = File(cacheFile(url).path + ".json")
+
+    private fun writeCompiledCache(url: String, parsed: NativeFilterRules) {
+        runCatching {
+            val destination = compiledCacheFile(url)
+            val temporary = File(destination.path + ".tmp")
+            temporary.writeText(parsed.compiled().toString())
+            require(temporary.renameTo(destination))
+        }.onFailure { Log.w(TAG, "Could not save compiled filter cache", it) }
     }
 
     private fun download(key: String, sourceUrl: String) {
@@ -258,10 +323,11 @@ class NativeFilterSources @Inject constructor(
                         output.toByteArray()
                     }
                     val body = bytes.toString(Charsets.UTF_8)
-                    val parsed = parseHostSource(body)
+                    val parsed = parseHostSource(body, trusted = OfficialFilterCatalog.get(key) != null)
                     val temporary = File(cache.parentFile, "${cache.name}.tmp")
                     temporary.writeText(body)
                     require(temporary.renameTo(cache))
+                    writeCompiledCache(sourceUrl, parsed)
                     synchronized(this) { putRules(key, parsed) }
                     loadedCacheKeys.add(key)
                     metadata.edit()

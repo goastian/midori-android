@@ -17,7 +17,7 @@ import java.util.WeakHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
-internal class SortedHosts(private val text: String) {
+internal class SortedHosts(val text: String) {
     private val starts: IntArray = IntArray(text.count { it == '\n' }).also { positions ->
         var index = 0
         var start = 0
@@ -67,8 +67,8 @@ internal class SortedHosts(private val text: String) {
 }
 
 internal class DesktopHostRules(blocked: String, allowed: String) {
-    private val blockedHosts = SortedHosts(blocked)
-    private val allowedHosts = SortedHosts(allowed)
+    val blockedHosts = SortedHosts(blocked)
+    val allowedHosts = SortedHosts(allowed)
 
     fun decision(url: String): RuleDecision {
         val uri = runCatching { URI(url) }.getOrNull() ?: return RuleDecision.NONE
