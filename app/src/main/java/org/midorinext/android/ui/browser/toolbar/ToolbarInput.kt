@@ -84,13 +84,15 @@ fun ToolbarInput(
         focusManager.clearFocus()
         activity?.forceHideKeyboard()
     }
+    var wasEditing by remember { mutableStateOf(false) }
     LaunchedEffect(toolbarState.hasFocus) {
         if (toolbarState.hasFocus) {
             focusRequester.requestFocus()
-        } else {
+        } else if (wasEditing) {
             focusManager.clearFocus()
             activity?.forceHideKeyboard()
         }
+        wasEditing = toolbarState.hasFocus
     }
 
     val decorationBox: @Composable (@Composable () -> Unit) -> Unit = { innerTextField ->

@@ -7,10 +7,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.net.Uri
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
@@ -174,6 +178,27 @@ class ToolbarInputDeviceTest {
         is SurfaceView -> view
         is ViewGroup -> (0 until view.childCount).firstNotNullOfOrNull { findSurface(view.getChildAt(it)) }
         else -> null
+    }
+
+    @Test
+    fun composingAnUnfocusedAddressPreservesFindFieldFocus() {
+        var showAddress by mutableStateOf(false)
+        val requester = FocusRequester()
+        compose.runOnIdle { state = createState() }
+        compose.setContent {
+            MidoriBrowserTheme {
+                Column {
+                    BasicTextField("Find in page", onValueChange = {}, modifier = Modifier.focusRequester(requester))
+                    if (showAddress) ToolbarInput(toolbarState = state, onCommit = {})
+                }
+            }
+        }
+        compose.runOnIdle { requester.requestFocus() }
+        compose.onNode(hasSetTextAction()).assertIsFocused()
+
+        compose.runOnIdle { showAddress = true }
+
+        compose.onNode(hasSetTextAction()).assertIsFocused()
     }
 
     @Test
