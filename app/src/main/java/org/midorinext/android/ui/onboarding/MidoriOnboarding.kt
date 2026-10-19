@@ -4,7 +4,6 @@
 package org.midorinext.android.ui.onboarding
 
 import android.app.Activity
-import android.app.role.RoleManager
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
@@ -79,7 +78,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.view.WindowCompat
 import org.midorinext.android.R
 import org.midorinext.android.adblock.BlockingLevel
-import org.midorinext.android.ext.openDefaultAppsSystemSettings
+import org.midorinext.android.ext.defaultBrowserStatus
 import org.midorinext.android.preferences.app.SearchEnginePreference
 import org.midorinext.android.preferences.app.ToolbarPosition
 import org.midorinext.android.ui.preferences.searchEngineName
@@ -708,16 +707,9 @@ private fun requestDefaultBrowser(
     context: Context,
     launcher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>,
 ) {
-    when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
-            val roleManager = context.getSystemService(RoleManager::class.java)
-            if (roleManager.isRoleAvailable(RoleManager.ROLE_BROWSER) &&
-                !roleManager.isRoleHeld(RoleManager.ROLE_BROWSER)
-            ) {
-                launcher.launch(roleManager.createRequestRoleIntent(RoleManager.ROLE_BROWSER))
-            }
-        }
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> context.openDefaultAppsSystemSettings()
+    val status = context.defaultBrowserStatus()
+    if (!status.isDefault) {
+        launcher.launch(status.requestIntent())
     }
 }
 

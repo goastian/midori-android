@@ -1,7 +1,5 @@
 package org.midorinext.android.ui.browser.menu
 
-import android.app.role.RoleManager
-import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -23,8 +21,8 @@ import mozilla.components.support.ktx.android.content.share
 import org.midorinext.android.BuildConfig
 import org.midorinext.android.R
 import org.midorinext.android.ext.activity
+import org.midorinext.android.ext.defaultBrowserStatus
 import org.midorinext.android.ext.isMidoriUrl
-import org.midorinext.android.ext.openDefaultAppsSystemSettings
 import org.midorinext.android.ext.toCleanHost
 import org.midorinext.android.ui.MidoriApplicationViewModel
 import org.midorinext.android.ui.browser.BrowserScreenViewModel
@@ -57,17 +55,12 @@ fun BrowserMenu(
             keyboard?.hide()
         }
         var showMoreOptions by rememberSaveable { mutableStateOf(false) }
-        val roleManager = remember(context) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) context.getSystemService(RoleManager::class.java) else null
+        var defaultBrowser by remember(context) {
+            mutableStateOf(context.defaultBrowserStatus())
         }
-        val canRequestDefault = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            roleManager?.isRoleAvailable(RoleManager.ROLE_BROWSER) == true
-        } else true
-        val isDefault = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-            roleManager?.isRoleHeld(RoleManager.ROLE_BROWSER) == true
         val defaultLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            defaultPromptDismissed = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-                roleManager?.isRoleHeld(RoleManager.ROLE_BROWSER) == true
+            defaultBrowser = context.defaultBrowserStatus()
+            defaultPromptDismissed = defaultBrowser.isDefault
         }
         val showPageActions = currentUrl.isExternalPage()
 
@@ -86,7 +79,7 @@ fun BrowserMenu(
                 BrowserMenuGroup { BrowserNavigation(viewModel, dismiss) }
             }
             BrowserMenuMainContent(
-                showDefaultPrompt = !showPageActions && canRequestDefault && !isDefault && !defaultPromptDismissed,
+                showDefaultPrompt = !showPageActions && !defaultBrowser.isDefault && !defaultPromptDismissed,
                 vpnEnabled = vpnEnabled,
                 extensionCount = extensions.size,
                 onNavigate = openDestination,
@@ -100,9 +93,7 @@ fun BrowserMenu(
                 },
                 onSetDefault = {
                     dismiss()
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && roleManager != null) {
-                        defaultLauncher.launch(roleManager.createRequestRoleIntent(RoleManager.ROLE_BROWSER))
-                    } else context.openDefaultAppsSystemSettings()
+                    defaultLauncher.launch(defaultBrowser.requestIntent())
                 },
                 onDismissDefault = { defaultPromptDismissed = true },
             )
