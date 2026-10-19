@@ -37,7 +37,7 @@ internal fun parseScriptletRule(line: String, trusted: Boolean = false): Scriptl
     }
     val position = line.indexOf(marker)
     if (position < 0 || !line.endsWith(')')) return null
-    val args = parseScriptletArguments(line.substring(position + marker.length, line.length - 1)) ?: return null
+    val args = parseScriptletArguments(line.substring(position + marker.length, line.length - 1), ublock) ?: return null
     val entry = args.firstOrNull()?.takeIf { it.isNotEmpty() }?.let { ScriptletCatalog.resolve(it, ublock) }
     if (entry == null && (args.isNotEmpty() || !exception)) return null
     if (entry?.trusted == true && !trusted && !exception) return null
@@ -57,7 +57,7 @@ internal fun parseScriptletRule(line: String, trusted: Boolean = false): Scriptl
         if (ublock && exception) emptyList() else excluded, exception, ublock)
 }
 
-internal fun parseScriptletArguments(text: String): List<String>? {
+internal fun parseScriptletArguments(text: String, ublock: Boolean = false): List<String>? {
     if (text.isBlank()) return emptyList()
     val result = mutableListOf<String>()
     var index = 0
@@ -69,7 +69,15 @@ internal fun parseScriptletArguments(text: String): List<String>? {
         var closed = quote == null
         while (index < text.length) {
             val char = text[index++]
-            if (char == '\\' && index < text.length) {
+            if (char == '\\' && ublock) {
+                val start = index - 1
+                while (text.getOrNull(index) == '\\') index++
+                val count = index - start
+                val separator = quote ?: ','
+                val escaped = text.getOrNull(index) == separator && count % 2 == 1
+                repeat(count - if (escaped) 1 else 0) { value.append('\\') }
+                if (escaped) value.append(text[index++])
+            } else if (char == '\\' && index < text.length) {
                 val next = text[index]
                 if (next == ',' || next == quote || next == '\\') {
                     value.append(next)

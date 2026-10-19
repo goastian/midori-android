@@ -46,6 +46,10 @@
     const enabled = rule => rule.tracker || level === "TRACKERS_AND_ADS";
 
     function networkMatch(pattern, url, matchCase) {
+      if (pattern.startsWith("/") && pattern.endsWith("/")) {
+        try { return new RegExp(pattern.slice(1, -1), matchCase ? "" : "i").test(url); }
+        catch { return false; }
+      }
       const domainAnchor = pattern.startsWith("||");
       const anchored = domainAnchor || pattern.startsWith("|");
       const end = pattern.endsWith("|");

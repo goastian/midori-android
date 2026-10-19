@@ -41,6 +41,12 @@ data class AdBlockConfiguration(
             runCatching { URI(url).scheme in setOf("http", "https") && hostOf(url) != null }.getOrDefault(false)
 }
 
+internal fun AdBlockConfiguration.networkPolicyConfiguration() = copy(
+    officialUpdatedAt = emptyMap(),
+    sources = sources.map { it.copy(updatedAt = 0L) },
+    rejectCookieBanners = false,
+)
+
 internal fun hostOf(url: String): String? = runCatching {
     URI(url).host?.lowercase(Locale.ROOT)?.takeIf { it.contains('.') }
 }.getOrNull()

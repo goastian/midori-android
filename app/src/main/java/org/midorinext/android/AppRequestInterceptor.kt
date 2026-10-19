@@ -90,10 +90,6 @@ class AppRequestInterceptor @Inject constructor(
             }
         }
 
-        if (isSubframeRequest && desktopHostFilter.blocksSubframe(engineSession, uri, isSameDomain)) {
-            return RequestInterceptor.InterceptionResponse.Deny
-        }
-
         return appLinksInterceptor.onLoadRequest(
             engineSession, uri, lastUri, hasUserGesture, isSameDomain, isRedirect, isDirectNavigation,
             isSubframeRequest

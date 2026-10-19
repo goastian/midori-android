@@ -83,6 +83,7 @@ def preLimitVersionCode = 2_090_000_000
 def configuredPlaystoreVersionCode = resolvePlaystoreVersionCode()
 
 android {
+    ndkVersion "29.0.14206865"
     // AGP 8.13 can fail preBundle when resource shrinking runs with multi-APK ABI splits.
     // Keep ABI splits for APK builds, but disable them when a bundle task is requested.
     def requestedTasks = gradle.startParameter.taskNames.collect { it.toLowerCase() }
@@ -290,12 +291,37 @@ tasks.matching { task -> task.name.startsWith("pre") && task.name.endsWith("Buil
 
 tasks.matching { task -> task.name == "testOriginalPlaystoreDebugUnitTest" }.configureEach {
     inputs.dir(file("src/main/assets/adblock"))
+    dependsOn("buildHostAdblock")
+    systemProperty("midori.adblock.library", layout.buildDirectory.file("rust-host/libmidori_adblock.so").get().asFile.absolutePath)
+}
+
+def rustInputs = rootProject.files("native/adblock/Cargo.toml", "native/adblock/Cargo.lock", "native/adblock/rust-toolchain.toml", "scripts/build-adblock.py") + rootProject.fileTree("native/adblock/src")
+
+tasks.register("buildHostAdblock", Exec) {
+    inputs.files(rustInputs)
+    outputs.file(layout.buildDirectory.file("rust-host/libmidori_adblock.so"))
+    commandLine("python3", rootProject.file("scripts/build-adblock.py"), "--host", "--output", layout.buildDirectory.dir("rust-host").get().asFile)
+}
+
+tasks.register("buildAndroidAdblock", Exec) {
+    inputs.files(rustInputs)
+    inputs.property("fullAbiBuild", project.findProperty("fullAbiBuild") ?: "false")
+    outputs.dir(layout.buildDirectory.dir("rust-jni"))
+    def abis = project.findProperty("fullAbiBuild") == "true" ? ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"] : ["armeabi-v7a", "arm64-v8a", "x86_64"]
+    commandLine(["python3", rootProject.file("scripts/build-adblock.py"), "--ndk", android.ndkDirectory,
+        "--output", layout.buildDirectory.dir("rust-jni").get().asFile] + abis.collectMany { ["--abi", it] })
+}
+
+android.sourceSets.main.jniLibs.srcDir(layout.buildDirectory.dir("rust-jni").get().asFile)
+tasks.matching { it.name.startsWith("merge") && it.name.endsWith("JniLibFolders") }.configureEach {
+    dependsOn("buildAndroidAdblock")
 }
 
 tasks.register("generateBundledFilters", JavaExec) {
     group = "verification"
     description = "Compiles the bundled filter snapshots with the native parser for fast Android startup."
-    dependsOn("compileOriginalPlaystoreDebugUnitTestKotlin", "compileOriginalPlaystoreDebugUnitTestJavaWithJavac")
+    dependsOn("compileOriginalPlaystoreDebugUnitTestKotlin", "compileOriginalPlaystoreDebugUnitTestJavaWithJavac", "buildHostAdblock")
+    systemProperty("midori.adblock.library", layout.buildDirectory.file("rust-host/libmidori_adblock.so").get().asFile.absolutePath)
     mainClass = "org.midorinext.android.adblock.GenerateBundledFilters"
     classpath = tasks.named("testOriginalPlaystoreDebugUnitTest").get().classpath
     args(file("src/main/assets/adblock").absolutePath)

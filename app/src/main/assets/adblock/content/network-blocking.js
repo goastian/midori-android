@@ -12,6 +12,7 @@
   let policyApplied = false;
   let policyTask = Promise.resolve();
   const requests = new Map();
+  const responsePolicies = new Map();
   let ready;
   let markReady;
   function resetReady() { ready = new Promise(resolve => { markReady = resolve; }); }
@@ -87,13 +88,14 @@
   }
 
   async function intercept(details) {
+    responsePolicies.delete(details.requestId);
     if (details.tabId < 0) return {};
-    if (details.type === "main_frame") {
+    const main = details.type === "main_frame";
+    if (main) {
       await deadline(ready, 4000, null);
       clearTimeout(tabs.get(details.tabId)?.timer);
       tabs.delete(details.tabId);
       stateFor(details.tabId, details.url);
-      return {};
     }
 
     const ancestor = details.frameAncestors?.find(frame => frame.frameId === 0)?.url;
@@ -109,24 +111,34 @@
     const requestPolicy = policy;
 
     const originUrl = details.documentUrl || details.originUrl || siteUrl;
-    const key = `${details.type}\n${details.url}\n${originUrl}`;
-    let cancel = state.cache.get(key);
-    if (cancel === undefined) {
+    const method = details.method || "GET";
+    const key = `${details.type}\n${method}\n${details.url}\n${originUrl}`;
+    let decision = state.cache.get(key);
+    if (decision === undefined) {
       try {
-        const response = await requestDecision({ url: details.url, siteUrl, originUrl, resourceType: details.type });
+        const response = await requestDecision({ url: details.url, siteUrl, originUrl, resourceType: details.type, method });
         if (policy !== requestPolicy || tabs.get(details.tabId) !== state) return {};
         if (typeof response?.cancel !== "boolean") return {};
-        cancel = response.cancel;
+        decision = { cancel: response.cancel, blocked: response.blocked === true };
+        if (typeof response.csp === "string" && response.csp.length <= 65536 && !/[\r\n]/.test(response.csp)) decision.csp = response.csp;
+        if (typeof response.redirectUrl === "string" && response.redirectUrl !== details.url &&
+            /^(?:https?:|data:)/.test(response.redirectUrl)) decision.redirectUrl = response.redirectUrl;
         if (state.cache.size >= 512) state.cache.clear();
-        state.cache.set(key, cancel);
+        state.cache.set(key, decision);
       } catch { return {}; }
     }
-    if (cancel && tabs.get(details.tabId) === state) {
+    if (decision.csp && details.requestId && !decision.redirectUrl) {
+      if (responsePolicies.size >= 2048) responsePolicies.clear();
+      responsePolicies.set(details.requestId, { csp: decision.csp, policy: requestPolicy, tabId: details.tabId, siteUrl });
+    }
+    if (main && (decision.cancel || decision.blocked)) return {};
+    if ((decision.cancel || decision.blocked) && tabs.get(details.tabId) === state) {
       state.count++;
       recordTotal(details);
       notifyCount(details.tabId, state);
     }
-    return cancel ? { cancel: true } : {};
+    if (decision.cancel) return { cancel: true };
+    return decision.redirectUrl ? { redirectUrl: decision.redirectUrl } : {};
   }
 
   function connect() {
@@ -188,8 +200,12 @@
       if (tabs.get(tabId) !== state) return;
       if (state.frames.get(frameId) !== frame || frame.url !== sender.url) return;
       if (message.siteUrl?.split("#")[0] !== (sender.url || sender.tab.url)?.split("#")[0]) return;
-      const code = message.enabled === true && Array.isArray(message.selectors) && message.selectors.length
-        ? message.selectors.map(selector => `${selector} { display: none !important; }`).join("\n") : "";
+      const selectors = Array.isArray(message.selectors) ? message.selectors : [];
+      const styles = Array.isArray(message.styles) ? message.styles.filter(item =>
+        typeof item?.selector === "string" && !/[{}\r\n]/.test(item.selector) &&
+        typeof item.declarations === "string" && !/[{}\r\n@]|url\s*\(/i.test(item.declarations)) : [];
+      const code = message.enabled === true ? selectors.map(selector => `${selector} { display: none !important; }`)
+        .concat(styles.map(item => `${item.selector} { ${item.declarations} }`)).join("\n") : "";
       if (code === frame.css) return;
       if (frame.css) await browser.tabs.removeCSS(tabId, { code: frame.css, cssOrigin: "user", frameId });
       frame.css = "";
@@ -201,10 +217,20 @@
     return frame.task;
   }
 
-  browser.webRequest.onBeforeRequest.addListener(intercept, { urls: ["http://*/*", "https://*/*"] }, ["blocking"]);
+  browser.webRequest.onBeforeRequest.addListener(intercept, { urls: ["http://*/*", "https://*/*", "ws://*/*", "wss://*/*"] }, ["blocking"]);
+  browser.webRequest.onHeadersReceived?.addListener(details => {
+    const response = responsePolicies.get(details.requestId);
+    responsePolicies.delete(details.requestId);
+    if (!response || policy !== response.policy || levelFor(response.siteUrl) === "OFF") return {};
+    return { responseHeaders: [...(details.responseHeaders || []), { name: "Content-Security-Policy", value: response.csp }] };
+  }, { urls: ["http://*/*", "https://*/*"], types: ["main_frame", "sub_frame"] }, ["blocking", "responseHeaders"]);
+  const forgetResponse = details => { responsePolicies.delete(details.requestId); };
+  browser.webRequest.onCompleted?.addListener(forgetResponse, { urls: ["<all_urls>"] });
+  browser.webRequest.onErrorOccurred?.addListener(forgetResponse, { urls: ["<all_urls>"] });
   browser.tabs.onRemoved.addListener(tabId => {
     clearTimeout(tabs.get(tabId)?.timer);
     tabs.delete(tabId);
+    for (const [id, response] of responsePolicies) if (response.tabId === tabId) responsePolicies.delete(id);
   });
   browser.tabs.onUpdated.addListener((tabId, change) => {
     if (change.url && tabs.has(tabId)) {

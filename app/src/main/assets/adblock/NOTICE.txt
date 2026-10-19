@@ -45,3 +45,26 @@ content/scriptlets/public-suffixes.json is derived from Public Suffix List commi
 52b71b3c4576ff77450cc7ebcfc7f34a916af3f9, Copyright the Public Suffix List authors,
 under MPL-2.0. The license text is included as LICENSE-PublicSuffixList.txt.
 Source: https://github.com/publicsuffix/list
+
+The native network and cosmetic engine is brave/adblock-rust 0.13.3 at revision
+6028a6d5735f1e81346eeef73c194c7240035248, Copyright the Brave Authors and
+contributors, under MPL-2.0. Source: https://github.com/brave/adblock-rust
+The exact dependency graph is fixed in native/adblock/Cargo.lock. The engine's
+license and transitive dependency attributions and licenses are included in
+rust-licenses/; dependencies.json records their versions and source locations.
+
+redirect-resources.json contains uBlock Origin replacement resources from the
+same revision recorded above for the scriptlet library. Copyright Raymond Hill
+and contributors, GPL-3.0; see content/scriptlets/LICENSE-uBlock.txt.
+They are generated alongside the scriptlets by scripts/vendor-scriptlets.mjs.
+
+ubo-unbreak.txt is an upstream snapshot downloaded on 2026-10-18 from
+https://ublockorigin.github.io/uAssetsCDN/filters/unbreak.min.txt.
+Copyright the uBlock Origin/uAssets contributors, GPL-3.0, with upstream headers
+retained. Source license: https://github.com/uBlockOrigin/uAssets/blob/master/LICENSE
+
+compiled/rust/*.dat are generated filter representations produced by the pinned
+adblock-rust engine and Midori's JNI adapter. The underlying lists retain the
+licenses stated above. Regenerate these and the JSON snapshots together using
+:app:generateBundledFilters. Their filenames are SHA-256 fingerprints of the
+adapter format, engine revision, filter text and bundled replacement resources.

@@ -4,6 +4,9 @@ import java.util.Locale
 
 internal class NetworkPattern(pattern: String, val matchCase: Boolean = false) {
     val source = pattern
+    private val regex = if (pattern.startsWith('/') && pattern.endsWith('/')) runCatching {
+        Regex(pattern.substring(1, pattern.length - 1), if (matchCase) emptySet() else setOf(RegexOption.IGNORE_CASE))
+    }.getOrNull() else null
     private val domainAnchor = pattern.startsWith("||")
     private val startAnchor = domainAnchor || pattern.startsWith('|')
     private val endAnchor = pattern.endsWith('|')
@@ -11,10 +14,13 @@ internal class NetworkPattern(pattern: String, val matchCase: Boolean = false) {
         .let { if (matchCase) it else it.lowercase(Locale.ROOT) }
     private val glob = (if (startAnchor) "" else "*") + body + (if (endAnchor) "" else "*")
 
-    fun indexKeys(): List<String> = body.lowercase(Locale.ROOT).split('*', '^')
+    fun indexKeys(): List<String> = if (patternIsRegex()) emptyList() else body.lowercase(Locale.ROOT).split('*', '^')
         .flatMap { literal -> literal.windowed(INDEX_LENGTH) }.distinct()
 
+    private fun patternIsRegex() = source.startsWith('/') && source.endsWith('/')
+
     fun matches(url: String, lowercaseUrl: String = url.lowercase(Locale.ROOT)): Boolean {
+        if (patternIsRegex()) return regex?.containsMatchIn(url) == true
         val target = if (matchCase) url else lowercaseUrl
         if (!domainAnchor) return matchesAt(target, 0)
         var start = target.indexOf("://").takeIf { it >= 0 }?.plus(3) ?: return false

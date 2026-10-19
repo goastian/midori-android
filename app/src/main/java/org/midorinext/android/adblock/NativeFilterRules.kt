@@ -31,17 +31,23 @@ internal class NativeFilterRules(
     val cosmetics: CosmeticFilterRules = CosmeticFilterRules(emptyList()),
     private val pageExceptions: List<ScopedRule> = emptyList(),
     val scriptlets: List<ScriptletRule> = emptyList(),
+    val engineSource: String = "",
 ) {
-    fun compiled(): JSONObject = JSONObject()
-        .put("format", 1).put("count", supportedCount)
-        .put("blocked", hosts.blockedHosts.text).put("allowed", hosts.allowedHosts.text)
-        .put("scoped", encodeRuleIndex(scoped)).put("indexed", encodeRuleIndex(indexed))
-        .put("unindexed", JSONArray(unindexed.map(ScopedRule::compiled)))
+    fun contentOnly() = NativeFilterRules(DesktopHostRules("", ""), emptyMap(), supportedCount,
+        pageExceptions = pageExceptions, scriptlets = scriptlets, engineSource = engineSource)
+
+    fun compiled(contentOnly: Boolean = false): JSONObject = JSONObject()
+        .put("format", COMPILED_FORMAT_VERSION).put("count", supportedCount).put("engineSource", engineSource)
         .put("pageExceptions", JSONArray(pageExceptions.map(ScopedRule::compiled)))
-        .put("cosmetics", JSONArray(cosmetics.rules.map { rule -> JSONArray(listOf(
+        .put("cosmetics", JSONArray((if (contentOnly) emptyList() else cosmetics.rules).map { rule -> JSONArray(listOf(
             rule.selector, rule.exception, JSONArray(rule.included.toList()), JSONArray(rule.excluded.toList()),
         )) }))
         .put("scriptlets", JSONArray(scriptlets.map { it.toJson(false) }))
+        .also { output ->
+            if (!contentOnly) output.put("blocked", hosts.blockedHosts.text).put("allowed", hosts.allowedHosts.text)
+                .put("scoped", encodeRuleIndex(scoped)).put("indexed", encodeRuleIndex(indexed))
+                .put("unindexed", JSONArray(unindexed.map(ScopedRule::compiled)))
+        }
 
     fun documentExceptions(tracker: Boolean): List<JSONObject> = pageExceptions.filter {
         "document" in it.includeTypes && "document" !in it.excludeTypes && it.thirdParty != true && it.pattern != null
@@ -108,13 +114,15 @@ internal class NativeFilterRules(
         decision(url, siteHost, type, thirdParty) in setOf(RuleDecision.BLOCK, RuleDecision.IMPORTANT_BLOCK)
 
     companion object {
+        private const val COMPILED_FORMAT_VERSION = 3
+
         fun fromCompiled(text: String): NativeFilterRules {
             val data = JSONObject(text)
-            require(data.getInt("format") == 1)
+            require(data.getInt("format") == COMPILED_FORMAT_VERSION)
             return NativeFilterRules(
-                DesktopHostRules(data.getString("blocked"), data.getString("allowed")),
-                decodeRuleIndex(data.getJSONObject("scoped")), data.getInt("count"),
-                decodeRuleIndex(data.getJSONObject("indexed")), data.getJSONArray("unindexed").rules(),
+                DesktopHostRules(data.optString("blocked"), data.optString("allowed")),
+                data.optJSONObject("scoped")?.let(::decodeRuleIndex).orEmpty(), data.getInt("count"),
+                data.optJSONObject("indexed")?.let(::decodeRuleIndex).orEmpty(), data.optJSONArray("unindexed")?.rules().orEmpty(),
                 CosmeticFilterRules(data.getJSONArray("cosmetics").let { values ->
                     (0 until values.length()).map { index ->
                         val row = values.getJSONArray(index)
@@ -132,6 +140,7 @@ internal class NativeFilterRules(
                             row.getBoolean("exception"), row.getBoolean("ublock"))
                     }
                 },
+                data.getString("engineSource"),
             )
         }
 
@@ -189,6 +198,19 @@ private fun JSONArray.rules(): List<ScopedRule> = (0 until length()).map { index
 private fun String.isDomainOrSubdomainOf(domain: String): Boolean = this == domain || endsWith(".$domain")
 
 internal fun parseHostSource(text: String, trusted: Boolean = false, onAcceptedRule: ((String) -> Unit)? = null): NativeFilterRules {
+    val activeLines = activeFilterLines(text).toList()
+    val engineSource = activeLines.asSequence().map(String::trim).filter { line ->
+        line.isNotEmpty() && line.length <= 32_768 && !line.startsWith('!') && !line.startsWith('[') &&
+            !(line.startsWith('#') && !line.startsWith("##") && !line.startsWith("#@#")) &&
+            !line.contains("##+js(") && !line.contains("#@#+js(") &&
+            !line.contains("#%#") && !line.contains("#@%#")
+    }.flatMap { line ->
+        if (line.startsWith("0.0.0.0 ") || line.startsWith("127.0.0.1 ") || line.startsWith(":: ")) {
+            line.substringBefore('#').trim().split(Regex("\\s+")).drop(1).asSequence()
+                .filter { host -> host != "localhost" && host.contains('.') && host.all { it.isLetterOrDigit() || it == '.' || it == '-' } }
+                .map { host -> "||$host^" }
+        } else sequenceOf(line)
+    }.joinToString("\n")
     val blocked = hashSetOf<String>()
     val allowed = hashSetOf<String>()
     val scoped = mutableMapOf<String, MutableList<ScopedRule>>()
@@ -199,14 +221,14 @@ internal fun parseHostSource(text: String, trusted: Boolean = false, onAcceptedR
     val scriptlets = mutableListOf<ScriptletRule>()
     var supported = 0
     val anchored = Regex("^\\|\\|([a-z0-9](?:[a-z0-9.-]*[a-z0-9]))(.*)$", RegexOption.IGNORE_CASE)
-    val disabled = activeFilterLines(text).mapNotNull { raw ->
+    val disabled = activeLines.mapNotNull { raw ->
         if (!raw.contains("badfilter")) return@mapNotNull null
         val line = raw.trim()
         val options = line.substringAfter('$', "").split(',')
         if ("badfilter" !in options) null else line.substringBefore('$') +
             options.filterNot { it == "badfilter" }.joinToString(",").let { if (it.isEmpty()) "" else "$$it" }
     }.toSet()
-    activeFilterLines(text).forEach { raw ->
+    activeLines.forEach { raw ->
         val line = raw.trim()
         if (line.isEmpty() || line.length > 32_768 || line.startsWith('!') || line.startsWith('[') || line in disabled) return@forEach
         val hostRule = line.removePrefix("@@")
@@ -239,11 +261,14 @@ internal fun parseHostSource(text: String, trusted: Boolean = false, onAcceptedR
             line.contains("#$#") || line.contains("#%#") || line.contains("#@%#")) return@forEach
         val exception = line.startsWith("@@")
         val body = if (exception) line.drop(2) else line
-        val optionIndex = body.indexOf('$')
+        val regexEnd = body.lastIndexOf('/')
+        val optionIndex = if (body.startsWith('/') && regexEnd > 0 &&
+            (regexEnd == body.lastIndex || body.getOrNull(regexEnd + 1) == '$')) {
+            (body.lastIndexOf('/') + 1).takeIf { body.getOrNull(it) == '$' } ?: -1
+        } else body.indexOf('$')
         val patternText = if (optionIndex >= 0) body.substring(0, optionIndex) else body
         val options = if (optionIndex >= 0) body.substring(optionIndex + 1) else ""
-        if (patternText.isEmpty() || patternText.length > 512 || patternText.any { it.isWhitespace() || it in "<>{}" } ||
-            patternText.startsWith('/') && patternText.endsWith('/')) return@forEach
+        if (patternText.isEmpty() || patternText.length > 512 || patternText.any { it.isWhitespace() || it in "<>{}" }) return@forEach
         val conditions = parseOptions(options) ?: return@forEach
         if (!exception && conditions.includeTypes.any { it in setOf("elemhide", "generichide") }) return@forEach
         val match = anchored.matchEntire(patternText)
@@ -275,12 +300,13 @@ internal fun parseHostSource(text: String, trusted: Boolean = false, onAcceptedR
         supported++
         onAcceptedRule?.invoke(line)
     }
+    supported = RustAdblock.countRules(engineSource).toInt() + scriptlets.size
     require(supported > 0) { "No supported filter rules" }
     val hostRules = DesktopHostRules(
         blocked.sorted().joinToString("\n", postfix = if (blocked.isEmpty()) "" else "\n"),
         allowed.sorted().joinToString("\n", postfix = if (allowed.isEmpty()) "" else "\n"),
     )
-    return NativeFilterRules(hostRules, scoped, supported, indexed, unindexed, CosmeticFilterRules(cosmetics), pageExceptions, scriptlets)
+    return NativeFilterRules(hostRules, scoped, supported, indexed, unindexed, CosmeticFilterRules(cosmetics), pageExceptions, scriptlets, engineSource)
 }
 
 private data class RuleConditions(

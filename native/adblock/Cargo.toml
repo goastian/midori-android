@@ -1,0 +1,19 @@
+[package]
+name = "midori-adblock"
+version = "0.1.0"
+edition = "2024"
+license = "MPL-2.0"
+
+[lib]
+name = "midori_adblock"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+adblock = { git = "https://github.com/brave/adblock-rust", rev = "6028a6d5735f1e81346eeef73c194c7240035248", default-features = false, features = ["embedded-domain-resolver", "full-regex-handling", "css-validation"] }
+jni = "0.21.1"
+serde_json = "1.0"
+
+[profile.release]
+lto = "thin"
+strip = "debuginfo"
+

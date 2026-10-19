@@ -28,7 +28,7 @@ object OfficialFilterCatalog {
         OfficialFilter("ubo-ads", "uBlock Origin · Ads",
             "https://ublockorigin.github.io/uAssetsCDN/filters/filters.min.txt", false, defaultEnabled = true, fallbackAsset = "ubo-ads"),
         OfficialFilter("ubo-unbreak", "uBlock Origin · Unbreak",
-            "https://ublockorigin.github.io/uAssetsCDN/filters/unbreak.min.txt", false, defaultEnabled = true),
+            "https://ublockorigin.github.io/uAssetsCDN/filters/unbreak.min.txt", false, defaultEnabled = true, fallbackAsset = "ubo-unbreak"),
         OfficialFilter("ubo-quick-fixes", "uBlock Origin · Quick fixes",
             "https://ublockorigin.github.io/uAssetsCDN/filters/quick-fixes.txt", false),
         OfficialFilter("adguard-base", "AdGuard · Base",

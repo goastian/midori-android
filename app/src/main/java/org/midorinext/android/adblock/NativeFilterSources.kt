@@ -10,6 +10,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -36,6 +38,20 @@ class NativeFilterSources @Inject constructor(
     private val locks = ConcurrentHashMap<String, Mutex>()
     private val downloadMutex = Mutex()
     private val cacheWarmupMutex = Mutex()
+    private val engineMutex = Mutex()
+    private val redirectResources by lazy { context.assets.open("adblock/redirect-resources.json").bufferedReader().use { it.readText() } }
+    private data class EngineSnapshot(
+        val sources: List<Pair<String, NativeFilterRules>>,
+        val trackerKeys: Set<String>,
+        val all: RustFilterEngine,
+        val trackers: RustFilterEngine,
+    ) {
+        fun close() {
+            all.close()
+            if (trackers !== all) trackers.close()
+        }
+    }
+    private var engineSnapshot: EngineSnapshot? = null
     private val loadingCacheKeys = ConcurrentHashMap.newKeySet<String>()
     private val loadedCacheKeys = ConcurrentHashMap.newKeySet<String>()
     private val lastAttempt = ConcurrentHashMap<String, Long>()
@@ -74,7 +90,8 @@ class NativeFilterSources @Inject constructor(
             enabledSources(settings.current, includeAds = true).forEach { (key, url, _) ->
                 if (cacheFile(url).exists()) loadCacheIfFast(key, url)
             }
-            settings.state.collectLatest { config ->
+            settings.state.map { it.networkPolicyConfiguration() }.distinctUntilChanged().collectLatest {
+                val config = settings.current
                 if (config.hasBlockingSites()) {
                     enabledSources(config).forEach { (key, url, updatedAt) ->
                         if (key !in loadedCacheKeys && cacheFile(url).exists()) loadCacheIfFast(key, url)
@@ -82,11 +99,76 @@ class NativeFilterSources @Inject constructor(
                             refreshStaleAsync(key)
                         }
                     }
-                    mutableRevision.update { it + 1 }
                 }
+                prepareEngines(config)
+                mutableRevision.update { it + 1 }
                 ready.complete(Unit)
             }
         }
+    }
+
+    private fun activeRules(config: AdBlockConfiguration): List<Pair<String, NativeFilterRules>> {
+        val snapshot = rules
+        val keys = OfficialFilterCatalog.all.filter { it.id in config.officialEnabled }.map { it.id } +
+            config.sources.filter { it.enabled }.map { it.url }
+        return keys.mapNotNull { key -> snapshot[key]?.let { key to it } }
+    }
+
+    private fun trackerKeys(config: AdBlockConfiguration): Set<String> =
+        OfficialFilterCatalog.all.filter { it.tracker }.mapTo(hashSetOf()) { it.id } +
+            config.sources.filter { it.tracker }.map { it.url }
+
+    internal suspend fun prepareEngines(config: AdBlockConfiguration) = withContext(Dispatchers.Default) {
+        engineMutex.withLock {
+            val active = activeRules(config)
+            val trackerKeys = trackerKeys(config)
+            if (synchronized(this@NativeFilterSources) { engineSnapshot?.sources == active && engineSnapshot?.trackerKeys == trackerKeys }) return@withLock
+            val trackerSources = active.filter { it.first in trackerKeys }
+            val all = loadEngine(active.map { it.second.engineSource })
+            val trackers = try {
+                if (trackerSources == active) all else loadEngine(trackerSources.map { it.second.engineSource })
+            } catch (error: Throwable) { all.close(); throw error }
+            synchronized(this@NativeFilterSources) {
+                val previous = engineSnapshot
+                engineSnapshot = EngineSnapshot(active, trackerKeys, all, trackers)
+                previous?.close()
+            }
+        }
+    }
+
+    private fun loadEngine(lists: List<String>): RustFilterEngine {
+        val fingerprint = RustFilterEngine.fingerprint(lists, redirectResources)
+        val directory = File(context.cacheDir, "adblock-rust").apply { mkdirs() }
+        val file = File(directory, "$fingerprint.dat")
+        if (file.exists()) runCatching { RustFilterEngine.restore(file.readBytes(), redirectResources) }
+            .onSuccess { return it }.onFailure { file.delete() }
+        runCatching {
+            context.assets.open("adblock/compiled/rust/$fingerprint.dat").use { RustFilterEngine.restore(it.readBytes(), redirectResources) }
+        }.onSuccess { return it }
+        val engine = RustFilterEngine.compile(lists, redirectResources)
+        runCatching {
+            val temporary = File(file.path + ".tmp")
+            temporary.writeBytes(engine.serialize())
+            require(temporary.renameTo(file))
+            directory.listFiles().orEmpty().filter { it != file }.sortedByDescending { it.lastModified() }
+                .drop(5).forEach { it.delete() }
+        }.onFailure { Log.w(TAG, "Could not cache Rust filters", it) }
+        return engine
+    }
+
+    @Synchronized
+    internal fun networkDecision(config: AdBlockConfiguration, level: BlockingLevel, url: String, source: String,
+        type: String, method: String = "GET", document: String = source): JSONObject {
+        val snapshot = engineSnapshot
+        if (level == BlockingLevel.OFF || snapshot == null || snapshot.sources != activeRules(config) || snapshot.trackerKeys != trackerKeys(config)) return JSONObject().put("cancel", false)
+        return (if (level == BlockingLevel.TRACKERS) snapshot.trackers else snapshot.all).query(url, source, type, method, document)
+    }
+
+    @Synchronized
+    internal fun nativeCosmetics(config: AdBlockConfiguration, url: String, classes: List<String>, ids: List<String>): JSONObject? {
+        val snapshot = engineSnapshot ?: return null
+        if (snapshot.sources != activeRules(config)) return null
+        return snapshot.all.cosmetics(url, classes, ids)
     }
 
     internal fun decision(
@@ -99,6 +181,13 @@ class NativeFilterSources @Inject constructor(
         documentUrl: String? = null,
     ): RuleDecision {
         if (level == BlockingLevel.OFF) return RuleDecision.NONE
+        synchronized(this) {
+            if (engineSnapshot?.sources == activeRules(config)) {
+                val result = networkDecision(config, level, url, siteHost?.let { "https://$it/" }.orEmpty(), type,
+                    document = documentUrl.orEmpty())
+                return if (result.optBoolean("cancel")) RuleDecision.BLOCK else RuleDecision.NONE
+            }
+        }
         val snapshot = rules
         var blocked = false
         var allowed = false
@@ -283,7 +372,7 @@ class NativeFilterSources @Inject constructor(
         runCatching {
             val destination = compiledCacheFile(url)
             val temporary = File(destination.path + ".tmp")
-            temporary.writeText(parsed.compiled().toString())
+            temporary.writeText(parsed.compiled(contentOnly = true).toString())
             require(temporary.renameTo(destination))
         }.onFailure { Log.w(TAG, "Could not save compiled filter cache", it) }
     }
@@ -351,7 +440,7 @@ class NativeFilterSources @Inject constructor(
 
     @Synchronized
     private fun putRules(key: String, parsed: NativeFilterRules) {
-        rules = rules + (key to parsed)
+        rules = rules + (key to parsed.contentOnly())
         mutableRuleCounts.update { it + (key to parsed.supportedCount) }
         mutableRevision.update { it + 1 }
     }

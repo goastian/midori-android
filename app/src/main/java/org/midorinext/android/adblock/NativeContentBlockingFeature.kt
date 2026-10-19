@@ -43,6 +43,8 @@ class NativeContentBlockingFeature @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val ports = mutableMapOf<EngineSession, Port>()
     private val adPorts = mutableSetOf<Port>()
+    private val adPortIds = mutableMapOf<String, Port>()
+    private val cosmeticTokens = mutableMapOf<Port, Pair<List<String>, List<String>>>()
     private var backgroundPort: WebExtension.Port? = null
     private var registeredSessions = emptySet<EngineSession>()
     private val trackingObservers = mutableMapOf<EngineSession, EngineSession.Observer>()
@@ -52,6 +54,9 @@ class NativeContentBlockingFeature @Inject constructor(
     private val appliedPolicy = MutableStateFlow<Pair<AdBlockConfiguration, Long>?>(null)
     private val sentPolicies = linkedMapOf<Long, AdBlockConfiguration>()
     private var policySequence = 0L
+    private data class PolicyKey(val port: WebExtension.Port, val config: AdBlockConfiguration, val revision: Long)
+    private var pendingNetworkPolicy: PolicyKey? = null
+    private var sentNetworkPolicy: PolicyKey? = null
     val ready: Deferred<Unit> = bridgeReady
 
     private val messageHandler = object : MessageHandler {
@@ -71,13 +76,30 @@ class NativeContentBlockingFeature @Inject constructor(
 
     private val adMessageHandler = object : MessageHandler {
         override fun onPortConnected(port: Port) {
-            if (port.engineSession != null) adPorts.add(port)
+            if (port.engineSession == null) return
+            adPorts.add(port)
+            val id = java.util.UUID.randomUUID().toString()
+            adPortIds[id] = port
+            runCatching { port.postMessage(JSONObject().put("type", "content_port").put("portId", id)) }
+                .onFailure { forgetAdPort(port) }
         }
 
         override fun onPortMessage(message: Any, port: Port) {
             if (message !is JSONObject) return
+            val connected = adPortIds[message.optString("portId")] ?: return
+            if (connected.engineSession !== port.engineSession || connected.senderUrl() != port.senderUrl()) return
             when (message.optString("type")) {
-                "ready" -> sendAdPolicy(port)
+                "ready" -> sendAdPolicy(connected)
+                "cosmetic_query" -> {
+                    fun tokens(key: String): List<String> {
+                        val values = message.optJSONArray(key) ?: return emptyList()
+                        return (0 until minOf(values.length(), 2_048)).mapNotNull { index ->
+                            values.optString(index).takeIf { it.isNotEmpty() && it.length <= 256 }
+                        }
+                    }
+                    cosmeticTokens[connected] = tokens("classes") to tokens("ids")
+                    sendAdPolicy(connected)
+                }
                 "blocked_count" -> port.engineSession?.let { session ->
                     val tab = (store.state.tabs + store.state.customTabs).find { it.engineState.engineSession === session }
                     if (tab?.content?.url?.substringBefore('#') == message.optString("siteUrl").substringBefore('#')) {
@@ -88,8 +110,14 @@ class NativeContentBlockingFeature @Inject constructor(
         }
 
         override fun onPortDisconnected(port: Port) {
-            adPorts.remove(port)
+            forgetAdPort(port)
         }
+    }
+
+    private fun forgetAdPort(port: Port) {
+        adPorts.remove(port)
+        cosmeticTokens.remove(port)
+        adPortIds.entries.removeAll { it.value === port }
     }
 
     private val backgroundDelegate = object : WebExtension.MessageDelegate {
@@ -107,8 +135,8 @@ class NativeContentBlockingFeature @Inject constructor(
                         "network_request" -> handleNetworkRequest(message, port)
                         "network_policy_applied" -> {
                             val config = sentPolicies.remove(message.optLong("policyId", -1))
-                            if (config == settings.current && message.optLong("revision", -1) == sources.revision.value &&
-                                sources.ready.isCompleted && networkBlocker.ready.isCompleted) {
+                            if (config == settings.current.networkPolicyConfiguration() && message.optLong("revision", -1) == sources.revision.value &&
+                                sources.ready.isCompleted) {
                                 appliedPolicy.value = config to sources.revision.value
                                 bridgeReady.complete(Unit)
                             }
@@ -123,6 +151,8 @@ class NativeContentBlockingFeature @Inject constructor(
                     if (backgroundPort === port) {
                         backgroundPort = null
                         appliedPolicy.value = null
+                        sentNetworkPolicy = null
+                        pendingNetworkPolicy = null
                     }
                 }
             })
@@ -133,13 +163,12 @@ class NativeContentBlockingFeature @Inject constructor(
         val requestId = message.optLong("requestId", -1)
         if (requestId <= 0) return
         scope.launch {
-            val blocked = withContext(Dispatchers.Default) {
-                runCatching { networkBlocker.blocks(message) }.getOrDefault(false)
+            val decision = withContext(Dispatchers.Default) {
+                runCatching { networkBlocker.decision(message) }.getOrElse { JSONObject().put("cancel", false) }
             }
             if (backgroundPort !== port) return@launch
             runCatching {
-                port.postMessage(JSONObject().put("type", "network_response")
-                    .put("requestId", requestId).put("cancel", blocked))
+                port.postMessage(decision.put("type", "network_response").put("requestId", requestId))
             }.onFailure { Log.w(TAG, "Could not send network decision", it) }
         }
     }
@@ -149,7 +178,6 @@ class NativeContentBlockingFeature @Inject constructor(
         started = true
         scope.launch {
             sources.ready.await()
-            networkBlocker.ready.await()
             sendNetworkPolicy()
         }
         scope.launch {
@@ -218,36 +246,43 @@ class NativeContentBlockingFeature @Inject constructor(
             installed.disconnectPort(NATIVE_APP, session)
             installed.disconnectPort(AD_APP, session)
             ports.remove(session)
-            adPorts.removeAll { it.engineSession === session }
+            adPorts.filter { it.engineSession === session }.forEach(::forgetAdPort)
         }
         registeredSessions = sessions
     }
 
     private fun sendNetworkPolicy() {
-        if (!sources.ready.isCompleted || !networkBlocker.ready.isCompleted) return
+        if (!sources.ready.isCompleted) return
         val port = backgroundPort ?: return
         val config = settings.current
         val revision = sources.revision.value
+        val key = PolicyKey(port, config.networkPolicyConfiguration(), revision)
+        if (key == sentNetworkPolicy || key == pendingNetworkPolicy) return
+        pendingNetworkPolicy = key
         scope.launch {
-            val scriptlets = withContext(Dispatchers.Default) { sources.scriptletPolicy(config) }
-            if (backgroundPort !== port || config != settings.current || revision != sources.revision.value) return@launch
-            val policyId = ++policySequence
-            if (BuildConfig.DEBUG) Log.d(TAG, "Sending policy $policyId, revision $revision, ${scriptlets.getJSONArray("rules").length()} scriptlet rules")
-            sentPolicies[policyId] = config
-            while (sentPolicies.size > 8) sentPolicies.remove(sentPolicies.keys.first())
-            runCatching {
-                port.postMessage(JSONObject()
-                    .put("type", "network_policy")
-                    .put("level", config.level.name)
-                    .put("siteLevels", JSONObject(config.siteLevels.mapValues { it.value.name }))
-                    .put("revision", revision).put("policyId", policyId).put("scriptlets", scriptlets))
-            }.onFailure { Log.w(TAG, "Could not update network policy", it) }
+            try {
+                sources.prepareEngines(config)
+                val scriptlets = withContext(Dispatchers.Default) { sources.scriptletPolicy(config) }
+                if (backgroundPort !== port || key.config != settings.current.networkPolicyConfiguration() || revision != sources.revision.value) return@launch
+                val policyId = ++policySequence
+                if (BuildConfig.DEBUG) Log.d(TAG, "Sending policy $policyId, revision $revision, ${scriptlets.getJSONArray("rules").length()} scriptlet rules")
+                sentPolicies[policyId] = key.config
+                while (sentPolicies.size > 8) sentPolicies.remove(sentPolicies.keys.first())
+                runCatching {
+                    port.postMessage(JSONObject()
+                        .put("type", "network_policy")
+                        .put("level", config.level.name)
+                        .put("siteLevels", JSONObject(config.siteLevels.mapValues { it.value.name }))
+                        .put("revision", revision).put("policyId", policyId).put("scriptlets", scriptlets))
+                    sentNetworkPolicy = key
+                }.onFailure { Log.w(TAG, "Could not update network policy", it) }
+            } finally { if (pendingNetworkPolicy == key) pendingNetworkPolicy = null }
         }
     }
 
     suspend fun awaitConfiguration(config: AdBlockConfiguration = settings.current): Boolean =
         withTimeoutOrNull(5_000) {
-            appliedPolicy.first { it != null && it.first == config && it.second == sources.revision.value }
+            appliedPolicy.first { it != null && it.first == config.networkPolicyConfiguration() && it.second == sources.revision.value }
             true
         } ?: false
 
@@ -259,18 +294,34 @@ class NativeContentBlockingFeature @Inject constructor(
             .find { it.engineState.engineSession === port.engineSession }?.content?.url ?: frameUrl
         val level = config.levelFor(topUrl)
         val enabled = level == BlockingLevel.TRACKERS_AND_ADS && sources.hasAdSources(config)
+        val tokens = cosmeticTokens[port] ?: (emptyList<String>() to emptyList<String>())
         scope.launch {
+            sources.ready.await()
+            if (config != settings.current || revision != sources.revision.value) return@launch
+            sources.prepareEngines(config)
             val policy = withContext(Dispatchers.Default) {
                 val top = sources.cosmeticRules(config, topUrl, level)
                 val frame = if (frameUrl == topUrl) top else sources.cosmeticRules(config, frameUrl, level)
-                AdPlacementPolicy.message(enabled, frame.copy(
-                    enabled = top.enabled && frame.enabled,
-                    genericEnabled = top.genericEnabled && frame.genericEnabled,
-                ))
+                val native = if (enabled) sources.nativeCosmetics(config, frameUrl, tokens.first, tokens.second) else null
+                val nativeTop = if (enabled && frameUrl != topUrl) sources.nativeCosmetics(config, topUrl, emptyList(), emptyList()) else native
+                val selection = if (native == null) frame else {
+                    val selectors = native.getJSONArray("hide_selectors")
+                    val exceptions = native.getJSONArray("exceptions")
+                    frame.copy(rules = (0 until selectors.length()).map { index ->
+                        CosmeticRule(selectors.getString(index), false, setOf("native"), emptySet())
+                    } + (0 until exceptions.length()).map { index ->
+                        CosmeticRule(exceptions.getString(index), true, emptySet(), emptySet())
+                    })
+                }
+                AdPlacementPolicy.message(enabled, selection.copy(
+                    enabled = top.enabled && frame.enabled && native?.optBoolean("disabled") != true && nativeTop?.optBoolean("disabled") != true,
+                    genericEnabled = top.genericEnabled && frame.genericEnabled && native?.optBoolean("generichide") != true && nativeTop?.optBoolean("generichide") != true,
+                )).put("procedural", native?.optJSONArray("procedural_actions") ?: org.json.JSONArray())
             }
-            if (port !in adPorts || config != settings.current || revision != sources.revision.value) return@launch
+            if (port !in adPorts || config != settings.current || revision != sources.revision.value ||
+                tokens != (cosmeticTokens[port] ?: (emptyList<String>() to emptyList<String>()))) return@launch
             runCatching { port.postMessage(policy) }.onFailure {
-                adPorts.remove(port)
+                forgetAdPort(port)
                 Log.w(TAG, "Could not update ad placement policy", it)
             }
         }
@@ -295,6 +346,6 @@ class NativeContentBlockingFeature @Inject constructor(
         private const val NATIVE_APP = "midori_adblock"
         private const val AD_APP = "midori_content_blocking"
         private const val NETWORK_APP = "midori_network"
-        private const val BUNDLE_VERSION = "1.9"
+        private const val BUNDLE_VERSION = "2.1"
     }
 }

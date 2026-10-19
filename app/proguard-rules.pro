@@ -29,6 +29,8 @@
 # Hilt generated application injector can be absent from certain transformed classpaths during R8 analysis.
 -dontwarn org.midorinext.android.MidoriApplication_GeneratedInjector
 
+-keep class org.midorinext.android.adblock.RustAdblock { *; }
+
 # Keep Hilt entry-point service classes and their generated wrappers to avoid
 # release-only injection failures when OEM ROMs restart foreground services.
 -keep class org.midorinext.android.apptracking.MidoriAppTrackingVpnService { *; }
