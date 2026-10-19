@@ -1,0 +1,17 @@
+<resources>
+    <string name="home_wallpaper_title">Fonds d’écran</string>
+    <string name="home_wallpaper_description">Choisissez un fond pour votre page d’accueil.</string>
+    <string name="home_wallpaper_choose">Choisir un fond d’écran</string>
+    <string name="home_wallpaper_collection">Collection Midori</string>
+    <string name="home_wallpaper_preview">Aperçu</string>
+    <string name="home_wallpaper_apply">Appliquer le fond</string>
+    <string name="home_wallpaper_selected">Sélectionné</string>
+    <string name="home_wallpaper_none">Suivre le thème</string>
+    <string name="home_wallpaper_forest">Forêt de brume</string>
+    <string name="home_wallpaper_dawn">Aube</string>
+    <string name="home_wallpaper_dunes">Dunes</string>
+    <string name="home_wallpaper_silk">Soie de jade</string>
+    <string name="home_wallpaper_save_error">Impossible d’enregistrer le fond. Réessayez.</string>
+    <string name="home_wallpaper_back">Tous les fonds</string>
+    <string name="home_wallpaper_load_error">Impossible d’ouvrir ce fond. Choisissez-en un autre.</string>
+</resources>

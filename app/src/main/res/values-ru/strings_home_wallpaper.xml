@@ -1,0 +1,17 @@
+<resources>
+    <string name="home_wallpaper_title">Обои</string>
+    <string name="home_wallpaper_description">Выберите фон для начальной страницы.</string>
+    <string name="home_wallpaper_choose">Выбрать обои</string>
+    <string name="home_wallpaper_collection">Коллекция Midori</string>
+    <string name="home_wallpaper_preview">Предпросмотр</string>
+    <string name="home_wallpaper_apply">Установить обои</string>
+    <string name="home_wallpaper_selected">Выбрано</string>
+    <string name="home_wallpaper_none">Следовать теме</string>
+    <string name="home_wallpaper_forest">Туманный лес</string>
+    <string name="home_wallpaper_dawn">Рассвет</string>
+    <string name="home_wallpaper_dunes">Дюны</string>
+    <string name="home_wallpaper_silk">Нефритовый шёлк</string>
+    <string name="home_wallpaper_save_error">Не удалось сохранить обои. Повторите попытку.</string>
+    <string name="home_wallpaper_back">Все обои</string>
+    <string name="home_wallpaper_load_error">Не удалось открыть эти обои. Выберите другие.</string>
+</resources>

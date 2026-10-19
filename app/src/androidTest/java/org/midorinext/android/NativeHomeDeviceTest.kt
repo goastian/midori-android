@@ -97,6 +97,7 @@ class NativeHomeDeviceTest {
         app.historyRepository.get().deleteVisitsFor(historyUrl)
         app.historyRepository.get().deleteVisitsFor("https://example.org/native-shortcut")
         app.appPreferencesRepository.get().apply {
+            updateHomeWallpaper(HomeWallpaper.fromId(preferences.homeWallpaperId))
             flow.first().homeShortcutsList.filter { it.title == "Home shortcut fixture" }.forEach { deleteHomeShortcut(it.id) }
             updateAppearance(preferences.appearance)
             updateToolbarPosition(preferences.toolbarPosition)
@@ -113,11 +114,97 @@ class NativeHomeDeviceTest {
     }
 
     @Test
+    fun wallpaperPreviewCanBeCancelledAndAnAppliedImageSurvivesRecreation(): Unit = runBlocking {
+        val repository = app.appPreferencesRepository.get()
+        repository.updateHomeWallpaper(HomeWallpaper.NONE)
+        compose.waitForIdle()
+        compose.onNodeWithTag("native_home").performScrollToIndex(0)
+        compose.onNodeWithTag("home_choose_wallpaper").performClick()
+        compose.onNodeWithTag("home_wallpaper_option:forest").performClick()
+        waitForWallpaperPreview("forest")
+        compose.onNodeWithTag("home_wallpaper_preview:forest").assertIsDisplayed()
+        assertEquals("", repository.flow.first().homeWallpaperId)
+        capture("wallpaper-preview.png")
+        compose.onNodeWithContentDescription(app.getString(R.string.cancel)).performClick()
+        compose.onNodeWithTag("home_wallpaper_picker").assertDoesNotExist()
+        assertEquals("", repository.flow.first().homeWallpaperId)
+
+        compose.onNodeWithTag("home_choose_wallpaper").performClick()
+        capture("wallpaper-gallery.png")
+        compose.onNodeWithTag("home_wallpaper_option:forest").performClick()
+        waitForWallpaperPreview("forest")
+        compose.onNodeWithTag("home_wallpaper_apply").performClick()
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("native_home_background:forest").fetchSemanticsNodes().isNotEmpty()
+        }
+        assertEquals("forest", repository.flow.first().homeWallpaperId)
+        assertNoWebSurface()
+        capture("wallpaper-forest-light.png")
+
+        scenario.recreate()
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("native_home_background:forest").fetchSemanticsNodes().isNotEmpty()
+        }
+        repository.updateAppearance(Appearance.DARK)
+        repository.updateToolbarPosition(ToolbarPosition.BOTTOM)
+        compose.waitForIdle()
+        compose.onNodeWithTag("native_home").performScrollToIndex(0)
+        capture("wallpaper-forest-dark.png")
+        assertNoWebSurface()
+
+        compose.onNodeWithTag("home_choose_wallpaper").performClick()
+        compose.onNodeWithTag("home_wallpaper_option:none").performClick()
+        compose.onNodeWithTag("home_wallpaper_apply").performClick()
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("native_home_background:none").fetchSemanticsNodes().isNotEmpty()
+        }
+        assertEquals("", repository.flow.first().homeWallpaperId)
+    }
+
+    @Test
+    fun wallpaperCanAlsoBeSelectedFromHomepageSettings(): Unit = runBlocking {
+        compose.onNodeWithTag("native_home").performScrollToIndex(6)
+        compose.onNodeWithText(app.getString(R.string.menu_customize_homepage)).performClick()
+        compose.onNodeWithTag("home_wallpaper_settings").performClick()
+        compose.onNodeWithTag("home_wallpaper_option:silk").performClick()
+        waitForWallpaperPreview("silk")
+        compose.onNodeWithTag("home_wallpaper_apply").performClick()
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("home_wallpaper_picker").fetchSemanticsNodes().isEmpty()
+        }
+        assertEquals("silk", app.appPreferencesRepository.get().flow.first().homeWallpaperId)
+        capture("wallpaper-settings.png")
+        instrumentation.sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK)
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("native_home_background:silk").fetchSemanticsNodes().isNotEmpty()
+        }
+        assertNoWebSurface()
+    }
+
+    @Test
+    fun everyPreloadedWallpaperRendersInBothToolbarPositions(): Unit = runBlocking {
+        for (position in listOf(ToolbarPosition.TOP, ToolbarPosition.BOTTOM)) {
+            app.appPreferencesRepository.get().updateToolbarPosition(position)
+            for (wallpaper in HomeWallpaper.entries) {
+                app.appPreferencesRepository.get().updateHomeWallpaper(wallpaper)
+                compose.waitUntil(10_000) {
+                    compose.onAllNodesWithTag("native_home_background:${wallpaper.id}").fetchSemanticsNodes().isNotEmpty()
+                }
+                assertNoWebSurface()
+                capture("wallpaper-${wallpaper.id}-${position.name.lowercase()}.png")
+            }
+        }
+    }
+
+    @Test
     fun restoredPlaceholderShowsNativeSectionsWithEitherToolbarPosition(): Unit = runBlocking {
+        compose.onNodeWithTag("native_home").performScrollToIndex(0)
         assertNoWebSurface()
         compose.onNodeWithText(app.getString(R.string.home_shortcuts)).assertIsDisplayed()
-        compose.onNode(hasText("Google") and hasAnyAncestor(hasTestTag("home_shortcut_tile")), useUnmergedTree = true).assertIsDisplayed()
-        compose.onNode(hasText("Wikipedia") and hasAnyAncestor(hasTestTag("home_shortcut_tile")), useUnmergedTree = true).assertIsDisplayed()
+        val visibleShortcuts = if (preferences.homeShortcutsInitialized) preferences.homeShortcutsList else defaultHomeShortcuts()
+        visibleShortcuts.take(2).forEach {
+            compose.onNode(hasText(it.title) and hasAnyAncestor(hasTestTag("home_shortcut_tile")), useUnmergedTree = true).assertIsDisplayed()
+        }
         compose.onNodeWithText(app.getString(R.string.home_continue)).assertIsDisplayed()
         compose.onNodeWithText("Native home continuation fixture").assertIsDisplayed()
         compose.onNodeWithText("Native home history fixture").assertIsDisplayed()
@@ -431,8 +518,17 @@ class NativeHomeDeviceTest {
         return contrast
     }
 
+    private fun waitForWallpaperPreview(id: String) {
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("home_wallpaper_preview:$id").fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
     private fun capture(name: String) {
-        val screenshot = if (name == "native-home-shortcuts.png") {
+        val screenshot = if (name.startsWith("wallpaper-")) {
+            compose.waitForIdle()
+            checkNotNull(instrumentation.uiAutomation.takeScreenshot())
+        } else if (name == "native-home-shortcuts.png") {
             compose.mainClock.advanceTimeBy(500)
             compose.waitForIdle()
             checkNotNull(instrumentation.uiAutomation.takeScreenshot())

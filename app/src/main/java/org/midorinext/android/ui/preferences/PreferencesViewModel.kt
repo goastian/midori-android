@@ -11,6 +11,7 @@ import org.midorinext.android.apptracking.AppTrackingRuntimeState
 import org.midorinext.android.preferences.app.*
 import org.midorinext.android.usecases.MidoriUseCases
 import org.midorinext.android.newtab.HomeSection
+import org.midorinext.android.newtab.HomeWallpaper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -95,6 +96,10 @@ class PreferencesViewModel @Inject constructor(
 
     fun updateHomeSection(section: HomeSection, visible: Boolean) {
         viewModelScope.launch { appPreferencesRepository.updateHomeSection(section, visible) }
+    }
+
+    suspend fun updateHomeWallpaper(wallpaper: HomeWallpaper) {
+        appPreferencesRepository.updateHomeWallpaper(wallpaper)
     }
 
     fun updateOpenBlankNewTab(enabled: Boolean) {

@@ -3,6 +3,7 @@ package org.midorinext.android.preferences.app
 import android.util.Log
 import androidx.datastore.core.DataStore
 import org.midorinext.android.newtab.HomeSection
+import org.midorinext.android.newtab.HomeWallpaper
 import org.midorinext.android.newtab.defaultHomeShortcuts
 import org.midorinext.android.newtab.publicHomeUrl
 import kotlinx.coroutines.flow.*
@@ -79,6 +80,12 @@ class AppPreferencesRepository @Inject constructor(
 
     suspend fun updateOpenBlankNewTab(enabled: Boolean) {
         datastore.updateData { it.toBuilder().setOpenBlankNewTab(enabled).build() }
+    }
+
+    suspend fun updateHomeWallpaper(wallpaper: HomeWallpaper) {
+        datastore.updateData { preferences -> preferences.toBuilder().apply {
+            if (wallpaper == HomeWallpaper.NONE) clearHomeWallpaperId() else setHomeWallpaperId(wallpaper.id)
+        }.build() }
     }
 
     suspend fun updateSearchEngine(engine: SearchEnginePreference) {

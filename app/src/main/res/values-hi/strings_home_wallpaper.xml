@@ -1,0 +1,17 @@
+<resources>
+    <string name="home_wallpaper_title">वॉलपेपर</string>
+    <string name="home_wallpaper_description">अपने आरंभ पृष्ठ के लिए पृष्ठभूमि चुनें।</string>
+    <string name="home_wallpaper_choose">वॉलपेपर चुनें</string>
+    <string name="home_wallpaper_collection">Midori संग्रह</string>
+    <string name="home_wallpaper_preview">पूर्वावलोकन</string>
+    <string name="home_wallpaper_apply">वॉलपेपर लगाएँ</string>
+    <string name="home_wallpaper_selected">चयनित</string>
+    <string name="home_wallpaper_none">थीम के अनुसार</string>
+    <string name="home_wallpaper_forest">धुंधला जंगल</string>
+    <string name="home_wallpaper_dawn">भोर</string>
+    <string name="home_wallpaper_dunes">रेत के टीले</string>
+    <string name="home_wallpaper_silk">जेड रेशम</string>
+    <string name="home_wallpaper_save_error">वॉलपेपर सहेजा नहीं जा सका। फिर से प्रयास करें।</string>
+    <string name="home_wallpaper_back">सभी वॉलपेपर</string>
+    <string name="home_wallpaper_load_error">यह वॉलपेपर नहीं खुल सका। कोई दूसरा चुनें।</string>
+</resources>

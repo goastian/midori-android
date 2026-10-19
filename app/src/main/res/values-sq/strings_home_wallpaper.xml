@@ -1,0 +1,17 @@
+<resources>
+    <string name="home_wallpaper_title">Sfonde</string>
+    <string name="home_wallpaper_description">Zgjidh një sfond për faqen fillestare.</string>
+    <string name="home_wallpaper_choose">Zgjidh sfondin</string>
+    <string name="home_wallpaper_collection">Koleksioni Midori</string>
+    <string name="home_wallpaper_preview">Pamje paraprake</string>
+    <string name="home_wallpaper_apply">Vendos sfondin</string>
+    <string name="home_wallpaper_selected">I zgjedhur</string>
+    <string name="home_wallpaper_none">Ndiq temën</string>
+    <string name="home_wallpaper_forest">Pyll me mjegull</string>
+    <string name="home_wallpaper_dawn">Agim</string>
+    <string name="home_wallpaper_dunes">Duna</string>
+    <string name="home_wallpaper_silk">Mëndafsh nefriti</string>
+    <string name="home_wallpaper_save_error">Sfondi nuk u ruajt. Provo përsëri.</string>
+    <string name="home_wallpaper_back">Të gjitha sfondet</string>
+    <string name="home_wallpaper_load_error">Ky sfond nuk u hap. Zgjidh një tjetër.</string>
+</resources>

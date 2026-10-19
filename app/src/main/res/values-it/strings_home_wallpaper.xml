@@ -1,0 +1,17 @@
+<resources>
+    <string name="home_wallpaper_title">Sfondi</string>
+    <string name="home_wallpaper_description">Scegli uno sfondo per la pagina iniziale.</string>
+    <string name="home_wallpaper_choose">Scegli sfondo</string>
+    <string name="home_wallpaper_collection">Collezione Midori</string>
+    <string name="home_wallpaper_preview">Anteprima</string>
+    <string name="home_wallpaper_apply">Imposta sfondo</string>
+    <string name="home_wallpaper_selected">Selezionato</string>
+    <string name="home_wallpaper_none">Segui il tema</string>
+    <string name="home_wallpaper_forest">Foresta nebbiosa</string>
+    <string name="home_wallpaper_dawn">Alba</string>
+    <string name="home_wallpaper_dunes">Dune</string>
+    <string name="home_wallpaper_silk">Seta di giada</string>
+    <string name="home_wallpaper_save_error">Impossibile salvare lo sfondo. Riprova.</string>
+    <string name="home_wallpaper_back">Tutti gli sfondi</string>
+    <string name="home_wallpaper_load_error">Impossibile aprire questo sfondo. Scegline un altro.</string>
+</resources>

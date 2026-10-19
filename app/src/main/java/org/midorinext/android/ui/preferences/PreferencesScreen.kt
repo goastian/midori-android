@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -29,10 +31,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -41,6 +46,9 @@ import org.midorinext.android.BuildConfig
 import org.midorinext.android.R
 import org.midorinext.android.ext.openAppStorePage
 import org.midorinext.android.mozac.downloads.hasPersistedWritableTreePermission
+import org.midorinext.android.newtab.HomeWallpaper
+import org.midorinext.android.ui.browser.home.HomeWallpaperImage
+import org.midorinext.android.ui.browser.home.HomeWallpaperPicker
 import org.midorinext.android.preferences.app.*
 import org.midorinext.android.ui.MidoriApplicationViewModel
 import org.midorinext.android.ui.nav.NavDestination
@@ -252,7 +260,18 @@ internal fun searchEngineName(engine: SearchEnginePreference): String =
 @Composable
 fun HomepageSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
     val preferences by viewModel.appPreferences.collectAsStateWithLifecycle()
+    var showWallpapers by rememberSaveable { mutableStateOf(false) }
+    val wallpaper = HomeWallpaper.fromId(preferences.homeWallpaperId)
     PreferenceScreenScaffold(title = stringResource(R.string.settings_homepage_title)) {
+        PreferenceRow(
+            label = R.string.home_wallpaper_title,
+            description = stringResource(wallpaper.title),
+            modifier = Modifier.testTag("home_wallpaper_settings"),
+            trailing = {
+                HomeWallpaperImage(wallpaper, Modifier.size(width = 84.dp, height = 60.dp).clip(RoundedCornerShape(12.dp)))
+            },
+            onClicked = { showWallpapers = true },
+        )
         PreferenceGroupLabel(label = R.string.settings_homepage_sections)
         PreferenceToggle(
             label = R.string.home_shortcuts, value = !preferences.hideHomeShortcuts,
@@ -279,6 +298,9 @@ fun HomepageSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
             label = R.string.home_blank_tab, value = preferences.openBlankNewTab,
             onValueChange = viewModel::updateOpenBlankNewTab,
         )
+    }
+    if (showWallpapers) {
+        HomeWallpaperPicker(current = wallpaper, onDismiss = { showWallpapers = false }, onApply = viewModel::updateHomeWallpaper)
     }
 }
 

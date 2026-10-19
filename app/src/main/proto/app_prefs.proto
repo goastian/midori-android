@@ -154,6 +154,7 @@ message AppPreferences {
   bool hide_home_recent_visits = 83;
   bool hide_home_stories = 84;
   bool hide_home_privacy = 85;
+  string home_wallpaper_id = 86;
 }
 
 message HomeShortcut {

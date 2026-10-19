@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,6 +24,7 @@ fun NativeHomeHeader(
     private: Boolean,
     onSwitchBrowsingMode: () -> Unit,
     modifier: Modifier = Modifier,
+    onChooseWallpaper: (() -> Unit)? = null,
 ) {
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         val logo = painterResource(R.drawable.logomidori)
@@ -34,6 +36,12 @@ fun NativeHomeHeader(
                 .testTag("native_home_brand"),
         )
         Spacer(Modifier.weight(1f))
+        if (onChooseWallpaper != null) {
+            IconButton(onClick = onChooseWallpaper, modifier = Modifier.testTag("home_choose_wallpaper")) {
+                Icon(painterResource(R.drawable.icons_wallpaper), stringResource(R.string.home_wallpaper_choose),
+                    modifier = Modifier.size(22.dp))
+            }
+        }
         IconToggleButton(
             checked = private,
             onCheckedChange = { onSwitchBrowsingMode() },
