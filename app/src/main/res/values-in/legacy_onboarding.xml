@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_anonymous_title">Selamat datang di Midori, pengguna anonim</string>
+    <string name="onboarding_anonymous_text_top">Cari dengan privasi penuh:</string>
+    <string name="onboarding_anonymous_bullet_1">Tanpa pelacakan pencarian Anda</string>
+    <string name="onboarding_anonymous_bullet_2">Tanpa pelacakan iklan</string>
+    <string name="onboarding_anonymous_bullet_3">Tanpa penjualan data pribadi Anda</string>
+    <string name="onboarding_anonymous_validate">Berikutnya</string>
+    <string name="onboarding_navigation_title">Jelajahi semua situs dengan aman</string>
+    <string name="onboarding_navigation_bullet_1">Lebih sedikit cookie, tanpa banner yang mengganggu!</string>
+    <string name="onboarding_navigation_bullet_2">Lebih sedikit pelacak, akhirnya bebas!</string>
+    <string name="onboarding_navigation_text_bottom">Coba dan mulai pencarian pertama Anda!</string>
+    <string name="onboarding_navigation_validate">Mari mulai!</string>
+</resources>

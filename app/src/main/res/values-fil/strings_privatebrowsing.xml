@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="privatebrowsing_title">Pribadong pag-browse</string>
+    <string name="privatebrowsing_paragraph_1">Ang mga site na binisita sa mga pribadong tab ay hindi lumalabas sa kasaysayan ng Midori, at laging natatanggal ang cookies ng mga ito kapag isinara mo ang tab. Kung hindi pribadong pag-browse, nakaimbak ang kasaysayan ng paghahanap sa iyong telepono ngunit hindi ito nakikita ng Midori (iginagalang namin ang iyong pagkapribado!).</string>
+    <string name="privatebrowsing_paragraph_2">Tandaan na hindi ka ginagawang hindi nakikita sa Internet ng pribadong pag-browse. Hindi napipigilan ng mga pribadong tab ang iyong mobile operator o may-ari ng Wi-Fi na subaybayan ang mga site na binibisita mo o ang iyong pampublikong IP address.</string>
+</resources>

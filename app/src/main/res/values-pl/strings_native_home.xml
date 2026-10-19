@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_shortcuts">Skróty</string>
+    <string name="home_show_all">Pokaż wszystkie</string>
+    <string name="home_add_shortcut">Dodaj skrót</string>
+    <string name="home_edit_shortcut">Edytuj skrót</string>
+    <string name="home_continue">Kontynuuj</string>
+    <string name="home_start_browsing">Rozpocznij przeglądanie</string>
+    <string name="home_continue_empty">Ostatnio otwarta strona pojawi się tutaj.</string>
+    <string name="home_recent_visits">Ostatnio odwiedzone</string>
+    <string name="home_recent_empty">Odwiedzone strony pojawią się tutaj.</string>
+    <string name="home_stories">Artykuły</string>
+    <string name="home_all_stories">Wszystkie artykuły</string>
+    <string name="home_stories_loading">Wczytywanie artykułów…</string>
+    <string name="home_stories_unavailable">Artykuły są niedostępne. Spróbuj ponownie po połączeniu z siecią.</string>
+    <string name="home_private">Przełącz na przeglądanie prywatne</string>
+    <string name="home_normal">Przełącz na zwykłe przeglądanie</string>
+    <string name="home_shortcut_title">Nazwa</string>
+    <string name="home_shortcut_url">Adres witryny</string>
+    <string name="home_shortcut_invalid">Wpisz nazwę i poprawny adres HTTP lub HTTPS.</string>
+    <string name="home_move_left">Przenieś w lewo</string>
+    <string name="home_move_right">Przenieś w prawo</string>
+    <string name="home_blocked">Zablokowane reklamy i elementy śledzące: %1$d</string>
+    <string name="home_blank_tab">Otwórz nową pustą kartę</string>
+    <string name="home_stories_source">Nagłówki z BBC News; dla języka hiszpańskiego z BBC Mundo.</string>
+</resources>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_title">Rozszerzenia</string>
+    <string name="extensions_empty_title">Brak zainstalowanych rozszerzeń</string>
+    <string name="extensions_empty_message">Zainstaluj rozszerzenia, aby dodać funkcje do przeglądarki.</string>
+    <string name="extensions_install">Zainstaluj</string>
+    <string name="extensions_install_hint">Wpisz adres URL pliku rozszerzenia (.xpi)</string>
+    <string name="extensions_uninstall">Odinstaluj</string>
+    <string name="extensions_uninstall_confirm">Odinstalować „%1$s”?</string>
+    <string name="extensions_enable">Włącz</string>
+    <string name="extensions_disable">Wyłącz</string>
+    <string name="extensions_install_error">Nie udało się zainstalować rozszerzenia</string>
+    <string name="extensions_recommended">Polecane rozszerzenia</string>
+    <string name="extensions_installed">Zainstalowane rozszerzenia</string>
+    <string name="extensions_loading">Wczytywanie rozszerzeń…</string>
+    <string name="extensions_detail_title">Szczegóły rozszerzenia</string>
+    <string name="extensions_author_by">autor: %1$s</string>
+    <string name="extensions_ratings">Oceny: %1$s</string>
+    <string name="extensions_users">Użytkownicy: %1$s</string>
+    <string name="extensions_version">Wersja %1$s</string>
+    <string name="extensions_permissions">Uprawnienia</string>
+    <string name="extensions_no_permissions">To rozszerzenie nie wymaga specjalnych uprawnień.</string>
+    <string name="extensions_installing">Instalowanie…</string>
+    <string name="extensions_installed_label">Zainstalowane</string>
+    <string name="extensions_enabled">Włączone</string>
+    <string name="extensions_open_popup">Otwórz okno rozszerzenia</string>
+    <string name="extensions_manage">Zarządzaj rozszerzeniami</string>
+    <string name="extensions_more">Więcej rozszerzeń</string>
+    <string name="extensions_search_hint">Szukaj rozszerzeń</string>
+    <string name="extensions_search_empty">Brak rozszerzeń pasujących do wyszukiwania.</string>
+    <string name="extensions_retry">Ponów</string>
+    <string name="extensions_load_error">Nie udało się wczytać rozszerzeń</string>
+    <string name="extensions_error_load_actionable">Nie udało się wczytać rozszerzeń. Sprawdź połączenie.</string>
+    <string name="extensions_error_action_actionable">Nie udało się wykonać działania rozszerzenia. Spróbuj ponownie.</string>
+</resources>

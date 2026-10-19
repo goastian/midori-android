@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_add_to_homescreen">ہوم اسکرین پر شامل کریں</string>
+    <string name="menu_request_desktop_site">ڈیسک ٹاپ سائٹ طلب کریں</string>
+    <string name="menu_quit_app">ایپ بند کریں</string>
+    <string name="menu_find_in_page">صفحے میں تلاش کریں</string>
+    <string name="menu_save_as_pdf">صفحہ PDF کے طور پر محفوظ کریں</string>
+    <string name="menu_save_as_pdf_failed">صفحہ PDF کے طور پر محفوظ نہیں ہو سکا</string>
+    <string name="menu_account">اکاؤنٹ</string>
+    <string name="menu_login">سائن ان کریں</string>
+    <string name="menu_midori_vpn">MidoriVPN</string>
+    <string name="menu_more_options">مزید اختیارات</string>
+    <string name="menu_back_to_main">بنیادی اقدامات</string>
+    <string name="menu_customize_homepage">ہوم پیج اپنی مرضی کے مطابق بنائیں</string>
+    <string name="menu_dismiss_default_prompt">طے شدہ براؤزر کی تجویز ہٹائیں</string>
+    <string name="menu_default_browser_description">تیز، نجی، اور آپ کے لیے بنایا گیا۔</string>
+</resources>

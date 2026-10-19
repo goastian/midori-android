@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_search_title">Piliin ang iyong search engine</string>
+    <string name="onboarding_search_description">Piliin ang default na search engine para sa address bar.</string>
+    <string name="onboarding_search_hint">Maaari mo itong baguhin sa ibang pagkakataon sa Mga Setting.</string>
+</resources>

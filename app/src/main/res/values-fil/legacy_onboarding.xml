@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_anonymous_title">Maligayang pagdating sa Midori, minamahal na di-kilalang user</string>
+    <string name="onboarding_anonymous_text_top">Maghanap nang ganap na pribado:</string>
+    <string name="onboarding_anonymous_bullet_1">Walang pagsubaybay sa iyong mga paghahanap</string>
+    <string name="onboarding_anonymous_bullet_2">Walang pagsubaybay sa mga ad</string>
+    <string name="onboarding_anonymous_bullet_3">Walang pagbebenta ng iyong personal na data</string>
+    <string name="onboarding_anonymous_validate">Susunod</string>
+    <string name="onboarding_navigation_title">Ligtas na mag-browse sa lahat ng website</string>
+    <string name="onboarding_navigation_bullet_1">Mas kaunting cookies, wala nang mapang-abala na banner!</string>
+    <string name="onboarding_navigation_bullet_2">Mas kaunting tagasubaybay, malaya na sa wakas!</string>
+    <string name="onboarding_navigation_text_bottom">Subukan kami at gawin ang una mong paghahanap!</string>
+    <string name="onboarding_navigation_validate">Magsimula na tayo!</string>
+</resources>

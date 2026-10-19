@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history">Riwayat</string>
+    <string name="history_today">Hari ini</string>
+    <string name="history_yesterday">Kemarin</string>
+    <string name="history_clear_all_confirm_title">Hapus riwayat</string>
+    <string name="history_clear_all_confirm_message">Yakin ingin menghapus semua riwayat?</string>
+    <string name="history_clear_all_confirm_ok">Hapus semua</string>
+    <string name="history_empty_title">Riwayat kosong</string>
+    <string name="history_empty_message">Halaman yang dikunjungi akan muncul di sini</string>
+</resources>

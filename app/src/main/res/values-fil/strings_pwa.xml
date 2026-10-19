@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pwa_install_action">I-install ang web app</string>
+    <string name="pwa_install_requested">Naidagdag ang web app sa Midori. Kumpirmahin ang shortcut sa home screen kung hihilingin.</string>
+    <string name="pwa_install_failed">Hindi ma-install ang web app na ito.</string>
+    <string name="pwa_shortcut_requested">Kumpirmahin ang shortcut sa home screen kung hihilingin.</string>
+    <string name="pwa_shortcut_failed">Hindi maidagdag ang shortcut na ito.</string>
+    <string name="pwa_manage_title">Mga web app</string>
+    <string name="pwa_installed_tab">Naka-install</string>
+    <string name="pwa_discover_tab">Tuklasin</string>
+    <string name="pwa_installed_badge">Naka-install</string>
+    <string name="pwa_enabled">Naka-enable</string>
+    <string name="pwa_install_explanation">Bubukas sa sarili nitong window. Depende sa website ang offline na pag-access.</string>
+    <string name="pwa_manage_summary">Buksan at pamahalaan ang mga naka-install na web app</string>
+    <string name="pwa_offline_explanation">Maaaring gumana nang offline ang mga web app kapag sinusuportahan ito ng kanilang website.</string>
+    <string name="pwa_empty">Wala pang naka-install na web app. Tumuklas ng isa rito o magbukas ng HTTPS site at piliin ang I-install ang web app sa menu.</string>
+    <string name="pwa_open">Buksan</string>
+    <string name="pwa_remove">Alisin</string>
+    <string name="pwa_remove_title">Alisin ang %1$s?</string>
+    <string name="pwa_remove_explanation">Aalisin nito ang web app sa Midori. Kung mananatili ang shortcut sa iyong home screen, alisin ang icon doon.</string>
+    <string name="pwa_cancel">Kanselahin</string>
+    <string name="pwa_disabled_message">Naka-disable ang web app na ito sa Midori.</string>
+    <string name="pwa_enable_app">I-enable ang %1$s</string>
+    <string name="pwa_clear_data">Burahin ang data</string>
+    <string name="pwa_clear_data_title">Burahin ang data para sa %1$s?</string>
+    <string name="pwa_clear_data_explanation">Aalisin ang cookies, mga offline na file at imbakan ng site para sa website na ito. Maaaring kailangan mong mag-sign in muli.</string>
+    <string name="pwa_clear_data_failed">Hindi mabura ang data ng site na ito.</string>
+    <string name="pwa_clear_data_done">Nabura ang data ng site.</string>
+</resources>

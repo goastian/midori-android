@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_search_title">اپنا سرچ انجن منتخب کریں</string>
+    <string name="onboarding_search_description">ایڈریس بار کے لیے طے شدہ سرچ انجن منتخب کریں۔</string>
+    <string name="onboarding_search_hint">آپ اسے بعد میں ترتیبات میں بدل سکتے ہیں۔</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bookmarks">بک مارکس</string>
+    <string name="bookmarks_folder">فولڈر</string>
+    <string name="bookmarks_bookmark">بک مارک</string>
+    <string name="bookmarks_folder_title_placeholder">فولڈر کا نام</string>
+    <string name="bookmarks_move_x_to">%1$s کو یہاں منتقل کریں</string>
+    <string name="bookmarks_empty_default_folder_name">بک مارکس کی فہرست</string>
+    <string name="bookmarks_empty_title">%1$s خالی ہے</string>
+    <string name="bookmarks_empty_message">ویب صفحے کے مینو سے بک مارکس شامل کریں۔</string>
+</resources>

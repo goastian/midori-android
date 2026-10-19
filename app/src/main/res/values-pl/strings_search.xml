@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_engines_group">Wyszukiwarki</string>
+    <string name="settings_manage_search_engines">Zarządzaj alternatywnymi wyszukiwarkami</string>
+    <string name="settings_manage_search_engines_summary">Edytuj wyszukiwarki widoczne w menu wyszukiwania</string>
+    <string name="settings_home_screen_widget">Widżet ekranu głównego</string>
+    <string name="settings_widget_instructions">Dodaj widżet wyszukiwania Midori z menu widżetów ekranu głównego. Aby usunąć istniejący widżet, usuń go z ekranu głównego.</string>
+    <string name="settings_search_suggestions_group">Sugestie wyszukiwarek</string>
+    <string name="settings_show_search_suggestions">Pokazuj sugestie wyszukiwania</string>
+    <string name="settings_search_suggestions_private">Pokazuj w sesjach prywatnych</string>
+    <string name="settings_trending_suggestions">Pokazuj popularne sugestie</string>
+    <string name="settings_recent_searches">Pokazuj ostatnie wyszukiwania</string>
+    <string name="settings_address_bar_suggest_group">Sugestie paska adresu</string>
+    <string name="settings_search_history">Szukaj w historii przeglądania</string>
+    <string name="settings_search_bookmarks">Szukaj w zakładkach</string>
+    <string name="settings_search_open_tabs">Szukaj w otwartych kartach</string>
+    <string name="settings_address_bar_preferences_group">Preferencje paska adresu</string>
+    <string name="settings_clipboard_suggestions">Pokazuj sugestie ze schowka</string>
+    <string name="settings_voice_search">Pokazuj wyszukiwanie głosowe</string>
+    <string name="settings_voice_search_unavailable">Rozpoznawanie mowy jest niedostępne na tym urządzeniu</string>
+    <string name="settings_autocomplete_urls">Autouzupełnianie adresów URL</string>
+    <string name="settings_normal_search_engine">Domyślna wyszukiwarka w zwykłym przeglądaniu</string>
+    <string name="settings_private_search_engine">Domyślna wyszukiwarka w przeglądaniu prywatnym</string>
+    <string name="settings_same_search_engine">Używaj tej samej wyszukiwarki co przy zwykłym przeglądaniu</string>
+    <string name="settings_alternative_search_engines">Wyszukiwarki w menu wyszukiwania</string>
+    <string name="settings_add_search_engine">Dodaj wyszukiwarkę</string>
+    <string name="settings_search_engine_name">Nazwa</string>
+    <string name="settings_search_engine_url">Adres URL wyszukiwania</string>
+    <string name="settings_search_suggestion_url">Adres URL sugestii (opcjonalny)</string>
+    <string name="settings_search_engine_url_hint" formatted="false">Użyj %s w miejscu wyszukiwanego hasła. Wymagany jest HTTPS.</string>
+    <string name="settings_remove_search_engine">Usunąć wyszukiwarkę?</string>
+</resources>

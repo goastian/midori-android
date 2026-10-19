@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="privatebrowsing_title">Przeglądanie prywatne</string>
+    <string name="privatebrowsing_paragraph_1">Witryny odwiedzane w kartach prywatnych nie pojawiają się w historii Midori, a ich ciasteczka są usuwane po zamknięciu karty. Poza trybem prywatnym historia wyszukiwania jest przechowywana na telefonie, ale nie jest widoczna dla Midori (szanujemy Twoją prywatność!).</string>
+    <string name="privatebrowsing_paragraph_2">Pamiętaj, że przeglądanie prywatne nie czyni Cię niewidocznym w Internecie. Karty prywatne nie zapobiegają śledzeniu odwiedzanych witryn ani publicznego adresu IP przez operatora komórkowego lub właściciela sieci Wi-Fi.</string>
+</resources>

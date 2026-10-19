@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="available_tabs_view_carousel">Karuzela</string>
+    <string name="tab_tray_view_mode">Widok kart</string>
+    <string name="tab_tray_done">Gotowe</string>
+    <string name="tab_tray_select_tabs">Zaznacz karty</string>
+    <string name="tab_tray_close_selected">Zamknij zaznaczone</string>
+    <string name="browser_tab_carousel_position">%1$d z %2$d</string>
+    <string name="tab_tray_switch_view">Zmień widok kart na %1$s</string>
+</resources>

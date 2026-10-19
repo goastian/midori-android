@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="available_tabs_view_carousel">Carousel</string>
+    <string name="tab_tray_view_mode">View ng tab</string>
+    <string name="tab_tray_done">Tapos na</string>
+    <string name="tab_tray_select_tabs">Pumili ng mga tab</string>
+    <string name="tab_tray_close_selected">Isara ang napili</string>
+    <string name="browser_tab_carousel_position">%1$d ng %2$d</string>
+    <string name="tab_tray_switch_view">Palitan ang view ng tab sa %1$s</string>
+</resources>

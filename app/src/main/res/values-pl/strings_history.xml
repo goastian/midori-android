@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history">Historia</string>
+    <string name="history_today">Dzisiaj</string>
+    <string name="history_yesterday">Wczoraj</string>
+    <string name="history_clear_all_confirm_title">Usuń historię</string>
+    <string name="history_clear_all_confirm_message">Czy na pewno chcesz usunąć całą historię?</string>
+    <string name="history_clear_all_confirm_ok">Wyczyść wszystko</string>
+    <string name="history_empty_title">Historia jest pusta</string>
+    <string name="history_empty_message">Odwiedzone strony pojawią się tutaj</string>
+</resources>

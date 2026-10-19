@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_add_to_homescreen">Tambahkan ke layar utama</string>
+    <string name="menu_request_desktop_site">Minta situs desktop</string>
+    <string name="menu_quit_app">Tutup aplikasi</string>
+    <string name="menu_find_in_page">Temukan di halaman</string>
+    <string name="menu_save_as_pdf">Simpan halaman sebagai PDF</string>
+    <string name="menu_save_as_pdf_failed">Tidak dapat menyimpan halaman sebagai PDF</string>
+    <string name="menu_account">Akun</string>
+    <string name="menu_login">Masuk</string>
+    <string name="menu_midori_vpn">MidoriVPN</string>
+    <string name="menu_more_options">Opsi lainnya</string>
+    <string name="menu_back_to_main">Tindakan utama</string>
+    <string name="menu_customize_homepage">Sesuaikan halaman utama</string>
+    <string name="menu_dismiss_default_prompt">Tutup saran browser default</string>
+    <string name="menu_default_browser_description">Cepat, pribadi, dan dibuat untuk Anda.</string>
+</resources>

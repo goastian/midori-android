@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_anonymous_title">Midori میں خوش آمدید، محترم گمنام صارف</string>
+    <string name="onboarding_anonymous_text_top">مکمل رازداری کے ساتھ تلاش کریں:</string>
+    <string name="onboarding_anonymous_bullet_1">آپ کی تلاشوں کی کوئی نگرانی نہیں</string>
+    <string name="onboarding_anonymous_bullet_2">اشتہارات کے ذریعے کوئی نگرانی نہیں</string>
+    <string name="onboarding_anonymous_bullet_3">آپ کا ذاتی ڈیٹا فروخت نہیں کیا جاتا</string>
+    <string name="onboarding_anonymous_validate">اگلا</string>
+    <string name="onboarding_navigation_title">تمام ویب سائٹس پر محفوظ براؤزنگ کریں</string>
+    <string name="onboarding_navigation_bullet_1">کم کوکیز، پریشان کن بینرز سے نجات!</string>
+    <string name="onboarding_navigation_bullet_2">کم ٹریکرز، آخرکار آزادی!</string>
+    <string name="onboarding_navigation_text_bottom">ہمیں آزمائیں اور اپنی پہلی تلاش کریں!</string>
+    <string name="onboarding_navigation_validate">آئیے شروع کریں!</string>
+</resources>

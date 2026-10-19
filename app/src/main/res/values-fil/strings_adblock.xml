@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="adblock_settings_title">Pagharang sa mga tagasubaybay at ad</string>
+    <string name="adblock_settings_summary">Piliin ang haharangan ng Midori</string>
+    <string name="adblock_default_level">Default na antas ng pagharang</string>
+    <string name="adblock_cookie_banners">Tanggihan ang opsyonal na cookies</string>
+    <string name="adblock_cookie_banners_description">Awtomatikong tanggihan ang mga katugmang abiso sa cookies. Hindi kasama ang mga site na naka-disable ang pagharang.</string>
+    <string name="adblock_level_off">Walang pagharang</string>
+    <string name="adblock_level_trackers">Harangan ang mga tagasubaybay</string>
+    <string name="adblock_level_trackers_ads">Harangan ang mga tagasubaybay at ad</string>
+    <string name="adblock_exceptions">Mga pagbubukod</string>
+    <string name="adblock_manage_sites">Pamahalaan ang antas ng pagharang sa bawat site</string>
+    <string name="adblock_sources">Mga pinagmulan</string>
+    <string name="adblock_tracker_sources">Pamahalaan ang mga pinagmulan ng tagasubaybay</string>
+    <string name="adblock_ad_sources">Pamahalaan ang mga pinagmulan ng ad</string>
+    <string name="adblock_strict">Mahigpit na pagharang</string>
+    <string name="adblock_strict_description">Gumamit ng mas malakas na proteksiyon sa pagsubaybay. Maaaring hindi gumana nang maayos ang ilang site.</string>
+    <string name="adblock_scope_note">Hinaharangan ang mga tumutugmang kahilingan ng pahina at karaniwang puwesto ng ad. Nalalapat ang mga pagbubukod ng site.</string>
+    <string name="adblock_add_site">Magdagdag ng site</string>
+    <string name="adblock_no_sites">Wala pang pagbubukod sa site</string>
+    <string name="adblock_remove">Alisin</string>
+    <string name="adblock_site_domain">Domain ng site</string>
+    <string name="adblock_invalid_site">Maglagay ng wastong domain</string>
+    <string name="adblock_add">Idagdag</string>
+    <string name="adblock_cancel">Kanselahin</string>
+    <string name="adblock_add_source">Magdagdag ng bagong pinagmulan</string>
+    <string name="adblock_gecko_source">GeckoView</string>
+    <string name="adblock_gecko_source_description">Naka-built-in na proteksiyon sa pagsubaybay</string>
+    <string name="adblock_midori_source">Midori Desktop EasyList</string>
+    <string name="adblock_midori_source_description">Mga panuntunang pang-host lamang na kasama sa Midori</string>
+    <string name="adblock_source_updated">Na-update: %1$s</string>
+    <string name="adblock_source_pending">Naghihintay ng update</string>
+    <string name="adblock_refresh">I-refresh</string>
+    <string name="adblock_source_url">HTTPS URL ng pinagmulan</string>
+    <string name="adblock_invalid_source">Maglagay ng natatanging HTTPS URL</string>
+    <string name="adblock_source_format">Sinusuportahan ang mga panuntunan sa domain, path, site at uri ng resource. Hindi ginagamit ang mga pasadyang cosmetic rule at scriptlet.</string>
+    <string name="onboarding_adblock_title">Piliin ang iyong proteksiyon</string>
+    <string name="onboarding_adblock_description">Gusto mo bang harangan ng Midori ang mga tagasubaybay at ad?</string>
+    <string name="onboarding_adblock_hint">Maaari mo itong baguhin sa ibang pagkakataon sa Mga Setting.</string>
+    <string name="adblock_source_disabled">Naka-disable</string>
+    <string name="adblock_source_failed">Nabigo ang update. I-tap ang I-refresh upang subukang muli.</string>
+    <string name="adblock_core_sources">Mga pangunahing listahan</string>
+    <string name="adblock_regional_sources">Mga panrehiyong listahan</string>
+    <string name="adblock_custom_sources">Mga pasadyang listahan</string>
+    <string name="adblock_update_all_sources">I-update ang lahat ng pinagmulan</string>
+    <string name="adblock_source_rules">Mga katugmang panuntunan: %1$d</string>
+</resources>

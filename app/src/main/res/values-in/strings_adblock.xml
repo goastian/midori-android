@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="adblock_settings_title">Pemblokiran pelacak dan iklan</string>
+    <string name="adblock_settings_summary">Pilih yang diblokir Midori</string>
+    <string name="adblock_default_level">Tingkat pemblokiran default</string>
+    <string name="adblock_cookie_banners">Tolak cookie opsional</string>
+    <string name="adblock_cookie_banners_description">Otomatis tolak pemberitahuan cookie yang didukung. Tidak berlaku untuk situs dengan pemblokiran nonaktif.</string>
+    <string name="adblock_level_off">Tanpa pemblokiran</string>
+    <string name="adblock_level_trackers">Blokir pelacak</string>
+    <string name="adblock_level_trackers_ads">Blokir pelacak dan iklan</string>
+    <string name="adblock_exceptions">Pengecualian</string>
+    <string name="adblock_manage_sites">Kelola tingkat pemblokiran per situs</string>
+    <string name="adblock_sources">Sumber</string>
+    <string name="adblock_tracker_sources">Kelola sumber pelacak</string>
+    <string name="adblock_ad_sources">Kelola sumber iklan</string>
+    <string name="adblock_strict">Pemblokiran ketat</string>
+    <string name="adblock_strict_description">Gunakan perlindungan pelacakan yang lebih kuat. Beberapa situs mungkin tidak berfungsi semestinya.</string>
+    <string name="adblock_scope_note">Memblokir permintaan halaman yang cocok dan penempatan iklan umum. Pengecualian situs berlaku.</string>
+    <string name="adblock_add_site">Tambahkan situs</string>
+    <string name="adblock_no_sites">Belum ada pengecualian situs</string>
+    <string name="adblock_remove">Hapus</string>
+    <string name="adblock_site_domain">Domain situs</string>
+    <string name="adblock_invalid_site">Masukkan domain yang valid</string>
+    <string name="adblock_add">Tambahkan</string>
+    <string name="adblock_cancel">Batal</string>
+    <string name="adblock_add_source">Tambahkan sumber baru</string>
+    <string name="adblock_gecko_source">GeckoView</string>
+    <string name="adblock_gecko_source_description">Perlindungan pelacakan bawaan</string>
+    <string name="adblock_midori_source">Midori Desktop EasyList</string>
+    <string name="adblock_midori_source_description">Aturan khusus host yang disertakan dalam Midori</string>
+    <string name="adblock_source_updated">Diperbarui: %1$s</string>
+    <string name="adblock_source_pending">Menunggu pembaruan</string>
+    <string name="adblock_refresh">Muat ulang</string>
+    <string name="adblock_source_url">URL sumber HTTPS</string>
+    <string name="adblock_invalid_source">Masukkan URL HTTPS yang unik</string>
+    <string name="adblock_source_format">Mendukung aturan domain, jalur, situs, dan jenis sumber daya. Aturan kosmetik kustom dan scriptlet diabaikan.</string>
+    <string name="onboarding_adblock_title">Pilih perlindungan Anda</string>
+    <string name="onboarding_adblock_description">Ingin Midori memblokir pelacak dan iklan?</string>
+    <string name="onboarding_adblock_hint">Anda dapat mengubahnya nanti di Setelan.</string>
+    <string name="adblock_source_disabled">Nonaktif</string>
+    <string name="adblock_source_failed">Pembaruan gagal. Ketuk Muat ulang untuk mencoba lagi.</string>
+    <string name="adblock_core_sources">Daftar inti</string>
+    <string name="adblock_regional_sources">Daftar regional</string>
+    <string name="adblock_custom_sources">Daftar kustom</string>
+    <string name="adblock_update_all_sources">Perbarui semua sumber</string>
+    <string name="adblock_source_rules">Aturan yang kompatibel: %1$d</string>
+</resources>

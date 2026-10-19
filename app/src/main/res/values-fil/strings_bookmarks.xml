@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bookmarks">Mga bookmark</string>
+    <string name="bookmarks_folder">folder</string>
+    <string name="bookmarks_bookmark">Bookmark</string>
+    <string name="bookmarks_folder_title_placeholder">Pangalan ng folder</string>
+    <string name="bookmarks_move_x_to">Ilipat ang %1$s sa</string>
+    <string name="bookmarks_empty_default_folder_name">Listahan ng mga bookmark</string>
+    <string name="bookmarks_empty_title">Walang laman ang %1$s</string>
+    <string name="bookmarks_empty_message">Magdagdag ng mga bookmark gamit ang menu sa web page.</string>
+</resources>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pwa_install_action">ویب ایپ نصب کریں</string>
+    <string name="pwa_install_requested">ویب ایپ Midori میں شامل ہو گئی۔ پوچھے جانے پر ہوم اسکرین کے شارٹ کٹ کی تصدیق کریں۔</string>
+    <string name="pwa_install_failed">یہ ویب ایپ نصب نہیں ہو سکی۔</string>
+    <string name="pwa_shortcut_requested">پوچھے جانے پر ہوم اسکرین کے شارٹ کٹ کی تصدیق کریں۔</string>
+    <string name="pwa_shortcut_failed">یہ شارٹ کٹ شامل نہیں ہو سکا۔</string>
+    <string name="pwa_manage_title">ویب ایپس</string>
+    <string name="pwa_installed_tab">نصب شدہ</string>
+    <string name="pwa_discover_tab">دریافت کریں</string>
+    <string name="pwa_installed_badge">نصب شدہ</string>
+    <string name="pwa_enabled">فعال</string>
+    <string name="pwa_install_explanation">اپنی الگ ونڈو میں کھلتی ہے۔ آف لائن رسائی ویب سائٹ پر منحصر ہے۔</string>
+    <string name="pwa_manage_summary">نصب شدہ ویب ایپس کھولیں اور ان کا نظم کریں</string>
+    <string name="pwa_offline_explanation">ویب ایپس آف لائن کام کر سکتی ہیں اگر ان کی ویب سائٹس یہ سہولت فراہم کریں۔</string>
+    <string name="pwa_empty">ابھی کوئی ویب ایپ نصب نہیں۔ یہاں دریافت کریں یا HTTPS سائٹ کھول کر مینو سے ویب ایپ نصب کریں منتخب کریں۔</string>
+    <string name="pwa_open">کھولیں</string>
+    <string name="pwa_remove">ہٹائیں</string>
+    <string name="pwa_remove_title">%1$s ہٹائیں؟</string>
+    <string name="pwa_remove_explanation">یہ ویب ایپ Midori سے ہٹا دے گا۔ اگر اس کا شارٹ کٹ ہوم اسکرین پر باقی رہے تو وہیں سے آئیکن ہٹا دیں۔</string>
+    <string name="pwa_cancel">منسوخ کریں</string>
+    <string name="pwa_disabled_message">یہ ویب ایپ Midori میں غیر فعال ہے۔</string>
+    <string name="pwa_enable_app">%1$s فعال کریں</string>
+    <string name="pwa_clear_data">ڈیٹا صاف کریں</string>
+    <string name="pwa_clear_data_title">%1$s کا ڈیٹا صاف کریں؟</string>
+    <string name="pwa_clear_data_explanation">اس ویب سائٹ کی کوکیز، آف لائن فائلیں اور سائٹ کا ذخیرہ ہٹا دیا جائے گا۔ آپ کو دوبارہ سائن ان کرنا پڑ سکتا ہے۔</string>
+    <string name="pwa_clear_data_failed">اس سائٹ کا ڈیٹا صاف نہیں ہو سکا۔</string>
+    <string name="pwa_clear_data_done">سائٹ کا ڈیٹا صاف ہو گیا۔</string>
+</resources>

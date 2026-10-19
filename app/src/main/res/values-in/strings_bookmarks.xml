@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bookmarks">Markah</string>
+    <string name="bookmarks_folder">folder</string>
+    <string name="bookmarks_bookmark">Markah</string>
+    <string name="bookmarks_folder_title_placeholder">Nama folder</string>
+    <string name="bookmarks_move_x_to">Pindahkan %1$s ke</string>
+    <string name="bookmarks_empty_default_folder_name">Daftar markah</string>
+    <string name="bookmarks_empty_title">%1$s kosong</string>
+    <string name="bookmarks_empty_message">Tambahkan markah melalui menu di halaman web.</string>
+</resources>

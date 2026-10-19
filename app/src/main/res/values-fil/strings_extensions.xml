@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_title">Mga extension</string>
+    <string name="extensions_empty_title">Walang naka-install na extension</string>
+    <string name="extensions_empty_message">Mag-install ng mga extension upang magdagdag ng mga tampok sa iyong browser.</string>
+    <string name="extensions_install">I-install</string>
+    <string name="extensions_install_hint">Ilagay ang URL ng file ng extension (.xpi)</string>
+    <string name="extensions_uninstall">I-uninstall</string>
+    <string name="extensions_uninstall_confirm">I-uninstall ang \"%1$s\"?</string>
+    <string name="extensions_enable">I-enable</string>
+    <string name="extensions_disable">I-disable</string>
+    <string name="extensions_install_error">Hindi ma-install ang extension</string>
+    <string name="extensions_recommended">Mga inirerekomendang extension</string>
+    <string name="extensions_installed">Mga naka-install na extension</string>
+    <string name="extensions_loading">Nilo-load ang mga extension…</string>
+    <string name="extensions_detail_title">Mga detalye ng extension</string>
+    <string name="extensions_author_by">ni %1$s</string>
+    <string name="extensions_ratings">%1$s rating</string>
+    <string name="extensions_users">%1$s user</string>
+    <string name="extensions_version">Bersiyon %1$s</string>
+    <string name="extensions_permissions">Mga pahintulot</string>
+    <string name="extensions_no_permissions">Hindi kailangan ng extension na ito ng anumang espesyal na pahintulot.</string>
+    <string name="extensions_installing">Ini-install…</string>
+    <string name="extensions_installed_label">Naka-install</string>
+    <string name="extensions_enabled">Naka-enable</string>
+    <string name="extensions_open_popup">Buksan ang popup ng extension</string>
+    <string name="extensions_manage">Pamahalaan ang mga extension</string>
+    <string name="extensions_more">Higit pang extension</string>
+    <string name="extensions_search_hint">Maghanap ng mga extension</string>
+    <string name="extensions_search_empty">Walang extension na tumutugma sa iyong paghahanap.</string>
+    <string name="extensions_retry">Subukang muli</string>
+    <string name="extensions_load_error">Hindi ma-load ang mga extension</string>
+    <string name="extensions_error_load_actionable">Hindi namin ma-load ang mga extension. Suriin ang iyong koneksiyon.</string>
+    <string name="extensions_error_action_actionable">Hindi namin makumpleto ang pagkilos sa extension. Subukang muli.</string>
+</resources>

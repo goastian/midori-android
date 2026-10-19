@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_shortcuts">Mga shortcut</string>
+    <string name="home_show_all">Ipakita lahat</string>
+    <string name="home_add_shortcut">Magdagdag ng shortcut</string>
+    <string name="home_edit_shortcut">I-edit ang shortcut</string>
+    <string name="home_continue">Magpatuloy</string>
+    <string name="home_start_browsing">Magsimulang mag-browse</string>
+    <string name="home_continue_empty">Lalabas dito ang huli mong bukas na pahina.</string>
+    <string name="home_recent_visits">Kamakailang binisita</string>
+    <string name="home_recent_empty">Lalabas dito ang mga pahinang binibisita mo.</string>
+    <string name="home_stories">Mga balita</string>
+    <string name="home_all_stories">Lahat ng balita</string>
+    <string name="home_stories_loading">Nilo-load ang mga balita…</string>
+    <string name="home_stories_unavailable">Hindi available ang mga balita. Subukang muli kapag nakakonekta na.</string>
+    <string name="home_private">Lumipat sa pribadong pag-browse</string>
+    <string name="home_normal">Lumipat sa normal na pag-browse</string>
+    <string name="home_shortcut_title">Pangalan</string>
+    <string name="home_shortcut_url">Address ng website</string>
+    <string name="home_shortcut_invalid">Maglagay ng pangalan at wastong HTTP o HTTPS address.</string>
+    <string name="home_move_left">Ilipat pakaliwa</string>
+    <string name="home_move_right">Ilipat pakanan</string>
+    <string name="home_blocked">%1$d ad at tagasubaybay ang naharangan</string>
+    <string name="home_blank_tab">Buksan ang bagong blangkong tab</string>
+    <string name="home_stories_source">Mga ulo ng balita mula sa BBC News; BBC Mundo para sa Espanyol.</string>
+</resources>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_engines_group">Mga search engine</string>
+    <string name="settings_manage_search_engines">Pamahalaan ang mga alternatibong search engine</string>
+    <string name="settings_manage_search_engines_summary">I-edit ang mga engine sa menu ng paghahanap</string>
+    <string name="settings_home_screen_widget">Widget sa home screen</string>
+    <string name="settings_widget_instructions">Idagdag ang Midori search widget mula sa menu ng mga widget sa iyong home screen. Upang alisin ang widget, alisin ito sa iyong home screen.</string>
+    <string name="settings_search_suggestions_group">Mga mungkahi mula sa mga search engine</string>
+    <string name="settings_show_search_suggestions">Ipakita ang mga mungkahi sa paghahanap</string>
+    <string name="settings_search_suggestions_private">Ipakita sa mga pribadong sesyon</string>
+    <string name="settings_trending_suggestions">Ipakita ang mga trending na mungkahi</string>
+    <string name="settings_recent_searches">Ipakita ang mga kamakailang paghahanap</string>
+    <string name="settings_address_bar_suggest_group">Mga mungkahi sa address bar</string>
+    <string name="settings_search_history">Maghanap sa kasaysayan ng pag-browse</string>
+    <string name="settings_search_bookmarks">Maghanap sa mga bookmark</string>
+    <string name="settings_search_open_tabs">Maghanap sa mga bukas na tab</string>
+    <string name="settings_address_bar_preferences_group">Mga kagustuhan sa address bar</string>
+    <string name="settings_clipboard_suggestions">Ipakita ang mga mungkahi mula sa clipboard</string>
+    <string name="settings_voice_search">Ipakita ang paghahanap gamit ang boses</string>
+    <string name="settings_voice_search_unavailable">Hindi available ang pagkilala sa boses sa device na ito</string>
+    <string name="settings_autocomplete_urls">Awtomatikong kumpletuhin ang mga URL</string>
+    <string name="settings_normal_search_engine">Default na search engine sa normal na pag-browse</string>
+    <string name="settings_private_search_engine">Default na search engine sa pribadong pag-browse</string>
+    <string name="settings_same_search_engine">Gamitin ang search engine ng normal na pag-browse</string>
+    <string name="settings_alternative_search_engines">Mga engine sa menu ng paghahanap</string>
+    <string name="settings_add_search_engine">Magdagdag ng search engine</string>
+    <string name="settings_search_engine_name">Pangalan</string>
+    <string name="settings_search_engine_url">URL ng paghahanap</string>
+    <string name="settings_search_suggestion_url">URL ng mungkahi (opsyonal)</string>
+    <string name="settings_search_engine_url_hint" formatted="false">Gamitin ang %s sa puwesto ng hinahanap na termino. Kailangan ang HTTPS.</string>
+    <string name="settings_remove_search_engine">Alisin ang search engine?</string>
+</resources>

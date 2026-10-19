@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_wallpaper_title">Mga wallpaper</string>
+    <string name="home_wallpaper_description">Pumili ng background para sa iyong panimulang pahina.</string>
+    <string name="home_wallpaper_choose">Pumili ng wallpaper</string>
+    <string name="home_wallpaper_collection">Koleksiyon ng Midori</string>
+    <string name="home_wallpaper_preview">I-preview</string>
+    <string name="home_wallpaper_apply">Itakda ang wallpaper</string>
+    <string name="home_wallpaper_selected">Napili</string>
+    <string name="home_wallpaper_none">Sundin ang tema</string>
+    <string name="home_wallpaper_forest">Maulap na kagubatan</string>
+    <string name="home_wallpaper_dawn">Unang liwanag</string>
+    <string name="home_wallpaper_dunes">Mga buhanginan ng disyerto</string>
+    <string name="home_wallpaper_silk">Sutlang jade</string>
+    <string name="home_wallpaper_save_error">Hindi ma-save ang wallpaper. Subukang muli.</string>
+    <string name="home_wallpaper_back">Lahat ng wallpaper</string>
+    <string name="home_wallpaper_load_error">Hindi mabuksan ang wallpaper na ito. Pumili ng iba.</string>
+</resources>

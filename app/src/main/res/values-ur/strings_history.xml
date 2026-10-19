@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history">تاریخ</string>
+    <string name="history_today">آج</string>
+    <string name="history_yesterday">کل</string>
+    <string name="history_clear_all_confirm_title">تاریخ حذف کریں</string>
+    <string name="history_clear_all_confirm_message">کیا آپ واقعی تمام تاریخ حذف کرنا چاہتے ہیں؟</string>
+    <string name="history_clear_all_confirm_ok">سب صاف کریں</string>
+    <string name="history_empty_title">تاریخ خالی ہے</string>
+    <string name="history_empty_message">دیکھے گئے صفحات یہاں ظاہر ہوں گے</string>
+</resources>

@@ -114,7 +114,8 @@ android {
         }
 
         resourceConfigurations += [
-            "en", "fr", "de", "es", "it", "ru", "pt-rPT", "pt-rBR", "zh-rCN", "ja", "sq", "hi"
+            "en", "fr", "de", "es", "it", "ru", "pt-rPT", "pt-rBR", "zh-rCN", "ja", "sq", "hi",
+            "fil", "pl", "en-rNG", "in", "ur"
         ]
     }
 
@@ -235,7 +236,7 @@ tasks.register("verifyLocalizedStrings") {
                 new XmlSlurper(false, false)
                     .parse(resourceFile)
                     .children()
-                    .findAll { it.@name.text() }
+                    .findAll { it.@name.text() && it.@translatable.text() != "false" }
                     .collect { it.@name.text() }
             } as Set
         }
@@ -249,7 +250,7 @@ tasks.register("verifyLocalizedStrings") {
             }
             def qualifierParts = []
             languageTag.split("-").eachWithIndex { part, index ->
-                qualifierParts << (index == 0 ? part : "r${part}")
+                qualifierParts << (index == 0 ? (part == "id" ? "in" : part) : "r${part}")
             }
             def qualifier = qualifierParts.join("-")
             def localeNames = stringNamesIn(resourcesDirectory.toPath().resolve("values-${qualifier}").toFile())

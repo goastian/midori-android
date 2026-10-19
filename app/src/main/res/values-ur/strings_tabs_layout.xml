@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="available_tabs_view_carousel">کیروسل</string>
+    <string name="tab_tray_view_mode">ٹیب کا منظر</string>
+    <string name="tab_tray_done">مکمل</string>
+    <string name="tab_tray_select_tabs">ٹیبز منتخب کریں</string>
+    <string name="tab_tray_close_selected">منتخب بند کریں</string>
+    <string name="browser_tab_carousel_position">%1$d از %2$d</string>
+    <string name="tab_tray_switch_view">ٹیب کا منظر %1$s میں بدلیں</string>
+</resources>

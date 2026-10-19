@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="privatebrowsing_title">Penjelajahan pribadi</string>
+    <string name="privatebrowsing_paragraph_1">Situs yang dilihat di tab pribadi tidak muncul di riwayat Midori, dan cookie-nya selalu dihapus saat tab ditutup. Tanpa penjelajahan pribadi, riwayat pencarian disimpan di ponsel Anda tetapi tidak dapat dilihat Midori (kami menghormati privasi Anda!).</string>
+    <string name="privatebrowsing_paragraph_2">Perlu diketahui bahwa penjelajahan pribadi tidak membuat Anda tak terlihat di Internet. Tab pribadi tidak mencegah operator seluler atau pemilik jaringan Wi-Fi melacak situs yang Anda kunjungi atau alamat IP publik Anda.</string>
+</resources>

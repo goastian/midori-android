@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tabs_default_group_name">Grupo</string>
+    <string name="tabs_group_created">Nagawa ang grupo</string>
+    <string name="tabs_group_ungrouped">Inalis sa grupo ang mga tab</string>
+    <string name="tabs_group_undo">I-undo</string>
+    <string name="tabs_ungroup">Alisin sa grupo</string>
+    <string name="tabs_collapse_group">I-collapse ang grupo</string>
+    <string name="tabs_new_tab_in_group">Bagong tab sa grupo</string>
+    <string name="tabs_group_failed">Hindi ma-update ang grupo ng tab. Subukang muli.</string>
+    <string name="tabs_select_all">Piliin lahat</string>
+    <string name="tabs_deselect_all">Alisin ang lahat ng pagpili</string>
+    <string name="tabs_move_to_group">Ilipat sa grupo</string>
+</resources>

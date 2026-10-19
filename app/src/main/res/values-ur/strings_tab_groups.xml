@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tabs_default_group_name">گروپ</string>
+    <string name="tabs_group_created">گروپ بن گیا</string>
+    <string name="tabs_group_ungrouped">ٹیبز کی گروپ بندی ہٹا دی گئی</string>
+    <string name="tabs_group_undo">کالعدم کریں</string>
+    <string name="tabs_ungroup">گروپ بندی ہٹائیں</string>
+    <string name="tabs_collapse_group">گروپ سمیٹیں</string>
+    <string name="tabs_new_tab_in_group">گروپ میں نیا ٹیب</string>
+    <string name="tabs_group_failed">ٹیب گروپ اپ ڈیٹ نہیں ہو سکا۔ دوبارہ کوشش کریں۔</string>
+    <string name="tabs_select_all">سب منتخب کریں</string>
+    <string name="tabs_deselect_all">سب کا انتخاب ہٹائیں</string>
+    <string name="tabs_move_to_group">گروپ میں منتقل کریں</string>
+</resources>

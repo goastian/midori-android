@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bookmarks">Zakładki</string>
+    <string name="bookmarks_folder">folder</string>
+    <string name="bookmarks_bookmark">Zakładka</string>
+    <string name="bookmarks_folder_title_placeholder">Nazwa folderu</string>
+    <string name="bookmarks_move_x_to">Przenieś %1$s do</string>
+    <string name="bookmarks_empty_default_folder_name">Lista zakładek</string>
+    <string name="bookmarks_empty_title">%1$s — pusto</string>
+    <string name="bookmarks_empty_message">Dodawaj zakładki za pomocą menu na stronie.</string>
+</resources>

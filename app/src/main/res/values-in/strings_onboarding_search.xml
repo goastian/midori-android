@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_search_title">Pilih mesin pencari Anda</string>
+    <string name="onboarding_search_description">Pilih mesin pencari default untuk bilah alamat.</string>
+    <string name="onboarding_search_hint">Anda dapat mengubahnya nanti di Setelan.</string>
+</resources>

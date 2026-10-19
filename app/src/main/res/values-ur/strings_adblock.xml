@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="adblock_settings_title">ٹریکرز اور اشتہارات کی روک تھام</string>
+    <string name="adblock_settings_summary">منتخب کریں کہ Midori کیا روکے</string>
+    <string name="adblock_default_level">روک تھام کی طے شدہ سطح</string>
+    <string name="adblock_cookie_banners">اختیاری کوکیز مسترد کریں</string>
+    <string name="adblock_cookie_banners_description">معاون کوکی نوٹس خودکار طور پر مسترد کریں۔ جن سائٹس پر روک تھام بند ہے وہ شامل نہیں ہیں۔</string>
+    <string name="adblock_level_off">کوئی روک تھام نہیں</string>
+    <string name="adblock_level_trackers">ٹریکرز روکیں</string>
+    <string name="adblock_level_trackers_ads">ٹریکرز اور اشتہارات روکیں</string>
+    <string name="adblock_exceptions">استثنائیں</string>
+    <string name="adblock_manage_sites">ہر سائٹ کے لیے روک تھام کی سطح کا نظم کریں</string>
+    <string name="adblock_sources">ذرائع</string>
+    <string name="adblock_tracker_sources">ٹریکرز کے ذرائع کا نظم کریں</string>
+    <string name="adblock_ad_sources">اشتہارات کے ذرائع کا نظم کریں</string>
+    <string name="adblock_strict">سخت روک تھام</string>
+    <string name="adblock_strict_description">نگرانی سے مضبوط تحفظ استعمال کریں۔ کچھ سائٹس حسبِ توقع کام نہیں کر سکتیں۔</string>
+    <string name="adblock_scope_note">مماثل صفحاتی درخواستیں اور عام اشتہاری جگہیں روکتا ہے۔ سائٹ کی استثنائیں لاگو ہیں۔</string>
+    <string name="adblock_add_site">سائٹ شامل کریں</string>
+    <string name="adblock_no_sites">ابھی کسی سائٹ کا استثناء نہیں</string>
+    <string name="adblock_remove">ہٹائیں</string>
+    <string name="adblock_site_domain">سائٹ کا ڈومین</string>
+    <string name="adblock_invalid_site">درست ڈومین درج کریں</string>
+    <string name="adblock_add">شامل کریں</string>
+    <string name="adblock_cancel">منسوخ کریں</string>
+    <string name="adblock_add_source">نیا ذریعہ شامل کریں</string>
+    <string name="adblock_gecko_source">GeckoView</string>
+    <string name="adblock_gecko_source_description">نگرانی سے اندرونی تحفظ</string>
+    <string name="adblock_midori_source">Midori Desktop EasyList</string>
+    <string name="adblock_midori_source_description">Midori میں شامل صرف ہوسٹ کے قواعد</string>
+    <string name="adblock_source_updated">اپ ڈیٹ ہوا: %1$s</string>
+    <string name="adblock_source_pending">اپ ڈیٹ کا انتظار</string>
+    <string name="adblock_refresh">تازہ کریں</string>
+    <string name="adblock_source_url">ذریعے کا HTTPS URL</string>
+    <string name="adblock_invalid_source">منفرد HTTPS URL درج کریں</string>
+    <string name="adblock_source_format">ڈومین، راستے، سائٹ اور وسائل کی قسم کے قواعد کی حمایت کرتا ہے۔ حسبِ ضرورت ظاہری قواعد اور اسکرپٹلٹس نظرانداز کیے جاتے ہیں۔</string>
+    <string name="onboarding_adblock_title">اپنا تحفظ منتخب کریں</string>
+    <string name="onboarding_adblock_description">کیا آپ چاہتے ہیں کہ Midori ٹریکرز اور اشتہارات روکے؟</string>
+    <string name="onboarding_adblock_hint">آپ اسے بعد میں ترتیبات میں بدل سکتے ہیں۔</string>
+    <string name="adblock_source_disabled">غیر فعال</string>
+    <string name="adblock_source_failed">اپ ڈیٹ ناکام ہو گیا۔ دوبارہ کوشش کے لیے تازہ کریں پر ٹیپ کریں۔</string>
+    <string name="adblock_core_sources">بنیادی فہرستیں</string>
+    <string name="adblock_regional_sources">علاقائی فہرستیں</string>
+    <string name="adblock_custom_sources">حسبِ ضرورت فہرستیں</string>
+    <string name="adblock_update_all_sources">تمام ذرائع اپ ڈیٹ کریں</string>
+    <string name="adblock_source_rules">مطابقت رکھنے والے قواعد: %1$d</string>
+</resources>

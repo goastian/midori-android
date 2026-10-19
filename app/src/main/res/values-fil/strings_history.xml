@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history">Kasaysayan</string>
+    <string name="history_today">Ngayon</string>
+    <string name="history_yesterday">Kahapon</string>
+    <string name="history_clear_all_confirm_title">Tanggalin ang kasaysayan</string>
+    <string name="history_clear_all_confirm_message">Gusto mo ba talagang tanggalin ang lahat ng kasaysayan?</string>
+    <string name="history_clear_all_confirm_ok">Burahin lahat</string>
+    <string name="history_empty_title">Walang laman ang kasaysayan</string>
+    <string name="history_empty_message">Lalabas dito ang mga binisitang pahina</string>
+</resources>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pwa_install_action">Pasang aplikasi web</string>
+    <string name="pwa_install_requested">Aplikasi web ditambahkan ke Midori. Konfirmasikan pintasan layar utama jika diminta.</string>
+    <string name="pwa_install_failed">Tidak dapat memasang aplikasi web ini.</string>
+    <string name="pwa_shortcut_requested">Konfirmasikan pintasan layar utama jika diminta.</string>
+    <string name="pwa_shortcut_failed">Tidak dapat menambahkan pintasan ini.</string>
+    <string name="pwa_manage_title">Aplikasi web</string>
+    <string name="pwa_installed_tab">Terpasang</string>
+    <string name="pwa_discover_tab">Temukan</string>
+    <string name="pwa_installed_badge">Terpasang</string>
+    <string name="pwa_enabled">Aktif</string>
+    <string name="pwa_install_explanation">Terbuka di jendela sendiri. Akses offline bergantung pada situs.</string>
+    <string name="pwa_manage_summary">Buka dan kelola aplikasi web terpasang</string>
+    <string name="pwa_offline_explanation">Aplikasi web dapat bekerja offline jika situsnya menyediakan dukungan offline.</string>
+    <string name="pwa_empty">Belum ada aplikasi web terpasang. Temukan di sini atau buka situs HTTPS dan pilih Pasang aplikasi web dari menu.</string>
+    <string name="pwa_open">Buka</string>
+    <string name="pwa_remove">Hapus</string>
+    <string name="pwa_remove_title">Hapus %1$s?</string>
+    <string name="pwa_remove_explanation">Ini menghapus aplikasi web dari Midori. Jika pintasannya masih ada di layar utama, hapus ikonnya di sana.</string>
+    <string name="pwa_cancel">Batal</string>
+    <string name="pwa_disabled_message">Aplikasi web ini dinonaktifkan di Midori.</string>
+    <string name="pwa_enable_app">Aktifkan %1$s</string>
+    <string name="pwa_clear_data">Hapus data</string>
+    <string name="pwa_clear_data_title">Hapus data untuk %1$s?</string>
+    <string name="pwa_clear_data_explanation">Cookie, file offline, dan penyimpanan situs ini akan dihapus. Anda mungkin perlu masuk kembali.</string>
+    <string name="pwa_clear_data_failed">Tidak dapat menghapus data situs ini.</string>
+    <string name="pwa_clear_data_done">Data situs dihapus.</string>
+</resources>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_title">ایکسٹینشنز</string>
+    <string name="extensions_empty_title">کوئی ایکسٹینشن نصب نہیں</string>
+    <string name="extensions_empty_message">اپنے براؤزر میں اضافی خصوصیات شامل کرنے کے لیے ایکسٹینشنز نصب کریں۔</string>
+    <string name="extensions_install">نصب کریں</string>
+    <string name="extensions_install_hint">ایکسٹینشن فائل کا URL درج کریں (.xpi)</string>
+    <string name="extensions_uninstall">اَن انسٹال کریں</string>
+    <string name="extensions_uninstall_confirm">\"%1$s\" اَن انسٹال کریں؟</string>
+    <string name="extensions_enable">فعال کریں</string>
+    <string name="extensions_disable">غیر فعال کریں</string>
+    <string name="extensions_install_error">ایکسٹینشن نصب نہیں ہو سکی</string>
+    <string name="extensions_recommended">تجویز کردہ ایکسٹینشنز</string>
+    <string name="extensions_installed">نصب شدہ ایکسٹینشنز</string>
+    <string name="extensions_loading">ایکسٹینشنز لوڈ ہو رہی ہیں…</string>
+    <string name="extensions_detail_title">ایکسٹینشن کی تفصیلات</string>
+    <string name="extensions_author_by">از %1$s</string>
+    <string name="extensions_ratings">%1$s درجہ بندیاں</string>
+    <string name="extensions_users">%1$s صارفین</string>
+    <string name="extensions_version">ورژن %1$s</string>
+    <string name="extensions_permissions">اجازتیں</string>
+    <string name="extensions_no_permissions">اس ایکسٹینشن کو کسی خاص اجازت کی ضرورت نہیں۔</string>
+    <string name="extensions_installing">نصب ہو رہا ہے…</string>
+    <string name="extensions_installed_label">نصب شدہ</string>
+    <string name="extensions_enabled">فعال</string>
+    <string name="extensions_open_popup">ایکسٹینشن کا پاپ اَپ کھولیں</string>
+    <string name="extensions_manage">ایکسٹینشنز کا نظم کریں</string>
+    <string name="extensions_more">مزید ایکسٹینشنز</string>
+    <string name="extensions_search_hint">ایکسٹینشنز تلاش کریں</string>
+    <string name="extensions_search_empty">آپ کی تلاش سے کوئی ایکسٹینشن مماثل نہیں۔</string>
+    <string name="extensions_retry">دوبارہ کوشش کریں</string>
+    <string name="extensions_load_error">ایکسٹینشنز لوڈ نہیں ہو سکیں</string>
+    <string name="extensions_error_load_actionable">ایکسٹینشنز لوڈ نہیں ہو سکیں۔ اپنا کنکشن چیک کریں۔</string>
+    <string name="extensions_error_action_actionable">ایکسٹینشن کا عمل مکمل نہیں ہو سکا۔ دوبارہ کوشش کریں۔</string>
+</resources>

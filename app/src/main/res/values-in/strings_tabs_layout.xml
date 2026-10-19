@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="available_tabs_view_carousel">Karosel</string>
+    <string name="tab_tray_view_mode">Tampilan tab</string>
+    <string name="tab_tray_done">Selesai</string>
+    <string name="tab_tray_select_tabs">Pilih tab</string>
+    <string name="tab_tray_close_selected">Tutup yang dipilih</string>
+    <string name="browser_tab_carousel_position">%1$d dari %2$d</string>
+    <string name="tab_tray_switch_view">Ubah tampilan tab ke %1$s</string>
+</resources>

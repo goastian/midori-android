@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pwa_install_action">Zainstaluj aplikację internetową</string>
+    <string name="pwa_install_requested">Dodano aplikację internetową do Midori. Potwierdź skrót na ekranie głównym, jeśli pojawi się prośba.</string>
+    <string name="pwa_install_failed">Nie udało się zainstalować tej aplikacji internetowej.</string>
+    <string name="pwa_shortcut_requested">Potwierdź skrót na ekranie głównym, jeśli pojawi się prośba.</string>
+    <string name="pwa_shortcut_failed">Nie udało się dodać tego skrótu.</string>
+    <string name="pwa_manage_title">Aplikacje internetowe</string>
+    <string name="pwa_installed_tab">Zainstalowane</string>
+    <string name="pwa_discover_tab">Odkrywaj</string>
+    <string name="pwa_installed_badge">Zainstalowane</string>
+    <string name="pwa_enabled">Włączone</string>
+    <string name="pwa_install_explanation">Otwiera się we własnym oknie. Dostęp offline zależy od witryny.</string>
+    <string name="pwa_manage_summary">Otwieraj zainstalowane aplikacje internetowe i zarządzaj nimi</string>
+    <string name="pwa_offline_explanation">Aplikacje internetowe mogą działać offline, gdy ich witryny to obsługują.</string>
+    <string name="pwa_empty">Brak aplikacji internetowych. Odkryj je tutaj lub otwórz witrynę HTTPS i wybierz Zainstaluj aplikację internetową z menu.</string>
+    <string name="pwa_open">Otwórz</string>
+    <string name="pwa_remove">Usuń</string>
+    <string name="pwa_remove_title">Usunąć %1$s?</string>
+    <string name="pwa_remove_explanation">Usuwa aplikację internetową z Midori. Jeśli skrót pozostał na ekranie głównym, usuń tam jego ikonę.</string>
+    <string name="pwa_cancel">Anuluj</string>
+    <string name="pwa_disabled_message">Ta aplikacja internetowa jest wyłączona w Midori.</string>
+    <string name="pwa_enable_app">Włącz %1$s</string>
+    <string name="pwa_clear_data">Wyczyść dane</string>
+    <string name="pwa_clear_data_title">Wyczyścić dane %1$s?</string>
+    <string name="pwa_clear_data_explanation">Ciasteczka, pliki offline i dane tej witryny zostaną usunięte. Może być wymagane ponowne logowanie.</string>
+    <string name="pwa_clear_data_failed">Nie udało się wyczyścić danych tej witryny.</string>
+    <string name="pwa_clear_data_done">Wyczyszczono dane witryny.</string>
+</resources>

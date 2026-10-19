@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_wallpaper_title">Wallpaper</string>
+    <string name="home_wallpaper_description">Pilih latar belakang untuk halaman awal Anda.</string>
+    <string name="home_wallpaper_choose">Pilih wallpaper</string>
+    <string name="home_wallpaper_collection">Koleksi Midori</string>
+    <string name="home_wallpaper_preview">Pratinjau</string>
+    <string name="home_wallpaper_apply">Atur wallpaper</string>
+    <string name="home_wallpaper_selected">Dipilih</string>
+    <string name="home_wallpaper_none">Ikuti tema</string>
+    <string name="home_wallpaper_forest">Hutan awan</string>
+    <string name="home_wallpaper_dawn">Cahaya pertama</string>
+    <string name="home_wallpaper_dunes">Bukit pasir gurun</string>
+    <string name="home_wallpaper_silk">Sutra giok</string>
+    <string name="home_wallpaper_save_error">Tidak dapat menyimpan wallpaper. Coba lagi.</string>
+    <string name="home_wallpaper_back">Semua wallpaper</string>
+    <string name="home_wallpaper_load_error">Tidak dapat membuka wallpaper ini. Pilih yang lain.</string>
+</resources>

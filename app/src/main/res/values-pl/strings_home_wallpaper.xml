@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_wallpaper_title">Tapety</string>
+    <string name="home_wallpaper_description">Wybierz tło strony startowej.</string>
+    <string name="home_wallpaper_choose">Wybierz tapetę</string>
+    <string name="home_wallpaper_collection">Kolekcja Midori</string>
+    <string name="home_wallpaper_preview">Podgląd</string>
+    <string name="home_wallpaper_apply">Ustaw tapetę</string>
+    <string name="home_wallpaper_selected">Wybrano</string>
+    <string name="home_wallpaper_none">Zgodnie z motywem</string>
+    <string name="home_wallpaper_forest">Las mglisty</string>
+    <string name="home_wallpaper_dawn">Pierwszy brzask</string>
+    <string name="home_wallpaper_dunes">Pustynne wydmy</string>
+    <string name="home_wallpaper_silk">Jedwab w kolorze jadeitu</string>
+    <string name="home_wallpaper_save_error">Nie można zapisać tapety. Spróbuj ponownie.</string>
+    <string name="home_wallpaper_back">Wszystkie tapety</string>
+    <string name="home_wallpaper_load_error">Nie można otworzyć tej tapety. Wybierz inną.</string>
+</resources>

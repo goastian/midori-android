@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="adblock_settings_title">Blokowanie śledzenia i reklam</string>
+    <string name="adblock_settings_summary">Wybierz, co blokuje Midori</string>
+    <string name="adblock_default_level">Domyślny poziom blokowania</string>
+    <string name="adblock_cookie_banners">Odrzucaj opcjonalne ciasteczka</string>
+    <string name="adblock_cookie_banners_description">Automatycznie odrzucaj obsługiwane prośby o ciasteczka. Nie dotyczy witryn z wyłączonym blokowaniem.</string>
+    <string name="adblock_level_off">Bez blokowania</string>
+    <string name="adblock_level_trackers">Blokuj śledzenie</string>
+    <string name="adblock_level_trackers_ads">Blokuj śledzenie i reklamy</string>
+    <string name="adblock_exceptions">Wyjątki</string>
+    <string name="adblock_manage_sites">Zarządzaj poziomem blokowania dla witryn</string>
+    <string name="adblock_sources">Źródła</string>
+    <string name="adblock_tracker_sources">Zarządzaj źródłami list śledzenia</string>
+    <string name="adblock_ad_sources">Zarządzaj źródłami list reklam</string>
+    <string name="adblock_strict">Ścisłe blokowanie</string>
+    <string name="adblock_strict_description">Używaj silniejszej ochrony przed śledzeniem. Niektóre witryny mogą nie działać poprawnie.</string>
+    <string name="adblock_scope_note">Blokuje pasujące żądania stron i typowe miejsca reklamowe. Obowiązują wyjątki witryn.</string>
+    <string name="adblock_add_site">Dodaj witrynę</string>
+    <string name="adblock_no_sites">Brak wyjątków witryn</string>
+    <string name="adblock_remove">Usuń</string>
+    <string name="adblock_site_domain">Domena witryny</string>
+    <string name="adblock_invalid_site">Wpisz poprawną domenę</string>
+    <string name="adblock_add">Dodaj</string>
+    <string name="adblock_cancel">Anuluj</string>
+    <string name="adblock_add_source">Dodaj nowe źródło</string>
+    <string name="adblock_gecko_source">GeckoView</string>
+    <string name="adblock_gecko_source_description">Wbudowana ochrona przed śledzeniem</string>
+    <string name="adblock_midori_source">Midori Desktop EasyList</string>
+    <string name="adblock_midori_source_description">Reguły dotyczące tylko hostów dołączone do Midori</string>
+    <string name="adblock_source_updated">Zaktualizowano: %1$s</string>
+    <string name="adblock_source_pending">Oczekiwanie na aktualizację</string>
+    <string name="adblock_refresh">Odśwież</string>
+    <string name="adblock_source_url">Adres HTTPS źródła</string>
+    <string name="adblock_invalid_source">Wpisz unikalny adres HTTPS</string>
+    <string name="adblock_source_format">Obsługuje reguły domen, ścieżek, witryn i typów zasobów. Własne reguły kosmetyczne i skryptlety są pomijane.</string>
+    <string name="onboarding_adblock_title">Wybierz ochronę</string>
+    <string name="onboarding_adblock_description">Czy Midori ma blokować śledzenie i reklamy?</string>
+    <string name="onboarding_adblock_hint">Możesz to później zmienić w ustawieniach.</string>
+    <string name="adblock_source_disabled">Wyłączone</string>
+    <string name="adblock_source_failed">Aktualizacja nieudana. Dotknij Odśwież, aby spróbować ponownie.</string>
+    <string name="adblock_core_sources">Listy podstawowe</string>
+    <string name="adblock_regional_sources">Listy regionalne</string>
+    <string name="adblock_custom_sources">Listy własne</string>
+    <string name="adblock_update_all_sources">Zaktualizuj wszystkie źródła</string>
+    <string name="adblock_source_rules">Zgodne reguły: %1$d</string>
+</resources>

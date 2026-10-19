@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_add_to_homescreen">Idagdag sa home screen</string>
+    <string name="menu_request_desktop_site">Hilingin ang desktop site</string>
+    <string name="menu_quit_app">Isara ang app</string>
+    <string name="menu_find_in_page">Hanapin sa pahina</string>
+    <string name="menu_save_as_pdf">I-save ang pahina bilang PDF</string>
+    <string name="menu_save_as_pdf_failed">Hindi ma-save ang pahina bilang PDF</string>
+    <string name="menu_account">Account</string>
+    <string name="menu_login">Mag-sign in</string>
+    <string name="menu_midori_vpn">MidoriVPN</string>
+    <string name="menu_more_options">Higit pang opsyon</string>
+    <string name="menu_back_to_main">Mga pangunahing pagkilos</string>
+    <string name="menu_customize_homepage">I-customize ang homepage</string>
+    <string name="menu_dismiss_default_prompt">I-dismiss ang mungkahing default na browser</string>
+    <string name="menu_default_browser_description">Mabilis, pribado, at ginawa para sa iyo.</string>
+</resources>

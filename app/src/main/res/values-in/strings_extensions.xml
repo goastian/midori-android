@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_title">Ekstensi</string>
+    <string name="extensions_empty_title">Tidak ada ekstensi terpasang</string>
+    <string name="extensions_empty_message">Pasang ekstensi untuk menambahkan fitur ke browser Anda.</string>
+    <string name="extensions_install">Pasang</string>
+    <string name="extensions_install_hint">Masukkan URL file ekstensi (.xpi)</string>
+    <string name="extensions_uninstall">Copot</string>
+    <string name="extensions_uninstall_confirm">Copot \"%1$s\"?</string>
+    <string name="extensions_enable">Aktifkan</string>
+    <string name="extensions_disable">Nonaktifkan</string>
+    <string name="extensions_install_error">Tidak dapat memasang ekstensi</string>
+    <string name="extensions_recommended">Ekstensi yang direkomendasikan</string>
+    <string name="extensions_installed">Ekstensi terpasang</string>
+    <string name="extensions_loading">Memuat ekstensi…</string>
+    <string name="extensions_detail_title">Detail ekstensi</string>
+    <string name="extensions_author_by">oleh %1$s</string>
+    <string name="extensions_ratings">%1$s penilaian</string>
+    <string name="extensions_users">%1$s pengguna</string>
+    <string name="extensions_version">Versi %1$s</string>
+    <string name="extensions_permissions">Izin</string>
+    <string name="extensions_no_permissions">Ekstensi ini tidak memerlukan izin khusus.</string>
+    <string name="extensions_installing">Memasang…</string>
+    <string name="extensions_installed_label">Terpasang</string>
+    <string name="extensions_enabled">Aktif</string>
+    <string name="extensions_open_popup">Buka popup ekstensi</string>
+    <string name="extensions_manage">Kelola ekstensi</string>
+    <string name="extensions_more">Ekstensi lainnya</string>
+    <string name="extensions_search_hint">Cari ekstensi</string>
+    <string name="extensions_search_empty">Tidak ada ekstensi yang cocok dengan pencarian Anda.</string>
+    <string name="extensions_retry">Coba lagi</string>
+    <string name="extensions_load_error">Tidak dapat memuat ekstensi</string>
+    <string name="extensions_error_load_actionable">Kami tidak dapat memuat ekstensi. Periksa koneksi Anda.</string>
+    <string name="extensions_error_action_actionable">Kami tidak dapat menyelesaikan tindakan ekstensi. Coba lagi.</string>
+</resources>

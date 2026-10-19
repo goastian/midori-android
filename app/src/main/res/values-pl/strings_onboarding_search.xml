@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_search_title">Wybierz wyszukiwarkę</string>
+    <string name="onboarding_search_description">Wybierz domyślną wyszukiwarkę dla paska adresu.</string>
+    <string name="onboarding_search_hint">Możesz to później zmienić w ustawieniach.</string>
+</resources>

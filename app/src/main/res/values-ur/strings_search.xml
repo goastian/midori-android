@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_engines_group">سرچ انجنز</string>
+    <string name="settings_manage_search_engines">متبادل سرچ انجنز کا نظم کریں</string>
+    <string name="settings_manage_search_engines_summary">تلاش کے مینو میں دکھائی دینے والے انجنز میں ترمیم کریں</string>
+    <string name="settings_home_screen_widget">ہوم اسکرین ویجٹ</string>
+    <string name="settings_widget_instructions">ہوم اسکرین کے ویجٹ مینو سے Midori تلاش ویجٹ شامل کریں۔ موجودہ ویجٹ ہٹانے کے لیے اسے ہوم اسکرین سے ہٹائیں۔</string>
+    <string name="settings_search_suggestions_group">سرچ انجنز کی تجاویز</string>
+    <string name="settings_show_search_suggestions">تلاش کی تجاویز دکھائیں</string>
+    <string name="settings_search_suggestions_private">نجی سیشنز میں دکھائیں</string>
+    <string name="settings_trending_suggestions">مقبول تجاویز دکھائیں</string>
+    <string name="settings_recent_searches">حالیہ تلاشیں دکھائیں</string>
+    <string name="settings_address_bar_suggest_group">ایڈریس بار کی تجاویز</string>
+    <string name="settings_search_history">براؤزنگ کی تاریخ میں تلاش کریں</string>
+    <string name="settings_search_bookmarks">بک مارکس میں تلاش کریں</string>
+    <string name="settings_search_open_tabs">کھلے ٹیبز میں تلاش کریں</string>
+    <string name="settings_address_bar_preferences_group">ایڈریس بار کی ترجیحات</string>
+    <string name="settings_clipboard_suggestions">کلپ بورڈ کی تجاویز دکھائیں</string>
+    <string name="settings_voice_search">صوتی تلاش دکھائیں</string>
+    <string name="settings_voice_search_unavailable">اس آلے پر آواز کی شناخت دستیاب نہیں</string>
+    <string name="settings_autocomplete_urls">URLs خودکار طور پر مکمل کریں</string>
+    <string name="settings_normal_search_engine">عام براؤزنگ کا طے شدہ سرچ انجن</string>
+    <string name="settings_private_search_engine">نجی براؤزنگ کا طے شدہ سرچ انجن</string>
+    <string name="settings_same_search_engine">عام براؤزنگ والا سرچ انجن استعمال کریں</string>
+    <string name="settings_alternative_search_engines">تلاش کے مینو میں دکھائے گئے انجنز</string>
+    <string name="settings_add_search_engine">سرچ انجن شامل کریں</string>
+    <string name="settings_search_engine_name">نام</string>
+    <string name="settings_search_engine_url">تلاش کا URL</string>
+    <string name="settings_search_suggestion_url">تجویز کا URL (اختیاری)</string>
+    <string name="settings_search_engine_url_hint" formatted="false">تلاش کی عبارت کی جگہ %s استعمال کریں۔ HTTPS ضروری ہے۔</string>
+    <string name="settings_remove_search_engine">سرچ انجن ہٹائیں؟</string>
+</resources>

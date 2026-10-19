@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_search_engines_group">Mesin pencari</string>
+    <string name="settings_manage_search_engines">Kelola mesin pencari alternatif</string>
+    <string name="settings_manage_search_engines_summary">Edit mesin yang terlihat di menu pencarian</string>
+    <string name="settings_home_screen_widget">Widget layar utama</string>
+    <string name="settings_widget_instructions">Tambahkan widget pencarian Midori dari menu widget layar utama. Untuk menghapus widget yang ada, hapus dari layar utama.</string>
+    <string name="settings_search_suggestions_group">Saran dari mesin pencari</string>
+    <string name="settings_show_search_suggestions">Tampilkan saran pencarian</string>
+    <string name="settings_search_suggestions_private">Tampilkan di sesi pribadi</string>
+    <string name="settings_trending_suggestions">Tampilkan saran tren</string>
+    <string name="settings_recent_searches">Tampilkan pencarian terbaru</string>
+    <string name="settings_address_bar_suggest_group">Saran bilah alamat</string>
+    <string name="settings_search_history">Cari riwayat penjelajahan</string>
+    <string name="settings_search_bookmarks">Cari markah</string>
+    <string name="settings_search_open_tabs">Cari tab terbuka</string>
+    <string name="settings_address_bar_preferences_group">Preferensi bilah alamat</string>
+    <string name="settings_clipboard_suggestions">Tampilkan saran papan klip</string>
+    <string name="settings_voice_search">Tampilkan pencarian suara</string>
+    <string name="settings_voice_search_unavailable">Pengenalan suara tidak tersedia di perangkat ini</string>
+    <string name="settings_autocomplete_urls">Lengkapi URL otomatis</string>
+    <string name="settings_normal_search_engine">Mesin pencari default penjelajahan normal</string>
+    <string name="settings_private_search_engine">Mesin pencari default penjelajahan pribadi</string>
+    <string name="settings_same_search_engine">Gunakan mesin pencari yang sama dengan penjelajahan normal</string>
+    <string name="settings_alternative_search_engines">Mesin yang ditampilkan di menu pencarian</string>
+    <string name="settings_add_search_engine">Tambahkan mesin pencari</string>
+    <string name="settings_search_engine_name">Nama</string>
+    <string name="settings_search_engine_url">URL pencarian</string>
+    <string name="settings_search_suggestion_url">URL saran (opsional)</string>
+    <string name="settings_search_engine_url_hint" formatted="false">Gunakan %s di tempat istilah pencarian. HTTPS wajib digunakan.</string>
+    <string name="settings_remove_search_engine">Hapus mesin pencari?</string>
+</resources>

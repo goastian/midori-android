@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_search_title">Choose your search engine</string>
+    <string name="onboarding_search_description">Select the default search engine for the address bar.</string>
+    <string name="onboarding_search_hint">You can change this later in Settings.</string>
+</resources>

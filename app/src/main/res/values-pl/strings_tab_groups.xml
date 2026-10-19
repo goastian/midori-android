@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tabs_default_group_name">Grupa</string>
+    <string name="tabs_group_created">Utworzono grupę</string>
+    <string name="tabs_group_ungrouped">Rozgrupowano karty</string>
+    <string name="tabs_group_undo">Cofnij</string>
+    <string name="tabs_ungroup">Rozgrupuj</string>
+    <string name="tabs_collapse_group">Zwiń grupę</string>
+    <string name="tabs_new_tab_in_group">Nowa karta w grupie</string>
+    <string name="tabs_group_failed">Nie udało się zaktualizować grupy kart. Spróbuj ponownie.</string>
+    <string name="tabs_select_all">Zaznacz wszystkie</string>
+    <string name="tabs_deselect_all">Odznacz wszystkie</string>
+    <string name="tabs_move_to_group">Przenieś do grupy</string>
+</resources>
