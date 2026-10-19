@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tabs_default_group_name">Group</string>
+    <string name="tabs_group_created">Group created</string>
+    <string name="tabs_group_ungrouped">Tabs ungrouped</string>
+    <string name="tabs_group_undo">Undo</string>
+    <string name="tabs_ungroup">Ungroup</string>
+    <string name="tabs_collapse_group">Collapse group</string>
+    <string name="tabs_new_tab_in_group">New tab in group</string>
+    <string name="tabs_group_failed">Could not update the tab group. Try again.</string>
+    <string name="tabs_select_all">Select all</string>
+    <string name="tabs_deselect_all">Deselect all</string>
+    <string name="tabs_move_to_group">Move to group</string>
+</resources>

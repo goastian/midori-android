@@ -11,8 +11,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
@@ -29,10 +27,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -115,7 +109,9 @@ fun TabCard(
     onRemoveFromGroup: (String, String) -> Unit = { _, _ -> },
     onLongPressed: (TabSessionState) -> Unit = {},
     dragEnabled: Boolean = false,
+    dragGestureAtParent: Boolean = false,
     isBeingDragged: Boolean = false,
+    isDropTarget: Boolean = false,
     onDragStarted: (TabSessionState) -> Unit = {},
     onDragPositionChanged: (Offset) -> Unit = {},
     onDragFinished: () -> Unit = {},
@@ -147,18 +143,17 @@ fun TabCard(
         tween(if (animationsEnabled) 140 else 0), label = "tab surface",
     )
     val borderColor by animateColorAsState(
-        if (highlighted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+        if (highlighted || isDropTarget) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
         tween(if (animationsEnabled) 140 else 0), label = "tab outline",
     )
     val shape = RoundedCornerShape(16.dp)
-    var coordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
 
     Column(modifier = modifier
         .testTag("tab_card:${tab.id}")
         .fillMaxWidth()
         .graphicsLayer {
             val progress = dismissal.progress.value
-            scaleX = pressScale * (1f - 0.06f * progress)
+            scaleX = pressScale * (if (isDropTarget) 0.94f else 1f) * (1f - 0.06f * progress)
             scaleY = scaleX
             val offset = dismissal.dragOffset
             if (dismissVertically) {
@@ -166,13 +161,12 @@ fun TabCard(
             } else {
                 translationX = offset + if (animationsEnabled) ((if (offset < 0) -size.width else size.width) - offset) * progress else 0f
             }
-            alpha = (1f - progress) * if (isBeingDragged) 0.42f else 1f
+            alpha = (1f - progress) * if (isBeingDragged) 0f else 1f
         }
         .tabSwipeToDismiss(dismissal, enabled = !selectionMode && !isBeingDragged && !dismissal.requested, vertical = dismissVertically)
-        .onGloballyPositioned { coordinates = it }
         .semantics { this.selected = highlighted }
         .border(
-            width = if (highlighted) 2.dp else 1.dp,
+            width = if (highlighted || isDropTarget) 2.dp else 1.dp,
             color = borderColor,
             shape = shape
         )
@@ -198,38 +192,14 @@ fun TabCard(
             }
         )
         .then(
-            if (dragEnabled) {
-                Modifier.pointerInput(tab.id, selectionMode) {
-                    val reportDragPosition: (Offset) -> Unit = { position ->
-                        coordinates?.boundsInWindow()?.let { bounds ->
-                            onDragPositionChanged(
-                                Offset(bounds.left + position.x, bounds.top + position.y)
-                            )
-                        }
-                    }
-                    if (selectionMode) {
-                        // After selection, Firefox starts the drag with the next press-and-move.
-                        detectDragGestures(
-                            onDragStart = {
-                                onDragStarted(tab)
-                                reportDragPosition(it)
-                            },
-                            onDrag = { change, _ -> reportDragPosition(change.position) },
-                            onDragEnd = onDragFinished,
-                            onDragCancel = onDragCancelled
-                        )
-                    } else {
-                        detectDragGesturesAfterLongPress(
-                            onDragStart = {
-                                onDragStarted(tab)
-                                reportDragPosition(it)
-                            },
-                            onDrag = { change, _ -> reportDragPosition(change.position) },
-                            onDragEnd = onDragFinished,
-                            onDragCancel = onDragCancelled
-                        )
-                    }
-                }
+            if (dragEnabled && !dragGestureAtParent) {
+                Modifier.tabDragGestures(
+                    id = tab.id,
+                    onStart = { onDragStarted(tab) },
+                    onPosition = onDragPositionChanged,
+                    onEnd = onDragFinished,
+                    onCancel = onDragCancelled,
+                )
             } else {
                 Modifier
             }
@@ -283,10 +253,7 @@ fun TabCard(
                     }
                 }
                 if (selectionMode) {
-                    Checkbox(
-                        checked = isSelectedForGrouping,
-                        onCheckedChange = { onSelected(tab) }
-                    )
+                    RadioButton(selected = isSelectedForGrouping, onClick = { onSelected(tab) })
                 } else if (groupId != null) {
                     IconButton(
                         onClick = { onRemoveFromGroup(groupId, tab.id) },

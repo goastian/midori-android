@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tabs_default_group_name">Grupo</string>
+    <string name="tabs_group_created">Grupo creado</string>
+    <string name="tabs_group_ungrouped">Pestañas desagrupadas</string>
+    <string name="tabs_group_undo">Deshacer</string>
+    <string name="tabs_ungroup">Desagrupar</string>
+    <string name="tabs_collapse_group">Contraer grupo</string>
+    <string name="tabs_new_tab_in_group">Nueva pestaña en el grupo</string>
+    <string name="tabs_group_failed">No se pudo actualizar el grupo de pestañas. Inténtalo de nuevo.</string>
+    <string name="tabs_select_all">Seleccionar todo</string>
+    <string name="tabs_deselect_all">Deseleccionar todo</string>
+    <string name="tabs_move_to_group">Mover a un grupo</string>
+</resources>

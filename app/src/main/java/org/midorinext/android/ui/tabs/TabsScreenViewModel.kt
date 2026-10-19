@@ -205,6 +205,56 @@ class TabsScreenViewModel @Inject constructor(
 
     fun nextGroupColor(): TabGroupColor = TabGroupColor.entries[tabGroups.value.size % TabGroupColor.entries.size]
 
+    internal suspend fun dropTabs(tabIds: Set<String>, target: TabDropTarget, defaultName: String): TabGroupingChange? {
+        val normalIds = store.state.tabs.filterNot { it.content.private }.mapTo(hashSetOf()) { it.id }
+        val moving = tabIds.intersect(normalIds)
+        if (moving.isEmpty()) return null
+        if (target is TabDropTarget.Tab && (target.id !in normalIds || target.id in moving)) return null
+        val groupId = when (target) {
+            is TabDropTarget.Group -> target.id
+            is TabDropTarget.Tab -> "group:${UUID.randomUUID()}"
+        }
+        var change: TabGroupingChange? = null
+        appPreferencesRepository.updateTabGroupsAndColors { groups, colors ->
+            if (target is TabDropTarget.Group && groups.none { it.id == groupId }) return@updateTabGroupsAndColors groups to colors
+            val ids = if (target is TabDropTarget.Tab) linkedSetOf(target.id).apply { addAll(moving) } else moving
+            change = changedTabGrouping(groups, colors, groupId, ids, defaultName, nextGroupColor().value)
+            change?.let { it.after to it.afterColors } ?: (groups to colors)
+        }
+        return change
+    }
+
+    internal suspend fun undoGrouping(change: TabGroupingChange) {
+        appPreferencesRepository.updateTabGroupsAndColors { groups, colors ->
+            change.undo(groups, colors, store.state.tabs.mapTo(hashSetOf()) { it.id })
+        }
+    }
+
+    internal suspend fun ungroup(groupId: String): TabGroupingChange? {
+        var change: TabGroupingChange? = null
+        appPreferencesRepository.updateTabGroupsAndColors { groups, colors ->
+            if (groups.any { it.id == groupId }) {
+                change = TabGroupingChange(groupId, groups, groups.filterNot { it.id == groupId }, colors, colors - groupId)
+            }
+            change?.let { it.after to it.afterColors } ?: (groups to colors)
+        }
+        return change
+    }
+
+    fun openNewTabInGroup(groupId: String) {
+        viewModelScope.launch {
+            if (findGroup(groupId) == null) return@launch
+            val preferences = appPreferencesRepository.flow.first()
+            val id = tabsUseCases.addTab(
+                org.midorinext.android.newtab.newTabUrl(preferences, private = false),
+                selectTab = false, startLoading = false,
+            )
+            appPreferencesRepository.updateTabGroups { groups ->
+                groups.map { if (it.id == groupId) it.toBuilder().addTabIds(id).build() else it }
+            }
+        }
+    }
+
     /** Creates one named group from explicitly selected normal tabs, regardless of their sites. */
     fun groupTabs(tabIds: Set<String>, name: String, color: TabGroupColor): Int {
         val selectedTabIds = store.state.tabs
@@ -322,7 +372,7 @@ class TabsScreenViewModel @Inject constructor(
                     color = TabGroupColor.fromValue(
                         groupColors[group.id] ?: TabGroupColor.entries[index % TabGroupColor.entries.size].value
                     ),
-                    tabs = groupTabs.sortedByDescending { maxOf(it.lastAccess, it.createdAt) }
+                    tabs = groupTabs
                 )
             } else {
                 null

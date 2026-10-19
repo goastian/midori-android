@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.snapping.SnapPosition
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,6 +46,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
@@ -83,7 +85,10 @@ fun TabCarousel(
     onTabDragStarted: (TabSessionState) -> Unit = {},
     onTabDragPositionChanged: (Offset) -> Unit = {},
     onTabDragFinished: () -> Unit = {},
-    onTabDragCancelled: () -> Unit = {}
+    onTabDragCancelled: () -> Unit = {},
+    expandedGroupId: String? = null,
+    tabContent: (@Composable (TabSessionState, Modifier, Dp) -> Unit)? = null,
+    groupContent: (@Composable (SmartTabGroup, Modifier, Dp) -> Unit)? = null,
 ) {
     val count = groups.size + tabs.size + inactiveTabs.size
     if (count == 0) return
@@ -126,6 +131,20 @@ fun TabCarousel(
                 alpha = 1f - distance * 0.18f
             }
 
+            LaunchedEffect(expandedGroupId, groups.size) {
+                val index = groups.indexOfFirst { it.id == expandedGroupId }
+                if (index >= 0) {
+                    if (reduceMotion) state.scrollToItem(index) else state.animateScrollToItem(index)
+                    androidx.compose.runtime.withFrameNanos { }
+                    val layout = state.layoutInfo
+                    val item = layout.visibleItemsInfo.firstOrNull { it.key == "carousel-group-$expandedGroupId" }
+                    if (item != null) {
+                        val distance = item.offset + item.size / 2f - (layout.viewportStartOffset + layout.viewportEndOffset) / 2f
+                        if (reduceMotion) state.scrollToItem(index, distance.toInt()) else state.animateScrollBy(distance)
+                    }
+                }
+            }
+
             LazyRow(
                 state = state,
                 modifier = Modifier.fillMaxSize().testTag("tabs_carousel"),
@@ -139,7 +158,11 @@ fun TabCarousel(
                 )
             ) {
                 items(groups, key = { "carousel-group-${it.id}" }, contentType = { "group" }) { group ->
-                    TabGroupCard(
+                    if (groupContent != null) {
+                        val width = if (group.id == expandedGroupId) maxWidth * 0.90f else cardWidth
+                        groupContent(group, (if (reduceMotion) Modifier else Modifier.animateItem()).width(width),
+                            if (group.id == expandedGroupId) (previewHeight - 68.dp).coerceAtLeast(96.dp) else previewHeight)
+                    } else TabGroupCard(
                         group = group,
                         selected = group.tabs.any { it.id == selectedTabId },
                         thumbnailStorage = thumbnailStorage,
@@ -157,7 +180,10 @@ fun TabCarousel(
                 // Separate intervals preserve stable keys without copying the entire tab list.
                 for ((prefix, section) in listOf("active" to tabs, "inactive" to inactiveTabs)) {
                     items(section, key = { "carousel-$prefix-${it.id}" }, contentType = { "tab" }) { tab ->
-                        TabCard(
+                        if (tabContent != null) {
+                            tabContent(tab, (if (reduceMotion) Modifier else Modifier.animateItem())
+                                .then(pageMotion("carousel-$prefix-${tab.id}")), previewHeight)
+                        } else TabCard(
                             tab = tab,
                             selected = tab.id == selectedTabId,
                             thumbnailStorage = thumbnailStorage,

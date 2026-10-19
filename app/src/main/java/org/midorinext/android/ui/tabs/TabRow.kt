@@ -6,8 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Checkbox
@@ -24,10 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -56,6 +50,7 @@ fun TabRow(
     onRemoveFromGroup: (String, String) -> Unit = { _, _ -> },
     onLongPressed: (TabSessionState) -> Unit = {},
     dragEnabled: Boolean = false,
+    dragGestureAtParent: Boolean = false,
     isBeingDragged: Boolean = false,
     onDragStarted: (TabSessionState) -> Unit = {},
     onDragPositionChanged: (Offset) -> Unit = {},
@@ -78,7 +73,6 @@ fun TabRow(
         tween(if (animationsEnabled) 140 else 0), label = "tab row outline",
     )
     val shape = RoundedCornerShape(14.dp)
-    val coordinates = remember { mutableStateOf<LayoutCoordinates?>(null) }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -91,10 +85,9 @@ fun TabRow(
                 val progress = dismissal.progress.value
                 val offset = dismissal.dragOffset
                 translationX = offset + if (animationsEnabled) ((if (offset < 0) -size.width else size.width) - offset) * progress else 0f
-                alpha = (1f - progress) * if (isBeingDragged) 0.42f else 1f
+                alpha = (1f - progress) * if (isBeingDragged) 0f else 1f
             }
             .tabSwipeToDismiss(dismissal, enabled = !selectionMode && !isBeingDragged && !dismissal.requested)
-            .onGloballyPositioned { coordinates.value = it }
             .semantics { this.selected = highlighted }
             .border(
                 width = if (highlighted) 2.dp else 1.dp,
@@ -117,39 +110,14 @@ fun TabRow(
                 }
             )
             .then(
-                if (dragEnabled) {
-                    Modifier.pointerInput(tab.id, selectionMode) {
-                        val reportDragPosition: (Offset) -> Unit = { position ->
-                            coordinates.value?.boundsInWindow()?.let { bounds ->
-                                onDragPositionChanged(
-                                    Offset(bounds.left + position.x, bounds.top + position.y)
-                                )
-                            }
-                        }
-                        if (selectionMode) {
-                            // A selected tab follows the next press-and-move without requiring
-                            // another long press before it can be dropped onto a group.
-                            detectDragGestures(
-                                onDragStart = {
-                                    onDragStarted(tab)
-                                    reportDragPosition(it)
-                                },
-                                onDrag = { change, _ -> reportDragPosition(change.position) },
-                                onDragEnd = onDragFinished,
-                                onDragCancel = onDragCancelled
-                            )
-                        } else {
-                            detectDragGesturesAfterLongPress(
-                                onDragStart = {
-                                    onDragStarted(tab)
-                                    reportDragPosition(it)
-                                },
-                                onDrag = { change, _ -> reportDragPosition(change.position) },
-                                onDragEnd = onDragFinished,
-                                onDragCancel = onDragCancelled
-                            )
-                        }
-                    }
+                if (dragEnabled && !dragGestureAtParent) {
+                    Modifier.tabDragGestures(
+                        id = tab.id,
+                        onStart = { onDragStarted(tab) },
+                        onPosition = onDragPositionChanged,
+                        onEnd = onDragFinished,
+                        onCancel = onDragCancelled,
+                    )
                 } else {
                     Modifier
                 }

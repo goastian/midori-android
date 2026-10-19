@@ -202,6 +202,16 @@ class AppPreferencesRepository @Inject constructor(
         }
     }
 
+    suspend fun updateTabGroupsAndColors(
+        update: (List<SavedTabGroup>, Map<String, Int>) -> Pair<List<SavedTabGroup>, Map<String, Int>>,
+    ) {
+        datastore.updateData { preferences ->
+            val (groups, colors) = update(preferences.tabGroupsList, preferences.tabGroupColorsMap)
+            preferences.toBuilder().clearTabGroups().addAllTabGroups(groups)
+                .clearTabGroupColors().putAllTabGroupColors(colors).build()
+        }
+    }
+
     suspend fun migrateLegacyTabGroups(groups: List<SavedTabGroup>) {
         datastore.updateData { preferences ->
             if (preferences.tabGroupsMigrated) preferences else preferences.toBuilder()

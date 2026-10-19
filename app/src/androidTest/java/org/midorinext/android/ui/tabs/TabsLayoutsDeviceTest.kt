@@ -124,6 +124,7 @@ class TabsLayoutsDeviceTest {
             fixtureIds.forEach { tabsViewModel.thumbnailStorage.deleteThumbnail(it, false).join() }
             privateFixtureIds.forEach { tabsViewModel.thumbnailStorage.deleteThumbnail(it, true).join() }
         }
+        fixtureTitles.indices.forEach { app.historyRepository.get().deleteVisitsFor("https://page$it.example/article?fixture=hidden") }
         PreferenceManager.getDefaultSharedPreferences(app).edit()
             .putBoolean(app.getString(R.string.pref_key_show_onboarding), onboardingEnabled).commit()
         if (::scenario.isInitialized) scenario.close()
@@ -225,13 +226,13 @@ class TabsLayoutsDeviceTest {
         // swiping must still work while grouped tabs are selected.
         compose.onNodeWithTag("tabs_carousel").performScrollToIndex(0)
         compose.onNodeWithTag("tab_group:$groupId").performClick()
+        compose.onNodeWithTag("tab_group_tabs:$groupId").performScrollToNode(hasTestTag("tab_card:${fixtureIds[0]}"))
         compose.onNodeWithTag("tab_card:${fixtureIds[0]}").performTouchInput { longClick() }
         compose.onNodeWithTag("tab_card:${fixtureIds[0]}").assertIsSelected()
+        compose.onNodeWithTag("tab_group_tabs:$groupId").performScrollToNode(hasTestTag("tab_card:${fixtureIds[1]}"))
         compose.onNodeWithTag("tab_card:${fixtureIds[1]}").performClick().assertIsSelected()
-        compose.onNode(
-            hasText(app.getString(R.string.tab_tray_done)) and hasAnyAncestor(hasTestTag("tab_group_sheet"))
-        ).performClick()
-        compose.onNodeWithTag("tab_group_sheet").assertDoesNotExist()
+        compose.onNodeWithTag("tab_group_collapse:$groupId").performClick()
+        compose.onNodeWithTag("tab_group_expanded:$groupId").assertDoesNotExist()
         compose.onNodeWithText(app.getString(R.string.browser_group_tabs_selected, 2)).assertIsDisplayed()
         compose.onNodeWithTag("tabs_carousel").performScrollToIndex(1)
         val carousel = compose.onNodeWithTag("tabs_carousel")

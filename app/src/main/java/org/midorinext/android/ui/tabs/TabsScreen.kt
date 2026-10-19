@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import java.io.IOException
 import org.midorinext.android.R
 import org.midorinext.android.preferences.app.TabsViewOption
 import org.midorinext.android.ui.MidoriApplicationViewModel
@@ -72,12 +74,47 @@ fun TabsScreen(
     SideEffect {
         if (isCurrentDestination) onPrivacyChanged(private)
     }
-    var showGroupNameDialog by rememberSaveable { mutableStateOf(false) }
-    var groupName by rememberSaveable { mutableStateOf("") }
-    var groupColor by rememberSaveable { mutableStateOf(TabGroupColor.BLUE) }
     var groupBeingEdited by remember { mutableStateOf<SmartTabGroup?>(null) }
     var groupBeingDeleted by remember { mutableStateOf<SmartTabGroup?>(null) }
-    var groupBeingOpened by remember { mutableStateOf<SmartTabGroup?>(null) }
+    var expandedGroupId by rememberSaveable { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(smartTabs?.groups) {
+        val id = expandedGroupId
+        if (id != null && smartTabs?.groups?.none { it.id == id } == true) expandedGroupId = null
+    }
+    var groupingSnackbarJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+    val defaultGroupName = stringResource(R.string.tabs_default_group_name)
+    val groupCreatedString = stringResource(R.string.tabs_group_created)
+    val groupUngroupedString = stringResource(R.string.tabs_group_ungrouped)
+    val groupFailedString = stringResource(R.string.tabs_group_failed)
+    val undoString = stringResource(R.string.tabs_group_undo)
+    val tabsAddedToGroupString = stringResource(R.string.browser_tabs_added_to_group)
+    fun showGroupingUndo(change: TabGroupingChange, message: String) {
+        groupingSnackbarJob?.cancel()
+        groupingSnackbarJob = scope.launch {
+            val result = appViewModel.snackbarHostState.showSnackbar(message, actionLabel = undoString,
+                withDismissAction = false, duration = SnackbarDuration.Short)
+            if (result == SnackbarResult.ActionPerformed) {
+                tabsViewModel.undoGrouping(change)
+                if (expandedGroupId == change.groupId) expandedGroupId = null
+            }
+        }
+    }
+    val dropTabs: (Set<String>, TabDropTarget) -> Unit = { tabIds, target ->
+        scope.launch {
+            try {
+                tabsViewModel.dropTabs(tabIds, target, defaultGroupName)?.let { change ->
+                    expandedGroupId = change.groupId
+                    dispatch(TabsUiAction.ExitTransientMode)
+                    val added = change.after.first { it.id == change.groupId }.tabIdsCount -
+                        (change.before.firstOrNull { it.id == change.groupId }?.tabIdsCount ?: 0)
+                    showGroupingUndo(change, if (target is TabDropTarget.Tab) groupCreatedString else tabsAddedToGroupString.format(added))
+                }
+            } catch (_: IOException) {
+                appViewModel.showSnackbar(groupFailedString)
+            }
+        }
+    }
 
     // A protobuf value saved by an incompatible app version can be UNRECOGNIZED.
     // Never pass that sentinel to Compose, which tries to obtain its numeric value.
@@ -116,16 +153,12 @@ fun TabsScreen(
     }
 
     BackHandler(
-        enabled = (groupBeingOpened != null || uiState.mode !is TabsMode.Browsing) &&
-            !showGroupNameDialog &&
+        enabled = (expandedGroupId != null || uiState.mode !is TabsMode.Browsing) &&
             groupBeingEdited == null &&
             groupBeingDeleted == null,
     ) {
-        if (groupBeingOpened != null) {
-            groupBeingOpened = null
-            return@BackHandler
-        }
-        dispatch(TabsUiAction.ExitTransientMode)
+        if (uiState.mode !is TabsMode.Browsing) dispatch(TabsUiAction.ExitTransientMode)
+        else expandedGroupId = null
     }
 
     MidoriBrowserTheme(
@@ -161,13 +194,23 @@ fun TabsScreen(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f).padding(start = 4.dp),
                     )
-                    Box(Modifier.size(48.dp)) {
-                        ZapButton(appViewModel, fromScreen = "Tabs") { success ->
-                            if (success) openIndividualTab(private)
+                    if (selectionMode) {
+                        TabsSelectionMenu(
+                            groups = if (private) emptyList() else smartTabs?.groups.orEmpty(),
+                            selectedCount = selectedTabIds.size,
+                            onSelectAll = { dispatch(TabsUiAction.BeginSelection(tabIds = tabs.filter { it.content.private == private }.mapTo(linkedSetOf()) { it.id })) },
+                            onDeselectAll = { dispatch(TabsUiAction.BeginSelection()) },
+                            onMoveToGroup = { dropTabs(selectedTabIds, TabDropTarget.Group(it.id)) },
+                        )
+                    } else {
+                        Box(Modifier.size(48.dp)) {
+                            ZapButton(appViewModel, fromScreen = "Tabs") { success ->
+                                if (success) openIndividualTab(private)
+                            }
                         }
-                    }
-                    IconButton(onClick = { dispatch(TabsUiAction.ToggleSearch) }) {
-                        Icon(painterResource(R.drawable.icons_search), stringResource(R.string.browser_search_tabs))
+                        IconButton(onClick = { dispatch(TabsUiAction.ToggleSearch) }) {
+                            Icon(painterResource(R.drawable.icons_search), stringResource(R.string.browser_search_tabs))
+                        }
                     }
                 }
 
@@ -216,53 +259,9 @@ fun TabsScreen(
 
                 val tabsGroupedString = stringResource(id = R.string.browser_tabs_grouped)
                 val noTabsGroupedString = stringResource(id = R.string.browser_no_tabs_grouped)
-                val tabsAddedToGroupString = stringResource(id = R.string.browser_tabs_added_to_group)
                 val tabGroupDeletedString = stringResource(id = R.string.browser_tab_group_deleted)
                 val tabRemovedFromGroupString = stringResource(id = R.string.browser_tab_removed_from_group)
 
-                if (showGroupNameDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showGroupNameDialog = false },
-                        title = { Text(stringResource(R.string.browser_name_tab_group)) },
-                        text = {
-                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                OutlinedTextField(
-                                    value = groupName,
-                                    onValueChange = { groupName = it },
-                                    label = { Text(stringResource(R.string.browser_tab_group_name_label)) },
-                                    singleLine = true
-                                )
-                                TabGroupColorSelector(selectedColor = groupColor, onColorSelected = { groupColor = it })
-                            }
-                        },
-                        confirmButton = {
-                            TextButton(
-                                enabled = groupName.isNotBlank(),
-                                onClick = {
-                                    val groupedCount = tabsViewModel.groupTabs(selectedTabIds, groupName, groupColor)
-                                    appViewModel.showSnackbar(
-                                        if (groupedCount > 0) {
-                                            tabsGroupedString.format(groupedCount)
-                                        } else {
-                                            noTabsGroupedString
-                                        }
-                                    )
-                                    if (groupedCount > 0) {
-                                        dispatch(TabsUiAction.ExitTransientMode)
-                                    }
-                                    showGroupNameDialog = false
-                                }
-                            ) {
-                                Text(stringResource(R.string.browser_create_tab_group))
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { showGroupNameDialog = false }) {
-                                Text(stringResource(R.string.browser_cancel_selection))
-                            }
-                        }
-                    )
-                }
 
                 groupBeingEdited?.let { group ->
                     EditTabGroupDialog(
@@ -287,6 +286,7 @@ fun TabsScreen(
                                 if (deleted > 0) {
                                     appViewModel.showSnackbar(tabGroupDeletedString.format(deleted))
                                 }
+                                if (expandedGroupId == group.id) expandedGroupId = null
                                 groupBeingDeleted = null
                             }) { Text(stringResource(R.string.browser_delete_tab_group)) }
                         },
@@ -296,41 +296,6 @@ fun TabsScreen(
                             }
                         }
                     )
-                }
-
-                groupBeingOpened?.let { openedGroup ->
-                    // Resolve against the latest state so closing a tab while this sheet is open updates
-                    // the group immediately instead of leaving a stale snapshot on screen.
-                    smartTabs?.groups?.firstOrNull { it.id == openedGroup.id }?.let { group ->
-                        val tabClosedString = stringResource(id = R.string.browser_tab_closed)
-                        TabGroupTabsSheet(
-                            group = group,
-                            selectedTabId = tabsViewModel.selectedTabId.collectAsStateWithLifecycle().value,
-                            thumbnailStorage = tabsViewModel.thumbnailStorage,
-                            browserIcons = tabsViewModel.browserIcons,
-                            onDismissRequest = { groupBeingOpened = null },
-                            selectionMode = selectionMode,
-                            selectedTabIds = selectedTabIds,
-                            onTabLongPressed = { tab ->
-                                dispatch(TabsUiAction.BeginSelection(tabIds = setOf(tab.id)))
-                            },
-                            onTabSelected = { tab ->
-                                if (selectionMode) {
-                                    dispatch(TabsUiAction.ToggleTabSelection(tab.id))
-                                } else {
-                                    tabsViewModel.selectTab(tab.id)
-                                    groupBeingOpened = null
-                                    onClose()
-                                }
-                            },
-                            onTabDeleted = { tab ->
-                                tabsViewModel.removeTab(tab.id)
-                                appViewModel.showTabClosureSnackbar(tabClosedString)
-                            }
-                        )
-                    } ?: run {
-                        groupBeingOpened = null
-                    }
                 }
 
                 Box(Modifier.weight(1f).fillMaxWidth()) {
@@ -357,14 +322,29 @@ fun TabsScreen(
                                 dispatch(TabsUiAction.BeginSelection(targetGroupId = group.id))
                             },
                             onDeleteGroup = { groupBeingDeleted = it },
-                            onOpenGroup = { groupBeingOpened = it },
-                            onTabsDroppedOnGroup = { group, tabIds ->
-                                val addedCount = tabsViewModel.addTabsToGroup(group.id, tabIds)
-                                if (addedCount > 0) {
-                                    appViewModel.showSnackbar(tabsAddedToGroupString.format(addedCount))
-                                    dispatch(TabsUiAction.ExitTransientMode)
+                            onOpenGroup = { expandedGroupId = it.id },
+                            expandedGroupId = expandedGroupId,
+                            onCollapseGroup = { expandedGroupId = null },
+                            onNewTabInGroup = { tabsViewModel.openNewTabInGroup(it.id) },
+                            onSelectGroup = { group ->
+                                if (selectionMode) {
+                                    val ids = if (group.tabIds.all { it in selectedTabIds }) selectedTabIds - group.tabIds
+                                        else selectedTabIds + group.tabIds
+                                    dispatch(TabsUiAction.BeginSelection(tabIds = ids))
+                                } else dispatch(TabsUiAction.BeginSelection(tabIds = group.tabIds))
+                            },
+                            onUngroup = { group ->
+                                scope.launch {
+                                    tabsViewModel.ungroup(group.id)?.let { change ->
+                                        expandedGroupId = null
+                                        dispatch(TabsUiAction.ExitTransientMode)
+                                        showGroupingUndo(change, groupUngroupedString)
+                                    }
                                 }
                             },
+                            onDragMoving = { dispatch(TabsUiAction.ExitTransientMode) },
+                            onStartSelection = { dispatch(TabsUiAction.BeginSelection()) },
+                            onTabsDropped = dropTabs,
                             onRemoveTabFromGroup = { groupId, tabId ->
                                 if (tabsViewModel.removeTabFromGroup(groupId, tabId)) {
                                     appViewModel.showSnackbar(tabRemovedFromGroupString)
@@ -391,9 +371,14 @@ fun TabsScreen(
                         onGroupTabs = {
                             val targetGroupId = selectionTargetGroupId
                             if (targetGroupId == null) {
-                                groupName = tabsViewModel.nextGroupName()
-                                groupColor = tabsViewModel.nextGroupColor()
-                                showGroupNameDialog = true
+                                val target = selectedTabIds.firstOrNull()
+                                if (target != null) scope.launch {
+                                    tabsViewModel.dropTabs(selectedTabIds - target, TabDropTarget.Tab(target), defaultGroupName)?.let { change ->
+                                        expandedGroupId = change.groupId
+                                        dispatch(TabsUiAction.ExitTransientMode)
+                                        showGroupingUndo(change, groupCreatedString)
+                                    }
+                                }
                             } else {
                                 val addedCount = tabsViewModel.addTabsToGroup(targetGroupId, selectedTabIds)
                                 appViewModel.showSnackbar(
@@ -515,6 +500,7 @@ private fun EditTabGroupDialog(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text(stringResource(R.string.browser_tab_group_name_label)) },
+                    modifier = Modifier.testTag("tab_group_name"),
                     singleLine = true
                 )
                 TabGroupColorSelector(selectedColor = color, onColorSelected = { color = it })
@@ -550,6 +536,7 @@ private fun TabGroupColorSelector(
             TabGroupColor.entries.forEach { color ->
                 Box(
                     modifier = Modifier
+                        .testTag("tab_group_color:${color.name}")
                         .size(40.dp)
                         .clip(CircleShape)
                         .background(color.toComposeColor(), CircleShape)
@@ -571,6 +558,38 @@ private fun TabGroupColorSelector(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TabsSelectionMenu(
+    groups: List<SmartTabGroup>,
+    selectedCount: Int,
+    onSelectAll: () -> Unit,
+    onDeselectAll: () -> Unit,
+    onMoveToGroup: (SmartTabGroup) -> Unit,
+) {
+    var show by remember { mutableStateOf(false) }
+    var choosingGroup by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { show = true; choosingGroup = false }, modifier = Modifier.testTag("tabs_selection_menu")) {
+            Icon(painterResource(R.drawable.icons_more_vertical), stringResource(R.string.menu_more_options))
+        }
+        DropdownMenu(expanded = show, onDismissRequest = { show = false }) {
+            if (choosingGroup) {
+                groups.forEach { group ->
+                    DropdownMenuItem(text = { Text(group.name) }, modifier = Modifier.testTag("tabs_move_to_group:${group.id}"),
+                        onClick = { show = false; onMoveToGroup(group) })
+                }
+            } else {
+                if (groups.isNotEmpty()) DropdownMenuItem(text = { Text(stringResource(R.string.tabs_move_to_group)) },
+                    enabled = selectedCount > 0, onClick = { choosingGroup = true })
+                DropdownMenuItem(text = { Text(stringResource(R.string.tabs_select_all)) },
+                    onClick = { show = false; onSelectAll() })
+                DropdownMenuItem(text = { Text(stringResource(R.string.tabs_deselect_all)) },
+                    enabled = selectedCount > 0, onClick = { show = false; onDeselectAll() })
             }
         }
     }
@@ -628,7 +647,14 @@ fun AnimatedTabList(
     onAddTabsToGroup: (SmartTabGroup) -> Unit,
     onDeleteGroup: (SmartTabGroup) -> Unit,
     onOpenGroup: (SmartTabGroup) -> Unit,
-    onTabsDroppedOnGroup: (SmartTabGroup, Set<String>) -> Unit,
+    onTabsDropped: (Set<String>, TabDropTarget) -> Unit,
+    expandedGroupId: String?,
+    onCollapseGroup: () -> Unit,
+    onNewTabInGroup: (SmartTabGroup) -> Unit,
+    onUngroup: (SmartTabGroup) -> Unit,
+    onSelectGroup: (SmartTabGroup) -> Unit,
+    onDragMoving: () -> Unit,
+    onStartSelection: () -> Unit,
     onRemoveTabFromGroup: (String, String) -> Unit,
     onTabLongPressed: (TabSessionState) -> Unit
 ) {
@@ -745,7 +771,14 @@ fun AnimatedTabList(
                     onAddTabsToGroup = onAddTabsToGroup,
                     onDeleteGroup = onDeleteGroup,
                     onOpenGroup = onOpenGroup,
-                    onTabsDroppedOnGroup = onTabsDroppedOnGroup,
+                    onTabsDropped = onTabsDropped,
+                    expandedGroupId = expandedGroupId,
+                    onCollapseGroup = onCollapseGroup,
+                    onNewTabInGroup = onNewTabInGroup,
+                    onUngroup = onUngroup,
+                    onSelectGroup = onSelectGroup,
+                    onDragMoving = onDragMoving,
+                    onStartSelection = onStartSelection,
                     onRemoveTabFromGroup = onRemoveTabFromGroup,
                 )
             }
