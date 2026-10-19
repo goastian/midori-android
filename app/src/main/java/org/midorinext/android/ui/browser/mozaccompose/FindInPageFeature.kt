@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import org.midorinext.android.R
@@ -39,7 +38,6 @@ fun FindInPageFeature(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val density = LocalDensity.current
     val session by store.observeAsComposableState { state ->
         state.selectedTab?.engineState?.engineSession
     }
@@ -52,12 +50,6 @@ fun FindInPageFeature(
         onDismiss()
         searchText = ""
         session?.clearFindMatches()
-    }
-
-    LaunchedEffect(enabled, density) {
-        if (enabled()) {
-            engineView.setDynamicToolbarMaxHeight(with(density) { 56.dp.roundToPx() })
-        }
     }
 
     BackHandler(enabled()) {

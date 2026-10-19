@@ -1,8 +1,15 @@
 package org.midorinext.android.ui.browser.toolbar
 
 import androidx.activity.ComponentActivity
+import android.view.SurfaceHolder
+import android.view.SurfaceView
+import android.view.View
+import android.view.ViewGroup
+import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
@@ -37,6 +44,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertSame
 import org.junit.Rule
 import org.junit.Test
 import org.midorinext.android.BuildConfig
@@ -47,6 +55,12 @@ import org.midorinext.android.preferences.app.AppPreferences
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.ToolbarPosition
 import org.midorinext.android.ui.theme.MidoriBrowserTheme
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
+import mozilla.components.concept.engine.EngineSession
+import mozilla.components.concept.engine.EngineView
+import org.json.JSONObject
+import org.midorinext.android.ui.browser.mozaccompose.EngineView as BrowserEngineView
 
 class ToolbarInputDeviceTest {
     @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
@@ -57,10 +71,109 @@ class ToolbarInputDeviceTest {
     private val store = BrowserStore(BrowserState(tabs = listOf(first, second), selectedTabId = first.id))
     private lateinit var state: BrowserToolbarState
     private var committedText: String? = null
+    private var viewportSession: EngineSession? = null
 
     @After
     fun finish() {
+        if (viewportSession != null) {
+            compose.activityRule.scenario.close()
+            InstrumentationRegistry.getInstrumentation().runOnMainSync { viewportSession?.close() }
+        }
         scope.cancel()
+    }
+
+    @Test
+    fun toolbarTransitionsKeepTheSameSurfaceAndBufferSize() {
+        val app = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as MidoriApplication
+        val pageMetrics = AtomicReference<JSONObject?>()
+        preferences.value = preferences.value.toBuilder().setHideToolbarOnScroll(true).build()
+        compose.runOnIdle {
+            state = createState()
+            viewportSession = app.engine.get().createSession().apply {
+                register(object : EngineSession.Observer {
+                    override fun onTitleChange(title: String) {
+                        if (title.startsWith('{')) pageMetrics.set(JSONObject(title))
+                    }
+                })
+                loadUrl("data:text/html," + Uri.encode("""
+                    <meta name="viewport" content="width=device-width, initial-scale=1">
+                    <style>body{margin:0;height:3000px}footer{position:fixed;bottom:0;height:24px}</style>
+                    <footer>Controls</footer><script>setInterval(()=>document.title=JSON.stringify({
+                      height:visualViewport.height,bottom:document.querySelector('footer').getBoundingClientRect().bottom
+                    }),50)</script>
+                """.trimIndent()))
+            }
+        }
+        compose.setContent {
+            var engineView by remember { mutableStateOf<EngineView?>(null) }
+            HideOnScrollToolbar(
+                toolbarState = state,
+                toolbar = { Box(it.height(ToolbarHeight)) },
+                engineView = engineView,
+                modifier = Modifier.fillMaxSize(),
+            ) { modifier ->
+                BrowserEngineView(app.engine.get(), modifier) { view ->
+                    DisposableEffect(view) {
+                        view.render(viewportSession!!)
+                        onDispose { view.release() }
+                    }
+                    SideEffect { engineView = view }
+                }
+            }
+        }
+        compose.waitUntil { state.shouldHideOnScroll.value }
+        compose.waitUntil(20_000) { pageMetrics.get() != null }
+        for (position in listOf(ToolbarPosition.TOP, ToolbarPosition.BOTTOM)) {
+            compose.runOnIdle {
+                preferences.value = preferences.value.toBuilder().setToolbarPosition(position).build()
+            }
+            compose.waitUntil { state.toolbarPosition.value == position }
+            compose.waitForIdle()
+            val visibleHeight = pageMetrics.get()!!.getDouble("height")
+            val surface = compose.runOnIdle { findSurface(compose.activity.window.decorView)!! }
+            val initialSize = compose.runOnIdle { surface.width to surface.height }
+            val resizes = AtomicInteger()
+            val callback = object : SurfaceHolder.Callback {
+                override fun surfaceCreated(holder: SurfaceHolder) = Unit
+                override fun surfaceDestroyed(holder: SurfaceHolder) = Unit
+                override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+                    resizes.incrementAndGet()
+                }
+            }
+            compose.runOnIdle { surface.holder.addCallback(callback) }
+            try {
+                repeat(10) { index ->
+                    compose.runOnIdle { state.updateVisibility(index % 2 == 0) }
+                    compose.waitForIdle()
+                }
+                compose.runOnIdle { state.updateVisibility(true) }
+                compose.waitForIdle()
+                assertEquals("Toolbar visibility must not resize the native surface ($position)", 0, resizes.get())
+                compose.runOnIdle { state.updateVisibility(false) }
+                compose.waitUntil(10_000) { pageMetrics.get()!!.getDouble("height") > visibleHeight + 1 }
+                compose.runOnIdle { state.updateVisibility(true) }
+                compose.waitUntil(10_000) { pageMetrics.get()!!.getDouble("height") <= visibleHeight + 1 }
+                repeat(3) {
+                    compose.runOnIdle { state.updateFocus(true) }
+                    compose.waitForIdle()
+                    compose.runOnIdle { state.updateFocus(false) }
+                    compose.waitForIdle()
+                }
+                compose.runOnIdle {
+                    assertSame("Editing must preserve GeckoView ($position)", surface, findSurface(compose.activity.window.decorView))
+                    assertEquals(initialSize, surface.width to surface.height)
+                }
+                assertEquals(0, resizes.get())
+            } finally {
+                compose.runOnIdle { surface.holder.removeCallback(callback) }
+            }
+        }
+    }
+
+    private fun findSurface(view: View): SurfaceView? = when (view) {
+        is SurfaceView -> view
+        is ViewGroup -> (0 until view.childCount).firstNotNullOfOrNull { findSurface(view.getChildAt(it)) }
+        else -> null
     }
 
     @Test

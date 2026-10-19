@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import org.midorinext.android.preferences.app.ToolbarPosition
@@ -46,31 +48,40 @@ fun HideOnScrollToolbar(
         Modifier.nestedScroll(nestedScrollConnection)
     } else Modifier
 
-    if (toolbarState.hasFocus) {
-        // Keep GeckoView composed while the Firefox-style edit surface replaces it visually.
-        Box(modifier = modifier) {
-            content(Modifier.fillMaxSize())
-            toolbar(
-                Modifier
-                    .fillMaxSize()
-                    .zIndex(2f)
-            )
+    val dynamicToolbar = shouldHideOnScroll && !lock()
+    val visible = !dynamicToolbar || toolbarState.visible || toolbarState.hasFocus
+    val atBottom = toolbarPosition == ToolbarPosition.BOTTOM
+    val toolbarHeightPx = with(LocalDensity.current) { ToolbarHeight.roundToPx() }
+    val dynamicHeight = if (dynamicToolbar) toolbarHeightPx else 0
+
+    DisposableEffect(engineView, dynamicHeight) {
+        engineView?.setDynamicToolbarMaxHeight(dynamicHeight)
+        onDispose {
+            engineView?.setDynamicToolbarMaxHeight(0)
+            engineView?.setVerticalClipping(0)
         }
-    } else if (shouldHideOnScroll) {
-        // Reserve the toolbar's space while it is visible so web controls at either edge remain
-        // reachable. Resize GeckoView only when visibility changes, not during each animation frame.
-        Box(modifier = modifier) {
-            content(
-                Modifier
-                    .fillMaxSize()
-                    .padding(
-                        top = if (toolbarState.visible && toolbarPosition != ToolbarPosition.BOTTOM) ToolbarHeight else 0.dp,
-                        bottom = if (toolbarState.visible && toolbarPosition == ToolbarPosition.BOTTOM) ToolbarHeight else 0.dp,
-                    )
-                    .then(contentModifier)
-            )
+    }
+    SideEffect {
+        engineView?.setVerticalClipping(if (dynamicToolbar && !visible) -dynamicHeight else 0)
+    }
+
+    // Translate a stable surface and let Gecko adjust its viewport without synchronous buffer resizes.
+    val viewportModifier = if (dynamicToolbar) {
+        Modifier.fillMaxSize().offset(y = if (visible && !atBottom) ToolbarHeight else 0.dp)
+    } else {
+        Modifier.fillMaxSize().padding(
+            top = if (atBottom) 0.dp else ToolbarHeight,
+            bottom = if (atBottom) ToolbarHeight else 0.dp,
+        )
+    }
+
+    Box(modifier = modifier.clipToBounds()) {
+        content(viewportModifier.then(contentModifier))
+        if (toolbarState.hasFocus) {
+            toolbar(Modifier.fillMaxSize().zIndex(2f))
+        } else if (dynamicToolbar) {
             DrawAnimatedToolbar(
-                visible = toolbarState.visible,
+                visible = visible,
                 toolbarPosition = toolbarPosition,
                 toolbar = toolbar,
                 modifier = Modifier
@@ -84,26 +95,12 @@ fun HideOnScrollToolbar(
                     )
                     .zIndex(2f),
             )
-        }
-    } else {
-        Column(modifier = modifier) {
-            if (toolbarPosition == ToolbarPosition.BOTTOM) {
-                content(
-                    Modifier
-                        .fillMaxWidth()
-                        .weight(2f, true)
-                        .then(contentModifier)
-                )
-                toolbar(Modifier.fillMaxWidth().zIndex(2f))
-            } else {
-                toolbar(Modifier.fillMaxWidth().zIndex(2f))
-                content(
-                    Modifier
-                        .fillMaxWidth()
-                        .weight(2f, true)
-                        .then(contentModifier)
-                )
-            }
+        } else {
+            toolbar(
+                Modifier.fillMaxWidth()
+                    .align(if (atBottom) Alignment.BottomCenter else Alignment.TopCenter)
+                    .zIndex(2f)
+            )
         }
     }
 }
