@@ -118,8 +118,7 @@ class NativeHomeDeviceTest {
         val repository = app.appPreferencesRepository.get()
         repository.updateHomeWallpaper(HomeWallpaper.NONE)
         compose.waitForIdle()
-        compose.onNodeWithTag("native_home").performScrollToIndex(0)
-        compose.onNodeWithTag("home_choose_wallpaper").performClick()
+        openWallpaperSettings()
         compose.onNodeWithTag("home_wallpaper_option:forest").performClick()
         waitForWallpaperPreview("forest")
         compose.onNodeWithTag("home_wallpaper_preview:forest").assertIsDisplayed()
@@ -129,16 +128,18 @@ class NativeHomeDeviceTest {
         compose.onNodeWithTag("home_wallpaper_picker").assertDoesNotExist()
         assertEquals("", repository.flow.first().homeWallpaperId)
 
-        compose.onNodeWithTag("home_choose_wallpaper").performClick()
+        compose.onNodeWithTag("home_wallpaper_settings").performClick()
         capture("wallpaper-gallery.png")
         compose.onNodeWithTag("home_wallpaper_option:forest").performClick()
         waitForWallpaperPreview("forest")
         compose.onNodeWithTag("home_wallpaper_apply").performClick()
+        returnFromWallpaperSettings()
         compose.waitUntil(10_000) {
             compose.onAllNodesWithTag("native_home_background:forest").fetchSemanticsNodes().isNotEmpty()
         }
         assertEquals("forest", repository.flow.first().homeWallpaperId)
         assertNoWebSurface()
+        compose.onNodeWithTag("native_home").performScrollToIndex(0)
         capture("wallpaper-forest-light.png")
 
         scenario.recreate()
@@ -152,9 +153,10 @@ class NativeHomeDeviceTest {
         capture("wallpaper-forest-dark.png")
         assertNoWebSurface()
 
-        compose.onNodeWithTag("home_choose_wallpaper").performClick()
+        openWallpaperSettings()
         compose.onNodeWithTag("home_wallpaper_option:none").performClick()
         compose.onNodeWithTag("home_wallpaper_apply").performClick()
+        returnFromWallpaperSettings()
         compose.waitUntil(10_000) {
             compose.onAllNodesWithTag("native_home_background:none").fetchSemanticsNodes().isNotEmpty()
         }
@@ -162,10 +164,8 @@ class NativeHomeDeviceTest {
     }
 
     @Test
-    fun wallpaperCanAlsoBeSelectedFromHomepageSettings(): Unit = runBlocking {
-        compose.onNodeWithTag("native_home").performScrollToIndex(6)
-        compose.onNodeWithText(app.getString(R.string.menu_customize_homepage)).performClick()
-        compose.onNodeWithTag("home_wallpaper_settings").performClick()
+    fun wallpaperCanBeSelectedFromHomepageSettings(): Unit = runBlocking {
+        openWallpaperSettings()
         compose.onNodeWithTag("home_wallpaper_option:silk").performClick()
         waitForWallpaperPreview("silk")
         compose.onNodeWithTag("home_wallpaper_apply").performClick()
@@ -174,7 +174,7 @@ class NativeHomeDeviceTest {
         }
         assertEquals("silk", app.appPreferencesRepository.get().flow.first().homeWallpaperId)
         capture("wallpaper-settings.png")
-        instrumentation.sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK)
+        returnFromWallpaperSettings()
         compose.waitUntil(10_000) {
             compose.onAllNodesWithTag("native_home_background:silk").fetchSemanticsNodes().isNotEmpty()
         }
@@ -182,16 +182,21 @@ class NativeHomeDeviceTest {
     }
 
     @Test
-    fun everyPreloadedWallpaperRendersInBothToolbarPositions(): Unit = runBlocking {
-        for (position in listOf(ToolbarPosition.TOP, ToolbarPosition.BOTTOM)) {
-            app.appPreferencesRepository.get().updateToolbarPosition(position)
-            for (wallpaper in HomeWallpaper.entries) {
-                app.appPreferencesRepository.get().updateHomeWallpaper(wallpaper)
-                compose.waitUntil(10_000) {
-                    compose.onAllNodesWithTag("native_home_background:${wallpaper.id}").fetchSemanticsNodes().isNotEmpty()
+    fun everyPreloadedWallpaperRendersInBothThemesAndToolbarPositions(): Unit = runBlocking {
+        val repository = app.appPreferencesRepository.get()
+        for (appearance in listOf(Appearance.LIGHT, Appearance.DARK)) {
+            repository.updateAppearance(appearance)
+            for (position in listOf(ToolbarPosition.TOP, ToolbarPosition.BOTTOM)) {
+                repository.updateToolbarPosition(position)
+                for (wallpaper in HomeWallpaper.entries) {
+                    repository.updateHomeWallpaper(wallpaper)
+                    compose.waitUntil(10_000) {
+                        compose.onAllNodesWithTag("native_home_background:${wallpaper.id}").fetchSemanticsNodes().isNotEmpty()
+                    }
+                    compose.onNodeWithTag("native_home").performScrollToIndex(0)
+                    assertNoWebSurface()
+                    capture("wallpaper-${wallpaper.id}-${appearance.name.lowercase()}-${position.name.lowercase()}.png")
                 }
-                assertNoWebSurface()
-                capture("wallpaper-${wallpaper.id}-${position.name.lowercase()}.png")
             }
         }
     }
@@ -516,6 +521,29 @@ class NativeHomeDeviceTest {
             }
         }
         return contrast
+    }
+
+    private fun openWallpaperSettings() {
+        waitForActivityFocus()
+        compose.onNodeWithTag("native_home").performScrollToIndex(6)
+        compose.onNodeWithText(app.getString(R.string.menu_customize_homepage)).performClick()
+        compose.onNodeWithTag("home_wallpaper_settings").performClick()
+    }
+
+    private fun returnFromWallpaperSettings() {
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("home_wallpaper_picker").fetchSemanticsNodes().isEmpty()
+        }
+        waitForActivityFocus()
+        compose.onNodeWithContentDescription(app.getString(R.string.nav_back)).performClick()
+    }
+
+    private fun waitForActivityFocus() {
+        compose.waitUntil(10_000) {
+            var focused = false
+            scenario.onActivity { focused = it.hasWindowFocus() }
+            focused
+        }
     }
 
     private fun waitForWallpaperPreview(id: String) {

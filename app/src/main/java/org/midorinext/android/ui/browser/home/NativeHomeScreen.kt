@@ -16,8 +16,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -47,6 +49,8 @@ import org.midorinext.android.preferences.app.HomeShortcut
 import org.midorinext.android.ui.nav.NavDestination
 import org.midorinext.android.ui.tabs.TabThumbnail
 import org.midorinext.android.ui.theme.LocalMidoriTheme
+
+private val wallpaperTextShadow = Shadow(Color.Black.copy(alpha = 0.8f), Offset(0f, 1f), 4f)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,14 +106,12 @@ fun NativeHomeScreen(
     var showShortcutEditor by rememberSaveable { mutableStateOf(false) }
     var selectedShortcut by remember { mutableStateOf<HomeShortcut?>(null) }
     var showAllShortcuts by rememberSaveable { mutableStateOf(false) }
-    var showWallpapers by rememberSaveable { mutableStateOf(false) }
     val wallpaper = HomeWallpaper.fromId(preferences.homeWallpaperId)
     val hasWallpaper = wallpaper != HomeWallpaper.NONE
     var wallpaperReady by remember(wallpaper) { mutableStateOf(!hasWallpaper) }
     val colors = MaterialTheme.colorScheme
     val background = if (LocalMidoriTheme.current.dark) colors.surface else Color(0xFFF5F8F5)
-    val cardColor = (if (LocalMidoriTheme.current.dark) colors.surfaceContainer else Color.White)
-        .copy(alpha = if (hasWallpaper) 0.96f else 1f)
+    val cardColor = if (LocalMidoriTheme.current.dark) colors.surfaceContainer else Color.White
     val insetColor = if (LocalMidoriTheme.current.dark) colors.surfaceContainerHigh else Color(0xFFE8F0E8)
     val shortcutColumns = (windowSize.width / LocalDensity.current.density / 80)
         .toInt().coerceIn(3, 6)
@@ -139,12 +141,8 @@ fun NativeHomeScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item(key = "header") {
-                Column {
-                    NativeHomeHeader(private = false, onSwitchBrowsingMode = onSwitchBrowsingMode,
-                        onChooseWallpaper = { showWallpapers = true },
-                        modifier = if (hasWallpaper) Modifier.background(cardColor, RoundedCornerShape(16.dp))
-                            .padding(horizontal = 12.dp, vertical = 2.dp) else Modifier)
-                    if (hasWallpaper) Spacer(Modifier.height(56.dp))
+                CompositionLocalProvider(LocalContentColor provides if (hasWallpaper) Color.White else LocalContentColor.current) {
+                    NativeHomeHeader(private = false, onSwitchBrowsingMode = onSwitchBrowsingMode)
                 }
             }
             if (!preferences.hideHomeShortcuts) {
@@ -169,15 +167,17 @@ fun NativeHomeScreen(
             if (!preferences.hideHomePrivacy) {
                 item(key = "privacy") {
                     Surface(onClick = { navigateTo(NavDestination.AdBlockSettings) }, shape = RoundedCornerShape(12.dp),
-                            color = if (hasWallpaper) cardColor else colors.primary.copy(alpha = 0.06f),
+                            color = if (hasWallpaper) Color.Transparent else colors.primary.copy(alpha = 0.06f),
                             modifier = Modifier.fillMaxWidth().testTag("native_home_protection")) {
                             Row(Modifier.heightIn(min = 48.dp).padding(horizontal = 12.dp, vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Icon(painterResource(mozilla.components.ui.icons.R.drawable.mozac_ic_shield_24), null,
-                                    tint = colors.primary, modifier = Modifier.size(18.dp))
+                                    tint = if (hasWallpaper) Color.White else colors.primary, modifier = Modifier.size(18.dp))
                                 Text(stringResource(R.string.home_blocked, blocked), Modifier.weight(1f),
-                                    style = MaterialTheme.typography.bodySmall, color = colors.onSurface)
-                                Icon(painterResource(R.drawable.icons_arrow_forward), null, Modifier.size(16.dp), tint = colors.primary)
+                                    style = MaterialTheme.typography.bodySmall.copy(shadow = if (hasWallpaper) wallpaperTextShadow else null),
+                                    color = if (hasWallpaper) Color.White else colors.onSurface)
+                                Icon(painterResource(R.drawable.icons_arrow_forward), null, Modifier.size(16.dp),
+                                    tint = if (hasWallpaper) Color.White else colors.primary)
                             }
                         }
                 }
@@ -280,19 +280,15 @@ fun NativeHomeScreen(
                 }
             }
             item(key = "customize") {
-                TextButton(onClick = { navigateTo(NavDestination.HomepageSettings) }, modifier = Modifier.fillMaxWidth()
-                    .background(if (hasWallpaper) cardColor else Color.Transparent, RoundedCornerShape(14.dp))) {
+                TextButton(onClick = { navigateTo(NavDestination.HomepageSettings) }, modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.textButtonColors(contentColor = if (hasWallpaper) Color.White else colors.primary)) {
                     Icon(painterResource(R.drawable.icons_settings), null, Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.menu_customize_homepage))
+                    Text(stringResource(R.string.menu_customize_homepage),
+                        style = MaterialTheme.typography.labelLarge.copy(shadow = if (hasWallpaper) wallpaperTextShadow else null))
                 }
             }
         }
-    }
-
-    if (showWallpapers) {
-        HomeWallpaperPicker(current = wallpaper, onDismiss = { showWallpapers = false },
-            onApply = viewModel.preferencesRepository::updateHomeWallpaper)
     }
 
     if (showAllShortcuts) {
@@ -357,22 +353,20 @@ fun NativeHomeScreen(
 private fun HomeSectionHeading(title: Int, action: Int? = null, onAdd: (() -> Unit)? = null,
     wallpaper: Boolean = false, onAction: () -> Unit = {}) {
     val contentColor = if (wallpaper) Color.White else LocalContentColor.current
-    val backdrop = if (wallpaper) Modifier.background(Color.Black.copy(alpha = 0.48f), RoundedCornerShape(12.dp)) else Modifier
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(if (wallpaper) 6.dp else 0.dp)) {
-        Text(stringResource(title), Modifier.weight(1f).then(if (wallpaper) Modifier
-            .wrapContentWidth(Alignment.Start).then(backdrop).padding(horizontal = 10.dp, vertical = 6.dp) else Modifier),
-            style = MaterialTheme.typography.titleSmall,
+    val shadow = if (wallpaper) wallpaperTextShadow else null
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(title), Modifier.weight(1f),
+            style = MaterialTheme.typography.titleSmall.copy(shadow = shadow),
             fontWeight = FontWeight.SemiBold, color = contentColor)
         if (action != null) {
-            TextButton(onClick = onAction, contentPadding = PaddingValues(horizontal = 8.dp),
-                modifier = Modifier.heightIn(min = 48.dp).then(backdrop),
+            TextButton(onClick = onAction, contentPadding = PaddingValues(start = 8.dp),
+                modifier = Modifier.heightIn(min = 48.dp),
                 colors = ButtonDefaults.textButtonColors(contentColor = if (wallpaper) Color.White else MaterialTheme.colorScheme.primary)) {
-                Text(stringResource(action), style = MaterialTheme.typography.labelMedium)
-                Text("›", Modifier.padding(start = 4.dp), fontSize = 18.sp)
+                Text(stringResource(action), style = MaterialTheme.typography.labelMedium.copy(shadow = shadow))
+                Text("›", Modifier.padding(start = 4.dp), fontSize = 18.sp, style = LocalTextStyle.current.copy(shadow = shadow))
             }
         }
-        if (onAdd != null) IconButton(onClick = onAdd, modifier = Modifier.then(backdrop).testTag("home_add_shortcut")) {
+        if (onAdd != null) IconButton(onClick = onAdd, modifier = Modifier.testTag("home_add_shortcut")) {
             Icon(painterResource(R.drawable.icons_add_tab), stringResource(R.string.home_add_shortcut), Modifier.size(20.dp), tint = contentColor)
         }
     }
@@ -398,8 +392,8 @@ private fun HomeShortcutTile(title: String, url: String?, color: Color, modifier
                     else HomeFavicon(url, viewModel, dataReady, Modifier.size(28.dp))
                 }
             }
-        Text(title, Modifier.fillMaxWidth().heightIn(min = 32.dp).then(if (wallpaper) Modifier
-            .background(Color.Black.copy(alpha = 0.48f), RoundedCornerShape(6.dp)).padding(horizontal = 4.dp) else Modifier),
+        Text(title, Modifier.fillMaxWidth().heightIn(min = 32.dp),
+            style = LocalTextStyle.current.copy(shadow = if (wallpaper) wallpaperTextShadow else null),
             fontSize = 12.sp, lineHeight = 16.sp, color = if (wallpaper) Color.White else LocalContentColor.current,
             textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }

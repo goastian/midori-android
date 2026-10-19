@@ -195,4 +195,3 @@ private fun WallpaperTile(wallpaper: HomeWallpaper, isSelected: Boolean, onClick
             maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
 }
-
