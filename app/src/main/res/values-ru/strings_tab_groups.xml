@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tabs_default_group_name">Группа</string>
+    <string name="tabs_group_created">Группа создана</string>
+    <string name="tabs_group_ungrouped">Вкладки разгруппированы</string>
+    <string name="tabs_group_undo">Отменить</string>
+    <string name="tabs_ungroup">Разгруппировать</string>
+    <string name="tabs_collapse_group">Свернуть группу</string>
+    <string name="tabs_new_tab_in_group">Новая вкладка в группе</string>
+    <string name="tabs_group_failed">Не удалось обновить группу вкладок. Повторите попытку.</string>
+    <string name="tabs_select_all">Выбрать все</string>
+    <string name="tabs_deselect_all">Снять выделение</string>
+    <string name="tabs_move_to_group">Переместить в группу</string>
+</resources>

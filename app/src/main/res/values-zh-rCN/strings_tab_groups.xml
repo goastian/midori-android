@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tabs_default_group_name">分组</string>
+    <string name="tabs_group_created">已创建分组</string>
+    <string name="tabs_group_ungrouped">已取消标签页分组</string>
+    <string name="tabs_group_undo">撤销</string>
+    <string name="tabs_ungroup">取消分组</string>
+    <string name="tabs_collapse_group">收起分组</string>
+    <string name="tabs_new_tab_in_group">在分组中新建标签页</string>
+    <string name="tabs_group_failed">无法更新标签页分组，请重试。</string>
+    <string name="tabs_select_all">全选</string>
+    <string name="tabs_deselect_all">取消全选</string>
+    <string name="tabs_move_to_group">移至分组</string>
+</resources>

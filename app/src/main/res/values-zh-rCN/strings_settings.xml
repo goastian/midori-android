@@ -14,13 +14,13 @@
     <string name="settings_group_privacy">Privacy</string>
     <string name="settings_group_about">About</string>
     <string name="default_browser_label">Set as default browser</string>
-    <string name="tabs_view_label">Tab settings</string>
+    <string name="tabs_view_label">标签页设置</string>
     <string name="tab_strip_label">显示标签栏</string>
     <string name="tab_strip_description">在浏览器顶部显示已打开的标签页。</string>
     <string name="close_tabs_on_exit_label">退出时关闭标签页</string>
     <string name="close_tabs_on_exit_description">退出 Midori 或将其从最近使用的应用中移除时，关闭所有标签页。下次启动时将打开新标签页。</string>
-    <string name="available_tabs_view_grid">Grid</string>
-    <string name="available_tabs_view_list">List</string>
+    <string name="available_tabs_view_grid">网格</string>
+    <string name="available_tabs_view_list">列表</string>
     <string name="settings_all">All settings</string>
     <string name="settings_on">On</string>
     <string name="settings_off">Off</string>

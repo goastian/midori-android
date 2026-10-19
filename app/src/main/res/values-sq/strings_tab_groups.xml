@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tabs_default_group_name">Grup</string>
+    <string name="tabs_group_created">Grupi u krijua</string>
+    <string name="tabs_group_ungrouped">Skedat u ndanë nga grupi</string>
+    <string name="tabs_group_undo">Zhbëj</string>
+    <string name="tabs_ungroup">Shpërbëj grupin</string>
+    <string name="tabs_collapse_group">Palos grupin</string>
+    <string name="tabs_new_tab_in_group">Skedë e re në grup</string>
+    <string name="tabs_group_failed">Nuk u përditësua grupi i skedave. Provo përsëri.</string>
+    <string name="tabs_select_all">Zgjidh të gjitha</string>
+    <string name="tabs_deselect_all">Hiq përzgjedhjen nga të gjitha</string>
+    <string name="tabs_move_to_group">Zhvendos në grup</string>
+</resources>

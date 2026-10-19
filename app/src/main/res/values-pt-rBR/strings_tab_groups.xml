@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tabs_default_group_name">Grupo</string>
+    <string name="tabs_group_created">Grupo criado</string>
+    <string name="tabs_group_ungrouped">Guias desagrupadas</string>
+    <string name="tabs_group_undo">Desfazer</string>
+    <string name="tabs_ungroup">Desagrupar</string>
+    <string name="tabs_collapse_group">Recolher grupo</string>
+    <string name="tabs_new_tab_in_group">Nova guia no grupo</string>
+    <string name="tabs_group_failed">Não foi possível atualizar o grupo de guias. Tente novamente.</string>
+    <string name="tabs_select_all">Selecionar todas</string>
+    <string name="tabs_deselect_all">Desmarcar todas</string>
+    <string name="tabs_move_to_group">Mover para um grupo</string>
+</resources>

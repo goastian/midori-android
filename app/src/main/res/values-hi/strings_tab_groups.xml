@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tabs_default_group_name">समूह</string>
+    <string name="tabs_group_created">समूह बनाया गया</string>
+    <string name="tabs_group_ungrouped">टैब का समूहन हटाया गया</string>
+    <string name="tabs_group_undo">पूर्ववत करें</string>
+    <string name="tabs_ungroup">समूहन हटाएँ</string>
+    <string name="tabs_collapse_group">समूह समेटें</string>
+    <string name="tabs_new_tab_in_group">समूह में नया टैब</string>
+    <string name="tabs_group_failed">टैब समूह अपडेट नहीं किया जा सका। फिर से कोशिश करें।</string>
+    <string name="tabs_select_all">सभी चुनें</string>
+    <string name="tabs_deselect_all">सभी का चयन हटाएँ</string>
+    <string name="tabs_move_to_group">समूह में ले जाएँ</string>
+</resources>

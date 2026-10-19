@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tabs_default_group_name">Gruppe</string>
+    <string name="tabs_group_created">Gruppe erstellt</string>
+    <string name="tabs_group_ungrouped">Gruppierung der Tabs aufgehoben</string>
+    <string name="tabs_group_undo">Rückgängig</string>
+    <string name="tabs_ungroup">Gruppierung aufheben</string>
+    <string name="tabs_collapse_group">Gruppe einklappen</string>
+    <string name="tabs_new_tab_in_group">Neuer Tab in der Gruppe</string>
+    <string name="tabs_group_failed">Die Tab-Gruppe konnte nicht aktualisiert werden. Versuche es erneut.</string>
+    <string name="tabs_select_all">Alle auswählen</string>
+    <string name="tabs_deselect_all">Auswahl aufheben</string>
+    <string name="tabs_move_to_group">In Gruppe verschieben</string>
+</resources>

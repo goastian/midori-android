@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tabs_default_group_name">Groupe</string>
+    <string name="tabs_group_created">Groupe créé</string>
+    <string name="tabs_group_ungrouped">Onglets dissociés</string>
+    <string name="tabs_group_undo">Annuler</string>
+    <string name="tabs_ungroup">Dissocier</string>
+    <string name="tabs_collapse_group">Réduire le groupe</string>
+    <string name="tabs_new_tab_in_group">Nouvel onglet dans le groupe</string>
+    <string name="tabs_group_failed">Impossible de mettre à jour le groupe d’onglets. Réessayez.</string>
+    <string name="tabs_select_all">Tout sélectionner</string>
+    <string name="tabs_deselect_all">Tout désélectionner</string>
+    <string name="tabs_move_to_group">Déplacer vers un groupe</string>
+</resources>

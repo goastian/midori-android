@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tabs_default_group_name">Gruppo</string>
+    <string name="tabs_group_created">Gruppo creato</string>
+    <string name="tabs_group_ungrouped">Schede separate dal gruppo</string>
+    <string name="tabs_group_undo">Annulla</string>
+    <string name="tabs_ungroup">Separa dal gruppo</string>
+    <string name="tabs_collapse_group">Comprimi gruppo</string>
+    <string name="tabs_new_tab_in_group">Nuova scheda nel gruppo</string>
+    <string name="tabs_group_failed">Impossibile aggiornare il gruppo di schede. Riprova.</string>
+    <string name="tabs_select_all">Seleziona tutte</string>
+    <string name="tabs_deselect_all">Deseleziona tutte</string>
+    <string name="tabs_move_to_group">Sposta in un gruppo</string>
+</resources>

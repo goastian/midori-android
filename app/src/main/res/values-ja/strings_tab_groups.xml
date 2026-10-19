@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tabs_default_group_name">グループ</string>
+    <string name="tabs_group_created">グループを作成しました</string>
+    <string name="tabs_group_ungrouped">タブのグループ化を解除しました</string>
+    <string name="tabs_group_undo">元に戻す</string>
+    <string name="tabs_ungroup">グループ化を解除</string>
+    <string name="tabs_collapse_group">グループを折りたたむ</string>
+    <string name="tabs_new_tab_in_group">グループに新しいタブを追加</string>
+    <string name="tabs_group_failed">タブグループを更新できませんでした。もう一度お試しください。</string>
+    <string name="tabs_select_all">すべて選択</string>
+    <string name="tabs_deselect_all">選択をすべて解除</string>
+    <string name="tabs_move_to_group">グループに移動</string>
+</resources>
