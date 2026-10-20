@@ -1,6 +1,6 @@
 [versions]
 # Legacy
-constraintlayout = "2.2.1"
+constraintlayout = "2.2.2"
 preference-ktx = "1.2.1"
 material = "1.14.0"
 # AndroidX
@@ -17,9 +17,9 @@ androidx-hilt = "1.3.0"
 compose-bom = "2026.05.01"
 compose-material3 = "1.4.0"
 compose-android-activity = "1.13.0"
-compose-android-navigation = "2.9.8"
-compose-android-paging = "3.5.0"
-coil = "2.6.0"
+compose-android-navigation = "2.10.2"
+compose-android-paging = "3.5.3"
+coil = "2.7.0"
 # Testing
 junit = "4.13.2"
 junit-androidx = "1.3.0"
@@ -29,7 +29,7 @@ espresso = "3.7.0"
 protobuf = "4.35.0"
 room = "2.8.4"
 work = "2.11.2"
-mozac = "158.0"
+mozac = "158.0.1"
 
 # Plugins
 android-gradle-plugin = "9.1.1"
