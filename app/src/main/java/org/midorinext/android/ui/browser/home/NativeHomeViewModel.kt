@@ -19,6 +19,7 @@ import org.midorinext.android.newtab.HomeFaviconRepository
 import org.midorinext.android.newtab.HomeStory
 import org.midorinext.android.newtab.publicHomeUrl
 import org.midorinext.android.newtab.isNativeHomeUrl
+import org.midorinext.android.newtab.recentHomeSiteKey
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.storage.history.HistoryRepository
@@ -42,9 +43,11 @@ class NativeHomeViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(0), AppPreferencesSerializer.defaultValue)
 
     val recentVisits by lazy {
-        historyProvider.get().recentPagesFlow.map { pages ->
-            pages.mapNotNull { page -> publicHomeUrl(page.uri)?.let { HomePage(page.title?.ifBlank { null } ?: it, it) } }
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(0), emptyList())
+        historyProvider.get().recentSitesFlow.map { pages ->
+            pages.mapNotNull { page -> publicHomeUrl(page.uri)?.let { url ->
+                HomePage(page.title?.ifBlank { null } ?: recentHomeSiteKey(url).orEmpty(), url)
+            } }
+        }
     }
 
     val continuation by lazy {

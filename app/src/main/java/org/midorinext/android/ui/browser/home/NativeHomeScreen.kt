@@ -74,9 +74,11 @@ fun NativeHomeScreen(
         dataReady = true
         viewModel.initialize()
     }
-    val recent = if (dataReady && !preferences.hideHomeRecentVisits) {
-        viewModel.recentVisits.collectAsStateWithLifecycle().value
-    } else emptyList()
+    val recent = key(tabId) {
+        if (dataReady && !preferences.hideHomeRecentVisits) {
+            viewModel.recentVisits.collectAsStateWithLifecycle(initialValue = emptyList()).value
+        } else emptyList()
+    }
     val continuation = if (dataReady && !preferences.hideHomeContinue) {
         viewModel.continuation.collectAsStateWithLifecycle().value
     } else null
@@ -223,13 +225,15 @@ fun NativeHomeScreen(
                             Surface(shape = RoundedCornerShape(14.dp), color = cardColor, contentColor = colors.onSurface) {
                                 Column {
                                     recent.take(3).forEach { page ->
-                                        Surface(onClick = { onOpenUrl(page.url) }, color = cardColor, contentColor = colors.onSurface,
-                                            modifier = Modifier.fillMaxWidth().testTag("native_home_recent")) {
-                                            Row(Modifier.heightIn(min = 52.dp).padding(horizontal = 12.dp, vertical = 8.dp),
-                                                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                                HomeFavicon(page.url, viewModel, dataReady, Modifier.size(24.dp))
-                                                Text(page.title, Modifier.weight(1f), maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
+                                        key(page.url) {
+                                            Surface(onClick = { onOpenUrl(page.url) }, color = cardColor, contentColor = colors.onSurface,
+                                                modifier = Modifier.fillMaxWidth().testTag("native_home_recent")) {
+                                                Row(Modifier.heightIn(min = 52.dp).padding(horizontal = 12.dp, vertical = 8.dp),
+                                                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                                    HomeFavicon(page.url, viewModel, dataReady, Modifier.size(24.dp))
+                                                    Text(page.title, Modifier.weight(1f), maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
+                                                }
                                             }
                                         }
                                     }

@@ -2,10 +2,17 @@ package org.midorinext.android.storage.history
 
 import org.midorinext.android.ext.isMidoriUrl
 import org.midorinext.android.newtab.isNativeHomeUrl
+import org.midorinext.android.newtab.recentHomeSiteKey
 import org.midorinext.android.suggest.Suggestion
 import org.midorinext.android.suggest.SuggestionProvider
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import mozilla.components.concept.storage.FrecencyThresholdOption
 import mozilla.components.concept.storage.HistoryStorage
@@ -25,9 +32,45 @@ class HistoryRepository @Inject constructor(
     private val db: HistoryDatabase,
 ): HistoryStorage, SuggestionProvider {
     private val dao = db.historyDao()
+    private val historyDeletionVersion = MutableStateFlow(0L)
 
     val hasHistoryFlow = dao.hasHistoryFlow().flowOn(Dispatchers.IO)
-    val recentPagesFlow = dao.recentPagesFlow(12).flowOn(Dispatchers.IO)
+    // Freeze each collection's snapshot; deletions only remove entries until Home is reopened.
+    val recentSitesFlow = flow {
+        var snapshot: List<Page>? = null
+        historyDeletionVersion.collect {
+            val previous = snapshot
+            val sites = if (previous == null) {
+                getRecentSites()
+            } else {
+                val retained = if (previous.isEmpty()) emptySet() else {
+                    dao.getPagesWithVisits(previous.map { it.uri }, RECENT_EXCLUDED_TYPES).toSet()
+                }
+                previous.filter { it.uri in retained }
+            }
+            snapshot = sites
+            emit(sites)
+        }
+    }.flowOn(Dispatchers.IO)
+
+    private suspend fun getRecentSites(): List<Page> {
+        val sites = linkedMapOf<String, Page>()
+        val context = currentCoroutineContext()
+        dao.getRecentPages(RECENT_EXCLUDED_TYPES).use { cursor ->
+            val uriColumn = cursor.getColumnIndexOrThrow("uri")
+            val titleColumn = cursor.getColumnIndexOrThrow("title")
+            val imageColumn = cursor.getColumnIndexOrThrow("previewImageUrl")
+            while (sites.size < RECENT_SITES_LIMIT && cursor.moveToNext()) {
+                context.ensureActive()
+                val uri = cursor.getString(uriColumn)
+                val site = recentHomeSiteKey(uri) ?: continue
+                if (site !in sites) {
+                    sites[site] = Page(uri, cursor.getString(titleColumn), cursor.getString(imageColumn))
+                }
+            }
+        }
+        return sites.values.toList()
+    }
 
     override fun canAddUri(uri: String): Boolean =
         !isNativeHomeUrl(uri) && !uri.isMidoriUrl() && !uri.startsWith("moz-extension://") && !uri.startsWith("about:blank")
@@ -53,22 +96,27 @@ class HistoryRepository @Inject constructor(
 
     override suspend fun deleteEverything() = withContext(Dispatchers.IO) {
         db.clearAllTables()
+        historyDeletionVersion.update { it + 1 }
     }
 
     override suspend fun deleteVisit(url: String, timestamp: Long) = withContext(Dispatchers.IO) {
         dao.deleteVisitByKey(VisitKey(url, timestamp))
+        historyDeletionVersion.update { it + 1 }
     }
 
     override suspend fun deleteVisitsBetween(startTime: Long, endTime: Long) = withContext(Dispatchers.IO) {
         dao.deleteVisitsBetween(startTime, endTime)
+        historyDeletionVersion.update { it + 1 }
     }
 
     override suspend fun deleteVisitsFor(url: String) = withContext(Dispatchers.IO) {
         dao.deleteURI(url)
+        historyDeletionVersion.update { it + 1 }
     }
 
     override suspend fun deleteVisitsSince(since: Long) = withContext(Dispatchers.IO) {
         dao.deleteVisitsSince(since)
+        historyDeletionVersion.update { it + 1 }
     }
 
     override suspend fun getDetailedVisits(
@@ -151,8 +199,9 @@ class HistoryRepository @Inject constructor(
             }
         }
 
-    override suspend fun runMaintenance(dbSizeLimit: UInt) {
+    override suspend fun runMaintenance(dbSizeLimit: UInt) = withContext(Dispatchers.IO) {
         dao.deleteVisitsBefore(System.currentTimeMillis() - TIME_LIMIT)
+        historyDeletionVersion.update { it + 1 }
     }
 
     /*
@@ -162,5 +211,9 @@ class HistoryRepository @Inject constructor(
 
     companion object {
         const val TIME_LIMIT = 1000L * 60 * 60 * 24 * 180 // 180 days ~ 6 months
+        private const val RECENT_SITES_LIMIT = 3
+        private val RECENT_EXCLUDED_TYPES = listOf(
+            VisitType.REDIRECT_PERMANENT, VisitType.REDIRECT_TEMPORARY, VisitType.DOWNLOAD,
+        )
     }
 }

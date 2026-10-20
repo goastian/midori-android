@@ -1,5 +1,6 @@
 package org.midorinext.android.storage.history
 
+import android.database.Cursor
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 import mozilla.components.concept.storage.FrecencyThresholdOption
@@ -101,7 +102,11 @@ interface HistoryDao {
     fun hasHistoryFlow() : Flow<Boolean>
 
     @Query("SELECT pages.* FROM pages JOIN visits ON pages.uri = visits.pageUri " +
-        "WHERE pages.uri LIKE 'https://%' OR pages.uri LIKE 'http://%' " +
-        "GROUP BY pages.uri ORDER BY MAX(visits.time) DESC LIMIT :limit")
-    fun recentPagesFlow(limit: Int): Flow<List<Page>>
+        "WHERE (pages.uri LIKE 'https://%' OR pages.uri LIKE 'http://%') " +
+        "AND visits.type NOT IN (:excludeTypes) " +
+        "GROUP BY pages.uri ORDER BY MAX(visits.time) DESC, pages.uri ASC")
+    fun getRecentPages(excludeTypes: List<VisitType>): Cursor
+
+    @Query("SELECT DISTINCT pageUri FROM visits WHERE pageUri IN (:uris) AND type NOT IN (:excludeTypes)")
+    suspend fun getPagesWithVisits(uris: List<String>, excludeTypes: List<VisitType>): List<String>
 }

@@ -225,6 +225,49 @@ class NativeHomeDeviceTest {
     }
 
     @Test
+    fun recentVisitsStayStableUntilHomeIsReopenedAndRemoveDeletedSites(): Unit = runBlocking {
+        val url = "https://recent-snapshot-fixture.example/"
+        val title = "Recent snapshot fixture"
+        compose.onNodeWithTag("native_home").performScrollToIndex(4)
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText("Native home history fixture").fetchSemanticsNodes().isNotEmpty()
+        }
+        try {
+            app.historyRepository.get().apply {
+                recordVisit(url, PageVisit(VisitType.LINK))
+                recordObservation(url, PageObservation(title = title))
+            }
+            delay(300)
+            compose.onNodeWithText(title).assertDoesNotExist()
+            compose.onNodeWithText("Native home history fixture").assertExists()
+
+            instrumentation.runOnMainSync {
+                fixtures += app.tabsUseCases.get().addTab("about:blank", selectTab = true, startLoading = false)
+            }
+            compose.waitUntil(10_000) {
+                compose.onAllNodesWithTag("native_home").fetchSemanticsNodes().isEmpty()
+            }
+            instrumentation.runOnMainSync {
+                app.store.get().dispatch(TabListAction.SelectTabAction(homeId))
+            }
+            compose.waitUntil(10_000) {
+                compose.onAllNodesWithTag("native_home").fetchSemanticsNodes().isNotEmpty()
+            }
+            compose.onNodeWithTag("native_home").performScrollToIndex(4)
+            compose.waitUntil(10_000) {
+                compose.onAllNodesWithText(title).fetchSemanticsNodes().isNotEmpty()
+            }
+            app.historyRepository.get().deleteVisitsFor(url)
+            compose.waitUntil(10_000) {
+                compose.onAllNodesWithText(title).fetchSemanticsNodes().isEmpty()
+            }
+            compose.onNodeWithText("Native home history fixture").assertExists()
+        } finally {
+            app.historyRepository.get().deleteVisitsFor(url)
+        }
+    }
+
+    @Test
     fun shortcutCanBeAddedAndOpenedAndHomeSurvivesActivityRecreation() {
         compose.onNodeWithTag("home_add_shortcut").performClick()
         compose.onNodeWithTag("home_shortcut_title").performTextInput("Home shortcut fixture")
