@@ -1,0 +1,12 @@
+beforeProject { p ->
+    if (p.path == ':app') {
+        p.pluginManager.withPlugin('com.android.application') {
+            p.android.buildTypes.named('debug').configure {
+                debuggable false
+                minifyEnabled true
+                shrinkResources true
+                proguardFiles p.android.getDefaultProguardFile('proguard-android-optimize.txt'), p.file('proguard-rules.pro')
+            }
+        }
+    }
+}

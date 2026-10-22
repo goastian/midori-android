@@ -12,6 +12,8 @@ use jni::{
 use serde_json::{Value, json};
 use std::{
     collections::HashMap,
+    fs::File,
+    io::{BufRead, BufReader, BufWriter, Write},
     panic::{AssertUnwindSafe, catch_unwind},
     sync::{
         Arc, OnceLock, RwLock,
@@ -43,6 +45,14 @@ impl NativeEngine {
         bytes.extend(self.documents.serialize());
         bytes
     }
+
+    fn serialize_to(&self, out: &mut impl Write) -> std::io::Result<()> {
+        let network = self.network.serialize();
+        out.write_all(&(network.len() as u64).to_le_bytes())?;
+        out.write_all(&network)?;
+        drop(network);
+        out.write_all(&self.documents.serialize())
+    }
 }
 
 static ENGINES: OnceLock<RwLock<HashMap<i64, Arc<NativeEngine>>>> = OnceLock::new();
@@ -69,9 +79,27 @@ fn get(id: i64) -> Result<Arc<NativeEngine>, String> {
 
 fn compile(lists: &str, resources: &str) -> Result<NativeEngine, String> {
     let lists: Vec<String> = serde_json::from_str(lists).map_err(|e| e.to_string())?;
+    build(lists.into_iter().map(Ok), resources)
+}
+
+fn compile_files(paths: &str, resources: &str) -> Result<NativeEngine, String> {
+    let paths: Vec<String> = serde_json::from_str(paths).map_err(|e| e.to_string())?;
+    build(
+        paths
+            .into_iter()
+            .map(|path| std::fs::read_to_string(&path).map_err(|e| format!("{path}: {e}"))),
+        resources,
+    )
+}
+
+fn build(
+    lists: impl Iterator<Item = Result<String, String>>,
+    resources: &str,
+) -> Result<NativeEngine, String> {
     let mut filters = FilterSet::new(false);
     let mut documents = FilterSet::new(false);
     for text in lists {
+        let text = text?;
         let exceptions = text
             .lines()
             .filter(|line| {
@@ -93,6 +121,32 @@ fn compile(lists: &str, resources: &str) -> Result<NativeEngine, String> {
         network: engine,
         documents: Engine::new_with_filter_set(documents),
     })
+}
+
+fn restore(bytes: &[u8], resources: &str) -> Result<NativeEngine, String> {
+    let prefix: [u8; 8] = bytes
+        .get(..8)
+        .ok_or("Truncated filter cache")?
+        .try_into()
+        .map_err(|_| "Invalid cache")?;
+    let length =
+        usize::try_from(u64::from_le_bytes(prefix)).map_err(|_| "Invalid filter cache length")?;
+    let split = length
+        .checked_add(8)
+        .filter(|split| *split <= bytes.len())
+        .ok_or("Invalid filter cache length")?;
+    let mut network = Engine::default();
+    network
+        .deserialize(&bytes[8..split])
+        .map_err(|e| e.to_string())?;
+    network.use_resources(
+        serde_json::from_str::<Vec<Resource>>(resources).map_err(|e| e.to_string())?,
+    );
+    let mut documents = Engine::default();
+    documents
+        .deserialize(&bytes[split..])
+        .map_err(|e| e.to_string())?;
+    Ok(NativeEngine { network, documents })
 }
 
 fn query(engine: &NativeEngine, input: &str) -> Result<Value, String> {
@@ -249,30 +303,54 @@ pub extern "system" fn Java_org_midorinext_android_adblock_RustAdblock_restore(
 ) -> jlong {
     guarded(&mut env, |env| {
         let bytes = env.convert_byte_array(data).map_err(|e| e.to_string())?;
-        let prefix: [u8; 8] = bytes
-            .get(..8)
-            .ok_or("Truncated filter cache")?
-            .try_into()
-            .map_err(|_| "Invalid cache")?;
-        let length = usize::try_from(u64::from_le_bytes(prefix))
-            .map_err(|_| "Invalid filter cache length")?;
-        let split = length
-            .checked_add(8)
-            .filter(|split| *split <= bytes.len())
-            .ok_or("Invalid filter cache length")?;
-        let mut network = Engine::default();
-        network
-            .deserialize(&bytes[8..split])
-            .map_err(|e| e.to_string())?;
-        network.use_resources(
-            serde_json::from_str::<Vec<Resource>>(&string(env, &resources)?)
-                .map_err(|e| e.to_string())?,
-        );
-        let mut documents = Engine::default();
-        documents
-            .deserialize(&bytes[split..])
-            .map_err(|e| e.to_string())?;
-        Ok(insert(NativeEngine { network, documents }))
+        Ok(insert(restore(&bytes, &string(env, &resources)?)?))
+    })
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_org_midorinext_android_adblock_RustAdblock_createFromFiles(
+    mut env: JNIEnv,
+    _: JClass,
+    paths: JString,
+    resources: JString,
+) -> jlong {
+    guarded(&mut env, |env| {
+        Ok(insert(compile_files(
+            &string(env, &paths)?,
+            &string(env, &resources)?,
+        )?))
+    })
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_org_midorinext_android_adblock_RustAdblock_restoreFromFile(
+    mut env: JNIEnv,
+    _: JClass,
+    path: JString,
+    resources: JString,
+) -> jlong {
+    guarded(&mut env, |env| {
+        let path = string(env, &path)?;
+        let bytes = std::fs::read(&path).map_err(|e| format!("{path}: {e}"))?;
+        let engine = restore(&bytes, &string(env, &resources)?);
+        drop(bytes);
+        Ok(insert(engine?))
+    })
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_org_midorinext_android_adblock_RustAdblock_serializeToFile(
+    mut env: JNIEnv,
+    _: JClass,
+    id: jlong,
+    path: JString,
+) {
+    guarded(&mut env, |env| {
+        let path = string(env, &path)?;
+        let engine = get(id)?;
+        let mut out = BufWriter::new(File::create(&path).map_err(|e| format!("{path}: {e}"))?);
+        engine.serialize_to(&mut out).map_err(|e| e.to_string())?;
+        out.flush().map_err(|e| e.to_string())
     })
 }
 
@@ -293,6 +371,26 @@ pub extern "system" fn Java_org_midorinext_android_adblock_RustAdblock_countRule
     })
 }
 
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_org_midorinext_android_adblock_RustAdblock_countRulesInFile(
+    mut env: JNIEnv,
+    _: JClass,
+    path: JString,
+) -> jlong {
+    guarded(&mut env, |env| {
+        let path = string(env, &path)?;
+        let file = File::open(&path).map_err(|e| format!("{path}: {e}"))?;
+        let mut count = 0i64;
+        for line in BufReader::new(file).lines() {
+            let line = line.map_err(|e| e.to_string())?;
+            if adblock::lists::parse_filter(&line, false, ParseOptions::default()).is_ok() {
+                count += 1;
+            }
+        }
+        Ok(count)
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -304,6 +402,43 @@ mod tests {
             &json!({"url":url,"source":source,"type":kind,"method":"GET"}).to_string(),
         )
         .unwrap()
+    }
+
+    #[test]
+    fn file_based_engines_match_the_in_memory_engine_and_survive_a_round_trip() {
+        let directory = std::env::temp_dir().join(format!("midori-adblock-{}", std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        let first = directory.join("first.engine");
+        let second = directory.join("second.engine");
+        std::fs::write(&first, "||ads.example^$script\n! comment\n##.banner\n").unwrap();
+        std::fs::write(&second, "@@||reader.example^$document\n||tracker.example^\n").unwrap();
+        let paths = json!([first.to_str().unwrap(), second.to_str().unwrap()]).to_string();
+        let engine = compile_files(&paths, "[]").unwrap();
+        let saved = directory.join("engine.dat");
+        let mut out = BufWriter::new(File::create(&saved).unwrap());
+        engine.serialize_to(&mut out).unwrap();
+        out.flush().unwrap();
+        assert_eq!(std::fs::read(&saved).unwrap(), engine.serialize());
+        let restored = restore(&std::fs::read(&saved).unwrap(), "[]").unwrap();
+        for candidate in [&engine, &restored] {
+            let blocked = query(
+                candidate,
+                &json!({"url":"https://ads.example/a.js","source":"https://news.example/","type":"script","method":"GET"}).to_string(),
+            )
+            .unwrap();
+            assert_eq!(blocked["cancel"], true);
+            assert_eq!(
+                query(
+                    candidate,
+                    &json!({"url":"https://tracker.example/p.gif","source":"https://news.example/","type":"image","method":"GET"}).to_string(),
+                )
+                .unwrap()["cancel"],
+                true
+            );
+            assert!(candidate.document_exception("https://reader.example/article"));
+        }
+        assert!(compile_files(&json!([directory.join("missing").to_str().unwrap()]).to_string(), "[]").is_err());
+        std::fs::remove_dir_all(&directory).unwrap();
     }
 
     #[test]
