@@ -12,3 +12,4 @@ upload-keystore.jks
 upload_certificate.pem
 deployment_cert.der
 /app/src/main/assets/extensions/
+/artifacts/
