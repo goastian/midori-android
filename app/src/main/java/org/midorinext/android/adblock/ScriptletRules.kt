@@ -23,6 +23,26 @@ internal data class ScriptletRule(
         .put("exception", exception)
         .put("ublock", ublock)
         .put("tracker", tracker)
+
+    /** Writes the same JSON as [toJson] without building the intermediate objects. */
+    fun appendJson(out: StringBuilder, tracker: Boolean) {
+        fun strings(values: List<String>) {
+            out.append('[')
+            values.forEachIndexed { index, value ->
+                if (index > 0) out.append(',')
+                out.append(JSONObject.quote(value))
+            }
+            out.append(']')
+        }
+        out.append("{\"id\":").append(if (id == null) "null" else JSONObject.quote(id)).append(",\"args\":")
+        strings(args)
+        out.append(",\"included\":")
+        strings(included)
+        out.append(",\"excluded\":")
+        strings(excluded)
+        out.append(",\"exception\":").append(exception).append(",\"ublock\":").append(ublock)
+            .append(",\"tracker\":").append(tracker).append('}')
+    }
 }
 
 internal fun parseScriptletRule(line: String, trusted: Boolean = false): ScriptletRule? {

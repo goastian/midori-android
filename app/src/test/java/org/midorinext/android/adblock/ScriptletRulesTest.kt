@@ -1,6 +1,7 @@
 package org.midorinext.android.adblock
 
 import org.junit.Assert.*
+import org.json.JSONObject
 import org.junit.Test
 import java.io.File
 
@@ -74,5 +75,23 @@ class ScriptletRulesTest {
         assertTrue(rules.scriptlets.size > 8_000)
         assertTrue(rules.scriptlets.any { it.id == "ubo/json-prune.js" && "m.youtube.com" in it.included })
         assertTrue(rules.scriptlets.any { it.id == "ubo/trusted-replace-fetch-response.js" })
+    }
+
+    @Test
+    fun theDirectlyWrittenJsonIsTheSameAsTheObjectModel() {
+        val rules = listOf(
+            ScriptletRule("set-constant", listOf("advertising", "false", "quote\"slash\\ </script> \u2028 ñ"), listOf("example.com", "*.example.org"), listOf("safe.example.com"), false, true),
+            ScriptletRule(null, emptyList(), emptyList(), emptyList(), true, false),
+            ScriptletRule("abort-on-property-read", listOf("a"), emptyList(), emptyList(), false, false),
+        )
+        for (tracker in listOf(false, true)) for (rule in rules) {
+            val written = StringBuilder().also { rule.appendJson(it, tracker) }.toString()
+            val parsed = JSONObject(written)
+            val expected = rule.toJson(tracker)
+            assertEquals(written, expected.isNull("id"), parsed.isNull("id"))
+            if (!expected.isNull("id")) assertEquals(expected.getString("id"), parsed.getString("id"))
+            for (key in listOf("args", "included", "excluded")) assertEquals(key, expected.getJSONArray(key).toString(), parsed.getJSONArray(key).toString())
+            for (key in listOf("exception", "ublock", "tracker")) assertEquals(key, expected.getBoolean(key), parsed.getBoolean(key))
+        }
     }
 }

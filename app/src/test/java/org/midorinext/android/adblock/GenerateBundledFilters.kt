@@ -8,26 +8,27 @@ object GenerateBundledFilters {
     fun main(args: Array<String>) {
         val root = File(args.single())
         val output = File(root, "compiled").apply { mkdirs() }
-        val all = mutableListOf<String>()
-        val trackers = mutableListOf<String>()
+        val all = mutableListOf<EngineList>()
+        val trackers = mutableListOf<EngineList>()
         for (source in OfficialFilterCatalog.all.filter { it.fallbackAsset != null }) {
             val file = File(root, "${source.fallbackAsset}.txt")
-            val text = file.readText()
-            val parsed = parseHostSource(text, trusted = true)
-            all += parsed.engineSource
-            if (source.tracker) trackers += parsed.engineSource
+            val parsed = parseHostFile(file, File(output, "${source.id}.engine"), trusted = true)
+            val engine = checkNotNull(parsed.engine)
+            all += engine
+            if (source.tracker) trackers += engine
             val data = parsed.compiled(contentOnly = true).put("sourceSha256", MessageDigest.getInstance("SHA-256")
-                .digest(text.toByteArray()).joinToString("") { "%02x".format(it) })
+                .digest(file.readBytes()).joinToString("") { "%02x".format(it) })
             File(output, "${source.id}.json").writeText(data.toString())
             println("${source.id}: ${parsed.supportedCount} rules, ${parsed.scriptlets.size} scriptlets")
         }
         val resources = File(root, "redirect-resources.json").readText()
+        val resourcesSha256 = RustFilterEngine.sha256(resources.toByteArray())
         val native = File(output, "rust").apply { mkdirs() }
         native.listFiles().orEmpty().filter { it.extension == "dat" }.forEach { it.delete() }
         for (lists in listOf(all, trackers)) {
-            RustFilterEngine.compile(lists, resources).use { engine ->
-                val file = File(native, RustFilterEngine.fingerprint(lists, resources) + ".dat")
-                file.writeBytes(engine.serialize())
+            RustFilterEngine.compileFiles(lists.map { it.file }, resources).use { engine ->
+                val file = File(native, RustFilterEngine.fingerprint(lists, resourcesSha256) + ".dat")
+                engine.serializeTo(file)
                 println("${file.name}: ${file.length()} bytes")
             }
         }

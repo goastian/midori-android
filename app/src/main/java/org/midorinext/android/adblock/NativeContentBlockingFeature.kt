@@ -265,7 +265,7 @@ class NativeContentBlockingFeature @Inject constructor(
                 val scriptlets = withContext(Dispatchers.Default) { sources.scriptletPolicy(config) }
                 if (backgroundPort !== port || key.config != settings.current.networkPolicyConfiguration() || revision != sources.revision.value) return@launch
                 val policyId = ++policySequence
-                if (BuildConfig.DEBUG) Log.d(TAG, "Sending policy $policyId, revision $revision, ${scriptlets.getJSONArray("rules").length()} scriptlet rules")
+                if (BuildConfig.DEBUG) Log.d(TAG, "Sending policy $policyId, revision $revision, ${scriptlets.length} characters of scriptlet rules")
                 sentPolicies[policyId] = key.config
                 while (sentPolicies.size > 8) sentPolicies.remove(sentPolicies.keys.first())
                 runCatching {
@@ -346,6 +346,6 @@ class NativeContentBlockingFeature @Inject constructor(
         private const val NATIVE_APP = "midori_adblock"
         private const val AD_APP = "midori_content_blocking"
         private const val NETWORK_APP = "midori_network"
-        private const val BUNDLE_VERSION = "2.1"
+        private const val BUNDLE_VERSION = "2.2"
     }
 }

@@ -152,6 +152,10 @@
           return;
         }
         if (message?.type !== "network_policy") return;
+        if (typeof message.scriptlets === "string") {
+          try { message = { ...message, scriptlets: JSON.parse(message.scriptlets) }; }
+          catch (error) { port.postMessage({ type: "scriptlet_policy_failed", error: String(error) }); return; }
+        }
         if (policyKey(policy) !== policyKey(message)) {
           if (policyApplied) resetReady();
           policyApplied = false;

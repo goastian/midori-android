@@ -22,17 +22,57 @@ class RustFilterEngineTest {
     fun bundledBinaryEnginesMatchTheCurrentSourcesAndPreserveBlocking() {
         val root = File("src/main/assets/adblock")
         val lists = OfficialFilterCatalog.all.filter { it.fallbackAsset != null }.map { source ->
-            source to NativeFilterRules.fromCompiled(File(root, "compiled/${source.id}.json").readText()).engineSource
+            val rules = NativeFilterRules.fromCompiled(File(root, "compiled/${source.id}.json").readText()) { File(root, "compiled/${source.id}.engine") }
+            val engine = checkNotNull(rules.engine) { source.id }
+            assertEquals(source.id, engine.sha256, RustFilterEngine.sha256(engine.file.readBytes()))
+            assertEquals(source.id, engine.length, engine.file.length())
+            source to engine
         }
-        for (texts in listOf(lists.map { it.second }, lists.filter { it.first.tracker }.map { it.second })) {
-            val fingerprint = RustFilterEngine.fingerprint(texts, resources)
+        for (selected in listOf(lists, lists.filter { it.first.tracker })) {
+            val fingerprint = RustFilterEngine.fingerprint(selected.map { it.second }, RustFilterEngine.sha256(resources.toByteArray()))
             val file = File(root, "compiled/rust/$fingerprint.dat")
             assertTrue(file.path, file.isFile)
-            RustFilterEngine.restore(file.readBytes(), resources).use { engine ->
+            RustFilterEngine.restoreFile(file, resources).use { engine ->
                 assertTrue(engine.query("https://www.google-analytics.com/analytics.js", "https://news.example/", "script").let { it.optBoolean("cancel") || it.optBoolean("blocked") })
                 assertFalse(engine.query("https://news.example/articles/story", "https://news.example/", "document").getBoolean("cancel"))
             }
         }
+    }
+
+    @Test
+    fun enginesBuiltFromFilesBehaveLikeEnginesBuiltFromTextAndSurviveSerializationToDisk() {
+        val directory = java.nio.file.Files.createTempDirectory("midori-engine").toFile()
+        try {
+            val lists = listOf("||ads.example^\n##.banner\n", "@@||reader.example^${'$'}document\n||tracker.example^${'$'}image\n")
+            val files = lists.mapIndexed { index, text -> File(directory, "$index.engine").also { it.writeText(text) } }
+            val saved = File(directory, "engine.dat")
+            RustFilterEngine.compileFiles(files).use { it.serializeTo(saved) }
+            val fromText = RustFilterEngine.compile(lists)
+            val fromFile = RustFilterEngine.restoreFile(saved)
+            try {
+                for (engine in listOf(fromText, fromFile)) {
+                    assertTrue(engine.query("https://ads.example/a.js", "https://news.example/", "script").getBoolean("cancel"))
+                    assertTrue(engine.query("https://tracker.example/p.gif", "https://news.example/", "image").getBoolean("cancel"))
+                    assertFalse(engine.query("https://tracker.example/p.js", "https://news.example/", "script").getBoolean("cancel"))
+                    assertTrue(engine.cosmetics("https://reader.example/article").getBoolean("disabled"))
+                }
+            } finally { fromText.close(); fromFile.close() }
+            assertThrows(IllegalStateException::class.java) { RustFilterEngine.compileFiles(listOf(File(directory, "missing"))) }
+            File(directory, "truncated.dat").also { it.writeBytes(saved.readBytes().copyOf(12)) }
+                .let { assertThrows(IllegalStateException::class.java) { RustFilterEngine.restoreFile(it) } }
+        } finally { directory.deleteRecursively() }
+    }
+
+    @Test
+    fun theFingerprintDependsOnTheContentAndOrderOfTheLists() {
+        val first = EngineList(File("a"), "aa", 1)
+        val second = EngineList(File("b"), "bb", 2)
+        val base = RustFilterEngine.fingerprint(listOf(first, second), "resources")
+        assertEquals(base, RustFilterEngine.fingerprint(listOf(first.copy(file = File("moved")), second), "resources"))
+        assertNotEquals(base, RustFilterEngine.fingerprint(listOf(second, first), "resources"))
+        assertNotEquals(base, RustFilterEngine.fingerprint(listOf(first, second.copy(sha256 = "cc")), "resources"))
+        assertNotEquals(base, RustFilterEngine.fingerprint(listOf(first, second), "other"))
+        assertNotEquals(base, RustFilterEngine.fingerprint(listOf(first), "resources"))
     }
 
     @Test

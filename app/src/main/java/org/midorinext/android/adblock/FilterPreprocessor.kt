@@ -1,10 +1,12 @@
 package org.midorinext.android.adblock
 
-internal fun activeFilterLines(text: String): Sequence<String> = sequence {
+internal fun activeFilterLines(text: String): Sequence<String> = activeFilterLines(text.lineSequence())
+
+internal fun activeFilterLines(lines: Sequence<String>): Sequence<String> = sequence {
     data class Branch(val parent: Boolean, val condition: Boolean)
     val branches = ArrayDeque<Branch>()
     var active = true
-    for (raw in text.lineSequence()) {
+    for (raw in lines) {
         val line = raw.trim()
         when {
             line.startsWith("!#if ") -> {

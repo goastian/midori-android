@@ -9,6 +9,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.midorinext.android.adblock.AdBlockSettings
+import org.midorinext.android.adblock.BlockingLevel
 import org.midorinext.android.adblock.NativeFilterSources
 import org.midorinext.android.adblock.RustFilterEngine
 import org.midorinext.android.adblock.parseHostFile
@@ -21,6 +22,9 @@ class AdblockMemoryDeviceTest {
     private val runtime = Runtime.getRuntime()
     private var keepAlive: Any? = null
     private val app get() = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as MidoriApplication
+
+    /** A redirect to a neutral resource counts as blocked: the request never reaches the tracker. */
+    private fun org.json.JSONObject.isBlocked() = optBoolean("cancel") || optBoolean("blocked")
 
     private fun javaUsedMb() = (runtime.totalMemory() - runtime.freeMemory()) / MB
     private fun nativeUsedMb() = Debug.getNativeHeapAllocatedSize() / MB
@@ -105,6 +109,50 @@ class AdblockMemoryDeviceTest {
     }
 
     @Test
+    fun theScriptletPolicySentToTheExtensionStaysSmall(): Unit = runBlocking {
+        val feature = app.nativeContentBlockingFeature.get()
+        val sources = feature.javaClass.getDeclaredField("sources").apply { isAccessible = true }.get(feature) as NativeFilterSources
+        withTimeout(120_000) { sources.ready.await() }
+        val config = app.adBlockSettings.get().current
+        settle()
+        val before = javaUsedMb()
+        val started = System.nanoTime()
+        val policy = sources.scriptletPolicy(config)
+        val elapsed = (System.nanoTime() - started) / 1_000_000
+        settle()
+        val heapDelta = javaUsedMb() - before
+        val parsed = org.json.JSONObject(policy)
+        Log.i(TAG, "SCRIPTLET_POLICY rules=${parsed.getJSONArray("rules").length()} exceptions=${parsed.getJSONArray("documentExceptions").length()} " +
+            "chars=${policy.length} buildMs=$elapsed retainedMb=$heapDelta")
+        assertTrue("Scriptlet policy retained ${heapDelta}MB", heapDelta <= MAX_POLICY_DELTA_MB)
+    }
+
+    @Test
+    fun theTrackersOnlyEngineIsBuiltOnDemandAndLeavesAdsAlone(): Unit = runBlocking {
+        val feature = app.nativeContentBlockingFeature.get()
+        val existing = feature.javaClass.getDeclaredField("sources").apply { isAccessible = true }.get(feature) as NativeFilterSources
+        withTimeout(120_000) { existing.ready.await() }
+        val settings = AdBlockSettings(app)
+        val sources = NativeFilterSources(app, settings)
+        keepAlive = sources
+        withTimeout(180_000) { sources.ready.await() }
+        val full = settings.current.copy(level = BlockingLevel.TRACKERS_AND_ADS, siteLevels = emptyMap())
+        val trackersOnly = full.copy(level = BlockingLevel.TRACKERS)
+        val analytics = "https://www.google-analytics.com/analytics.js"
+        val advertising = "https://googleads.g.doubleclick.net/pagead/id"
+        fun blocked(config: org.midorinext.android.adblock.AdBlockConfiguration, level: BlockingLevel, url: String) =
+            sources.networkDecision(config, level, url, "https://news.example/", "script").isBlocked()
+
+        sources.prepareEngines(full)
+        assertTrue("ads are blocked at the full level", blocked(full, BlockingLevel.TRACKERS_AND_ADS, advertising))
+        assertFalse("no tracker engine exists until a tracker-only level is configured", blocked(full, BlockingLevel.TRACKERS, analytics))
+        sources.prepareEngines(trackersOnly)
+        assertTrue("trackers are blocked", blocked(trackersOnly, BlockingLevel.TRACKERS, analytics))
+        assertFalse("ads are left alone", blocked(trackersOnly, BlockingLevel.TRACKERS, advertising))
+        assertTrue("the full engine still blocks ads", blocked(trackersOnly, BlockingLevel.TRACKERS_AND_ADS, advertising))
+    }
+
+    @Test
     fun refreshingEveryListSucceedsOnADeviceWithASmallJavaHeap(): Unit = runBlocking {
         val feature = app.nativeContentBlockingFeature.get()
         val existing = feature.javaClass.getDeclaredField("sources").apply { isAccessible = true }.get(feature) as NativeFilterSources
@@ -151,5 +199,6 @@ class AdblockMemoryDeviceTest {
         const val SMALL_HEAP_MB = 100L
         const val MAX_PEAK_DELTA_MB = 150L
         const val MAX_RETAINED_DELTA_MB = 35L
+        const val MAX_POLICY_DELTA_MB = 12L
     }
 }
