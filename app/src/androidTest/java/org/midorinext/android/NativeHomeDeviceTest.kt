@@ -236,6 +236,57 @@ class NativeHomeDeviceTest {
     }
 
     @Test
+    fun returningHomeKeepsWarmContentAndDoesNotRestoreHistoryDeletedWhileHidden(): Unit = runBlocking {
+        app.appPreferencesRepository.get().apply {
+            updateHomeSection(HomeSection.SHORTCUTS, false)
+            updateHomeSection(HomeSection.PRIVACY, false)
+            updateHomeSection(HomeSection.STORIES, false)
+        }
+        compose.waitForIdle()
+        compose.onNodeWithText("Native home history fixture").assertIsDisplayed()
+        compose.onNodeWithText("Native home continuation fixture").assertIsDisplayed()
+
+        var otherTab = ""
+        instrumentation.runOnMainSync {
+            otherTab = app.tabsUseCases.get().addTab("about:blank", selectTab = true, startLoading = false)
+            fixtures += otherTab
+        }
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("native_home").fetchSemanticsNodes().isEmpty()
+        }
+
+        compose.mainClock.autoAdvance = false
+        try {
+            instrumentation.runOnMainSync { app.store.get().dispatch(TabListAction.SelectTabAction(homeId)) }
+            compose.waitUntil(10_000) {
+                compose.mainClock.advanceTimeByFrame()
+                compose.onAllNodesWithTag("native_home").fetchSemanticsNodes().isNotEmpty()
+            }
+            repeat(3) {
+                compose.onNodeWithText("Native home history fixture").assertIsDisplayed()
+                compose.onNodeWithText("Native home continuation fixture").assertIsDisplayed()
+                compose.onNodeWithText(app.getString(R.string.home_recent_empty)).assertDoesNotExist()
+                compose.mainClock.advanceTimeByFrame()
+            }
+        } finally {
+            compose.mainClock.autoAdvance = true
+        }
+
+        instrumentation.runOnMainSync { app.store.get().dispatch(TabListAction.SelectTabAction(otherTab)) }
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("native_home").fetchSemanticsNodes().isEmpty()
+        }
+        app.historyRepository.get().deleteVisitsFor(historyUrl)
+        instrumentation.runOnMainSync { app.store.get().dispatch(TabListAction.SelectTabAction(homeId)) }
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("native_home").fetchSemanticsNodes().isNotEmpty() &&
+                compose.onAllNodesWithText("Native home history fixture").fetchSemanticsNodes().isEmpty()
+        }
+        compose.onNodeWithText("Native home history fixture").assertDoesNotExist()
+        compose.onNodeWithText("Native home continuation fixture").assertIsDisplayed()
+    }
+
+    @Test
     fun recentVisitsStayStableUntilHomeIsReopenedAndRemoveDeletedSites(): Unit = runBlocking {
         val url = "https://recent-snapshot-fixture.example/"
         val title = "Recent snapshot fixture"

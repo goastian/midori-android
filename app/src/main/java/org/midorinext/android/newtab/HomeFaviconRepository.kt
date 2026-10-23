@@ -1,6 +1,7 @@
 package org.midorinext.android.newtab
 
 import android.content.Context
+import android.content.ComponentCallbacks2
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -97,16 +98,23 @@ class HomeFaviconRepository @Inject constructor(
     private val clientProvider: dagger.Lazy<Client>,
 ) {
     private val downloads = Semaphore(3)
+    private val memory = HomeFaviconMemoryCache<Icon>(sizeOf = { it.bitmap.allocationByteCount })
     private val iconLoader = lazy { BrowserIcons(context, clientProvider.get(), preparers = emptyList()) }
     private val icons by iconLoader
 
     fun onTrimMemory(level: Int) {
+        if (level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND ||
+            level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW ||
+            level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL
+        ) memory.clear()
         if (iconLoader.isInitialized()) icons.onTrimMemory(level)
     }
 
+    fun cached(url: String): Icon? = homeIconOrigin(url)?.let(memory::peek)
+
     suspend fun load(url: String): Icon? = withContext(Dispatchers.IO) {
         val origin = homeIconOrigin(url) ?: return@withContext null
-        downloads.withPermit {
+        memory.getOrLoad(origin) { downloads.withPermit {
             try {
                 val resources = resources(url, origin)
                 ensureActive()
@@ -126,7 +134,7 @@ class HomeFaviconRepository @Inject constructor(
             } catch (_: Exception) {
                 null
             }
-        }
+        } }
     }
 
     private suspend fun resources(url: String, origin: String): List<IconRequest.Resource> {

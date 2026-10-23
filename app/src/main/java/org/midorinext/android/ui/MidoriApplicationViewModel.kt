@@ -6,6 +6,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import org.midorinext.android.preferences.app.AppPreferencesRepository
+import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.adblock.AdBlockSettings
 import org.midorinext.android.adblock.BlockingLevel
 import org.midorinext.android.preferences.app.Appearance
@@ -33,6 +34,13 @@ class MidoriApplicationViewModel @Inject constructor(
     private val adBlockSettings: AdBlockSettings,
     clearDataUseCase: dagger.Lazy<ClearDataUseCase>,
 ) : ViewModel() {
+    val preferencesSnapshot = appPreferencesRepository.snapshot
+    val browserUiState = browserUiStates(preferencesSnapshot, store.flow()).stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = resolvedBrowserUiState(preferencesSnapshot.value, store.state),
+    )
+
     val adBlockConfiguration = adBlockSettings.state
 
     fun updateBlockingLevel(level: BlockingLevel) = adBlockSettings.setLevel(level)
@@ -78,15 +86,16 @@ class MidoriApplicationViewModel @Inject constructor(
         }
     }
 
-    val toolbarPosition = appPreferencesRepository.flow
+    val toolbarPosition = preferencesSnapshot.filterNotNull()
         .map { preferences ->
             if (preferences.toolbarPosition == ToolbarPosition.BOTTOM) ToolbarPosition.BOTTOM
             else ToolbarPosition.TOP
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = ToolbarPosition.TOP
+            started = SharingStarted.Eagerly,
+            initialValue = (preferencesSnapshot.value ?: AppPreferencesSerializer.defaultValue).toolbarPosition
+                .let { if (it == ToolbarPosition.BOTTOM) it else ToolbarPosition.TOP }
         )
 
     val isPrivate = store.flow()
@@ -94,16 +103,16 @@ class MidoriApplicationViewModel @Inject constructor(
         .distinctUntilChanged()
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
+            started = SharingStarted.Eagerly,
             initialValue = store.state.selectedTab?.content?.private ?: false
         )
 
-    val appearance = appPreferencesRepository.flow
+    val appearance = preferencesSnapshot.filterNotNull()
         .map { it.appearance }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = Appearance.UNRECOGNIZED
+            started = SharingStarted.Eagerly,
+            initialValue = preferencesSnapshot.value?.appearance ?: Appearance.SYSTEM_SETTINGS
         )
 
     fun updateToolbarPosition(position: ToolbarPosition) {
@@ -112,7 +121,7 @@ class MidoriApplicationViewModel @Inject constructor(
         }
     }
 
-    val searchEngine = appPreferencesRepository.flow
+    val searchEngine = preferencesSnapshot.filterNotNull()
         .map { preferences ->
             if (preferences.searchEngine == SearchEnginePreference.UNRECOGNIZED) {
                 SearchEnginePreference.ASTIANGO
@@ -122,8 +131,9 @@ class MidoriApplicationViewModel @Inject constructor(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = SearchEnginePreference.ASTIANGO,
+            started = SharingStarted.Eagerly,
+            initialValue = preferencesSnapshot.value?.searchEngine
+                ?.takeUnless { it == SearchEnginePreference.UNRECOGNIZED } ?: SearchEnginePreference.ASTIANGO,
         )
 
     fun updateSearchEngine(engine: SearchEnginePreference) {
@@ -132,11 +142,11 @@ class MidoriApplicationViewModel @Inject constructor(
         }
     }
 
-    val showQuitApp = appPreferencesRepository.flow
+    val showQuitApp = preferencesSnapshot.filterNotNull()
         .map { it.clearDataOnQuit || it.closeTabsOnExit }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
+            started = SharingStarted.Eagerly,
             initialValue = false
         )
 

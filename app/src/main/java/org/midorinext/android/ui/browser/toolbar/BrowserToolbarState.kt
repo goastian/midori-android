@@ -12,7 +12,7 @@ import org.midorinext.android.ext.toCleanHost
 import org.midorinext.android.ext.urlDecode
 import org.midorinext.android.newtab.MidoriNewTabFeature
 import org.midorinext.android.preferences.app.AppPreferencesRepository
-import org.midorinext.android.preferences.app.AppPreferences
+import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.preferences.app.ToolbarPosition
 import org.midorinext.android.stats.Datahub
 import org.midorinext.android.suggest.SuggestionProvider
@@ -48,7 +48,7 @@ class BrowserToolbarState @AssistedInject constructor(
     @Assisted private val coroutineScope: CoroutineScope = MainScope()
 ): ToolbarState(
     browserIcons, lazy { datahub.get() }, lazy { suggestionProviders.get() }, coroutineScope,
-    appPreferencesRepository.flow,
+    appPreferencesRepository.snapshot.filterNotNull(),
     store.flow().map { it.selectedTab?.content?.private == true },
 ) {
     var visible by mutableStateOf(true)
@@ -65,29 +65,30 @@ class BrowserToolbarState @AssistedInject constructor(
     var trueHeightPx by mutableIntStateOf(0)
         private set
 
-    val searchPreferences = appPreferencesRepository.flow.stateIn(
+    val searchPreferences = appPreferencesRepository.snapshot.filterNotNull().stateIn(
         scope = coroutineScope,
-        started = SharingStarted.WhileSubscribed(5000L),
-        initialValue = AppPreferences.getDefaultInstance(),
+        started = SharingStarted.Eagerly,
+        initialValue = appPreferencesRepository.snapshot.value ?: AppPreferencesSerializer.defaultValue,
     )
 
     val isPrivateMode = store.flow()
         .map { it.selectedTab?.content?.private == true }
-        .stateIn(coroutineScope, SharingStarted.WhileSubscribed(5000L), false)
+        .stateIn(coroutineScope, SharingStarted.WhileSubscribed(5000L), store.state.selectedTab?.content?.private == true)
 
-    val toolbarPosition = appPreferencesRepository.flow
+    val toolbarPosition = appPreferencesRepository.snapshot.filterNotNull()
         .map { preferences ->
             if (preferences.toolbarPosition == ToolbarPosition.BOTTOM) ToolbarPosition.BOTTOM
             else ToolbarPosition.TOP
         }
         .stateIn(
             scope = coroutineScope,
-            started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = ToolbarPosition.TOP
+            started = SharingStarted.Eagerly,
+            initialValue = (appPreferencesRepository.snapshot.value ?: AppPreferencesSerializer.defaultValue)
+                .toolbarPosition.let { if (it == ToolbarPosition.BOTTOM) it else ToolbarPosition.TOP }
         )
 
     val recentSearches = combine(
-        appPreferencesRepository.flow,
+        appPreferencesRepository.snapshot.filterNotNull(),
         store.flow().map { it.selectedTab?.content?.private == true },
     ) { prefs, privateMode ->
         if (privateMode || prefs.disableRecentSearches) emptyList() else prefs.recentSearchesList
@@ -98,12 +99,12 @@ class BrowserToolbarState @AssistedInject constructor(
             initialValue = emptyList()
         )
 
-    val shouldHideOnScroll = appPreferencesRepository.flow
+    val shouldHideOnScroll = appPreferencesRepository.snapshot.filterNotNull()
         .map { prefs -> prefs.hideToolbarOnScroll }
         .stateIn(
             scope = coroutineScope,
-            started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = false
+            started = SharingStarted.Eagerly,
+            initialValue = (appPreferencesRepository.snapshot.value ?: AppPreferencesSerializer.defaultValue).hideToolbarOnScroll
         )
 
     val loadingProgress = store.flow()

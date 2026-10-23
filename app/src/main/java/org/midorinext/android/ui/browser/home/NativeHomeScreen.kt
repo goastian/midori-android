@@ -70,38 +70,33 @@ fun NativeHomeScreen(
     modifier: Modifier = Modifier,
     viewModel: NativeHomeViewModel = hiltViewModel(),
 ) {
-    val preferences by viewModel.preferences.collectAsStateWithLifecycle()
-    var dataReady by remember(tabId) { mutableStateOf(false) }
+    val storedPreferences by viewModel.preferences.collectAsStateWithLifecycle()
+    val preferences = storedPreferences ?: return
     LaunchedEffect(tabId) {
-        withFrameNanos { }
-        withFrameNanos { }
-        onFirstFrameDrawn(tabId)
-        dataReady = true
         viewModel.initialize()
     }
-    val recent = key(tabId) {
-        if (dataReady && !preferences.hideHomeRecentVisits) {
-            viewModel.recentVisits.collectAsStateWithLifecycle(initialValue = emptyList()).value
-        } else emptyList()
-    }
-    val continuation = if (dataReady && !preferences.hideHomeContinue) {
+    val recent = if (!preferences.hideHomeRecentVisits) {
+        viewModel.recentVisits.collectAsStateWithLifecycle().value
+    } else emptyList()
+    val continuation = if (!preferences.hideHomeContinue) {
         viewModel.continuation.collectAsStateWithLifecycle().value
     } else null
-    val blocked = if (dataReady && !preferences.hideHomePrivacy) {
+    val blocked = if (!preferences.hideHomePrivacy) {
         viewModel.blockedCount.collectAsStateWithLifecycle().value
     } else 0L
     val configuration = LocalConfiguration.current
     val windowSize = LocalWindowInfo.current.containerSize
     val language = configuration.locales[0].language
     val lifecycleOwner = LocalLifecycleOwner.current
-    LaunchedEffect(dataReady, preferences.hideHomeStories, language, lifecycleOwner) {
-        if (dataReady && !preferences.hideHomeStories) {
+    LaunchedEffect(preferences.hideHomeStories, language, lifecycleOwner) {
+        if (!preferences.hideHomeStories) {
             lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                val request = viewModel.loadStories(language)
                 try {
-                    viewModel.loadStories(language).join()
+                    request.join()
                     kotlinx.coroutines.awaitCancellation()
                 } finally {
-                    viewModel.stopStories()
+                    viewModel.stopStories(request)
                 }
             }
         }
@@ -113,20 +108,35 @@ fun NativeHomeScreen(
     val haptics = LocalHapticFeedback.current
     val homeOptionsLabel = stringResource(R.string.home_context_menu)
     val wallpaper = HomeWallpaper.fromId(preferences.homeWallpaperId)
-    val hasWallpaper = wallpaper != HomeWallpaper.NONE
-    var wallpaperReady by remember(wallpaper) { mutableStateOf(!hasWallpaper) }
+    val wallpaperAsset by key(wallpaper) {
+        produceState(viewModel.cachedWallpaper(wallpaper), viewModel, wallpaper) {
+            if (value == null) value = viewModel.loadWallpaper(wallpaper)
+        }
+    }
+    LaunchedEffect(tabId, wallpaperAsset) {
+        if (wallpaperAsset == null) return@LaunchedEffect
+        withFrameNanos { }
+        withFrameNanos { }
+        onFirstFrameDrawn(tabId)
+    }
     val colors = MaterialTheme.colorScheme
     val background = colors.background
+    if (wallpaperAsset == null) {
+        Box(modifier.fillMaxSize().background(background).testTag("native_home_loading_background:${wallpaper.id}"))
+        return
+    }
+    val wallpaperBitmap = wallpaperAsset?.bitmap
+    val hasWallpaper = wallpaperBitmap != null
     val cardColor = if (LocalMidoriTheme.current.dark) colors.surfaceContainerLow else colors.surfaceContainerLowest
     val insetColor = colors.surfaceContainer
     val shortcutColumns = ((windowSize.width / LocalDensity.current.density - 32) /
         if (preferences.homeLargeShortcuts) 88 else 72).toInt().coerceIn(3, 6)
     val listState = rememberLazyListState()
-    val thumbnailContent = remember(preferences, recent, continuation, blocked, stories, background, configuration, windowSize, wallpaperReady) {
-        listOf(preferences, recent, continuation, blocked, stories, background, configuration, windowSize, wallpaperReady)
+    val thumbnailContent = remember(preferences, recent, continuation, blocked, stories, background, configuration, windowSize, wallpaperAsset) {
+        listOf(preferences, recent, continuation, blocked, stories, background, configuration, windowSize, wallpaperAsset)
     }
     val thumbnailModifier = rememberNativeHomeThumbnail(
-        tabId = tabId.takeIf { dataReady && wallpaperReady },
+        tabId = tabId,
         contentKey = thumbnailContent,
         scrolling = listState.isScrollInProgress,
         onThumbnail = viewModel::updateThumbnail,
@@ -142,9 +152,10 @@ fun NativeHomeScreen(
         .semantics {
             onLongClick(label = homeOptionsLabel) { homeMenuPosition = Offset.Zero; true }
         }
-        .testTag(if (wallpaperReady) "native_home_background:${wallpaper.id}" else "native_home_loading_background:${wallpaper.id}")) {
-        if (hasWallpaper) {
-            HomeWallpaperImage(wallpaper, Modifier.matchParentSize(), onReady = { wallpaperReady = true })
+        .testTag("native_home_background:${wallpaper.id}")) {
+        if (wallpaperBitmap != null) {
+            Image(wallpaperBitmap.asImageBitmap(), null, Modifier.matchParentSize(),
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop)
             Box(Modifier.matchParentSize().background(Brush.verticalGradient(listOf(
                 Color.Black.copy(alpha = 0.54f), Color.Black.copy(alpha = 0.54f), Color.Black.copy(alpha = 0.62f),
             ))))
@@ -174,7 +185,7 @@ fun NativeHomeScreen(
                             shortcutState.collectionId = ""
                         }
                         HomeShortcutGrid(shortcuts.filter { it.parentId.isEmpty() }, shortcuts, preferences,
-                            shortcutColumns, insetColor, hasWallpaper, viewModel, dataReady, shortcutState, onOpenUrl)
+                            shortcutColumns, insetColor, hasWallpaper, viewModel, true, shortcutState, onOpenUrl)
                     }
                 }
             }
@@ -206,8 +217,8 @@ fun NativeHomeScreen(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                 Box(Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)).background(insetColor),
                                     contentAlignment = Alignment.Center) {
-                                    HomeFavicon(continuation?.url, viewModel, dataReady, Modifier.size(28.dp))
-                                    if (dataReady && continuation != null) {
+                                    HomeFavicon(continuation?.url, viewModel, true, Modifier.size(28.dp))
+                                    if (continuation != null) {
                                         TabThumbnail(continuation.tabId, false, viewModel.thumbnailStorage)
                                     }
                                 }
@@ -242,7 +253,7 @@ fun NativeHomeScreen(
                                                 modifier = Modifier.fillMaxWidth().testTag("native_home_recent")) {
                                                 Row(Modifier.heightIn(min = 52.dp).padding(horizontal = 12.dp, vertical = 8.dp),
                                                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                                    HomeFavicon(page.url, viewModel, dataReady, Modifier.size(24.dp))
+                                                    HomeFavicon(page.url, viewModel, true, Modifier.size(24.dp))
                                                     Text(page.title, Modifier.weight(1f), maxLines = 1,
                                                         overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
                                                 }
@@ -264,9 +275,9 @@ fun NativeHomeScreen(
                         if (stories.stories.isEmpty()) {
                             HomeCard(cardColor, onClick = { viewModel.loadStories(language, force = true) }) {
                                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Text(stringResource(if (stories.loading) R.string.home_stories_loading else R.string.home_stories_unavailable),
+                                    Text(stringResource(if (stories.failed) R.string.home_stories_unavailable else R.string.home_stories_loading),
                                         color = colors.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
-                                    if (!stories.loading) Text(stringResource(R.string.extensions_retry), color = colors.primary)
+                                    if (stories.failed) Text(stringResource(R.string.extensions_retry), color = colors.primary)
                                 }
                             }
                         } else {
@@ -330,7 +341,7 @@ fun NativeHomeScreen(
     }
 
     if (preferences.homeShortcutsInitialized) {
-        HomeShortcutDialogs(shortcutState, shortcuts, viewModel, dataReady, onOpenUrl)
+        HomeShortcutDialogs(shortcutState, shortcuts, viewModel, true, onOpenUrl)
     }
 }
 
@@ -365,9 +376,10 @@ private fun HomeCard(color: Color, modifier: Modifier = Modifier, onClick: () ->
 
 @Composable
 internal fun HomeFavicon(url: String?, viewModel: NativeHomeViewModel, enabled: Boolean, modifier: Modifier = Modifier) {
+    val cached = remember(viewModel, url) { url?.let(viewModel::cachedFavicon) }
     val icon = if (enabled && url != null) {
-        remember(viewModel, url) { viewModel.favicon(url) }.collectAsStateWithLifecycle(initialValue = null).value
-    } else null
+        remember(viewModel, url) { viewModel.favicon(url) }.collectAsStateWithLifecycle(initialValue = cached).value
+    } else cached
     if (icon != null) {
         Image(icon.bitmap.asImageBitmap(), null, modifier.testTag("home_favicon:${homeIconOrigin(url!!)}"))
     } else if (url == null) {

@@ -68,7 +68,8 @@ fun MidoriNavHost(
     val navigationOffset = with(LocalDensity.current) { MidoriMotion.NavigationOffset.roundToPx() } *
         if (LocalLayoutDirection.current == LayoutDirection.Ltr) 1 else -1
     val currentDestination by navController.currentBackStackEntryAsState()
-    val selectedTabIsPrivate by appViewModel.isPrivate.collectAsStateWithLifecycle()
+    val browserUiState by appViewModel.browserUiState.collectAsStateWithLifecycle()
+    val selectedTabIsPrivate = browserUiState?.isPrivate ?: LocalMidoriTheme.current.private
 
     // The browser surface is an AndroidView.  Keep the navigation host constrained to the
     // padded area provided by Scaffold so Gecko never measures against the full window and

@@ -3,6 +3,9 @@ package org.midorinext.android.ui
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -14,28 +17,28 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import org.midorinext.android.ui.nav.MidoriNavHost
 import org.midorinext.android.ui.nav.NavDestination
 import org.midorinext.android.ui.theme.MidoriBrowserTheme
+import org.midorinext.android.ui.theme.darkColorScheme
+import org.midorinext.android.ui.theme.lightColorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.midorinext.android.preferences.app.Appearance
+import org.midorinext.android.preferences.app.SearchEnginePreference
 import org.midorinext.android.preferences.app.ToolbarPosition
 import androidx.preference.PreferenceManager
 import org.midorinext.android.R
 import org.midorinext.android.ui.onboarding.MidoriOnboarding
-import org.midorinext.android.adblock.BlockingLevel
 import org.midorinext.android.ui.zap.ZapFeature
 
 @Composable
 fun MidoriBrowserApp(
     applicationViewModel: MidoriApplicationViewModel = hiltViewModel()
 ) {
-    val navController = rememberNavController()
-    val currentDestination by navController.currentBackStackEntryAsState()
-    val trayIsVisible = currentDestination?.destination?.route == NavDestination.Tabs.match
-    var trayPrivacy by remember(currentDestination?.id) { mutableStateOf<Boolean?>(null) }
     val context = LocalContext.current
     val onboardingKey = stringResource(R.string.pref_key_show_onboarding)
     val onboardingPreferences = remember(context) {
@@ -45,9 +48,29 @@ fun MidoriBrowserApp(
         mutableStateOf(onboardingPreferences.getBoolean(onboardingKey, true))
     }
 
-    val isPrivate by applicationViewModel.isPrivate.collectAsStateWithLifecycle()
-    val appearance by applicationViewModel.appearance.collectAsStateWithLifecycle()
-    val toolbarPosition by applicationViewModel.toolbarPosition.collectAsStateWithLifecycle()
+    val storedPreferences by applicationViewModel.preferencesSnapshot.collectAsStateWithLifecycle()
+    val browserUiState by applicationViewModel.browserUiState.collectAsStateWithLifecycle()
+    val systemTheme = isSystemInDarkTheme()
+    val preferences = if (showOnboarding) storedPreferences else browserUiState?.preferences
+    if (preferences == null) {
+        val background = when (storedPreferences?.appearance) {
+            null -> colorResource(R.color.startup_background)
+            Appearance.LIGHT -> lightColorScheme.background
+            Appearance.DARK -> darkColorScheme.background
+            else -> if (systemTheme) darkColorScheme.background else lightColorScheme.background
+        }
+        Box(Modifier.fillMaxSize().background(background)
+            .testTag("browser_startup_pending"))
+        return
+    }
+
+    val navController = rememberNavController()
+    val currentDestination by navController.currentBackStackEntryAsState()
+    val trayIsVisible = currentDestination?.destination?.route == NavDestination.Tabs.match
+    var trayPrivacy by remember(currentDestination?.id) { mutableStateOf<Boolean?>(null) }
+    val isPrivate = browserUiState?.isPrivate == true
+    val appearance = preferences.appearance
+    val toolbarPosition = preferences.toolbarPosition
     val adBlockConfiguration by applicationViewModel.adBlockConfiguration.collectAsStateWithLifecycle()
 
     // Protobuf returns UNRECOGNIZED for enum values written by a newer or older app
@@ -64,7 +87,6 @@ fun MidoriBrowserApp(
         else -> ToolbarPosition.TOP
     }
 
-    val systemTheme = isSystemInDarkTheme()
     val darkTheme by remember(resolvedAppearance, systemTheme) { derivedStateOf {
         when (resolvedAppearance) {
             Appearance.LIGHT -> false
@@ -80,7 +102,8 @@ fun MidoriBrowserApp(
         updateSystemBars = !trayIsVisible,
     ) {
         if (showOnboarding) {
-            val searchEngine by applicationViewModel.searchEngine.collectAsStateWithLifecycle()
+            val searchEngine = preferences.searchEngine.takeUnless { it == SearchEnginePreference.UNRECOGNIZED }
+                ?: SearchEnginePreference.ASTIANGO
             MidoriOnboarding(
                 onToolbarPositionSelected = applicationViewModel::updateToolbarPosition,
                 blockingLevel = adBlockConfiguration.level,

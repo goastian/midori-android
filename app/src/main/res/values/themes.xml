@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.MidoriBrowserCompose" parent="Theme.AppCompat.NoActionBar" />
+    <style name="Theme.MidoriBrowserCompose" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@color/startup_background</item>
+        <item name="android:statusBarColor">@color/startup_background</item>
+        <item name="android:navigationBarColor">@color/startup_background</item>
+        <item name="android:windowLightStatusBar">@bool/startup_light_system_bars</item>
+        <item name="android:windowLightNavigationBar">@bool/startup_light_system_bars</item>
+    </style>
 </resources>

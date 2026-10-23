@@ -6,11 +6,16 @@ import org.midorinext.android.newtab.HomeSection
 import org.midorinext.android.newtab.HomeWallpaper
 import org.midorinext.android.newtab.defaultHomeShortcuts
 import org.midorinext.android.newtab.publicHomeUrl
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import mozilla.components.concept.engine.Engine
 import java.io.IOException
 import java.util.UUID
 import javax.inject.Inject
+import javax.inject.Singleton
 
 
 private const val LOGTAG: String = "AppPreferencesRepo"
@@ -21,12 +26,17 @@ data class ClearDataPreferences(
     val history: Boolean
 )
 
-// Not needed, while this class remains stateless
-// @Module
-// @InstallIn(ActivityRetainedComponent::class)
-class AppPreferencesRepository @Inject constructor(
-    private val datastore: DataStore<AppPreferences>
+@Singleton
+class AppPreferencesRepository internal constructor(
+    private val datastore: DataStore<AppPreferences>,
+    snapshotScope: CoroutineScope,
 ) {
+    @Inject
+    constructor(datastore: DataStore<AppPreferences>) : this(
+        datastore,
+        CoroutineScope(SupervisorJob() + Dispatchers.IO),
+    )
+
     suspend fun ensureHomeShortcuts() {
         datastore.updateData { it.withInitializedHomeShortcuts() }
     }
@@ -273,11 +283,28 @@ class AppPreferencesRepository @Inject constructor(
         .catch { exception ->
             if (exception is IOException) {
                 Log.e(LOGTAG, "Error reading frontend preferences.", exception)
-                emit(AppPreferences.getDefaultInstance())
+                emit(AppPreferencesSerializer.defaultValue)
             } else {
                 throw exception
             }
         }
+
+    val snapshot: StateFlow<AppPreferences?> = kotlinx.coroutines.flow.flow {
+        var hasSnapshot = false
+        emitAll(datastore.data.onEach { hasSnapshot = true }.retryWhen { cause, _ ->
+            if (cause !is IOException) return@retryWhen false
+            if (!hasSnapshot) {
+                emit(AppPreferencesSerializer.defaultValue)
+                hasSnapshot = true
+            }
+            delay(1_000)
+            true
+        })
+    }.stateIn(
+        scope = snapshotScope,
+        started = SharingStarted.Eagerly,
+        initialValue = null,
+    )
 
     val clearDataPreferencesFlow = flow
         .map { ClearDataPreferences(

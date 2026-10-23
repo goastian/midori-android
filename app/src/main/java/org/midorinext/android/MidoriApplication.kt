@@ -22,6 +22,8 @@ import org.midorinext.android.storage.history.HistoryRepository
 import org.midorinext.android.usecases.MidoriUseCases
 import org.midorinext.android.vpn.MidoriVpnFeature
 import org.midorinext.android.newtab.HomeFaviconRepository
+import org.midorinext.android.newtab.HomeWallpaper
+import org.midorinext.android.newtab.HomeWallpaperRepository
 import mozilla.components.browser.icons.BrowserIcons
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.*
@@ -76,10 +78,12 @@ class MidoriApplication : Application(), Configuration.Provider {
     @Inject lateinit var midoriVpnFeature: dagger.Lazy<MidoriVpnFeature>
     @Inject lateinit var browserIcons: dagger.Lazy<BrowserIcons>
     @Inject lateinit var homeFavicons: dagger.Lazy<HomeFaviconRepository>
+    @Inject lateinit var homeWallpaper: dagger.Lazy<HomeWallpaperRepository>
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val postFirstFrameWorkStarted = AtomicBoolean(false)
     private val nativeHomeFrameDrawn = MutableStateFlow(false)
+    @Volatile private var warmedHomeWallpaper: HomeWallpaperRepository? = null
 
     fun onNativeHomeFrameDrawn() {
         nativeHomeFrameDrawn.value = true
@@ -110,6 +114,13 @@ class MidoriApplication : Application(), Configuration.Provider {
         }
 
         StartupTiming.mark("application_create (${BuildConfig.VERSION_NAME}, ${BuildConfig.BUILD_TYPE})")
+        val preferencesRepository = appPreferencesRepository.get()
+        applicationScope.launch(Dispatchers.IO) {
+            val preferences = preferencesRepository.flow.first()
+            StartupTiming.mark("preferences_ready")
+            homeWallpaper.get().also { warmedHomeWallpaper = it }
+                .load(HomeWallpaper.fromId(preferences.homeWallpaperId))
+        }
         StartupTiming.measure("app_services") {
             AppServicesInitializer.init(
                 AppServicesInitializer.Config(
@@ -233,6 +244,9 @@ class MidoriApplication : Application(), Configuration.Provider {
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
         runOnlyInMainProcess {
+            if (level == TRIM_MEMORY_RUNNING_LOW || level == TRIM_MEMORY_RUNNING_CRITICAL ||
+                level >= TRIM_MEMORY_BACKGROUND
+            ) warmedHomeWallpaper?.clearMemory()
             browserIcons.get().onTrimMemory(level)
             homeFavicons.get().onTrimMemory(level)
             store.get().dispatch(SystemAction.LowMemoryAction(level))

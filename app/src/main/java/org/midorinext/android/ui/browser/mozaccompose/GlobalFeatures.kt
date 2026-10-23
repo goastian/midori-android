@@ -103,7 +103,6 @@ fun GlobalFeatures(
     ClFeature()
 
     EngineSettingsFeature(
-        appViewModel = appViewModel,
         engine = viewModel.engine,
         appPreferences = appPreferences,
     )

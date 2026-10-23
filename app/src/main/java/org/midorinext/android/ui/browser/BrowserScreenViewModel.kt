@@ -218,11 +218,11 @@ class BrowserScreenViewModel @Inject constructor(
             initialValue = ReaderModeStatus(),
         )
 
-    val appPreferences = appPreferencesRepository.flow
+    val appPreferences = appPreferencesRepository.snapshot.filterNotNull()
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = AppPreferencesSerializer.defaultValue
+            started = SharingStarted.Eagerly,
+            initialValue = appPreferencesRepository.snapshot.value ?: AppPreferencesSerializer.defaultValue
         )
 
     private val tabsWithUserNavigationInFlight = mutableSetOf<String>()

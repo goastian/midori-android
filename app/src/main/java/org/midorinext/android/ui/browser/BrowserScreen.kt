@@ -73,7 +73,7 @@ fun BrowserScreen(
     val tabStripTabs = if (appPrefs.showTabStrip) {
         viewModel.tabStripTabs.collectAsStateWithLifecycle().value
     } else emptyList()
-    val private by appViewModel.isPrivate.collectAsStateWithLifecycle()
+    val private = selectedTabSnapshot?.private == true
     val legacyNewTabOrigins by viewModel.legacyNewTabOrigins.collectAsStateWithLifecycle()
     val surface = currentUrl?.let { browserSurface(it, selectedTabSnapshot?.private == true, viewModel.isNewTabUrl(it)) }
     val nativeHome = surface == BrowserSurface.HOME
@@ -234,6 +234,11 @@ fun BrowserScreen(
         viewModel.returnToParentTab()
     }
 
+    if (currentUrl == null) {
+        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
+        return
+    }
+
     Column(Modifier.fillMaxSize()) {
         if (appPrefs.showTabStrip && !isFullScreen && !viewModel.toolbarState.hasFocus) {
             BrowserTabStrip(
@@ -251,7 +256,7 @@ fun BrowserScreen(
             toolbarState = viewModel.toolbarState,
             toolbar = { modifier ->
                 Toolbar(
-                    onTextCommit = { text -> viewModel.commitSearch(text, currentUrl?.getMidoriSERPCategory()) },
+                    onTextCommit = { text -> viewModel.commitSearch(text, currentUrl.getMidoriSERPCategory()) },
                     modifier = modifier,
                     toolbarState = viewModel.toolbarState,
                     browserIcons = viewModel.browserIcons,
@@ -265,8 +270,8 @@ fun BrowserScreen(
                     beforeTextFieldVisible = {
                         readerModeStatus.isActive ||
                             (!viewModel.toolbarState.hasFocus &&
-                                currentUrl?.isNotBlank() == true &&
-                                currentUrl?.isMidoriUrl() == false &&
+                                currentUrl.isNotBlank() &&
+                                !currentUrl.isMidoriUrl() &&
                                 !viewModel.isNewTabUrl(currentUrl) &&
                                 currentUrl != "about:blank")
                     },
@@ -327,70 +332,63 @@ fun BrowserScreen(
             modifier = Modifier.fillMaxWidth().weight(1f),
             lock = { viewModel.showFindInPage || nativeHome || privateHome || blankPage }
         ) { modifier ->
-            if (currentUrl != null) {
-                if (nativeHome) {
-                    if (nativeHomeReady) GlobalFeatures(appViewModel, viewModel, onManageLogins = { navigateTo(NavDestination.SavedPasswords) })
-                    val canGoBack by viewModel.canGoBackInPage.collectAsStateWithLifecycle()
-                    BackHandler(enabled = canGoBack && !viewModel.toolbarState.hasFocus) {
-                        viewModel.sessionUseCases.goBack()
-                    }
-                    key(selectedTabSnapshot?.id) {
-                        NativeHomeScreen(
-                            tabId = selectedTabSnapshot?.id,
-                            onOpenUrl = viewModel::openHomeUrl,
-                            onSelectTab = viewModel::selectTab,
-                            onSwitchBrowsingMode = { switchBrowsingMode(true) },
-                            onSearch = { viewModel.toolbarState.updateFocus(true) },
-                            onFirstFrameDrawn = { tabId ->
-                                nativeHomeReady = true
-                                (context.applicationContext as MidoriApplication).onNativeHomeFrameDrawn()
-                                viewModel.prepareNativeHomeSession(tabId)
-                            },
-                            navigateTo = navigateTo,
-                            modifier = modifier,
-                        )
-                    }
-                } else if (privateHome || blankPage) {
-                    val canGoBack by viewModel.canGoBackInPage.collectAsStateWithLifecycle()
-                    BackHandler(enabled = canGoBack && !viewModel.toolbarState.hasFocus) {
-                        viewModel.sessionUseCases.goBack()
-                    }
-                    if (privateHome) HomePrivateBrowsing(
-                        onSwitchBrowsingMode = { switchBrowsingMode(false) },
+            if (nativeHome) {
+                if (nativeHomeReady) GlobalFeatures(appViewModel, viewModel, onManageLogins = { navigateTo(NavDestination.SavedPasswords) })
+                val canGoBack by viewModel.canGoBackInPage.collectAsStateWithLifecycle()
+                BackHandler(enabled = canGoBack && !viewModel.toolbarState.hasFocus) {
+                    viewModel.sessionUseCases.goBack()
+                }
+                key(selectedTabSnapshot?.id) {
+                    NativeHomeScreen(
+                        tabId = selectedTabSnapshot?.id,
+                        onOpenUrl = viewModel::openHomeUrl,
+                        onSelectTab = viewModel::selectTab,
+                        onSwitchBrowsingMode = { switchBrowsingMode(true) },
+                        onSearch = { viewModel.toolbarState.updateFocus(true) },
+                        onFirstFrameDrawn = { tabId ->
+                            nativeHomeReady = true
+                            (context.applicationContext as MidoriApplication).onNativeHomeFrameDrawn()
+                            context.activity?.reportFullyDrawn()
+                            viewModel.prepareNativeHomeSession(tabId)
+                        },
+                        navigateTo = navigateTo,
                         modifier = modifier,
                     )
-                    else Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).testTag("native_blank_home"))
-                } else {
-                    GlobalFeatures(appViewModel, viewModel, onManageLogins = { navigateTo(NavDestination.SavedPasswords) })
+                }
+            } else if (privateHome || blankPage) {
+                val canGoBack by viewModel.canGoBackInPage.collectAsStateWithLifecycle()
+                BackHandler(enabled = canGoBack && !viewModel.toolbarState.hasFocus) {
+                    viewModel.sessionUseCases.goBack()
+                }
+                if (privateHome) HomePrivateBrowsing(
+                    onSwitchBrowsingMode = { switchBrowsingMode(false) },
+                    modifier = modifier,
+                )
+                else Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).testTag("native_blank_home"))
+            } else {
+                GlobalFeatures(appViewModel, viewModel, onManageLogins = { navigateTo(NavDestination.SavedPasswords) })
 
-                    PullToRefreshBox(
-                        onRefresh = { viewModel.reloadUrl() },
-                        enabled = {
-                            appPrefs.pullToRefreshEnabled &&
-                            engineViewHolder?.canScrollVerticallyUp() == false &&
-                            engineViewHolder?.getInputResultDetail()?.let {
-                                it.canOverscrollTop() &&
-                                it.canOverscrollLeft() &&
-                                it.canOverscrollRight()
-                            } == true
-                        },
-                        modifier = modifier
-                    ) {
-                        EngineView(
-                            engine = viewModel.engine,
-                            modifier = Modifier.fillMaxSize()
-                        ) { engineView ->
-                            engineViewHolder = engineView
-                            EngineViewFeatures(engineView, viewModel)
-                        }
+                PullToRefreshBox(
+                    onRefresh = { viewModel.reloadUrl() },
+                    enabled = {
+                        appPrefs.pullToRefreshEnabled &&
+                        engineViewHolder?.canScrollVerticallyUp() == false &&
+                        engineViewHolder?.getInputResultDetail()?.let {
+                            it.canOverscrollTop() &&
+                            it.canOverscrollLeft() &&
+                            it.canOverscrollRight()
+                        } == true
+                    },
+                    modifier = modifier
+                ) {
+                    EngineView(
+                        engine = viewModel.engine,
+                        modifier = Modifier.fillMaxSize()
+                    ) { engineView ->
+                        engineViewHolder = engineView
+                        EngineViewFeatures(engineView, viewModel)
                     }
                 }
-            } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.primaryContainer)
-                )
             }
         }
     }

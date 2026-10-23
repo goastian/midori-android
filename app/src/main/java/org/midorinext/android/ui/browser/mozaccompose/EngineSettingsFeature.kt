@@ -1,24 +1,18 @@
 package org.midorinext.android.ui.browser.mozaccompose
 
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.midorinext.android.preferences.app.Appearance
 import org.midorinext.android.preferences.app.AppPreferences
-import org.midorinext.android.ui.MidoriApplicationViewModel
 import mozilla.components.concept.engine.Engine
 import mozilla.components.concept.engine.mediaquery.PreferredColorScheme
 
 @Composable
 fun EngineSettingsFeature(
-    appViewModel: MidoriApplicationViewModel = hiltViewModel(),
     engine: Engine,
     appPreferences: AppPreferences,
 ) {
-    val appearance by appViewModel.appearance.collectAsStateWithLifecycle()
+    val appearance = appPreferences.appearance
 
     LaunchedEffect(
         appearance,

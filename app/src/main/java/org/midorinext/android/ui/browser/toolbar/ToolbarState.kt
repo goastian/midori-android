@@ -46,7 +46,7 @@ open class ToolbarState(
     var searchEngineOverride by mutableStateOf<String?>(null)
 
     val voiceSearchEnabled = preferences.map { !it.disableVoiceSearch }
-        .stateIn(coroutineScope, SharingStarted.WhileSubscribed(5000L), true)
+        .stateIn(coroutineScope, SharingStarted.Eagerly, true)
 
     private val emptySuggestions = emptyMap<SuggestionProvider, List<Suggestion>>()
 
