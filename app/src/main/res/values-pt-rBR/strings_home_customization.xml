@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_icon_shape">Forma dos ícones</string>
+    <string name="home_shape_circle">Círculo</string>
+    <string name="home_shape_rounded">Quadrado arredondado</string>
+    <string name="home_shape_square">Quadrado</string>
+    <string name="home_large_icons">Ícones grandes</string>
+    <string name="home_show_add_shortcut">Mostrar botão para adicionar atalhos</string>
+    <string name="home_show_logo">Mostrar logo do Midori</string>
+    <string name="home_show_customize_shortcut">Mostrar botão de personalização</string>
+    <string name="home_context_menu">Opções da página inicial</string>
+    <string name="home_add_folder">Adicionar pasta</string>
+    <string name="home_edit_folder">Renomear pasta</string>
+    <string name="home_folder_empty">Adicione sites a esta pasta.</string>
+    <string name="home_remove_folder">Remover pasta</string>
+    <string name="home_remove_folder_message">A pasta será removida. Os sites dela permanecerão na página inicial.</string>
+    <string name="home_move_to_folder">Mover para pasta</string>
+    <string name="home_folder_root">Página inicial</string>
+    <string name="home_add_website">Adicionar site</string>
+    <string name="home_site_categories">Categorias</string>
+    <string name="home_suggested_sites">Sites sugeridos</string>
+    <string name="home_saved_bookmarks">Favoritos salvos</string>
+    <string name="home_site_added">Adicionado</string>
+    <string name="home_category_gaming">Jogos</string>
+    <string name="home_category_finance">Finanças</string>
+    <string name="home_category_social">Redes sociais</string>
+    <string name="home_category_travel">Viagens</string>
+    <string name="home_category_education">Educação</string>
+    <string name="home_category_news">Notícias</string>
+    <string name="home_category_sport">Esportes</string>
+    <string name="home_category_shopping">Compras</string>
+    <string name="home_category_government">Governo</string>
+    <string name="home_create_category_folder">Adicionar categoria como pasta</string>
+    <string name="home_folder_name_required">Digite um nome para a pasta.</string>
+    <string name="home_shortcut_save_failed">Não foi possível salvar as alterações. Tente novamente.</string>
+    <string name="home_folder_contents">Sites: %1$d</string>
+</resources>

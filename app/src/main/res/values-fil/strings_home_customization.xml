@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_icon_shape">Hugis ng icon</string>
+    <string name="home_shape_circle">Bilog</string>
+    <string name="home_shape_rounded">Parisukat na may bilugang sulok</string>
+    <string name="home_shape_square">Parisukat</string>
+    <string name="home_large_icons">Malalaking icon</string>
+    <string name="home_show_add_shortcut">Ipakita ang button para magdagdag ng shortcut</string>
+    <string name="home_show_logo">Ipakita ang logo ng Midori</string>
+    <string name="home_show_customize_shortcut">Ipakita ang button ng pag-customize</string>
+    <string name="home_context_menu">Mga opsyon sa home page</string>
+    <string name="home_add_folder">Magdagdag ng folder</string>
+    <string name="home_edit_folder">Palitan ang pangalan ng folder</string>
+    <string name="home_folder_empty">Magdagdag ng mga website sa folder na ito.</string>
+    <string name="home_remove_folder">Alisin ang folder</string>
+    <string name="home_remove_folder_message">Aalisin ang folder. Mananatili sa home page ang mga website nito.</string>
+    <string name="home_move_to_folder">Ilipat sa folder</string>
+    <string name="home_folder_root">Home page</string>
+    <string name="home_add_website">Magdagdag ng website</string>
+    <string name="home_site_categories">Mga kategorya</string>
+    <string name="home_suggested_sites">Mga iminumungkahing site</string>
+    <string name="home_saved_bookmarks">Mga na-save na bookmark</string>
+    <string name="home_site_added">Naidagdag</string>
+    <string name="home_category_gaming">Mga laro</string>
+    <string name="home_category_finance">Pananalapi</string>
+    <string name="home_category_social">Social media</string>
+    <string name="home_category_travel">Paglalakbay</string>
+    <string name="home_category_education">Edukasyon</string>
+    <string name="home_category_news">Balita</string>
+    <string name="home_category_sport">Palakasan</string>
+    <string name="home_category_shopping">Pamimili</string>
+    <string name="home_category_government">Pamahalaan</string>
+    <string name="home_create_category_folder">Idagdag ang kategorya bilang folder</string>
+    <string name="home_folder_name_required">Maglagay ng pangalan ng folder.</string>
+    <string name="home_shortcut_save_failed">Hindi ma-save ang iyong mga pagbabago. Subukan ulit.</string>
+    <string name="home_folder_contents">Mga website: %1$d</string>
+</resources>

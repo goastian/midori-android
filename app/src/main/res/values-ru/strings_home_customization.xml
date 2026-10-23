@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_icon_shape">Форма значков</string>
+    <string name="home_shape_circle">Круг</string>
+    <string name="home_shape_rounded">Квадрат со скруглёнными углами</string>
+    <string name="home_shape_square">Квадрат</string>
+    <string name="home_large_icons">Крупные значки</string>
+    <string name="home_show_add_shortcut">Показывать кнопку добавления ярлыка</string>
+    <string name="home_show_logo">Показывать логотип Midori</string>
+    <string name="home_show_customize_shortcut">Показывать кнопку настройки</string>
+    <string name="home_context_menu">Параметры домашней страницы</string>
+    <string name="home_add_folder">Добавить папку</string>
+    <string name="home_edit_folder">Переименовать папку</string>
+    <string name="home_folder_empty">Добавьте сайты в эту папку.</string>
+    <string name="home_remove_folder">Удалить папку</string>
+    <string name="home_remove_folder_message">Папка будет удалена. Сайты из неё останутся на домашней странице.</string>
+    <string name="home_move_to_folder">Переместить в папку</string>
+    <string name="home_folder_root">Домашняя страница</string>
+    <string name="home_add_website">Добавить сайт</string>
+    <string name="home_site_categories">Категории</string>
+    <string name="home_suggested_sites">Рекомендуемые сайты</string>
+    <string name="home_saved_bookmarks">Сохранённые закладки</string>
+    <string name="home_site_added">Добавлено</string>
+    <string name="home_category_gaming">Игры</string>
+    <string name="home_category_finance">Финансы</string>
+    <string name="home_category_social">Социальные сети</string>
+    <string name="home_category_travel">Путешествия</string>
+    <string name="home_category_education">Образование</string>
+    <string name="home_category_news">Новости</string>
+    <string name="home_category_sport">Спорт</string>
+    <string name="home_category_shopping">Покупки</string>
+    <string name="home_category_government">Государственные сайты</string>
+    <string name="home_create_category_folder">Добавить категорию как папку</string>
+    <string name="home_folder_name_required">Введите название папки.</string>
+    <string name="home_shortcut_save_failed">Не удалось сохранить изменения. Попробуйте ещё раз.</string>
+    <string name="home_folder_contents">Сайтов: %1$d</string>
+</resources>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_icon_shape">图标形状</string>
+    <string name="home_shape_circle">圆形</string>
+    <string name="home_shape_rounded">圆角方形</string>
+    <string name="home_shape_square">方形</string>
+    <string name="home_large_icons">大图标</string>
+    <string name="home_show_add_shortcut">显示添加快捷方式按钮</string>
+    <string name="home_show_logo">显示 Midori 标志</string>
+    <string name="home_show_customize_shortcut">显示自定义按钮</string>
+    <string name="home_context_menu">主页选项</string>
+    <string name="home_add_folder">添加文件夹</string>
+    <string name="home_edit_folder">重命名文件夹</string>
+    <string name="home_folder_empty">向此文件夹添加网站。</string>
+    <string name="home_remove_folder">删除文件夹</string>
+    <string name="home_remove_folder_message">文件夹将被删除，其中的网站将保留在主页上。</string>
+    <string name="home_move_to_folder">移至文件夹</string>
+    <string name="home_folder_root">主页</string>
+    <string name="home_add_website">添加网站</string>
+    <string name="home_site_categories">分类</string>
+    <string name="home_suggested_sites">推荐网站</string>
+    <string name="home_saved_bookmarks">已保存的书签</string>
+    <string name="home_site_added">已添加</string>
+    <string name="home_category_gaming">游戏</string>
+    <string name="home_category_finance">金融</string>
+    <string name="home_category_social">社交</string>
+    <string name="home_category_travel">旅游</string>
+    <string name="home_category_education">教育</string>
+    <string name="home_category_news">新闻</string>
+    <string name="home_category_sport">体育</string>
+    <string name="home_category_shopping">购物</string>
+    <string name="home_category_government">政府</string>
+    <string name="home_create_category_folder">将分类添加为文件夹</string>
+    <string name="home_folder_name_required">请输入文件夹名称。</string>
+    <string name="home_shortcut_save_failed">无法保存更改，请重试。</string>
+    <string name="home_folder_contents">网站数：%1$d</string>
+</resources>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_icon_shape">アイコンの形</string>
+    <string name="home_shape_circle">円形</string>
+    <string name="home_shape_rounded">角丸四角形</string>
+    <string name="home_shape_square">四角形</string>
+    <string name="home_large_icons">大きいアイコン</string>
+    <string name="home_show_add_shortcut">ショートカット追加ボタンを表示</string>
+    <string name="home_show_logo">Midori のロゴを表示</string>
+    <string name="home_show_customize_shortcut">カスタマイズボタンを表示</string>
+    <string name="home_context_menu">ホームのオプション</string>
+    <string name="home_add_folder">フォルダーを追加</string>
+    <string name="home_edit_folder">フォルダー名を変更</string>
+    <string name="home_folder_empty">このフォルダーにウェブサイトを追加してください。</string>
+    <string name="home_remove_folder">フォルダーを削除</string>
+    <string name="home_remove_folder_message">フォルダーは削除されます。フォルダー内のウェブサイトはホームページに残ります。</string>
+    <string name="home_move_to_folder">フォルダーに移動</string>
+    <string name="home_folder_root">ホームページ</string>
+    <string name="home_add_website">ウェブサイトを追加</string>
+    <string name="home_site_categories">カテゴリー</string>
+    <string name="home_suggested_sites">おすすめのサイト</string>
+    <string name="home_saved_bookmarks">保存したブックマーク</string>
+    <string name="home_site_added">追加済み</string>
+    <string name="home_category_gaming">ゲーム</string>
+    <string name="home_category_finance">金融</string>
+    <string name="home_category_social">SNS</string>
+    <string name="home_category_travel">旅行</string>
+    <string name="home_category_education">教育</string>
+    <string name="home_category_news">ニュース</string>
+    <string name="home_category_sport">スポーツ</string>
+    <string name="home_category_shopping">ショッピング</string>
+    <string name="home_category_government">行政</string>
+    <string name="home_create_category_folder">カテゴリーをフォルダーとして追加</string>
+    <string name="home_folder_name_required">フォルダー名を入力してください。</string>
+    <string name="home_shortcut_save_failed">変更を保存できませんでした。もう一度お試しください。</string>
+    <string name="home_folder_contents">ウェブサイト数：%1$d</string>
+</resources>

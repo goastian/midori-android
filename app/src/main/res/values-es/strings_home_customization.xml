@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_icon_shape">Forma de los iconos</string>
+    <string name="home_shape_circle">Círculo</string>
+    <string name="home_shape_rounded">Cuadrado redondeado</string>
+    <string name="home_shape_square">Cuadrado</string>
+    <string name="home_large_icons">Iconos grandes</string>
+    <string name="home_show_add_shortcut">Mostrar botón para añadir accesos directos</string>
+    <string name="home_show_logo">Mostrar el logo de Midori</string>
+    <string name="home_show_customize_shortcut">Mostrar botón de personalización</string>
+    <string name="home_context_menu">Opciones de inicio</string>
+    <string name="home_add_folder">Añadir carpeta</string>
+    <string name="home_edit_folder">Renombrar carpeta</string>
+    <string name="home_folder_empty">Añade sitios web a esta carpeta.</string>
+    <string name="home_remove_folder">Eliminar carpeta</string>
+    <string name="home_remove_folder_message">Se eliminará la carpeta. Sus sitios web permanecerán en la página de inicio.</string>
+    <string name="home_move_to_folder">Mover a carpeta</string>
+    <string name="home_folder_root">Página de inicio</string>
+    <string name="home_add_website">Añadir sitio web</string>
+    <string name="home_site_categories">Categorías</string>
+    <string name="home_suggested_sites">Sitios sugeridos</string>
+    <string name="home_saved_bookmarks">Marcadores guardados</string>
+    <string name="home_site_added">Añadido</string>
+    <string name="home_category_gaming">Videojuegos</string>
+    <string name="home_category_finance">Finanzas</string>
+    <string name="home_category_social">Redes sociales</string>
+    <string name="home_category_travel">Viajes</string>
+    <string name="home_category_education">Educación</string>
+    <string name="home_category_news">Noticias</string>
+    <string name="home_category_sport">Deportes</string>
+    <string name="home_category_shopping">Compras</string>
+    <string name="home_category_government">Gobierno</string>
+    <string name="home_create_category_folder">Añadir categoría como carpeta</string>
+    <string name="home_folder_name_required">Introduce un nombre para la carpeta.</string>
+    <string name="home_shortcut_save_failed">No se pudieron guardar los cambios. Inténtalo de nuevo.</string>
+    <string name="home_folder_contents">Sitios web: %1$d</string>
+</resources>

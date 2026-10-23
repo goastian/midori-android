@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_icon_shape">Symbolform</string>
+    <string name="home_shape_circle">Kreis</string>
+    <string name="home_shape_rounded">Abgerundetes Quadrat</string>
+    <string name="home_shape_square">Quadrat</string>
+    <string name="home_large_icons">Große Symbole</string>
+    <string name="home_show_add_shortcut">Schaltfläche zum Hinzufügen von Verknüpfungen anzeigen</string>
+    <string name="home_show_logo">Midori-Logo anzeigen</string>
+    <string name="home_show_customize_shortcut">Schaltfläche zum Anpassen anzeigen</string>
+    <string name="home_context_menu">Startseitenoptionen</string>
+    <string name="home_add_folder">Ordner hinzufügen</string>
+    <string name="home_edit_folder">Ordner umbenennen</string>
+    <string name="home_folder_empty">Füge diesem Ordner Websites hinzu.</string>
+    <string name="home_remove_folder">Ordner entfernen</string>
+    <string name="home_remove_folder_message">Der Ordner wird entfernt. Seine Websites bleiben auf der Startseite.</string>
+    <string name="home_move_to_folder">In Ordner verschieben</string>
+    <string name="home_folder_root">Startseite</string>
+    <string name="home_add_website">Website hinzufügen</string>
+    <string name="home_site_categories">Kategorien</string>
+    <string name="home_suggested_sites">Vorgeschlagene Websites</string>
+    <string name="home_saved_bookmarks">Gespeicherte Lesezeichen</string>
+    <string name="home_site_added">Hinzugefügt</string>
+    <string name="home_category_gaming">Spiele</string>
+    <string name="home_category_finance">Finanzen</string>
+    <string name="home_category_social">Soziale Netzwerke</string>
+    <string name="home_category_travel">Reisen</string>
+    <string name="home_category_education">Bildung</string>
+    <string name="home_category_news">Nachrichten</string>
+    <string name="home_category_sport">Sport</string>
+    <string name="home_category_shopping">Einkaufen</string>
+    <string name="home_category_government">Behörden</string>
+    <string name="home_create_category_folder">Kategorie als Ordner hinzufügen</string>
+    <string name="home_folder_name_required">Gib einen Ordnernamen ein.</string>
+    <string name="home_shortcut_save_failed">Deine Änderungen konnten nicht gespeichert werden. Versuche es erneut.</string>
+    <string name="home_folder_contents">Websites: %1$d</string>
+</resources>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_icon_shape">Bentuk ikon</string>
+    <string name="home_shape_circle">Lingkaran</string>
+    <string name="home_shape_rounded">Persegi dengan sudut membulat</string>
+    <string name="home_shape_square">Persegi</string>
+    <string name="home_large_icons">Ikon besar</string>
+    <string name="home_show_add_shortcut">Tampilkan tombol tambah pintasan</string>
+    <string name="home_show_logo">Tampilkan logo Midori</string>
+    <string name="home_show_customize_shortcut">Tampilkan tombol penyesuaian</string>
+    <string name="home_context_menu">Opsi beranda</string>
+    <string name="home_add_folder">Tambah folder</string>
+    <string name="home_edit_folder">Ganti nama folder</string>
+    <string name="home_folder_empty">Tambahkan situs web ke folder ini.</string>
+    <string name="home_remove_folder">Hapus folder</string>
+    <string name="home_remove_folder_message">Folder akan dihapus. Situs web di dalamnya akan tetap ada di beranda.</string>
+    <string name="home_move_to_folder">Pindahkan ke folder</string>
+    <string name="home_folder_root">Beranda</string>
+    <string name="home_add_website">Tambah situs web</string>
+    <string name="home_site_categories">Kategori</string>
+    <string name="home_suggested_sites">Situs yang disarankan</string>
+    <string name="home_saved_bookmarks">Bookmark tersimpan</string>
+    <string name="home_site_added">Ditambahkan</string>
+    <string name="home_category_gaming">Gim</string>
+    <string name="home_category_finance">Keuangan</string>
+    <string name="home_category_social">Media sosial</string>
+    <string name="home_category_travel">Perjalanan</string>
+    <string name="home_category_education">Pendidikan</string>
+    <string name="home_category_news">Berita</string>
+    <string name="home_category_sport">Olahraga</string>
+    <string name="home_category_shopping">Belanja</string>
+    <string name="home_category_government">Pemerintahan</string>
+    <string name="home_create_category_folder">Tambahkan kategori sebagai folder</string>
+    <string name="home_folder_name_required">Masukkan nama folder.</string>
+    <string name="home_shortcut_save_failed">Perubahan tidak dapat disimpan. Coba lagi.</string>
+    <string name="home_folder_contents">Situs web: %1$d</string>
+</resources>

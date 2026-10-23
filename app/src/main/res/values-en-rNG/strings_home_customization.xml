@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_icon_shape">Icon shape</string>
+    <string name="home_shape_circle">Circle</string>
+    <string name="home_shape_rounded">Rounded square</string>
+    <string name="home_shape_square">Square</string>
+    <string name="home_large_icons">Large icons</string>
+    <string name="home_show_add_shortcut">Show add shortcut button</string>
+    <string name="home_show_logo">Show Midori logo</string>
+    <string name="home_show_customize_shortcut">Show customization button</string>
+    <string name="home_context_menu">Home options</string>
+    <string name="home_add_folder">Add folder</string>
+    <string name="home_edit_folder">Rename folder</string>
+    <string name="home_folder_empty">Add websites to this folder.</string>
+    <string name="home_remove_folder">Remove folder</string>
+    <string name="home_remove_folder_message">The folder will be removed. Its websites will stay on the home page.</string>
+    <string name="home_move_to_folder">Move to folder</string>
+    <string name="home_folder_root">Home page</string>
+    <string name="home_add_website">Add website</string>
+    <string name="home_site_categories">Categories</string>
+    <string name="home_suggested_sites">Suggested sites</string>
+    <string name="home_saved_bookmarks">Saved bookmarks</string>
+    <string name="home_site_added">Added</string>
+    <string name="home_category_gaming">Gaming</string>
+    <string name="home_category_finance">Finance</string>
+    <string name="home_category_social">Social</string>
+    <string name="home_category_travel">Travel</string>
+    <string name="home_category_education">Education</string>
+    <string name="home_category_news">News</string>
+    <string name="home_category_sport">Sport</string>
+    <string name="home_category_shopping">Shopping</string>
+    <string name="home_category_government">Government</string>
+    <string name="home_create_category_folder">Add category as folder</string>
+    <string name="home_folder_name_required">Enter a folder name.</string>
+    <string name="home_shortcut_save_failed">Could not save your changes. Try again.</string>
+    <string name="home_folder_contents">Websites: %1$d</string>
+</resources>

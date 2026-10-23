@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_icon_shape">Kształt ikon</string>
+    <string name="home_shape_circle">Koło</string>
+    <string name="home_shape_rounded">Zaokrąglony kwadrat</string>
+    <string name="home_shape_square">Kwadrat</string>
+    <string name="home_large_icons">Duże ikony</string>
+    <string name="home_show_add_shortcut">Pokaż przycisk dodawania skrótu</string>
+    <string name="home_show_logo">Pokaż logo Midori</string>
+    <string name="home_show_customize_shortcut">Pokaż przycisk personalizacji</string>
+    <string name="home_context_menu">Opcje strony głównej</string>
+    <string name="home_add_folder">Dodaj folder</string>
+    <string name="home_edit_folder">Zmień nazwę folderu</string>
+    <string name="home_folder_empty">Dodaj witryny do tego folderu.</string>
+    <string name="home_remove_folder">Usuń folder</string>
+    <string name="home_remove_folder_message">Folder zostanie usunięty. Jego witryny pozostaną na stronie głównej.</string>
+    <string name="home_move_to_folder">Przenieś do folderu</string>
+    <string name="home_folder_root">Strona główna</string>
+    <string name="home_add_website">Dodaj witrynę</string>
+    <string name="home_site_categories">Kategorie</string>
+    <string name="home_suggested_sites">Sugerowane witryny</string>
+    <string name="home_saved_bookmarks">Zapisane zakładki</string>
+    <string name="home_site_added">Dodano</string>
+    <string name="home_category_gaming">Gry</string>
+    <string name="home_category_finance">Finanse</string>
+    <string name="home_category_social">Media społecznościowe</string>
+    <string name="home_category_travel">Podróże</string>
+    <string name="home_category_education">Edukacja</string>
+    <string name="home_category_news">Wiadomości</string>
+    <string name="home_category_sport">Sport</string>
+    <string name="home_category_shopping">Zakupy</string>
+    <string name="home_category_government">Administracja publiczna</string>
+    <string name="home_create_category_folder">Dodaj kategorię jako folder</string>
+    <string name="home_folder_name_required">Wpisz nazwę folderu.</string>
+    <string name="home_shortcut_save_failed">Nie udało się zapisać zmian. Spróbuj ponownie.</string>
+    <string name="home_folder_contents">Liczba witryn: %1$d</string>
+</resources>

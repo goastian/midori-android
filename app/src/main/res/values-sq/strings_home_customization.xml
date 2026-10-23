@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_icon_shape">Forma e ikonave</string>
+    <string name="home_shape_circle">Rreth</string>
+    <string name="home_shape_rounded">Katror me qoshe të rrumbullakosura</string>
+    <string name="home_shape_square">Katror</string>
+    <string name="home_large_icons">Ikona të mëdha</string>
+    <string name="home_show_add_shortcut">Shfaq butonin për shtimin e shkurtoreve</string>
+    <string name="home_show_logo">Shfaq logon e Midori</string>
+    <string name="home_show_customize_shortcut">Shfaq butonin e personalizimit</string>
+    <string name="home_context_menu">Opsionet e faqes kryesore</string>
+    <string name="home_add_folder">Shto dosje</string>
+    <string name="home_edit_folder">Riemërto dosjen</string>
+    <string name="home_folder_empty">Shto sajte në këtë dosje.</string>
+    <string name="home_remove_folder">Hiq dosjen</string>
+    <string name="home_remove_folder_message">Dosja do të hiqet. Sajtet e saj do të mbeten në faqen kryesore.</string>
+    <string name="home_move_to_folder">Zhvendos në dosje</string>
+    <string name="home_folder_root">Faqja kryesore</string>
+    <string name="home_add_website">Shto sajt</string>
+    <string name="home_site_categories">Kategoritë</string>
+    <string name="home_suggested_sites">Sajte të sugjeruara</string>
+    <string name="home_saved_bookmarks">Faqeshënues të ruajtur</string>
+    <string name="home_site_added">U shtua</string>
+    <string name="home_category_gaming">Lojëra</string>
+    <string name="home_category_finance">Financa</string>
+    <string name="home_category_social">Rrjete sociale</string>
+    <string name="home_category_travel">Udhëtime</string>
+    <string name="home_category_education">Arsim</string>
+    <string name="home_category_news">Lajme</string>
+    <string name="home_category_sport">Sport</string>
+    <string name="home_category_shopping">Blerje</string>
+    <string name="home_category_government">Qeveri</string>
+    <string name="home_create_category_folder">Shto kategorinë si dosje</string>
+    <string name="home_folder_name_required">Shkruaj një emër për dosjen.</string>
+    <string name="home_shortcut_save_failed">Ndryshimet nuk u ruajtën dot. Provo sërish.</string>
+    <string name="home_folder_contents">Sajte: %1$d</string>
+</resources>

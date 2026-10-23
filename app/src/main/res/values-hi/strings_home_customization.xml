@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_icon_shape">आइकन का आकार</string>
+    <string name="home_shape_circle">गोल</string>
+    <string name="home_shape_rounded">गोल कोनों वाला वर्ग</string>
+    <string name="home_shape_square">वर्ग</string>
+    <string name="home_large_icons">बड़े आइकन</string>
+    <string name="home_show_add_shortcut">शॉर्टकट जोड़ने का बटन दिखाएँ</string>
+    <string name="home_show_logo">Midori का लोगो दिखाएँ</string>
+    <string name="home_show_customize_shortcut">कस्टमाइज़ करने का बटन दिखाएँ</string>
+    <string name="home_context_menu">होम पेज के विकल्प</string>
+    <string name="home_add_folder">फ़ोल्डर जोड़ें</string>
+    <string name="home_edit_folder">फ़ोल्डर का नाम बदलें</string>
+    <string name="home_folder_empty">इस फ़ोल्डर में वेबसाइटें जोड़ें।</string>
+    <string name="home_remove_folder">फ़ोल्डर हटाएँ</string>
+    <string name="home_remove_folder_message">फ़ोल्डर हटा दिया जाएगा। उसमें मौजूद वेबसाइटें होम पेज पर बनी रहेंगी।</string>
+    <string name="home_move_to_folder">फ़ोल्डर में ले जाएँ</string>
+    <string name="home_folder_root">होम पेज</string>
+    <string name="home_add_website">वेबसाइट जोड़ें</string>
+    <string name="home_site_categories">श्रेणियाँ</string>
+    <string name="home_suggested_sites">सुझाई गई साइटें</string>
+    <string name="home_saved_bookmarks">सहेजे गए बुकमार्क</string>
+    <string name="home_site_added">जोड़ा गया</string>
+    <string name="home_category_gaming">गेमिंग</string>
+    <string name="home_category_finance">वित्त</string>
+    <string name="home_category_social">सोशल मीडिया</string>
+    <string name="home_category_travel">यात्रा</string>
+    <string name="home_category_education">शिक्षा</string>
+    <string name="home_category_news">समाचार</string>
+    <string name="home_category_sport">खेल</string>
+    <string name="home_category_shopping">खरीदारी</string>
+    <string name="home_category_government">सरकार</string>
+    <string name="home_create_category_folder">श्रेणी को फ़ोल्डर के रूप में जोड़ें</string>
+    <string name="home_folder_name_required">फ़ोल्डर का नाम दर्ज करें।</string>
+    <string name="home_shortcut_save_failed">आपके बदलाव सहेजे नहीं जा सके। फिर से कोशिश करें।</string>
+    <string name="home_folder_contents">वेबसाइटें: %1$d</string>
+</resources>

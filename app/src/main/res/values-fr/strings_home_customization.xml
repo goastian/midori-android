@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_icon_shape">Forme des icônes</string>
+    <string name="home_shape_circle">Cercle</string>
+    <string name="home_shape_rounded">Carré arrondi</string>
+    <string name="home_shape_square">Carré</string>
+    <string name="home_large_icons">Grandes icônes</string>
+    <string name="home_show_add_shortcut">Afficher le bouton d’ajout de raccourci</string>
+    <string name="home_show_logo">Afficher le logo Midori</string>
+    <string name="home_show_customize_shortcut">Afficher le bouton de personnalisation</string>
+    <string name="home_context_menu">Options de la page d’accueil</string>
+    <string name="home_add_folder">Ajouter un dossier</string>
+    <string name="home_edit_folder">Renommer le dossier</string>
+    <string name="home_folder_empty">Ajoutez des sites à ce dossier.</string>
+    <string name="home_remove_folder">Supprimer le dossier</string>
+    <string name="home_remove_folder_message">Le dossier sera supprimé. Ses sites resteront sur la page d’accueil.</string>
+    <string name="home_move_to_folder">Déplacer vers un dossier</string>
+    <string name="home_folder_root">Page d’accueil</string>
+    <string name="home_add_website">Ajouter un site</string>
+    <string name="home_site_categories">Catégories</string>
+    <string name="home_suggested_sites">Sites suggérés</string>
+    <string name="home_saved_bookmarks">Favoris enregistrés</string>
+    <string name="home_site_added">Ajouté</string>
+    <string name="home_category_gaming">Jeux</string>
+    <string name="home_category_finance">Finance</string>
+    <string name="home_category_social">Réseaux sociaux</string>
+    <string name="home_category_travel">Voyages</string>
+    <string name="home_category_education">Éducation</string>
+    <string name="home_category_news">Actualités</string>
+    <string name="home_category_sport">Sport</string>
+    <string name="home_category_shopping">Achats</string>
+    <string name="home_category_government">Services publics</string>
+    <string name="home_create_category_folder">Ajouter la catégorie comme dossier</string>
+    <string name="home_folder_name_required">Saisissez un nom de dossier.</string>
+    <string name="home_shortcut_save_failed">Impossible d’enregistrer vos modifications. Réessayez.</string>
+    <string name="home_folder_contents">Sites : %1$d</string>
+</resources>

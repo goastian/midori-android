@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_icon_shape">آئیکن کی شکل</string>
+    <string name="home_shape_circle">دائرہ</string>
+    <string name="home_shape_rounded">گول کونوں والا مربع</string>
+    <string name="home_shape_square">مربع</string>
+    <string name="home_large_icons">بڑے آئیکنز</string>
+    <string name="home_show_add_shortcut">شارٹ کٹ شامل کرنے کا بٹن دکھائیں</string>
+    <string name="home_show_logo">Midori کا لوگو دکھائیں</string>
+    <string name="home_show_customize_shortcut">حسبِ پسند بنانے کا بٹن دکھائیں</string>
+    <string name="home_context_menu">ہوم پیج کے اختیارات</string>
+    <string name="home_add_folder">فولڈر شامل کریں</string>
+    <string name="home_edit_folder">فولڈر کا نام بدلیں</string>
+    <string name="home_folder_empty">اس فولڈر میں ویب سائٹس شامل کریں۔</string>
+    <string name="home_remove_folder">فولڈر ہٹائیں</string>
+    <string name="home_remove_folder_message">فولڈر ہٹا دیا جائے گا۔ اس کی ویب سائٹس ہوم پیج پر موجود رہیں گی۔</string>
+    <string name="home_move_to_folder">فولڈر میں منتقل کریں</string>
+    <string name="home_folder_root">ہوم پیج</string>
+    <string name="home_add_website">ویب سائٹ شامل کریں</string>
+    <string name="home_site_categories">زمرے</string>
+    <string name="home_suggested_sites">تجویز کردہ سائٹس</string>
+    <string name="home_saved_bookmarks">محفوظ بک مارکس</string>
+    <string name="home_site_added">شامل کر دیا گیا</string>
+    <string name="home_category_gaming">گیمنگ</string>
+    <string name="home_category_finance">مالیات</string>
+    <string name="home_category_social">سوشل میڈیا</string>
+    <string name="home_category_travel">سفر</string>
+    <string name="home_category_education">تعلیم</string>
+    <string name="home_category_news">خبریں</string>
+    <string name="home_category_sport">کھیل</string>
+    <string name="home_category_shopping">خریداری</string>
+    <string name="home_category_government">حکومت</string>
+    <string name="home_create_category_folder">زمرے کو فولڈر کے طور پر شامل کریں</string>
+    <string name="home_folder_name_required">فولڈر کا نام درج کریں۔</string>
+    <string name="home_shortcut_save_failed">آپ کی تبدیلیاں محفوظ نہیں ہو سکیں۔ دوبارہ کوشش کریں۔</string>
+    <string name="home_folder_contents">ویب سائٹس: %1$d</string>
+</resources>
