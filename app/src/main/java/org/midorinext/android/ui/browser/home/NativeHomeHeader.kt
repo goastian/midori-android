@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,17 +24,30 @@ fun NativeHomeHeader(
     private: Boolean,
     onSwitchBrowsingMode: () -> Unit,
     modifier: Modifier = Modifier,
+    showLogo: Boolean = true,
+    onCustomize: (() -> Unit)? = null,
 ) {
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        val logo = painterResource(R.drawable.logomidori)
-        Image(
-            logo,
-            "Midori",
-            Modifier.height(28.dp)
-                .aspectRatio(logo.intrinsicSize.width / logo.intrinsicSize.height)
-                .testTag("native_home_brand"),
-        )
+        if (showLogo) {
+            val logo = painterResource(R.drawable.logomidori)
+            Image(
+                logo,
+                "Midori",
+                Modifier.height(28.dp)
+                    .aspectRatio(logo.intrinsicSize.width / logo.intrinsicSize.height)
+                    .testTag("native_home_brand"),
+            )
+        }
         Spacer(Modifier.weight(1f))
+        if (onCustomize != null) {
+            IconButton(onClick = onCustomize, modifier = Modifier.testTag("native_home_customize")) {
+                Icon(
+                    painterResource(R.drawable.icons_edit),
+                    stringResource(R.string.menu_customize_homepage),
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+        }
         IconToggleButton(
             checked = private,
             onCheckedChange = { onSwitchBrowsingMode() },

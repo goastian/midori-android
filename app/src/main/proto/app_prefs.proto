@@ -155,12 +155,25 @@ message AppPreferences {
   bool hide_home_stories = 84;
   bool hide_home_privacy = 85;
   string home_wallpaper_id = 86;
+  HomeShortcutShape home_shortcut_shape = 87;
+  bool home_large_shortcuts = 88;
+  bool hide_home_add_shortcut = 89;
+  bool hide_home_logo = 90;
+  bool hide_home_customize_shortcut = 91;
 }
 
 message HomeShortcut {
   string id = 1;
   string title = 2;
   string url = 3;
+  bool is_folder = 4;
+  string parent_id = 5;
+}
+
+enum HomeShortcutShape {
+  HOME_SHORTCUT_ROUNDED = 0;
+  HOME_SHORTCUT_CIRCLE = 1;
+  HOME_SHORTCUT_SQUARE = 2;
 }
 
 message CustomSearchEngine {

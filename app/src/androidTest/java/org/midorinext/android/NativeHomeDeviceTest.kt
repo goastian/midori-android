@@ -60,6 +60,11 @@ class NativeHomeDeviceTest {
             updateAppearance(Appearance.LIGHT)
             updateToolbarPosition(ToolbarPosition.TOP)
             updateOpenBlankNewTab(false)
+            updateHomeShortcutShape(HomeShortcutShape.HOME_SHORTCUT_ROUNDED)
+            updateHomeLargeShortcuts(false)
+            updateHomeAddShortcut(true)
+            updateHomeLogo(true)
+            updateHomeCustomizeShortcut(true)
             HomeSection.entries.forEach { updateHomeSection(it, visible = true) }
         }
         scenario = ActivityScenario.launch(MainActivity::class.java)
@@ -102,6 +107,11 @@ class NativeHomeDeviceTest {
             updateAppearance(preferences.appearance)
             updateToolbarPosition(preferences.toolbarPosition)
             updateOpenBlankNewTab(preferences.openBlankNewTab)
+            updateHomeShortcutShape(preferences.homeShortcutShape)
+            updateHomeLargeShortcuts(preferences.homeLargeShortcuts)
+            updateHomeAddShortcut(!preferences.hideHomeAddShortcut)
+            updateHomeLogo(!preferences.hideHomeLogo)
+            updateHomeCustomizeShortcut(!preferences.hideHomeCustomizeShortcut)
             updateHomeSection(HomeSection.SHORTCUTS, !preferences.hideHomeShortcuts)
             updateHomeSection(HomeSection.CONTINUE, !preferences.hideHomeContinue)
             updateHomeSection(HomeSection.RECENT_VISITS, !preferences.hideHomeRecentVisits)
@@ -207,7 +217,8 @@ class NativeHomeDeviceTest {
         assertNoWebSurface()
         compose.onNodeWithText(app.getString(R.string.home_shortcuts)).assertIsDisplayed()
         val visibleShortcuts = if (preferences.homeShortcutsInitialized) preferences.homeShortcutsList else defaultHomeShortcuts()
-        visibleShortcuts.take(2).forEach {
+        val displayedCount = compose.onAllNodesWithTag("home_shortcut_tile").fetchSemanticsNodes().size
+        visibleShortcuts.filter { it.parentId.isEmpty() }.take(displayedCount).forEach {
             compose.onNode(hasText(it.title) and hasAnyAncestor(hasTestTag("home_shortcut_tile")), useUnmergedTree = true).assertIsDisplayed()
         }
         compose.onNodeWithText(app.getString(R.string.home_continue)).assertIsDisplayed()
@@ -270,6 +281,7 @@ class NativeHomeDeviceTest {
     @Test
     fun shortcutCanBeAddedAndOpenedAndHomeSurvivesActivityRecreation() {
         compose.onNodeWithTag("home_add_shortcut").performClick()
+        compose.onNodeWithTag("home_add_website").performClick()
         compose.onNodeWithTag("home_shortcut_title").performTextInput("Home shortcut fixture")
         compose.onNodeWithTag("home_shortcut_url").performTextInput("https://example.org/native-shortcut")
         compose.onNodeWithTag("home_shortcut_save").performClick()
@@ -280,8 +292,9 @@ class NativeHomeDeviceTest {
         compose.waitForIdle()
         compose.onNodeWithTag("native_home").assertIsDisplayed()
         compose.onAllNodesWithText(app.getString(R.string.home_show_all))[0].performClick()
+        compose.onNodeWithTag("home_collection_list").performScrollToNode(hasText("Home shortcut fixture"))
         compose.onNode(hasText("Home shortcut fixture") and hasAnyAncestor(hasTestTag("home_shortcuts_sheet")))
-            .performScrollTo().performClick()
+            .performClick()
         compose.waitUntil(20_000) { app.store.get().state.tabs.find { it.id == homeId }?.content?.url == "https://example.org/native-shortcut" }
         compose.onNodeWithTag("native_home").assertDoesNotExist()
     }
@@ -392,6 +405,10 @@ class NativeHomeDeviceTest {
 
     @Test
     fun compactHomeKeepsActionsReachableAndSupportsDarkAppearance(): Unit = runBlocking {
+        app.appPreferencesRepository.get().updateHomeWallpaper(HomeWallpaper.NONE)
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("native_home_background:none").fetchSemanticsNodes().isNotEmpty()
+        }
         val lightContrast = assertBrandVisible(dark = false)
         val density = app.resources.displayMetrics.density
         val shortcutIcons = compose.onAllNodesWithTag("home_shortcut_icon", useUnmergedTree = true).fetchSemanticsNodes()
@@ -502,11 +519,14 @@ class NativeHomeDeviceTest {
     @Test
     fun amazonShortcutLoadsARealFaviconOnTheConnectedDevice(): Unit = runBlocking {
         Assume.assumeTrue(InstrumentationRegistry.getArguments().getString("homeLiveFavicons") == "true")
-        val amazon = preferences.homeShortcutsList.firstOrNull { it.url.contains("amazon.com") }
+        val amazon = preferences.homeShortcutsList.firstOrNull { it.parentId.isEmpty() && it.url.contains("amazon.com") }
         val url = amazon?.url ?: "https://amazon.com"
+        val shortcutId = amazon?.id ?: "native-home-amazon-fixture"
         if (amazon == null) app.appPreferencesRepository.get().saveHomeShortcut(
-            "native-home-amazon-fixture", "Amazon favicon fixture", url)
+            shortcutId, "Amazon favicon fixture", url)
         try {
+            compose.onAllNodesWithText(app.getString(R.string.home_show_all))[0].performClick()
+            compose.onNodeWithTag("home_collection_list").performScrollToNode(hasTestTag("home_collection_item:$shortcutId"))
             compose.waitUntil(60_000) {
                 compose.onAllNodesWithTag("home_favicon:${homeIconOrigin(url)}", useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty()
             }
@@ -518,9 +538,7 @@ class NativeHomeDeviceTest {
             File(app.cacheDir, "amazon-favicon-result.json").writeText(
                 """{"width":${favicon.bitmap.width},"height":${favicon.bitmap.height},"source":"${favicon.source}"}""")
             capture("native-home-amazon.png")
-            compose.onAllNodesWithText(app.getString(R.string.home_show_all))[0].performClick()
-            compose.onNode(hasText(amazon?.title ?: "Amazon favicon fixture") and hasAnyAncestor(hasTestTag("home_shortcuts_sheet")))
-                .assertIsDisplayed()
+            compose.onNodeWithTag("home_collection_item:$shortcutId").assertIsDisplayed()
             capture("native-home-shortcuts.png")
         } finally {
             if (amazon == null) app.appPreferencesRepository.get().deleteHomeShortcut("native-home-amazon-fixture")

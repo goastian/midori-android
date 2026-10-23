@@ -23,6 +23,7 @@ import org.midorinext.android.newtab.recentHomeSiteKey
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.storage.history.HistoryRepository
+import org.midorinext.android.storage.bookmarks.BookmarksRepository
 import javax.inject.Inject
 
 data class HomePage(val title: String, val url: String)
@@ -37,6 +38,7 @@ class NativeHomeViewModel @Inject constructor(
     private val storiesProvider: dagger.Lazy<HomeStoriesRepository>,
     private val thumbnailProvider: dagger.Lazy<ThumbnailStorage>,
     private val faviconProvider: dagger.Lazy<HomeFaviconRepository>,
+    private val bookmarksProvider: dagger.Lazy<BookmarksRepository>,
     private val store: BrowserStore,
 ) : ViewModel() {
     val preferences = preferencesRepository.flow.stateIn(viewModelScope,
@@ -49,6 +51,13 @@ class NativeHomeViewModel @Inject constructor(
             } }
         }
     }
+
+    suspend fun savedBookmarks(): List<HomePage> = bookmarksProvider.get().searchBookmarks("", 100)
+        .getOrNull().orEmpty().mapNotNull { bookmark ->
+            bookmark.url?.let(::publicHomeUrl)?.let { url ->
+                HomePage(bookmark.title?.ifBlank { null } ?: recentHomeSiteKey(url).orEmpty(), url)
+            }
+        }.distinctBy { it.url }
 
     val continuation by lazy {
         store.flow().map { state -> state.tabs

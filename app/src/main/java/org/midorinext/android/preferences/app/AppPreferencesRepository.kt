@@ -28,42 +28,141 @@ class AppPreferencesRepository @Inject constructor(
     private val datastore: DataStore<AppPreferences>
 ) {
     suspend fun ensureHomeShortcuts() {
-        datastore.updateData { prefs ->
-            if (prefs.homeShortcutsInitialized) prefs else prefs.toBuilder()
-                .addAllHomeShortcuts(defaultHomeShortcuts()).setHomeShortcutsInitialized(true).build()
-        }
+        datastore.updateData { it.withInitializedHomeShortcuts() }
     }
 
-    suspend fun saveHomeShortcut(id: String?, title: String, url: String): Boolean {
+    suspend fun saveHomeShortcut(id: String?, title: String, url: String, parentId: String? = null): Boolean {
         val normalized = publicHomeUrl(url) ?: return false
-        if (title.isBlank()) return false
+        if (title.isBlank() || id?.isBlank() == true) return false
+        var saved = false
         datastore.updateData { prefs ->
-            val sites = prefs.homeShortcutsList.toMutableList()
+            val initialized = prefs.withInitializedHomeShortcuts()
+            val sites = initialized.homeShortcutsList.toMutableList()
             val index = sites.indexOfFirst { it.id == id }
-            val shortcut = HomeShortcut.newBuilder().setId(id ?: UUID.randomUUID().toString())
-                .setTitle(title.trim()).setUrl(normalized).build()
+            val existing = sites.getOrNull(index)
+            val destination = parentId ?: existing?.parentId.orEmpty()
+            if (existing?.isFolder == true || !sites.hasHomeFolder(destination)) return@updateData prefs
+            val shortcut = (existing?.toBuilder() ?: HomeShortcut.newBuilder())
+                .setId(id ?: UUID.randomUUID().toString())
+                .setTitle(title.trim()).setUrl(normalized).setParentId(destination).build()
             if (index >= 0) sites[index] = shortcut else sites.add(shortcut)
-            prefs.toBuilder().clearHomeShortcuts().addAllHomeShortcuts(sites)
-                .setHomeShortcutsInitialized(true).build()
+            saved = true
+            initialized.withHomeShortcuts(sites)
+        }
+        return saved
+    }
+
+    suspend fun saveHomeFolder(id: String?, title: String): Boolean {
+        if (title.isBlank() || id?.isBlank() == true) return false
+        var saved = false
+        datastore.updateData { prefs ->
+            val initialized = prefs.withInitializedHomeShortcuts()
+            val sites = initialized.homeShortcutsList.toMutableList()
+            val index = sites.indexOfFirst { it.id == id }
+            val existing = sites.getOrNull(index)
+            if (existing != null && !existing.isFolder) return@updateData prefs
+            val folder = HomeShortcut.newBuilder().setId(id ?: UUID.randomUUID().toString())
+                .setTitle(title.trim()).setIsFolder(true).build()
+            if (index >= 0) sites[index] = folder else sites.add(folder)
+            saved = true
+            initialized.withHomeShortcuts(sites)
+        }
+        return saved
+    }
+
+    suspend fun addHomeShortcutFolder(title: String, sites: List<Pair<String, String>>): Boolean {
+        if (title.isBlank() || sites.any { it.first.isBlank() }) return false
+        val normalizedSites = sites.map { (name, url) ->
+            name.trim() to (publicHomeUrl(url) ?: return false)
+        }.distinctBy { it.second }
+        val folderId = UUID.randomUUID().toString()
+        val folder = HomeShortcut.newBuilder().setId(folderId).setTitle(title.trim()).setIsFolder(true).build()
+        val shortcuts = normalizedSites.map { (name, url) ->
+            HomeShortcut.newBuilder().setId(UUID.randomUUID().toString())
+                .setTitle(name).setUrl(url).setParentId(folderId).build()
+        }
+        datastore.updateData { prefs ->
+            val initialized = prefs.withInitializedHomeShortcuts()
+            initialized.withHomeShortcuts(initialized.homeShortcutsList + folder + shortcuts)
         }
         return true
     }
 
     suspend fun deleteHomeShortcut(id: String) {
-        datastore.updateData { prefs -> prefs.toBuilder().clearHomeShortcuts()
-            .addAllHomeShortcuts(prefs.homeShortcutsList.filterNot { it.id == id }).build() }
+        datastore.updateData { prefs ->
+            val initialized = prefs.withInitializedHomeShortcuts()
+            initialized.withHomeShortcuts(initialized.homeShortcutsList.filterNot { it.id == id }.map { site ->
+                if (site.parentId == id) site.toBuilder().clearParentId().build() else site
+            })
+        }
     }
 
     suspend fun moveHomeShortcut(id: String, offset: Int) {
         datastore.updateData { prefs ->
-            val sites = prefs.homeShortcutsList.toMutableList()
+            val initialized = prefs.withInitializedHomeShortcuts()
+            val sites = initialized.homeShortcutsList.toMutableList()
             val index = sites.indexOfFirst { it.id == id }
-            if (index < 0 || sites.isEmpty()) prefs else {
-                val target = (index + offset).coerceIn(0, sites.lastIndex)
-                sites.add(target, sites.removeAt(index))
-                prefs.toBuilder().clearHomeShortcuts().addAllHomeShortcuts(sites).build()
-            }
+            if (index < 0) return@updateData initialized
+            val siblingIndices = sites.indices.filter { sites[it].parentId == sites[index].parentId }
+            val siblings = siblingIndices.map { sites[it] }.toMutableList()
+            val siblingIndex = siblingIndices.indexOf(index)
+            val target = (siblingIndex.toLong() + offset).coerceIn(0, siblings.lastIndex.toLong()).toInt()
+            siblings.add(target, siblings.removeAt(siblingIndex))
+            siblingIndices.forEachIndexed { position, siteIndex -> sites[siteIndex] = siblings[position] }
+            initialized.withHomeShortcuts(sites)
         }
+    }
+
+    suspend fun moveHomeShortcutToFolder(id: String, parentId: String): Boolean {
+        var moved = false
+        datastore.updateData { prefs ->
+            val initialized = prefs.withInitializedHomeShortcuts()
+            val sites = initialized.homeShortcutsList.toMutableList()
+            val index = sites.indexOfFirst { it.id == id }
+            if (index < 0 || !sites.hasHomeFolder(parentId)) return@updateData prefs
+            val site = sites[index]
+            if (site.isFolder && parentId.isNotEmpty()) return@updateData prefs
+            moved = true
+            if (site.parentId == parentId) return@updateData initialized
+            sites.removeAt(index)
+            sites.add(site.toBuilder().setParentId(parentId).build())
+            initialized.withHomeShortcuts(sites)
+        }
+        return moved
+    }
+
+    private fun AppPreferences.withInitializedHomeShortcuts(): AppPreferences {
+        if (homeShortcutsInitialized) return this
+        return toBuilder().apply {
+            if (homeShortcutsCount == 0) addAllHomeShortcuts(defaultHomeShortcuts())
+        }.setHomeShortcutsInitialized(true).build()
+    }
+
+    private fun AppPreferences.withHomeShortcuts(shortcuts: List<HomeShortcut>): AppPreferences =
+        toBuilder().clearHomeShortcuts().addAllHomeShortcuts(shortcuts).build()
+
+    private fun List<HomeShortcut>.hasHomeFolder(id: String): Boolean =
+        id.isEmpty() || any { it.id == id && it.isFolder && it.parentId.isEmpty() }
+
+    suspend fun updateHomeShortcutShape(shape: HomeShortcutShape) {
+        if (shape == HomeShortcutShape.UNRECOGNIZED) return
+        datastore.updateData { it.toBuilder().setHomeShortcutShape(shape).build() }
+    }
+
+    suspend fun updateHomeLargeShortcuts(enabled: Boolean) {
+        datastore.updateData { it.toBuilder().setHomeLargeShortcuts(enabled).build() }
+    }
+
+    suspend fun updateHomeAddShortcut(visible: Boolean) {
+        datastore.updateData { it.toBuilder().setHideHomeAddShortcut(!visible).build() }
+    }
+
+    suspend fun updateHomeLogo(visible: Boolean) {
+        datastore.updateData { it.toBuilder().setHideHomeLogo(!visible).build() }
+    }
+
+    suspend fun updateHomeCustomizeShortcut(visible: Boolean) {
+        datastore.updateData { it.toBuilder().setHideHomeCustomizeShortcut(!visible).build() }
     }
 
     suspend fun updateHomeSection(section: HomeSection, visible: Boolean) {

@@ -98,6 +98,26 @@ class PreferencesViewModel @Inject constructor(
         viewModelScope.launch { appPreferencesRepository.updateHomeSection(section, visible) }
     }
 
+    fun updateHomeShortcutShape(shape: HomeShortcutShape) {
+        viewModelScope.launch { appPreferencesRepository.updateHomeShortcutShape(shape) }
+    }
+
+    fun updateHomeLargeShortcuts(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateHomeLargeShortcuts(enabled) }
+    }
+
+    fun updateHomeAddShortcut(visible: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateHomeAddShortcut(visible) }
+    }
+
+    fun updateHomeLogo(visible: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateHomeLogo(visible) }
+    }
+
+    fun updateHomeCustomizeShortcut(visible: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateHomeCustomizeShortcut(visible) }
+    }
+
     suspend fun updateHomeWallpaper(wallpaper: HomeWallpaper) {
         appPreferencesRepository.updateHomeWallpaper(wallpaper)
     }

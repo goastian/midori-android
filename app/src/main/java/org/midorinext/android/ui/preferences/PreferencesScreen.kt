@@ -8,7 +8,10 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,12 +22,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,11 +45,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.midorinext.android.BuildConfig
 import org.midorinext.android.R
@@ -49,6 +62,7 @@ import org.midorinext.android.mozac.downloads.hasPersistedWritableTreePermission
 import org.midorinext.android.newtab.HomeWallpaper
 import org.midorinext.android.ui.browser.home.HomeWallpaperImage
 import org.midorinext.android.ui.browser.home.HomeWallpaperPicker
+import org.midorinext.android.ui.browser.home.homeShortcutIconShape
 import org.midorinext.android.preferences.app.*
 import org.midorinext.android.ui.MidoriApplicationViewModel
 import org.midorinext.android.ui.nav.NavDestination
@@ -272,6 +286,35 @@ fun HomepageSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
             },
             onClicked = { showWallpapers = true },
         )
+        PreferenceGroupLabel(label = R.string.home_icon_shape)
+        HomeShortcutShapeSelector(
+            value = preferences.homeShortcutShape,
+            onValueChange = viewModel::updateHomeShortcutShape,
+        )
+        HomeAppearanceToggle(
+            label = R.string.home_large_icons,
+            value = preferences.homeLargeShortcuts,
+            testTag = "home_large_icons",
+            onValueChange = viewModel::updateHomeLargeShortcuts,
+        )
+        HomeAppearanceToggle(
+            label = R.string.home_show_add_shortcut,
+            value = !preferences.hideHomeAddShortcut,
+            testTag = "home_show_add_shortcut",
+            onValueChange = viewModel::updateHomeAddShortcut,
+        )
+        HomeAppearanceToggle(
+            label = R.string.home_show_logo,
+            value = !preferences.hideHomeLogo,
+            testTag = "home_show_logo",
+            onValueChange = viewModel::updateHomeLogo,
+        )
+        HomeAppearanceToggle(
+            label = R.string.home_show_customize_shortcut,
+            value = !preferences.hideHomeCustomizeShortcut,
+            testTag = "home_show_customize_shortcut",
+            onValueChange = viewModel::updateHomeCustomizeShortcut,
+        )
         PreferenceGroupLabel(label = R.string.settings_homepage_sections)
         PreferenceToggle(
             label = R.string.home_shortcuts, value = !preferences.hideHomeShortcuts,
@@ -301,6 +344,74 @@ fun HomepageSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
     }
     if (showWallpapers) {
         HomeWallpaperPicker(current = wallpaper, onDismiss = { showWallpapers = false }, onApply = viewModel::updateHomeWallpaper)
+    }
+}
+
+@Composable
+private fun HomeShortcutShapeSelector(
+    value: HomeShortcutShape,
+    onValueChange: (HomeShortcutShape) -> Unit,
+) {
+    val options = listOf(
+        Triple(HomeShortcutShape.HOME_SHORTCUT_CIRCLE, R.string.home_shape_circle, "home_shape_circle"),
+        Triple(HomeShortcutShape.HOME_SHORTCUT_ROUNDED, R.string.home_shape_rounded, "home_shape_rounded"),
+        Triple(HomeShortcutShape.HOME_SHORTCUT_SQUARE, R.string.home_shape_square, "home_shape_square"),
+    )
+    Row(
+        modifier = Modifier.fillMaxWidth().selectableGroup().padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        options.forEach { (shape, label, testTag) ->
+            val selected = value == shape ||
+                (value == HomeShortcutShape.UNRECOGNIZED && shape == HomeShortcutShape.HOME_SHORTCUT_ROUNDED)
+            Column(
+                modifier = Modifier.weight(1f)
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(
+                        width = 2.dp,
+                        color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                        shape = RoundedCornerShape(12.dp),
+                    )
+                    .selectable(selected = selected, role = Role.RadioButton, onClick = { onValueChange(shape) })
+                    .testTag(testTag)
+                    .padding(horizontal = 4.dp, vertical = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Surface(
+                    modifier = Modifier.size(48.dp),
+                    shape = homeShortcutIconShape(shape),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                    contentColor = MaterialTheme.colorScheme.primary,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                ) {
+                    Icon(painterResource(R.drawable.icons_home), contentDescription = null, modifier = Modifier.padding(12.dp))
+                }
+                Text(stringResource(label), style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center)
+                RadioButton(selected = selected, onClick = null)
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeAppearanceToggle(
+    @StringRes label: Int,
+    value: Boolean,
+    testTag: String,
+    onValueChange: (Boolean) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth()
+            .toggleable(value = value, role = Role.Switch, onValueChange = onValueChange)
+            .testTag(testTag)
+            .heightIn(min = 56.dp)
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(stringResource(label), modifier = Modifier.weight(1f), fontSize = 16.sp, lineHeight = 20.sp)
+        Switch(checked = value, onCheckedChange = null)
     }
 }
 

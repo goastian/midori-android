@@ -1,9 +1,8 @@
 package org.midorinext.android.ui.browser.home
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -13,10 +12,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.onLongClick
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Shadow
@@ -28,7 +34,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,7 +43,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import coil.compose.AsyncImage
-import kotlinx.coroutines.launch
 import org.midorinext.android.R
 import org.midorinext.android.ext.toCleanHost
 import org.midorinext.android.newtab.defaultHomeShortcuts
@@ -49,8 +53,9 @@ import org.midorinext.android.preferences.app.HomeShortcut
 import org.midorinext.android.ui.nav.NavDestination
 import org.midorinext.android.ui.tabs.TabThumbnail
 import org.midorinext.android.ui.theme.LocalMidoriTheme
+import kotlin.math.roundToInt
 
-private val wallpaperTextShadow = Shadow(Color.Black.copy(alpha = 0.8f), Offset(0f, 1f), 4f)
+internal val wallpaperTextShadow = Shadow(Color.Black.copy(alpha = 0.8f), Offset(0f, 1f), 4f)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,11 +108,10 @@ fun NativeHomeScreen(
     }
     val stories by viewModel.stories.collectAsStateWithLifecycle()
     val shortcuts = if (preferences.homeShortcutsInitialized) preferences.homeShortcutsList else remember { defaultHomeShortcuts() }
-    val scope = rememberCoroutineScope()
-    var shortcutEditor by remember { mutableStateOf<HomeShortcut?>(null) }
-    var showShortcutEditor by rememberSaveable { mutableStateOf(false) }
-    var selectedShortcut by remember { mutableStateOf<HomeShortcut?>(null) }
-    var showAllShortcuts by rememberSaveable { mutableStateOf(false) }
+    val shortcutState = rememberSaveable(saver = HomeShortcutUiState.Saver) { HomeShortcutUiState() }
+    var homeMenuPosition by remember { mutableStateOf<Offset?>(null) }
+    val haptics = LocalHapticFeedback.current
+    val homeOptionsLabel = stringResource(R.string.home_context_menu)
     val wallpaper = HomeWallpaper.fromId(preferences.homeWallpaperId)
     val hasWallpaper = wallpaper != HomeWallpaper.NONE
     var wallpaperReady by remember(wallpaper) { mutableStateOf(!hasWallpaper) }
@@ -115,8 +119,8 @@ fun NativeHomeScreen(
     val background = if (LocalMidoriTheme.current.dark) colors.surface else Color(0xFFF5F8F5)
     val cardColor = if (LocalMidoriTheme.current.dark) colors.surfaceContainer else Color.White
     val insetColor = if (LocalMidoriTheme.current.dark) colors.surfaceContainerHigh else Color(0xFFE8F0E8)
-    val shortcutColumns = (windowSize.width / LocalDensity.current.density / 80)
-        .toInt().coerceIn(3, 6)
+    val shortcutColumns = ((windowSize.width / LocalDensity.current.density - 32) /
+        if (preferences.homeLargeShortcuts) 88 else 72).toInt().coerceIn(3, 6)
     val listState = rememberLazyListState()
     val thumbnailContent = remember(preferences, recent, continuation, blocked, stories, background, configuration, windowSize, wallpaperReady) {
         listOf(preferences, recent, continuation, blocked, stories, background, configuration, windowSize, wallpaperReady)
@@ -129,6 +133,15 @@ fun NativeHomeScreen(
     )
 
     Box(modifier.fillMaxSize().then(thumbnailModifier).background(background)
+        .pointerInput(Unit) {
+            detectTapGestures(onLongPress = { position ->
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                homeMenuPosition = position
+            })
+        }
+        .semantics {
+            onLongClick(label = homeOptionsLabel) { homeMenuPosition = Offset.Zero; true }
+        }
         .testTag(if (wallpaperReady) "native_home_background:${wallpaper.id}" else "native_home_loading_background:${wallpaper.id}")) {
         if (hasWallpaper) {
             HomeWallpaperImage(wallpaper, Modifier.matchParentSize(), onReady = { wallpaperReady = true })
@@ -144,25 +157,22 @@ fun NativeHomeScreen(
         ) {
             item(key = "header") {
                 CompositionLocalProvider(LocalContentColor provides if (hasWallpaper) Color.White else LocalContentColor.current) {
-                    NativeHomeHeader(private = false, onSwitchBrowsingMode = onSwitchBrowsingMode)
+                    NativeHomeHeader(private = false, onSwitchBrowsingMode = onSwitchBrowsingMode,
+                        showLogo = !preferences.hideHomeLogo,
+                        onCustomize = if (preferences.hideHomeCustomizeShortcut) null else {
+                            { navigateTo(NavDestination.HomepageSettings) }
+                        })
                 }
             }
             if (!preferences.hideHomeShortcuts) {
                 item(key = "shortcuts") {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         HomeSectionHeading(R.string.home_shortcuts, R.string.home_show_all,
-                            onAdd = { shortcutEditor = null; showShortcutEditor = true }, wallpaper = hasWallpaper) { showAllShortcuts = true }
-                        shortcuts.take(shortcutColumns * 2).chunked(shortcutColumns).forEach { row ->
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                row.forEach { site ->
-                                    HomeShortcutTile(site.title, site.url,
-                                        insetColor, Modifier.weight(1f), viewModel, dataReady,
-                                        wallpaper = hasWallpaper,
-                                        onClick = { onOpenUrl(site.url) }, onLongClick = { selectedShortcut = site })
-                                }
-                                repeat(shortcutColumns - row.size) { Spacer(Modifier.weight(1f)) }
-                            }
+                            onAdd = if (preferences.hideHomeAddShortcut) null else { { shortcutState.pickerParentId = "" } }, wallpaper = hasWallpaper) {
+                            shortcutState.collectionId = ""
                         }
+                        HomeShortcutGrid(shortcuts.filter { it.parentId.isEmpty() }, shortcuts, preferences,
+                            shortcutColumns, insetColor, hasWallpaper, viewModel, dataReady, shortcutState, onOpenUrl)
                     }
                 }
             }
@@ -283,7 +293,7 @@ fun NativeHomeScreen(
                     }
                 }
             }
-            item(key = "customize") {
+            if (!preferences.hideHomeCustomizeShortcut) item(key = "customize") {
                 TextButton(onClick = { navigateTo(NavDestination.HomepageSettings) }, modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.textButtonColors(contentColor = if (hasWallpaper) Color.White else colors.primary)) {
                     Icon(painterResource(R.drawable.icons_settings), null, Modifier.size(18.dp))
@@ -293,63 +303,32 @@ fun NativeHomeScreen(
                 }
             }
         }
+        homeMenuPosition?.let { position ->
+            Box(Modifier.align(AbsoluteAlignment.TopLeft).absoluteOffset { IntOffset(position.x.roundToInt(), position.y.roundToInt()) }) {
+                DropdownMenu(expanded = true, onDismissRequest = { homeMenuPosition = null },
+                    modifier = Modifier.testTag("home_context_menu")) {
+                    DropdownMenuItem(text = { Text(stringResource(R.string.menu_customize_homepage)) },
+                        leadingIcon = { Icon(painterResource(R.drawable.icons_settings), null) },
+                        modifier = Modifier.testTag("home_context_customize"), onClick = {
+                            homeMenuPosition = null; navigateTo(NavDestination.HomepageSettings)
+                        })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.home_add_shortcut)) },
+                        leadingIcon = { Icon(painterResource(R.drawable.icons_add_tab), null) },
+                        modifier = Modifier.testTag("home_context_add_shortcut"), onClick = {
+                            homeMenuPosition = null; shortcutState.pickerParentId = ""
+                        })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.home_add_folder)) },
+                        leadingIcon = { Icon(painterResource(R.drawable.icons_folder_add), null) },
+                        modifier = Modifier.testTag("home_context_add_folder"), onClick = {
+                            homeMenuPosition = null; shortcutState.folderEditorId = null; shortcutState.showFolderEditor = true
+                        })
+                }
+            }
+        }
     }
 
-    if (showAllShortcuts) {
-        ModalBottomSheet(onDismissRequest = { showAllShortcuts = false }, containerColor = background,
-            modifier = Modifier.testTag("home_shortcuts_sheet"),
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
-            Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                Text(stringResource(R.string.home_shortcuts), style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 12.dp))
-                LazyColumn(Modifier.heightIn(max = 400.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    items(shortcuts, key = { it.id }) { site ->
-                        HomeCard(cardColor, onClick = { showAllShortcuts = false; onOpenUrl(site.url) }) {
-                            Row(Modifier.heightIn(min = 56.dp).padding(start = 12.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                                HomeFavicon(site.url, viewModel, dataReady, Modifier.size(28.dp))
-                                Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-                                    Text(site.title, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                    Text(site.url.toCleanHost(), style = MaterialTheme.typography.bodySmall,
-                                        color = colors.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                }
-                                IconButton(onClick = { showAllShortcuts = false; selectedShortcut = site }) {
-                                    Icon(painterResource(R.drawable.icons_settings), stringResource(R.string.home_edit_shortcut), Modifier.size(20.dp))
-                                }
-                            }
-                        }
-                    }
-                }
-                FilledTonalButton(onClick = { showAllShortcuts = false; shortcutEditor = null; showShortcutEditor = true },
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp), shape = RoundedCornerShape(12.dp)) {
-                    Text(stringResource(R.string.home_add_shortcut))
-                }
-            }
-        }
-    }
-    selectedShortcut?.let { site ->
-        AlertDialog(onDismissRequest = { selectedShortcut = null }, title = { Text(site.title) }, text = {
-            Column {
-                TextButton(onClick = { shortcutEditor = site; showShortcutEditor = true; selectedShortcut = null }) {
-                    Text(stringResource(R.string.home_edit_shortcut))
-                }
-                TextButton(onClick = { scope.launch { viewModel.preferencesRepository.moveHomeShortcut(site.id, -1) }; selectedShortcut = null }) {
-                    Text(stringResource(R.string.home_move_left))
-                }
-                TextButton(onClick = { scope.launch { viewModel.preferencesRepository.moveHomeShortcut(site.id, 1) }; selectedShortcut = null }) {
-                    Text(stringResource(R.string.home_move_right))
-                }
-                TextButton(onClick = { scope.launch { viewModel.preferencesRepository.deleteHomeShortcut(site.id) }; selectedShortcut = null }) {
-                    Text(stringResource(R.string.adblock_remove))
-                }
-            }
-        }, confirmButton = { TextButton(onClick = { selectedShortcut = null }) { Text(stringResource(R.string.adblock_cancel)) } })
-    }
-    if (showShortcutEditor) {
-        HomeShortcutEditor(shortcutEditor, onDismiss = { showShortcutEditor = false }) { title, url ->
-            scope.launch {
-                if (viewModel.preferencesRepository.saveHomeShortcut(shortcutEditor?.id, title, url)) showShortcutEditor = false
-            }
-        }
+    if (preferences.homeShortcutsInitialized) {
+        HomeShortcutDialogs(shortcutState, shortcuts, viewModel, dataReady, onOpenUrl)
     }
 }
 
@@ -382,29 +361,8 @@ private fun HomeCard(color: Color, modifier: Modifier = Modifier, onClick: () ->
         color = color, contentColor = MaterialTheme.colorScheme.onSurface, content = content)
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun HomeShortcutTile(title: String, url: String?, color: Color, modifier: Modifier,
-    viewModel: NativeHomeViewModel, dataReady: Boolean, wallpaper: Boolean = false,
-    onClick: () -> Unit, onLongClick: (() -> Unit)? = null) {
-    Column(modifier.testTag("home_shortcut_tile").combinedClickable(onClick = onClick, onLongClick = onLongClick,
-        role = androidx.compose.ui.semantics.Role.Button), horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Surface(Modifier.size(48.dp).testTag("home_shortcut_icon"), shape = RoundedCornerShape(12.dp), color = color) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    if (url == null) Icon(painterResource(R.drawable.icons_add_tab), null, Modifier.size(24.dp))
-                    else HomeFavicon(url, viewModel, dataReady, Modifier.size(28.dp))
-                }
-            }
-        Text(title, Modifier.fillMaxWidth().heightIn(min = 32.dp),
-            style = LocalTextStyle.current.copy(shadow = if (wallpaper) wallpaperTextShadow else null),
-            fontSize = 12.sp, lineHeight = 16.sp, color = if (wallpaper) Color.White else LocalContentColor.current,
-            textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
-    }
-}
-
-@Composable
-private fun HomeFavicon(url: String?, viewModel: NativeHomeViewModel, enabled: Boolean, modifier: Modifier = Modifier) {
+internal fun HomeFavicon(url: String?, viewModel: NativeHomeViewModel, enabled: Boolean, modifier: Modifier = Modifier) {
     val icon = if (enabled && url != null) {
         remember(viewModel, url) { viewModel.favicon(url) }.collectAsStateWithLifecycle(initialValue = null).value
     } else null
@@ -422,7 +380,7 @@ private fun HomeFavicon(url: String?, viewModel: NativeHomeViewModel, enabled: B
 }
 
 @Composable
-private fun HomeShortcutEditor(site: HomeShortcut?, onDismiss: () -> Unit, onSave: (String, String) -> Unit) {
+internal fun HomeShortcutEditor(site: HomeShortcut?, busy: Boolean = false, onDismiss: () -> Unit, onSave: (String, String) -> Unit) {
     var title by rememberSaveable(site?.id) { mutableStateOf(site?.title.orEmpty()) }
     var url by rememberSaveable(site?.id) { mutableStateOf(site?.url.orEmpty()) }
     var attempted by rememberSaveable(site?.id) { mutableStateOf(false) }
@@ -438,7 +396,7 @@ private fun HomeShortcutEditor(site: HomeShortcut?, onDismiss: () -> Unit, onSav
                 if (attempted && !valid) Text(stringResource(R.string.home_shortcut_invalid), color = MaterialTheme.colorScheme.error)
             }
         }, confirmButton = {
-            TextButton(onClick = { attempted = true; if (valid) onSave(title, url) }, modifier = Modifier.testTag("home_shortcut_save")) {
+            TextButton(enabled = !busy, onClick = { attempted = true; if (valid) onSave(title, url) }, modifier = Modifier.testTag("home_shortcut_save")) {
                 Text(stringResource(R.string.browser_save_tab_group))
             }
         }, dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.adblock_cancel)) } })
