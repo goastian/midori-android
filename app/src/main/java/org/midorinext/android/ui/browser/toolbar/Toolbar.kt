@@ -202,7 +202,7 @@ private fun ToolbarChrome(
                     Alignment.BottomCenter
                 }
             ),
-            color = MaterialTheme.colorScheme.outline,
+            color = MaterialTheme.colorScheme.outlineVariant,
         )
 
         if (!isEditMode && loadingProgress in 0f..0.999f && loadingProgress > 0f) {

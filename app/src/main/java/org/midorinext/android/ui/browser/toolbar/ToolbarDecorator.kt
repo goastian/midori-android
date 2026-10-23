@@ -3,6 +3,7 @@ package org.midorinext.android.ui.browser.toolbar
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -11,13 +12,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -25,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.midorinext.android.R
 import org.midorinext.android.ui.widgets.MidoriIconOnBackground
+import org.midorinext.android.ui.animation.LocalReduceMotion
+import org.midorinext.android.ui.animation.MidoriMotion
 
 @Composable
 fun ToolbarDecorator(
@@ -36,11 +42,21 @@ fun ToolbarDecorator(
     leadingContent: (@Composable () -> Unit)? = null,
     onMidoriIconClicked: () -> Unit = {}
 ) {
+    val colors = MaterialTheme.colorScheme
+    val shape = MaterialTheme.shapes.small
+    val fieldColor by animateColorAsState(
+        targetValue = if (state.hasFocus) colors.surfaceContainerLowest else colors.surfaceContainer,
+        animationSpec = if (LocalReduceMotion.current) snap() else tween(MidoriMotion.FeedbackDurationMillis),
+        label = "address field focus",
+    )
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .height(48.dp)
-            .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(50))
+            .clip(shape)
+            .background(fieldColor)
+            .border(if (state.hasFocus) 1.5.dp else 0.5.dp,
+                if (state.hasFocus) colors.primary else colors.outlineVariant, shape)
     ) {
         if (leadingContent != null) {
             leadingContent()
@@ -94,7 +110,7 @@ fun ToolbarDecorator(
                                 currentUrl?.startsWith("moz-extension://") == false
                             ) {
                                 currentUrl ?: ""
-                            } else stringResource(id = R.string.browser_toolbar_hint)
+                            } else stringResource(if (state.hasFocus) R.string.browser_toolbar_hint else R.string.settings_search_title)
                         }
                         else -> stringResource(id = R.string.browser_toolbar_hint)
                     },

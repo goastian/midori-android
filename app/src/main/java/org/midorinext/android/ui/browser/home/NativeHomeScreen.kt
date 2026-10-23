@@ -55,7 +55,7 @@ import org.midorinext.android.ui.tabs.TabThumbnail
 import org.midorinext.android.ui.theme.LocalMidoriTheme
 import kotlin.math.roundToInt
 
-internal val wallpaperTextShadow = Shadow(Color.Black.copy(alpha = 0.8f), Offset(0f, 1f), 4f)
+internal val wallpaperTextShadow = Shadow(Color.Black.copy(alpha = 0.45f), Offset(0f, 1f), 2f)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -116,9 +116,9 @@ fun NativeHomeScreen(
     val hasWallpaper = wallpaper != HomeWallpaper.NONE
     var wallpaperReady by remember(wallpaper) { mutableStateOf(!hasWallpaper) }
     val colors = MaterialTheme.colorScheme
-    val background = if (LocalMidoriTheme.current.dark) colors.surface else Color(0xFFF5F8F5)
-    val cardColor = if (LocalMidoriTheme.current.dark) colors.surfaceContainer else Color.White
-    val insetColor = if (LocalMidoriTheme.current.dark) colors.surfaceContainerHigh else Color(0xFFE8F0E8)
+    val background = colors.background
+    val cardColor = if (LocalMidoriTheme.current.dark) colors.surfaceContainerLow else colors.surfaceContainerLowest
+    val insetColor = colors.surfaceContainer
     val shortcutColumns = ((windowSize.width / LocalDensity.current.density - 32) /
         if (preferences.homeLargeShortcuts) 88 else 72).toInt().coerceIn(3, 6)
     val listState = rememberLazyListState()
@@ -146,8 +146,10 @@ fun NativeHomeScreen(
         if (hasWallpaper) {
             HomeWallpaperImage(wallpaper, Modifier.matchParentSize(), onReady = { wallpaperReady = true })
             Box(Modifier.matchParentSize().background(Brush.verticalGradient(listOf(
-                Color.Black.copy(alpha = 0.12f), Color.Black.copy(alpha = 0.20f), Color.Black.copy(alpha = 0.32f),
+                Color.Black.copy(alpha = 0.54f), Color.Black.copy(alpha = 0.54f), Color.Black.copy(alpha = 0.62f),
             ))))
+        } else {
+            MidoriHomeBackdrop(Modifier.fillMaxWidth().height(280.dp))
         }
         LazyColumn(
             state = listState,
@@ -161,7 +163,7 @@ fun NativeHomeScreen(
                         showLogo = !preferences.hideHomeLogo,
                         onCustomize = if (preferences.hideHomeCustomizeShortcut) null else {
                             { navigateTo(NavDestination.HomepageSettings) }
-                        })
+                        }, wallpaper = hasWallpaper)
                 }
             }
             if (!preferences.hideHomeShortcuts) {
@@ -178,8 +180,8 @@ fun NativeHomeScreen(
             }
             if (!preferences.hideHomePrivacy) {
                 item(key = "privacy") {
-                    Surface(onClick = { navigateTo(NavDestination.AdBlockSettings) }, shape = RoundedCornerShape(12.dp),
-                            color = if (hasWallpaper) Color.Transparent else colors.primary.copy(alpha = 0.06f),
+                    Surface(onClick = { navigateTo(NavDestination.AdBlockSettings) }, shape = MaterialTheme.shapes.medium,
+                            color = if (hasWallpaper) colors.scrim.copy(alpha = 0.60f) else colors.secondaryContainer,
                             modifier = Modifier.fillMaxWidth().testTag("native_home_protection")) {
                             Row(Modifier.heightIn(min = 48.dp).padding(horizontal = 12.dp, vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -232,7 +234,7 @@ fun NativeHomeScreen(
                                     color = colors.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
                             }
                         } else {
-                            Surface(shape = RoundedCornerShape(14.dp), color = cardColor, contentColor = colors.onSurface) {
+                            Surface(shape = MaterialTheme.shapes.medium, color = cardColor, contentColor = colors.onSurface) {
                                 Column {
                                     recent.take(3).forEach { page ->
                                         key(page.url) {
@@ -357,7 +359,7 @@ private fun HomeSectionHeading(title: Int, action: Int? = null, onAdd: (() -> Un
 
 @Composable
 private fun HomeCard(color: Color, modifier: Modifier = Modifier, onClick: () -> Unit, content: @Composable () -> Unit) {
-    Surface(onClick = onClick, modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp),
+    Surface(onClick = onClick, modifier = modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium,
         color = color, contentColor = MaterialTheme.colorScheme.onSurface, content = content)
 }
 

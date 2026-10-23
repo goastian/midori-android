@@ -35,9 +35,9 @@ import org.midorinext.android.MainActivity
 import org.midorinext.android.MidoriApplication
 import org.midorinext.android.R
 import org.midorinext.android.ui.MidoriApplicationViewModel
-import org.midorinext.android.ui.theme.PrivateSurfaceDark
 import org.midorinext.android.ui.theme.darkColorScheme
 import org.midorinext.android.ui.theme.lightColorScheme
+import org.midorinext.android.ui.theme.privateColorScheme
 import org.midorinext.android.preferences.app.*
 
 /** Full tray checks using local thumbnails and unloaded .example tabs, with no live websites. */
@@ -316,10 +316,10 @@ class TabsLayoutsDeviceTest {
     }
 
     private fun assertPrivateSwitchHasImmediateSurface(appearance: Appearance) {
-        val normalSurface = if (appearance == Appearance.DARK) {
-            darkColorScheme.primaryContainer
+        val normalBackground = if (appearance == Appearance.DARK) {
+            darkColorScheme.background
         } else {
-            lightColorScheme.primaryContainer
+            lightColorScheme.background
         }
         compose.waitForIdle()
         compose.mainClock.autoAdvance = false
@@ -327,13 +327,13 @@ class TabsLayoutsDeviceTest {
             compose.onNodeWithTag("tabs_page_PRIVATE").performClick()
             compose.mainClock.advanceTimeByFrame()
             compose.onNodeWithTag("tabs_page_PRIVATE").assertIsSelected()
-            assertTraySurface(PrivateSurfaceDark.toArgb(), "First private frame from $appearance")
+            assertTraySurface(privateColorScheme.background.toArgb(), "First private frame from $appearance")
             assertNoNormalFixtures()
 
             compose.onNodeWithTag("tabs_page_NORMAL").performClick()
             compose.mainClock.advanceTimeByFrame()
             compose.onNodeWithTag("tabs_page_NORMAL").assertIsSelected()
-            assertTraySurface(normalSurface.toArgb(), "First normal frame from private in $appearance")
+            assertTraySurface(normalBackground.toArgb(), "First normal frame from private in $appearance")
         } finally {
             compose.mainClock.autoAdvance = true
             compose.waitForIdle()

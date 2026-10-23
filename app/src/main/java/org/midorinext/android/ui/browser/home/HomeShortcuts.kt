@@ -1,9 +1,15 @@
 package org.midorinext.android.ui.browser.home
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -39,6 +45,10 @@ import org.midorinext.android.ext.toCleanHost
 import org.midorinext.android.newtab.*
 import org.midorinext.android.preferences.app.AppPreferences
 import org.midorinext.android.preferences.app.HomeShortcut
+import org.midorinext.android.ui.animation.LocalReduceMotion
+import org.midorinext.android.ui.animation.MidoriMotion
+import org.midorinext.android.ui.theme.LocalMidoriTheme
+import org.midorinext.android.ui.theme.MidoriDialogSystemBars
 
 @Stable
 internal class HomeShortcutUiState {
@@ -135,10 +145,26 @@ private fun HomeShortcutTile(
 ) {
     val size = if (preferences.homeLargeShortcuts) 64.dp else 48.dp
     val shape = homeShortcutIconShape(preferences.homeShortcutShape)
+    val interactions = remember { MutableInteractionSource() }
+    val pressed by interactions.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (pressed) 0.96f else 1f,
+        animationSpec = if (LocalReduceMotion.current) snap() else tween(MidoriMotion.FeedbackDurationMillis),
+        label = "shortcut press",
+    )
+    val colors = MaterialTheme.colorScheme
+    val tileColor = when {
+        site == null || site.isFolder -> color
+        LocalMidoriTheme.current.dark -> colors.surfaceContainerHigh
+        else -> colors.surfaceContainerLowest
+    }
     Column(modifier.testTag(if (site == null) "home_add_shortcut_tile" else "home_shortcut_tile")
-        .combinedClickable(onClick = onClick, onLongClick = onLongClick, role = Role.Button),
+        .combinedClickable(interactionSource = interactions, indication = ripple(),
+            onClick = onClick, onLongClick = onLongClick, role = Role.Button),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Surface(Modifier.size(size).testTag("home_shortcut_icon"), shape = shape, color = color) {
+        Surface(Modifier.size(size).graphicsLayer { scaleX = scale; scaleY = scale }.testTag("home_shortcut_icon"),
+            shape = shape, color = tileColor,
+            border = BorderStroke(0.5.dp, colors.outlineVariant.copy(alpha = 0.55f))) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 when {
                     site == null -> Icon(painterResource(R.drawable.icons_add_tab), null, Modifier.size(24.dp))
@@ -182,6 +208,7 @@ internal fun HomeShortcutDialogs(
         ModalBottomSheet(onDismissRequest = { state.collectionId = null },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
             modifier = Modifier.testTag("home_shortcuts_sheet")) {
+            MidoriDialogSystemBars()
             Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(folder?.title ?: stringResource(R.string.home_shortcuts), Modifier.weight(1f),
@@ -336,6 +363,7 @@ private fun HomeSitePicker(parentId: String, state: HomeShortcutUiState, sites: 
     val existingUrls = sites.filter { !it.isFolder && it.parentId == parentId }.map { it.url }.toSet()
     ModalBottomSheet(onDismissRequest = { state.pickerParentId = null },
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true), modifier = Modifier.testTag("home_site_picker")) {
+        MidoriDialogSystemBars()
         BoxWithConstraints(Modifier.fillMaxWidth().heightIn(max = 600.dp)) {
             val columns = ((maxWidth - 32.dp) / 80.dp).toInt().coerceIn(2, 6)
             val listState = key(parentId, categoryId) { rememberLazyListState() }

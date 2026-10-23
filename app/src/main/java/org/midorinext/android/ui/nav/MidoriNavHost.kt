@@ -1,7 +1,6 @@
 package org.midorinext.android.ui.nav
 
 import android.os.Build
-import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
@@ -11,6 +10,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -52,6 +54,7 @@ import org.midorinext.android.ui.tabs.TabsScreen
 import org.midorinext.android.ui.theme.LocalMidoriTheme
 import org.midorinext.android.ui.theme.MidoriBrowserTheme
 import org.midorinext.android.ui.animation.reduceMotionRequested
+import org.midorinext.android.ui.animation.MidoriMotion
 
 @Composable
 fun MidoriNavHost(
@@ -60,9 +63,10 @@ fun MidoriNavHost(
     appViewModel: MidoriApplicationViewModel = hiltViewModel(),
     onTabsPrivacyChanged: (Boolean) -> Unit = {},
 ) {
-    val onBrowse = { navController.navigateSingleTopTo(NavDestination.Browser.route()) }
-    val transitionTimeMs = if (reduceMotionRequested()) 0 else 250
-    val trayTransitionTimeMs = if (reduceMotionRequested()) 0 else 160
+    val onBrowse = { navController.returnToBrowser() }
+    val reduceMotion = reduceMotionRequested()
+    val navigationOffset = with(LocalDensity.current) { MidoriMotion.NavigationOffset.roundToPx() } *
+        if (LocalLayoutDirection.current == LayoutDirection.Ltr) 1 else -1
     val currentDestination by navController.currentBackStackEntryAsState()
     val selectedTabIsPrivate by appViewModel.isPrivate.collectAsStateWithLifecycle()
 
@@ -75,61 +79,25 @@ fun MidoriNavHost(
         startDestination = NavDestination.Browser.match,
         modifier = Modifier.fillMaxSize(),
         enterTransition = {
-            slideIntoContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                animationSpec = tween(durationMillis = transitionTimeMs)
-            )
+            navigationEnterTransition(navigationOffset, reduceMotion)
         },
         exitTransition = {
-            slideOutOfContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                animationSpec = tween(durationMillis = transitionTimeMs)
-            )
+            navigationExitTransition(-navigationOffset, reduceMotion)
         },
         popEnterTransition = {
-            slideIntoContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.End,
-                animationSpec = tween(durationMillis = transitionTimeMs)
-            )
+            navigationEnterTransition(-navigationOffset, reduceMotion)
         },
         popExitTransition = {
-            slideOutOfContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.End,
-                animationSpec = tween(durationMillis = transitionTimeMs)
-            )
+            navigationExitTransition(navigationOffset, reduceMotion)
         }
     ) {
         composable(
             route = NavDestination.Browser.match,
             arguments = NavDestination.Browser.arguments,
-            enterTransition = {
-                if (initialState.destination.route == NavDestination.Tabs.match) EnterTransition.None
-                else slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                    animationSpec = tween(durationMillis = transitionTimeMs)
-                )
-            },
-            popEnterTransition = {
-                if (initialState.destination.route == NavDestination.Tabs.match) EnterTransition.None
-                else slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.End,
-                    animationSpec = tween(durationMillis = transitionTimeMs)
-                )
-            },
-            exitTransition = {
-                if (targetState.destination.route == NavDestination.Tabs.match) ExitTransition.None
-                else slideOutOfContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                    animationSpec = tween(durationMillis = transitionTimeMs)
-                )
-            },
-            popExitTransition = {
-                if (targetState.destination.route == NavDestination.Tabs.match) ExitTransition.None
-                else slideOutOfContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.End,
-                    animationSpec = tween(durationMillis = transitionTimeMs)
-                )
-            }
+            enterTransition = { EnterTransition.None },
+            popEnterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
+            popExitTransition = { ExitTransition.None },
         ) { backStackEntry ->
             val openNewTab = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 backStackEntry.arguments?.getSerializable("openNewTab", TabOpening::class.java) ?: TabOpening.NONE
@@ -163,10 +131,22 @@ fun MidoriNavHost(
         }
         composable(
             route = NavDestination.Tabs.match,
-            enterTransition = { fadeIn(tween(trayTransitionTimeMs)) },
-            exitTransition = { fadeOut(tween(trayTransitionTimeMs)) },
-            popEnterTransition = { fadeIn(tween(trayTransitionTimeMs)) },
-            popExitTransition = { fadeOut(tween(trayTransitionTimeMs)) },
+            enterTransition = {
+                if (reduceMotion) EnterTransition.None
+                else fadeIn(tween(MidoriMotion.ReplacementDurationMillis))
+            },
+            exitTransition = {
+                if (reduceMotion) ExitTransition.None
+                else fadeOut(tween(MidoriMotion.ReplacementDurationMillis))
+            },
+            popEnterTransition = {
+                if (reduceMotion) EnterTransition.None
+                else fadeIn(tween(MidoriMotion.ReplacementDurationMillis))
+            },
+            popExitTransition = {
+                if (reduceMotion) ExitTransition.None
+                else fadeOut(tween(MidoriMotion.ReplacementDurationMillis))
+            },
         ) {
             TabsScreen(
                 appViewModel = appViewModel,

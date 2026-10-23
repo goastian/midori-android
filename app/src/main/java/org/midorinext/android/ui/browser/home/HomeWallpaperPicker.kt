@@ -32,6 +32,7 @@ import java.io.IOException
 import kotlinx.coroutines.launch
 import org.midorinext.android.R
 import org.midorinext.android.newtab.HomeWallpaper
+import org.midorinext.android.ui.theme.MidoriDialogSystemBars
 
 @Composable
 internal fun HomeWallpaperImage(
@@ -78,6 +79,7 @@ fun HomeWallpaperPicker(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         modifier = Modifier.testTag("home_wallpaper_picker"),
     ) {
+        MidoriDialogSystemBars()
         BackHandler(enabled = preview != null && !saving) { previewId = null }
         Column(
             Modifier.fillMaxWidth().heightIn(max = LocalConfiguration.current.screenHeightDp.dp * 0.88f)

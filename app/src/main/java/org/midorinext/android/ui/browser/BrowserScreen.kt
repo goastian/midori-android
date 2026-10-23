@@ -334,20 +334,22 @@ fun BrowserScreen(
                     BackHandler(enabled = canGoBack && !viewModel.toolbarState.hasFocus) {
                         viewModel.sessionUseCases.goBack()
                     }
-                    NativeHomeScreen(
-                        tabId = selectedTabSnapshot?.id,
-                        onOpenUrl = viewModel::openHomeUrl,
-                        onSelectTab = viewModel::selectTab,
-                        onSwitchBrowsingMode = { switchBrowsingMode(true) },
-                        onSearch = { viewModel.toolbarState.updateFocus(true) },
-                        onFirstFrameDrawn = { tabId ->
-                            nativeHomeReady = true
-                            (context.applicationContext as MidoriApplication).onNativeHomeFrameDrawn()
-                            viewModel.prepareNativeHomeSession(tabId)
-                        },
-                        navigateTo = navigateTo,
-                        modifier = modifier,
-                    )
+                    key(selectedTabSnapshot?.id) {
+                        NativeHomeScreen(
+                            tabId = selectedTabSnapshot?.id,
+                            onOpenUrl = viewModel::openHomeUrl,
+                            onSelectTab = viewModel::selectTab,
+                            onSwitchBrowsingMode = { switchBrowsingMode(true) },
+                            onSearch = { viewModel.toolbarState.updateFocus(true) },
+                            onFirstFrameDrawn = { tabId ->
+                                nativeHomeReady = true
+                                (context.applicationContext as MidoriApplication).onNativeHomeFrameDrawn()
+                                viewModel.prepareNativeHomeSession(tabId)
+                            },
+                            navigateTo = navigateTo,
+                            modifier = modifier,
+                        )
+                    }
                 } else if (privateHome || blankPage) {
                     val canGoBack by viewModel.canGoBackInPage.collectAsStateWithLifecycle()
                     BackHandler(enabled = canGoBack && !viewModel.toolbarState.hasFocus) {

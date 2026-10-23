@@ -63,9 +63,9 @@ fun HomePrivateBrowsingContent(
     iconScale: Float = 1f,
     iconPaddingBottom: Dp = 20.dp,
     titleFontSize: TextUnit = 24.sp,
-    titleLineHeight: TextUnit = 20.sp,
+    titleLineHeight: TextUnit = 30.sp,
     textFontSize: TextUnit = 14.sp,
-    textLineHeight: TextUnit = 18.sp,
+    textLineHeight: TextUnit = 22.sp,
 ) {
     Column(modifier = modifier) {
         Image(
@@ -78,6 +78,7 @@ fun HomePrivateBrowsingContent(
         )
         Text(
             text = stringResource(id = R.string.privatebrowsing_title),
+            style = MaterialTheme.typography.headlineSmall,
             fontSize = titleFontSize,
             lineHeight = titleLineHeight,
             fontWeight = FontWeight.Bold,
@@ -85,12 +86,14 @@ fun HomePrivateBrowsingContent(
         )
         Text(
             text = stringResource(id = R.string.privatebrowsing_paragraph_1),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = textFontSize,
             lineHeight = textLineHeight,
             modifier = Modifier.padding(vertical = 4.dp)
         )
         Text(
             text = stringResource(id = R.string.privatebrowsing_paragraph_2),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = textFontSize,
             lineHeight = textLineHeight,
             modifier = Modifier.padding(vertical = 4.dp)

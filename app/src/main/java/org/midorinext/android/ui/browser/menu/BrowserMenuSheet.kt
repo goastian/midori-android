@@ -13,7 +13,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -23,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.midorinext.android.R
 import org.midorinext.android.ui.nav.NavDestination
-import org.midorinext.android.ui.theme.LocalMidoriTheme
+import org.midorinext.android.ui.theme.MidoriDialogSystemBars
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,23 +39,21 @@ internal fun BrowserMenuSheet(
         }
         Unit
     }
-    val theme = LocalMidoriTheme.current
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
-        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-        containerColor = if (theme.dark || theme.private) {
-            MaterialTheme.colorScheme.secondaryContainer
-        } else Color(0xFFF7F6FB),
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         contentColor = MaterialTheme.colorScheme.onSurface,
         modifier = Modifier.testTag("browser_menu_sheet"),
     ) {
+        MidoriDialogSystemBars()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(start = 8.dp, end = 8.dp, bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             content(dismiss)
         }
@@ -122,8 +119,8 @@ internal fun BrowserMenuMainContent(
 @Composable
 internal fun BrowserMenuGroup(content: @Composable ColumnScope.() -> Unit) {
     Column(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+        modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium),
+        verticalArrangement = Arrangement.spacedBy(1.dp),
         content = content,
     )
 }
@@ -141,12 +138,12 @@ internal fun BrowserMenuRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .heightIn(min = 52.dp)
-            .padding(horizontal = 20.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(20.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         CompositionLocalProvider(LocalContentColor provides contentColor.copy(alpha = if (enabled) 1f else .38f)) {
             if (icon != null) {
@@ -166,7 +163,7 @@ internal fun BrowserMenuRow(
 @Composable
 private fun BrowserMenuLibrary(onNavigate: (NavDestination) -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min).clip(RoundedCornerShape(28.dp)).testTag("browser_menu_library"),
+        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min).clip(MaterialTheme.shapes.medium).testTag("browser_menu_library"),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         BrowserMenuLibraryItem(R.string.history, R.drawable.icons_menu_history, "browser_menu_history") {
@@ -188,7 +185,7 @@ private fun BrowserMenuLibrary(onNavigate: (NavDestination) -> Unit) {
 private fun RowScope.BrowserMenuLibraryItem(label: Int, icon: Int, tag: String, onClick: () -> Unit) {
     Column(
         modifier = Modifier.weight(1f).fillMaxHeight()
-            .background(MaterialTheme.colorScheme.surface)
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
             .clickable(role = Role.Button, onClick = onClick)
             .heightIn(min = 72.dp)
             .padding(horizontal = 2.dp, vertical = 12.dp)
@@ -205,8 +202,8 @@ private fun RowScope.BrowserMenuLibraryItem(label: Int, icon: Int, tag: String, 
 @Composable
 private fun DefaultBrowserBanner(onClick: () -> Unit, onDismiss: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp))
-            .background(MaterialTheme.colorScheme.surface)
+        modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(start = 24.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,

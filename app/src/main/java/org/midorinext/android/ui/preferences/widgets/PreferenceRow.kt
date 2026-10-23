@@ -4,7 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
@@ -30,9 +30,10 @@ fun PreferenceRow(
             .fillMaxWidth()
             .clickable(enabled = enabled) { onClicked() }
             .minimumInteractiveComponentSize()
+            .heightIn(min = 56.dp)
             .padding(horizontal = 16.dp, vertical = if (description != null) 12.dp else 2.dp)
     ) {
-        Column(Modifier.weight(2f)) {
+        Column(Modifier.weight(2f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = stringResource(label),
                 fontSize = 16.sp,
@@ -44,7 +45,7 @@ fun PreferenceRow(
                         text = description,
                         fontSize = 14.sp,
                         lineHeight = 18.sp,
-                        color = LocalContentColor.current.copy(0.6f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

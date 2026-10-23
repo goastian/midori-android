@@ -61,7 +61,7 @@ fun ToolbarInput(
     trailingContent: (@Composable () -> Unit)? = null,
     onMidoriIconClicked: () -> Unit = {}
 ) {
-    val localStyle = LocalTextStyle.current
+    val localStyle = MaterialTheme.typography.bodyLarge
     val mergedStyle = localStyle.merge(TextStyle(color = LocalContentColor.current))
 
     val focusManager = LocalFocusManager.current
@@ -98,7 +98,7 @@ fun ToolbarInput(
     val decorationBox: @Composable (@Composable () -> Unit) -> Unit = { innerTextField ->
         ToolbarDecorator(
             state = toolbarState,
-            hintColor = mergedStyle.color.copy(alpha = 0.6f),
+            hintColor = MaterialTheme.colorScheme.onSurfaceVariant,
             innerTextField = innerTextField,
             trailingIcons = {
                 if (toolbarState.hasFocus) {

@@ -2,43 +2,79 @@ package org.midorinext.android.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import org.midorinext.android.R
 
 private val AppFontFamily = FontFamily.Default
+private val HeadingFontFamily = FontFamily(
+    Font(R.font.asap_regular, FontWeight.Normal),
+    Font(R.font.asap_medium, FontWeight.Medium),
+    Font(R.font.asap_semibold, FontWeight.SemiBold),
+    Font(R.font.asap_bold, FontWeight.Bold),
+)
 
 val Typography = Typography(
+    displayLarge = TextStyle(
+        fontFamily = HeadingFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 52.sp,
+        lineHeight = 60.sp,
+        letterSpacing = (-0.5).sp,
+    ),
+    displayMedium = TextStyle(
+        fontFamily = HeadingFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 40.sp,
+        lineHeight = 48.sp,
+        letterSpacing = (-0.5).sp,
+    ),
     displaySmall = TextStyle(
-        fontFamily = AppFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 30.sp,
+        fontFamily = HeadingFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 32.sp,
+        lineHeight = 40.sp,
+        letterSpacing = (-0.3).sp,
+    ),
+    headlineLarge = TextStyle(
+        fontFamily = HeadingFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 28.sp,
         lineHeight = 36.sp,
-        letterSpacing = 0.sp,
+        letterSpacing = (-0.3).sp,
+    ),
+    headlineMedium = TextStyle(
+        fontFamily = HeadingFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 26.sp,
+        lineHeight = 32.sp,
+        letterSpacing = (-0.2).sp,
     ),
     headlineSmall = TextStyle(
-        fontFamily = AppFontFamily,
+        fontFamily = HeadingFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 24.sp,
         lineHeight = 30.sp,
         letterSpacing = 0.sp,
     ),
     titleLarge = TextStyle(
-        fontFamily = AppFontFamily,
+        fontFamily = HeadingFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 20.sp,
         lineHeight = 26.sp,
         letterSpacing = 0.sp,
     ),
     titleMedium = TextStyle(
-        fontFamily = AppFontFamily,
+        fontFamily = HeadingFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 18.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.sp,
     ),
     titleSmall = TextStyle(
-        fontFamily = AppFontFamily,
+        fontFamily = HeadingFontFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 16.sp,
         lineHeight = 22.sp,

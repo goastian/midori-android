@@ -300,6 +300,35 @@ class NativeHomeDeviceTest {
     }
 
     @Test
+    fun shortcutPickerRestoresOnSameTabButDoesNotFollowNewHomeTabs() {
+        compose.onNodeWithTag("home_add_shortcut").performClick()
+        compose.onNodeWithTag("home_site_picker").assertIsDisplayed()
+
+        scenario.recreate()
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithTag("home_site_picker").fetchSemanticsNodes().isNotEmpty()
+        }
+        assertEquals(homeId, app.store.get().state.selectedTabId)
+        compose.onNodeWithTag("home_site_picker").assertIsDisplayed()
+
+        var newHomeId = ""
+        instrumentation.runOnMainSync {
+            newHomeId = app.tabsUseCases.get().addTab(NATIVE_HOME_URL, selectTab = true, private = false)
+            fixtures += newHomeId
+        }
+        compose.waitUntil(30_000) {
+            val state = app.store.get().state
+            state.selectedTabId == newHomeId && state.tabs.find { it.id == newHomeId }?.let {
+                it.content.url == NATIVE_HOME_URL && it.engineState.engineSession != null && !it.content.loading
+            } == true
+        }
+        compose.waitForIdle()
+        compose.onNodeWithTag("native_home").assertIsDisplayed()
+        compose.onNodeWithTag("home_site_picker").assertDoesNotExist()
+        compose.onNodeWithTag("home_add_shortcut").assertIsDisplayed()
+    }
+
+    @Test
     fun firstWebPageRetainsHomeInGeckoHistoryAndSavedSessions() {
         instrumentation.runOnMainSync {
             app.sessionUseCases.get().loadUrl("data:text/html,<title>Native home navigation fixture</title><h1>Ready</h1>", sessionId = homeId)
