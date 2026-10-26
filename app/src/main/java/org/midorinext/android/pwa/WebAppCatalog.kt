@@ -5,6 +5,7 @@ data class WebAppSuggestion(val name: String, val url: String)
 /** Sites with useful standalone experiences. Offline access depends on each site. */
 object WebAppCatalog {
     val suggestions = listOf(
+        WebAppSuggestion("P2P.me", "https://app.p2p.me/"),
         WebAppSuggestion("Telegram", "https://web.telegram.org/"),
         WebAppSuggestion("Discord", "https://discord.com/app"),
         WebAppSuggestion("X", "https://x.com/"),
