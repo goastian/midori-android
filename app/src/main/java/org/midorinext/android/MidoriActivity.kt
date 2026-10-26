@@ -7,11 +7,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.viewmodel.CreationExtras
+import org.midorinext.android.ext.withoutIntentDefaultArgs
 
 open class MidoriActivity: AppCompatActivity() {
     private var imm: InputMethodManager? = null
     private var onKeyboardHiddenCallback: (() -> Unit)? = null
     private var rootView: View? = null
+
+    override val defaultViewModelCreationExtras: CreationExtras
+        get() = super.defaultViewModelCreationExtras.withoutIntentDefaultArgs()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -30,6 +31,7 @@ import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.lib.state.ext.flow
 import org.midorinext.android.R
+import org.midorinext.android.ext.withoutIntentDefaultArgs
 import org.midorinext.android.intent.IntentReceiverActivity
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
@@ -50,6 +52,9 @@ class WebAppActivity : AppCompatActivity() {
     @Inject lateinit var preferences: AppPreferencesRepository
     @Inject lateinit var permissionsStorage: GeckoSitePermissionsStorage
     @Inject lateinit var loginRepository: LoginAutofillRepository
+
+    override val defaultViewModelCreationExtras: CreationExtras
+        get() = super.defaultViewModelCreationExtras.withoutIntentDefaultArgs()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

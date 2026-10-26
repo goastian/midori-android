@@ -94,7 +94,7 @@ class ExtensionViewModel @Inject constructor(
 
     fun installAddon(addon: Addon) {
         val url = addon.downloadUrl
-        if (url.isBlank()) return
+        if (url.isBlank() || _installingAddonId.value != null) return
         viewModelScope.launch {
             _installingAddonId.value = addon.id
             _error.value = null
@@ -113,8 +113,9 @@ class ExtensionViewModel @Inject constructor(
                         when (request) {
                             is WebExtensionPromptRequest.AfterInstallation.Permissions.Required -> {
                                 if (request.extension.id == addon.id) {
-                                    request.onConfirm(
-                                        approvedPermissionResponse(request.dataCollectionPermissions)
+                                    confirmInstallPermissions(
+                                        request.dataCollectionPermissions,
+                                        request.onConfirm,
                                     )
                                     consumePromptRequest()
                                 }
@@ -224,6 +225,22 @@ class ExtensionViewModel @Inject constructor(
     private fun consumePromptRequest() {
         store.dispatch(WebExtensionAction.ConsumePromptRequestWebExtensionAction)
     }
+}
+
+/**
+ * Approves an installation prompt. GeckoView throws [IllegalStateException] when the prompt result
+ * was already completed, which happens when a stale prompt remains in the store or another
+ * collector answered first. Returns whether this call was the one that completed the prompt.
+ */
+internal fun confirmInstallPermissions(
+    dataCollectionPermissions: List<String>,
+    onConfirm: (PermissionPromptResponse) -> Unit,
+): Boolean = try {
+    onConfirm(approvedPermissionResponse(dataCollectionPermissions))
+    true
+} catch (e: IllegalStateException) {
+    Log.w(TAG, "Install prompt was already answered", e)
+    false
 }
 
 internal fun approvedPermissionResponse(
