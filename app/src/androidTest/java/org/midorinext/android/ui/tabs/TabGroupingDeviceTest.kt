@@ -225,8 +225,13 @@ class TabGroupingDeviceTest {
         compose.onNodeWithTag("tab_group_name").performTextReplacement("Trip plans")
         compose.onNodeWithTag("tab_group_color:PURPLE").performClick()
         compose.onNodeWithText(app.getString(R.string.browser_save_tab_group)).performClick()
-        compose.waitUntil(10_000) { runBlocking { repository.flow.first().tabGroupsList.first { it.id == change.groupId }.name == "Trip plans" } }
-        assertEquals(TabGroupColor.PURPLE.value, repository.flow.first().tabGroupColorsMap[change.groupId])
+        compose.waitUntil(10_000) {
+            runBlocking {
+                val saved = repository.flow.first()
+                saved.tabGroupsList.first { it.id == change.groupId }.name == "Trip plans" &&
+                    saved.tabGroupColorsMap[change.groupId] == TabGroupColor.PURPLE.value
+            }
+        }
         capture("tab-groups-carousel-expanded.png")
         compose.onNodeWithTag("tab_group_collapse:${change.groupId}").performClick()
         compose.onNodeWithTag("tab_group:${change.groupId}").assertIsDisplayed()
