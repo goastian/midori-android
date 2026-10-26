@@ -41,6 +41,13 @@ height="80">](https://play.google.com/store/apps/details?id=org.midorinext.andro
 * Share Content.
 * and much more.
 
+## Sponsors
+<div align="left">
+  <a href="https://www.herodevs.com/">
+    <img src="https://cdn.prod.website-files.com/62865614b39c464b76d339aa/668c0ec8bc50d24d58a40475_Logo%20Gradient%20Darkmode.svg" alt="HeroDevs Logo" width="400" height="200">
+  </a>
+</div>
+
 ![Midori Screenshot](https://astian.org/wp-content/uploads/2023/09/midori-devices.webp)
 
 ## Star History
