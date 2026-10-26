@@ -22,6 +22,7 @@ APPS = {
     ),
     "opera": ("com.opera.browser", "com.opera.browser/com.opera.Launcher3"),
     "firefox": ("org.mozilla.firefox", "org.mozilla.firefox/.App"),
+    "edge": ("com.microsoft.emmx", "com.microsoft.emmx/com.microsoft.ruby.Main"),
     "vivaldi": (
         "com.vivaldi.browser",
         "com.vivaldi.browser/org.chromium.chrome.browser.ChromeTabbedActivity",
@@ -53,7 +54,7 @@ class Device:
             match = re.search(rf"\b{key}=([^\s]+)", output)
             if match:
                 fields[key] = match[1]
-        fields["debuggable"] = bool(re.search(r"pkgFlags=\[[^\]]*DEBUGGABLE", output))
+        fields["debuggable"] = bool(re.search(r"(?:pkgFlags|flags)=\[[^\]]*DEBUGGABLE", output))
         return fields
 
     def sample(self, name, run, settle_seconds):
