@@ -1,0 +1,21 @@
+plugins {
+    id 'java-gradle-plugin'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.ow2.asm:asm:9.9.1'
+    testImplementation 'junit:junit:4.13.2'
+}
+
+gradlePlugin {
+    plugins {
+        withoutTelemetry {
+            id = 'midori.without-telemetry'
+            implementationClass = 'org.midorinext.build.WithoutTelemetryPlugin'
+        }
+    }
+}
