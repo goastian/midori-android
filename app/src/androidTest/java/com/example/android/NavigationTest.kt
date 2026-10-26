@@ -50,7 +50,7 @@ class NavigationTest {
         assertFalse(defaults.openBlankNewTab)
         assertTrue(defaults.pullToRefreshEnabled)
         assertTrue(defaults.savePasswordsEnabled)
-        assertFalse(defaults.passwordAutofillEnabled)
+        assertTrue(defaults.passwordAutofillEnabled)
         assertFalse(defaults.autofillAddressesEnabled)
         assertFalse(defaults.accessibilityAutomaticFontSizing)
         assertEquals(100, defaults.accessibilityFontScale)
