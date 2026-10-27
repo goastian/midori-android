@@ -49,7 +49,7 @@ import org.midorinext.android.ui.preferences.widgets.PreferenceRow
 import org.midorinext.android.usecases.SearchEngineOption
 import org.midorinext.android.usecases.SearchEngines
 import org.midorinext.android.widget.WidgetProvider
-import coil.compose.AsyncImage
+import org.midorinext.android.ui.widgets.SearchEngineIcon
 
 @Composable
 fun SearchSettingsScreen(
@@ -189,6 +189,7 @@ fun AlternativeSearchEngineSettingsScreen(viewModel: PreferencesViewModel = hilt
                         enabled = !isDefault,
                         onCheckedChange = { viewModel.updateAlternativeSearchEngine(option.id, it) },
                     )
+                    SearchEngineIcon(option, Modifier.padding(start = 16.dp).size(28.dp))
                     Text(engineName(option), modifier = Modifier.padding(start = 16.dp))
                 }
                 if (option.builtIn == null && !isDefault) {
@@ -256,33 +257,6 @@ private fun SearchEngineRadioRow(option: SearchEngineOption, selected: Boolean, 
         RadioButton(selected = selected, onClick = onClick)
         SearchEngineIcon(option, Modifier.padding(start = 24.dp).size(28.dp))
         Text(engineName(option), modifier = Modifier.padding(start = 16.dp))
-    }
-}
-
-@Composable
-private fun SearchEngineIcon(option: SearchEngineOption, modifier: Modifier = Modifier) {
-    val iconUrl = when (option.builtIn) {
-        SearchEnginePreference.ASTIANGO -> "https://astiango.com/favicon.ico"
-        SearchEnginePreference.ECOSIA -> "https://www.ecosia.org/favicon.ico"
-        SearchEnginePreference.QWANT -> "https://www.qwant.com/favicon.ico"
-        SearchEnginePreference.STARTPAGE -> "https://www.startpage.com/favicon.ico"
-        SearchEnginePreference.BING -> "https://www.bing.com/favicon.ico"
-        SearchEnginePreference.GOOGLE -> "https://www.google.com/favicon.ico"
-        SearchEnginePreference.DUCKDUCKGO -> "https://duckduckgo.com/favicon.ico"
-        else -> null
-    }
-    if (iconUrl != null) {
-        AsyncImage(
-            model = iconUrl,
-            contentDescription = null,
-            error = painterResource(R.drawable.icons_search),
-            modifier = modifier,
-        )
-    } else {
-        androidx.compose.foundation.layout.Box(
-            modifier = modifier.background(MaterialTheme.colorScheme.secondaryContainer, CircleShape),
-            contentAlignment = Alignment.Center,
-        ) { Text(option.name.take(1), maxLines = 1, overflow = TextOverflow.Clip) }
     }
 }
 

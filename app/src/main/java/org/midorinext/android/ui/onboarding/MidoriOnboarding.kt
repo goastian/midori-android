@@ -93,6 +93,8 @@ import org.midorinext.android.ui.theme.OnboardingPaper
 import org.midorinext.android.ui.theme.OnboardingPaperRaised
 import org.midorinext.android.ui.animation.reduceMotionRequested
 import org.midorinext.android.widget.WidgetProvider
+import org.midorinext.android.ui.widgets.SearchEngineIcon
+import org.midorinext.android.usecases.SearchEngineOption
 import org.midorinext.android.usecases.SearchEngines
 
 private const val OnboardingPageCount = 6
@@ -235,6 +237,10 @@ private fun SearchEnginePage(
                                 selectedColor = OnboardingGreenDeep,
                                 unselectedColor = OnboardingMutedInk,
                             ),
+                        )
+                        SearchEngineIcon(
+                            option = SearchEngineOption(SearchEngines.id(engine), engine.name, engine),
+                            modifier = Modifier.size(32.dp),
                         )
                         Text(
                             text = searchEngineName(engine),

@@ -43,12 +43,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupProperties
 import org.midorinext.android.R
 import org.midorinext.android.ext.activity
 import org.midorinext.android.ext.selectedLocale
-import org.midorinext.android.ui.widgets.MidoriIconOnBackground
+import org.midorinext.android.ui.widgets.SearchEngineIcon
 import org.midorinext.android.ui.preferences.searchEngineName
 import org.midorinext.android.usecases.SearchEngines
 
@@ -191,6 +195,7 @@ fun ToolbarSearchSelector(toolbarState: BrowserToolbarState) {
     }
     val selected = options.find { it.id == selectedId }
     var expanded by remember { mutableStateOf(false) }
+    val selectedName = selected?.let { it.builtIn?.let { builtIn -> searchEngineName(builtIn) } ?: it.name }
     Box(
         modifier = Modifier
             .padding(horizontal = 4.dp)
@@ -200,7 +205,8 @@ fun ToolbarSearchSelector(toolbarState: BrowserToolbarState) {
                 color = MaterialTheme.colorScheme.surface,
                 shape = CircleShape,
             )
-            .clickable { expanded = true },
+            .clickable(role = Role.Button) { expanded = true }
+            .semantics { selectedName?.let { contentDescription = it } },
         contentAlignment = Alignment.Center,
     ) {
         Row(
@@ -208,11 +214,7 @@ fun ToolbarSearchSelector(toolbarState: BrowserToolbarState) {
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (selected?.builtIn == org.midorinext.android.preferences.app.SearchEnginePreference.ASTIANGO) {
-                MidoriIconOnBackground(shape = CircleShape, modifier = Modifier.size(24.dp))
-            } else {
-                Text(selected?.name?.take(1).orEmpty(), style = MaterialTheme.typography.titleSmall)
-            }
+            selected?.let { SearchEngineIcon(it, Modifier.size(24.dp)) }
             Spacer(Modifier.width(4.dp))
             Icon(
                 painter = painterResource(R.drawable.icons_chevron_down_small),
@@ -220,10 +222,28 @@ fun ToolbarSearchSelector(toolbarState: BrowserToolbarState) {
                 modifier = Modifier.size(8.dp),
             )
         }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        // A focusable popup takes the window focus away from the address field, which hides the
+        // keyboard and makes KeyboardObserver leave edit mode before the menu can be used.
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            properties = PopupProperties(focusable = false),
+        ) {
             options.forEach { option ->
                 DropdownMenuItem(
                     text = { Text(option.builtIn?.let { searchEngineName(it) } ?: option.name) },
+                    leadingIcon = { SearchEngineIcon(option, Modifier.size(24.dp)) },
+                    trailingIcon = if (option.id == selectedId) {
+                        {
+                            Icon(
+                                painter = painterResource(R.drawable.icons_check),
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                            )
+                        }
+                    } else {
+                        null
+                    },
                     onClick = {
                         toolbarState.searchEngineOverride = option.id
                         expanded = false
