@@ -1,0 +1,50 @@
+<resources>
+    <string name="home_wallpaper_nature_01" translatable="false">Blue lake</string>
+    <string name="home_wallpaper_nature_02" translatable="false">Sea foam</string>
+    <string name="home_wallpaper_nature_03" translatable="false">Snow road</string>
+    <string name="home_wallpaper_nature_04" translatable="false">Sunset palm</string>
+    <string name="home_wallpaper_nature_05" translatable="false">Salar de Uyuni</string>
+    <string name="home_wallpaper_nature_06" translatable="false">Atlantic waves</string>
+    <string name="home_wallpaper_nature_07" translatable="false">Winter chapel</string>
+    <string name="home_wallpaper_nature_08" translatable="false">Above the clouds</string>
+    <string name="home_wallpaper_nature_09" translatable="false">Mount Fuji</string>
+    <string name="home_wallpaper_nature_10" translatable="false">Alpine lake</string>
+    <string name="home_wallpaper_nature_11" translatable="false">Forest road</string>
+    <string name="home_wallpaper_nature_12" translatable="false">Nordic cabin</string>
+    <string name="home_wallpaper_nature_13" translatable="false">Neist Point</string>
+    <string name="home_wallpaper_nature_14" translatable="false">Lofoten</string>
+    <string name="home_wallpaper_nature_15" translatable="false">Rocky shore</string>
+    <string name="home_wallpaper_nature_16" translatable="false">Mountain ridge</string>
+    <string name="home_wallpaper_nature_17" translatable="false">Emerald forest</string>
+    <string name="home_wallpaper_nature_18" translatable="false">Turquoise coast</string>
+    <string name="home_wallpaper_nature_19" translatable="false">Ocean promenade</string>
+    <string name="home_wallpaper_nature_20" translatable="false">Autumn path</string>
+    <string name="home_wallpaper_nature_21" translatable="false">Alpenglow</string>
+    <string name="home_wallpaper_nature_22" translatable="false">Misty valley</string>
+    <string name="home_wallpaper_nature_23" translatable="false">Namib dunes</string>
+    <string name="home_wallpaper_nature_24" translatable="false">Desert sunrise</string>
+    <string name="home_wallpaper_space_01" translatable="false">Lunar terminator</string>
+    <string name="home_wallpaper_space_02" translatable="false">Earthset</string>
+    <string name="home_wallpaper_space_03" translatable="false">Hello, Earth</string>
+    <string name="home_wallpaper_space_04" translatable="false">Two worlds</string>
+    <string name="home_wallpaper_space_05" translatable="false">Solar eclipse</string>
+    <string name="home_wallpaper_space_06" translatable="false">Earthrise</string>
+    <string name="home_wallpaper_space_07" translatable="false">Lunar silhouette</string>
+    <string name="home_wallpaper_space_08" translatable="false">Earth crescent</string>
+    <string name="home_wallpaper_space_09" translatable="false">NGC 2261</string>
+    <string name="home_wallpaper_space_10" translatable="false">Stephan’s Quintet</string>
+    <string name="home_wallpaper_space_11" translatable="false">Orbital horizon</string>
+    <string name="home_wallpaper_space_12" translatable="false">Cosmic clouds</string>
+    <string name="home_wallpaper_space_13" translatable="false">Orion</string>
+    <string name="home_wallpaper_space_14" translatable="false">North America Nebula</string>
+    <string name="home_wallpaper_space_15" translatable="false">Westerlund 2</string>
+    <string name="home_wallpaper_space_16" translatable="false">Milky Way</string>
+    <string name="home_wallpaper_space_17" translatable="false">Rocky Mountain sky</string>
+    <string name="home_wallpaper_space_18" translatable="false">Andromeda</string>
+    <string name="home_wallpaper_space_19" translatable="false">Earth at night</string>
+    <string name="home_wallpaper_space_20" translatable="false">Bubble Nebula</string>
+    <string name="home_wallpaper_space_21" translatable="false">NGC 2392</string>
+    <string name="home_wallpaper_space_22" translatable="false">Orion 1995</string>
+    <string name="home_wallpaper_space_23" translatable="false">Orion clouds</string>
+    <string name="home_wallpaper_space_24" translatable="false">Crab Nebula</string>
+</resources>

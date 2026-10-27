@@ -192,9 +192,7 @@ class AppPreferencesRepository internal constructor(
     }
 
     suspend fun updateHomeWallpaper(wallpaper: HomeWallpaper) {
-        datastore.updateData { preferences -> preferences.toBuilder().apply {
-            if (wallpaper == HomeWallpaper.NONE) clearHomeWallpaperId() else setHomeWallpaperId(wallpaper.id)
-        }.build() }
+        datastore.updateData { it.toBuilder().setHomeWallpaperId(wallpaper.id).build() }
     }
 
     suspend fun updateSearchEngine(engine: SearchEnginePreference) {

@@ -4,6 +4,7 @@ import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
 import com.google.protobuf.InvalidProtocolBufferException
 import mozilla.components.concept.engine.Engine
+import org.midorinext.android.newtab.HomeWallpaper
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -28,6 +29,7 @@ object AppPreferencesSerializer : Serializer<AppPreferences> {
         .setHttpsOnlyLevel(HttpsOnlyLevel.ALL_TABS)
         .setHttpsOnlyAllTabsMigrationCompleted(true)
         .setOpenBlankNewTab(false)
+        .setHomeWallpaperId(HomeWallpaper.DEFAULT.id)
         .setPullToRefreshEnabled(true)
         .setSavePasswordsEnabled(true)
         .setPasswordAutofillEnabled(true)

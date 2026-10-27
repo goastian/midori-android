@@ -7,11 +7,10 @@
     <string name="home_wallpaper_apply">Hintergrund anwenden</string>
     <string name="home_wallpaper_selected">Ausgewählt</string>
     <string name="home_wallpaper_none">Design übernehmen</string>
-    <string name="home_wallpaper_forest">Nebelwald</string>
-    <string name="home_wallpaper_dawn">Morgenlicht</string>
-    <string name="home_wallpaper_dunes">Dünen</string>
-    <string name="home_wallpaper_silk">Jadeseide</string>
     <string name="home_wallpaper_save_error">Der Hintergrund konnte nicht gespeichert werden. Versuche es erneut.</string>
     <string name="home_wallpaper_back">Alle Hintergründe</string>
     <string name="home_wallpaper_load_error">Dieser Hintergrund konnte nicht geöffnet werden. Wähle einen anderen.</string>
+    <string name="home_wallpaper_all">Alle</string>
+    <string name="home_wallpaper_nature">Natur</string>
+    <string name="home_wallpaper_space">Weltraum</string>
 </resources>

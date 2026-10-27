@@ -7,11 +7,10 @@
     <string name="home_wallpaper_apply">Set wallpaper</string>
     <string name="home_wallpaper_selected">Selected</string>
     <string name="home_wallpaper_none">Follow theme</string>
-    <string name="home_wallpaper_forest">Cloud forest</string>
-    <string name="home_wallpaper_dawn">First light</string>
-    <string name="home_wallpaper_dunes">Desert dunes</string>
-    <string name="home_wallpaper_silk">Jade silk</string>
     <string name="home_wallpaper_save_error">Unable to save the wallpaper. Try again.</string>
     <string name="home_wallpaper_back">All wallpapers</string>
     <string name="home_wallpaper_load_error">Unable to open this wallpaper. Choose another one.</string>
+    <string name="home_wallpaper_all">All</string>
+    <string name="home_wallpaper_nature">Nature</string>
+    <string name="home_wallpaper_space">Space</string>
 </resources>

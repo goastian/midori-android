@@ -8,11 +8,10 @@
     <string name="home_wallpaper_apply">وال پیپر لگائیں</string>
     <string name="home_wallpaper_selected">منتخب</string>
     <string name="home_wallpaper_none">تھیم کی پیروی کریں</string>
-    <string name="home_wallpaper_forest">بادلوں کا جنگل</string>
-    <string name="home_wallpaper_dawn">پہلی کرن</string>
-    <string name="home_wallpaper_dunes">صحرائی ٹیلے</string>
-    <string name="home_wallpaper_silk">یشمی ریشم</string>
     <string name="home_wallpaper_save_error">وال پیپر محفوظ نہیں ہو سکا۔ دوبارہ کوشش کریں۔</string>
     <string name="home_wallpaper_back">تمام وال پیپرز</string>
     <string name="home_wallpaper_load_error">یہ وال پیپر نہیں کھل سکا۔ کوئی اور منتخب کریں۔</string>
+    <string name="home_wallpaper_all">سبھی</string>
+    <string name="home_wallpaper_nature">قدرت</string>
+    <string name="home_wallpaper_space">خلا</string>
 </resources>

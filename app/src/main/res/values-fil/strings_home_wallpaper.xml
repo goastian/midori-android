@@ -8,11 +8,10 @@
     <string name="home_wallpaper_apply">Itakda ang wallpaper</string>
     <string name="home_wallpaper_selected">Napili</string>
     <string name="home_wallpaper_none">Sundin ang tema</string>
-    <string name="home_wallpaper_forest">Maulap na kagubatan</string>
-    <string name="home_wallpaper_dawn">Unang liwanag</string>
-    <string name="home_wallpaper_dunes">Mga buhanginan ng disyerto</string>
-    <string name="home_wallpaper_silk">Sutlang jade</string>
     <string name="home_wallpaper_save_error">Hindi ma-save ang wallpaper. Subukang muli.</string>
     <string name="home_wallpaper_back">Lahat ng wallpaper</string>
     <string name="home_wallpaper_load_error">Hindi mabuksan ang wallpaper na ito. Pumili ng iba.</string>
+    <string name="home_wallpaper_all">Lahat</string>
+    <string name="home_wallpaper_nature">Kalikasan</string>
+    <string name="home_wallpaper_space">Kalawakan</string>
 </resources>

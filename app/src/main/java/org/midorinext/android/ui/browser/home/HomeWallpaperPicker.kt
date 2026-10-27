@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -32,6 +34,7 @@ import java.io.IOException
 import kotlinx.coroutines.launch
 import org.midorinext.android.R
 import org.midorinext.android.newtab.HomeWallpaper
+import org.midorinext.android.newtab.HomeWallpaperCategory
 import org.midorinext.android.ui.theme.MidoriDialogSystemBars
 
 @Composable
@@ -39,8 +42,9 @@ internal fun HomeWallpaperImage(
     wallpaper: HomeWallpaper,
     modifier: Modifier = Modifier,
     onReady: (Boolean) -> Unit = {},
+    thumbnail: Boolean = false,
 ) {
-    val image = wallpaper.image
+    val image = if (thumbnail) wallpaper.thumbnail else wallpaper.image
     if (image == null) {
         Box(modifier.background(MaterialTheme.colorScheme.surface))
     } else {
@@ -67,13 +71,21 @@ fun HomeWallpaperPicker(
     onApply: suspend (HomeWallpaper) -> Unit,
 ) {
     var previewId by rememberSaveable { mutableStateOf<String?>(null) }
+    var category by rememberSaveable { mutableStateOf<HomeWallpaperCategory?>(null) }
     var saving by remember { mutableStateOf(false) }
     var saveFailed by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val uriHandler = LocalUriHandler.current
     val preview = previewId?.let { HomeWallpaper.fromId(it) }
     var previewReady by remember(preview) { mutableStateOf(preview?.image == null) }
     var previewFailed by remember(preview) { mutableStateOf(false) }
     val close = { if (!saving) onDismiss() }
+    val visibleWallpapers = remember(category) {
+        HomeWallpaper.entries.filter { category == null || it.category == category }
+    }
+    val galleryState = key(category) {
+        rememberLazyGridState(initialFirstVisibleItemIndex = visibleWallpapers.indexOf(current).coerceAtLeast(0))
+    }
     ModalBottomSheet(
         onDismissRequest = close,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
@@ -104,16 +116,25 @@ fun HomeWallpaperPicker(
                 }
             }
             if (preview == null) {
-                Text(stringResource(R.string.home_wallpaper_collection), style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(selected = category == null, onClick = { category = null },
+                        label = { Text(stringResource(R.string.home_wallpaper_all)) },
+                        modifier = Modifier.testTag("home_wallpaper_filter:all"))
+                    HomeWallpaperCategory.entries.forEach { option ->
+                        FilterChip(selected = category == option, onClick = { category = option },
+                            label = { Text(stringResource(option.title)) },
+                            modifier = Modifier.testTag("home_wallpaper_filter:${option.name.lowercase()}"))
+                    }
+                }
                 LazyVerticalGrid(
-                    columns = GridCells.Adaptive(108.dp),
+                    columns = GridCells.Adaptive(96.dp),
+                    state = galleryState,
                     modifier = Modifier.weight(1f, fill = false).testTag("home_wallpaper_gallery"),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     contentPadding = PaddingValues(bottom = 20.dp),
                 ) {
-                    items(HomeWallpaper.entries, key = { it.id }) { wallpaper ->
+                    items(visibleWallpapers, key = { it.id }) { wallpaper ->
                         WallpaperTile(wallpaper, wallpaper == current) { previewId = wallpaper.id }
                     }
                 }
@@ -135,6 +156,12 @@ fun HomeWallpaperPicker(
                     if (preview == HomeWallpaper.NONE) {
                         Icon(painterResource(R.drawable.icons_wallpaper), null,
                             Modifier.size(48.dp).align(Alignment.Center), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+                preview.sourceUrl?.let { source ->
+                    TextButton(onClick = { uriHandler.openUri(source) },
+                        modifier = Modifier.fillMaxWidth().testTag("home_wallpaper_credit")) {
+                        Text("${preview.photographer} · Unsplash", maxLines = 2, overflow = TextOverflow.Ellipsis)
                     }
                 }
                 if (saveFailed) {
@@ -179,7 +206,7 @@ private fun WallpaperTile(wallpaper: HomeWallpaper, isSelected: Boolean, onClick
                 .semantics { selected = isSelected; contentDescription = title },
         ) {
             Box {
-                HomeWallpaperImage(wallpaper, Modifier.fillMaxSize())
+                HomeWallpaperImage(wallpaper, Modifier.fillMaxSize(), thumbnail = true)
                 if (wallpaper == HomeWallpaper.NONE) {
                     Icon(painterResource(R.drawable.icons_wallpaper), null, Modifier.size(32.dp).align(Alignment.Center),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant)

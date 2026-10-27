@@ -129,64 +129,67 @@ class NativeHomeDeviceTest {
         repository.updateHomeWallpaper(HomeWallpaper.NONE)
         compose.waitForIdle()
         openWallpaperSettings()
-        compose.onNodeWithTag("home_wallpaper_option:forest").performClick()
-        waitForWallpaperPreview("forest")
-        compose.onNodeWithTag("home_wallpaper_preview:forest").assertIsDisplayed()
-        assertEquals("", repository.flow.first().homeWallpaperId)
+        compose.onNodeWithTag("home_wallpaper_option:nature_01").performClick()
+        waitForWallpaperPreview("nature_01")
+        compose.onNodeWithTag("home_wallpaper_preview:nature_01").assertIsDisplayed()
+        assertEquals("none", repository.flow.first().homeWallpaperId)
         capture("wallpaper-preview.png")
         compose.onNodeWithContentDescription(app.getString(R.string.cancel)).performClick()
         compose.onNodeWithTag("home_wallpaper_picker").assertDoesNotExist()
-        assertEquals("", repository.flow.first().homeWallpaperId)
+        assertEquals("none", repository.flow.first().homeWallpaperId)
 
         compose.onNodeWithTag("home_wallpaper_settings").performClick()
         capture("wallpaper-gallery.png")
-        compose.onNodeWithTag("home_wallpaper_option:forest").performClick()
-        waitForWallpaperPreview("forest")
+        compose.onNodeWithTag("home_wallpaper_option:nature_01").performClick()
+        waitForWallpaperPreview("nature_01")
         compose.onNodeWithTag("home_wallpaper_apply").performClick()
         returnFromWallpaperSettings()
         compose.waitUntil(10_000) {
-            compose.onAllNodesWithTag("native_home_background:forest").fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithTag("native_home_background:nature_01").fetchSemanticsNodes().isNotEmpty()
         }
-        assertEquals("forest", repository.flow.first().homeWallpaperId)
+        assertEquals("nature_01", repository.flow.first().homeWallpaperId)
         assertNoWebSurface()
         compose.onNodeWithTag("native_home").performScrollToIndex(0)
-        capture("wallpaper-forest-light.png")
+        capture("wallpaper-nature-light.png")
 
         scenario.recreate()
         compose.waitUntil(10_000) {
-            compose.onAllNodesWithTag("native_home_background:forest").fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithTag("native_home_background:nature_01").fetchSemanticsNodes().isNotEmpty()
         }
         repository.updateAppearance(Appearance.DARK)
         repository.updateToolbarPosition(ToolbarPosition.BOTTOM)
         compose.waitForIdle()
         compose.onNodeWithTag("native_home").performScrollToIndex(0)
-        capture("wallpaper-forest-dark.png")
+        capture("wallpaper-nature-dark.png")
         assertNoWebSurface()
 
         openWallpaperSettings()
-        compose.onNodeWithTag("home_wallpaper_option:none").performClick()
+        compose.onNodeWithTag("home_wallpaper_option:none").performScrollTo().performClick()
         compose.onNodeWithTag("home_wallpaper_apply").performClick()
         returnFromWallpaperSettings()
         compose.waitUntil(10_000) {
             compose.onAllNodesWithTag("native_home_background:none").fetchSemanticsNodes().isNotEmpty()
         }
-        assertEquals("", repository.flow.first().homeWallpaperId)
+        assertEquals("none", repository.flow.first().homeWallpaperId)
     }
 
     @Test
     fun wallpaperCanBeSelectedFromHomepageSettings(): Unit = runBlocking {
         openWallpaperSettings()
-        compose.onNodeWithTag("home_wallpaper_option:silk").performClick()
-        waitForWallpaperPreview("silk")
+        compose.onNodeWithTag("home_wallpaper_filter:space").performClick()
+        compose.onNodeWithTag("home_wallpaper_filter:space").assertIsSelected()
+        compose.onNodeWithTag("home_wallpaper_option:space_01").performClick()
+        waitForWallpaperPreview("space_01")
+        compose.onNodeWithTag("home_wallpaper_credit").assertTextContains("NASA", substring = true)
         compose.onNodeWithTag("home_wallpaper_apply").performClick()
         compose.waitUntil(10_000) {
             compose.onAllNodesWithTag("home_wallpaper_picker").fetchSemanticsNodes().isEmpty()
         }
-        assertEquals("silk", app.appPreferencesRepository.get().flow.first().homeWallpaperId)
+        assertEquals("space_01", app.appPreferencesRepository.get().flow.first().homeWallpaperId)
         capture("wallpaper-settings.png")
         returnFromWallpaperSettings()
         compose.waitUntil(10_000) {
-            compose.onAllNodesWithTag("native_home_background:silk").fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithTag("native_home_background:space_01").fetchSemanticsNodes().isNotEmpty()
         }
         assertNoWebSurface()
     }
@@ -205,7 +208,9 @@ class NativeHomeDeviceTest {
                     }
                     compose.onNodeWithTag("native_home").performScrollToIndex(0)
                     assertNoWebSurface()
-                    capture("wallpaper-${wallpaper.id}-${appearance.name.lowercase()}-${position.name.lowercase()}.png")
+                    if (wallpaper in listOf(HomeWallpaper.NONE, HomeWallpaper.DEFAULT, HomeWallpaper.SPACE_01, HomeWallpaper.SPACE_20)) {
+                        capture("wallpaper-${wallpaper.id}-${appearance.name.lowercase()}-${position.name.lowercase()}.png")
+                    }
                 }
             }
         }

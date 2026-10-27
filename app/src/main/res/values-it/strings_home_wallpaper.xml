@@ -7,11 +7,10 @@
     <string name="home_wallpaper_apply">Imposta sfondo</string>
     <string name="home_wallpaper_selected">Selezionato</string>
     <string name="home_wallpaper_none">Segui il tema</string>
-    <string name="home_wallpaper_forest">Foresta nebbiosa</string>
-    <string name="home_wallpaper_dawn">Alba</string>
-    <string name="home_wallpaper_dunes">Dune</string>
-    <string name="home_wallpaper_silk">Seta di giada</string>
     <string name="home_wallpaper_save_error">Impossibile salvare lo sfondo. Riprova.</string>
     <string name="home_wallpaper_back">Tutti gli sfondi</string>
     <string name="home_wallpaper_load_error">Impossibile aprire questo sfondo. Scegline un altro.</string>
+    <string name="home_wallpaper_all">Tutti</string>
+    <string name="home_wallpaper_nature">Natura</string>
+    <string name="home_wallpaper_space">Spazio</string>
 </resources>

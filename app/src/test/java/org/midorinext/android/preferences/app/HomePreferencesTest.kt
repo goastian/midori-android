@@ -12,7 +12,7 @@ import org.midorinext.android.newtab.defaultHomeShortcuts
 
 class HomePreferencesTest {
     @Test
-    fun wallpaperPersistsAlongsideExistingPreferencesAndCanReturnToTheLegacyBackground() = runBlocking {
+    fun wallpaperPersistsAlongsideExistingPreferencesAndThemeChoiceRemainsExplicit() = runBlocking {
         val directory = kotlin.io.path.createTempDirectory("home-wallpaper").toFile()
         val file = File(directory, "preferences.pb")
         val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -22,16 +22,18 @@ class HomePreferencesTest {
             repository.updateHomeSection(HomeSection.STORIES, false)
             repository.updateOpenBlankNewTab(true)
             val original = repository.flow.first()
-            repository.updateHomeWallpaper(HomeWallpaper.FOREST)
+            assertEquals(HomeWallpaper.DEFAULT.id, original.homeWallpaperId)
+            repository.updateHomeWallpaper(HomeWallpaper.SPACE_01)
 
             val restored = file.inputStream().use { AppPreferencesSerializer.readFrom(it) }
-            assertEquals(HomeWallpaper.FOREST, HomeWallpaper.fromId(restored.homeWallpaperId))
-            assertEquals(original, restored.toBuilder().clearHomeWallpaperId().build())
+            assertEquals(HomeWallpaper.SPACE_01, HomeWallpaper.fromId(restored.homeWallpaperId))
+            assertEquals(original, restored.toBuilder().setHomeWallpaperId(original.homeWallpaperId).build())
 
             repository.updateHomeWallpaper(HomeWallpaper.NONE)
-            assertEquals(original, file.inputStream().use { AppPreferencesSerializer.readFrom(it) })
-            assertEquals(HomeWallpaper.NONE, HomeWallpaper.fromId(original.homeWallpaperId))
-            assertEquals(HomeWallpaper.NONE, HomeWallpaper.fromId("retired-wallpaper"))
+            val themeChoice = file.inputStream().use { AppPreferencesSerializer.readFrom(it) }
+            assertEquals("none", themeChoice.homeWallpaperId)
+            assertEquals(HomeWallpaper.NONE, HomeWallpaper.fromId(themeChoice.homeWallpaperId))
+            assertEquals(original, themeChoice.toBuilder().setHomeWallpaperId(original.homeWallpaperId).build())
         } finally {
             scope.cancel()
             directory.deleteRecursively()

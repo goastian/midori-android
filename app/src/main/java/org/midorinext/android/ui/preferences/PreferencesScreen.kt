@@ -282,7 +282,8 @@ fun HomepageSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
             description = stringResource(wallpaper.title),
             modifier = Modifier.testTag("home_wallpaper_settings"),
             trailing = {
-                HomeWallpaperImage(wallpaper, Modifier.size(width = 84.dp, height = 60.dp).clip(RoundedCornerShape(12.dp)))
+                HomeWallpaperImage(wallpaper, Modifier.size(width = 84.dp, height = 60.dp).clip(RoundedCornerShape(12.dp)),
+                    thumbnail = true)
             },
             onClicked = { showWallpapers = true },
         )

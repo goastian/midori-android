@@ -7,11 +7,10 @@
     <string name="home_wallpaper_apply">Aplicar fondo</string>
     <string name="home_wallpaper_selected">Seleccionado</string>
     <string name="home_wallpaper_none">Seguir el tema</string>
-    <string name="home_wallpaper_forest">Bosque de niebla</string>
-    <string name="home_wallpaper_dawn">Amanecer</string>
-    <string name="home_wallpaper_dunes">Dunas</string>
-    <string name="home_wallpaper_silk">Seda jade</string>
     <string name="home_wallpaper_save_error">No se pudo guardar el fondo. Inténtalo de nuevo.</string>
     <string name="home_wallpaper_back">Todos los fondos</string>
     <string name="home_wallpaper_load_error">No se pudo abrir este fondo. Elige otro.</string>
+    <string name="home_wallpaper_all">Todos</string>
+    <string name="home_wallpaper_nature">Naturaleza</string>
+    <string name="home_wallpaper_space">Espacio</string>
 </resources>

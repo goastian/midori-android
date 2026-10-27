@@ -7,11 +7,10 @@
     <string name="home_wallpaper_apply">壁紙を設定</string>
     <string name="home_wallpaper_selected">選択中</string>
     <string name="home_wallpaper_none">テーマに合わせる</string>
-    <string name="home_wallpaper_forest">霧の森</string>
-    <string name="home_wallpaper_dawn">夜明け</string>
-    <string name="home_wallpaper_dunes">砂丘</string>
-    <string name="home_wallpaper_silk">翡翠のシルク</string>
     <string name="home_wallpaper_save_error">壁紙を保存できませんでした。もう一度お試しください。</string>
     <string name="home_wallpaper_back">すべての壁紙</string>
     <string name="home_wallpaper_load_error">この壁紙を開けませんでした。別の壁紙を選んでください。</string>
+    <string name="home_wallpaper_all">すべて</string>
+    <string name="home_wallpaper_nature">自然</string>
+    <string name="home_wallpaper_space">宇宙</string>
 </resources>
