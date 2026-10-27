@@ -7,6 +7,7 @@ import org.midorinext.android.R
 enum class HomeWallpaperCategory(@StringRes val title: Int) {
     NATURE(R.string.home_wallpaper_nature),
     SPACE(R.string.home_wallpaper_space),
+    TRAVEL(R.string.home_wallpaper_travel),
 }
 
 enum class HomeWallpaper(
@@ -162,7 +163,43 @@ enum class HomeWallpaper(
         "NASA Hubble Space Telescope", "https://unsplash.com/photos/a-colorful-space-filled-with-lots-of-stars-et7KsPlqhQc"),
     SPACE_24("space_24", R.string.home_wallpaper_space_24,
         R.drawable.home_wallpaper_space_24, R.drawable.home_wallpaper_space_24_thumb, HomeWallpaperCategory.SPACE,
-        "NASA Hubble Space Telescope", "https://unsplash.com/photos/a-close-up-of-a-blue-and-red-object-in-the-dark-nb5TaJq99_M");
+        "NASA Hubble Space Telescope", "https://unsplash.com/photos/a-close-up-of-a-blue-and-red-object-in-the-dark-nb5TaJq99_M"),
+    TRAVEL_01("travel_01", R.string.home_wallpaper_travel_01,
+        R.drawable.home_wallpaper_travel_01, R.drawable.home_wallpaper_travel_01_thumb, HomeWallpaperCategory.TRAVEL,
+        "Leo Tang", "https://unsplash.com/photos/a-tram-travels-down-a-cobblestone-street-with-cars-rplD3Dk8y04"),
+    TRAVEL_02("travel_02", R.string.home_wallpaper_travel_02,
+        R.drawable.home_wallpaper_travel_02, R.drawable.home_wallpaper_travel_02_thumb, HomeWallpaperCategory.TRAVEL,
+        "Maria Lupan", "https://unsplash.com/photos/woman-on-stone-wall-in-dubrovnik-6zwmysIEi-s"),
+    TRAVEL_03("travel_03", R.string.home_wallpaper_travel_03,
+        R.drawable.home_wallpaper_travel_03, R.drawable.home_wallpaper_travel_03_thumb, HomeWallpaperCategory.TRAVEL,
+        "Vincent Yap", "https://unsplash.com/photos/boats-inside-large-sea-cave-e0U1IaXiqUg"),
+    TRAVEL_04("travel_04", R.string.home_wallpaper_travel_04,
+        R.drawable.home_wallpaper_travel_04, R.drawable.home_wallpaper_travel_04_thumb, HomeWallpaperCategory.TRAVEL,
+        "Trương Tuyết Ly", "https://unsplash.com/photos/person-in-silhouette-walking-on-beach-ePCinTh36Y4"),
+    TRAVEL_05("travel_05", R.string.home_wallpaper_travel_05,
+        R.drawable.home_wallpaper_travel_05, R.drawable.home_wallpaper_travel_05_thumb, HomeWallpaperCategory.TRAVEL,
+        "Vincent Yap", "https://unsplash.com/photos/traffic-cone-in-yellow-building-archway-pZUCfeqeU7w"),
+    TRAVEL_06("travel_06", R.string.home_wallpaper_travel_06,
+        R.drawable.home_wallpaper_travel_06, R.drawable.home_wallpaper_travel_06_thumb, HomeWallpaperCategory.TRAVEL,
+        "Fabio Sasso", "https://unsplash.com/photos/historic-brick-hotel-with-neon-signs-Gi-HkcQRyfE"),
+    TRAVEL_07("travel_07", R.string.home_wallpaper_travel_07,
+        R.drawable.home_wallpaper_travel_07, R.drawable.home_wallpaper_travel_07_thumb, HomeWallpaperCategory.TRAVEL,
+        "Richard Stachmann", "https://unsplash.com/photos/colosseum-in-rome-against-clear-sky-_dTOwzSZWPk"),
+    TRAVEL_08("travel_08", R.string.home_wallpaper_travel_08,
+        R.drawable.home_wallpaper_travel_08, R.drawable.home_wallpaper_travel_08_thumb, HomeWallpaperCategory.TRAVEL,
+        "Filip Kvasnak", "https://unsplash.com/photos/person-walking-on-forest-trail-zU2D2utVSsA"),
+    TRAVEL_09("travel_09", R.string.home_wallpaper_travel_09,
+        R.drawable.home_wallpaper_travel_09, R.drawable.home_wallpaper_travel_09_thumb, HomeWallpaperCategory.TRAVEL,
+        "Mariano Baraldi", "https://unsplash.com/photos/person-in-orange-jacket-on-beach-f2g06uLwlRA"),
+    TRAVEL_10("travel_10", R.string.home_wallpaper_travel_10,
+        R.drawable.home_wallpaper_travel_10, R.drawable.home_wallpaper_travel_10_thumb, HomeWallpaperCategory.TRAVEL,
+        "Wenhao Ruan", "https://unsplash.com/photos/red-torii-gate-in-rainy-forest-_t9Sxe54_Yk"),
+    TRAVEL_11("travel_11", R.string.home_wallpaper_travel_11,
+        R.drawable.home_wallpaper_travel_11, R.drawable.home_wallpaper_travel_11_thumb, HomeWallpaperCategory.TRAVEL,
+        "Wenhao Ruan", "https://unsplash.com/photos/people-with-umbrellas-on-rainy-stairs-LjDbSAdTUxA"),
+    TRAVEL_12("travel_12", R.string.home_wallpaper_travel_12,
+        R.drawable.home_wallpaper_travel_12, R.drawable.home_wallpaper_travel_12_thumb, HomeWallpaperCategory.TRAVEL,
+        "Tom Swinnen", "https://unsplash.com/photos/stone-walkway-above-dark-sea-LgSUmtCL07w");
 
     companion object {
         val DEFAULT = NATURE_10

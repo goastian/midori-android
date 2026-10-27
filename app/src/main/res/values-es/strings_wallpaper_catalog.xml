@@ -47,4 +47,16 @@
     <string name="home_wallpaper_space_22">Orión 1995</string>
     <string name="home_wallpaper_space_23">Nubes de Orión</string>
     <string name="home_wallpaper_space_24">Nebulosa del Cangrejo</string>
+    <string name="home_wallpaper_travel_01">Tranvía urbano</string>
+    <string name="home_wallpaper_travel_02">Dubrovnik</string>
+    <string name="home_wallpaper_travel_03">Cueva marina</string>
+    <string name="home_wallpaper_travel_04">Marea dorada</string>
+    <string name="home_wallpaper_travel_05">Arcos amarillos</string>
+    <string name="home_wallpaper_travel_06">Tranvía nocturno</string>
+    <string name="home_wallpaper_travel_07">Coliseo</string>
+    <string name="home_wallpaper_travel_08">Sendero del bosque</string>
+    <string name="home_wallpaper_travel_09">Bruma de la costa</string>
+    <string name="home_wallpaper_travel_10">Torii bajo la lluvia</string>
+    <string name="home_wallpaper_travel_11">Calles bajo la lluvia</string>
+    <string name="home_wallpaper_travel_12">Mirador del océano</string>
 </resources>

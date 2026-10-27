@@ -47,4 +47,16 @@
     <string name="home_wallpaper_space_22" translatable="false">Orion 1995</string>
     <string name="home_wallpaper_space_23" translatable="false">Orion clouds</string>
     <string name="home_wallpaper_space_24" translatable="false">Crab Nebula</string>
+    <string name="home_wallpaper_travel_01" translatable="false">City tram</string>
+    <string name="home_wallpaper_travel_02" translatable="false">Dubrovnik</string>
+    <string name="home_wallpaper_travel_03" translatable="false">Sea cave</string>
+    <string name="home_wallpaper_travel_04" translatable="false">Golden tide</string>
+    <string name="home_wallpaper_travel_05" translatable="false">Yellow arches</string>
+    <string name="home_wallpaper_travel_06" translatable="false">Night tram</string>
+    <string name="home_wallpaper_travel_07" translatable="false">Colosseum</string>
+    <string name="home_wallpaper_travel_08" translatable="false">Forest trail</string>
+    <string name="home_wallpaper_travel_09" translatable="false">Coastal mist</string>
+    <string name="home_wallpaper_travel_10" translatable="false">Torii in the rain</string>
+    <string name="home_wallpaper_travel_11" translatable="false">Rainy old town</string>
+    <string name="home_wallpaper_travel_12" translatable="false">Ocean lookout</string>
 </resources>

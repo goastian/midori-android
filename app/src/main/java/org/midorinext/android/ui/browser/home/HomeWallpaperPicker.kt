@@ -3,6 +3,8 @@ package org.midorinext.android.ui.browser.home
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -15,6 +17,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -28,6 +34,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Velocity
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import java.io.IOException
@@ -89,12 +96,13 @@ fun HomeWallpaperPicker(
     ModalBottomSheet(
         onDismissRequest = close,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        dragHandle = { BottomSheetDefaults.DragHandle(Modifier.testTag("home_wallpaper_drag_handle")) },
         modifier = Modifier.testTag("home_wallpaper_picker"),
     ) {
         MidoriDialogSystemBars()
         BackHandler(enabled = preview != null && !saving) { previewId = null }
         Column(
-            Modifier.fillMaxWidth().heightIn(max = LocalConfiguration.current.screenHeightDp.dp * 0.88f)
+            Modifier.fillMaxWidth().height(LocalConfiguration.current.screenHeightDp.dp * 0.88f)
                 .padding(horizontal = 20.dp).navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -116,7 +124,8 @@ fun HomeWallpaperPicker(
                 }
             }
             if (preview == null) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     FilterChip(selected = category == null, onClick = { category = null },
                         label = { Text(stringResource(R.string.home_wallpaper_all)) },
                         modifier = Modifier.testTag("home_wallpaper_filter:all"))
@@ -129,7 +138,8 @@ fun HomeWallpaperPicker(
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(96.dp),
                     state = galleryState,
-                    modifier = Modifier.weight(1f, fill = false).testTag("home_wallpaper_gallery"),
+                    modifier = Modifier.weight(1f).nestedScroll(WallpaperGalleryScrollConnection)
+                        .testTag("home_wallpaper_gallery"),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     contentPadding = PaddingValues(bottom = 20.dp),
@@ -191,6 +201,14 @@ fun HomeWallpaperPicker(
             }
         }
     }
+}
+
+private object WallpaperGalleryScrollConnection : NestedScrollConnection {
+    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset =
+        Offset(0f, available.y)
+
+    override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity =
+        Velocity(0f, available.y)
 }
 
 @Composable

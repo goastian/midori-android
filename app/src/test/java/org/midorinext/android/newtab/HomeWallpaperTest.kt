@@ -14,11 +14,12 @@ class HomeWallpaperTest {
     }
 
     @Test
-    fun bothCollectionsContainMoreThanTwentyDistinctAttributedPhotosWithThumbnails() {
+    fun largeNatureAndSpaceCollectionsAndTravelContainDistinctAttributedPhotosWithThumbnails() {
         val photos = HomeWallpaper.entries.filter { it != HomeWallpaper.NONE }
-        HomeWallpaperCategory.entries.forEach { category ->
+        listOf(HomeWallpaperCategory.NATURE, HomeWallpaperCategory.SPACE).forEach { category ->
             assertTrue(category.name, photos.count { it.category == category } > 20)
         }
+        assertTrue(photos.any { it.category == HomeWallpaperCategory.TRAVEL })
         assertEquals(photos.size, photos.map { it.id }.toSet().size)
         assertEquals(photos.size, photos.map { it.image }.toSet().size)
         assertEquals(photos.size, photos.map { it.thumbnail }.toSet().size)
