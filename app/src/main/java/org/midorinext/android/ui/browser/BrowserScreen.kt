@@ -95,7 +95,11 @@ fun BrowserScreen(
             url.substringBefore('?').substringBefore('#').endsWith("/readerview.html", ignoreCase = true)
     } == true
     val readerViewFeature = if (readerModeStatus.isAvailable || readerModeStatus.isActive || restoredReaderPage) {
-        rememberReaderViewFeature(store = viewModel.store, engine = viewModel.engine)
+        rememberReaderViewFeature(
+            store = viewModel.store,
+            engine = viewModel.engine,
+            appearance = appPrefs.appearance,
+        )
     } else null
     readerViewFeature?.let { ComposeFeatureWrapper(it) }
 
