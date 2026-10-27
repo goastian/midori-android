@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -30,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -122,7 +124,7 @@ fun NativeHomeScreen(
         onFirstFrameDrawn(tabId)
     }
     val colors = MaterialTheme.colorScheme
-    val background = colors.surface
+    val background = colors.background
     if (wallpaperAsset == null) {
         Box(modifier.fillMaxSize().background(background).testTag("native_home_loading_background:${wallpaper.id}"))
         return
@@ -132,14 +134,15 @@ fun NativeHomeScreen(
     val palette = HomePalette(
         primary = if (hasWallpaper) Color.White else colors.onSurface,
         secondary = if (hasWallpaper) Color.White.copy(alpha = 0.78f) else colors.onSurfaceVariant,
-        panel = if (hasWallpaper) Color.Black.copy(alpha = 0.32f) else Color.Transparent,
-        panelBorder = if (hasWallpaper) null else BorderStroke(1.dp, colors.outlineVariant),
-        divider = if (hasWallpaper) Color.White.copy(alpha = 0.18f) else colors.outlineVariant,
-        tile = if (hasWallpaper) Color.White.copy(alpha = 0.94f) else colors.surfaceContainer,
+        panel = if (hasWallpaper) Color.Black.copy(alpha = 0.32f) else colors.surface,
+        panelBorder = if (hasWallpaper) BorderStroke(0.5.dp, Color.White.copy(alpha = 0.16f)) else null,
+        divider = if (hasWallpaper) Color.White.copy(alpha = 0.18f) else colors.outlineVariant.copy(alpha = 0.55f),
+        tile = if (hasWallpaper) Color.White.copy(alpha = 0.94f) else lerp(colors.surface, colors.surfaceContainer, 0.25f),
         shadow = if (hasWallpaper) wallpaperTextShadow else null,
     )
-    val shortcutColumns = ((windowSize.width / LocalDensity.current.density - 32) /
-        if (preferences.homeLargeShortcuts) 88 else 72).toInt().coerceIn(3, 6)
+    val shortcutWidth = (if (preferences.homeLargeShortcuts) 88 else 72) * configuration.fontScale.coerceAtLeast(1f)
+    val shortcutColumns = ((windowSize.width / LocalDensity.current.density - 32) / shortcutWidth)
+        .toInt().coerceIn(if (configuration.fontScale > 1.2f) 2 else 3, 6)
     val listState = rememberLazyListState()
     val thumbnailContent = remember(preferences, recent, continuation, blocked, stories, background, configuration, windowSize, wallpaperAsset) {
         listOf(preferences, recent, continuation, blocked, stories, background, configuration, windowSize, wallpaperAsset)
@@ -168,12 +171,12 @@ fun NativeHomeScreen(
             Box(Modifier.matchParentSize().background(Brush.verticalGradient(listOf(
                 Color.Black.copy(alpha = 0.54f), Color.Black.copy(alpha = 0.54f), Color.Black.copy(alpha = 0.62f),
             ))))
-        }
+        } else Box(Modifier.matchParentSize().homeGrain())
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize().testTag("native_home"),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             item(key = "header") {
                 CompositionLocalProvider(LocalContentColor provides palette.primary) {
@@ -197,15 +200,22 @@ fun NativeHomeScreen(
             }
             if (!preferences.hideHomePrivacy) {
                 item(key = "privacy") {
-                    Surface(onClick = { navigateTo(NavDestination.AdBlockSettings) }, shape = MaterialTheme.shapes.small,
-                        color = palette.panel, contentColor = palette.primary, border = palette.panelBorder,
-                        modifier = Modifier.fillMaxWidth().testTag("native_home_protection")) {
-                        Row(Modifier.heightIn(min = 48.dp).padding(horizontal = 16.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Icon(painterResource(mozilla.components.ui.icons.R.drawable.mozac_ic_shield_24), null,
-                                tint = palette.secondary, modifier = Modifier.size(20.dp))
+                    val interactions = remember { MutableInteractionSource() }
+                    Surface(onClick = { navigateTo(NavDestination.AdBlockSettings) }, shape = RoundedCornerShape(12.dp),
+                        color = if (hasWallpaper) palette.panel else Color.Transparent,
+                        contentColor = palette.primary, interactionSource = interactions,
+                        modifier = Modifier.fillMaxWidth().homePressFeedback(interactions).testTag("native_home_protection")) {
+                        Row(Modifier.heightIn(min = 48.dp).padding(horizontal = 4.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Surface(shape = RoundedCornerShape(10.dp),
+                                color = if (hasWallpaper) Color.White.copy(alpha = 0.14f) else colors.primary.copy(alpha = 0.08f)) {
+                                Icon(painterResource(mozilla.components.ui.icons.R.drawable.mozac_ic_shield_24), null,
+                                    tint = if (hasWallpaper) palette.primary else colors.primary,
+                                    modifier = Modifier.padding(7.dp).size(18.dp))
+                            }
                             Text(stringResource(R.string.home_blocked, blocked), Modifier.weight(1f),
-                                style = MaterialTheme.typography.bodyMedium.copy(shadow = palette.shadow))
+                                color = palette.secondary,
+                                style = MaterialTheme.typography.bodySmall.copy(shadow = palette.shadow))
                             Icon(painterResource(R.drawable.icons_chevron_forward), null, Modifier.size(16.dp),
                                 tint = palette.secondary)
                         }
@@ -227,12 +237,14 @@ fun NativeHomeScreen(
                                 }
                                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                     Text(continuation.title ?: continuation.url.toCleanHost(),
-                                        maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyLarge,
+                                        maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Medium)
                                     Text(continuation.url.toCleanHost(),
                                         maxLines = 1, overflow = TextOverflow.Ellipsis, color = palette.secondary,
                                         style = MaterialTheme.typography.bodySmall)
                                 }
+                                Icon(painterResource(R.drawable.icons_chevron_forward), null,
+                                    Modifier.size(18.dp), tint = palette.secondary)
                             }
                         }
                     }
@@ -248,7 +260,7 @@ fun NativeHomeScreen(
                                     .clickable(role = Role.Button) { onOpenUrl(page.url) }
                                     .padding(horizontal = 4.dp, vertical = 8.dp).testTag("native_home_recent"),
                                     verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                    Box(Modifier.size(32.dp).clip(RoundedCornerShape(8.dp)).background(palette.tile),
+                                    Box(Modifier.size(36.dp).clip(RoundedCornerShape(10.dp)).background(palette.tile),
                                         contentAlignment = Alignment.Center) {
                                         HomeFavicon(page.url, viewModel, true, Modifier.size(20.dp))
                                     }
@@ -274,32 +286,33 @@ fun NativeHomeScreen(
                         }
                         if (stories.stories.isEmpty()) {
                             Text(stringResource(if (stories.failed) R.string.home_stories_unavailable else R.string.home_stories_loading),
-                                Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small)
-                                    .clickable(enabled = stories.failed) { viewModel.loadStories(language, force = true) }
-                                    .padding(vertical = 12.dp, horizontal = 4.dp),
+                                Modifier.fillMaxWidth().padding(vertical = 12.dp, horizontal = 4.dp),
                                 color = palette.secondary, style = MaterialTheme.typography.bodyMedium.copy(shadow = palette.shadow))
-                            if (stories.failed) Text(stringResource(R.string.extensions_retry),
-                                Modifier.padding(horizontal = 4.dp), color = palette.primary,
-                                style = MaterialTheme.typography.labelLarge.copy(shadow = palette.shadow))
+                            if (stories.failed) TextButton(onClick = { viewModel.loadStories(language, force = true) },
+                                modifier = Modifier.testTag("home_stories_retry")) {
+                                Text(stringResource(R.string.extensions_retry), color = palette.primary)
+                            }
                         } else {
                             val visibleStories = stories.stories.take(6)
                             visibleStories.forEachIndexed { index, story ->
                                 key(story.url) {
                                     if (index > 0) HorizontalDivider(color = palette.divider)
-                                    Row(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small)
+                                    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
                                         .clickable(role = Role.Button) { onOpenUrl(story.url) }
                                         .padding(horizontal = 4.dp, vertical = 14.dp),
                                         verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                             Text(story.title, maxLines = 3, overflow = TextOverflow.Ellipsis, color = palette.primary,
-                                                style = MaterialTheme.typography.bodyLarge.copy(shadow = palette.shadow),
+                                                style = (if (index == 0) MaterialTheme.typography.titleMedium
+                                                    else MaterialTheme.typography.bodyMedium).copy(shadow = palette.shadow),
                                                 fontWeight = FontWeight.Medium)
                                             Text(story.publisher, color = palette.secondary,
                                                 style = MaterialTheme.typography.bodySmall.copy(shadow = palette.shadow))
                                         }
                                         if (story.imageUrl != null) {
                                             AsyncImage(story.imageUrl, null,
-                                                Modifier.size(width = 104.dp, height = 72.dp).clip(RoundedCornerShape(8.dp))
+                                                Modifier.size(width = 104.dp, height = if (index == 0) 88.dp else 72.dp)
+                                                    .clip(RoundedCornerShape(12.dp))
                                                     .background(colors.surfaceContainer),
                                                 contentScale = androidx.compose.ui.layout.ContentScale.Crop)
                                         }
@@ -365,12 +378,14 @@ private fun HomeSectionHeading(title: Int, palette: HomePalette, action: Int? = 
     Row(Modifier.fillMaxWidth().heightIn(min = 40.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(stringResource(title), Modifier.weight(1f),
             style = MaterialTheme.typography.titleSmall.copy(shadow = palette.shadow),
-            fontWeight = FontWeight.Medium, color = palette.primary)
+            fontWeight = FontWeight.SemiBold, color = palette.primary)
         if (action != null) {
             TextButton(onClick = onAction, contentPadding = PaddingValues(horizontal = 8.dp),
-                modifier = Modifier.heightIn(min = 40.dp),
+                modifier = Modifier.heightIn(min = 48.dp),
                 colors = ButtonDefaults.textButtonColors(contentColor = palette.secondary)) {
-                Text(stringResource(action), style = MaterialTheme.typography.labelLarge.copy(shadow = palette.shadow))
+                Text(stringResource(action), style = MaterialTheme.typography.labelMedium.copy(shadow = palette.shadow))
+                Spacer(Modifier.width(2.dp))
+                Icon(painterResource(R.drawable.icons_chevron_forward), null, Modifier.size(14.dp))
             }
         }
     }
@@ -378,8 +393,11 @@ private fun HomeSectionHeading(title: Int, palette: HomePalette, action: Int? = 
 
 @Composable
 private fun HomeCard(palette: HomePalette, modifier: Modifier = Modifier, onClick: () -> Unit, content: @Composable () -> Unit) {
-    Surface(onClick = onClick, modifier = modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium,
-        color = palette.panel, contentColor = palette.primary, border = palette.panelBorder, content = content)
+    val interactions = remember { MutableInteractionSource() }
+    Surface(onClick = onClick, modifier = modifier.fillMaxWidth().homePressFeedback(interactions),
+        shape = RoundedCornerShape(16.dp), shadowElevation = 1.dp,
+        interactionSource = interactions, color = palette.panel, contentColor = palette.primary,
+        border = palette.panelBorder, content = content)
 }
 
 @Composable

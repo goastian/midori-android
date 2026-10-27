@@ -6,10 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -25,9 +21,11 @@ import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -45,8 +43,6 @@ import org.midorinext.android.ext.toCleanHost
 import org.midorinext.android.newtab.*
 import org.midorinext.android.preferences.app.AppPreferences
 import org.midorinext.android.preferences.app.HomeShortcut
-import org.midorinext.android.ui.animation.LocalReduceMotion
-import org.midorinext.android.ui.animation.MidoriMotion
 import org.midorinext.android.ui.theme.LocalMidoriTheme
 import org.midorinext.android.ui.theme.MidoriDialogSystemBars
 
@@ -115,7 +111,7 @@ internal fun HomeShortcutGrid(
     val showAdd = !preferences.hideHomeAddShortcut
     val visible = sites.take(columns * 2 - if (showAdd) 1 else 0)
     val tiles: List<HomeShortcut?> = visible + if (showAdd) listOf(null) else emptyList()
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(Modifier.padding(top = 4.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         tiles.chunked(columns).forEach { row ->
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 row.forEach { site ->
@@ -145,23 +141,28 @@ private fun HomeShortcutTile(
 ) {
     val size = if (preferences.homeLargeShortcuts) 64.dp else 48.dp
     val shape = homeShortcutIconShape(preferences.homeShortcutShape)
+    val labelLines = if (LocalConfiguration.current.fontScale > 1.2f) 2 else 1
     val interactions = remember { MutableInteractionSource() }
-    val pressed by interactions.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (pressed) 0.96f else 1f,
-        animationSpec = if (LocalReduceMotion.current) snap() else tween(MidoriMotion.FeedbackDurationMillis),
-        label = "shortcut press",
-    )
-    Column(modifier.testTag(if (site == null) "home_add_shortcut" else "home_shortcut_tile")
+    Column(modifier.homePressFeedback(interactions)
+        .clip(RoundedCornerShape(12.dp))
+        .testTag(if (site == null) "home_add_shortcut" else "home_shortcut_tile")
         .combinedClickable(interactionSource = interactions, indication = ripple(),
-            onClick = onClick, onLongClick = onLongClick, role = Role.Button),
+            onClick = onClick, onLongClick = onLongClick,
+            onLongClickLabel = site?.let {
+                stringResource(if (it.isFolder) R.string.home_edit_folder else R.string.home_edit_shortcut)
+            }, role = Role.Button)
+        .padding(vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Surface(Modifier.size(size).graphicsLayer { scaleX = scale; scaleY = scale }.testTag("home_shortcut_icon"),
-            shape = shape, color = palette.tile) {
+        Surface(Modifier.size(size)
+            .shadow(if (site == null) 0.dp else 2.dp, shape,
+                ambientColor = palette.primary.copy(alpha = 0.10f), spotColor = palette.primary.copy(alpha = 0.14f))
+            .testTag("home_shortcut_icon"),
+            shape = shape, color = if (site == null) Color.Transparent else palette.tile,
+            border = BorderStroke(0.5.dp, palette.divider)) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 when {
                     site == null -> Icon(painterResource(mozilla.components.ui.icons.R.drawable.mozac_ic_plus_24), null,
-                        Modifier.size(24.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Modifier.size(24.dp), tint = palette.secondary)
                     site.isFolder -> {
                         val children = allSites.filter { it.parentId == site.id }.take(4)
                         if (children.isEmpty()) Icon(painterResource(R.drawable.icons_folder_add), null, Modifier.size(26.dp),
@@ -180,7 +181,7 @@ private fun HomeShortcutTile(
             }
         }
         Text(site?.title ?: stringResource(R.string.home_add_shortcut),
-            Modifier.fillMaxWidth(), maxLines = 1, overflow = TextOverflow.Ellipsis,
+            Modifier.fillMaxWidth(), minLines = labelLines, maxLines = labelLines, overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.bodySmall.copy(shadow = palette.shadow),
             color = palette.primary, textAlign = TextAlign.Center)
     }
