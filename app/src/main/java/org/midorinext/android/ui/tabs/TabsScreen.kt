@@ -4,6 +4,9 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.DragInteraction
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
@@ -13,10 +16,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.res.painterResource
@@ -414,7 +419,7 @@ fun TabsScreen(
                         ) {
                             Icon(painterResource(R.drawable.icons_history), stringResource(R.string.browser_reopen_closed_tab))
                         }
-                        Button(
+                        FilledTonalButton(
                             onClick = { openIndividualTab(private) },
                             modifier = Modifier.weight(1f).heightIn(min = 48.dp),
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
@@ -786,7 +791,6 @@ fun AnimatedTabList(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TabsPageSelector(
     selectedPage: TabsPage,
@@ -794,31 +798,47 @@ internal fun TabsPageSelector(
     privateTabsCount: Int,
     onPageSelected: (TabsPage) -> Unit,
 ) {
-    SingleChoiceSegmentedButtonRow(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-    ) {
-        TabsPage.entries.forEachIndexed { index, page ->
-            SegmentedButton(
-                selected = selectedPage == page,
-                onClick = { onPageSelected(page) },
-                shape = SegmentedButtonDefaults.itemShape(index = index, count = TabsPage.entries.size),
-                icon = {},
-                modifier = Modifier.weight(1f).heightIn(min = 48.dp).testTag("tabs_page_${page.name}"),
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    if (page.isPrivate) Icon(painterResource(R.drawable.icons_privacy_mask), null, Modifier.size(18.dp))
-                    Text(
-                        text = stringResource(if (page.isPrivate) R.string.tab_tray_private_tabs else R.string.tab_tray_normal_tabs),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false),
-                    )
-                    Text(
-                        text = (if (page.isPrivate) privateTabsCount else normalTabsCount).toString(),
-                        style = MaterialTheme.typography.labelMedium,
+    Column(Modifier.fillMaxWidth()) {
+        Row(Modifier.fillMaxWidth().selectableGroup()) {
+            TabsPage.entries.forEach { page ->
+                val selected = selectedPage == page
+                val contentColor = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                Column(
+                    modifier = Modifier.weight(1f).heightIn(min = 48.dp)
+                        .selectable(selected = selected, role = Role.Tab, onClick = { onPageSelected(page) })
+                        .testTag("tabs_page_${page.name}"),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 13.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                    ) {
+                        if (page.isPrivate) Icon(painterResource(R.drawable.icons_privacy_mask), null, Modifier.size(18.dp), tint = contentColor)
+                        Text(
+                            text = stringResource(if (page.isPrivate) R.string.tab_tray_private_tabs else R.string.tab_tray_normal_tabs),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = contentColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        Text(
+                            text = (if (page.isPrivate) privateTabsCount else normalTabsCount).toString(),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = contentColor,
+                        )
+                    }
+                    Box(
+                        Modifier.fillMaxWidth(0.6f).height(3.dp)
+                            .background(
+                                if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp),
+                            )
                     )
                 }
             }
         }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     }
 }

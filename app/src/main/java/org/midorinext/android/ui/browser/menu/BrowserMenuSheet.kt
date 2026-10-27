@@ -42,8 +42,8 @@ internal fun BrowserMenuSheet(
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
         modifier = Modifier.testTag("browser_menu_sheet"),
     ) {
@@ -52,8 +52,7 @@ internal fun BrowserMenuSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(bottom = 12.dp),
         ) {
             content(dismiss)
         }
@@ -70,11 +69,12 @@ internal fun BrowserMenuMainContent(
     onAccountClick: () -> Unit,
     onSetDefault: () -> Unit,
     onDismissDefault: () -> Unit,
+    precededByContent: Boolean = false,
 ) {
     if (showDefaultPrompt) {
         DefaultBrowserBanner(onSetDefault, onDismissDefault)
     }
-    BrowserMenuGroup {
+    BrowserMenuGroup(divider = showDefaultPrompt || precededByContent) {
         BrowserMenuRow(
             text = stringResource(R.string.menu_midori_vpn),
             icon = R.drawable.icons_internet,
@@ -82,8 +82,6 @@ internal fun BrowserMenuMainContent(
             onClick = onVpnClick,
             modifier = Modifier.testTag("browser_menu_vpn"),
         )
-    }
-    BrowserMenuGroup {
         BrowserMenuRow(
             text = stringResource(R.string.extensions_title),
             icon = R.drawable.icons_menu_extensions,
@@ -94,7 +92,7 @@ internal fun BrowserMenuMainContent(
             modifier = Modifier.testTag("browser_menu_extensions"),
         )
     }
-    BrowserMenuLibrary(onNavigate)
+    BrowserMenuGroup { BrowserMenuLibrary(onNavigate) }
     BrowserMenuGroup {
         BrowserMenuRow(
             text = stringResource(R.string.menu_account),
@@ -117,12 +115,16 @@ internal fun BrowserMenuMainContent(
 }
 
 @Composable
-internal fun BrowserMenuGroup(content: @Composable ColumnScope.() -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium),
-        verticalArrangement = Arrangement.spacedBy(1.dp),
-        content = content,
-    )
+internal fun BrowserMenuGroup(divider: Boolean = true, content: @Composable ColumnScope.() -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        if (divider) {
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 4.dp),
+                color = MaterialTheme.colorScheme.outlineVariant,
+            )
+        }
+        content()
+    }
 }
 
 @Composable
@@ -138,12 +140,11 @@ internal fun BrowserMenuRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .heightIn(min = 52.dp)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 20.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         CompositionLocalProvider(LocalContentColor provides contentColor.copy(alpha = if (enabled) 1f else .38f)) {
             if (icon != null) {
@@ -151,7 +152,7 @@ internal fun BrowserMenuRow(
                     painterResource(icon),
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
-                    tint = contentColor.copy(alpha = if (enabled) .7f else .38f),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (enabled) 1f else .38f),
                 )
             }
             Text(text, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
@@ -163,8 +164,7 @@ internal fun BrowserMenuRow(
 @Composable
 private fun BrowserMenuLibrary(onNavigate: (NavDestination) -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min).clip(MaterialTheme.shapes.medium).testTag("browser_menu_library"),
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min).padding(horizontal = 8.dp).testTag("browser_menu_library"),
     ) {
         BrowserMenuLibraryItem(R.string.history, R.drawable.icons_menu_history, "browser_menu_history") {
             onNavigate(NavDestination.History)
@@ -185,7 +185,7 @@ private fun BrowserMenuLibrary(onNavigate: (NavDestination) -> Unit) {
 private fun RowScope.BrowserMenuLibraryItem(label: Int, icon: Int, tag: String, onClick: () -> Unit) {
     Column(
         modifier = Modifier.weight(1f).fillMaxHeight()
-            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+            .clip(MaterialTheme.shapes.small)
             .clickable(role = Role.Button, onClick = onClick)
             .heightIn(min = 72.dp)
             .padding(horizontal = 2.dp, vertical = 12.dp)
@@ -202,7 +202,8 @@ private fun RowScope.BrowserMenuLibraryItem(label: Int, icon: Int, tag: String, 
 @Composable
 private fun DefaultBrowserBanner(onClick: () -> Unit, onDismiss: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium)
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)
+            .clip(MaterialTheme.shapes.medium)
             .background(MaterialTheme.colorScheme.secondaryContainer)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(start = 24.dp, top = 12.dp, bottom = 12.dp),

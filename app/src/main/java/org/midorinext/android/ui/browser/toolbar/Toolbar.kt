@@ -28,8 +28,8 @@ import org.midorinext.android.suggest.Suggestion
 import org.midorinext.android.suggest.SuggestionProvider
 import org.midorinext.android.ui.browser.suggest.Suggest
 
-internal val ToolbarHeight = 64.dp
-private val AddressBarHeight = 48.dp
+internal val ToolbarHeight = 56.dp
+private val AddressBarHeight = 44.dp
 
 /**
  * Firefox-style browser toolbar with distinct display and edit layouts.
@@ -172,8 +172,8 @@ private fun ToolbarChrome(
                         .weight(1f)
                         .height(AddressBarHeight)
                         .padding(
-                            start = 8.dp,
-                            end = if (isEditMode) 8.dp else 0.dp,
+                            start = 12.dp,
+                            end = if (isEditMode) 12.dp else 0.dp,
                         ),
                     leadingContent = when {
                         isEditMode -> ({ ToolbarSearchSelector(toolbarState) })

@@ -65,7 +65,7 @@ fun Suggest(
                     fontSize = 14.sp,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 8.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                 )
             }
             items(
@@ -80,7 +80,7 @@ fun Suggest(
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = 48.dp)
                         .clickable { onRecentSearchClicked(search) }
-                        .padding(start = 24.dp, end = 4.dp)
+                        .padding(start = 16.dp, end = 4.dp)
                 )
             }
         }
@@ -96,7 +96,7 @@ fun Suggest(
                                 .fillMaxWidth()
                                 .defaultMinSize(minHeight = 48.dp)
                                 .clickable { onSuggestionClicked(suggestion) }
-                                .padding(start = 24.dp, end = 4.dp)
+                                .padding(start = 16.dp, end = 4.dp)
                         )
                     }
                 }

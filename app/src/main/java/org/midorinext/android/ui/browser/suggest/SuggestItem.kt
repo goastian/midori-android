@@ -262,7 +262,7 @@ fun RecentSearchSuggestionItem(
             Icon(
                 painter = painterResource(R.drawable.icons_history),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(24.dp),
             )
         },
@@ -310,7 +310,7 @@ fun WebsiteRow(
                     title?.toSuggestAnnotatedString(it)
                 } ?: AnnotatedString(title ?: ""),
                 fontSize = 16.sp,
-                fontWeight = if (highlight != null) FontWeight.Bold else FontWeight.Normal,
+                fontWeight = if (highlight != null) FontWeight.Medium else FontWeight.Normal,
                 lineHeight = 20.sp,
                 maxLines = maxTitleLines,
                 overflow = TextOverflow.Ellipsis,
@@ -366,7 +366,7 @@ fun SuggestIcon(
     Icon(
         painter = painterResource(id = icon),
         contentDescription = "Suggest icon",
-        tint = MaterialTheme.colorScheme.primary,
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier
             .padding(4.dp)
             .size(24.dp)
@@ -388,12 +388,12 @@ fun SuggestUrlIcon(
         Icon(
             painter = painterResource(id = miniature),
             contentDescription = "miniature",
-            tint = MaterialTheme.colorScheme.primary,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
                 .size(18.dp)
                 .align(Alignment.BottomEnd)
                 .offset(4.dp, 4.dp)
-                .background(MaterialTheme.colorScheme.background, CircleShape)
+                .background(MaterialTheme.colorScheme.surface, CircleShape)
                 .padding(2.dp)
         )
     }

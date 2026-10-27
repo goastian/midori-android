@@ -235,7 +235,7 @@ fun BrowserScreen(
     }
 
     if (currentUrl == null) {
-        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
+        Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface))
         return
     }
 
@@ -364,7 +364,7 @@ fun BrowserScreen(
                     onSwitchBrowsingMode = { switchBrowsingMode(false) },
                     modifier = modifier,
                 )
-                else Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).testTag("native_blank_home"))
+                else Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).testTag("native_blank_home"))
             } else {
                 GlobalFeatures(appViewModel, viewModel, onManageLogins = { navigateTo(NavDestination.SavedPasswords) })
 

@@ -109,18 +109,18 @@ internal class HomeShortcutUiState {
 @Composable
 internal fun HomeShortcutGrid(
     sites: List<HomeShortcut>, allSites: List<HomeShortcut>, preferences: AppPreferences,
-    columns: Int, color: Color, wallpaper: Boolean, viewModel: NativeHomeViewModel,
+    columns: Int, palette: HomePalette, wallpaper: Boolean, viewModel: NativeHomeViewModel,
     dataReady: Boolean, state: HomeShortcutUiState, onOpenUrl: (String) -> Unit,
 ) {
     val showAdd = !preferences.hideHomeAddShortcut
     val visible = sites.take(columns * 2 - if (showAdd) 1 else 0)
     val tiles: List<HomeShortcut?> = visible + if (showAdd) listOf(null) else emptyList()
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         tiles.chunked(columns).forEach { row ->
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 row.forEach { site ->
                     key(site?.id ?: "add") {
-                        HomeShortcutTile(site, allSites, preferences, color, wallpaper, viewModel, dataReady,
+                        HomeShortcutTile(site, allSites, preferences, palette, viewModel, dataReady,
                             Modifier.weight(1f), onClick = {
                                 when {
                                     site == null -> state.pickerParentId = ""
@@ -140,7 +140,7 @@ internal fun HomeShortcutGrid(
 @Composable
 private fun HomeShortcutTile(
     site: HomeShortcut?, allSites: List<HomeShortcut>, preferences: AppPreferences,
-    color: Color, wallpaper: Boolean, viewModel: NativeHomeViewModel, dataReady: Boolean,
+    palette: HomePalette, viewModel: NativeHomeViewModel, dataReady: Boolean,
     modifier: Modifier = Modifier, onClick: () -> Unit, onLongClick: (() -> Unit)?,
 ) {
     val size = if (preferences.homeLargeShortcuts) 64.dp else 48.dp
@@ -152,25 +152,20 @@ private fun HomeShortcutTile(
         animationSpec = if (LocalReduceMotion.current) snap() else tween(MidoriMotion.FeedbackDurationMillis),
         label = "shortcut press",
     )
-    val colors = MaterialTheme.colorScheme
-    val tileColor = when {
-        site == null || site.isFolder -> color
-        LocalMidoriTheme.current.dark -> colors.surfaceContainerHigh
-        else -> colors.surfaceContainerLowest
-    }
-    Column(modifier.testTag(if (site == null) "home_add_shortcut_tile" else "home_shortcut_tile")
+    Column(modifier.testTag(if (site == null) "home_add_shortcut" else "home_shortcut_tile")
         .combinedClickable(interactionSource = interactions, indication = ripple(),
             onClick = onClick, onLongClick = onLongClick, role = Role.Button),
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Surface(Modifier.size(size).graphicsLayer { scaleX = scale; scaleY = scale }.testTag("home_shortcut_icon"),
-            shape = shape, color = tileColor,
-            border = BorderStroke(0.5.dp, colors.outlineVariant.copy(alpha = 0.55f))) {
+            shape = shape, color = palette.tile) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 when {
-                    site == null -> Icon(painterResource(R.drawable.icons_add_tab), null, Modifier.size(24.dp))
+                    site == null -> Icon(painterResource(mozilla.components.ui.icons.R.drawable.mozac_ic_plus_24), null,
+                        Modifier.size(24.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     site.isFolder -> {
                         val children = allSites.filter { it.parentId == site.id }.take(4)
-                        if (children.isEmpty()) Icon(painterResource(R.drawable.icons_folder_add), null, Modifier.size(26.dp))
+                        if (children.isEmpty()) Icon(painterResource(R.drawable.icons_folder_add), null, Modifier.size(26.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         else Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                             children.chunked(2).forEach { row ->
                                 Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
@@ -185,9 +180,9 @@ private fun HomeShortcutTile(
             }
         }
         Text(site?.title ?: stringResource(R.string.home_add_shortcut),
-            Modifier.fillMaxWidth().heightIn(min = 32.dp), maxLines = 2, overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.labelSmall.copy(shadow = if (wallpaper) wallpaperTextShadow else null),
-            color = if (wallpaper) Color.White else LocalContentColor.current, textAlign = TextAlign.Center)
+            Modifier.fillMaxWidth(), maxLines = 1, overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodySmall.copy(shadow = palette.shadow),
+            color = palette.primary, textAlign = TextAlign.Center)
     }
 }
 
@@ -391,13 +386,7 @@ private fun HomeSitePicker(parentId: String, state: HomeShortcutUiState, sites: 
                     item {
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(homeSiteCategories, key = { it.id }) { option ->
-                                val colors = MaterialTheme.colorScheme
-                                val color = when (homeSiteCategories.indexOf(option) % 3) {
-                                    0 -> colors.primaryContainer
-                                    1 -> colors.secondaryContainer
-                                    else -> colors.tertiaryContainer
-                                }
-                                Surface(onClick = { categoryId = option.id }, color = color,
+                                Surface(onClick = { categoryId = option.id }, color = MaterialTheme.colorScheme.surfaceContainer,
                                     shape = RoundedCornerShape(12.dp),
                                     modifier = Modifier.width(112.dp).testTag("home_category:${option.id}")) {
                                     Column(Modifier.heightIn(min = 92.dp).padding(12.dp),

@@ -163,7 +163,6 @@ class HomeCustomizationDeviceTest {
         waitForTag("native_home")
         compose.onNodeWithTag("native_home_brand").assertDoesNotExist()
         compose.onNodeWithTag("native_home_customize").assertDoesNotExist()
-        compose.onNodeWithTag("home_add_shortcut_tile").assertDoesNotExist()
         compose.onNodeWithTag("home_add_shortcut").assertDoesNotExist()
         val icons = compose.onAllNodesWithTag("home_shortcut_icon", useUnmergedTree = true).fetchSemanticsNodes()
         assertTrue(icons.isNotEmpty())

@@ -65,7 +65,7 @@ fun TabRow(
     val animationsEnabled = !reduceMotionRequested()
     val dismissal = rememberTabDismissal(tab.id) { onDeleted(tab) }
     val surfaceColor by animateColorAsState(
-        if (highlighted) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerLow,
+        if (highlighted) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.surfaceContainerLow,
         tween(if (animationsEnabled) 140 else 0), label = "tab row surface",
     )
     val borderColor by animateColorAsState(

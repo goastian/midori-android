@@ -15,7 +15,7 @@ fun MidoriIconOnBackground(
     shape: Shape,
     modifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
-    bgColor: Color = MaterialTheme.colorScheme.tertiary
+    bgColor: Color = MaterialTheme.colorScheme.surfaceContainerLowest
 ) {
     GenericMidoriIconOnBackground(shape = shape, modifier = modifier, color = color, bgColor = bgColor)
 }

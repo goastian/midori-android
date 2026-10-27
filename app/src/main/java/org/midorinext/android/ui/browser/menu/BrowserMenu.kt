@@ -76,7 +76,7 @@ fun BrowserMenu(
                 navigateTo(destination)
             }
             if (showPageActions) {
-                BrowserMenuGroup { BrowserNavigation(viewModel, dismiss) }
+                BrowserMenuGroup(divider = false) { BrowserNavigation(viewModel, dismiss) }
             }
             BrowserMenuMainContent(
                 showDefaultPrompt = !showPageActions && !defaultBrowser.isDefault && !defaultPromptDismissed,
@@ -96,6 +96,7 @@ fun BrowserMenu(
                     defaultLauncher.launch(defaultBrowser.requestIntent())
                 },
                 onDismissDefault = { defaultPromptDismissed = true },
+                precededByContent = showPageActions,
             )
             BrowserMenuGroup {
                 BrowserMenuRow(
@@ -210,7 +211,7 @@ fun BrowserNavigation(
 
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
-        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).heightIn(min = 60.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 8.dp),
     ) {
         IconButton(
             onClick = {

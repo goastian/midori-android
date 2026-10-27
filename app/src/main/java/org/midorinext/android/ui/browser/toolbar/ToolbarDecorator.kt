@@ -3,7 +3,6 @@ package org.midorinext.android.ui.browser.toolbar
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -32,6 +31,8 @@ import org.midorinext.android.ui.widgets.MidoriIconOnBackground
 import org.midorinext.android.ui.animation.LocalReduceMotion
 import org.midorinext.android.ui.animation.MidoriMotion
 
+private val FieldHeight = 44.dp
+
 @Composable
 fun ToolbarDecorator(
     state: ToolbarState,
@@ -43,20 +44,17 @@ fun ToolbarDecorator(
     onMidoriIconClicked: () -> Unit = {}
 ) {
     val colors = MaterialTheme.colorScheme
-    val shape = MaterialTheme.shapes.small
     val fieldColor by animateColorAsState(
-        targetValue = if (state.hasFocus) colors.surfaceContainerLowest else colors.surfaceContainer,
+        targetValue = if (state.hasFocus) colors.surfaceContainerHigh else colors.surfaceContainer,
         animationSpec = if (LocalReduceMotion.current) snap() else tween(MidoriMotion.FeedbackDurationMillis),
         label = "address field focus",
     )
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
-            .height(48.dp)
-            .clip(shape)
+            .height(FieldHeight)
+            .clip(CircleShape)
             .background(fieldColor)
-            .border(if (state.hasFocus) 1.5.dp else 0.5.dp,
-                if (state.hasFocus) colors.primary else colors.outlineVariant, shape)
     ) {
         if (leadingContent != null) {
             leadingContent()
@@ -68,15 +66,15 @@ fun ToolbarDecorator(
                     // AnimatedVisibility nodes briefly measured both icons and shifted the field.
                     Box(
                         modifier = Modifier
-                            .width(48.dp)
-                            .height(48.dp),
+                            .width(FieldHeight)
+                            .height(FieldHeight),
                         contentAlignment = Alignment.Center,
                     ) {
                         if (shouldShowMidoriIcon) {
                             MidoriIconOnBackground(
                                 shape = CircleShape,
                                 modifier = Modifier
-                                    .size(32.dp)
+                                    .size(28.dp)
                                     .clickable { onMidoriIconClicked() }
                             )
                         } else {
@@ -88,7 +86,7 @@ fun ToolbarDecorator(
                     shape = CircleShape,
                     Modifier
                         .padding(start = 8.dp)
-                        .size(32.dp)
+                        .size(28.dp)
                         .clickable { onMidoriIconClicked() }
                 )
             }

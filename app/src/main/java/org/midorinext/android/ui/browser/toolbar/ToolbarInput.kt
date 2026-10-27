@@ -7,7 +7,6 @@ import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.speech.RecognizerIntent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
@@ -198,13 +198,10 @@ fun ToolbarSearchSelector(toolbarState: BrowserToolbarState) {
     val selectedName = selected?.let { it.builtIn?.let { builtIn -> searchEngineName(builtIn) } ?: it.name }
     Box(
         modifier = Modifier
-            .padding(horizontal = 4.dp)
+            .padding(start = 6.dp)
             .width(52.dp)
-            .height(40.dp)
-            .background(
-                color = MaterialTheme.colorScheme.surface,
-                shape = CircleShape,
-            )
+            .height(36.dp)
+            .clip(CircleShape)
             .clickable(role = Role.Button) { expanded = true }
             .semantics { selectedName?.let { contentDescription = it } },
         contentAlignment = Alignment.Center,
@@ -214,12 +211,13 @@ fun ToolbarSearchSelector(toolbarState: BrowserToolbarState) {
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            selected?.let { SearchEngineIcon(it, Modifier.size(24.dp)) }
+            selected?.let { SearchEngineIcon(it, Modifier.size(22.dp)) }
             Spacer(Modifier.width(4.dp))
             Icon(
                 painter = painterResource(R.drawable.icons_chevron_down_small),
                 contentDescription = null,
                 modifier = Modifier.size(8.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         // A focusable popup takes the window focus away from the address field, which hides the

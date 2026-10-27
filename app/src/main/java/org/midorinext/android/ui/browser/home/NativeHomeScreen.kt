@@ -1,7 +1,9 @@
 package org.midorinext.android.ui.browser.home
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,6 +22,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
@@ -52,7 +55,6 @@ import org.midorinext.android.newtab.publicHomeUrl
 import org.midorinext.android.preferences.app.HomeShortcut
 import org.midorinext.android.ui.nav.NavDestination
 import org.midorinext.android.ui.tabs.TabThumbnail
-import org.midorinext.android.ui.theme.LocalMidoriTheme
 import kotlin.math.roundToInt
 
 internal val wallpaperTextShadow = Shadow(Color.Black.copy(alpha = 0.45f), Offset(0f, 1f), 2f)
@@ -120,15 +122,22 @@ fun NativeHomeScreen(
         onFirstFrameDrawn(tabId)
     }
     val colors = MaterialTheme.colorScheme
-    val background = colors.background
+    val background = colors.surface
     if (wallpaperAsset == null) {
         Box(modifier.fillMaxSize().background(background).testTag("native_home_loading_background:${wallpaper.id}"))
         return
     }
     val wallpaperBitmap = wallpaperAsset?.bitmap
     val hasWallpaper = wallpaperBitmap != null
-    val cardColor = if (LocalMidoriTheme.current.dark) colors.surfaceContainerLow else colors.surfaceContainerLowest
-    val insetColor = colors.surfaceContainer
+    val palette = HomePalette(
+        primary = if (hasWallpaper) Color.White else colors.onSurface,
+        secondary = if (hasWallpaper) Color.White.copy(alpha = 0.78f) else colors.onSurfaceVariant,
+        panel = if (hasWallpaper) Color.Black.copy(alpha = 0.32f) else Color.Transparent,
+        panelBorder = if (hasWallpaper) null else BorderStroke(1.dp, colors.outlineVariant),
+        divider = if (hasWallpaper) Color.White.copy(alpha = 0.18f) else colors.outlineVariant,
+        tile = if (hasWallpaper) Color.White.copy(alpha = 0.94f) else colors.surfaceContainer,
+        shadow = if (hasWallpaper) wallpaperTextShadow else null,
+    )
     val shortcutColumns = ((windowSize.width / LocalDensity.current.density - 32) /
         if (preferences.homeLargeShortcuts) 88 else 72).toInt().coerceIn(3, 6)
     val listState = rememberLazyListState()
@@ -159,17 +168,15 @@ fun NativeHomeScreen(
             Box(Modifier.matchParentSize().background(Brush.verticalGradient(listOf(
                 Color.Black.copy(alpha = 0.54f), Color.Black.copy(alpha = 0.54f), Color.Black.copy(alpha = 0.62f),
             ))))
-        } else {
-            MidoriHomeBackdrop(Modifier.fillMaxWidth().height(280.dp))
         }
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize().testTag("native_home"),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             item(key = "header") {
-                CompositionLocalProvider(LocalContentColor provides if (hasWallpaper) Color.White else LocalContentColor.current) {
+                CompositionLocalProvider(LocalContentColor provides palette.primary) {
                     NativeHomeHeader(private = false, onSwitchBrowsingMode = onSwitchBrowsingMode,
                         showLogo = !preferences.hideHomeLogo,
                         onCustomize = if (preferences.hideHomeCustomizeShortcut) null else {
@@ -179,55 +186,51 @@ fun NativeHomeScreen(
             }
             if (!preferences.hideHomeShortcuts) {
                 item(key = "shortcuts") {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        HomeSectionHeading(R.string.home_shortcuts, R.string.home_show_all,
-                            onAdd = if (preferences.hideHomeAddShortcut) null else { { shortcutState.pickerParentId = "" } }, wallpaper = hasWallpaper) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        HomeSectionHeading(R.string.home_shortcuts, palette, R.string.home_show_all) {
                             shortcutState.collectionId = ""
                         }
                         HomeShortcutGrid(shortcuts.filter { it.parentId.isEmpty() }, shortcuts, preferences,
-                            shortcutColumns, insetColor, hasWallpaper, viewModel, true, shortcutState, onOpenUrl)
+                            shortcutColumns, palette, hasWallpaper, viewModel, true, shortcutState, onOpenUrl)
                     }
                 }
             }
             if (!preferences.hideHomePrivacy) {
                 item(key = "privacy") {
-                    Surface(onClick = { navigateTo(NavDestination.AdBlockSettings) }, shape = MaterialTheme.shapes.medium,
-                            color = if (hasWallpaper) colors.scrim.copy(alpha = 0.60f) else colors.secondaryContainer,
-                            modifier = Modifier.fillMaxWidth().testTag("native_home_protection")) {
-                            Row(Modifier.heightIn(min = 48.dp).padding(horizontal = 12.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Icon(painterResource(mozilla.components.ui.icons.R.drawable.mozac_ic_shield_24), null,
-                                    tint = if (hasWallpaper) Color.White else colors.primary, modifier = Modifier.size(18.dp))
-                                Text(stringResource(R.string.home_blocked, blocked), Modifier.weight(1f),
-                                    style = MaterialTheme.typography.bodySmall.copy(shadow = if (hasWallpaper) wallpaperTextShadow else null),
-                                    color = if (hasWallpaper) Color.White else colors.onSurface)
-                                Icon(painterResource(R.drawable.icons_arrow_forward), null, Modifier.size(16.dp),
-                                    tint = if (hasWallpaper) Color.White else colors.primary)
-                            }
+                    Surface(onClick = { navigateTo(NavDestination.AdBlockSettings) }, shape = MaterialTheme.shapes.small,
+                        color = palette.panel, contentColor = palette.primary, border = palette.panelBorder,
+                        modifier = Modifier.fillMaxWidth().testTag("native_home_protection")) {
+                        Row(Modifier.heightIn(min = 48.dp).padding(horizontal = 16.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Icon(painterResource(mozilla.components.ui.icons.R.drawable.mozac_ic_shield_24), null,
+                                tint = palette.secondary, modifier = Modifier.size(20.dp))
+                            Text(stringResource(R.string.home_blocked, blocked), Modifier.weight(1f),
+                                style = MaterialTheme.typography.bodyMedium.copy(shadow = palette.shadow))
+                            Icon(painterResource(R.drawable.icons_chevron_forward), null, Modifier.size(16.dp),
+                                tint = palette.secondary)
                         }
+                    }
                 }
             }
-            if (!preferences.hideHomeContinue) {
+            if (!preferences.hideHomeContinue && continuation != null) {
                 item(key = "continue") {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        HomeSectionHeading(R.string.home_continue, wallpaper = hasWallpaper)
-                        HomeCard(cardColor, Modifier.testTag("native_home_continue"),
-                            onClick = { continuation?.let { onSelectTab(it.tabId) } ?: onSearch() }) {
+                        HomeSectionHeading(R.string.home_continue, palette)
+                        HomeCard(palette, Modifier.testTag("native_home_continue"),
+                            onClick = { onSelectTab(continuation.tabId) }) {
                             Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                Box(Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)).background(insetColor),
+                                Box(Modifier.size(56.dp).clip(RoundedCornerShape(8.dp)).background(colors.surfaceContainer),
                                     contentAlignment = Alignment.Center) {
-                                    HomeFavicon(continuation?.url, viewModel, true, Modifier.size(28.dp))
-                                    if (continuation != null) {
-                                        TabThumbnail(continuation.tabId, false, viewModel.thumbnailStorage)
-                                    }
+                                    HomeFavicon(continuation.url, viewModel, true, Modifier.size(28.dp))
+                                    TabThumbnail(continuation.tabId, false, viewModel.thumbnailStorage)
                                 }
                                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                    Text(continuation?.title ?: stringResource(R.string.home_start_browsing),
-                                        maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium,
+                                    Text(continuation.title ?: continuation.url.toCleanHost(),
+                                        maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyLarge,
                                         fontWeight = FontWeight.Medium)
-                                    Text(continuation?.url?.toCleanHost() ?: stringResource(R.string.home_continue_empty),
-                                        maxLines = 2, overflow = TextOverflow.Ellipsis, color = colors.onSurfaceVariant,
+                                    Text(continuation.url.toCleanHost(),
+                                        maxLines = 1, overflow = TextOverflow.Ellipsis, color = palette.secondary,
                                         style = MaterialTheme.typography.bodySmall)
                                 }
                             }
@@ -235,30 +238,27 @@ fun NativeHomeScreen(
                     }
                 }
             }
-            if (!preferences.hideHomeRecentVisits) {
+            if (!preferences.hideHomeRecentVisits && recent.isNotEmpty()) {
                 item(key = "recent") {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        HomeSectionHeading(R.string.home_recent_visits, R.string.home_show_all, wallpaper = hasWallpaper) { navigateTo(NavDestination.History) }
-                        if (recent.isEmpty()) {
-                            HomeCard(cardColor, onClick = onSearch) {
-                                Text(stringResource(R.string.home_recent_empty), Modifier.padding(12.dp),
-                                    color = colors.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
-                            }
-                        } else {
-                            Surface(shape = MaterialTheme.shapes.medium, color = cardColor, contentColor = colors.onSurface) {
-                                Column {
-                                    recent.take(3).forEach { page ->
-                                        key(page.url) {
-                                            Surface(onClick = { onOpenUrl(page.url) }, color = cardColor, contentColor = colors.onSurface,
-                                                modifier = Modifier.fillMaxWidth().testTag("native_home_recent")) {
-                                                Row(Modifier.heightIn(min = 52.dp).padding(horizontal = 12.dp, vertical = 8.dp),
-                                                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                                    HomeFavicon(page.url, viewModel, true, Modifier.size(24.dp))
-                                                    Text(page.title, Modifier.weight(1f), maxLines = 1,
-                                                        overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
-                                                }
-                                            }
-                                        }
+                    Column {
+                        HomeSectionHeading(R.string.home_recent_visits, palette, R.string.home_show_all) { navigateTo(NavDestination.History) }
+                        recent.take(3).forEach { page ->
+                            key(page.url) {
+                                Row(Modifier.fillMaxWidth().heightIn(min = 56.dp).clip(MaterialTheme.shapes.small)
+                                    .clickable(role = Role.Button) { onOpenUrl(page.url) }
+                                    .padding(horizontal = 4.dp, vertical = 8.dp).testTag("native_home_recent"),
+                                    verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                    Box(Modifier.size(32.dp).clip(RoundedCornerShape(8.dp)).background(palette.tile),
+                                        contentAlignment = Alignment.Center) {
+                                        HomeFavicon(page.url, viewModel, true, Modifier.size(20.dp))
+                                    }
+                                    Column(Modifier.weight(1f)) {
+                                        Text(page.title, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                                            color = palette.primary,
+                                            style = MaterialTheme.typography.bodyMedium.copy(shadow = palette.shadow))
+                                        Text(page.url.toCleanHost(), maxLines = 1, overflow = TextOverflow.Ellipsis,
+                                            color = palette.secondary,
+                                            style = MaterialTheme.typography.bodySmall.copy(shadow = palette.shadow))
                                     }
                                 }
                             }
@@ -268,36 +268,40 @@ fun NativeHomeScreen(
             }
             if (!preferences.hideHomeStories) {
                 item(key = "stories") {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        HomeSectionHeading(R.string.home_stories, R.string.home_all_stories, wallpaper = hasWallpaper) {
+                    Column {
+                        HomeSectionHeading(R.string.home_stories, palette, R.string.home_all_stories) {
                             onOpenUrl(if (language == "es") "https://www.bbc.com/mundo" else "https://www.bbc.com/news/world")
                         }
                         if (stories.stories.isEmpty()) {
-                            HomeCard(cardColor, onClick = { viewModel.loadStories(language, force = true) }) {
-                                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Text(stringResource(if (stories.failed) R.string.home_stories_unavailable else R.string.home_stories_loading),
-                                        color = colors.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
-                                    if (stories.failed) Text(stringResource(R.string.extensions_retry), color = colors.primary)
-                                }
-                            }
+                            Text(stringResource(if (stories.failed) R.string.home_stories_unavailable else R.string.home_stories_loading),
+                                Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small)
+                                    .clickable(enabled = stories.failed) { viewModel.loadStories(language, force = true) }
+                                    .padding(vertical = 12.dp, horizontal = 4.dp),
+                                color = palette.secondary, style = MaterialTheme.typography.bodyMedium.copy(shadow = palette.shadow))
+                            if (stories.failed) Text(stringResource(R.string.extensions_retry),
+                                Modifier.padding(horizontal = 4.dp), color = palette.primary,
+                                style = MaterialTheme.typography.labelLarge.copy(shadow = palette.shadow))
                         } else {
-                            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                items(stories.stories, key = { it.url }) { story ->
-                                    HomeCard(cardColor, Modifier.widthIn(max = 300.dp).width(280.dp), onClick = { onOpenUrl(story.url) }) {
-                                        Row(Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                            Box(Modifier.size(56.dp).clip(RoundedCornerShape(8.dp)).background(insetColor),
-                                                contentAlignment = Alignment.Center) {
-                                                Icon(painterResource(R.drawable.icons_internet), null, Modifier.size(24.dp), tint = colors.onSurfaceVariant)
-                                                if (story.imageUrl != null) AsyncImage(story.imageUrl, null,
-                                                    Modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
-                                            }
-                                            Column(Modifier.weight(1f).padding(end = 8.dp)) {
-                                                Text(story.title, maxLines = 2, overflow = TextOverflow.Ellipsis,
-                                                    style = MaterialTheme.typography.bodyMedium)
-                                                Text(story.publisher, color = colors.onSurfaceVariant,
-                                                    style = MaterialTheme.typography.bodySmall)
-                                            }
+                            val visibleStories = stories.stories.take(6)
+                            visibleStories.forEachIndexed { index, story ->
+                                key(story.url) {
+                                    if (index > 0) HorizontalDivider(color = palette.divider)
+                                    Row(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small)
+                                        .clickable(role = Role.Button) { onOpenUrl(story.url) }
+                                        .padding(horizontal = 4.dp, vertical = 14.dp),
+                                        verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                            Text(story.title, maxLines = 3, overflow = TextOverflow.Ellipsis, color = palette.primary,
+                                                style = MaterialTheme.typography.bodyLarge.copy(shadow = palette.shadow),
+                                                fontWeight = FontWeight.Medium)
+                                            Text(story.publisher, color = palette.secondary,
+                                                style = MaterialTheme.typography.bodySmall.copy(shadow = palette.shadow))
+                                        }
+                                        if (story.imageUrl != null) {
+                                            AsyncImage(story.imageUrl, null,
+                                                Modifier.size(width = 104.dp, height = 72.dp).clip(RoundedCornerShape(8.dp))
+                                                    .background(colors.surfaceContainer),
+                                                contentScale = androidx.compose.ui.layout.ContentScale.Crop)
                                         }
                                     }
                                 }
@@ -308,11 +312,11 @@ fun NativeHomeScreen(
             }
             if (!preferences.hideHomeCustomizeShortcut) item(key = "customize") {
                 TextButton(onClick = { navigateTo(NavDestination.HomepageSettings) }, modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.textButtonColors(contentColor = if (hasWallpaper) Color.White else colors.primary)) {
+                    colors = ButtonDefaults.textButtonColors(contentColor = palette.secondary)) {
                     Icon(painterResource(R.drawable.icons_settings), null, Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
                     Text(stringResource(R.string.menu_customize_homepage),
-                        style = MaterialTheme.typography.labelLarge.copy(shadow = if (hasWallpaper) wallpaperTextShadow else null))
+                        style = MaterialTheme.typography.labelLarge.copy(shadow = palette.shadow))
                 }
             }
         }
@@ -345,33 +349,37 @@ fun NativeHomeScreen(
     }
 }
 
+@Immutable
+internal class HomePalette(
+    val primary: Color,
+    val secondary: Color,
+    val panel: Color,
+    val panelBorder: BorderStroke?,
+    val divider: Color,
+    val tile: Color,
+    val shadow: Shadow?,
+)
+
 @Composable
-private fun HomeSectionHeading(title: Int, action: Int? = null, onAdd: (() -> Unit)? = null,
-    wallpaper: Boolean = false, onAction: () -> Unit = {}) {
-    val contentColor = if (wallpaper) Color.White else LocalContentColor.current
-    val shadow = if (wallpaper) wallpaperTextShadow else null
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+private fun HomeSectionHeading(title: Int, palette: HomePalette, action: Int? = null, onAction: () -> Unit = {}) {
+    Row(Modifier.fillMaxWidth().heightIn(min = 40.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(stringResource(title), Modifier.weight(1f),
-            style = MaterialTheme.typography.titleSmall.copy(shadow = shadow),
-            fontWeight = FontWeight.SemiBold, color = contentColor)
+            style = MaterialTheme.typography.titleSmall.copy(shadow = palette.shadow),
+            fontWeight = FontWeight.Medium, color = palette.primary)
         if (action != null) {
-            TextButton(onClick = onAction, contentPadding = PaddingValues(start = 8.dp),
-                modifier = Modifier.heightIn(min = 48.dp),
-                colors = ButtonDefaults.textButtonColors(contentColor = if (wallpaper) Color.White else MaterialTheme.colorScheme.primary)) {
-                Text(stringResource(action), style = MaterialTheme.typography.labelMedium.copy(shadow = shadow))
-                Text("›", Modifier.padding(start = 4.dp), fontSize = 18.sp, style = LocalTextStyle.current.copy(shadow = shadow))
+            TextButton(onClick = onAction, contentPadding = PaddingValues(horizontal = 8.dp),
+                modifier = Modifier.heightIn(min = 40.dp),
+                colors = ButtonDefaults.textButtonColors(contentColor = palette.secondary)) {
+                Text(stringResource(action), style = MaterialTheme.typography.labelLarge.copy(shadow = palette.shadow))
             }
-        }
-        if (onAdd != null) IconButton(onClick = onAdd, modifier = Modifier.testTag("home_add_shortcut")) {
-            Icon(painterResource(R.drawable.icons_add_tab), stringResource(R.string.home_add_shortcut), Modifier.size(20.dp), tint = contentColor)
         }
     }
 }
 
 @Composable
-private fun HomeCard(color: Color, modifier: Modifier = Modifier, onClick: () -> Unit, content: @Composable () -> Unit) {
+private fun HomeCard(palette: HomePalette, modifier: Modifier = Modifier, onClick: () -> Unit, content: @Composable () -> Unit) {
     Surface(onClick = onClick, modifier = modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium,
-        color = color, contentColor = MaterialTheme.colorScheme.onSurface, content = content)
+        color = palette.panel, contentColor = palette.primary, border = palette.panelBorder, content = content)
 }
 
 @Composable
@@ -385,10 +393,10 @@ internal fun HomeFavicon(url: String?, viewModel: NativeHomeViewModel, enabled: 
     } else if (url == null) {
         Icon(painterResource(R.drawable.icons_internet), null, modifier, tint = MaterialTheme.colorScheme.onSurfaceVariant)
     } else {
-        Box(modifier.clip(RoundedCornerShape(6.dp)).background(MaterialTheme.colorScheme.primaryContainer),
+        Box(modifier.clip(RoundedCornerShape(6.dp)).background(MaterialTheme.colorScheme.surfaceContainerHighest),
             contentAlignment = Alignment.Center) {
             Text(url.toCleanHost().firstOrNull()?.uppercase().orEmpty(), fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onPrimaryContainer)
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
