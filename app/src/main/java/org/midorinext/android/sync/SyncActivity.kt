@@ -172,8 +172,8 @@ private fun syncError(code: String): Int = when {
 @OptIn(ExperimentalMaterial3Api::class)
 internal fun SyncAppBar(onBack: () -> Unit) {
     TopAppBar(title = { Text(stringResource(R.string.sync_title)) }, navigationIcon = {
-    IconButton(onClick = onBack) {
-    Icon(painterResource(R.drawable.icons_arrow_backward), stringResource(R.string.sync_back))
-    }
+        IconButton(onClick = onBack) {
+            Icon(painterResource(R.drawable.icons_arrow_backward), stringResource(R.string.sync_back))
+        }
     })
 }
