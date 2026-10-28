@@ -1,6 +1,7 @@
 package org.midorinext.android.storage.bookmarks
 
 import android.content.Context
+import androidx.room.withTransaction
 import org.midorinext.android.R
 import org.midorinext.android.suggest.Suggestion
 import org.midorinext.android.suggest.SuggestionProvider
@@ -24,7 +25,7 @@ import javax.inject.Singleton
 
 @Singleton
 class BookmarksRepository @Inject constructor(
-    db: BookmarksDatabase,
+    private val db: BookmarksDatabase,
     @ApplicationContext context: Context
 ): BookmarksStorage, SuggestionProvider {
     private val dao = db.bookmarksDao()
@@ -120,9 +121,16 @@ class BookmarksRepository @Inject constructor(
     }
 
     override suspend fun deleteNode(guid: String): Result<Boolean> = withContext(Dispatchers.IO) {
-         val exists = dao.alreadyExists(guid)
-         if (exists) dao.deleteByGuid(guid)
-        Result.success(exists)
+        db.withTransaction {
+            suspend fun remove(id: String, visited: MutableSet<String>) {
+                if (!visited.add(id)) return
+                dao.getChildren(id).forEach { remove(it.guid, visited) }
+                dao.deleteByGuid(id)
+            }
+            val exists = dao.alreadyExists(guid)
+            if (exists) remove(guid, mutableSetOf())
+            Result.success(exists)
+        }
     }
 
     override suspend fun countBookmarksInTrees(guids: List<String>): UInt {

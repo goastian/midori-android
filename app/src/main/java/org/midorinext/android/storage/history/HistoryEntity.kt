@@ -16,7 +16,7 @@ data class Page(
 
 @Entity(
     tableName = "visits",
-    primaryKeys = ["pageUri", "time"],
+    primaryKeys = ["pageUri", "timestampUsec", "type"],
     foreignKeys = [ForeignKey(
         entity = Page::class,
         parentColumns = arrayOf("uri"),
@@ -28,9 +28,19 @@ data class Visit(
     val pageUri: String,
     val time: Long,
     val type: VisitType,
+    val timestampUsec: Long = time * 1000,
+    val count: Int = 1,
 )
 
 data class VisitKey(
     val pageUri: String,
     val time: Long
+)
+
+@Entity(tableName = "sync_history_removals")
+data class HistoryRemoval(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val url: String?,
+    val startTime: Long,
+    val endTime: Long,
 )

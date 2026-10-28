@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="sync_title">Midori Sync</string>
+    <string name="sync_summary">Keep bookmarks, history and autofill in sync with your other devices.</string>
+    <string name="sync_unlock_summary">Unlock your encrypted data using the recovery code from another device.</string>
+    <string name="sync_recovery_code">Recovery code</string>
+    <string name="sync_unlock">Unlock data</string>
+    <string name="sync_create_keys">Set up encryption for a new account</string>
+    <string name="sync_backup_summary">Save this recovery code in a safe place. You need it to unlock your data on another device.</string>
+    <string name="sync_backup_saved">I saved my recovery code</string>
+    <string name="sync_continue">Continue</string>
+    <string name="sync_bookmarks">Bookmarks</string>
+    <string name="sync_history">History</string>
+    <string name="sync_passwords">Passwords</string>
+    <string name="sync_cards">Payment cards</string>
+    <string name="sync_addresses">Addresses</string>
+    <string name="sync_forms">Saved form values</string>
+    <string name="sync_unsupported">This data is not supported by the current server or browser.</string>
+    <string name="sync_pending">Waiting for the first sync</string>
+    <string name="sync_last_sync">Last sync: %1$s</string>
+    <string name="sync_pending_count">%1$d changes waiting to sync</string>
+    <string name="sync_conflicts">Review %1$d conflicts</string>
+    <string name="sync_conflict_summary">Both devices changed this item. Choose which copy to keep.</string>
+    <string name="sync_keep_local">Keep this device</string>
+    <string name="sync_use_remote">Use other device</string>
+    <string name="sync_disconnect">Disconnect account</string>
+    <string name="sync_disconnect_summary">Stop syncing on this device? Your local browsing data will stay on the device.</string>
+    <string name="sync_error_keys">Your encryption keys need attention. Check the recovery code or unlock your data again.</string>
+    <string name="sync_error_login">Your account connection needs attention. Try signing in again.</string>
+    <string name="sync_error_quota">Sync storage is full. Free up space before trying again.</string>
+    <string name="sync_error_retry">Some data could not sync. Your changes are saved; try again when the connection is available.</string>
+  <string name="sync_local_copy">This device: %1$s</string>
+  <string name="sync_remote_copy">Other device: %1$s</string>
+  <string name="sync_deleted_item">Deleted item</string>
+  <string name="sync_error_rate_limit">The server is busy. Your changes are saved and will retry automatically.</string>
+    <string name="sync_scan_title">Sign in with your camera</string>
+    <string name="sync_scan_summary">On your computer, open sync.astian.org, sign in and choose Connect Android to display a QR code.</string>
+    <string name="sync_scan">Scan QR code</string>
+    <string name="sync_sign_in_authentik">Sign in with Authentik</string>
+    <string name="sync_scan_prompt">Scan the QR code shown on sync.astian.org</string>
+    <string name="sync_camera_denied">Allow camera access to scan the QR code, or sign in with Authentik.</string>
+    <string name="sync_invalid_qr">This QR code is not for Midori Sync. Open sync.astian.org on your computer and generate a new one.</string>
+    <string name="sync_qr_expired">This QR code expired or was already used. Generate a new one on your computer.</string>
+    <string name="sync_back">Back</string>
+</resources>

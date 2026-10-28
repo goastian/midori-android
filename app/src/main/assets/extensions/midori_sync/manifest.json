@@ -1,0 +1,14 @@
+{
+  "manifest_version": 2,
+  "name": "Midori Sync native storage bridge",
+  "version": "1.0.1",
+  "browser_specific_settings": {"gecko": {"id": "sync-native@midori.astian.org"}},
+  "permissions": ["nativeMessaging", "geckoViewAddons"],
+  "background": {"scripts": ["background.js"]},
+  "experiment_apis": {
+    "midoriSyncStorage": {
+      "schema": "schema.json",
+      "parent": {"scopes": ["addon_parent"], "paths": [["midoriSyncStorage"]], "script": "api.js"}
+    }
+  }
+}

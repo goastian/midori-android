@@ -102,7 +102,7 @@ android {
         minSdk 26
         targetSdk 36
         versionCode configuredPlaystoreVersionCode
-        versionName "11.9.4.4"
+        versionName "11.9.4.5"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -156,6 +156,11 @@ android {
             getIsDefault().set(true)
             applicationIdSuffix ".debug"
         }
+        syncTest {
+            initWith debug
+            applicationIdSuffix ".synctest"
+            matchingFallbacks = ["debug"]
+        }
         release {
             // Shrink bytecode and resources to reduce final artifact size.
             minifyEnabled true
@@ -180,6 +185,10 @@ android {
             getIsDefault().set(true)
             dimension "target"
         }
+    }
+
+    if (project.findProperty("syncIntegration") == "true") {
+        testBuildType "syncTest"
     }
 
     buildFeatures {
@@ -313,6 +322,27 @@ tasks.register("buildAndroidAdblock", Exec) {
         "--output", layout.buildDirectory.dir("rust-jni").get().asFile] + abis.collectMany { ["--abi", it] })
 }
 
+def syncInputs = rootProject.files("native/sync/Cargo.toml", "native/sync/Cargo.lock", "scripts/build-sync.py") + rootProject.fileTree("native/sync/src") + rootProject.fileTree("native/sync/core")
+tasks.register("buildHostSync", Exec) {
+    inputs.files(syncInputs)
+    outputs.file(layout.buildDirectory.file("rust-sync-host/libmidori_sync_android.so"))
+    commandLine("python3", rootProject.file("scripts/build-sync.py"), "--host", "--output", layout.buildDirectory.dir("rust-sync-host").get().asFile)
+}
+tasks.register("buildAndroidSync", Exec) {
+    inputs.files(syncInputs)
+    outputs.dir(layout.buildDirectory.dir("rust-sync-jni"))
+    commandLine(["python3", rootProject.file("scripts/build-sync.py"), "--ndk", android.ndkDirectory,
+        "--output", layout.buildDirectory.dir("rust-sync-jni").get().asFile] + splitAbisForSync(project).collectMany { ["--abi", it] })
+}
+android.sourceSets.main.jniLibs.srcDir(layout.buildDirectory.dir("rust-sync-jni").get().asFile)
+tasks.matching { it.name.startsWith("merge") && it.name.endsWith("JniLibFolders") }.configureEach {
+    dependsOn("buildAndroidSync")
+}
+tasks.matching { it.name == "testOriginalPlaystoreDebugUnitTest" }.configureEach {
+    dependsOn("buildHostSync")
+    systemProperty("midori.sync.library", layout.buildDirectory.file("rust-sync-host/libmidori_sync_android.so").get().asFile.absolutePath)
+}
+
 android.sourceSets.main.jniLibs.srcDir(layout.buildDirectory.dir("rust-jni").get().asFile)
 tasks.matching { it.name.startsWith("merge") && it.name.endsWith("JniLibFolders") }.configureEach {
     dependsOn("buildAndroidAdblock")
@@ -411,6 +441,7 @@ dependencies {
 
     // Others
     implementation libs.protobuf
+    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
 
     // Tests
     testImplementation libs.junit.main
@@ -473,4 +504,8 @@ tasks.register("validatePlaystoreReleaseConfig") {
 
 tasks.matching { it.name == "bundleOriginalPlaystoreRelease" }.configureEach {
     dependsOn("validatePlaystoreReleaseConfig")
+}
+
+static List<String> splitAbisForSync(Project project) {
+    project.findProperty("fullAbiBuild") == "true" ? ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"] : ["armeabi-v7a", "arm64-v8a", "x86_64"]
 }

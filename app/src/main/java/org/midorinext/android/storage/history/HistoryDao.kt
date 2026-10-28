@@ -17,11 +17,11 @@ interface HistoryDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertIfNeeded(page: Page)
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(visit: Visit)
 
-    @Delete(entity = Visit::class)
-    suspend fun deleteVisitByKey(visitKey: VisitKey)
+    @Query("DELETE FROM visits WHERE pageUri = :url AND time = :time")
+    suspend fun deleteVisitByKey(url: String, time: Long)
 
     @Query("DELETE from pages WHERE uri = :uri")
     suspend fun deleteURI(uri: String)
@@ -35,7 +35,31 @@ interface HistoryDao {
     @Query("DELETE from visits WHERE time < :time")
     suspend fun deleteVisitsBefore(time: Long)
 
-    @Query("SELECT * from pages")
+    @Query("SELECT * FROM visits ORDER BY pageUri, timestampUsec, type")
+    suspend fun syncVisits(): List<Visit>
+
+    @Query("SELECT * FROM visits WHERE pageUri = :url AND timestampUsec >= :start AND timestampUsec < :end ORDER BY timestampUsec, type")
+    suspend fun syncVisits(url: String, start: Long, end: Long): List<Visit>
+
+    @Query("DELETE FROM visits WHERE pageUri = :url AND timestampUsec >= :start AND timestampUsec < :end")
+    suspend fun deleteSyncWindow(url: String, start: Long, end: Long)
+
+    @Insert
+    suspend fun recordRemoval(removal: HistoryRemoval)
+
+    @Query("SELECT * FROM sync_history_removals")
+    suspend fun syncRemovals(): List<HistoryRemoval>
+
+    @Query("DELETE FROM pages")
+    suspend fun deleteAllPages()
+
+    @Query("DELETE FROM pages WHERE NOT EXISTS (SELECT 1 FROM visits WHERE visits.pageUri = pages.uri)")
+    suspend fun prunePages()
+
+    @Query("SELECT EXISTS (SELECT 1 FROM visits WHERE pageUri = :url)")
+    fun hasVisits(url: String): Boolean
+
+    @Query("SELECT * FROM pages WHERE EXISTS (SELECT 1 FROM visits WHERE visits.pageUri = pages.uri)")
     fun getAllPages(): List<Page>
 
     @Query("SELECT * from pages WHERE uri = :uri")
@@ -52,7 +76,7 @@ interface HistoryDao {
     ): Map<Page, List<Visit>>
 
     @Query("SELECT uri, title, previewImageUrl, " +
-            "pageUri, type, MAX(time) time " +
+            "pageUri, type, MAX(time) time, timestampUsec, count " +
             "FROM pages " +
             "JOIN visits ON uri = pageUri " +
             "AND (type NOT IN (:excludeTypes))" +

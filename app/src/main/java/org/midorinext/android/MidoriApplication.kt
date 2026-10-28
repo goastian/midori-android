@@ -80,6 +80,8 @@ class MidoriApplication : Application(), Configuration.Provider {
     @Inject lateinit var homeFavicons: dagger.Lazy<HomeFaviconRepository>
     @Inject lateinit var homeWallpaper: dagger.Lazy<HomeWallpaperRepository>
 
+    @Inject internal lateinit var syncCoordinator: dagger.Lazy<org.midorinext.android.sync.SyncCoordinator>
+
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val postFirstFrameWorkStarted = AtomicBoolean(false)
     private val nativeHomeFrameDrawn = MutableStateFlow(false)
@@ -202,6 +204,7 @@ class MidoriApplication : Application(), Configuration.Provider {
         StartupTiming.mark("first_frame")
 
         applicationScope.launch {
+            org.midorinext.android.sync.SyncScheduler.start(this@MidoriApplication, syncCoordinator.get())
             mediaFeature.get().start()
             backgroundPlaybackFeature.get().start()
         }

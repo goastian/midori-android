@@ -6,6 +6,12 @@ import mozilla.components.concept.storage.BookmarkNodeType
 
 @Dao
 interface BookmarksDao {
+    @Query("SELECT * FROM bookmark_node ORDER BY parentGuid, position, dateAdded, guid")
+    suspend fun syncNodes(): List<BookmarkNode>
+
+    @Upsert
+    suspend fun syncUpsert(bookmark: BookmarkNode)
+
     @Insert
     suspend fun insert(bookmark: BookmarkNode)
 

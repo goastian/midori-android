@@ -95,6 +95,12 @@ fun PreferencesScreen(
             // Make default browser
             DefaultBrowserPreference()
 
+            SettingsNavRow(
+                label = R.string.sync_title,
+                description = stringResource(R.string.sync_summary),
+                onClicked = { context.startActivity(Intent(context, org.midorinext.android.sync.SyncActivity::class.java)) }
+            )
+
             PreferenceGroupLabel(label = R.string.settings_group_general)
 
             SettingsNavRow(

@@ -36,3 +36,5 @@
 -keep class org.midorinext.android.apptracking.MidoriAppTrackingVpnService { *; }
 -keep class org.midorinext.android.apptracking.Hilt_MidoriAppTrackingVpnService { *; }
 
+
+-keep class org.midorinext.android.sync.NativeSync { *; }

@@ -1,0 +1,8 @@
+[
+  {
+    "namespace": "midoriSyncStorage",
+    "functions": [
+      {"name":"request", "type":"function", "async":true, "returns":{"type":"string"}, "parameters":[{"name":"request", "type":"string"}]}
+    ]
+  }
+]

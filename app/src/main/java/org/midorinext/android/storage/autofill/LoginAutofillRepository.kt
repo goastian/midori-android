@@ -89,6 +89,8 @@ class LoginAutofillRepository(private val storage: Lazy<LoginsStorage>) {
         }
     }
 
+    internal suspend fun <T> syncTransaction(operation: suspend LoginsStorage.() -> T): T = withStorage(operation)
+
     private suspend fun <T> withStorage(operation: suspend LoginsStorage.() -> T): T =
         withContext(Dispatchers.IO) { mutex.withLock { storage.value.operation() } }
 

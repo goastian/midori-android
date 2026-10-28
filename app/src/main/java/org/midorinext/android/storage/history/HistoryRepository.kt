@@ -5,6 +5,7 @@ import org.midorinext.android.newtab.isNativeHomeUrl
 import org.midorinext.android.newtab.recentHomeSiteKey
 import org.midorinext.android.suggest.Suggestion
 import org.midorinext.android.suggest.SuggestionProvider
+import androidx.room.withTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -95,27 +96,45 @@ class HistoryRepository @Inject constructor(
     }
 
     override suspend fun deleteEverything() = withContext(Dispatchers.IO) {
-        db.clearAllTables()
+        db.withTransaction {
+            dao.recordRemoval(HistoryRemoval(url = null, startTime = 0, endTime = System.currentTimeMillis()))
+            dao.deleteAllPages()
+        }
         historyDeletionVersion.update { it + 1 }
     }
 
     override suspend fun deleteVisit(url: String, timestamp: Long) = withContext(Dispatchers.IO) {
-        dao.deleteVisitByKey(VisitKey(url, timestamp))
+        db.withTransaction {
+            dao.recordRemoval(HistoryRemoval(url = url, startTime = timestamp, endTime = timestamp))
+            dao.deleteVisitByKey(url, timestamp)
+            dao.prunePages()
+        }
         historyDeletionVersion.update { it + 1 }
     }
 
     override suspend fun deleteVisitsBetween(startTime: Long, endTime: Long) = withContext(Dispatchers.IO) {
-        dao.deleteVisitsBetween(startTime, endTime)
+        db.withTransaction {
+            dao.recordRemoval(HistoryRemoval(url = null, startTime = startTime, endTime = endTime))
+            dao.deleteVisitsBetween(startTime, endTime)
+            dao.prunePages()
+        }
         historyDeletionVersion.update { it + 1 }
     }
 
     override suspend fun deleteVisitsFor(url: String) = withContext(Dispatchers.IO) {
-        dao.deleteURI(url)
+        db.withTransaction {
+            dao.recordRemoval(HistoryRemoval(url = url, startTime = 0, endTime = System.currentTimeMillis()))
+            dao.deleteURI(url)
+        }
         historyDeletionVersion.update { it + 1 }
     }
 
     override suspend fun deleteVisitsSince(since: Long) = withContext(Dispatchers.IO) {
-        dao.deleteVisitsSince(since)
+        db.withTransaction {
+            dao.recordRemoval(HistoryRemoval(url = null, startTime = since, endTime = System.currentTimeMillis()))
+            dao.deleteVisitsSince(since)
+            dao.prunePages()
+        }
         historyDeletionVersion.update { it + 1 }
     }
 
@@ -174,7 +193,7 @@ class HistoryRepository @Inject constructor(
     }
 
     override suspend fun getVisited(uris: List<String>): List<Boolean> = withContext(Dispatchers.IO) {
-        uris.map { dao.getPage(it) != null }
+        uris.map { dao.hasVisits(it) }
     }
 
     override suspend fun getVisitsPaginated(
@@ -200,7 +219,10 @@ class HistoryRepository @Inject constructor(
         }
 
     override suspend fun runMaintenance(dbSizeLimit: UInt) = withContext(Dispatchers.IO) {
-        dao.deleteVisitsBefore(System.currentTimeMillis() - TIME_LIMIT)
+        db.withTransaction {
+            dao.deleteVisitsBefore(System.currentTimeMillis() - TIME_LIMIT)
+            dao.prunePages()
+        }
         historyDeletionVersion.update { it + 1 }
     }
 

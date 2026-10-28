@@ -1,0 +1,14 @@
+{
+  "Cargo.toml": "b809e48644b21050ad29bc943b097c1e0eee506d8c52c70459fa6eb54e788360",
+  "tests/fixtures/native-sodium.json": "7b06c3cc1fd544f9a68454dee4f3ea397ee449fb40f8ee3b9c5e6e36114f3a64",
+  "src/bookmarks.rs": "75e62b807b69acce7bcfff1f392dbc8dfb6b8d6e2c0728118badc1560537dd9c",
+  "src/crypto.rs": "e941c891348e151ac4a4aa838c7b46cd4b90e249fded448d8807e2ce258a4eec",
+  "src/history.rs": "db26576a47bc0f92b153c748a54e9f02f6b9cbe51e8c87fc8bada9ffb2f1ba92",
+  "src/keyring.rs": "5d125a07f376200fe63c8729a1dccb635d7deeb7dca7f7f799313d0557ee92a4",
+  "src/lib.rs": "da0c112eaa5b15570e0f71c49efc6f469a188efaef9d046ddb3370a4c26391c4",
+  "src/mobile.rs": "0f8be49e7b8397b2948ad8cfaf7bf01bae445a981c877a63b752708b89af6a4c",
+  "src/native.rs": "f0885f33fce6d4871bd7874ca18b1efe529ff8ba2f4606c617b26e0db1aea375",
+  "src/native_tests.rs": "ba12e44da798e992f7dc1634388a8ad84356294d1967f2b05201801b53c4c03f",
+  "src/passwords.rs": "1528ede13c9cf921ebee55fc535ee6d5dd52f6862ec047698917f258056d8034",
+  "src/secret.rs": "d587e5456d951c2e5566d5afb3d286bdbd9f7b8c829ea06a26a4fe1c5f5a0db4"
+}
