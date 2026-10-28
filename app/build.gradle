@@ -392,6 +392,7 @@ dependencies {
     implementation libs.compose.animation
     debugImplementation libs.compose.ui.tooling
     debugImplementation libs.compose.ui.test.manifest
+    syncTestImplementation libs.compose.ui.test.manifest
     androidTestImplementation libs.compose.ui.test.junit4
     // Other compose libs
     implementation libs.compose.material3

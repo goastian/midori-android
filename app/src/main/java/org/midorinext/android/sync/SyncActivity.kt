@@ -18,7 +18,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -79,90 +78,73 @@ private fun SyncScreen(coordinator: SyncCoordinator, onBack: () -> Unit) {
     val cameraPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) scan() else actionError = R.string.sync_camera_denied
     }
-    Scaffold(topBar = {
-        TopAppBar(title = { Text(stringResource(R.string.sync_title)) }, navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(painterResource(R.drawable.icons_arrow_backward), stringResource(R.string.sync_back))
-            }
-        })
-    }) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
-            actionError?.let { Text(stringResource(it), color = MaterialTheme.colorScheme.error) }
-            state.error?.let { Text(stringResource(syncError(it)), color = MaterialTheme.colorScheme.error) }
-            if (!state.connected) {
-                Text(stringResource(R.string.sync_scan_title), style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.align(Alignment.CenterHorizontally))
-                Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = MaterialTheme.shapes.extraLarge,
-                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(vertical = 24.dp)) {
-                    Icon(painterResource(R.drawable.icons_sync_qr), contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.padding(32.dp).size(80.dp))
-                }
-                Text(stringResource(R.string.sync_scan_summary))
-                Button(onClick = {
+    Scaffold(topBar = { SyncAppBar(onBack) }) { padding ->
+        if (!state.connected) {
+            SyncWelcome(
+                busy = state.busy,
+                error = actionError?.let { stringResource(it) } ?: state.error?.let { stringResource(syncError(it)) },
+                onScan = {
                     if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) scan()
                     else cameraPermission.launch(Manifest.permission.CAMERA)
-                }, enabled = !state.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
-                    Icon(painterResource(R.drawable.icons_sync_qr), contentDescription = null, modifier = Modifier.size(20.dp))
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.sync_scan))
-                }
-                OutlinedButton(onClick = {
+                },
+                onSignIn = {
                     actionError = null
                     run {
                         val url = coordinator.beginLogin(SyncTransport.DEFAULT_SERVER)
                         try { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url))) }
                         catch (_: android.content.ActivityNotFoundException) { actionError = R.string.sync_error_login }
                     }
-                }, enabled = !state.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
-                    Text(stringResource(R.string.sync_sign_in_authentik))
-                }
-            } else {
-                Text(stringResource(R.string.sync_summary))
-                Text(state.name, style = MaterialTheme.typography.titleMedium)
-                Text(state.server, style = MaterialTheme.typography.bodySmall)
-                if (state.phase == "recovery_required" || state.phase == "backup_required") {
-                    Text(stringResource(R.string.sync_unlock_summary))
-                    OutlinedTextField(recovery, { recovery = it }, label = { Text(stringResource(R.string.sync_recovery_code)) }, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth())
-                    Button(onClick = { run { coordinator.recover(recovery); recovery = ""; coordinator.sync() } }, enabled = !state.busy && recovery.isNotBlank()) { Text(stringResource(R.string.sync_unlock)) }
-                    if (backup == null) OutlinedButton(onClick = { run { backup = coordinator.prepareKeys() } }, enabled = !state.busy) { Text(stringResource(R.string.sync_create_keys)) }
-                }
-                backup?.let { code ->
-                    Text(stringResource(R.string.sync_backup_summary))
-                    Text(code, style = MaterialTheme.typography.bodyLarge)
-                    Row { Checkbox(backupSaved, { backupSaved = it }); Text(stringResource(R.string.sync_backup_saved), Modifier.padding(top = 12.dp)) }
-                    Button(onClick = { run { coordinator.activateKeys(); backup = null; coordinator.sync() } }, enabled = backupSaved && !state.busy) { Text(stringResource(R.string.sync_continue)) }
-                }
-                if (state.phase == "ready") {
-                    for (name in SyncModels.schemas.keys) {
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(stringResource(collectionLabel(name)), Modifier.weight(1f).padding(top = 12.dp))
-                            Switch(name in state.selected, onCheckedChange = { enabled -> run { coordinator.select(name, enabled); coordinator.sync() } }, enabled = !state.busy)
-                        }
-                        if (name in state.unsupported) Text(stringResource(R.string.sync_unsupported), color = MaterialTheme.colorScheme.error)
-                    }
-                    Text(if (state.lastSync == 0L) stringResource(R.string.sync_pending) else stringResource(R.string.sync_last_sync,
-                        java.text.DateFormat.getDateTimeInstance().format(java.util.Date(state.lastSync))))
-                    if (state.pending > 0) Text(stringResource(R.string.sync_pending_count, state.pending))
-                    Button(onClick = { run { coordinator.sync() } }, enabled = !state.busy) { Text(stringResource(R.string.sync_now)) }
-                }
-                if (state.conflicts > 0) OutlinedButton(onClick = { run { conflicts = coordinator.conflictSummaries() } }, enabled = !state.busy) { Text(stringResource(R.string.sync_conflicts, state.conflicts)) }
-                for (conflict in conflicts) {
-                    val name = conflict.collection
-                    val id = conflict.id
-                    Text(stringResource(collectionLabel(name)))
-                    Text(stringResource(if (conflict.canResolve) R.string.sync_conflict_summary else R.string.sync_error_retry))
-                    if (conflict.canResolve) {
-                        Text(stringResource(R.string.sync_local_copy, conflict.local ?: stringResource(R.string.sync_deleted_item)))
-                        Text(stringResource(R.string.sync_remote_copy, conflict.remote ?: stringResource(R.string.sync_deleted_item)))
-                    }
-                    if (conflict.canResolve) Row {
-                        TextButton(onClick = { run { coordinator.resolve(name, id, true); conflicts = coordinator.conflictSummaries(); coordinator.sync() } }, enabled = !state.busy) { Text(stringResource(R.string.sync_keep_local)) }
-                        TextButton(onClick = { run { coordinator.resolve(name, id, false); conflicts = coordinator.conflictSummaries(); coordinator.sync() } }, enabled = !state.busy) { Text(stringResource(R.string.sync_use_remote)) }
-                    }
-                }
-                TextButton(onClick = { disconnect = true }, enabled = !state.busy) { Text(stringResource(R.string.sync_disconnect)) }
+                },
+                modifier = Modifier.fillMaxSize().padding(padding),
+            )
+        } else Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
+            actionError?.let { Text(stringResource(it), color = MaterialTheme.colorScheme.error) }
+            state.error?.let { Text(stringResource(syncError(it)), color = MaterialTheme.colorScheme.error) }
+            Text(stringResource(R.string.sync_summary))
+            Text(state.name, style = MaterialTheme.typography.titleMedium)
+            Text(state.server, style = MaterialTheme.typography.bodySmall)
+            if (state.phase == "recovery_required" || state.phase == "backup_required") {
+                Text(stringResource(R.string.sync_unlock_summary))
+                OutlinedTextField(recovery, { recovery = it }, label = { Text(stringResource(R.string.sync_recovery_code)) }, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth())
+                Button(onClick = { run { coordinator.recover(recovery); recovery = ""; coordinator.sync() } }, enabled = !state.busy && recovery.isNotBlank()) { Text(stringResource(R.string.sync_unlock)) }
+                if (backup == null) OutlinedButton(onClick = { run { backup = coordinator.prepareKeys() } }, enabled = !state.busy) { Text(stringResource(R.string.sync_create_keys)) }
             }
+            backup?.let { code ->
+                Text(stringResource(R.string.sync_backup_summary))
+                Text(code, style = MaterialTheme.typography.bodyLarge)
+                Row { Checkbox(backupSaved, { backupSaved = it }); Text(stringResource(R.string.sync_backup_saved), Modifier.padding(top = 12.dp)) }
+                Button(onClick = { run { coordinator.activateKeys(); backup = null; coordinator.sync() } }, enabled = backupSaved && !state.busy) { Text(stringResource(R.string.sync_continue)) }
+            }
+            if (state.phase == "ready") {
+                for (name in SyncModels.schemas.keys) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text(stringResource(collectionLabel(name)), Modifier.weight(1f).padding(top = 12.dp))
+                        Switch(name in state.selected, onCheckedChange = { enabled -> run { coordinator.select(name, enabled); coordinator.sync() } }, enabled = !state.busy)
+                    }
+                    if (name in state.unsupported) Text(stringResource(R.string.sync_unsupported), color = MaterialTheme.colorScheme.error)
+                }
+                Text(if (state.lastSync == 0L) stringResource(R.string.sync_pending) else stringResource(R.string.sync_last_sync,
+                    java.text.DateFormat.getDateTimeInstance().format(java.util.Date(state.lastSync))))
+                if (state.pending > 0) Text(stringResource(R.string.sync_pending_count, state.pending))
+                Button(onClick = { run { coordinator.sync() } }, enabled = !state.busy) { Text(stringResource(R.string.sync_now)) }
+            }
+            if (state.conflicts > 0) OutlinedButton(onClick = { run { conflicts = coordinator.conflictSummaries() } }, enabled = !state.busy) { Text(stringResource(R.string.sync_conflicts, state.conflicts)) }
+            for (conflict in conflicts) {
+                val name = conflict.collection
+                val id = conflict.id
+                Text(stringResource(collectionLabel(name)))
+                Text(stringResource(if (conflict.canResolve) R.string.sync_conflict_summary else R.string.sync_error_retry))
+                if (conflict.canResolve) {
+                    Text(stringResource(R.string.sync_local_copy, conflict.local ?: stringResource(R.string.sync_deleted_item)))
+                    Text(stringResource(R.string.sync_remote_copy, conflict.remote ?: stringResource(R.string.sync_deleted_item)))
+                }
+                if (conflict.canResolve) Row {
+                    TextButton(onClick = { run { coordinator.resolve(name, id, true); conflicts = coordinator.conflictSummaries(); coordinator.sync() } }, enabled = !state.busy) { Text(stringResource(R.string.sync_keep_local)) }
+                    TextButton(onClick = { run { coordinator.resolve(name, id, false); conflicts = coordinator.conflictSummaries(); coordinator.sync() } }, enabled = !state.busy) { Text(stringResource(R.string.sync_use_remote)) }
+                }
+            }
+            TextButton(onClick = { disconnect = true }, enabled = !state.busy) { Text(stringResource(R.string.sync_disconnect)) }
         }
     }
     if (disconnect) AlertDialog(onDismissRequest = { disconnect = false }, title = { Text(stringResource(R.string.sync_disconnect)) },
@@ -184,4 +166,14 @@ private fun syncError(code: String): Int = when {
     code.contains("quota") || code.contains("capacity") -> R.string.sync_error_quota
     code.contains("incompatible") || code.contains("unsupported") -> R.string.sync_unsupported
     else -> R.string.sync_error_retry
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+internal fun SyncAppBar(onBack: () -> Unit) {
+    TopAppBar(title = { Text(stringResource(R.string.sync_title)) }, navigationIcon = {
+    IconButton(onClick = onBack) {
+    Icon(painterResource(R.drawable.icons_arrow_backward), stringResource(R.string.sync_back))
+    }
+    })
 }

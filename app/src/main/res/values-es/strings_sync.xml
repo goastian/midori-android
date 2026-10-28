@@ -33,13 +33,16 @@
   <string name="sync_remote_copy">Otro dispositivo: %1$s</string>
   <string name="sync_deleted_item">Elemento eliminado</string>
   <string name="sync_error_rate_limit">El servidor está ocupado. Tus cambios están guardados y se volverán a intentar automáticamente.</string>
-    <string name="sync_scan_title">Inicia sesión con tu cámara</string>
-    <string name="sync_scan_summary">En tu ordenador, abre sync.astian.org, inicia sesión y elige Conectar Android para ver un código QR.</string>
+    <string name="sync_scan_title">Todo tu Midori.\nTambién aquí.</string>
+    <string name="sync_scan_summary">Tus marcadores, historial y contraseñas, contigo.</string>
     <string name="sync_scan">Escanear código QR</string>
-    <string name="sync_sign_in_authentik">Iniciar sesión con Authentik</string>
+    <string name="sync_sign_in_authentik">Entrar con mi cuenta Astian</string>
     <string name="sync_scan_prompt">Escanea el código QR que aparece en sync.astian.org</string>
     <string name="sync_camera_denied">Permite el acceso a la cámara para escanear el QR o inicia sesión con Authentik.</string>
     <string name="sync_invalid_qr">Este QR no es de Midori Sync. Abre sync.astian.org en tu ordenador y genera uno nuevo.</string>
     <string name="sync_qr_expired">Este QR ha caducado o ya se ha utilizado. Genera uno nuevo en tu ordenador.</string>
     <string name="sync_back">Volver</string>
+    <string name="sync_on_computer">En tu ordenador</string>
+    <string name="sync_portal_instruction">Inicia sesión y elige «Conectar Android».</string>
+    <string name="sync_encrypted_transfer">Tus datos viajan cifrados.</string>
 </resources>
