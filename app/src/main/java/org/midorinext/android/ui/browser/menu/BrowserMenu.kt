@@ -87,10 +87,6 @@ fun BrowserMenu(
                     dismiss()
                     viewModel.triggerInstalledExtensionAction(MidoriVpnFeature.EXTENSION_ID)
                 },
-                onAccountClick = {
-                    dismiss()
-                    viewModel.tabsUseCases.selectOrAddTab(url = "https://accounts.astian.org")
-                },
                 onSetDefault = {
                     dismiss()
                     defaultLauncher.launch(defaultBrowser.requestIntent())

@@ -66,7 +66,6 @@ internal fun BrowserMenuMainContent(
     extensionCount: Int,
     onNavigate: (NavDestination) -> Unit,
     onVpnClick: () -> Unit,
-    onAccountClick: () -> Unit,
     onSetDefault: () -> Unit,
     onDismissDefault: () -> Unit,
     precededByContent: Boolean = false,
@@ -94,11 +93,6 @@ internal fun BrowserMenuMainContent(
     }
     BrowserMenuGroup { BrowserMenuLibrary(onNavigate) }
     BrowserMenuGroup {
-        BrowserMenuRow(
-            text = stringResource(R.string.menu_account),
-            icon = R.drawable.icons_account,
-            onClick = onAccountClick,
-        )
         BrowserMenuRow(
             text = stringResource(R.string.menu_customize_homepage),
             icon = R.drawable.icons_home,

@@ -28,7 +28,7 @@ class BrowserMenuSheetTest {
                         BrowserMenuMainContent(
                             showDefaultPrompt = true, vpnEnabled = false, extensionCount = 2,
                             onNavigate = { destination = it }, onVpnClick = { vpnClicked = true },
-                            onAccountClick = {}, onSetDefault = {}, onDismissDefault = {},
+                            onSetDefault = {}, onDismissDefault = {},
                         )
                     }
                 }
@@ -53,7 +53,7 @@ class BrowserMenuSheetTest {
                     BrowserMenuMainContent(
                         showDefaultPrompt = false, vpnEnabled = true, extensionCount = 0,
                         onNavigate = { destination = it; dismiss() }, onVpnClick = {},
-                        onAccountClick = {}, onSetDefault = {}, onDismissDefault = {},
+                        onSetDefault = {}, onDismissDefault = {},
                     )
                 }
             }
