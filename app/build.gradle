@@ -338,7 +338,7 @@ android.sourceSets.main.jniLibs.srcDir(layout.buildDirectory.dir("rust-sync-jni"
 tasks.matching { it.name.startsWith("merge") && it.name.endsWith("JniLibFolders") }.configureEach {
     dependsOn("buildAndroidSync")
 }
-tasks.matching { it.name == "testOriginalPlaystoreDebugUnitTest" }.configureEach {
+tasks.matching { it.name in ["testOriginalPlaystoreDebugUnitTest", "testOriginalPlaystoreSyncTestUnitTest"] }.configureEach {
     dependsOn("buildHostSync")
     systemProperty("midori.sync.library", layout.buildDirectory.file("rust-sync-host/libmidori_sync_android.so").get().asFile.absolutePath)
 }

@@ -1,6 +1,7 @@
 package org.midorinext.android.sync
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -36,7 +37,6 @@ class SyncActivity : ComponentActivity() {
     @Inject internal lateinit var coordinator: SyncCoordinator
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         SyncScheduler.start(applicationContext, coordinator)
         handle(intent)
         setContent { MidoriBrowserTheme { SyncScreen(coordinator, onBack = { finish() }) } }
@@ -64,6 +64,7 @@ private fun SyncScreen(coordinator: SyncCoordinator, onBack: () -> Unit) {
     var backupSaved by remember { mutableStateOf(false) }
     var conflicts by remember { mutableStateOf(emptyList<SyncConflict>()) }
     var disconnect by remember { mutableStateOf(false) }
+    SyncCapturePolicy(state.connected && (backup != null || recovery.isNotEmpty()))
     fun run(block: suspend () -> Unit) { scope.launch { runCatching { block() } } }
     val scanner = rememberLauncherForActivityResult(ScanContract()) { result ->
         result.contents?.let { contents -> run { coordinator.pairQr(contents); coordinator.sync() } }
@@ -176,4 +177,14 @@ internal fun SyncAppBar(onBack: () -> Unit) {
             Icon(painterResource(R.drawable.icons_arrow_backward), stringResource(R.string.sync_back))
         }
     })
+}
+
+@Composable
+internal fun SyncCapturePolicy(sensitive: Boolean) {
+    val window = (LocalContext.current as Activity).window
+    DisposableEffect(window, sensitive) {
+        if (sensitive) window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        else window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        onDispose { window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE) }
+    }
 }
