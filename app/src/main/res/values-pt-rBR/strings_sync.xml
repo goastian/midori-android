@@ -45,4 +45,8 @@
     <string name="sync_on_computer">On your computer</string>
     <string name="sync_portal_instruction">Sign in and choose “Connect Android”.</string>
     <string name="sync_encrypted_transfer">Your data travels encrypted.</string>
+    <string name="sync_account_connecting">Preparing your sync with Astian…</string>
+    <string name="sync_account_update_waiting">Your account is connected. To update an older account, open Midori once on a device that has already synced. This device will continue automatically.</string>
+    <string name="sync_retry">Try again</string>
+    <string name="sync_error_account_access">Could not finish connecting. Midori will retry automatically.</string>
 </resources>

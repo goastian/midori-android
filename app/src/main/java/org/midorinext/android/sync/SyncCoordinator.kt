@@ -38,7 +38,7 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
         val session = state.objectOrNull("session")
         val collections = state.objectOrNull("collections")?.entries().orEmpty().map { it.second as JSONObject }
         mutable.value = SyncUiState(session != null, busy, session?.getJSONObject("user")?.optString("email").orEmpty(),
-            state.optString("phase", if (session == null) "disconnected" else "recovery_required"), state.optString("server"), error,
+            state.optString("phase", if (session == null) "disconnected" else "connecting"), state.optString("server"), error,
             state.optLong("lastSync"), collections.sumOf { it.optJSONObject("conflicts")?.length() ?: 0 },
             collections.sumOf { (it.optJSONObject("outbox")?.length() ?: 0) + (it.optJSONObject("inbox")?.length() ?: 0) }, selected(),
             state.optJSONArray("unsupported")?.let { array -> (0 until array.length()).map { array.getString(it) }.toSet() }.orEmpty())
@@ -107,7 +107,7 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
         val account = transport.request("api/v1/account", token = session.getString("token"))
         requireSync(same(account.getJSONObject("identity"), identity) && account.getJSONObject("device").getString("id") == session.getJSONObject("device").getString("id"), "invalid_account_identity")
         state = obj("version" to 1, "server" to transport.server, "scope" to JSONArray().put(transport.server).put(issuer).put(identity.getString("subject")).toString(),
-            "session" to session, "collections" to JSONObject(), "phase" to "recovery_required")
+            "session" to session, "collections" to JSONObject(), "phase" to "connecting")
         save()
     }
     private fun request(transport: SyncTransport, path: String, method: String = "GET", body: JSONObject? = null, query: Map<String, String> = emptyMap()): JSONObject {
@@ -171,14 +171,8 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
         requireSync(capabilities.getJSONObject("authentication").getString("issuer") == state.getJSONObject("session").getJSONObject("identity").getString("issuer"), "identity_issuer_mismatch")
         val selected = selected()
         state.put("unsupported", JSONArray(selected.filter { !SyncModels.supported(capabilities, it) }))
-        val local = state.objectOrNull("keys") ?: run { state.put("phase", "recovery_required"); save(); return@operation }
-        if (state.optString("phase") == "backup_required" && !local.optBoolean("confirmed")) return@operation
         run {
-            var remote = request(transport, "api/v1/crypto/state")
-            if (remote.objects("keys").isEmpty() && local.optBoolean("confirmed")) {
-                remote = request(transport, "api/v1/crypto/activate", "POST", local.getJSONObject("activation"))
-            }
-            val keys = readyKeys(remote, local)
+            val keys = connectKeys(transport, capabilities) ?: return@operation
             state.put("phase", "ready"); save()
             val engine = SyncEngine(keys, stores, { path, method, body, query -> request(transport, path, method, body, query) }, ::save)
             val failures = mutableListOf<String>()
@@ -197,6 +191,66 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
             requireSync(failures.isEmpty(), failures.joinToString(","))
             state.put("lastSync", System.currentTimeMillis()); save()
         }
+    }
+    private fun connectKeys(transport: SyncTransport, capabilities: JSONObject): SyncKeys? {
+        var remote = request(transport, "api/v1/crypto/state")
+        val managed = capabilities.optJSONObject("crypto")?.optInt("account_recovery_version") == 1 && remote.has("account_recovery")
+        var local = state.objectOrNull("keys")
+        if (managed && remote.objects("keys").isEmpty() && !remote.getBoolean("migration_required")) {
+            if (local == null) {
+                local = SyncKeys(state.getString("scope")).use { it.prepareAccount(remote) }
+                state.put("keys", local).put("phase", "connecting"); save()
+            }
+            if (local.has("activation")) {
+                val activation = local.getJSONObject("activation")
+                val next = copy(remote).put("keys", JSONArray().put(obj("key_id" to activation.getString("key_id"),
+                    "encrypted_bundle" to activation.getString("encrypted_bundle")))).put("identity_key", activation.getJSONObject("identity_key"))
+                if (!activation.has("account_recovery")) {
+                    SyncKeys(state.getString("scope")).use { activation.put("account_recovery", it.accountCapsule(local, next)) }
+                }
+                local.put("confirmed", true); save()
+            }
+            if (local.optBoolean("confirmed") && local.has("activation")) {
+                try { remote = request(transport, "api/v1/crypto/activate", "POST", local.getJSONObject("activation")) }
+                catch (error: SyncException) {
+                    if (error.code !in listOf("crypto_state_conflict", "native_keys_already_active")) throw error
+                    remote = request(transport, "api/v1/crypto/state")
+                }
+            }
+        }
+        if (!managed) {
+            val stored = local ?: throw SyncException("account_recovery_unsupported")
+            if (state.optString("phase") == "backup_required" && !stored.optBoolean("confirmed")) {
+                throw SyncException("account_recovery_unsupported")
+            }
+            if (remote.objects("keys").isEmpty() && stored.optBoolean("confirmed")) {
+                remote = request(transport, "api/v1/crypto/activate", "POST", stored.getJSONObject("activation"))
+            }
+            return readyKeys(remote, stored)
+        }
+        val available = local?.objects("keys")?.map { it.getString("key_id") }?.toSet().orEmpty()
+        val canOpen = local != null && remote.objects("keys").isNotEmpty() &&
+            remote.objects("keys").all { it.getString("key_id") in available } &&
+            local.getJSONObject("identity_key").getString("key_id") == remote.getJSONObject("identity_key").getString("key_id")
+        if (!canOpen) {
+            if (!remote.optBoolean("account_recovery")) {
+                state.put("phase", "account_recovery_pending"); save()
+                return null
+            }
+            val response = request(transport, "api/v1/crypto/account-recovery")
+            requireSync(response.getString("epoch") == remote.getString("epoch"), "invalid_account_capsule")
+            val restored = SyncKeys(state.getString("scope"))
+            try {
+                local = restored.restoreAccount(remote, response.getJSONObject("capsule"), local)
+                state.put("keys", local); save()
+                activeKeys?.close(); activeKeys = restored
+            } catch (error: Throwable) { restored.close(); throw error }
+        }
+        val keys = readyKeys(remote, local!!)
+        if (!remote.optBoolean("account_recovery")) {
+            request(transport, "api/v1/crypto/account-recovery", "PUT", obj("crypto" to keys.context, "capsule" to keys.accountCapsule(local, remote)))
+        }
+        return keys
     }
     suspend fun disconnect() = operation {
         if (state.has("session")) {

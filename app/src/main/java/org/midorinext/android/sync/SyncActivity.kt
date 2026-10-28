@@ -1,11 +1,9 @@
 package org.midorinext.android.sync
 
 import android.Manifest
-import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -22,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import dagger.hilt.android.AndroidEntryPoint
 import com.journeyapps.barcodescanner.ScanContract
@@ -59,12 +56,8 @@ private fun SyncScreen(coordinator: SyncCoordinator, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var actionError by remember { mutableStateOf<Int?>(null) }
-    var recovery by remember { mutableStateOf("") }
-    var backup by remember { mutableStateOf<String?>(null) }
-    var backupSaved by remember { mutableStateOf(false) }
     var conflicts by remember { mutableStateOf(emptyList<SyncConflict>()) }
     var disconnect by remember { mutableStateOf(false) }
-    SyncCapturePolicy(state.connected && (backup != null || recovery.isNotEmpty()))
     fun run(block: suspend () -> Unit) { scope.launch { runCatching { block() } } }
     val scanner = rememberLauncherForActivityResult(ScanContract()) { result ->
         result.contents?.let { contents -> run { coordinator.pairQr(contents); coordinator.sync() } }
@@ -104,18 +97,11 @@ private fun SyncScreen(coordinator: SyncCoordinator, onBack: () -> Unit) {
             state.error?.let { Text(stringResource(syncError(it)), color = MaterialTheme.colorScheme.error) }
             Text(stringResource(R.string.sync_summary))
             Text(state.name, style = MaterialTheme.typography.titleMedium)
-            Text(state.server, style = MaterialTheme.typography.bodySmall)
-            if (state.phase == "recovery_required" || state.phase == "backup_required") {
-                Text(stringResource(R.string.sync_unlock_summary))
-                OutlinedTextField(recovery, { recovery = it }, label = { Text(stringResource(R.string.sync_recovery_code)) }, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth())
-                Button(onClick = { run { coordinator.recover(recovery); recovery = ""; coordinator.sync() } }, enabled = !state.busy && recovery.isNotBlank()) { Text(stringResource(R.string.sync_unlock)) }
-                if (backup == null) OutlinedButton(onClick = { run { backup = coordinator.prepareKeys() } }, enabled = !state.busy) { Text(stringResource(R.string.sync_create_keys)) }
-            }
-            backup?.let { code ->
-                Text(stringResource(R.string.sync_backup_summary))
-                Text(code, style = MaterialTheme.typography.bodyLarge)
-                Row { Checkbox(backupSaved, { backupSaved = it }); Text(stringResource(R.string.sync_backup_saved), Modifier.padding(top = 12.dp)) }
-                Button(onClick = { run { coordinator.activateKeys(); backup = null; coordinator.sync() } }, enabled = backupSaved && !state.busy) { Text(stringResource(R.string.sync_continue)) }
+            if (state.phase != "ready") {
+                Text(stringResource(if (state.phase == "account_recovery_pending") R.string.sync_account_update_waiting else R.string.sync_account_connecting))
+                TextButton(onClick = { run { coordinator.sync() } }, enabled = !state.busy) {
+                    Text(stringResource(R.string.sync_retry))
+                }
             }
             if (state.phase == "ready") {
                 for (name in SyncModels.schemas.keys) {
@@ -161,6 +147,7 @@ internal fun collectionLabel(name: String): Int = when (name) {
 private fun syncError(code: String): Int = when {
     code == "invalid_pairing_qr" -> R.string.sync_invalid_qr
     code == "pairing_expired" -> R.string.sync_qr_expired
+    code.startsWith("account_") || code == "invalid_account_capsule" -> R.string.sync_error_account_access
     code.contains("rate_limited") -> R.string.sync_error_rate_limit
     code.contains("recovery") || code.contains("keys") || code.contains("registry") -> R.string.sync_error_keys
     code.contains("auth") || code.contains("login") || code.contains("refresh") -> R.string.sync_error_login
@@ -179,12 +166,3 @@ internal fun SyncAppBar(onBack: () -> Unit) {
     })
 }
 
-@Composable
-internal fun SyncCapturePolicy(sensitive: Boolean) {
-    val window = (LocalContext.current as Activity).window
-    DisposableEffect(window, sensitive) {
-        if (sensitive) window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
-        else window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
-        onDispose { window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE) }
-    }
-}
