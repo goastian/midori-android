@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="sync_title">Midori Sync</string>
+    <string name="sync_summary">Mantén tus marcadores, historial y autollenado sincronizados con tus otros dispositivos.</string>
+    <string name="sync_server">Servidor de sincronización</string>
+    <string name="sync_sign_in">Iniciar sesión en tu cuenta</string>
+    <string name="sync_pair_summary">También puedes conectarte con un código de vinculación del escritorio.</string>
+    <string name="sync_pair_code">Código de vinculación</string>
+    <string name="sync_pair">Conectar dispositivo</string>
+    <string name="sync_unlock_summary">Desbloquea tus datos cifrados con el código de recuperación de otro dispositivo.</string>
+    <string name="sync_recovery_code">Código de recuperación</string>
+    <string name="sync_unlock">Desbloquear datos</string>
+    <string name="sync_create_keys">Configurar cifrado para una cuenta nueva</string>
+    <string name="sync_backup_summary">Guarda este código de recuperación en un lugar seguro. Lo necesitarás para desbloquear tus datos en otro dispositivo.</string>
+    <string name="sync_backup_saved">He guardado mi código de recuperación</string>
+    <string name="sync_continue">Continuar</string>
+    <string name="sync_bookmarks">Marcadores</string>
+    <string name="sync_history">Historial</string>
+    <string name="sync_passwords">Contraseñas</string>
+    <string name="sync_cards">Tarjetas de pago</string>
+    <string name="sync_addresses">Direcciones</string>
+    <string name="sync_forms">Valores de formularios guardados</string>
+    <string name="sync_unsupported">El servidor o navegador actual no admite estos datos.</string>
+    <string name="sync_pending">Esperando la primera sincronización</string>
+    <string name="sync_last_sync">Última sincronización: %1$s</string>
+    <string name="sync_pending_count">%1$d cambios pendientes de sincronizar</string>
+    <string name="sync_conflicts">Revisar %1$d conflictos</string>
+    <string name="sync_conflict_summary">Ambos dispositivos cambiaron este elemento. Elige la copia que deseas conservar.</string>
+    <string name="sync_keep_local">Conservar este dispositivo</string>
+    <string name="sync_use_remote">Usar el otro dispositivo</string>
+    <string name="sync_disconnect">Desconectar cuenta</string>
+    <string name="sync_disconnect_summary">¿Detener la sincronización en este dispositivo? Tus datos de navegación locales se conservarán.</string>
+    <string name="sync_error_keys">Las claves de cifrado necesitan atención. Comprueba el código de recuperación o desbloquea los datos de nuevo.</string>
+    <string name="sync_error_login">La conexión con tu cuenta necesita atención. Intenta iniciar sesión de nuevo.</string>
+    <string name="sync_error_quota">El almacenamiento de sincronización está lleno. Libera espacio para volver a intentarlo.</string>
+    <string name="sync_error_retry">Algunos datos no se pudieron sincronizar. Tus cambios están guardados; vuelve a intentarlo cuando haya conexión.</string>
+  <string name="sync_local_copy">Este dispositivo: %1$s</string>
+  <string name="sync_remote_copy">Otro dispositivo: %1$s</string>
+  <string name="sync_deleted_item">Elemento eliminado</string>
+  <string name="sync_error_rate_limit">El servidor está ocupado. Tus cambios están guardados y se volverán a intentar automáticamente.</string>
+</resources>

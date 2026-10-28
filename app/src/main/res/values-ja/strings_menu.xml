@@ -6,7 +6,6 @@
     <string name="menu_find_in_page">ページ内で検索</string>
     <string name="menu_save_as_pdf">ページを PDF として保存</string>
     <string name="menu_save_as_pdf_failed">ページを PDF として保存できませんでした</string>
-    <string name="menu_account">アカウント</string>
     <string name="menu_login">ログイン</string>
     <string name="menu_midori_vpn">みどりVPN</string>
     <string name="menu_more_options">その他のオプション</string>

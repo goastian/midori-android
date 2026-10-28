@@ -6,7 +6,6 @@
     <string name="menu_find_in_page">Znajdź na stronie</string>
     <string name="menu_save_as_pdf">Zapisz stronę jako PDF</string>
     <string name="menu_save_as_pdf_failed">Nie udało się zapisać strony jako PDF</string>
-    <string name="menu_account">Konto</string>
     <string name="menu_login">Zaloguj się</string>
     <string name="menu_midori_vpn">MidoriVPN</string>
     <string name="menu_more_options">Więcej opcji</string>
