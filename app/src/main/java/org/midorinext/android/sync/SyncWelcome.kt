@@ -59,13 +59,6 @@ internal fun SyncWelcome(
             DeviceConnection(Modifier.fillMaxWidth().padding(vertical = 16.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Box(Modifier.width(3.dp).height(72.dp).background(colors.primary, RoundedCornerShape(2.dp)))
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(stringResource(R.string.sync_on_computer), style = MaterialTheme.typography.labelMedium,
-                        color = colors.onSurfaceVariant)
-                    Text("sync.astian.org", style = MaterialTheme.typography.titleLarge, color = colors.onSurface)
-                    Text(stringResource(R.string.sync_portal_instruction), style = MaterialTheme.typography.bodyMedium,
-                        color = colors.onSurfaceVariant)
-                }
             }
             Spacer(Modifier.height(24.dp))
             if (busy) {
