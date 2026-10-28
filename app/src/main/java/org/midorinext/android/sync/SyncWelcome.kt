@@ -57,9 +57,6 @@ internal fun SyncWelcome(
             Text(stringResource(R.string.sync_scan_summary), style = MaterialTheme.typography.bodyMedium,
                 color = colors.onSurfaceVariant)
             DeviceConnection(Modifier.fillMaxWidth().padding(vertical = 16.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Box(Modifier.width(3.dp).height(72.dp).background(colors.primary, RoundedCornerShape(2.dp)))
-            }
             Spacer(Modifier.height(24.dp))
             if (busy) {
                 LinearProgressIndicator(Modifier.fillMaxWidth().padding(bottom = 16.dp))
