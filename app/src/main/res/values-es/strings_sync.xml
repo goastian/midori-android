@@ -25,7 +25,7 @@
     <string name="sync_use_remote">Usar el otro dispositivo</string>
     <string name="sync_disconnect">Desconectar cuenta</string>
     <string name="sync_disconnect_summary">¿Detener la sincronización en este dispositivo? Tus datos de navegación locales se conservarán.</string>
-    <string name="sync_error_keys">Las claves de cifrado necesitan atención. Comprueba el código de recuperación o desbloquea los datos de nuevo.</string>
+    <string name="sync_error_keys">No se pudieron verificar tus datos de Sync. Vuelve a conectar tu cuenta Astian.</string>
     <string name="sync_error_login">La conexión con tu cuenta necesita atención. Intenta iniciar sesión de nuevo.</string>
     <string name="sync_error_quota">El almacenamiento de sincronización está lleno. Libera espacio para volver a intentarlo.</string>
     <string name="sync_error_retry">Algunos datos no se pudieron sincronizar. Tus cambios están guardados; vuelve a intentarlo cuando haya conexión.</string>

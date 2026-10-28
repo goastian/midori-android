@@ -25,7 +25,7 @@
     <string name="sync_use_remote">Use other device</string>
     <string name="sync_disconnect">Disconnect account</string>
     <string name="sync_disconnect_summary">Stop syncing on this device? Your local browsing data will stay on the device.</string>
-    <string name="sync_error_keys">Your encryption keys need attention. Check the recovery code or unlock your data again.</string>
+    <string name="sync_error_keys">Could not verify your Sync data. Reconnect your Astian account.</string>
     <string name="sync_error_login">Your account connection needs attention. Try signing in again.</string>
     <string name="sync_error_quota">Sync storage is full. Free up space before trying again.</string>
     <string name="sync_error_retry">Some data could not sync. Your changes are saved; try again when the connection is available.</string>
