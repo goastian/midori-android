@@ -29,6 +29,7 @@ import javax.inject.Inject
 @HiltViewModel
 class WidgetViewModel @Inject constructor(
     val engine: Engine,
+    private val memoryBudget: org.midorinext.android.mozac.BrowserMemoryBudget,
     val datahub: Datahub,
     val MidoriUseCases: MidoriUseCases,
     clipboardProvider: ClipboardProvider,
@@ -58,6 +59,8 @@ class WidgetViewModel @Inject constructor(
         private set
 
     init {
+        memoryBudget.register(this) {}
+        memoryBudget.update(this, listOf(org.midorinext.android.mozac.ResidentTab("widget-${System.identityHashCode(this)}", 0, true)))
         viewModelScope.launch {
             snapshotFlow { currentSearch }
                 .distinctUntilChanged()
@@ -71,6 +74,12 @@ class WidgetViewModel @Inject constructor(
 
     fun commitSearch() {
         currentSearch = toolbarState.text.text
+    }
+
+    override fun onCleared() {
+        memoryBudget.unregister(this)
+        session.close()
+        super.onCleared()
     }
 
     fun resetSearch() {

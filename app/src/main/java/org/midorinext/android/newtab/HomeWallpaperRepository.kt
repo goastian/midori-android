@@ -17,9 +17,16 @@ data class HomeWallpaperAsset(val wallpaper: HomeWallpaper, val bitmap: Bitmap?)
 @Singleton
 class HomeWallpaperRepository @Inject constructor(
     @ApplicationContext private val context: Context,
+    memoryBudget: org.midorinext.android.mozac.BrowserMemoryBudget,
 ) {
     private val cache = LruCache<HomeWallpaper, HomeWallpaperAsset>(2)
     private val decoding = Mutex()
+
+    init {
+        memoryBudget.registerCache(this) { repository, level ->
+            if (org.midorinext.android.mozac.shouldClearBrowserMemory(level)) repository.clearMemory()
+        }
+    }
 
     fun cached(wallpaper: HomeWallpaper): HomeWallpaperAsset? =
         if (wallpaper.image == null) HomeWallpaperAsset(wallpaper, null) else cache.get(wallpaper)

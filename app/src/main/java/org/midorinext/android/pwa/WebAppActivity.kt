@@ -13,6 +13,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import org.midorinext.android.mozac.BrowserMemoryBudget
+import org.midorinext.android.mozac.TabResourceMiddleware
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -48,6 +51,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class WebAppActivity : AppCompatActivity() {
     @Inject lateinit var repository: WebAppRepository
+    @Inject lateinit var memoryBudget: BrowserMemoryBudget
     @Inject lateinit var engine: Engine
     @Inject lateinit var preferences: AppPreferencesRepository
     @Inject lateinit var permissionsStorage: GeckoSitePermissionsStorage
@@ -84,6 +88,7 @@ class WebAppActivity : AppCompatActivity() {
                             app = app,
                             manifest = manifest,
                             engine = engine,
+                            memoryBudget = memoryBudget,
                             repository = repository,
                             preferences = preferences,
                             permissionsStorage = permissionsStorage,
@@ -112,14 +117,17 @@ private fun WebAppPage(
     app: InstalledWebApp,
     manifest: WebAppManifest,
     engine: Engine,
+    memoryBudget: BrowserMemoryBudget,
     repository: WebAppRepository,
     preferences: AppPreferencesRepository,
     permissionsStorage: GeckoSitePermissionsStorage,
     loginRepository: LoginAutofillRepository,
     onOpenInBrowser: (String) -> Unit,
 ) {
-    val store = remember(app.startUrl, engine) {
-        BrowserStore(middleware = listOf(PromptMiddleware()) + EngineMiddleware.create(engine))
+    val resourceScope = rememberCoroutineScope()
+    val resources = remember(app.startUrl, engine) { TabResourceMiddleware(memoryBudget, resourceScope) }
+    val store = remember(resources) {
+        BrowserStore(middleware = listOf(PromptMiddleware(), resources) + EngineMiddleware.create(engine, trimMemoryAutomatically = false))
     }
     val tabs = remember(store) { TabsUseCases(store) }
     val sessions = remember(store) { SessionUseCases(store) }
@@ -136,7 +144,10 @@ private fun WebAppPage(
     DisposableEffect(store, app.startUrl) {
         val id = tabs.addTab(app.startUrl, title = app.name)
         store.dispatch(ContentAction.UpdateWebAppManifestAction(id, manifest))
-        onDispose { tabs.removeTab(id) }
+        onDispose {
+            tabs.removeAllTabs()
+            resources.close()
+        }
     }
 
     LaunchedEffect(selectedTab?.content?.url) {

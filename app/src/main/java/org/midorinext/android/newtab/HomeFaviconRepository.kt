@@ -1,7 +1,6 @@
 package org.midorinext.android.newtab
 
 import android.content.Context
-import android.content.ComponentCallbacks2
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -96,18 +95,18 @@ internal fun rankHomeIcons(resources: List<IconRequest.Resource>) = resources.so
 class HomeFaviconRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val clientProvider: dagger.Lazy<Client>,
+    memoryBudget: org.midorinext.android.mozac.BrowserMemoryBudget,
 ) {
     private val downloads = Semaphore(3)
     private val memory = HomeFaviconMemoryCache<Icon>(sizeOf = { it.bitmap.allocationByteCount })
     private val iconLoader = lazy { BrowserIcons(context, clientProvider.get(), preparers = emptyList()) }
     private val icons by iconLoader
 
+    init { memoryBudget.registerCache(this) { repository, level -> repository.onTrimMemory(level) } }
+
     fun onTrimMemory(level: Int) {
-        if (level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND ||
-            level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW ||
-            level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL
-        ) memory.clear()
-        if (iconLoader.isInitialized()) icons.onTrimMemory(level)
+        if (org.midorinext.android.mozac.shouldClearBrowserMemory(level)) memory.clear()
+        if (iconLoader.isInitialized()) icons.onTrimMemory(org.midorinext.android.mozac.iconCacheTrimLevel(level))
     }
 
     fun cached(url: String): Icon? = homeIconOrigin(url)?.let(memory::peek)

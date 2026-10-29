@@ -103,6 +103,8 @@ android {
         targetSdk 36
         versionCode configuredPlaystoreVersionCode
         versionName "11.9.4.5"
+        buildConfigField "String", "ADBLOCK_BUNDLE_VERSION", groovy.json.JsonOutput.toJson(
+                new groovy.json.JsonSlurper().parse(file("src/main/assets/adblock/content/manifest.json")).version)
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

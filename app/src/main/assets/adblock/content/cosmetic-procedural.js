@@ -2,9 +2,14 @@ globalThis.MidoriCosmetics = (() => {
   "use strict";
 
   function create(changed) {
-    const attribute = `data-midori-${Array.from(crypto.getRandomValues(new Uint32Array(2)), n => n.toString(16)).join("")}`;
+    let generation = 0;
+    const marker = () => `data-midori-${Array.from(crypto.getRandomValues(new Uint32Array(2)), n => n.toString(16)).join("")}-${generation++}`;
+    let attribute = marker();
     let rules = [], signature = "", timer = null, cursor = 0, work = null, rerun = false;
     const marked = new Map(), removed = new Map(), attributes = new Map();
+    let attributeRecords = new WeakMap();
+    const maxNodes = 2048, maxCharacters = 131072, maxAttributes = 512;
+    let retainedNodes = 0, retainedCharacters = 0, retainedAttributes = 0, overflows = 0;
     const observer = new MutationObserver(records => {
       if (records.some(record => record.type !== "attributes" || record.attributeName !== attribute)) schedule();
     });
@@ -90,21 +95,124 @@ globalThis.MidoriCosmetics = (() => {
       return nodes.filter(node => node.nodeType === 1);
     }
 
+    function markFallback(node, index) {
+      const tokens = new Set((node.getAttribute(attribute) || "").split(" ").filter(Boolean));
+      tokens.add(`r${index}`);
+      node.setAttribute(attribute, [...tokens].join(" "));
+      if (!marked.has(index)) marked.set(index, new Set());
+      marked.get(index).add(new WeakRef(node));
+    }
+
+    function overflow() {
+      if (++overflows === 1 || (overflows & (overflows - 1)) === 0) console.warn("Midori cosmetic restoration budget exceeded", overflows);
+    }
+
+    function restoreAttributes(node, values) {
+      for (const [name, value] of values) {
+        if (node) {
+          if (value === null) node.removeAttribute(name); else node.setAttribute(name, value);
+        }
+        retainedAttributes--;
+        retainedCharacters -= name.length + (value?.length || 0);
+      }
+    }
+
+    function restoreRemoved(node, entry) {
+      entry.observer?.disconnect();
+      const parent = entry.parent.deref(), sibling = entry.sibling?.deref();
+      if (!node.isConnected && parent) parent.insertBefore(node, sibling?.parentNode === parent ? sibling : null);
+      retainedNodes -= entry.nodes;
+      retainedCharacters -= entry.characters;
+    }
+
+    function* prune() {
+      for (const [reference, values] of attributes) {
+        const node = reference.deref();
+        if (!node?.isConnected) {
+          restoreAttributes(node, values);
+          attributes.delete(reference);
+          if (node) attributeRecords.delete(node);
+        }
+        yield;
+      }
+      for (const [node, entry] of [...removed].reverse()) {
+        if (node.isConnected || !entry.parent.deref()?.isConnected) {
+          restoreRemoved(node, entry);
+          removed.delete(node);
+        } else {
+          retainedNodes -= entry.nodes;
+          retainedCharacters -= entry.characters;
+          entry.nodes = 0; entry.characters = 0;
+          const cost = yield* removalCost(node);
+          if (cost) {
+            Object.assign(entry, cost);
+            retainedNodes += cost.nodes;
+            retainedCharacters += cost.characters;
+          } else {
+            restoreRemoved(node, entry);
+            removed.delete(node);
+            if (node.isConnected) markFallback(node, entry.index);
+            overflow();
+          }
+        }
+        yield;
+      }
+    }
+
     function remember(node, name) {
-      if (!attributes.has(node)) attributes.set(node, new Map());
-      const values = attributes.get(node);
-      if (!values.has(name)) values.set(name, node.getAttribute(name));
+      let record = attributeRecords.get(node);
+      if (record?.values.has(name)) return true;
+      const value = node.getAttribute(name), characters = name.length + (value?.length || 0);
+      if (retainedAttributes >= maxAttributes || retainedCharacters + characters > maxCharacters) { overflow(); return false; }
+      if (!record) {
+        record = { reference: new WeakRef(node), values: new Map() };
+        attributeRecords.set(node, record);
+        attributes.set(record.reference, record.values);
+      }
+      record.values.set(name, value);
+      retainedAttributes++;
+      retainedCharacters += characters;
+      return true;
+    }
+
+    function* removalCost(node) {
+      const walker = document.createTreeWalker(node, NodeFilter.SHOW_ALL);
+      let current = node, nodes = 0, characters = 0;
+      while (current) {
+        nodes++;
+        characters += current.nodeValue?.length || 0;
+        for (const name of current.getAttributeNames?.() || []) characters += name.length + current.getAttribute(name).length;
+        if (retainedNodes + nodes > maxNodes || retainedCharacters + characters > maxCharacters) return null;
+        yield;
+        current = walker.nextNode();
+      }
+      return { nodes, characters };
     }
 
     function* apply(rule, index) {
       const nodes = yield* select(rule);
       const action = rule.action?.type;
       if (action === "remove") {
+        const fallback = [];
         for (const node of nodes) {
           yield;
-          if (!removed.has(node)) removed.set(node, [node.parentNode, node.nextSibling]);
+          if (!node.isConnected || !node.parentNode || removed.has(node)) continue;
+          const cost = yield* removalCost(node);
+          if (!cost) {
+            overflow();
+            markFallback(node, index);
+            fallback.push(node);
+            continue;
+          }
+          if (!node.isConnected || !node.parentNode) continue;
+          const detachedObserver = new MutationObserver(schedule);
+          removed.set(node, { parent: new WeakRef(node.parentNode), sibling: node.nextSibling ? new WeakRef(node.nextSibling) : null, observer: detachedObserver, index, ...cost });
+          retainedNodes += cost.nodes;
+          retainedCharacters += cost.characters;
           node.remove();
+          detachedObserver.observe(node, {childList: true, subtree: true, attributes: true, characterData: true});
         }
+        yield* mark(fallback, index);
         return;
       }
       if (action === "remove-attr" || action === "remove-class") {
@@ -112,37 +220,50 @@ globalThis.MidoriCosmetics = (() => {
         for (const node of nodes) {
           yield;
           if (action === "remove-attr") {
-            for (const name of node.getAttributeNames().filter(test)) { remember(node, name); node.removeAttribute(name); }
+            for (const name of node.getAttributeNames().filter(test)) { if (remember(node, name)) node.removeAttribute(name); }
           } else {
-            for (const name of [...node.classList].filter(test)) { remember(node, "class"); node.classList.remove(name); }
+            for (const name of [...node.classList].filter(test)) { if (remember(node, "class")) node.classList.remove(name); }
           }
         }
         return;
       }
       if (action && action !== "style") return;
-      const previous = marked.get(index) || new Set(), next = new Set(nodes), token = `r${index}`;
-      const tracked = new Set(previous);
+      yield* mark(nodes, index);
+    }
+
+    function* mark(nodes, index) {
+      const previousRefs = marked.get(index) || new Set(), previous = new Set(), next = new Set(nodes), token = `r${index}`;
+      for (const reference of previousRefs) { const node = reference.deref(); if (node) previous.add(node); yield; }
+      const tracked = new Set(previousRefs), nextRefs = new Set();
       marked.set(index, tracked);
       for (const node of new Set([...previous, ...next])) {
         yield;
         const tokens = new Set((node.getAttribute(attribute) || "").split(" ").filter(Boolean));
-        if (next.has(node)) { tokens.add(token); tracked.add(node); }
-        else { tokens.delete(token); tracked.delete(node); }
+        if (next.has(node)) {
+          tokens.add(token);
+          const reference = new WeakRef(node);
+          tracked.add(reference); nextRefs.add(reference);
+        } else tokens.delete(token);
         const value = [...tokens].join(" ");
         if (value !== (node.getAttribute(attribute) || "")) {
           if (value) node.setAttribute(attribute, value); else node.removeAttribute(attribute);
         }
       }
-      marked.set(index, next);
+      marked.set(index, nextRefs);
     }
 
     function styles() {
       return rules.flatMap((rule, index) => {
-        if (rule.action && rule.action.type !== "style") return [];
-        const declarations = rule.action?.arg || "display: none !important";
+        if (rule.action && rule.action.type !== "style" && rule.action.type !== "remove") return [];
+        const declarations = rule.action?.type === "style" ? rule.action.arg : "display: none !important";
         if (/[{}\r\n@]|url\s*\(/i.test(declarations)) return [];
         return [{selector: `[${attribute}~="r${index}"]`, declarations}];
       });
+    }
+
+    function* applyWithPruning(rule, index) {
+      if (index === 0) yield* prune();
+      yield* apply(rule, index);
     }
 
     function run() {
@@ -151,7 +272,7 @@ globalThis.MidoriCosmetics = (() => {
       let steps = 0;
       while (cursor < rules.length) {
         try {
-          if (!work) work = apply(rules[cursor], cursor);
+          if (!work) work = applyWithPruning(rules[cursor], cursor);
           if (work.next().done) { work = null; cursor++; }
         } catch { work = null; cursor++; }
         if (++steps >= 256 || performance.now() >= deadline) {
@@ -171,19 +292,19 @@ globalThis.MidoriCosmetics = (() => {
     function clear() {
       observer.disconnect();
       clearTimeout(timer); timer = null; cursor = 0; work = null; rerun = false;
-      for (const nodes of marked.values()) for (const node of nodes) node.removeAttribute(attribute);
+      for (const references of marked.values()) for (const reference of references) reference.deref()?.removeAttribute(attribute);
       marked.clear();
-      for (const [node, values] of attributes) for (const [name, value] of values) {
-        if (value === null) node.removeAttribute(name); else node.setAttribute(name, value);
-      }
+      for (const [reference, values] of attributes) restoreAttributes(reference.deref(), values);
       attributes.clear();
-      for (const [node, [parent, sibling]] of [...removed].reverse()) {
-        if (!node.isConnected && parent?.isConnected) parent.insertBefore(node, sibling?.parentNode === parent ? sibling : null);
-      }
+      attributeRecords = new WeakMap();
+      for (const [node, entry] of [...removed].reverse()) restoreRemoved(node, entry);
       removed.clear();
+      retainedNodes = 0; retainedCharacters = 0; retainedAttributes = 0;
+      attribute = marker();
     }
 
     return {
+      retention() { return { removed: removed.size, nodes: retainedNodes, characters: retainedCharacters, attributes: retainedAttributes, overflows }; },
       update(values) {
         const next = JSON.stringify(values);
         if (next === signature) return;

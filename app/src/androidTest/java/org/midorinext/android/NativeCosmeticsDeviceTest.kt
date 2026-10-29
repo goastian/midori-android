@@ -110,6 +110,15 @@ class NativeCosmeticsDeviceTest {
             """.trimIndent()))
             withTimeout(30_000) { feature.ready.await() }
             assertTrue(feature.awaitConfiguration())
+            val bundleVersion = kotlinx.coroutines.CompletableDeferred<String>()
+            instrumentation.runOnMainSync {
+                app.geckoRuntime.get().webExtensionController.list().accept({ extensions ->
+                    bundleVersion.complete(extensions.orEmpty().firstOrNull {
+                        it.id == NativeContentBlockingFeature.EXTENSION_ID
+                    }?.metaData?.version.orEmpty())
+                }, { error -> bundleVersion.completeExceptionally(error ?: IllegalStateException("Could not list installed extensions")) })
+            }
+            assertEquals(BuildConfig.ADBLOCK_BUNDLE_VERSION, withTimeout(30_000) { bundleVersion.await() })
             load(private = false, enabled = true)
             load(private = true, enabled = true)
             settings.setSiteLevel("127.0.0.1", BlockingLevel.OFF)

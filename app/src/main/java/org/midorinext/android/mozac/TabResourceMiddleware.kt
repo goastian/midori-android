@@ -1,6 +1,5 @@
 package org.midorinext.android.mozac
 
-import android.content.ComponentCallbacks2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -30,11 +29,11 @@ internal fun tabsToSuspend(tabs: List<ResidentTab>, limit: Int): List<String> = 
     .map { it.id }
 
 class TabResourceMiddleware(
-    private val foregroundLimit: Int = 5,
-    private val backgroundLimit: Int = 2,
+    private val budget: BrowserMemoryBudget,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
 ) : Middleware<BrowserState, BrowserAction> {
-    private var limit = foregroundLimit
+    private var registered = false
+    private var closed = false
     private var trimJob: Job? = null
     private var previousSelectedId: String? = null
     private val priorities = mutableMapOf<EngineSession, EngineSession.SessionPriority>()
@@ -50,17 +49,17 @@ class TabResourceMiddleware(
             store.state.tabs.any { it.id == action.tabId && it.isProtected(store.state.selectedTabId) }
         ) return
         next(action)
-        if (!action.affectsTabResources()) return
+        if (closed || !action.affectsTabResources()) return
 
         scope.launch {
-            when (action) {
-                is AppLifecycleAction.ResumeAction -> limit = foregroundLimit
-                is AppLifecycleAction.PauseAction -> limit = backgroundLimit
-                is SystemAction.LowMemoryAction -> {
-                    if (action.level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW) limit = backgroundLimit
-                }
-                else -> Unit
+            if (closed) return@launch
+            if (!registered) {
+                registered = true
+                budget.register(this@TabResourceMiddleware) { scheduleTrim(store) }
             }
+            budget.update(this@TabResourceMiddleware, store.state.tabs.filter { it.engineState.engineSession != null }.map {
+                ResidentTab(it.id, maxOf(it.lastAccess, it.createdAt), it.isProtected(store.state.selectedTabId))
+            })
             val state = store.state
             val liveSessions = state.tabs.mapNotNull { it.engineState.engineSession }.toSet()
             priorities.keys.retainAll(liveSessions)
@@ -111,26 +110,37 @@ class TabResourceMiddleware(
                 }
                 else -> Unit
             }
-            trimJob?.cancel()
-            trimJob = launch {
-                delay(1_000)
-                candidates(store.state).forEach { id ->
-                    if (id !in checkingForms && id !in flushingState) {
-                        val session = store.state.tabs.find { it.id == id }?.engineState?.engineSession ?: return@forEach
-                        checkingForms[id] = session
-                        session.checkForFormData(adjustPriority = false)
-                    }
+            scheduleTrim(store)
+        }
+    }
+
+    private fun scheduleTrim(store: Store<BrowserState, BrowserAction>) {
+        if (trimJob?.isActive == true) return
+        trimJob = scope.launch {
+            delay(1_000)
+            candidates(store.state).forEach { id ->
+                if (id !in checkingForms && id !in flushingState) {
+                    val session = store.state.tabs.find { it.id == id }?.engineState?.engineSession ?: return@forEach
+                    checkingForms[id] = session
+                    session.checkForFormData(adjustPriority = false)
                 }
             }
         }
     }
 
-    private fun candidates(state: BrowserState) = tabsToSuspend(
-        state.tabs.filter { it.engineState.engineSession != null }.map {
-            ResidentTab(it.id, maxOf(it.lastAccess, it.createdAt), it.isProtected(state.selectedTabId))
-        },
-        limit,
-    )
+    fun close() {
+        closed = true
+        trimJob?.cancel()
+        budget.unregister(this)
+        registered = false
+        priorities.clear()
+        checkingForms.clear()
+        flushingState.clear()
+    }
+
+    private fun candidates(state: BrowserState) = budget.candidates(this).filter { id ->
+        state.tabs.any { it.id == id && it.engineState.engineSession != null && !it.isProtected(state.selectedTabId) }
+    }
 }
 
 private fun BrowserAction.affectsTabResources(): Boolean = when (this) {

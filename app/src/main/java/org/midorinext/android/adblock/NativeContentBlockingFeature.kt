@@ -257,7 +257,7 @@ class NativeContentBlockingFeature @Inject constructor(
                 }
         }
         runtime.webExtensionController.ensureBuiltIn(LOCATION, EXTENSION_ID).accept({ installed ->
-            if (installed != null && installed.metaData.version != BUNDLE_VERSION) {
+            if (installed != null && installed.metaData.version != BuildConfig.ADBLOCK_BUNDLE_VERSION) {
                 runtime.webExtensionController.installBuiltIn(LOCATION).accept(::allowPrivateBrowsing, ::installError)
             } else {
                 allowPrivateBrowsing(installed)
@@ -410,6 +410,5 @@ class NativeContentBlockingFeature @Inject constructor(
         private const val NATIVE_APP = "midori_adblock"
         private const val AD_APP = "midori_content_blocking"
         private const val NETWORK_APP = "midori_network"
-        private const val BUNDLE_VERSION = "2.3"
     }
 }

@@ -1,6 +1,7 @@
 package org.midorinext.android
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Debug
 import android.os.SystemClock
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -27,82 +28,93 @@ class BrowserResourceDeviceTest {
 
     @Test
     fun privateFixturesKeepTheirStateWhileResidentSessionsStayBounded() {
-        instrumentation.targetContext.startActivity(Intent(instrumentation.targetContext, MainActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        })
-        await("session restoration") { store.state.restoreComplete && store.state.selectedTabId != null }
-        val originalTabs = store.state.tabs
-        val originalSelected = store.state.selectedTabId!!
-        val fixtures = mutableListOf<String>()
+        val preferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(app)
+        val key = app.getString(R.string.pref_key_show_onboarding)
+        val onboarding = preferences.getBoolean(key, true)
+        preferences.edit().putBoolean(key, false).commit()
         try {
-            val initial = addFixture(0, fixtures)
-            await("initial fixture document") {
-                store.state.tabs.find { it.id == initial }?.let {
-                    it.engineState.engineSession != null && !it.content.loading && it.content.firstContentfulPaint
-                } == true
-            }
-            SystemClock.sleep(3_000)
-            sample(fixtures.size)
-            for (number in 1..49) {
-                addFixture(number, fixtures)
-                if (number == 9 || number == 49) {
-                    SystemClock.sleep(3_000)
-                    if (expectedLimit > 0) await("resident budget") { residentCount() <= expectedLimit }
-                    assertEquals(originalTabs.size + fixtures.size, store.state.tabs.size)
-                    assertTrue(store.state.tabs.filter { it.id in fixtures }.all { it.content.private })
-                    sample(fixtures.size)
+            instrumentation.targetContext.startActivity(Intent(instrumentation.targetContext, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            })
+            await("session restoration") { store.state.restoreComplete }
+            val originalTabs = store.state.tabs
+            val originalSelected = store.state.selectedTabId
+            val fixtures = mutableListOf<String>()
+            try {
+                val initial = addFixture(0, fixtures)
+                await("initial fixture document") {
+                    store.state.tabs.find { it.id == initial }?.let {
+                        it.engineState.engineSession != null && !it.content.loading && it.content.firstContentfulPaint
+                    } == true && fixturePainted(0)
                 }
-            }
-            if (expectedLimit > 0) {
-                val suspended = store.state.tabs.first { it.id in fixtures && it.engineState.engineSession == null }
-                assertNotNull(suspended.engineState.engineSessionState)
-                val started = SystemClock.elapsedRealtime()
-                store.dispatch(ContentAction.UpdateFirstContentfulPaintStateAction(suspended.id, false))
-                store.dispatch(TabListAction.SelectTabAction(suspended.id))
-                await("resuming suspended fixture") {
-                    store.state.tabs.find { it.id == suspended.id }?.let {
-                        it.engineState.engineSession != null && !it.content.loading &&
-                            it.content.firstContentfulPaint && it.content.url == suspended.content.url
-                    } == true
+                SystemClock.sleep(3_000)
+                sample(fixtures.size)
+                for (number in 1..49) {
+                    addFixture(number, fixtures)
+                    if (number == 9 || number == 49) {
+                        SystemClock.sleep(3_000)
+                        if (expectedLimit > 0) await("resident budget") { residentCount() <= expectedLimit }
+                        assertEquals(originalTabs.size + fixtures.size, store.state.tabs.size)
+                        assertTrue(store.state.tabs.filter { it.id in fixtures }.all { it.content.private })
+                        sample(fixtures.size)
+                    }
                 }
-                samples.put(JSONObject().put("resume_ms", SystemClock.elapsedRealtime() - started))
-                instrumentation.runOnMainSync { app.sessionUseCases.get().loadUrl(fixtureUrl(1000)) }
-                await("second history entry") {
-                    store.state.tabs.find { it.id == suspended.id }?.let {
-                        !it.content.loading && it.content.title == "Fixture 1000" && it.content.canGoBack
-                    } == true
+                if (expectedLimit > 0) {
+                    val suspended = store.state.tabs.first { it.id in fixtures && it.engineState.engineSession == null }
+                    assertNotNull(suspended.engineState.engineSessionState)
+                    val started = SystemClock.elapsedRealtime()
+                    store.dispatch(ContentAction.UpdateFirstContentfulPaintStateAction(suspended.id, false))
+                    store.dispatch(TabListAction.SelectTabAction(suspended.id))
+                    await("resuming suspended fixture") {
+                        store.state.tabs.find { it.id == suspended.id }?.let {
+                            it.engineState.engineSession != null && !it.content.loading && it.content.url == suspended.content.url
+                        } == true && fixturePainted(suspended.content.title.removePrefix("Fixture ").toInt())
+                    }
+                    samples.put(JSONObject().put("resume_ms", SystemClock.elapsedRealtime() - started)
+                        .put("resume_fcp_flag", store.state.tabs.first { it.id == suspended.id }.content.firstContentfulPaint)
+                        .put("restored_frame_verified", true))
+                    instrumentation.runOnMainSync { app.sessionUseCases.get().loadUrl(fixtureUrl(1000)) }
+                    await("second history entry") {
+                        store.state.tabs.find { it.id == suspended.id }?.let {
+                            !it.content.loading && it.content.title == "Fixture 1000" && it.content.canGoBack
+                        } == true
+                    }
+                    addFixture(50, fixtures)
+                    val lastFixture = addFixture(51, fixtures)
+                    instrumentation.runOnMainSync { app.memoryBudget.onVisibilityChanged(false) }
+                    store.dispatch(AppLifecycleAction.PauseAction)
+                    await("background resident budget") {
+                        residentCount() <= 2 && store.state.tabs.find { it.id == suspended.id }?.engineState?.engineSession == null
+                    }
+                    assertNotNull(store.state.tabs.find { it.id == lastFixture }?.engineState?.engineSession)
+                    samples.put(JSONObject().put("background_resident_sessions", residentCount()))
+                    instrumentation.runOnMainSync { app.memoryBudget.onVisibilityChanged(true) }
+                    store.dispatch(AppLifecycleAction.ResumeAction)
+                    store.dispatch(ContentAction.UpdateFirstContentfulPaintStateAction(suspended.id, false))
+                    store.dispatch(TabListAction.SelectTabAction(suspended.id))
+                    await("history restored with a fresh paint") {
+                        store.state.tabs.find { it.id == suspended.id }?.let {
+                            it.engineState.engineSession != null && !it.content.loading &&
+                                it.content.canGoBack && it.content.title == "Fixture 1000"
+                        } == true && fixturePainted(1000)
+                    }
+                    instrumentation.runOnMainSync { app.sessionUseCases.get().goBack(suspended.id) }
+                    await("back navigation after suspension") {
+                        store.state.tabs.find { it.id == suspended.id }?.let {
+                            !it.content.loading && it.content.title == suspended.content.title && it.content.url == suspended.content.url
+                        } == true && fixturePainted(suspended.content.title.removePrefix("Fixture ").toInt())
+                    }
+                    samples.put(JSONObject().put("history_restored", true))
                 }
-                addFixture(50, fixtures)
-                val lastFixture = addFixture(51, fixtures)
-                store.dispatch(AppLifecycleAction.PauseAction)
-                await("background resident budget") {
-                    residentCount() <= 2 && store.state.tabs.find { it.id == suspended.id }?.engineState?.engineSession == null
-                }
-                assertNotNull(store.state.tabs.find { it.id == lastFixture }?.engineState?.engineSession)
-                samples.put(JSONObject().put("background_resident_sessions", residentCount()))
-                store.dispatch(AppLifecycleAction.ResumeAction)
-                store.dispatch(ContentAction.UpdateFirstContentfulPaintStateAction(suspended.id, false))
-                store.dispatch(TabListAction.SelectTabAction(suspended.id))
-                await("history restored with a fresh paint") {
-                    store.state.tabs.find { it.id == suspended.id }?.let {
-                        it.engineState.engineSession != null && !it.content.loading &&
-                            it.content.firstContentfulPaint && it.content.canGoBack && it.content.title == "Fixture 1000"
-                    } == true
-                }
-                instrumentation.runOnMainSync { app.sessionUseCases.get().goBack(suspended.id) }
-                await("back navigation after suspension") {
-                    store.state.tabs.find { it.id == suspended.id }?.let {
-                        !it.content.loading && it.content.title == suspended.content.title && it.content.url == suspended.content.url
-                    } == true
-                }
-                samples.put(JSONObject().put("history_restored", true))
+            } finally {
+                store.dispatch(TabListAction.RemoveTabsAction(fixtures))
+                originalSelected?.let { store.dispatch(TabListAction.SelectTabAction(it)) }
+                await("fixture cleanup") { store.state.tabs.none { it.id in fixtures } && store.state.selectedTabId == originalSelected }
+                assertEquals(originalTabs.map { it.id }, store.state.tabs.map { it.id })
+                File(app.cacheDir, "browser-resource-results.json").writeText(samples.toString(2))
             }
         } finally {
-            store.dispatch(TabListAction.RemoveTabsAction(fixtures))
-            store.dispatch(TabListAction.SelectTabAction(originalSelected))
-            await("fixture cleanup") { store.state.tabs.none { it.id in fixtures } && store.state.selectedTabId == originalSelected }
-            assertEquals(originalTabs.map { it.id }, store.state.tabs.map { it.id })
-            File(app.cacheDir, "browser-resource-results.json").writeText(samples.toString(2))
+            preferences.edit().putBoolean(key, onboarding).commit()
         }
     }
 
@@ -122,7 +134,20 @@ class BrowserResourceDeviceTest {
 
     private fun fixtureUrl(number: Int) = "data:text/html,<html><head><title>Fixture $number</title></head>" +
         "<body><h1>Fixture $number</h1><canvas id='c' width='1200' height='1200'></canvas>" +
-        "<script>let x=document.getElementById('c').getContext('2d');x.fillStyle='green';x.fillRect(0,0,1200,1200);</script></body></html>"
+        "<script>let x=document.getElementById('c').getContext('2d');x.fillStyle='rgb(${Color.red(fixtureColor(number))},${Color.green(fixtureColor(number))},${Color.blue(fixtureColor(number))})';x.fillRect(0,0,1200,1200);</script></body></html>"
+
+    private fun fixtureColor(number: Int) = Color.rgb((number * 37) % 180 + 35, (number * 67) % 180 + 35, (number * 97) % 180 + 35)
+
+    private fun fixturePainted(number: Int): Boolean {
+        val bitmap = instrumentation.uiAutomation.takeScreenshot() ?: return false
+        return try {
+            val pixel = bitmap.getPixel(bitmap.width / 2, bitmap.height / 2)
+            val expected = fixtureColor(number)
+            kotlin.math.abs(Color.red(pixel) - Color.red(expected)) < 10 &&
+                kotlin.math.abs(Color.green(pixel) - Color.green(expected)) < 10 &&
+                kotlin.math.abs(Color.blue(pixel) - Color.blue(expected)) < 10
+        } finally { bitmap.recycle() }
+    }
 
     private fun sample(fixtureTabs: Int) {
         val memory = Debug.MemoryInfo()
@@ -137,7 +162,10 @@ class BrowserResourceDeviceTest {
     private fun await(description: String, condition: () -> Boolean) {
         val deadline = SystemClock.elapsedRealtime() + 30_000
         while (!condition()) {
-            check(SystemClock.elapsedRealtime() < deadline) { "Timed out waiting for $description; resident=${residentCount()}" }
+            check(SystemClock.elapsedRealtime() < deadline) {
+                val selected = store.state.tabs.find { it.id == store.state.selectedTabId }
+                "Timed out waiting for $description; resident=${residentCount()}, selectedEngine=${selected?.engineState?.engineSession != null}, loading=${selected?.content?.loading}, fcp=${selected?.content?.firstContentfulPaint}"
+            }
             SystemClock.sleep(100)
         }
     }

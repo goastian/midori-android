@@ -1,0 +1,73 @@
+<!doctype html><meta charset="utf-8"><title>loading</title><main id="legitimate">Content</main><section id="spa"></section><script>
+/*SOURCE*/
+const style = document.createElement('style'); document.head.append(style);
+const cosmetic = MidoriCosmetics.create(styles => { style.textContent = styles.map(s => `${s.selector}{${s.declarations}}`).join('\n'); });
+const rules = [
+  {selector:[{type:'css-selector',arg:'.remove'}],action:{type:'remove'}},
+  {selector:[{type:'css-selector',arg:'.attributes'}],action:{type:'remove-attr',arg:'data-ad'}},
+  {selector:[{type:'css-selector',arg:'.classes'}],action:{type:'remove-class',arg:'advert'}},
+  {selector:[{type:'css-selector',arg:'.hidden'}]},
+].map(JSON.stringify);
+const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+function check(value, message) { if (!value) throw new Error(message); }
+async function settled(predicate, label) {
+  const deadline = performance.now() + 30000;
+  while (!predicate()) { if (performance.now() > deadline) throw new Error(label); await pause(50); }
+}
+window.runRetention = async (cycles = 20, interval = 0) => {
+  const samples = [], started = performance.now();
+  try {
+    cosmetic.update(rules);
+    for (let cycle = 0; cycle < cycles; cycle++) {
+      const parent = document.createElement('div'); parent.className = 'route';
+      parent.innerHTML = Array.from({length:1000}, (_, i) => `<div class="remove"><span>ad ${i}</span></div><div class="attributes" data-ad="original">value</div><div class="classes advert">class</div><div class="hidden">hidden</div>`).join('');
+      document.querySelector('#spa').append(parent);
+      await settled(() => {
+        const state = cosmetic.retention();
+        const hidden = parent.querySelector('.hidden');
+        return state.nodes > 0 && state.attributes === 512 && hidden && getComputedStyle(hidden).display === 'none' && [...parent.querySelectorAll('.remove')].every(node => getComputedStyle(node).display === 'none');
+      }, 'apply');
+      const state = cosmetic.retention();
+      check(state.nodes <= 2048 && state.characters <= 131072 && state.attributes <= 512, 'retention quota');
+      check(parent.querySelectorAll('.remove').length > 0, 'overflow retains reversible visual fallback');
+      check([...parent.querySelectorAll('.remove')].every(node => getComputedStyle(node).display === 'none'), 'overflow is hidden');
+      const anchor = document.createElement('aside'); parent.append(anchor);
+      const retained = document.createElement('div'); retained.className='remove'; anchor.append(retained);
+      parent.remove();
+      await settled(() => cosmetic.retention().nodes === 0 && cosmetic.retention().attributes === 0, 'prune detached route');
+      check(parent.querySelectorAll('.remove').length === 1001, 'restore nodes into detached live parent');
+      check([...parent.querySelectorAll('.attributes')].every(node => node.getAttribute('data-ad') === 'original'), 'restore detached attributes');
+      samples.push({cycle, ...state, after:cosmetic.retention()});
+      document.title=JSON.stringify({progress:cycle+1,elapsed:performance.now()-started,state:cosmetic.retention()});
+      if (interval) await pause(interval);
+    }
+    const parent = document.createElement('div');
+    parent.innerHTML='<span id="a">A</span><div class="remove" id="restore">R</div><span id="b">B</span><div class="attributes" data-ad="original">value</div><div class="classes advert">class</div><div class="hidden">hidden</div>';
+    document.querySelector('#spa').append(parent);
+    await settled(() => !parent.querySelector('#restore') && !parent.querySelector('.attributes').hasAttribute('data-ad') && !parent.querySelector('.classes').classList.contains('advert'), 'small apply');
+    cosmetic.update([]);
+    check(parent.querySelector('#a').nextElementSibling.id === 'restore' && parent.querySelector('#restore').nextElementSibling.id === 'b', 'sibling order restored');
+    check(parent.querySelector('.attributes').getAttribute('data-ad') === 'original', 'attributes restored');
+    check(parent.querySelector('.classes').classList.contains('advert'), 'class restored');
+    check(getComputedStyle(parent.querySelector('.hidden')).display !== 'none', 'hide restored');
+    check(getComputedStyle(document.querySelector('#legitimate')).display !== 'none', 'legitimate content');
+    parent.replaceChildren();
+    parent.innerHTML=Array.from({length:1000}, () => '<div class="remove"><span>partial</span></div>').join('');
+    cosmetic.update(rules);
+    await settled(() => cosmetic.retention().nodes > 0 && cosmetic.retention().nodes < 2048, 'partial remove');
+    cosmetic.disconnect();
+    check(parent.querySelectorAll('.remove').length === 1000, 'disconnect restores partial removal');
+    check(cosmetic.retention().nodes === 0 && cosmetic.retention().attributes === 0, 'disconnect clears partial work');
+    parent.replaceChildren();
+    const huge = document.createElement('div'); huge.className='remove'; huge.textContent='x'.repeat(200000);
+    const hugeAttribute=document.createElement('div'); hugeAttribute.className='attributes'; hugeAttribute.setAttribute('data-ad','x'.repeat(200000));
+    parent.append(huge,hugeAttribute);
+    cosmetic.update(rules);
+    await settled(() => getComputedStyle(huge).display === 'none', 'large fallback');
+    check(cosmetic.retention().nodes === 0 && cosmetic.retention().characters <= 131072, 'large subtree does not enter journal');
+    cosmetic.disconnect();
+    check(huge.isConnected && getComputedStyle(huge).display !== 'none' && hugeAttribute.getAttribute('data-ad').length === 200000, 'large operations remain reversible');
+    return window.result = {ok:true, cycles, elapsed:performance.now()-started, samples};
+  } catch(error) { return window.result={ok:false,error:error.stack,samples}; }
+};
+</script>

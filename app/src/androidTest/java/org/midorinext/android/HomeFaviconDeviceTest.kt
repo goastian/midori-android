@@ -60,7 +60,7 @@ class HomeFaviconDeviceTest {
             }
         }
         try {
-            val repository = HomeFaviconRepository(app, app.client)
+            val repository = HomeFaviconRepository(app, app.client, app.memoryBudget)
             val icon = repository.load(url)
             assertNotNull(icon)
             assertTrue("Decoded favicon should remain sharp at high density", icon!!.bitmap.width >= 128)
@@ -71,7 +71,7 @@ class HomeFaviconDeviceTest {
             val networkForbidden = object : Client() {
                 override fun fetch(request: Request): Response = throw AssertionError("Cached favicon requested network")
             }
-            val cached = HomeFaviconRepository(app, dagger.Lazy { networkForbidden }).load(url)
+            val cached = HomeFaviconRepository(app, dagger.Lazy { networkForbidden }, app.memoryBudget).load(url)
             assertNotNull(cached)
             assertTrue(cached!!.source == Icon.Source.MEMORY || cached.source == Icon.Source.DISK)
             assertEquals(icon.bitmap.width, cached.bitmap.width)

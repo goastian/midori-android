@@ -1,6 +1,9 @@
 package org.midorinext.android
 
+import android.app.Activity
 import android.app.Application
+import android.os.Bundle
+import org.midorinext.android.mozac.BrowserMemoryBudget
 import androidx.work.Configuration
 import org.midorinext.android.migration.MigrationUtility
 import org.midorinext.android.mozac.GeckoPreferences
@@ -56,6 +59,7 @@ private const val READING_LIST_DATABASE_NAME = "reading_list_db"
 
 @HiltAndroidApp
 class MidoriApplication : Application(), Configuration.Provider {
+    @Inject lateinit var memoryBudget: BrowserMemoryBudget
     @Inject lateinit var engine: dagger.Lazy<Engine>
     @Inject lateinit var client: dagger.Lazy<Client>
     @Inject lateinit var store: dagger.Lazy<BrowserStore>
@@ -82,7 +86,6 @@ class MidoriApplication : Application(), Configuration.Provider {
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val postFirstFrameWorkStarted = AtomicBoolean(false)
     private val nativeHomeFrameDrawn = MutableStateFlow(false)
-    @Volatile private var warmedHomeWallpaper: HomeWallpaperRepository? = null
 
     fun onNativeHomeFrameDrawn() {
         nativeHomeFrameDrawn.value = true
@@ -112,12 +115,26 @@ class MidoriApplication : Application(), Configuration.Provider {
             return
         }
 
+        registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
+            private var started = 0
+            override fun onActivityStarted(activity: Activity) {
+                if (started++ == 0) memoryBudget.onVisibilityChanged(true)
+            }
+            override fun onActivityStopped(activity: Activity) {
+                if (--started == 0 && !activity.isChangingConfigurations) memoryBudget.onVisibilityChanged(false)
+            }
+            override fun onActivityCreated(activity: Activity, state: Bundle?) = Unit
+            override fun onActivityResumed(activity: Activity) = Unit
+            override fun onActivityPaused(activity: Activity) = Unit
+            override fun onActivitySaveInstanceState(activity: Activity, state: Bundle) = Unit
+            override fun onActivityDestroyed(activity: Activity) = Unit
+        })
         StartupTiming.mark("application_create (${BuildConfig.VERSION_NAME}, ${BuildConfig.BUILD_TYPE})")
         val preferencesRepository = appPreferencesRepository.get()
         applicationScope.launch(Dispatchers.IO) {
             val preferences = preferencesRepository.flow.first()
             StartupTiming.mark("preferences_ready")
-            homeWallpaper.get().also { warmedHomeWallpaper = it }
+            homeWallpaper.get()
                 .load(HomeWallpaper.fromId(preferences.homeWallpaperId))
         }
         StartupTiming.measure("app_services") {
@@ -233,12 +250,7 @@ class MidoriApplication : Application(), Configuration.Provider {
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
         runOnlyInMainProcess {
-            if (level == TRIM_MEMORY_RUNNING_LOW || level == TRIM_MEMORY_RUNNING_CRITICAL ||
-                level >= TRIM_MEMORY_BACKGROUND
-            ) warmedHomeWallpaper?.clearMemory()
-            browserIcons.get().onTrimMemory(level)
-            homeFavicons.get().onTrimMemory(level)
-            store.get().dispatch(SystemAction.LowMemoryAction(level))
+            memoryBudget.onTrimMemory(level)
         }
     }
 }

@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import org.midorinext.android.preferences.app.AppPreferencesRepository
+import org.midorinext.android.mozac.BrowserMemoryBudget
 import org.midorinext.android.mozac.TabResourceMiddleware
 import org.midorinext.android.mozac.downloads.DownloadLocationProvider
 import org.midorinext.android.mozac.downloads.DownloadService
@@ -65,6 +66,7 @@ object MozacComponentHiltModule {
         notificationsDelegate: NotificationsDelegate,
         appPreferencesRepository: AppPreferencesRepository,
         pdfSaveEvents: PdfSaveEvents,
+        memoryBudget: BrowserMemoryBudget,
     ) : BrowserStore {
         val translationsScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         return BrowserStore(
@@ -83,7 +85,7 @@ object MozacComponentHiltModule {
                 UndoMiddleware(clearAfterMillis = 15_000),
                 LastMediaAccessMiddleware(),
                 RecordingDevicesMiddleware(context, notificationsDelegate),
-                TabResourceMiddleware(),
+                TabResourceMiddleware(memoryBudget),
                 ReaderViewMiddleware(),
             ) + EngineMiddleware.create(engine, trimMemoryAutomatically = false) + TranslationsMiddleware(
                 engine = engine,
@@ -143,10 +145,12 @@ object MozacComponentHiltModule {
         @ApplicationContext context: Context,
         engine: Engine,
         client: Client,
-        store: BrowserStore
+        store: BrowserStore,
+        memoryBudget: BrowserMemoryBudget,
     ) : BrowserIcons {
         return BrowserIcons(context, client).apply {
             this.install(engine, store)
+            memoryBudget.registerCache(this) { icons, level -> icons.onTrimMemory(level) }
         }
     }
 
