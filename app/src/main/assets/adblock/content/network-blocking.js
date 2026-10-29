@@ -8,6 +8,7 @@
   let totalBlocked = 0;
   let totalTimer = null;
   let nextRequestId = 0;
+  let saturatedRequests = 0;
   let decisionReceived = false;
   let policyApplied = false;
   let policyTask = Promise.resolve();
@@ -42,6 +43,10 @@
   async function requestDecision(message) {
     const port = nativePort;
     if (!port) return null;
+    if (requests.size >= 128) {
+      if (++saturatedRequests === 1 || saturatedRequests % 128 === 0) console.warn(`Midori network queue saturated; ${saturatedRequests} requests cancelled`);
+      return { cancel: true, saturated: true };
+    }
     const requestId = ++nextRequestId;
     const response = new Promise(resolve => { requests.set(requestId, resolve); });
     try {
@@ -124,7 +129,7 @@
         if (typeof response.redirectUrl === "string" && response.redirectUrl !== details.url &&
             /^(?:https?:|data:)/.test(response.redirectUrl)) decision.redirectUrl = response.redirectUrl;
         if (state.cache.size >= 512) state.cache.clear();
-        state.cache.set(key, decision);
+        if (!response.saturated) state.cache.set(key, decision);
       } catch { return {}; }
     }
     if (decision.csp && details.requestId && !decision.redirectUrl) {

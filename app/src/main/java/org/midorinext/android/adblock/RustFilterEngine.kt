@@ -14,6 +14,7 @@ internal object RustAdblock {
 
     external fun create(lists: String, resources: String): Long
     external fun createFromFiles(paths: String, resources: String): Long
+    external fun liveEngineCount(): Long
     external fun release(handle: Long)
     external fun query(handle: Long, input: String): String
     external fun cosmetics(handle: Long, input: String): String

@@ -1,5 +1,6 @@
 package org.midorinext.android.adblock
 
+import android.app.ActivityManager
 import android.content.Context
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -14,6 +15,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.ensureActive
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -40,7 +45,6 @@ class NativeFilterSources @Inject constructor(
     private val metadata = context.getSharedPreferences("native_adblock_http", Context.MODE_PRIVATE)
     private val locks = ConcurrentHashMap<String, Mutex>()
     private val downloadMutex = Mutex()
-    private val cacheWarmupMutex = Mutex()
     private val engineMutex = Mutex()
     private val redirectResources by lazy { context.assets.open("adblock/redirect-resources.json").bufferedReader().use { it.readText() } }
     private val redirectResourcesSha256 by lazy { RustFilterEngine.sha256(redirectResources.toByteArray()) }
@@ -51,19 +55,18 @@ class NativeFilterSources @Inject constructor(
     private class EngineSnapshot(
         val sources: List<Pair<String, NativeFilterRules>>,
         val trackerKeys: Set<String>,
-        val all: RustFilterEngine,
+        val all: RustFilterEngine?,
         /** Only built while a tracker-only level is in use. */
         val trackers: RustFilterEngine?,
     ) {
         val keys = sources.map { it.first }
 
         fun close() {
-            all.close()
+            all?.close()
             if (trackers !== all) trackers?.close()
         }
     }
     private var engineSnapshot: EngineSnapshot? = null
-    private val loadingCacheKeys = ConcurrentHashMap.newKeySet<String>()
     private val loadedCacheKeys = ConcurrentHashMap.newKeySet<String>()
     private val lastAttempt = ConcurrentHashMap<String, Long>()
     @Volatile private var rules: Map<String, NativeFilterRules> = emptyMap()
@@ -83,43 +86,25 @@ class NativeFilterSources @Inject constructor(
                 metadata.edit().putInt("format_version", CACHE_FORMAT_VERSION).apply()
             }
             removeLegacyCaches()
-            OfficialFilterCatalog.all.filter { it.fallbackAsset != null }.forEach { source ->
-                runCatching {
-                    val loadStarted = android.os.SystemClock.elapsedRealtime()
-                    val downloaded = readDownloaded(source.url)
-                    if (downloaded != null) {
-                        putRules(source.id, downloaded)
-                        loadedCacheKeys.add(source.id)
-                    } else putRules(source.id, loadBundled(source))
-                    if (org.midorinext.android.BuildConfig.DEBUG) {
-                        Log.d(TAG, "Loaded bundled ${source.id} in ${android.os.SystemClock.elapsedRealtime() - loadStarted} ms")
-                    }
-                }.onFailure { Log.e(TAG, "Could not load bundled ${source.id}", it) }
-            }
-            enabledSources(settings.current, includeAds = true).forEach { (key, url, _) ->
-                if (key !in loadedCacheKeys && cacheFile(url).exists()) loadCacheIfFast(key, url)
-            }
             settings.state.map { it.networkPolicyConfiguration() }.distinctUntilChanged().collectLatest {
                 val config = settings.current
+                prepareEngines(config)
+                mutableRevision.update { it + 1 }
+                ready.complete(Unit)
                 if (config.hasBlockingSites()) {
                     enabledSources(config).forEach { (key, url, updatedAt) ->
-                        if (key !in loadedCacheKeys && cacheFile(url).exists()) loadCacheIfFast(key, url)
                         if (!cacheFile(url).exists() || System.currentTimeMillis() - updatedAt >= UPDATE_INTERVAL_MS) {
                             refreshStaleAsync(key)
                         }
                     }
                 }
-                prepareEngines(config)
-                mutableRevision.update { it + 1 }
-                ready.complete(Unit)
             }
         }
     }
 
     private fun activeRules(config: AdBlockConfiguration): List<Pair<String, NativeFilterRules>> {
         val snapshot = rules
-        val keys = OfficialFilterCatalog.all.filter { it.id in config.officialEnabled }.map { it.id } +
-            config.sources.filter { it.enabled }.map { it.url }
+        val keys = if (config.hasBlockingSites()) enabledSources(config).map { it.first } else emptyList()
         return keys.mapNotNull { key -> snapshot[key]?.let { key to it } }
     }
 
@@ -130,27 +115,51 @@ class NativeFilterSources @Inject constructor(
     internal suspend fun prepareEngines(config: AdBlockConfiguration) = withContext(Dispatchers.Default) {
         engineMutex.withLock {
             try {
+                val needed = if (config.hasBlockingSites()) enabledSources(config) else emptyList()
+                for ((key, url, _) in needed) {
+                    if (rules[key] != null) continue
+                    val official = OfficialFilterCatalog.get(key)
+                    val downloaded = readDownloaded(url)
+                    when {
+                        downloaded != null -> { putRules(key, downloaded); loadedCacheKeys.add(key) }
+                        official?.fallbackAsset != null -> putRules(key, loadBundled(official))
+                        cacheFile(url).exists() -> loadCache(key, url)
+                    }
+                }
                 val active = activeRules(config)
                 val trackerKeys = trackerKeys(config)
+                val needsAll = config.hasAdBlockingSites()
                 val needsTrackers = config.level == BlockingLevel.TRACKERS || BlockingLevel.TRACKERS in config.siteLevels.values
                 val current = synchronized(this@NativeFilterSources) { engineSnapshot }
-                if (current != null && current.trackerKeys == trackerKeys && (current.trackers != null || !needsTrackers)) {
-                    if (current.sources == active) return@withLock
-                    // Keep serving the previous engine until the lists being downloaded have settled; one rebuild then covers all of them.
-                    if (refreshesInFlight.get() > 0 && current.keys == active.map { it.first }) return@withLock
-                }
-                val all = loadEngine(active.mapNotNull { it.second.engine })
-                val trackers = try {
-                    when {
+                val sameRules = current?.sources == active && current.trackerKeys == trackerKeys
+                if (sameRules && (current?.all != null) == needsAll && (current?.trackers != null) == needsTrackers) return@withLock
+                // Keep serving the previous engine until the lists being downloaded have settled; one rebuild then covers all of them.
+                if (current != null && refreshesInFlight.get() > 0 && current.keys == active.map { it.first } &&
+                    current.trackerKeys == trackerKeys && (current.all != null) == needsAll && (current.trackers != null) == needsTrackers) return@withLock
+                val all = if (needsAll) {
+                    if (sameRules && current?.all != null) current.all else loadEngine(active.mapNotNull { it.second.engine })
+                } else null
+                var trackers: RustFilterEngine? = null
+                try {
+                    trackers = when {
                         !needsTrackers -> null
-                        active.all { it.first in trackerKeys } -> all
+                        sameRules && current?.trackers != null -> current.trackers
+                        all != null && active.all { it.first in trackerKeys } -> all
                         else -> loadEngine(active.filter { it.first in trackerKeys }.mapNotNull { it.second.engine })
                     }
-                } catch (error: Throwable) { all.close(); throw error }
-                synchronized(this@NativeFilterSources) {
-                    val previous = engineSnapshot
-                    engineSnapshot = EngineSnapshot(active, trackerKeys, all, trackers)
-                    previous?.close()
+                    coroutineContext.ensureActive()
+                    synchronized(this@NativeFilterSources) {
+                        engineSnapshot = if (needsAll || needsTrackers) EngineSnapshot(active, trackerKeys, all, trackers) else null
+                        if (current?.all !== all && current?.all !== trackers) current?.all?.close()
+                        if (current?.trackers !== current?.all && current?.trackers !== all && current?.trackers !== trackers) current?.trackers?.close()
+                        val keys = needed.mapTo(hashSetOf()) { it.first }
+                        rules = rules.filterKeys { it in keys }
+                        loadedCacheKeys.retainAll(keys)
+                    }
+                } catch (error: Throwable) {
+                    if (all !== current?.all && all !== current?.trackers) all?.close()
+                    if (trackers !== all && trackers !== current?.all && trackers !== current?.trackers) trackers?.close()
+                    throw error
                 }
                 deleteStaleEngineFiles()
             } catch (error: Exception) {
@@ -158,6 +167,28 @@ class NativeFilterSources @Inject constructor(
                 Log.e(TAG, "Could not prepare the filter engines", error)
             }
         }
+    }
+
+    internal suspend fun close() {
+        ready.cancel()
+        scope.coroutineContext[Job]?.cancelAndJoin()
+        engineMutex.withLock {
+            synchronized(this) {
+                engineSnapshot?.close()
+                engineSnapshot = null
+                rules = emptyMap()
+                loadedCacheKeys.clear()
+            }
+        }
+    }
+
+    internal fun engineState(): Pair<Boolean, Boolean> = synchronized(this) {
+        (engineSnapshot?.all != null) to (engineSnapshot?.trackers != null)
+    }
+
+    private fun isUnderMemoryPressure(): Boolean {
+        val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        return ActivityManager.MemoryInfo().also(manager::getMemoryInfo).lowMemory
     }
 
     private fun loadEngine(lists: List<EngineList>): RustFilterEngine {
@@ -211,7 +242,7 @@ class NativeFilterSources @Inject constructor(
     internal fun nativeCosmetics(config: AdBlockConfiguration, url: String, classes: List<String>, ids: List<String>): JSONObject? {
         val snapshot = engineSnapshot ?: return null
         if (snapshot.keys != activeRules(config).map { it.first }) return null
-        return snapshot.all.cosmetics(url, classes, ids)
+        return snapshot.all?.cosmetics(url, classes, ids)
     }
 
     internal fun decision(
@@ -275,9 +306,10 @@ class NativeFilterSources @Inject constructor(
      */
     internal fun scriptletPolicy(config: AdBlockConfiguration): String {
         val snapshot = rules
-        val active = OfficialFilterCatalog.all.filter { it.id in config.officialEnabled }
-            .map { it.id to it.tracker } + config.sources.filter { it.enabled }.map { it.url to it.tracker }
-        val out = StringBuilder(1 shl 20)
+        val active = if (!config.hasBlockingSites()) emptyList() else
+            OfficialFilterCatalog.all.filter { it.id in config.officialEnabled && (it.tracker || config.hasAdBlockingSites()) }
+                .map { it.id to it.tracker } + config.sources.filter { it.enabled && (it.tracker || config.hasAdBlockingSites()) }.map { it.url to it.tracker }
+        val out = StringBuilder(if (active.isEmpty()) 128 else 1 shl 20)
         out.append("{\"level\":").append(JSONObject.quote(config.level.name))
             .append(",\"siteLevels\":").append(JSONObject(config.siteLevels.mapValues { it.value.name }))
             .append(",\"rules\":[")
@@ -325,6 +357,7 @@ class NativeFilterSources @Inject constructor(
     }
 
     private fun refreshStaleAsync(key: String) {
+        if (isUnderMemoryPressure()) return
         val now = System.currentTimeMillis()
         if (now - (lastAttempt[key] ?: 0L) < RETRY_INTERVAL_MS) return
         lastAttempt[key] = now
@@ -364,6 +397,7 @@ class NativeFilterSources @Inject constructor(
 
     private suspend fun refreshCounted(key: String, force: Boolean): Boolean {
         ready.await()
+        if (!force && isUnderMemoryPressure()) return false
         val source = sourceFor(key) ?: return false
         val mutex = locks.getOrPut(key) { Mutex() }
         return mutex.withLock {
@@ -372,6 +406,7 @@ class NativeFilterSources @Inject constructor(
                 System.currentTimeMillis() - updatedAt < UPDATE_INTERVAL_MS
             ) return@withLock true
             downloadMutex.withLock {
+                if (!force && isUnderMemoryPressure()) return@withLock false
                 runCatching { download(key, source) }.onSuccess {
                     mutableFailures.update { failures -> failures - key }
                 }.onFailure { error ->
@@ -445,28 +480,6 @@ class NativeFilterSources @Inject constructor(
         val rules = NativeFilterRules.fromCompiled(compiled.readText()) { engineFile(owner, it) }
         val engine = rules.engine ?: return null
         return rules.takeIf { engine.file.isFile && engine.file.length() == engine.length }
-    }
-
-    private fun loadCacheIfFast(key: String, url: String) {
-        if (compiledCacheFile(url).exists()) {
-            loadCache(key, url)
-            return
-        }
-        if (!loadingCacheKeys.add(key)) return
-        beginRefresh()
-        scope.launch {
-            try {
-                ready.await()
-                cacheWarmupMutex.withLock {
-                    locks.getOrPut(key) { Mutex() }.withLock {
-                        if (key !in loadedCacheKeys) loadCache(key, url, announce = false)
-                    }
-                }
-            } finally {
-                loadingCacheKeys.remove(key)
-                endRefresh()
-            }
-        }
     }
 
     private fun compiledCacheFile(url: String): File = File(cacheFile(url).path + ".meta")
@@ -607,7 +620,9 @@ class NativeFilterSources @Inject constructor(
     @Synchronized
     private fun storeRules(key: String, parsed: NativeFilterRules, announce: Boolean) {
         val stored = persistEngine(key, parsed).contentOnly()
-        rules = rules + (key to stored)
+        if (announce || settings.current.hasBlockingSites() && enabledSources(settings.current).any { it.first == key }) {
+            rules = rules + (key to stored)
+        }
         mutableRuleCounts.update { it + (key to parsed.supportedCount) }
         if (announce) mutableRevision.update { it + 1 } else announcePending.set(true)
     }

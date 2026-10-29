@@ -229,6 +229,16 @@ pub extern "system" fn Java_org_midorinext_android_adblock_RustAdblock_release(
 }
 
 #[unsafe(no_mangle)]
+pub extern "system" fn Java_org_midorinext_android_adblock_RustAdblock_liveEngineCount(
+    mut env: JNIEnv,
+    _: JClass,
+) -> jlong {
+    guarded(&mut env, |_| {
+        Ok(engines().read().map_err(|e| e.to_string())?.len() as i64)
+    })
+}
+
+#[unsafe(no_mangle)]
 pub extern "system" fn Java_org_midorinext_android_adblock_RustAdblock_query(
     mut env: JNIEnv,
     _: JClass,
