@@ -31,17 +31,18 @@ class BrowserResourceDeviceTest {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         })
         await("session restoration") { store.state.restoreComplete && store.state.selectedTabId != null }
-        await("initial document") {
-            store.state.tabs.find { it.id == store.state.selectedTabId }?.let {
-                it.engineState.engineSession != null && !it.content.loading && it.content.firstContentfulPaint
-            } == true
-        }
-        SystemClock.sleep(3_000)
         val originalTabs = store.state.tabs
         val originalSelected = store.state.selectedTabId!!
         val fixtures = mutableListOf<String>()
         try {
-            sample(0)
+            val initial = addFixture(0, fixtures)
+            await("initial fixture document") {
+                store.state.tabs.find { it.id == initial }?.let {
+                    it.engineState.engineSession != null && !it.content.loading && it.content.firstContentfulPaint
+                } == true
+            }
+            SystemClock.sleep(3_000)
+            sample(fixtures.size)
             for (number in 1..49) {
                 addFixture(number, fixtures)
                 if (number == 9 || number == 49) {
@@ -49,7 +50,7 @@ class BrowserResourceDeviceTest {
                     if (expectedLimit > 0) await("resident budget") { residentCount() <= expectedLimit }
                     assertEquals(originalTabs.size + fixtures.size, store.state.tabs.size)
                     assertTrue(store.state.tabs.filter { it.id in fixtures }.all { it.content.private })
-                    sample(number)
+                    sample(fixtures.size)
                 }
             }
             if (expectedLimit > 0) {

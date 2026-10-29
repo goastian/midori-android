@@ -100,13 +100,14 @@ class NativeCosmeticsDeviceTest {
             original.sources.filter { it.enabled }.forEach { settings.setSourceEnabled(it.url, false) }
             settings.setLevel(BlockingLevel.OFF)
             assertTrue(settings.addSource(sourceUrl, tracker = false))
+            settings.setSiteLevel("127.0.0.1", BlockingLevel.TRACKERS_AND_ADS)
+            sources.prepareEngines(settings.current)
             putRules.invoke(sources, sourceUrl, parseHostSource("""
                 ##.generic-midori-ad
                 ##.dynamic-midori-ad
                 127.0.0.1##.label:has-text(Sponsored):upward(1)
                 127.0.0.1##.overlay:remove()
             """.trimIndent()))
-            settings.setSiteLevel("127.0.0.1", BlockingLevel.TRACKERS_AND_ADS)
             withTimeout(30_000) { feature.ready.await() }
             assertTrue(feature.awaitConfiguration())
             load(private = false, enabled = true)

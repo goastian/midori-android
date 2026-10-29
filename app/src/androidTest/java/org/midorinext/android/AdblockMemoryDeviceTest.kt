@@ -8,9 +8,11 @@ import kotlinx.coroutines.withTimeout
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.After
 import org.midorinext.android.adblock.AdBlockSettings
 import org.midorinext.android.adblock.BlockingLevel
 import org.midorinext.android.adblock.NativeFilterSources
+import org.midorinext.android.adblock.RustAdblock
 import org.midorinext.android.adblock.RustFilterEngine
 import org.midorinext.android.adblock.parseHostFile
 import java.io.File
@@ -20,7 +22,13 @@ import kotlin.concurrent.thread
 
 class AdblockMemoryDeviceTest {
     private val runtime = Runtime.getRuntime()
-    private var keepAlive: Any? = null
+    private var keepAlive: NativeFilterSources? = null
+
+    @After
+    fun releaseOwnedSources(): Unit = runBlocking {
+        keepAlive?.close()
+        keepAlive = null
+    }
     private val app get() = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as MidoriApplication
 
     /** A redirect to a neutral resource counts as blocked: the request never reaches the tracker. */
@@ -31,6 +39,26 @@ class AdblockMemoryDeviceTest {
 
     private fun settle() {
         repeat(3) { runtime.gc(); System.runFinalization(); Thread.sleep(300) }
+    }
+
+    private suspend fun <T> measureNative(stage: String, block: suspend () -> T): T {
+        val before = Debug.getNativeHeapAllocatedSize()
+        val peak = AtomicLong(before)
+        val running = AtomicBoolean(true)
+        val sampler = thread(isDaemon = true) {
+            while (running.get()) {
+                peak.accumulateAndGet(Debug.getNativeHeapAllocatedSize(), ::maxOf)
+                Thread.sleep(2)
+            }
+        }
+        val started = System.nanoTime()
+        try {
+            return block()
+        } finally {
+            running.set(false)
+            sampler.join()
+            report("NATIVE_STAGE stage=$stage beforeBytes=$before peakBytes=${peak.get()} afterBytes=${Debug.getNativeHeapAllocatedSize()} elapsedMs=${(System.nanoTime() - started) / 1_000_000}")
+        }
     }
 
     @Test
@@ -44,10 +72,12 @@ class AdblockMemoryDeviceTest {
         val baselineJava = javaUsedMb()
         val baselineNative = nativeUsedMb()
         val peakJava = AtomicLong(baselineJava)
+        val peakNative = AtomicLong(baselineNative)
         val running = AtomicBoolean(true)
         val sampler = thread(isDaemon = true) {
             while (running.get()) {
                 peakJava.accumulateAndGet(javaUsedMb(), ::maxOf)
+                peakNative.accumulateAndGet(nativeUsedMb(), ::maxOf)
                 Thread.sleep(2)
             }
         }
@@ -64,8 +94,8 @@ class AdblockMemoryDeviceTest {
         settle()
         val retainedJava = javaUsedMb() - baselineJava
         val retainedNative = nativeUsedMb() - baselineNative
-        Log.i(TAG, "RESULT maxHeap=${runtime.maxMemory() / MB}MB baselineJava=${baselineJava}MB peakJavaDelta=${peakDelta}MB " +
-            "retainedJavaDelta=${retainedJava}MB retainedNativeDelta=${retainedNative}MB elapsed=${elapsedMs}ms")
+        report("RESULT maxHeap=${runtime.maxMemory() / MB}MB baselineJava=${baselineJava}MB peakJavaDelta=${peakDelta}MB " +
+            "peakNativeDelta=${peakNative.get() - baselineNative}MB retainedJavaDelta=${retainedJava}MB retainedNativeDelta=${retainedNative}MB elapsed=${elapsedMs}ms")
         val config = settings.current
         assertTrue(sources.networkDecision(config, config.level, "https://googleads.g.doubleclick.net/pagead/id", "https://news.example/", "script").optBoolean("cancel"))
         assertFalse(sources.networkDecision(config, config.level, "https://news.example/story.html", "https://news.example/", "document").optBoolean("cancel"))
@@ -104,7 +134,7 @@ class AdblockMemoryDeviceTest {
                 withTimeout(180_000) { sources.ready.await() }
                 sources.prepareEngines(settings.current)
             }
-            Log.i(TAG, "SMALL_HEAP loaded with ${SMALL_HEAP_MB}MB usable, javaUsed=${javaUsedMb()}MB")
+            report("SMALL_HEAP loaded with ${SMALL_HEAP_MB}MB usable, javaUsed=${javaUsedMb()}MB")
         }
     }
 
@@ -122,7 +152,7 @@ class AdblockMemoryDeviceTest {
         settle()
         val heapDelta = javaUsedMb() - before
         val parsed = org.json.JSONObject(policy)
-        Log.i(TAG, "SCRIPTLET_POLICY rules=${parsed.getJSONArray("rules").length()} exceptions=${parsed.getJSONArray("documentExceptions").length()} " +
+        report("SCRIPTLET_POLICY rules=${parsed.getJSONArray("rules").length()} exceptions=${parsed.getJSONArray("documentExceptions").length()} " +
             "chars=${policy.length} buildMs=$elapsed retainedMb=$heapDelta")
         assertTrue("Scriptlet policy retained ${heapDelta}MB", heapDelta <= MAX_POLICY_DELTA_MB)
     }
@@ -149,7 +179,7 @@ class AdblockMemoryDeviceTest {
         sources.prepareEngines(trackersOnly)
         assertTrue("trackers are blocked", blocked(trackersOnly, BlockingLevel.TRACKERS, analytics))
         assertFalse("ads are left alone", blocked(trackersOnly, BlockingLevel.TRACKERS, advertising))
-        assertTrue("the full engine still blocks ads", blocked(trackersOnly, BlockingLevel.TRACKERS_AND_ADS, advertising))
+        assertFalse("the full engine is released when only trackers are configured", sources.engineState().first)
     }
 
     @Test
@@ -166,9 +196,12 @@ class AdblockMemoryDeviceTest {
             runBlocking {
                 withTimeout(180_000) { sources.ready.await() }
                 val started = System.nanoTime()
-                val updated = withTimeout(600_000) { sources.updateEnabled(force = true) }
-                sources.prepareEngines(settings.current)
-                Log.i(TAG, "SMALL_HEAP refreshed all lists=$updated in ${(System.nanoTime() - started) / 1_000_000}ms")
+                val updated = measureNative("refresh") {
+                    val result = withTimeout(600_000) { sources.updateEnabled(force = true) }
+                    sources.prepareEngines(settings.current)
+                    result
+                }
+                report("SMALL_HEAP refreshed all lists=$updated in ${(System.nanoTime() - started) / 1_000_000}ms")
                 assertTrue("every list refreshed", updated)
                 val config = settings.current
                 assertTrue(sources.networkDecision(config, config.level, "https://googleads.g.doubleclick.net/pagead/id", "https://news.example/", "script").optBoolean("cancel"))
@@ -180,17 +213,56 @@ class AdblockMemoryDeviceTest {
     fun parsingTheLargestDownloadedListSucceedsOnADeviceWithASmallJavaHeap() {
         val directory = File(app.filesDir, "adblock-sources")
         val largest = directory.listFiles { file -> file.name.endsWith(".txt") }.orEmpty().maxByOrNull { it.length() }
-            ?: return Log.i(TAG, "No downloaded list to parse").let { }
+            ?: return report("No downloaded list to parse").let { }
         val engine = File(app.cacheDir, "memory-probe.engine")
         try {
             withHeapLimit(SMALL_HEAP_MB) {
                 val started = System.nanoTime()
                 val parsed = parseHostFile(largest, engine, trusted = false)
-                Log.i(TAG, "SMALL_HEAP parsed ${largest.length() / MB}MB list: ${parsed.supportedCount} rules, " +
+                report("SMALL_HEAP parsed ${largest.length() / MB}MB list: ${parsed.supportedCount} rules, " +
                     "${parsed.scriptlets.size} scriptlets in ${(System.nanoTime() - started) / 1_000_000}ms")
-                RustFilterEngine.compileFiles(listOf(engine)).close()
+                runBlocking { measureNative("compile-largest-list") { RustFilterEngine.compileFiles(listOf(engine)).close() } }
             }
         } finally { engine.delete() }
+    }
+
+    @Test
+    fun realFilterModesReleaseNativeMemory(): Unit = runBlocking {
+        val feature = app.nativeContentBlockingFeature.get()
+        val settings = app.adBlockSettings.get()
+        val sources = feature.javaClass.getDeclaredField("sources").apply { isAccessible = true }.get(feature) as NativeFilterSources
+        withTimeout(120_000) { sources.ready.await() }
+        val original = settings.current
+        suspend fun sample(stage: String, level: BlockingLevel, override: BlockingLevel? = null) {
+            settings.setSiteLevel("memory-probe.example", override)
+            settings.setLevel(level)
+            val started = System.nanoTime()
+            sources.prepareEngines(settings.current)
+            assertTrue(feature.awaitConfiguration())
+            settle()
+            val memory = Debug.MemoryInfo().also(Debug::getMemoryInfo)
+            val expected = if (override != null || level != BlockingLevel.OFF) 1L else 0L
+            assertTrue("Unexpected engine ownership in $stage", RustAdblock.liveEngineCount() == expected)
+            report("REAL_MODE stage=$stage nativeBytes=${Debug.getNativeHeapAllocatedSize()} javaBytes=${runtime.totalMemory() - runtime.freeMemory()} pssKiB=${memory.totalPss} handles=${RustAdblock.liveEngineCount()} elapsedMs=${(System.nanoTime() - started) / 1_000_000}")
+        }
+        try {
+            original.siteLevels.keys.forEach { settings.setSiteLevel(it, null) }
+            sample("full", BlockingLevel.TRACKERS_AND_ADS)
+            sample("trackers", BlockingLevel.TRACKERS)
+            sample("off", BlockingLevel.OFF)
+            sample("off-with-site", BlockingLevel.OFF, BlockingLevel.TRACKERS_AND_ADS)
+            sample("off-again", BlockingLevel.OFF)
+        } finally {
+            settings.setSiteLevel("memory-probe.example", null)
+            original.siteLevels.forEach { (host, level) -> settings.setSiteLevel(host, level) }
+            settings.setLevel(original.level)
+            sources.prepareEngines(settings.current)
+        }
+    }
+
+    private fun report(value: String) {
+        Log.i(TAG, value)
+        InstrumentationRegistry.getInstrumentation().sendStatus(2, android.os.Bundle().apply { putString("adblock_metric", value) })
     }
 
     private companion object {

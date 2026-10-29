@@ -138,8 +138,9 @@ class ScriptletsDeviceTest {
                 ||127.0.0.1^${'$'}removeparam=utm_source
                 ||127.0.0.1^${'$'}csp=img-src 'none'
             """.trimIndent()
-            putRules.invoke(sources, sourceUrl, parseHostSource(text))
             settings.setSiteLevel("127.0.0.1", BlockingLevel.TRACKERS_AND_ADS)
+            sources.prepareEngines(settings.current)
+            putRules.invoke(sources, sourceUrl, parseHostSource(text))
             Log.i("ScriptletsDeviceTest", "Waiting for scriptlet bridge")
             withTimeout(30_000) { feature.ready.await() }
             Log.i("ScriptletsDeviceTest", "Scriptlet bridge ready")
