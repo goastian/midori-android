@@ -2,11 +2,33 @@ package org.midorinext.android.mozac.permissions
 
 import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import mozilla.components.concept.engine.permission.Permission
 import mozilla.components.concept.engine.permission.PermissionRequest
 import mozilla.components.concept.engine.permission.SitePermissions
 import mozilla.components.support.ktx.android.content.isPermissionGranted
 import java.security.InvalidParameterException
+
+internal fun PermissionRequest.androidPermissions(): Array<String> {
+    val requested = permissions.mapNotNull { it.id?.takeIf(String::isNotBlank) }.toMutableSet()
+    if (Manifest.permission.ACCESS_FINE_LOCATION in requested) {
+        requested += Manifest.permission.ACCESS_COARSE_LOCATION
+    }
+    return requested.toTypedArray()
+}
+
+internal fun permissionResultsGranted(permissions: Array<String>, grantResults: IntArray): Boolean {
+    if (permissions.isEmpty() || permissions.size != grantResults.size) return false
+    val granted = permissions.zip(grantResults.toList()).associate { (permission, result) ->
+        permission to (result == PackageManager.PERMISSION_GRANTED)
+    }
+    val location = setOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
+    return if (granted.keys.containsAll(location)) {
+        location.any { granted[it] == true } && granted.filterKeys { it !in location }.values.all { it }
+    } else {
+        granted.values.all { it }
+    }
+}
 
 internal fun PermissionRequest.toSitePermissions(
     host: String,

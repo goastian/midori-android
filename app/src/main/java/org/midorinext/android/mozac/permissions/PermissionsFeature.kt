@@ -2,13 +2,13 @@ package org.midorinext.android.mozac.permissions
 
 import android.app.Activity
 import android.content.Context
-import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import org.midorinext.android.ext.activity
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.mapNotNull
 import mozilla.components.browser.state.action.ContentAction
+import mozilla.components.browser.state.action.SystemPermissionRequestAction
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.ContentState
 import mozilla.components.browser.state.store.BrowserStore
@@ -48,7 +48,7 @@ class PermissionsFeature(
     }
 
     private fun setupLoadingCollector() {
-        loadingScope = store.flowScoped(dispatcher = Dispatchers.IO) { flow -> flow
+        loadingScope = store.flowScoped(dispatcher = Dispatchers.Main.immediate) { flow -> flow
             .mapNotNull { state -> state.selectedTab }
             .distinctUntilChangedBy { it.content.loading }
             .collect { tab ->
@@ -60,18 +60,17 @@ class PermissionsFeature(
     }
 
     private fun setupAppPermissionRequestsCollector() {
-        appPermissionScope = store.flowScoped(dispatcher = Dispatchers.IO) { flow -> flow
+        appPermissionScope = store.flowScoped(dispatcher = Dispatchers.Main.immediate) { flow -> flow
             .mapNotNull { state -> state.selectedTab?.content?.appPermissionRequestsList }
             .filterChanged { it }
             .collect { appPermissionRequest ->
-                val permissions = appPermissionRequest.permissions.map { it.id ?: "" }
-                onNeedToRequestPermissions(permissions.toTypedArray())
+                onNeedToRequestPermissions(appPermissionRequest.androidPermissions())
             }
         }
     }
 
     private fun setupPermissionRequestsCollector() {
-        sitePermissionScope = store.flowScoped(dispatcher = Dispatchers.IO) { flow -> flow
+        sitePermissionScope = store.flowScoped(dispatcher = Dispatchers.Main.immediate) { flow -> flow
             .mapNotNull { state -> state.selectedTab?.content?.permissionRequestsList }
             .filterChanged { it }
             .collect { permissionRequest ->
@@ -95,11 +94,7 @@ class PermissionsFeature(
         val appPermissionRequest = findRequestedAppPermission(permissions)
 
         if (appPermissionRequest != null && currentContentSate != null) {
-            val allPermissionWereGranted = grantResults.all { grantResult ->
-                grantResult == PackageManager.PERMISSION_GRANTED
-            }
-
-            if (grantResults.isNotEmpty() && allPermissionWereGranted) {
+            if (permissionResultsGranted(permissions, grantResults)) {
                 appPermissionRequest.grant()
             } else {
                 appPermissionRequest.reject()
@@ -113,6 +108,7 @@ class PermissionsFeature(
 
             store.dispatch(ContentAction.ConsumeAppPermissionsRequest(currentTabState.id, appPermissionRequest))
         }
+        store.dispatch(SystemPermissionRequestAction.SystemPermissionStateRequestNotInProgress)
     }
 
     private suspend fun onContentPermissionRequested(

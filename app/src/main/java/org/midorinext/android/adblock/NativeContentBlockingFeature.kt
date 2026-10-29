@@ -20,7 +20,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 import mozilla.components.browser.engine.gecko.webextension.GeckoWebExtension
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.EngineSession
-import mozilla.components.concept.engine.content.blocking.Tracker
 import mozilla.components.concept.engine.webextension.MessageHandler
 import mozilla.components.concept.engine.webextension.Port
 import mozilla.components.lib.state.ext.flow
@@ -289,11 +288,7 @@ class NativeContentBlockingFeature @Inject constructor(
             trackingObservers.remove(session)?.let(session::unregister)
         }
         (regularSessions - trackingObservers.keys).forEach { session ->
-            val observer = object : EngineSession.Observer {
-                override fun onTrackerBlocked(tracker: Tracker) {
-                    statistics.get().recordBlocked()
-                }
-            }
+            val observer = TrackingStatisticsObserver { statistics.get().recordBlocked() }
             trackingObservers[session] = observer
             session.register(observer)
         }
