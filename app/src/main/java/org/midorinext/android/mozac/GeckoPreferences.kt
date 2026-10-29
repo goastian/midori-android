@@ -8,7 +8,6 @@ import org.mozilla.geckoview.GeckoRuntimeSettings
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 import org.midorinext.android.preferences.app.TrackingProtectionLevel
 import org.midorinext.android.adblock.BlockingLevel
-import org.midorinext.android.preferences.app.AppTrackingProtectionMode
 import org.midorinext.android.preferences.app.HttpsOnlyLevel
 import org.midorinext.android.preferences.app.DoHProvider
 import java.util.concurrent.atomic.AtomicBoolean
@@ -37,7 +36,6 @@ object GeckoPreferences {
         val trackerSourceEnabled: Boolean = true,
         val httpsOnlyLevel: HttpsOnlyLevel = HttpsOnlyLevel.ALL_TABS,
         val dohProvider: DoHProvider = DoHProvider.DOH_DEFAULT,
-        val appTrackingProtectionMode: AppTrackingProtectionMode = AppTrackingProtectionMode.BROWSER_FIRST
     )
 
     fun initialize(runtime: GeckoRuntime, settings: UserSettings) {
@@ -108,17 +106,12 @@ object GeckoPreferences {
 
     private fun applyContentBlockingSettings(runtime: GeckoRuntime, settings: UserSettings) {
         val trackersEnabled = settings.adBlockLevel != BlockingLevel.OFF && settings.trackerSourceEnabled
-        val hybridSystemModeSelected = settings.appTrackingProtectionMode == AppTrackingProtectionMode.HYBRID_SYSTEM
-        val appTrackingProtectionEnabled =
+        val strictTrackingProtectionEnabled =
             settings.strictTrackingProtection || settings.trackingProtectionLevel == TrackingProtectionLevel.STRICT
-        val effectiveTrackingProtectionLevel = if (appTrackingProtectionEnabled) {
+        val effectiveTrackingProtectionLevel = if (strictTrackingProtectionEnabled) {
             TrackingProtectionLevel.STRICT
         } else {
             settings.trackingProtectionLevel
-        }
-
-        if (hybridSystemModeSelected) {
-            // Reserved hook: a future VPN/proxy layer can subscribe here while Gecko keeps browser-first protection.
         }
 
         runtime.settings.getContentBlocking()
@@ -152,7 +145,7 @@ object GeckoPreferences {
             )
             // Block cross-site tracking via social media
             .setStrictSocialTrackingProtection(
-                trackersEnabled && appTrackingProtectionEnabled
+                trackersEnabled && strictTrackingProtectionEnabled
             )
     }
 

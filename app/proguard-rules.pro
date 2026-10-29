@@ -31,10 +31,4 @@
 
 -keep class org.midorinext.android.adblock.RustAdblock { *; }
 
-# Keep Hilt entry-point service classes and their generated wrappers to avoid
-# release-only injection failures when OEM ROMs restart foreground services.
--keep class org.midorinext.android.apptracking.MidoriAppTrackingVpnService { *; }
--keep class org.midorinext.android.apptracking.Hilt_MidoriAppTrackingVpnService { *; }
-
-
 -keep class org.midorinext.android.sync.NativeSync { *; }

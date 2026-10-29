@@ -15,8 +15,6 @@ import org.midorinext.android.preferences.app.AppPreferences
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.migrateLegacyTabGroups
-import org.midorinext.android.preferences.app.AppTrackingProtectionMode
-import org.midorinext.android.apptracking.AppTrackingProtectionController
 import org.midorinext.android.storage.autofill.AutofillPreferenceState
 import org.midorinext.android.storage.history.HistoryRepository
 import org.midorinext.android.usecases.MidoriUseCases
@@ -68,7 +66,6 @@ class MidoriApplication : Application(), Configuration.Provider {
     @Inject lateinit var migrationUtility: dagger.Lazy<MigrationUtility>
     @Inject lateinit var mediaFeature: dagger.Lazy<MediaSessionFeature>
     @Inject lateinit var backgroundPlaybackFeature: dagger.Lazy<BackgroundPlaybackFeature>
-    @Inject lateinit var appTrackingProtectionController: dagger.Lazy<AppTrackingProtectionController>
     @Inject lateinit var geckoRuntime: dagger.Lazy<GeckoRuntime>
     @Inject lateinit var appPreferencesRepository: dagger.Lazy<AppPreferencesRepository>
     @Inject lateinit var adBlockSettings: dagger.Lazy<AdBlockSettings>
@@ -148,17 +145,6 @@ class MidoriApplication : Application(), Configuration.Provider {
         applicationScope.launch(Dispatchers.IO) {
             appPreferencesRepository.get().flow.collect { prefs ->
                 autofillPreferenceState.get().update(prefs)
-
-                val shouldRunSystemProtection =
-                    prefs.appTrackingProtectionMode == AppTrackingProtectionMode.HYBRID_SYSTEM &&
-                        prefs.appTrackingSystemEnabled
-                val running = appTrackingProtectionController.get().systemProtectionRunning.value
-
-                if (shouldRunSystemProtection && !running) {
-                    appTrackingProtectionController.get().startSystemProtection()
-                } else if (!shouldRunSystemProtection && running) {
-                    appTrackingProtectionController.get().stopSystemProtection()
-                }
             }
         }
 
@@ -274,7 +260,6 @@ private fun AppPreferences.toGeckoSettings(adBlock: AdBlockConfiguration) = Geck
     trackerSourceEnabled = adBlock.builtInTrackers,
     httpsOnlyLevel = httpsOnlyLevel,
     dohProvider = dohProvider,
-    appTrackingProtectionMode = appTrackingProtectionMode
 )
 
 private fun setupLogging() {

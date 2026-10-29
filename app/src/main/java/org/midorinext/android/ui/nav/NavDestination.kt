@@ -47,7 +47,6 @@ sealed class NavDestination(
     object AdBlockSites : NavDestination(match = "settings/adblock/sites")
     object AdBlockTrackerSources : NavDestination(match = "settings/adblock/trackers")
     object AdBlockAdSources : NavDestination(match = "settings/adblock/ads")
-    object AppTrackingReport : NavDestination(match = "app_tracking_report")
     object History : NavDestination(match = "history")
     object Extensions : NavDestination(match = "extensions")
     object AddonDetail : NavDestination(

@@ -6,8 +6,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import org.midorinext.android.apptracking.AppTrackingProtectionController
-import org.midorinext.android.apptracking.AppTrackingRuntimeState
 import org.midorinext.android.preferences.app.*
 import org.midorinext.android.usecases.MidoriUseCases
 import org.midorinext.android.newtab.HomeSection
@@ -39,7 +37,6 @@ import javax.inject.Inject
 @HiltViewModel
 class PreferencesViewModel @Inject constructor(
     private val appPreferencesRepository: AppPreferencesRepository,
-    private val appTrackingProtectionController: AppTrackingProtectionController,
     private val permissionsStorage: GeckoSitePermissionsStorage,
     private val store: BrowserStore,
     tabsUseCases: TabsUseCases,
@@ -64,9 +61,6 @@ class PreferencesViewModel @Inject constructor(
     var permissions: MutableStateFlow<PagingData<SitePermissions>> = MutableStateFlow(PagingData.empty())
         private set
     private var permissionsCollectionJob: Job? = null
-
-    val systemProtectionRunning = appTrackingProtectionController.systemProtectionRunning
-    val appTrackingMetrics = AppTrackingRuntimeState.metrics
 
     val translationState = store.flow().map { it.translationEngine }.stateIn(
         scope = viewModelScope,
@@ -330,48 +324,6 @@ class PreferencesViewModel @Inject constructor(
 
     fun updateHttpsOnlyLevel(level: HttpsOnlyLevel) {
         viewModelScope.launch { appPreferencesRepository.updateHttpsOnlyLevel(level) }
-    }
-
-    fun updateAppTrackingProtectionMode(mode: AppTrackingProtectionMode) {
-        viewModelScope.launch { appPreferencesRepository.updateAppTrackingProtectionMode(mode) }
-    }
-
-    fun updateAppTrackingSystemEnabled(enabled: Boolean) {
-        viewModelScope.launch {
-            appPreferencesRepository.updateAppTrackingSystemEnabled(enabled)
-        }
-    }
-
-    fun addAppTrackingExcludedPackage(packageName: String) {
-        viewModelScope.launch {
-            appPreferencesRepository.addAppTrackingExcludedPackage(packageName)
-        }
-    }
-
-    fun removeAppTrackingExcludedPackage(packageName: String) {
-        viewModelScope.launch {
-            appPreferencesRepository.removeAppTrackingExcludedPackage(packageName)
-        }
-    }
-
-    fun clearAppTrackingExcludedPackages() {
-        viewModelScope.launch {
-            appPreferencesRepository.clearAppTrackingExcludedPackages()
-        }
-    }
-
-    fun getSystemProtectionPermissionIntent() = appTrackingProtectionController.getVpnPermissionIntent()
-
-    fun startSystemProtection() {
-        viewModelScope.launch {
-            appTrackingProtectionController.startSystemProtection()
-        }
-    }
-
-    fun stopSystemProtection() {
-        viewModelScope.launch {
-            appTrackingProtectionController.stopSystemProtection()
-        }
     }
 
     fun updatePermissions(permissions: SitePermissions, permission: SitePermissionsStorage.Permission, value: SitePermissions.Status) {

@@ -609,42 +609,4 @@ class AppPreferencesRepository internal constructor(
             prefs.toBuilder().setHttpsOnlyLevel(level).build()
         }
     }
-
-    suspend fun updateAppTrackingProtectionMode(mode: AppTrackingProtectionMode) {
-        datastore.updateData { prefs ->
-            prefs.toBuilder().setAppTrackingProtectionMode(mode).build()
-        }
-    }
-
-    suspend fun updateAppTrackingSystemEnabled(enabled: Boolean) {
-        datastore.updateData { prefs ->
-            prefs.toBuilder().setAppTrackingSystemEnabled(enabled).build()
-        }
-    }
-
-    suspend fun addAppTrackingExcludedPackage(packageName: String) {
-        datastore.updateData { prefs ->
-            if (prefs.appTrackingExcludedPackagesList.contains(packageName)) {
-                prefs
-            } else {
-                prefs.toBuilder().addAppTrackingExcludedPackages(packageName).build()
-            }
-        }
-    }
-
-    suspend fun removeAppTrackingExcludedPackage(packageName: String) {
-        datastore.updateData { prefs ->
-            val updated = prefs.appTrackingExcludedPackagesList.filterNot { it == packageName }
-            prefs.toBuilder()
-                .clearAppTrackingExcludedPackages()
-                .addAllAppTrackingExcludedPackages(updated)
-                .build()
-        }
-    }
-
-    suspend fun clearAppTrackingExcludedPackages() {
-        datastore.updateData { prefs ->
-            prefs.toBuilder().clearAppTrackingExcludedPackages().build()
-        }
-    }
 }

@@ -45,7 +45,6 @@ import org.midorinext.android.ui.preferences.DefaultSearchEngineSettingsScreen
 import org.midorinext.android.ui.preferences.AlternativeSearchEngineSettingsScreen
 import org.midorinext.android.ui.preferences.SavedAutofillScreen
 import org.midorinext.android.ui.preferences.SavedPasswordsScreen
-import org.midorinext.android.ui.preferences.AppTrackingProtectionReportScreen
 import org.midorinext.android.ui.preferences.PrivacyScreen
 import org.midorinext.android.ui.preferences.AdBlockSettingsScreen
 import org.midorinext.android.ui.preferences.AdBlockSitesScreen
@@ -226,9 +225,6 @@ fun MidoriNavHost(
         composable(NavDestination.Privacy.match) {
             PrivacyScreen(
                 onClose = onBrowse,
-                onNavigateToAppTrackingReport = {
-                    navController.navigate(NavDestination.AppTrackingReport.route())
-                }
             )
         }
         composable(NavDestination.AdBlockSettings.match) {
@@ -241,9 +237,6 @@ fun MidoriNavHost(
         composable(NavDestination.AdBlockSites.match) { AdBlockSitesScreen() }
         composable(NavDestination.AdBlockTrackerSources.match) { AdBlockSourcesScreen(tracker = true) }
         composable(NavDestination.AdBlockAdSources.match) { AdBlockSourcesScreen(tracker = false) }
-        composable(NavDestination.AppTrackingReport.match) {
-            AppTrackingProtectionReportScreen()
-        }
         navigation(
             startDestination = NavDestination.Extensions.match,
             route = "extensions_graph"

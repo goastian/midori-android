@@ -55,11 +55,6 @@ enum HttpsOnlyLevel {
   PRIVATE_TABS = 2;
 }
 
-enum AppTrackingProtectionMode {
-  BROWSER_FIRST = 0;
-  HYBRID_SYSTEM = 1;
-}
-
 enum HomepageOpeningScreen {
   HOMEPAGE = 0;
   LAST_TAB = 1;
@@ -94,9 +89,9 @@ message AppPreferences {
   TrackingProtectionLevel tracking_protection_level = 15;
   DoHProvider doh_provider = 16;
   HttpsOnlyLevel https_only_level = 17;
-  AppTrackingProtectionMode app_tracking_protection_mode = 18;
-  bool app_tracking_system_enabled = 19;
-  repeated string app_tracking_excluded_packages = 20;
+  reserved 18, 19, 20;
+  reserved "app_tracking_protection_mode", "app_tracking_system_enabled",
+    "app_tracking_excluded_packages";
   bool download_wifi_only = 21;
   bool open_blank_new_tab = 22;
   reserved 23, 24, 25, 26;
