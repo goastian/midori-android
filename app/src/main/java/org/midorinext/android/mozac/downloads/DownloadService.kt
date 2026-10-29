@@ -20,6 +20,12 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class DownloadService: AbstractFetchDownloadService() {
+    override fun onCreate() {
+        (application as org.midorinext.android.MidoriApplication)
+            .initializeBrowser("download_service", restoreSession = false)
+        super.onCreate()
+    }
+
     @Inject lateinit var c: dagger.Lazy<Client>
     override val httpClient: Client by lazy { c.get() }
 

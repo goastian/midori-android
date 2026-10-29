@@ -10,6 +10,12 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MediaSessionService: AbstractMediaSessionService() {
+    override fun onCreate() {
+        (application as org.midorinext.android.MidoriApplication)
+            .initializeBrowser("media_service", restoreSession = false)
+        super.onCreate()
+    }
+
     override val crashReporter: CrashReporting? = null
 
     @Inject lateinit var nd: dagger.Lazy<NotificationsDelegate>

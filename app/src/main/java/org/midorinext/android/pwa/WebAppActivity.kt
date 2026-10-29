@@ -61,6 +61,7 @@ class WebAppActivity : AppCompatActivity() {
         get() = super.defaultViewModelCreationExtras.withoutIntentDefaultArgs()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        (application as org.midorinext.android.MidoriApplication).initializeBrowser("web_app_activity")
         super.onCreate(savedInstanceState)
         val startUrl = intent?.dataString ?: return finish()
         lifecycleScope.launch {

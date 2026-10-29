@@ -7,8 +7,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-import mozilla.components.concept.fetch.Client
-import mozilla.components.concept.fetch.Request
 import mozilla.components.support.ktx.android.org.json.toList
 import org.json.JSONArray
 import org.json.JSONException
@@ -18,6 +16,7 @@ import org.midorinext.android.ext.selectedLocale
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.storage.MidoriClientProvider
 import org.midorinext.android.suggest.Suggestion
+import org.midorinext.android.suggest.SuggestionFetcher
 import org.midorinext.android.suggest.SuggestionProvider
 import org.midorinext.android.usecases.SearchEngines
 import java.io.IOException
@@ -27,7 +26,7 @@ import javax.inject.Singleton
 @Singleton
 class MidoriSuggestProvider @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val client: Client,
+    private val fetcher: SuggestionFetcher,
     private val midoriClientProvider: MidoriClientProvider,
     private val appPreferencesRepository: AppPreferencesRepository,
 ) : SuggestionProvider {
@@ -65,14 +64,9 @@ class MidoriSuggestProvider @Inject constructor(
                 ?: return@withContext emptyList()
         }
         try {
-            client.fetch(Request(url)).use { response ->
-                if (response.status != 200) return@withContext emptyList()
-                response.body.use { body ->
-                    val json = body.string()
-                    if (engineId == "astiango") parseAstianGo(json, text)
-                    else parseOpenSearch(json, text)
-                }
-            }
+            val json = fetcher.fetch(url, private) ?: return@withContext emptyList()
+            if (engineId == "astiango") parseAstianGo(json, text)
+            else parseOpenSearch(json, text)
         } catch (e: IOException) {
             Log.d(LOGTAG, "Search suggestions unavailable", e)
             emptyList()

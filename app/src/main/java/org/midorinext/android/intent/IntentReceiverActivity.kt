@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import org.midorinext.android.MainActivity
+import org.midorinext.android.MidoriApplication
 import org.midorinext.android.usecases.MidoriUseCases
 import dagger.hilt.android.AndroidEntryPoint
 import mozilla.components.feature.tabs.TabsUseCases
@@ -15,6 +16,7 @@ class IntentReceiverActivity: AppCompatActivity() {
     @Inject lateinit var MidoriUseCases: MidoriUseCases
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        (application as MidoriApplication).initializeBrowser("intent_receiver")
         super.onCreate(savedInstanceState)
 
         val intent = intent?.let { Intent(it) } ?: Intent()

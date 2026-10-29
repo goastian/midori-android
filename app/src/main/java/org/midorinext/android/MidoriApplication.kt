@@ -3,7 +3,10 @@ package org.midorinext.android
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import android.os.Looper
+import androidx.annotation.MainThread
 import org.midorinext.android.mozac.BrowserMemoryBudget
+import org.midorinext.android.mozac.BrowserWorkerFactory
 import androidx.work.Configuration
 import org.midorinext.android.migration.MigrationUtility
 import org.midorinext.android.mozac.GeckoPreferences
@@ -80,6 +83,7 @@ class MidoriApplication : Application(), Configuration.Provider {
     @Inject lateinit var browserIcons: dagger.Lazy<BrowserIcons>
     @Inject lateinit var homeFavicons: dagger.Lazy<HomeFaviconRepository>
     @Inject lateinit var homeWallpaper: dagger.Lazy<HomeWallpaperRepository>
+    @Inject lateinit var addonManager: dagger.Lazy<mozilla.components.feature.addons.AddonManager>
 
     @Inject internal lateinit var syncCoordinator: dagger.Lazy<org.midorinext.android.sync.SyncCoordinator>
 
@@ -91,6 +95,7 @@ class MidoriApplication : Application(), Configuration.Provider {
         nativeHomeFrameDrawn.value = true
     }
     private var browserStateRestoration: Job? = null
+    private var browserInitialized = false
     private val browserSessionLifecycle by lazy {
         BrowserSessionLifecycle(
             preferences = appPreferencesRepository.get().flow,
@@ -102,7 +107,9 @@ class MidoriApplication : Application(), Configuration.Provider {
 
     /** Lazily initializes WorkManager when Mozilla's add-on updater first schedules work. */
     override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder().build()
+        get() = Configuration.Builder()
+            .setWorkerFactory(BrowserWorkerFactory(this, addonManager))
+            .build()
 
     override fun onCreate() {
         super.onCreate()
@@ -130,13 +137,6 @@ class MidoriApplication : Application(), Configuration.Provider {
             override fun onActivityDestroyed(activity: Activity) = Unit
         })
         StartupTiming.mark("application_create (${BuildConfig.VERSION_NAME}, ${BuildConfig.BUILD_TYPE})")
-        val preferencesRepository = appPreferencesRepository.get()
-        applicationScope.launch(Dispatchers.IO) {
-            val preferences = preferencesRepository.flow.first()
-            StartupTiming.mark("preferences_ready")
-            homeWallpaper.get()
-                .load(HomeWallpaper.fromId(preferences.homeWallpaperId))
-        }
         StartupTiming.measure("app_services") {
             AppServicesInitializer.init(
                 AppServicesInitializer.Config(
@@ -146,7 +146,29 @@ class MidoriApplication : Application(), Configuration.Provider {
             )
         }
         RustHttpConfig.setClient(lazy { client.get() })
+        StartupTiming.mark("application_ready")
+    }
 
+    @MainThread
+    fun initializeBrowser(reason: String, restoreSession: Boolean = true) {
+        check(Looper.myLooper() == Looper.getMainLooper())
+        if (!browserInitialized) {
+            StartupTiming.mark("browser_initialization ($reason)")
+            initializeBrowserComponents()
+            browserInitialized = true
+            StartupTiming.mark("browser_ready")
+        }
+        if (restoreSession && browserStateRestoration == null) {
+            applicationScope.launch(Dispatchers.IO) {
+                val preferences = appPreferencesRepository.get().flow.first()
+                StartupTiming.mark("preferences_ready")
+                homeWallpaper.get().load(HomeWallpaper.fromId(preferences.homeWallpaperId))
+            }
+            browserStateRestoration = restoreBrowserState()
+        }
+    }
+
+    private fun initializeBrowserComponents() {
         // Apply safe defaults immediately; persisted settings are applied below without blocking startup.
         StartupTiming.measure("initial_gecko_settings") {
             GeckoPreferences.initialize(geckoRuntime.get(), AppPreferencesSerializer.defaultValue.toGeckoSettings(adBlockSettings.get().current))
@@ -166,7 +188,6 @@ class MidoriApplication : Application(), Configuration.Provider {
         }
 
         StartupTiming.measure("native_blocker") { nativeContentBlockingFeature.get().start() }
-        browserStateRestoration = restoreBrowserState()
 
         // TODO
         //  Should be removed in futur version, once mozilla has fully migrated
@@ -193,7 +214,6 @@ class MidoriApplication : Application(), Configuration.Provider {
             },
             onExtensionsLoaded = {}
         )
-        StartupTiming.mark("application_ready")
     }
 
     /**
@@ -243,7 +263,8 @@ class MidoriApplication : Application(), Configuration.Provider {
     }
 
     fun onBrowserClosed() = applicationScope.launch {
-        browserStateRestoration?.join()
+        val restoration = browserStateRestoration ?: return@launch
+        restoration.join()
         browserSessionLifecycle.close()
     }
 

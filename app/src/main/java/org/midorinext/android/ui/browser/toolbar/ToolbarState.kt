@@ -16,12 +16,11 @@ import org.midorinext.android.preferences.app.AppPreferences
 import mozilla.components.concept.storage.BookmarksStorage
 import mozilla.components.concept.storage.HistoryStorage
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.coroutineScope as runProvidersInParallel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.*
 import mozilla.components.browser.icons.BrowserIcons
 
@@ -51,7 +50,7 @@ open class ToolbarState(
     private val emptySuggestions = emptyMap<SuggestionProvider, List<Suggestion>>()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val suggestions = combine(snapshotFlow {
+    val suggestions: StateFlow<Map<SuggestionProvider, List<Suggestion>>> = combine(snapshotFlow {
         SuggestionQuery(
             text = text.getTextBeforeSelection(text.text.length).text,
             hasFocus = hasFocus,
@@ -60,29 +59,37 @@ open class ToolbarState(
         )
     }.distinctUntilChanged(), preferences, privateMode) { query, prefs, isPrivate ->
         Triple(query, prefs, isPrivate)
-    }.mapLatest { (query, prefs, isPrivate) ->
+    }.flatMapLatest { (query, prefs, isPrivate) ->
+        flow<Map<SuggestionProvider, List<Suggestion>>> {
+            emit(emptySuggestions)
+            if (!query.hasFocus || (query.isPrefilled && query.text.isNotBlank())) return@flow
             delay(100)
-            if (query.hasFocus && (!query.isPrefilled || query.text.isBlank())) {
-                runProvidersInParallel {
-                    suggestionProviders.value
-                        .filter { provider ->
-                            (query.text.isNotBlank() || provider.supportsEmptyQuery) &&
-                                provider.isEnabled(prefs, isPrivate)
-                        }
-                        .map { provider ->
-                            async {
-                                provider to if (provider is MidoriSuggestProvider) {
-                                    provider.getSuggestions(query.text, query.engineOverride, isPrivate)
-                                } else {
-                                    provider.getSuggestions(query.text)
-                                }
+            val providers = suggestionProviders.value.filter { provider ->
+                (query.text.isNotBlank() || provider.supportsEmptyQuery) && provider.isEnabled(prefs, isPrivate)
+            }
+            emitAll(channelFlow<Pair<SuggestionProvider, List<Suggestion>>> {
+                providers.forEach { provider ->
+                    launch {
+                        val results = try {
+                            if (provider is MidoriSuggestProvider) {
+                                provider.getSuggestions(query.text, query.engineOverride, isPrivate)
+                            } else {
+                                provider.getSuggestions(query.text)
                             }
+                        } catch (error: CancellationException) {
+                            throw error
+                        } catch (_: Exception) {
+                            emptyList()
                         }
-                        .awaitAll()
-                        .toMap()
+                        send(provider to results)
+                    }
                 }
-            } else emptySuggestions
+            }.runningFold(providers.associateWith { emptyList<Suggestion>() }) { results, (provider, items) ->
+                results + (provider to items)
+            })
         }
+    }
+        .buffer(0)
         .stateIn(
             scope = coroutineScope,
             started = SharingStarted.WhileSubscribed(5000L),

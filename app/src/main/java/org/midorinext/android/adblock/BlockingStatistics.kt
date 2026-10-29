@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -33,40 +34,40 @@ internal class BlockingStatisticsCounter(initialTotal: Long = 0) {
 
 @Singleton
 class BlockingStatistics @Inject constructor(@ApplicationContext context: Context) {
-    private sealed interface Event {
-        data class Block(val count: Long) : Event
-        data class Network(val reportId: String, val count: Long) : Event
-    }
-
-    private val events = Channel<Event>(Channel.UNLIMITED)
+    private val counter = BlockingStatisticsCounter()
+    private val changes = Channel<Unit>(Channel.CONFLATED)
     private val mutableTotal = MutableStateFlow(0L)
     val totalBlocked = mutableTotal.asStateFlow()
 
     init {
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
             val preferences = context.getSharedPreferences("native_blocking_statistics", Context.MODE_PRIVATE)
-            val counter = BlockingStatisticsCounter(preferences.getLong("total_blocked", 0))
-            mutableTotal.value = counter.totalBlocked
-            for (event in events) {
-                fun apply(event: Event) = when (event) {
-                    is Event.Block -> counter.record(event.count)
-                    is Event.Network -> counter.recordNetwork(event.reportId, event.count)
-                }
-                apply(event)
-                while (true) apply(events.tryReceive().getOrNull() ?: break)
-                if (mutableTotal.value != counter.totalBlocked) {
-                    preferences.edit().putLong("total_blocked", counter.totalBlocked).apply()
-                    mutableTotal.value = counter.totalBlocked
+            val savedTotal = preferences.getLong("total_blocked", 0).coerceAtLeast(0)
+            mutableTotal.value = synchronized(counter) {
+                counter.record(savedTotal)
+                counter.totalBlocked
+            }
+            if (mutableTotal.value != savedTotal) {
+                preferences.edit().putLong("total_blocked", mutableTotal.value).apply()
+            }
+            for (change in changes) {
+                delay(250)
+                val total = synchronized(counter) { counter.totalBlocked }
+                if (mutableTotal.value != total) {
+                    preferences.edit().putLong("total_blocked", total).apply()
+                    mutableTotal.value = total
                 }
             }
         }
     }
 
     fun recordBlocked() {
-        events.trySend(Event.Block(1))
+        synchronized(counter) { counter.record() }
+        changes.trySend(Unit)
     }
 
     fun recordNetworkSnapshot(reportId: String, count: Long) {
-        events.trySend(Event.Network(reportId, count))
+        synchronized(counter) { counter.recordNetwork(reportId, count) }
+        changes.trySend(Unit)
     }
 }

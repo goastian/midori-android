@@ -6,10 +6,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import mozilla.components.concept.fetch.Client
-import mozilla.components.concept.fetch.Request
 import org.midorinext.android.ext.selectedLocale
 import org.midorinext.android.suggest.Suggestion
+import org.midorinext.android.suggest.SuggestionFetcher
 import org.midorinext.android.suggest.SuggestionProvider
 import org.xmlpull.v1.XmlPullParser
 import java.io.StringReader
@@ -20,7 +19,7 @@ import javax.inject.Singleton
 @Singleton
 class TrendingSuggestProvider @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val client: Client,
+    private val fetcher: SuggestionFetcher,
 ) : SuggestionProvider {
     override val supportsEmptyQuery = true
 
@@ -34,10 +33,8 @@ class TrendingSuggestProvider @Inject constructor(
         } else {
             val country = context.selectedLocale().country.ifBlank { "US" }
             val fetched = try {
-                client.fetch(Request("https://trends.google.com/trending/rss?geo=$country")).use { response ->
-                    if (response.status != 200) emptyList()
-                    else response.body.use { parseTitles(it.string()) }
-                }
+                fetcher.fetch("https://trends.google.com/trending/rss?geo=$country")
+                    ?.let(::parseTitles).orEmpty()
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {

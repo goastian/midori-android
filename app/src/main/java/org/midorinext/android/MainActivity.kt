@@ -22,6 +22,7 @@ class MainActivity : MidoriActivity() {
     @Inject lateinit var backgroundPlaybackFeature: BackgroundPlaybackFeature
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        (application as MidoriApplication).initializeBrowser("main_activity")
         super.onCreate(savedInstanceState)
 
         notificationsDelegate.bindToActivity(this)

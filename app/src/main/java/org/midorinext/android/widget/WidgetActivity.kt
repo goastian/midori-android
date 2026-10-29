@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.compose.ui.platform.ComposeView
 import org.midorinext.android.MidoriActivity
+import org.midorinext.android.MidoriApplication
 import org.midorinext.android.intent.IntentReceiverActivity
 import org.midorinext.android.ui.theme.MidoriBrowserTheme
 import org.midorinext.android.widget.ui.Widget
@@ -16,6 +17,7 @@ class WidgetActivity: MidoriActivity() {
     private val viewModel: WidgetViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        (application as MidoriApplication).initializeBrowser("widget_activity")
         super.onCreate(savedInstanceState)
         val v = ComposeView(this).apply {
             setContent {

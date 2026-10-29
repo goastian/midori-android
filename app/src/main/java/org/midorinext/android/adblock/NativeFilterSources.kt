@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -76,21 +77,32 @@ class NativeFilterSources @Inject constructor(
     val failedSources = mutableFailures.asStateFlow()
     private val mutableRuleCounts = MutableStateFlow<Map<String, Int>>(emptyMap())
     val ruleCounts = mutableRuleCounts.asStateFlow()
-    internal val ready = CompletableDeferred<Unit>()
+    private val enginesReady = CompletableDeferred<Unit>()
+    private val browserEnginesStarted = AtomicBoolean()
+    internal val ready: kotlinx.coroutines.Deferred<Unit>
+        get() {
+            startBrowserEngines()
+            return enginesReady
+        }
 
-    init {
+    private val cacheReady = scope.async {
+        if (metadata.getInt("format_version", 0) != CACHE_FORMAT_VERSION) {
+            File(context.filesDir, "adblock-sources").listFiles().orEmpty()
+                .filter { it.extension == "txt" || it.extension == "tmp" }.forEach { it.delete() }
+            metadata.edit().putInt("format_version", CACHE_FORMAT_VERSION).apply()
+        }
+        removeLegacyCaches()
+    }
+
+    private fun startBrowserEngines() {
+        if (!browserEnginesStarted.compareAndSet(false, true)) return
         scope.launch {
-            if (metadata.getInt("format_version", 0) != CACHE_FORMAT_VERSION) {
-                File(context.filesDir, "adblock-sources").listFiles().orEmpty()
-                    .filter { it.extension == "txt" || it.extension == "tmp" }.forEach { it.delete() }
-                metadata.edit().putInt("format_version", CACHE_FORMAT_VERSION).apply()
-            }
-            removeLegacyCaches()
+            cacheReady.await()
             settings.state.map { it.networkPolicyConfiguration() }.distinctUntilChanged().collectLatest {
                 val config = settings.current
                 prepareEngines(config)
                 mutableRevision.update { it + 1 }
-                ready.complete(Unit)
+                enginesReady.complete(Unit)
                 if (config.hasBlockingSites()) {
                     enabledSources(config).forEach { (key, url, updatedAt) ->
                         if (!cacheFile(url).exists() || System.currentTimeMillis() - updatedAt >= UPDATE_INTERVAL_MS) {
@@ -113,6 +125,7 @@ class NativeFilterSources @Inject constructor(
             config.sources.filter { it.tracker }.map { it.url }
 
     internal suspend fun prepareEngines(config: AdBlockConfiguration) = withContext(Dispatchers.Default) {
+        cacheReady.await()
         engineMutex.withLock {
             try {
                 val needed = if (config.hasBlockingSites()) enabledSources(config) else emptyList()
@@ -170,7 +183,7 @@ class NativeFilterSources @Inject constructor(
     }
 
     internal suspend fun close() {
-        ready.cancel()
+        enginesReady.cancel()
         scope.coroutineContext[Job]?.cancelAndJoin()
         engineMutex.withLock {
             synchronized(this) {
@@ -396,7 +409,7 @@ class NativeFilterSources @Inject constructor(
     }
 
     private suspend fun refreshCounted(key: String, force: Boolean): Boolean {
-        ready.await()
+        cacheReady.await()
         if (!force && isUnderMemoryPressure()) return false
         val source = sourceFor(key) ?: return false
         val mutex = locks.getOrPut(key) { Mutex() }
