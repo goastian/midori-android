@@ -34,6 +34,7 @@ import androidx.preference.PreferenceManager
 import org.midorinext.android.R
 import org.midorinext.android.ui.onboarding.MidoriOnboarding
 import org.midorinext.android.ui.zap.ZapFeature
+import org.midorinext.android.ui.extensions.ExtensionPrompt
 
 @Composable
 fun MidoriBrowserApp(
@@ -134,6 +135,7 @@ fun MidoriBrowserApp(
                     modifier = Modifier.padding(scaffoldPadding)
                 )
                 ZapFeature(state = applicationViewModel.zapState)
+                ExtensionPrompt()
             }
         }
     }

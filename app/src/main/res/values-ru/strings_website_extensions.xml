@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_website_install_prompt">Установить расширение с этого адреса?\n\n%1$s</string>
+    <string name="extensions_permission_prompt">Проверьте разрешения и сбор данных, запрашиваемые этим расширением.</string>
+    <string name="extensions_allow">Разрешить</string>
+</resources>

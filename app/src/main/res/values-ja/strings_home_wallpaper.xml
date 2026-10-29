@@ -14,4 +14,21 @@
     <string name="home_wallpaper_nature">自然</string>
     <string name="home_wallpaper_space">宇宙</string>
     <string name="home_wallpaper_travel">旅行</string>
+    <string name="home_wallpaper_colors">単色</string>
+    <string name="home_wallpaper_black">黒</string>
+    <string name="home_wallpaper_white">白</string>
+    <string name="home_wallpaper_gray">グレー</string>
+    <string name="home_wallpaper_blue">青</string>
+    <string name="home_wallpaper_green">緑</string>
+    <string name="home_wallpaper_purple">紫</string>
+    <string name="home_wallpaper_red">赤</string>
+    <string name="home_wallpaper_coral">コーラル</string>
+    <string name="home_wallpaper_orange">オレンジ</string>
+    <string name="home_wallpaper_yellow">黄</string>
+    <string name="home_wallpaper_mint">ミント</string>
+    <string name="home_wallpaper_teal">ティール</string>
+    <string name="home_wallpaper_sky">空色</string>
+    <string name="home_wallpaper_pink">ピンク</string>
+    <string name="home_wallpaper_sand">サンド</string>
+    <string name="home_wallpaper_brown">茶</string>
 </resources>

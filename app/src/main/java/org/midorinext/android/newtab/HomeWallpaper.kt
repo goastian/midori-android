@@ -1,10 +1,12 @@
 package org.midorinext.android.newtab
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
 import org.midorinext.android.R
 
 enum class HomeWallpaperCategory(@StringRes val title: Int) {
+    COLORS(R.string.home_wallpaper_colors),
     NATURE(R.string.home_wallpaper_nature),
     SPACE(R.string.home_wallpaper_space),
     TRAVEL(R.string.home_wallpaper_travel),
@@ -18,8 +20,41 @@ enum class HomeWallpaper(
     val category: HomeWallpaperCategory? = null,
     val photographer: String? = null,
     val sourceUrl: String? = null,
+    @ColorInt val color: Int? = null,
 ) {
     NONE("none", R.string.home_wallpaper_none),
+    BLACK("color_black", R.string.home_wallpaper_black,
+        category = HomeWallpaperCategory.COLORS, color = 0xFF121212.toInt()),
+    WHITE("color_white", R.string.home_wallpaper_white,
+        category = HomeWallpaperCategory.COLORS, color = 0xFFF9F9F6.toInt()),
+    GRAY("color_gray", R.string.home_wallpaper_gray,
+        category = HomeWallpaperCategory.COLORS, color = 0xFF6B7280.toInt()),
+    BLUE("color_blue", R.string.home_wallpaper_blue,
+        category = HomeWallpaperCategory.COLORS, color = 0xFF16324F.toInt()),
+    GREEN("color_green", R.string.home_wallpaper_green,
+        category = HomeWallpaperCategory.COLORS, color = 0xFF1E4939.toInt()),
+    PURPLE("color_purple", R.string.home_wallpaper_purple,
+        category = HomeWallpaperCategory.COLORS, color = 0xFF4A3159.toInt()),
+    RED("color_red", R.string.home_wallpaper_red,
+        category = HomeWallpaperCategory.COLORS, color = 0xFF8C2935.toInt()),
+    CORAL("color_coral", R.string.home_wallpaper_coral,
+        category = HomeWallpaperCategory.COLORS, color = 0xFFE58F82.toInt()),
+    ORANGE("color_orange", R.string.home_wallpaper_orange,
+        category = HomeWallpaperCategory.COLORS, color = 0xFFC56632.toInt()),
+    YELLOW("color_yellow", R.string.home_wallpaper_yellow,
+        category = HomeWallpaperCategory.COLORS, color = 0xFFE9CB69.toInt()),
+    MINT("color_mint", R.string.home_wallpaper_mint,
+        category = HomeWallpaperCategory.COLORS, color = 0xFFB8DACA.toInt()),
+    TEAL("color_teal", R.string.home_wallpaper_teal,
+        category = HomeWallpaperCategory.COLORS, color = 0xFF205E61.toInt()),
+    SKY("color_sky", R.string.home_wallpaper_sky,
+        category = HomeWallpaperCategory.COLORS, color = 0xFFAFCFE6.toInt()),
+    PINK("color_pink", R.string.home_wallpaper_pink,
+        category = HomeWallpaperCategory.COLORS, color = 0xFFD9A6C1.toInt()),
+    SAND("color_sand", R.string.home_wallpaper_sand,
+        category = HomeWallpaperCategory.COLORS, color = 0xFFD8C6A8.toInt()),
+    BROWN("color_brown", R.string.home_wallpaper_brown,
+        category = HomeWallpaperCategory.COLORS, color = 0xFF614838.toInt()),
     NATURE_01("nature_01", R.string.home_wallpaper_nature_01,
         R.drawable.home_wallpaper_nature_01, R.drawable.home_wallpaper_nature_01_thumb, HomeWallpaperCategory.NATURE,
         "Samuel Scrimshaw", "https://unsplash.com/photos/landscape-photography-of-mountain-under-cloudy-sky-between-body-of-water-at-daytime-2oFdVd00xOg"),

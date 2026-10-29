@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_website_install_prompt">Installer une extension depuis cette adresse ?\n\n%1$s</string>
+    <string name="extensions_permission_prompt">Vérifiez les autorisations et la collecte de données demandées par cette extension.</string>
+    <string name="extensions_allow">Autoriser</string>
+</resources>

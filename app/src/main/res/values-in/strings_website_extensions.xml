@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_website_install_prompt">Instal ekstensi dari alamat ini?\n\n%1$s</string>
+    <string name="extensions_permission_prompt">Tinjau izin dan pengumpulan data yang diminta oleh ekstensi ini.</string>
+    <string name="extensions_allow">Izinkan</string>
+</resources>

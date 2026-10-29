@@ -15,4 +15,21 @@
     <string name="home_wallpaper_nature">قدرت</string>
     <string name="home_wallpaper_space">خلا</string>
     <string name="home_wallpaper_travel">سفر</string>
+    <string name="home_wallpaper_colors">یک رنگ پس منظر</string>
+    <string name="home_wallpaper_black">سیاہ</string>
+    <string name="home_wallpaper_white">سفید</string>
+    <string name="home_wallpaper_gray">سرمئی</string>
+    <string name="home_wallpaper_blue">نیلا</string>
+    <string name="home_wallpaper_green">سبز</string>
+    <string name="home_wallpaper_purple">جامنی</string>
+    <string name="home_wallpaper_red">سرخ</string>
+    <string name="home_wallpaper_coral">مرجانی</string>
+    <string name="home_wallpaper_orange">نارنجی</string>
+    <string name="home_wallpaper_yellow">پیلا</string>
+    <string name="home_wallpaper_mint">پودینے جیسا سبز</string>
+    <string name="home_wallpaper_teal">نیلگوں سبز</string>
+    <string name="home_wallpaper_sky">آسمانی</string>
+    <string name="home_wallpaper_pink">گلابی</string>
+    <string name="home_wallpaper_sand">ریتلا</string>
+    <string name="home_wallpaper_brown">بھورا</string>
 </resources>

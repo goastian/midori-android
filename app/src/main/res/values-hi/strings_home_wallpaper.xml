@@ -14,4 +14,21 @@
     <string name="home_wallpaper_nature">प्रकृति</string>
     <string name="home_wallpaper_space">अंतरिक्ष</string>
     <string name="home_wallpaper_travel">यात्रा</string>
+    <string name="home_wallpaper_colors">एक रंग वाले बैकग्राउंड</string>
+    <string name="home_wallpaper_black">काला</string>
+    <string name="home_wallpaper_white">सफ़ेद</string>
+    <string name="home_wallpaper_gray">धूसर</string>
+    <string name="home_wallpaper_blue">नीला</string>
+    <string name="home_wallpaper_green">हरा</string>
+    <string name="home_wallpaper_purple">बैंगनी</string>
+    <string name="home_wallpaper_red">लाल</string>
+    <string name="home_wallpaper_coral">मूंगा</string>
+    <string name="home_wallpaper_orange">नारंगी</string>
+    <string name="home_wallpaper_yellow">पीला</string>
+    <string name="home_wallpaper_mint">पुदीना हरा</string>
+    <string name="home_wallpaper_teal">नीला-हरा</string>
+    <string name="home_wallpaper_sky">आसमानी</string>
+    <string name="home_wallpaper_pink">गुलाबी</string>
+    <string name="home_wallpaper_sand">रेतीला</string>
+    <string name="home_wallpaper_brown">भूरा</string>
 </resources>

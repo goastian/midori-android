@@ -15,4 +15,21 @@
     <string name="home_wallpaper_nature">Nature</string>
     <string name="home_wallpaper_space">Space</string>
     <string name="home_wallpaper_travel">Travel</string>
+    <string name="home_wallpaper_colors">Solid colors</string>
+    <string name="home_wallpaper_black">Black</string>
+    <string name="home_wallpaper_white">White</string>
+    <string name="home_wallpaper_gray">Gray</string>
+    <string name="home_wallpaper_blue">Blue</string>
+    <string name="home_wallpaper_green">Green</string>
+    <string name="home_wallpaper_purple">Purple</string>
+    <string name="home_wallpaper_red">Red</string>
+    <string name="home_wallpaper_coral">Coral</string>
+    <string name="home_wallpaper_orange">Orange</string>
+    <string name="home_wallpaper_yellow">Yellow</string>
+    <string name="home_wallpaper_mint">Mint</string>
+    <string name="home_wallpaper_teal">Teal</string>
+    <string name="home_wallpaper_sky">Sky blue</string>
+    <string name="home_wallpaper_pink">Pink</string>
+    <string name="home_wallpaper_sand">Sand</string>
+    <string name="home_wallpaper_brown">Brown</string>
 </resources>

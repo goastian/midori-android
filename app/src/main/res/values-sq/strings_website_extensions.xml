@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_website_install_prompt">Të instalohet një shtesë nga kjo adresë?\n\n%1$s</string>
+    <string name="extensions_permission_prompt">Shqyrtoni lejet dhe mbledhjen e të dhënave që kërkon kjo shtesë.</string>
+    <string name="extensions_allow">Lejo</string>
+</resources>

@@ -15,4 +15,21 @@
     <string name="home_wallpaper_nature">Kalikasan</string>
     <string name="home_wallpaper_space">Kalawakan</string>
     <string name="home_wallpaper_travel">Paglalakbay</string>
+    <string name="home_wallpaper_colors">Mga solid na kulay</string>
+    <string name="home_wallpaper_black">Itim</string>
+    <string name="home_wallpaper_white">Puti</string>
+    <string name="home_wallpaper_gray">Abo</string>
+    <string name="home_wallpaper_blue">Asul</string>
+    <string name="home_wallpaper_green">Berde</string>
+    <string name="home_wallpaper_purple">Lila</string>
+    <string name="home_wallpaper_red">Pula</string>
+    <string name="home_wallpaper_coral">Koral</string>
+    <string name="home_wallpaper_orange">Kahel</string>
+    <string name="home_wallpaper_yellow">Dilaw</string>
+    <string name="home_wallpaper_mint">Mint</string>
+    <string name="home_wallpaper_teal">Berdeng asul</string>
+    <string name="home_wallpaper_sky">Asul na langit</string>
+    <string name="home_wallpaper_pink">Rosas</string>
+    <string name="home_wallpaper_sand">Buhangin</string>
+    <string name="home_wallpaper_brown">Kayumanggi</string>
 </resources>

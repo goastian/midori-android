@@ -36,6 +36,7 @@ fun NativeHomeHeader(
     showLogo: Boolean = true,
     onCustomize: (() -> Unit)? = null,
     wallpaper: Boolean = false,
+    wallpaperTint: Color = Color.White,
 ) {
     val theme = LocalMidoriTheme.current
     Row(modifier.fillMaxWidth().heightIn(min = 56.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -49,7 +50,7 @@ fun NativeHomeHeader(
                 if (wallpaper || theme.dark || theme.private) {
                     Image(logo, null, Modifier.matchParentSize().drawWithContent {
                         clipRect(left = size.height) { this@drawWithContent.drawContent() }
-                    }, colorFilter = ColorFilter.tint(if (wallpaper) Color.White else MaterialTheme.colorScheme.onSurface))
+                    }, colorFilter = ColorFilter.tint(if (wallpaper) wallpaperTint else MaterialTheme.colorScheme.onSurface))
                 }
             }
         }

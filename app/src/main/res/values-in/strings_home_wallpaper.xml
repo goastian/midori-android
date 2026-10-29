@@ -15,4 +15,21 @@
     <string name="home_wallpaper_nature">Alam</string>
     <string name="home_wallpaper_space">Antariksa</string>
     <string name="home_wallpaper_travel">Perjalanan</string>
+    <string name="home_wallpaper_colors">Warna polos</string>
+    <string name="home_wallpaper_black">Hitam</string>
+    <string name="home_wallpaper_white">Putih</string>
+    <string name="home_wallpaper_gray">Abu-abu</string>
+    <string name="home_wallpaper_blue">Biru</string>
+    <string name="home_wallpaper_green">Hijau</string>
+    <string name="home_wallpaper_purple">Ungu</string>
+    <string name="home_wallpaper_red">Merah</string>
+    <string name="home_wallpaper_coral">Koral</string>
+    <string name="home_wallpaper_orange">Oranye</string>
+    <string name="home_wallpaper_yellow">Kuning</string>
+    <string name="home_wallpaper_mint">Hijau mint</string>
+    <string name="home_wallpaper_teal">Hijau kebiruan</string>
+    <string name="home_wallpaper_sky">Biru langit</string>
+    <string name="home_wallpaper_pink">Merah muda</string>
+    <string name="home_wallpaper_sand">Pasir</string>
+    <string name="home_wallpaper_brown">Cokelat</string>
 </resources>

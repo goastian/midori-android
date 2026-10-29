@@ -9,6 +9,7 @@ import kotlinx.coroutines.withContext
 import mozilla.components.feature.addons.Addon
 import mozilla.components.feature.addons.AddonManager
 import mozilla.components.concept.engine.webextension.InstallationMethod
+import mozilla.components.concept.engine.webextension.WebExtension
 import org.midorinext.android.extensions.store.ExtensionRepository
 import org.midorinext.android.extensions.store.InstalledExtensionProto
 import javax.inject.Inject
@@ -76,6 +77,12 @@ class ExtensionManager @Inject constructor(
             repository.addExtension(addon.toProto(url))
         }
         Log.d(TAG, "Installed extension: ${addon.id}")
+    }
+
+    suspend fun rememberInstalled(extension: WebExtension) = withContext(Dispatchers.IO) {
+        if (!extension.isBuiltIn()) {
+            repository.addExtension(Addon.newFromWebExtension(extension).toProto(extension.url))
+        }
     }
 
     /** Uninstall an extension by its ID. */

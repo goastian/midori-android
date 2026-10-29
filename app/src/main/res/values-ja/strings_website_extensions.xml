@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_website_install_prompt">このアドレスから拡張機能をインストールしますか？\n\n%1$s</string>
+    <string name="extensions_permission_prompt">この拡張機能が要求する権限とデータ収集の内容を確認してください。</string>
+    <string name="extensions_allow">許可</string>
+</resources>

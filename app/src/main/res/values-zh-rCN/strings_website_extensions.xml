@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_website_install_prompt">要从此地址安装扩展吗？\n\n%1$s</string>
+    <string name="extensions_permission_prompt">请查看此扩展请求的权限和数据收集内容。</string>
+    <string name="extensions_allow">允许</string>
+</resources>

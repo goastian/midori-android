@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -53,7 +54,7 @@ internal fun HomeWallpaperImage(
 ) {
     val image = if (thumbnail) wallpaper.thumbnail else wallpaper.image
     if (image == null) {
-        Box(modifier.background(MaterialTheme.colorScheme.surface))
+        Box(modifier.background(wallpaper.color?.let { Color(it) } ?: MaterialTheme.colorScheme.surface))
     } else {
         val context = LocalContext.current
         val request = remember(context, image) {

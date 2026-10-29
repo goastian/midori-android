@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_website_install_prompt">Mag-install ng extension mula sa address na ito?\n\n%1$s</string>
+    <string name="extensions_permission_prompt">Suriin ang mga pahintulot at pangongolekta ng data na hinihiling ng extension na ito.</string>
+    <string name="extensions_allow">Payagan</string>
+</resources>

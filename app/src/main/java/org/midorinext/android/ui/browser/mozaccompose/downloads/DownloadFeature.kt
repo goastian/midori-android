@@ -27,9 +27,12 @@ import org.midorinext.android.mozac.downloads.DownloadLocationProvider
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.ui.MidoriApplicationViewModel
 import mozilla.components.browser.state.selector.selectedTab
+import mozilla.components.browser.state.action.WebExtensionAction
+import mozilla.components.browser.state.state.extension.WebExtensionPromptRequest
 import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.state.content.DownloadState
 import mozilla.components.browser.state.store.BrowserStore
+import mozilla.components.concept.engine.webextension.InstallationMethod
 import mozilla.components.feature.downloads.*
 import mozilla.components.feature.downloads.manager.DownloadManager
 import mozilla.components.feature.downloads.manager.onDownloadStopped
@@ -57,6 +60,7 @@ fun DownloadFeature(
 ) {
     val context = LocalContext.current
     val tab by store.observeAsComposableState { state -> state.selectedTab }
+    val extensionPrompt by store.observeAsComposableState { it.webExtensionPromptRequest }
     val downloadState = remember(tab) { tab?.content?.download }
     val url = remember(tab) { tab?.content?.url }
     val wifiOnly by downloadPreferences.wifiOnly.collectAsStateWithLifecycle()
@@ -148,11 +152,24 @@ fun DownloadFeature(
         }
     }
 
-    LaunchedEffect(downloadState) {
+    LaunchedEffect(downloadState, extensionPrompt) {
         if (downloadState != null) {
             downloadName = downloadState.displayNameForConfirmation()
             previousTab = tab
-            if (downloadState.skipConfirmation) {
+            if (downloadState.isExtensionPackage()) {
+                showDownloadRequest = false
+                if (extensionPrompt != null) return@LaunchedEffect
+                val session = tab ?: return@LaunchedEffect
+                useCases.cancelDownloadRequest(session.id, downloadState.id)
+                store.dispatch(WebExtensionAction.UpdatePromptRequestWebExtensionAction(
+                    WebExtensionPromptRequest.InstallationRequested(
+                        url = downloadState.url,
+                        name = downloadName,
+                        iconUrl = null,
+                        installationMethod = InstallationMethod.FROM_FILE,
+                    ),
+                ))
+            } else if (downloadState.skipConfirmation) {
                 checkPermissionAndStartDownload()
             } else {
                 showDownloadRequest = true
@@ -251,6 +268,11 @@ private fun DownloadState.displayNameForConfirmation(): String {
 
     return Uri.parse(url).lastPathSegment?.trim()?.takeIf { it.isNotEmpty() } ?: "download"
 }
+
+private fun DownloadState.isExtensionPackage(): Boolean =
+    contentType?.substringBefore(';')?.trim().equals("application/x-xpinstall", ignoreCase = true) ||
+        fileName?.endsWith(".xpi", ignoreCase = true) == true ||
+        Uri.parse(url).lastPathSegment?.endsWith(".xpi", ignoreCase = true) == true
 
 private fun Context.isConnectedToWifi(): Boolean {
     val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager

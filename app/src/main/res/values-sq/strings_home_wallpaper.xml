@@ -14,4 +14,21 @@
     <string name="home_wallpaper_nature">Natyrë</string>
     <string name="home_wallpaper_space">Hapësirë</string>
     <string name="home_wallpaper_travel">Udhëtime</string>
+    <string name="home_wallpaper_colors">Ngjyra të njëtrajtshme</string>
+    <string name="home_wallpaper_black">E zezë</string>
+    <string name="home_wallpaper_white">E bardhë</string>
+    <string name="home_wallpaper_gray">Gri</string>
+    <string name="home_wallpaper_blue">Blu</string>
+    <string name="home_wallpaper_green">E gjelbër</string>
+    <string name="home_wallpaper_purple">Vjollcë</string>
+    <string name="home_wallpaper_red">E kuqe</string>
+    <string name="home_wallpaper_coral">Koral</string>
+    <string name="home_wallpaper_orange">Portokalli</string>
+    <string name="home_wallpaper_yellow">E verdhë</string>
+    <string name="home_wallpaper_mint">Mente</string>
+    <string name="home_wallpaper_teal">E gjelbër në blu</string>
+    <string name="home_wallpaper_sky">Bojëqielli</string>
+    <string name="home_wallpaper_pink">Rozë</string>
+    <string name="home_wallpaper_sand">Ngjyrë rëre</string>
+    <string name="home_wallpaper_brown">Kafe</string>
 </resources>

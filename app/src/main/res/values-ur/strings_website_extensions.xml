@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="extensions_website_install_prompt">کیا اس پتے سے ایکسٹینشن انسٹال کرنی ہے؟\n\n%1$s</string>
+    <string name="extensions_permission_prompt">اس ایکسٹینشن کی درخواست کردہ اجازتوں اور ڈیٹا جمع کرنے کی تفصیلات کا جائزہ لیں۔</string>
+    <string name="extensions_allow">اجازت دیں</string>
+</resources>

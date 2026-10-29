@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -124,21 +125,23 @@ fun NativeHomeScreen(
         onFirstFrameDrawn(tabId)
     }
     val colors = MaterialTheme.colorScheme
-    val background = colors.background
+    val solidColor = wallpaper.color?.let { Color(it) }
+    val background = solidColor ?: colors.background
     if (wallpaperAsset == null) {
         Box(modifier.fillMaxSize().background(background).testTag("native_home_loading_background:${wallpaper.id}"))
         return
     }
     val wallpaperBitmap = wallpaperAsset?.bitmap
-    val hasWallpaper = wallpaperBitmap != null
+    val hasWallpaper = wallpaperBitmap != null || solidColor != null
+    val foreground = if (solidColor != null && solidColor.luminance() > 0.179f) Color.Black else Color.White
     val palette = HomePalette(
-        primary = if (hasWallpaper) Color.White else colors.onSurface,
-        secondary = if (hasWallpaper) Color.White.copy(alpha = 0.78f) else colors.onSurfaceVariant,
-        panel = if (hasWallpaper) Color.Black.copy(alpha = 0.32f) else colors.surface,
-        panelBorder = if (hasWallpaper) BorderStroke(0.5.dp, Color.White.copy(alpha = 0.16f)) else null,
-        divider = if (hasWallpaper) Color.White.copy(alpha = 0.18f) else colors.outlineVariant.copy(alpha = 0.55f),
+        primary = if (hasWallpaper) foreground else colors.onSurface,
+        secondary = if (hasWallpaper) foreground.copy(alpha = 0.78f) else colors.onSurfaceVariant,
+        panel = if (hasWallpaper) (if (foreground == Color.Black) Color.White else Color.Black).copy(alpha = 0.32f) else colors.surface,
+        panelBorder = if (hasWallpaper) BorderStroke(0.5.dp, foreground.copy(alpha = 0.16f)) else null,
+        divider = if (hasWallpaper) foreground.copy(alpha = 0.18f) else colors.outlineVariant.copy(alpha = 0.55f),
         tile = if (hasWallpaper) Color.White.copy(alpha = 0.94f) else lerp(colors.surface, colors.surfaceContainer, 0.25f),
-        shadow = if (hasWallpaper) wallpaperTextShadow else null,
+        shadow = if (wallpaperBitmap != null) wallpaperTextShadow else null,
     )
     val shortcutWidth = (if (preferences.homeLargeShortcuts) 88 else 72) * configuration.fontScale.coerceAtLeast(1f)
     val shortcutColumns = ((windowSize.width / LocalDensity.current.density - 32) / shortcutWidth)
@@ -171,7 +174,7 @@ fun NativeHomeScreen(
             Box(Modifier.matchParentSize().background(Brush.verticalGradient(listOf(
                 Color.Black.copy(alpha = 0.54f), Color.Black.copy(alpha = 0.54f), Color.Black.copy(alpha = 0.62f),
             ))))
-        } else Box(Modifier.matchParentSize().homeGrain())
+        } else if (solidColor == null) Box(Modifier.matchParentSize().homeGrain())
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize().testTag("native_home"),
@@ -184,7 +187,7 @@ fun NativeHomeScreen(
                         showLogo = !preferences.hideHomeLogo,
                         onCustomize = if (preferences.hideHomeCustomizeShortcut) null else {
                             { navigateTo(NavDestination.HomepageSettings) }
-                        }, wallpaper = hasWallpaper)
+                        }, wallpaper = hasWallpaper, wallpaperTint = foreground)
                 }
             }
             if (!preferences.hideHomeShortcuts) {
@@ -208,7 +211,7 @@ fun NativeHomeScreen(
                         Row(Modifier.heightIn(min = 48.dp).padding(horizontal = 4.dp, vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             Surface(shape = RoundedCornerShape(10.dp),
-                                color = if (hasWallpaper) Color.White.copy(alpha = 0.14f) else colors.primary.copy(alpha = 0.08f)) {
+                                color = if (hasWallpaper) foreground.copy(alpha = 0.14f) else colors.primary.copy(alpha = 0.08f)) {
                                 Icon(painterResource(mozilla.components.ui.icons.R.drawable.mozac_ic_shield_24), null,
                                     tint = if (hasWallpaper) palette.primary else colors.primary,
                                     modifier = Modifier.padding(7.dp).size(18.dp))

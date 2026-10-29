@@ -14,4 +14,21 @@
     <string name="home_wallpaper_nature">自然</string>
     <string name="home_wallpaper_space">太空</string>
     <string name="home_wallpaper_travel">旅行</string>
+    <string name="home_wallpaper_colors">纯色</string>
+    <string name="home_wallpaper_black">黑色</string>
+    <string name="home_wallpaper_white">白色</string>
+    <string name="home_wallpaper_gray">灰色</string>
+    <string name="home_wallpaper_blue">蓝色</string>
+    <string name="home_wallpaper_green">绿色</string>
+    <string name="home_wallpaper_purple">紫色</string>
+    <string name="home_wallpaper_red">红色</string>
+    <string name="home_wallpaper_coral">珊瑚色</string>
+    <string name="home_wallpaper_orange">橙色</string>
+    <string name="home_wallpaper_yellow">黄色</string>
+    <string name="home_wallpaper_mint">薄荷绿</string>
+    <string name="home_wallpaper_teal">蓝绿色</string>
+    <string name="home_wallpaper_sky">天蓝色</string>
+    <string name="home_wallpaper_pink">粉色</string>
+    <string name="home_wallpaper_sand">沙色</string>
+    <string name="home_wallpaper_brown">棕色</string>
 </resources>

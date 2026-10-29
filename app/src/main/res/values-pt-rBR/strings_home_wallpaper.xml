@@ -14,4 +14,21 @@
     <string name="home_wallpaper_nature">Natureza</string>
     <string name="home_wallpaper_space">Espaço</string>
     <string name="home_wallpaper_travel">Viagens</string>
+    <string name="home_wallpaper_colors">Cores sólidas</string>
+    <string name="home_wallpaper_black">Preto</string>
+    <string name="home_wallpaper_white">Branco</string>
+    <string name="home_wallpaper_gray">Cinza</string>
+    <string name="home_wallpaper_blue">Azul</string>
+    <string name="home_wallpaper_green">Verde</string>
+    <string name="home_wallpaper_purple">Roxo</string>
+    <string name="home_wallpaper_red">Vermelho</string>
+    <string name="home_wallpaper_coral">Coral</string>
+    <string name="home_wallpaper_orange">Laranja</string>
+    <string name="home_wallpaper_yellow">Amarelo</string>
+    <string name="home_wallpaper_mint">Menta</string>
+    <string name="home_wallpaper_teal">Verde-azulado</string>
+    <string name="home_wallpaper_sky">Azul-celeste</string>
+    <string name="home_wallpaper_pink">Rosa</string>
+    <string name="home_wallpaper_sand">Areia</string>
+    <string name="home_wallpaper_brown">Marrom</string>
 </resources>
