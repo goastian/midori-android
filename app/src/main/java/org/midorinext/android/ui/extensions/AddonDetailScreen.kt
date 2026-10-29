@@ -1,7 +1,7 @@
 package org.midorinext.android.ui.extensions
 
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,7 +35,12 @@ fun AddonDetailScreen(
     val error by viewModel.error.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .testTag("addon_detail")
+    ) {
         ScreenHeader(
             title = stringResource(R.string.extensions_detail_title),
             scrollableState = scrollState

@@ -239,7 +239,19 @@ fun MidoriNavHost(
         composable(NavDestination.AdBlockAdSources.match) { AdBlockSourcesScreen(tracker = false) }
         navigation(
             startDestination = NavDestination.Extensions.match,
-            route = "extensions_graph"
+            route = "extensions_graph",
+            enterTransition = {
+                navigationEnterTransition(navigationOffset, reduceMotion, fullScreenSlide = true)
+            },
+            exitTransition = {
+                navigationExitTransition(-navigationOffset, reduceMotion, fullScreenSlide = true)
+            },
+            popEnterTransition = {
+                navigationEnterTransition(-navigationOffset, reduceMotion, fullScreenSlide = true)
+            },
+            popExitTransition = {
+                navigationExitTransition(navigationOffset, reduceMotion, fullScreenSlide = true)
+            },
         ) {
             composable(NavDestination.Extensions.match) { backStackEntry ->
                 val parentEntry = remember(backStackEntry) {

@@ -61,7 +61,7 @@ class ExtensionViewModel @Inject constructor(
     private val _addons = MutableStateFlow<List<Addon>>(emptyList())
     val addons: StateFlow<List<Addon>> = _addons.asStateFlow()
 
-    private val _addonsLoading = MutableStateFlow(false)
+    private val _addonsLoading = MutableStateFlow(true)
     val addonsLoading: StateFlow<Boolean> = _addonsLoading.asStateFlow()
 
     private val _addonsError = MutableStateFlow<ExtensionUiError?>(null)

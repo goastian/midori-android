@@ -55,6 +55,7 @@ fun BrowserMenu(
             keyboard?.hide()
         }
         var showMoreOptions by rememberSaveable { mutableStateOf(false) }
+        var pendingDestination by remember { mutableStateOf<NavDestination?>(null) }
         var defaultBrowser by remember(context) {
             mutableStateOf(context.defaultBrowserStatus())
         }
@@ -65,15 +66,20 @@ fun BrowserMenu(
         val showPageActions = currentUrl.isExternalPage()
 
         BrowserMenuSheet(onDismissRequest = {
+            val destination = pendingDestination
+            pendingDestination = null
             onDismissRequest()
+            destination?.let(navigateTo)
             if (translationRequested) {
                 translationRequested = false
                 showTranslationSheet = true
             }
         }) { dismiss ->
             val openDestination: (NavDestination) -> Unit = { destination ->
-                dismiss()
-                navigateTo(destination)
+                if (pendingDestination == null) {
+                    pendingDestination = destination
+                    dismiss()
+                }
             }
             if (showPageActions) {
                 BrowserMenuGroup(divider = false) { BrowserNavigation(viewModel, dismiss) }
