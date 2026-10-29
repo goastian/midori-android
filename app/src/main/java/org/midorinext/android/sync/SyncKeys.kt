@@ -73,7 +73,8 @@ internal class SyncKeys(private val scope: String) : AutoCloseable {
         validateState(remote)
         requireSync(previous == null || previous.getString("epoch") == remote.getString("epoch") &&
             remote.getString("revision").toLong() >= previous.getString("revision").toLong(), "registry_replay")
-        requireSync(capsule.getInt("version") == 1 && capsule.getString("scope") == scope &&
+        val matchingScope = runCatching { same(JSONArray(capsule.getString("scope")), JSONArray(scope)) }.getOrDefault(false)
+        requireSync(capsule.getInt("version") == 1 && matchingScope &&
             capsule.getString("epoch") == remote.getString("epoch") &&
             capsule.getString("secret").matches(Regex("[0-9a-f]{64}")) &&
             capsule.objects("keys").size == remote.objects("keys").size &&
