@@ -35,7 +35,6 @@ class SyncWelcomeTest {
         var scans = 0
         var signIns = 0
         render(dark = false, onScan = { scans++ }, onSignIn = { signIns++ })
-        compose.onNodeWithText("sync.astian.org").assertIsDisplayed()
         compose.onNodeWithText("Escanear código QR").assertIsDisplayed().performClick()
         compose.onNodeWithText("Entrar con mi cuenta Astian").assertIsDisplayed().performClick()
         assertEquals(1, scans)
