@@ -74,6 +74,7 @@ class LoginAutofillRepository(private val storage: Lazy<LoginsStorage>) {
             if (get(guid) == null) return@withStorage false
             update(guid, authorization.entry)
         }
+        org.midorinext.android.sync.SyncLocalSignals.changed()
         true
     }
 
@@ -87,6 +88,7 @@ class LoginAutofillRepository(private val storage: Lazy<LoginsStorage>) {
             }
             pendingSaves.entries.removeAll { it.value.existingGuid == guid }
         }
+        org.midorinext.android.sync.SyncLocalSignals.changed()
     }
 
     internal suspend fun <T> syncTransaction(operation: suspend LoginsStorage.() -> T): T = withStorage(operation)

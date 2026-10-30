@@ -6,8 +6,15 @@ import java.util.UUID
 
 internal interface SyncAdapter {
     suspend fun snapshot(name: String, state: JSONObject, keys: SyncKeys): Map<String, JSONObject>
+    suspend fun capture(name: String, state: JSONObject, keys: SyncKeys, persist: () -> Unit,
+                        consume: suspend (Map<String, JSONObject?>) -> Unit) {
+        val local = snapshot(name, state, keys)
+        val ids = local.keys + state.getJSONObject("mirror").keys().asSequence().toSet()
+        for (batch in ids.sorted().chunked(100)) consume(batch.associateWith { local[it] })
+    }
     suspend fun read(name: String, id: String, hint: JSONObject?, state: JSONObject, keys: SyncKeys): JSONObject?
     suspend fun apply(name: String, id: String, value: JSONObject?, expected: JSONObject?, hint: JSONObject?, state: JSONObject, keys: SyncKeys, persist: () -> Unit)
+    suspend fun markPending(name: String, id: String, hint: JSONObject?, state: JSONObject) {}
     suspend fun canDeleteHistory(value: JSONObject): Boolean
     suspend fun canDelete(name: String, id: String, value: JSONObject, state: JSONObject): Boolean = name != "history" || canDeleteHistory(value)
     suspend fun clearHistoryBefore(ms: Long)
@@ -17,6 +24,7 @@ internal class SyncEngine(
     private val keys: SyncKeys,
     private val stores: SyncAdapter,
     private val request: (String, String, JSONObject?, Map<String, String>) -> JSONObject,
+    private val metrics: SyncRunMetrics? = null,
     private val persist: () -> Unit,
 ) {
     suspend fun sync(name: String, state: JSONObject) {
@@ -40,6 +48,7 @@ internal class SyncEngine(
                 persist()
             }
             validatePage(page, state)
+            metrics?.receivedRecords?.addAndGet(page.objects("changes").size.toLong())
             for (change in page.objects("changes")) {
                 val record = change.getJSONObject("record")
                 try {
@@ -103,11 +112,12 @@ internal class SyncEngine(
                         stores.apply(name, id, desired, local, remote ?: base, state, keys, persist)
                     }
                     mirror.put(id, obj("revision" to record.getString("revision"), "value" to remote, "record" to record))
+                    if (!same(desired, remote)) stores.markPending(name, id, desired ?: remote ?: base, state)
                     inbox.remove(id); conflicts.remove(id); state.remove("application"); persist()
                 } catch (error: Exception) {
                     if (error is kotlinx.coroutines.CancellationException) throw error
                     val code = (error as? SyncException)?.code ?: "invalid_record"
-                    if (code in listOf("parent_missing", "folder_not_empty") && attempt < 3) continue
+                    if (code in listOf("parent_missing", "folder_not_empty")) continue
                     if (code in listOf("local_changed", "native_write_pending")) continue
                     conflicts.put(id, obj("reason" to code, "record" to record))
                     inbox.remove(id); state.remove("application"); persist()
@@ -117,60 +127,87 @@ internal class SyncEngine(
         }
     }
     private suspend fun capture(name: String, state: JSONObject) {
-        val local = stores.snapshot(name, state, keys)
         val mirror = state.getJSONObject("mirror")
         val outbox = state.getJSONObject("outbox")
         val conflicts = state.getJSONObject("conflicts")
-        for (id in (local.keys + mirror.keys().asSequence().toSet()).sorted()) {
-            if (outbox.has(id) || conflicts.has(id) || state.getJSONObject("inbox").has(id)) continue
-            val base = mirror.objectOrNull(id)
-            val value = local[id]
-            if (same(value, base?.objectOrNull("value"))) continue
-            if (value == null && base?.objectOrNull("value")?.let { stores.canDelete(name, id, it, state) } == false) continue
-            try {
-                if (value != null) SyncModels.validate(keys, name, id, value)
-                val revision = base?.getString("revision") ?: "0"
-                val operation = obj("operation_id" to UUID.randomUUID().toString(), "id" to id, "base_revision" to revision,
-                    "payload" to keys.seal(name, id, state.getString("generation"), revision, value), "deleted" to (value == null), "ttl" to null)
-                outbox.put(id, obj("operation" to operation, "value" to value, "crypto" to keys.context))
-            } catch (error: Exception) {
-                if (error is kotlinx.coroutines.CancellationException) throw error
-                conflicts.put(id, obj("reason" to ((error as? SyncException)?.code ?: "invalid_local_record")))
+        stores.capture(name, state, keys, persist) { local ->
+            var changed = false
+            for ((id, value) in local) {
+                metrics?.prepared?.incrementAndGet()
+                if (outbox.has(id) || conflicts.has(id) || state.getJSONObject("inbox").has(id)) continue
+                val base = mirror.objectOrNull(id)
+                if (same(value, base?.objectOrNull("value"))) continue
+                if (value == null && base?.objectOrNull("value")?.let { stores.canDelete(name, id, it, state) } == false) continue
+                try {
+                    if (value != null) SyncModels.validate(keys, name, id, value)
+                    val revision = base?.getString("revision") ?: "0"
+                    val operation = obj("operation_id" to UUID.randomUUID().toString(), "id" to id, "base_revision" to revision,
+                        "payload" to keys.seal(name, id, state.getString("generation"), revision, value), "deleted" to (value == null), "ttl" to null)
+                    outbox.put(id, obj("operation" to operation, "value" to value, "crypto" to keys.context))
+                    changed = true
+                } catch (error: Exception) {
+                    if (error is kotlinx.coroutines.CancellationException) throw error
+                    conflicts.put(id, obj("reason" to ((error as? SyncException)?.code ?: "invalid_local_record")))
+                    changed = true
+                }
             }
+            if (changed) { persist(); upload(name, state) }
         }
-        persist()
     }
     private fun upload(name: String, state: JSONObject) {
         val outbox = state.getJSONObject("outbox")
         if (outbox.length() == 0 || !state.has("generation")) return
-        for ((id, untyped) in outbox.entries()) {
-            val entry = untyped as JSONObject
-            val operation = entry.getJSONObject("operation")
+        while (outbox.length() > 0) {
+            val candidates = mutableListOf<Pair<String, JSONObject>>()
+            var bytes = 0
+            var crypto: JSONObject? = null
+            for ((id, untyped) in outbox.entries()) {
+                val entry = untyped as JSONObject
+                if (crypto != null && !same(crypto, entry.getJSONObject("crypto"))) continue
+                val size = entry.getJSONObject("operation").toString().toByteArray().size
+                if (candidates.isNotEmpty() && (candidates.size >= 100 || bytes + size > 3 * 1024 * 1024)) break
+                crypto = entry.getJSONObject("crypto")
+                candidates.add(id to entry); bytes += size + 1
+            }
             val response = request(path(name, "operations"), "POST", obj("generation" to state.getString("generation"),
-                "crypto" to entry.getJSONObject("crypto"), "operations" to JSONArray().put(operation)), emptyMap())
+                "crypto" to crypto, "operations" to JSONArray(candidates.map { it.second.getJSONObject("operation") })), emptyMap())
             requireSync(response.getString("generation") == state.getString("generation"), "invalid_operation_results")
             val results = response.getJSONArray("results")
-            requireSync(results.length() == 1, "invalid_operation_results")
-            val result = results.getJSONObject(0)
-            requireSync(result.getInt("index") == 0 && result.getString("operation_id") == operation.getString("operation_id"), "invalid_operation_results")
-            when (result.getString("status")) {
-                "applied" -> {
-                    requireSync(result.getString("id") == id && result.getString("revision").toLong() == operation.getString("base_revision").toLong() + 1, "invalid_operation_results")
-                    val record = obj("id" to id, "revision" to result.getString("revision"), "payload" to operation.getString("payload"), "deleted" to operation.getBoolean("deleted"), "ttl" to operation.opt("ttl"))
-                    state.getJSONObject("mirror").put(id, obj("revision" to result.getString("revision"), "value" to entry.opt("value"), "record" to record))
-                    outbox.remove(id)
+            requireSync(results.length() == candidates.size, "invalid_operation_results")
+            // Validate the complete response before advancing any durable receipts.
+            for ((index, candidate) in candidates.withIndex()) {
+                val (id, entry) = candidate
+                val operation = entry.getJSONObject("operation")
+                val result = results.getJSONObject(index)
+                requireSync(result.getInt("index") == index && result.getString("operation_id") == operation.getString("operation_id") &&
+                    result.getString("status") in listOf("applied", "conflict", "quota_exceeded", "invalid", "idempotency_conflict"), "invalid_operation_results")
+                if (result.getString("status") == "applied") requireSync(result.getString("id") == id &&
+                    result.getString("revision").toLong() == operation.getString("base_revision").toLong() + 1, "invalid_operation_results")
+            }
+            var quota = false
+            for ((index, candidate) in candidates.withIndex()) {
+                val (id, entry) = candidate
+                val operation = entry.getJSONObject("operation")
+                val result = results.getJSONObject(index)
+                when (result.getString("status")) {
+                    "applied" -> {
+                        val record = obj("id" to id, "revision" to result.getString("revision"), "payload" to operation.getString("payload"), "deleted" to operation.getBoolean("deleted"), "ttl" to operation.opt("ttl"))
+                        state.getJSONObject("mirror").put(id, obj("revision" to result.getString("revision"), "value" to entry.opt("value"), "record" to record))
+                        outbox.remove(id); metrics?.uploaded?.incrementAndGet()
+                    }
+                    "conflict" -> outbox.remove(id)
+                    "quota_exceeded" -> quota = true
+                    else -> {
+                        state.getJSONObject("conflicts").put(id, obj("reason" to result.getString("status"), "pending" to entry))
+                        outbox.remove(id)
+                    }
                 }
-                "conflict" -> outbox.remove(id)
-                "quota_exceeded" -> throw SyncException("quota_exceeded")
-                "invalid", "idempotency_conflict" -> {
-                    state.getJSONObject("conflicts").put(id, obj("reason" to result.getString("status"), "pending" to entry))
-                    outbox.remove(id)
-                }
-                else -> throw SyncException("invalid_operation_results")
             }
             persist()
+            if (quota) throw SyncException("quota_exceeded")
         }
     }
+
     private suspend fun reset(name: String, state: JSONObject, page: JSONObject) {
         val control = page.objectOrNull("control") ?: throw SyncException("reset_requires_review")
         val generation = page.getString("generation")
@@ -185,7 +222,9 @@ internal class SyncEngine(
         stores.clearHistoryBefore(control.getLong("clear_before_ms"))
         state.put("mirror", JSONObject()).put("inbox", JSONObject()).put("outbox", JSONObject()).put("conflicts", JSONObject())
             .put("control_revision", control.getString("control_revision"))
-        state.remove("reset"); state.remove("application"); state.remove("ack_sequence"); persist()
+        state.remove("reset"); state.remove("application"); state.remove("ack_sequence")
+        listOf("native_epoch", "native_revision", "native_local_revision", "native_identity").forEach(state::remove)
+        persist()
     }
     private fun validatePage(page: JSONObject, state: JSONObject) {
         val sequence = state.getString("sequence").toLong()

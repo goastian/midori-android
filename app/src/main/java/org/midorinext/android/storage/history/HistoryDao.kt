@@ -8,6 +8,24 @@ import mozilla.components.concept.storage.VisitType
 
 @Dao
 interface HistoryDao {
+    @Query("SELECT DISTINCT pageUri FROM visits WHERE pageUri > :after ORDER BY pageUri LIMIT :limit")
+    suspend fun syncUrlPage(after: String, limit: Int): List<String>
+
+    @Query("SELECT DISTINCT (timestampUsec / 86400000000) * 86400000000 FROM visits WHERE pageUri=:url AND timestampUsec >= :after ORDER BY 1 LIMIT :limit")
+    suspend fun syncDayPage(url: String, after: Long, limit: Int): List<Long>
+
+    @Query("SELECT COUNT(*) FROM visits WHERE pageUri=:url AND timestampUsec>=:start AND timestampUsec<:end")
+    suspend fun syncWindowCount(url: String, start: Long, end: Long): Int
+
+    @Query("SELECT * FROM visits WHERE pageUri=:url AND timestampUsec>=:start AND timestampUsec<:end ORDER BY timestampUsec,type LIMIT :limit")
+    suspend fun syncWindowPage(url: String, start: Long, end: Long, limit: Int): List<Visit>
+
+    @Query("SELECT * FROM sync_history_removals WHERE (url IS NULL OR url=:url) AND startTime<=:end AND endTime>=:start")
+    suspend fun syncRemovalsFor(url: String, start: Long, end: Long): List<HistoryRemoval>
+
+    @Query("SELECT * FROM sync_history_removals WHERE id=:id")
+    suspend fun syncRemoval(id: Long): HistoryRemoval?
+
     @Insert
     suspend fun insert(page: Page)
 

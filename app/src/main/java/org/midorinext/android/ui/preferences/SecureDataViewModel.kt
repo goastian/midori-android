@@ -73,11 +73,13 @@ class SecureDataViewModel @Inject constructor(
 
     fun deleteCard(guid: String) = launchOperation {
         autofillStorage.deleteCreditCard(guid)
+        org.midorinext.android.sync.SyncLocalSignals.changed()
         refreshAutofill()
     }
 
     fun deleteAddress(guid: String) = launchOperation {
         autofillStorage.deleteAddress(guid)
+        org.midorinext.android.sync.SyncLocalSignals.changed()
         refreshAutofill()
     }
 
@@ -98,6 +100,7 @@ class SecureDataViewModel @Inject constructor(
                 cardType = cardType(digits),
             ),
         )
+        org.midorinext.android.sync.SyncLocalSignals.changed()
         refreshAutofill()
     }
 
@@ -116,6 +119,7 @@ class SecureDataViewModel @Inject constructor(
                 email = form.email.trim(),
             ),
         )
+        org.midorinext.android.sync.SyncLocalSignals.changed()
         refreshAutofill()
     }
 

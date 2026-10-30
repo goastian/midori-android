@@ -1,5 +1,6 @@
 package org.midorinext.android.ui.preferences
 
+import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import android.content.Intent
@@ -88,18 +89,12 @@ fun PreferencesScreen(
 
     val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
 
-    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).testTag("preferences_screen")) {
         ScreenHeader(title = stringResource(id = R.string.settings), scrollableState = scrollState)
 
         Column(modifier = Modifier.verticalScroll(scrollState)) {
             // Make default browser
             DefaultBrowserPreference()
-
-            SettingsNavRow(
-                label = R.string.sync_title,
-                description = stringResource(R.string.sync_summary),
-                onClicked = { context.startActivity(Intent(context, org.midorinext.android.sync.SyncActivity::class.java)) }
-            )
 
             PreferenceGroupLabel(label = R.string.settings_group_general)
 
@@ -1001,7 +996,7 @@ internal fun PreferenceScreenScaffold(
     content: @Composable () -> Unit
 ) {
     val scrollState = rememberScrollState()
-    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).testTag("preferences_screen")) {
         ScreenHeader(title = title, scrollableState = scrollState)
         Column(
             modifier = Modifier

@@ -2,6 +2,10 @@ package org.midorinext.android.sync
 
 import android.net.Uri
 import android.os.Build
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.update
+import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +22,7 @@ import javax.inject.Singleton
 internal data class SyncUiState(
     val connected: Boolean = false, val busy: Boolean = false, val name: String = "", val phase: String = "disconnected",
     val server: String = "", val error: String? = null, val lastSync: Long = 0, val conflicts: Int = 0,
-    val pending: Int = 0, val selected: Set<String> = SyncModels.schemas.keys, val unsupported: Set<String> = emptySet(),
+    val accountId: String = "", val pending: Int = 0, val selected: Set<String> = SyncModels.schemas.keys, val unsupported: Set<String> = emptySet(), val email: String = "",
 )
 
 internal data class SyncConflict(val collection: String, val id: String, val local: String?, val remote: String?, val canResolve: Boolean)
@@ -26,6 +30,31 @@ internal data class SyncConflict(val collection: String, val id: String, val loc
 @Singleton
 internal class SyncCoordinator @Inject constructor(private val vault: SyncVault, private val stores: SyncNativeStores) {
     private val mutex = Mutex()
+    private val syncScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private class Flight(val epoch: Long, val task: Deferred<Unit>, var waiters: Int = 0)
+    private val flightLock = Any()
+    private var flight: Flight? = null
+    private val accountEpoch = AtomicLong()
+    @Volatile private var disconnecting = false
+    @Volatile private var network: SyncNetworkContext? = null
+    private val requestedCount = AtomicLong()
+    private val executedCount = AtomicLong()
+    private val coalescedCount = AtomicLong()
+    private val changedCount = AtomicLong()
+    private val unchangedCount = AtomicLong()
+    private val cancelledCount = AtomicLong()
+    private val failedCount = AtomicLong()
+    private val totalSent = AtomicLong()
+    private val totalReceived = AtomicLong()
+    private val totalCpu = AtomicLong()
+    internal fun statisticsSnapshot(): JSONObject = obj(
+        "requested" to requestedCount.get(), "executed" to executedCount.get(), "coalesced" to coalescedCount.get(),
+        "with_changes" to changedCount.get(), "without_changes" to unchangedCount.get(), "cancelled" to cancelledCount.get(), "failed" to failedCount.get(),
+        "sent_body_bytes" to totalSent.get(), "received_body_bytes" to totalReceived.get(), "process_cpu_ms" to totalCpu.get())
+    private val latestRun = MutableStateFlow<SyncRunResult?>(null)
+    val statistics = latestRun.asStateFlow()
+    fun localChanges(): Flow<Pair<Long, Long>> = stores.localChanges()
+    private fun transport(server: String) = SyncTransport(server, network)
     private var state = obj("version" to 1)
     private var loaded = false
     private val mutable = MutableStateFlow(SyncUiState())
@@ -37,23 +66,39 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
     private fun report(error: String? = null, busy: Boolean = false) {
         val session = state.objectOrNull("session")
         val collections = state.objectOrNull("collections")?.entries().orEmpty().map { it.second as JSONObject }
-        mutable.value = SyncUiState(session != null, busy, session?.getJSONObject("user")?.optString("email").orEmpty(),
+        mutable.value = SyncUiState(session != null && !disconnecting, busy, session?.getJSONObject("user")?.let { it.optString("name").ifBlank { it.optString("email").substringBefore('@') } }.orEmpty(),
             state.optString("phase", if (session == null) "disconnected" else "connecting"), state.optString("server"), error,
             state.optLong("lastSync"), collections.sumOf { it.optJSONObject("conflicts")?.length() ?: 0 },
+            state.textOrNull("scope")?.let { value -> java.security.MessageDigest.getInstance("SHA-256").digest(value.toByteArray()).joinToString("") { "%02x".format(it) } }.orEmpty(),
             collections.sumOf { (it.optJSONObject("outbox")?.length() ?: 0) + (it.optJSONObject("inbox")?.length() ?: 0) }, selected(),
-            state.optJSONArray("unsupported")?.let { array -> (0 until array.length()).map { array.getString(it) }.toSet() }.orEmpty())
+            state.optJSONArray("unsupported")?.let { array -> (0 until array.length()).map { array.getString(it) }.toSet() }.orEmpty(), session?.optJSONObject("user")?.optString("email").orEmpty())
     }
-    private suspend fun <T> operation(block: suspend () -> T): T = withContext(Dispatchers.IO) {
+    private suspend fun <T> operation(metrics: SyncRunMetrics? = null, reportErrors: Boolean = true, block: suspend () -> T): T = withContext(Dispatchers.IO) {
         mutex.withLock {
-            load(); report(busy = true)
-            try { block().also { report() } } catch (error: Exception) {
-                if (error is kotlinx.coroutines.CancellationException) { report(); throw error }
-                report((error as? SyncException)?.code ?: "sync_unavailable")
-                throw error
+            load(); if (reportErrors) report(busy = true)
+            coroutineScope {
+                val context = SyncNetworkContext(currentCoroutineContext().job, metrics)
+                network = context
+                val cancellation = launch(Dispatchers.IO, start = CoroutineStart.UNDISPATCHED) {
+                    try { awaitCancellation() } finally { context.cancel() }
+                }
+                try { block().also { if (reportErrors) report() } } catch (error: Exception) {
+                    if (error is CancellationException) { if (reportErrors) report(); throw error }
+                    if (reportErrors) report((error as? SyncException)?.code ?: "sync_unavailable")
+                    throw error
+                } finally {
+                    cancellation.cancel()
+                    network = null
+                }
             }
         }
     }
     suspend fun inspect() = operation { Unit }
+    suspend fun needsLocalSync(): Boolean = mutex.withLock {
+        load()
+        if (!state.has("session") || state.optString("phase") != "ready") false
+        else stores.hasPendingLocal(state.optJSONObject("collections") ?: JSONObject(), selected())
+    }
     suspend fun pair(server: String, token: String) = operation {
         pairSession(server, token)
     }
@@ -67,7 +112,7 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
     }
     private fun pairSession(server: String, token: String) {
         requireSync(!state.has("session"), "account_connected")
-        val transport = SyncTransport(server)
+        val transport = transport(server)
         val capabilities = discover(transport)
         val session = transport.request("api/v1/pair/redeem", method = "POST", body = obj("pairing_token" to token,
             "device_name" to deviceName(), "device_type" to "mobile", "native_refresh" to true))
@@ -75,7 +120,7 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
     }
     suspend fun beginLogin(server: String): String = operation {
         requireSync(!state.has("session"), "account_connected")
-        val transport = SyncTransport(server)
+        val transport = transport(server)
         val capabilities = discover(transport)
         val login = capabilities.getJSONObject("authentication").objectOrNull("browser_login")
         requireSync(login?.optJSONArray("device_types")?.toString()?.contains("mobile") == true, "browser_login_unavailable")
@@ -92,7 +137,7 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
             uri.getQueryParameters("state").size == 1 && uri.getQueryParameter("state") == pending.getString("state") &&
             uri.getQueryParameters("code").size == 1 && uri.getQueryParameter("code")?.matches(Regex("[0-9a-f]{64}")) == true &&
             System.currentTimeMillis() <= pending.getLong("expires"), "invalid_login_callback")
-        val transport = SyncTransport(pending.getString("server"))
+        val transport = transport(pending.getString("server"))
         val capabilities = discover(transport)
         val session = transport.request("api/v1/auth/browser-token", method = "POST", body = obj("code" to uri.getQueryParameter("code"),
             "code_verifier" to pending.getString("verifier"), "device_name" to deviceName()))
@@ -134,7 +179,7 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
         state.put("session", response); state.remove("refresh"); save()
     }
     suspend fun prepareKeys(): String = operation {
-        val transport = SyncTransport(state.getString("server"))
+        val transport = transport(state.getString("server"))
         SyncKeys(state.getString("scope")).use { keys ->
             val (code, local) = keys.prepare(request(transport, "api/v1/crypto/state"))
             state.put("keys", local).put("phase", "backup_required"); save(); code
@@ -143,13 +188,13 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
     suspend fun activateKeys() = operation {
         requireSync(state.getString("phase") == "backup_required", "recovery_backup_required")
         state.getJSONObject("keys").put("confirmed", true); save()
-        val transport = SyncTransport(state.getString("server"))
+        val transport = transport(state.getString("server"))
         val pending = state.getJSONObject("keys").getJSONObject("activation")
         request(transport, "api/v1/crypto/activate", "POST", pending)
         state.put("phase", "ready"); save()
     }
     suspend fun recover(code: String) = operation {
-        val transport = SyncTransport(state.getString("server"))
+        val transport = transport(state.getString("server"))
         val keys = SyncKeys(state.getString("scope"))
         try {
             val local = keys.restore(request(transport, "api/v1/crypto/state"), null, code)
@@ -162,14 +207,68 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
         state.put("selected", JSONArray((if (enabled) selected() + name else selected() - name).toList()))
         save()
     }
-    suspend fun sync(): Unit {
+    suspend fun sync(reason: SyncReason = SyncReason.MANUAL) {
+        requestedCount.incrementAndGet()
         org.midorinext.android.diagnostics.ScenarioMetrics.count(org.midorinext.android.diagnostics.ScenarioMetrics.Event.SYNC_REQUESTED)
-        operation {
+        if (disconnecting) return
+        if (!loaded) inspect()
+        if (!ui.value.connected) return
+        val selectedFlight = synchronized(flightLock) {
+            val existing = flight?.takeIf { !it.task.isCompleted && it.epoch == accountEpoch.get() }
+            if (existing != null) coalescedCount.incrementAndGet()
+            val current = existing ?: run {
+                val epoch = accountEpoch.get()
+                val task = syncScope.async(start = CoroutineStart.LAZY) {
+                    val metrics = SyncRunMetrics()
+                    var cancelled = false
+                    var failed = false
+                    try { executeSync(epoch, metrics) }
+                    catch (error: CancellationException) { cancelled = true; throw error }
+                    catch (error: Exception) { failed = true; throw error }
+                    finally {
+                        val result = metrics.finish(cancelled, failed)
+                        latestRun.value = result
+                        if (cancelled) cancelledCount.incrementAndGet()
+                        else if (result.requests > 0) {
+                            if (failed) failedCount.incrementAndGet()
+                            else if (result.changed) changedCount.incrementAndGet() else unchangedCount.incrementAndGet()
+                        }
+                        totalSent.addAndGet(result.sentBytes); totalReceived.addAndGet(result.receivedBytes); totalCpu.addAndGet(result.cpuMs)
+                        if (org.midorinext.android.BuildConfig.DEBUG) android.util.Log.i("MidoriSyncMetrics", statisticsSnapshot().put("reason", reason.name).toString())
+                    }
+                }
+                Flight(epoch, task).also { flight = it }
+            }
+            current.waiters++
+            current.task.start()
+            current
+        }
+        try { selectedFlight.task.await() }
+        finally {
+            synchronized(flightLock) {
+                selectedFlight.waiters--
+                if (selectedFlight.waiters == 0 && selectedFlight.task.isActive) selectedFlight.task.cancel()
+            }
+        }
+    }
+
+    suspend fun notificationTicket(): Pair<String, String> = operation(reportErrors = false) {
+        requireSync(state.has("session") && state.optString("phase") == "ready", "auth_required")
+        val transport = transport(state.getString("server"))
+        val response = request(transport, "api/v1/sync/notifications/ticket", "POST")
+        requireSync(response.optInt("version") == 1 && response.optString("ticket").matches(Regex("[0-9a-f]{64}")) &&
+            runCatching { Instant.parse(response.getString("expires_at")).toEpochMilli() > System.currentTimeMillis() }.getOrDefault(false), "invalid_notification_ticket")
+        transport.server to response.getString("ticket")
+    }
+
+    private suspend fun executeSync(epoch: Long, metrics: SyncRunMetrics): Unit = operation(metrics) {
+            if (epoch != accountEpoch.get() || disconnecting) throw CancellationException("Account changed")
             if (!state.has("session")) return@operation
             val remaining = state.optLong("retry_at") - System.currentTimeMillis()
             if (remaining > 0) throw SyncException("rate_limited", 429, (remaining + 999) / 1000)
             org.midorinext.android.diagnostics.ScenarioMetrics.count(org.midorinext.android.diagnostics.ScenarioMetrics.Event.SYNC_EXECUTED)
-            val transport = SyncTransport(state.getString("server"))
+            executedCount.incrementAndGet()
+            val transport = transport(state.getString("server"))
             val capabilities = discover(transport)
             requireSync(capabilities.getJSONObject("authentication").getString("issuer") == state.getJSONObject("session").getJSONObject("identity").getString("issuer"), "identity_issuer_mismatch")
             val selected = selected()
@@ -177,7 +276,7 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
             run {
                 val keys = connectKeys(transport, capabilities) ?: return@operation
                 state.put("phase", "ready"); save()
-                val engine = SyncEngine(keys, stores, { path, method, body, query -> request(transport, path, method, body, query) }, ::save)
+                val engine = SyncEngine(keys, stores, { path, method, body, query -> request(transport, path, method, body, query) }, metrics, ::save)
                 val failures = mutableListOf<String>()
                 for (name in selected.filter { SyncModels.supported(capabilities, it) }) {
                     val collections = state.getJSONObject("collections")
@@ -195,7 +294,7 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
                 state.put("lastSync", System.currentTimeMillis()); save()
             }
         }
-    }
+
     private fun connectKeys(transport: SyncTransport, capabilities: JSONObject): SyncKeys? {
         var remote = request(transport, "api/v1/crypto/state")
         val managed = capabilities.optJSONObject("crypto")?.optInt("account_recovery_version") == 1 && remote.has("account_recovery")
@@ -256,20 +355,35 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
         }
         return keys
     }
-    suspend fun disconnect() = operation {
-        if (state.has("session")) {
-            val transport = SyncTransport(state.getString("server"))
-            val session = state.getJSONObject("session")
-            transport.request("api/v1/auth/refresh", method = "DELETE", body = obj("refresh_token" to session.getString("refresh_token")))
-        }
-        activeKeys?.close(); activeKeys = null
-        state = obj("version" to 1); save()
+    suspend fun disconnect() = withContext(NonCancellable + Dispatchers.IO) {
+        disconnecting = true
+        accountEpoch.incrementAndGet()
+        mutable.update { it.copy(connected = false, busy = true) }
+        try {
+            network?.cancel()
+            synchronized(flightLock) { flight?.task }?.cancelAndJoin()
+            val revoke = mutex.withLock {
+                load()
+                val session = state.objectOrNull("session")
+                val previous = session?.let { state.getString("server") to it.getString("refresh_token") }
+                activeKeys?.close(); activeKeys = null
+                state = obj("version" to 1); save(); report()
+                previous
+            }
+            // Local disconnection is durable before the optional network revocation.
+            revoke?.let { (server, refresh) ->
+                try {
+                    SyncTransport(server).request("api/v1/auth/refresh", method = "DELETE",
+                        body = obj("refresh_token" to refresh), timeoutMs = 5_000)
+                } catch (_: Exception) { }
+            }
+        } finally { disconnecting = false }
     }
     suspend fun resolve(name: String, id: String, keepLocal: Boolean) = operation {
         val collection = state.getJSONObject("collections").getJSONObject(name)
         val conflict = collection.getJSONObject("conflicts").getJSONObject(id)
         val record = conflict.getJSONObject("record")
-        val transport = SyncTransport(state.getString("server"))
+        val transport = transport(state.getString("server"))
         run {
             val keys = readyKeys(request(transport, "api/v1/crypto/state"), state.getJSONObject("keys"))
             val remote = keys.open(name, collection.getString("generation"), record)
@@ -279,7 +393,9 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
                 stores.apply(name, id, remote, local, remote ?: conflict.objectOrNull("base"), collection, keys, ::save)
             }
             collection.getJSONObject("mirror").put(id, obj("revision" to record.getString("revision"), "value" to remote, "record" to record))
-            collection.getJSONObject("conflicts").remove(id); save()
+            collection.getJSONObject("conflicts").remove(id)
+            if (keepLocal) stores.markPending(name, id, conflict.objectOrNull("local") ?: conflict.objectOrNull("base"), collection)
+            save()
         }
     }
     suspend fun conflictSummaries(): List<SyncConflict> = operation {

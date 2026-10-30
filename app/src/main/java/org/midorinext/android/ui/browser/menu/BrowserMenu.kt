@@ -55,6 +55,7 @@ fun BrowserMenu(
             keyboard?.hide()
         }
         var showMoreOptions by rememberSaveable { mutableStateOf(false) }
+        var pendingSync by remember { mutableStateOf(false) }
         var pendingDestination by remember { mutableStateOf<NavDestination?>(null) }
         var defaultBrowser by remember(context) {
             mutableStateOf(context.defaultBrowserStatus())
@@ -70,6 +71,10 @@ fun BrowserMenu(
             pendingDestination = null
             onDismissRequest()
             destination?.let(navigateTo)
+            if (pendingSync) {
+                pendingSync = false
+                context.startActivity(android.content.Intent(context, org.midorinext.android.sync.SyncActivity::class.java))
+            }
             if (translationRequested) {
                 translationRequested = false
                 showTranslationSheet = true
@@ -84,6 +89,7 @@ fun BrowserMenu(
             if (showPageActions) {
                 BrowserMenuGroup(divider = false) { BrowserNavigation(viewModel, dismiss) }
             }
+            BrowserMenuSyncCard(onClick = { pendingSync = true; dismiss() })
             BrowserMenuMainContent(
                 showDefaultPrompt = !showPageActions && !defaultBrowser.isDefault && !defaultPromptDismissed,
                 vpnEnabled = vpnEnabled,

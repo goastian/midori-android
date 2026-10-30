@@ -1,6 +1,14 @@
 package org.midorinext.android.sync
 
 import androidx.room.withTransaction
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import mozilla.components.concept.storage.*
 import mozilla.components.service.sync.autofill.AutofillCreditCardsAddressesStorage
 import org.json.JSONArray
@@ -16,16 +24,20 @@ import javax.inject.Singleton
 
 @Singleton
 internal class SyncNativeStores @Inject constructor(
-    private val bookmarks: BookmarksDatabase,
-    private val history: HistoryDatabase,
+    internal val bookmarks: BookmarksDatabase,
+    internal val history: HistoryDatabase,
     private val logins: LoginAutofillRepository,
     private val autofill: dagger.Lazy<AutofillCreditCardsAddressesStorage>,
     private val forms: SyncFormHistory,
 ) : SyncAdapter {
-    private fun links(state: JSONObject) = state.objectOrNull("links") ?: JSONObject().also { state.put("links", it) }
+    internal fun links(state: JSONObject) = state.objectOrNull("links") ?: JSONObject().also { state.put("links", it) }
     private fun projections(state: JSONObject) = state.objectOrNull("projections") ?: JSONObject().also { state.put("projections", it) }
-    private fun nativeId(state: JSONObject, id: String) = links(state).optString(id, id)
-    private fun wireId(state: JSONObject, id: String) = links(state).entries().firstOrNull { it.second == id }?.first ?: portableGuid(id)
+    internal fun nativeId(state: JSONObject, id: String) = links(state).optString(id, id)
+    internal fun wireId(state: JSONObject, id: String): String {
+        val candidate = portableGuid(id)
+        if (!links(state).has(candidate) || links(state).optString(candidate) == id) return candidate
+        return links(state).entries().firstOrNull { it.second == id }?.first ?: candidate
+    }
     private fun wireIds(state: JSONObject, native: String, password: Boolean = false): List<String> {
         val existing = links(state).entries().filter { it.second == native }.map { it.first }.sorted()
         if (existing.isNotEmpty()) return existing
@@ -42,19 +54,49 @@ internal class SyncNativeStores @Inject constructor(
         }
         links(state).put(id, native)
     }
-    private fun projected(state: JSONObject, id: String, raw: JSONObject): JSONObject {
+    internal fun projected(state: JSONObject, id: String, raw: JSONObject): JSONObject {
         val previous = projections(state).objectOrNull(id) ?: return raw
         val result = copy(previous.getJSONObject("value"))
         val native = previous.getJSONObject("native")
         for ((key, value) in raw.entries()) if (!same(value, native.opt(key))) result.put(key, value)
         return result
     }
-    private fun shadow(state: JSONObject, id: String, raw: JSONObject, value: JSONObject) {
+    internal fun shadow(state: JSONObject, id: String, raw: JSONObject, value: JSONObject) {
         projections(state).put(id, obj("native" to raw, "value" to value))
     }
+    private val journalLock = Mutex()
+    @Volatile private var journalReady = false
+    internal suspend fun prepareJournals() {
+        if (journalReady) return
+        journalLock.withLock {
+            if (!journalReady) withContext(Dispatchers.IO) {
+                bookmarks.withTransaction { SyncJournalSchema.create(bookmarks.openHelper.writableDatabase, history = false) }
+                history.withTransaction { SyncJournalSchema.create(history.openHelper.writableDatabase, history = true) }
+                journalReady = true
+            }
+        }
+    }
+    fun localChanges(): Flow<Pair<Long, Long>> = combine(
+        bookmarks.syncJournalDao().localRevisions(), history.syncJournalDao().localRevisions()
+    ) { a, b -> a to b }.distinctUntilChanged().flowOn(Dispatchers.IO)
+
+    suspend fun hasPendingLocal(collections: JSONObject, selected: Set<String>): Boolean {
+        prepareJournals()
+        for ((name, journal) in listOf("bookmarks" to bookmarks.syncJournalDao(), "history" to history.syncJournalDao())) {
+            if (name !in selected) continue
+            val revision = journal.revision()
+            val collection = collections.optJSONObject(name)
+            if (collection == null || collection.optString("native_epoch") != revision.epoch || collection.optLong("native_local_revision", -1) != revision.localRevision) return true
+        }
+        return false
+    }
+    override suspend fun capture(name: String, state: JSONObject, keys: SyncKeys, persist: () -> Unit,
+                                 consume: suspend (Map<String, JSONObject?>) -> Unit) {
+        if (name == "bookmarks" || name == "history") captureNative(name, state, keys, persist, consume)
+        else super<SyncAdapter>.capture(name, state, keys, persist, consume)
+    }
     override suspend fun snapshot(name: String, state: JSONObject, keys: SyncKeys): Map<String, JSONObject> = when (name) {
-        "bookmarks" -> bookmarkSnapshot(state)
-        "history" -> historySnapshot(state, keys)
+        "bookmarks", "history" -> nativeSnapshot(name, state, keys)
         "passwords" -> logins.list().filter { SyncModels.http(it.origin) }.flatMap { login ->
             wireIds(state, login.guid, password = true).map { id -> id to projected(state, id, loginValue(login)) }
         }.toMap()
@@ -83,7 +125,11 @@ internal class SyncNativeStores @Inject constructor(
         else -> throw SyncException("unsupported_collection")
     }
     override suspend fun read(name: String, id: String, hint: JSONObject?, state: JSONObject, keys: SyncKeys): JSONObject? {
-        if (name == "history" && hint != null) return historyValue(hint, state)
+        if (name == "bookmarks" || name == "history") nativeScope(name, state, keys)
+        if (name == "history" && hint != null) return historyValue(hint, state, id = id)
+        if (name == "bookmarks") return bookmarks.withTransaction {
+            bookmarks.bookmarksDao().get(indexedNativeId(name, id, state))?.let { bookmarkValue(it, state) }
+        }
         return snapshot(name, state, keys)[id]
     }
     override suspend fun apply(name: String, id: String, value: JSONObject?, expected: JSONObject?, hint: JSONObject?, state: JSONObject, keys: SyncKeys, persist: () -> Unit) {
@@ -99,10 +145,10 @@ internal class SyncNativeStores @Inject constructor(
             }
         }
         when (name) {
-            "bookmarks" -> bookmarks.withTransaction {
-                requireSync(same(bookmarkSnapshot(state)[id], expected), "local_changed")
+            "bookmarks" -> bookmarks.remoteSyncWrite(bookmarks.syncJournalDao()) {
+                requireSync(same(read(name, id, hint ?: value ?: expected, state, keys), expected), "local_changed")
                 val dao = bookmarks.bookmarksDao()
-                val localId = nativeId(state, id)
+                val localId = indexedNativeId(name, id, state)
                 if (value == null) {
                     requireSync(dao.getChildren(localId).isEmpty(), "folder_not_empty")
                     dao.deleteByGuid(localId)
@@ -121,12 +167,12 @@ internal class SyncNativeStores @Inject constructor(
                         "folder" -> BookmarkNodeType.FOLDER; "separator" -> BookmarkNodeType.SEPARATOR; else -> BookmarkNodeType.ITEM
                     }, parent, value.getInt("index"), value.getString("title"), value.textOrNull("url"), value.getLong("dateAdded")))
                     links(state).put(id, localId)
-                    shadow(state, id, bookmarkSnapshot(state, raw = true).getValue(id), value)
+                    shadow(state, id, bookmarkValue(dao.get(localId)!!, state, raw = true)!!, value)
                 }
             }
-            "history" -> history.withTransaction {
-                val identity = value ?: hint ?: expected ?: return@withTransaction
-                requireSync(same(historyValue(identity, state), expected), "local_changed")
+            "history" -> history.remoteSyncWrite(history.syncJournalDao()) {
+                val identity = value ?: hint ?: expected ?: return@remoteSyncWrite
+                requireSync(same(historyValue(identity, state, id = id), expected), "local_changed")
                 val (start, end) = window(identity)
                 val url = identity.getString("url")
                 val dao = history.historyDao()
@@ -137,7 +183,8 @@ internal class SyncNativeStores @Inject constructor(
                         val usec = visit.getLong("atUsec")
                         dao.insert(Visit(url, usec / 1000, visitType(visit.getInt("transition")), usec, visit.getInt("count")))
                     }
-                    shadow(state, id, historyValue(value, state, raw = true) ?: copy(value), value)
+                    history.syncJournalDao().remember(SyncRecordIndex(state.getString("native_scope"), id, url, identity.getLong("dayStartUsec"), start, end))
+                    shadow(state, id, historyValue(value, state, raw = true, id = id) ?: copy(value), value)
                 } else dao.prunePages()
             }
             "passwords" -> logins.syncTransaction {
@@ -200,93 +247,58 @@ internal class SyncNativeStores @Inject constructor(
         persist()
         requireSync(same(read(name, id, value ?: hint ?: expected, state, keys), value), "native_write_pending")
     }
-    private suspend fun bookmarkSnapshot(state: JSONObject, raw: Boolean = false): Map<String, JSONObject> {
-        val nodes = bookmarks.bookmarksDao().syncNodes().filter { it.guid !in ROOTS }
-        val result = linkedMapOf<String, JSONObject>()
-        for ((parent, children) in nodes.groupBy { it.parentGuid }) for ((index, node) in children.withIndex()) {
-            val id = wireId(state, node.guid)
-            links(state).put(id, node.guid)
-            val value = obj("version" to 1, "kind" to when(node.type) { BookmarkNodeType.FOLDER -> "folder"; BookmarkNodeType.SEPARATOR -> "separator"; else -> "bookmark" },
-                "parentGuid" to if (parent == LOCAL_ROOT || parent == null) "mobile______" else wireId(state, parent),
-                "index" to (node.position ?: index), "title" to (node.title ?: ""), "url" to node.url, "dateAdded" to node.dateAdded)
-            if (node.type != BookmarkNodeType.ITEM || SyncModels.http(node.url.orEmpty())) result[id] = if (raw) value else projected(state, id, value)
-        }
-        return result
-    }
-    private suspend fun historySnapshot(state: JSONObject, keys: SyncKeys): Map<String, JSONObject> {
-        val result = linkedMapOf<String, JSONObject>()
-        val visits = history.historyDao().syncVisits().filter { SyncModels.http(it.pageUri) }
-        val known = state.objectOrNull("mirror")?.entries().orEmpty().mapNotNull { (it.second as? JSONObject)?.objectOrNull("value") }
-        val identities = known.associateBy { it.getString("url") to it.getLong("dayStartUsec") }
-        for ((identity, group) in visits.groupBy { it.pageUri to it.timestampUsec / DAY * DAY }) {
-            val parts = known.filter { it.optString("url") == identity.first && it.optLong("dayStartUsec") == identity.second && it.has("part") }
-            if (parts.isNotEmpty()) {
-                parts.forEach { value -> historyValue(value, state)?.let { result[SyncModels.historyId(keys, value)] = it } }
-                val remaining = group.filter { visit -> parts.none { value -> val (start, end) = window(value); visit.timestampUsec in start until end } }
-                if (remaining.isNotEmpty()) {
-                    for ((start, length) in uncoveredHistoryWindows(identity.second, parts.map(::window))) {
-                        splitHistory(identity.first, identity.second, start, length, remaining.filter { it.timestampUsec in start until start + length }, state, keys, result, partitioned = true)
-                    }
-                }
-            } else {
-                val knownValue = identities[identity]
-                if (knownValue != null && group.size <= 2048) historyValue(knownValue, state)?.let { result[SyncModels.historyId(keys, knownValue)] = it }
-                else splitHistory(identity.first, identity.second, identity.second, DAY, group, state, keys, result)
-            }
-        }
-        for (value in known) {
-            val id = SyncModels.historyId(keys, value)
-            if (id !in result) historyValue(value, state)?.let { result[id] = it }
-        }
-        return result
-    }
-    private suspend fun splitHistory(url: String, day: Long, start: Long, length: Long, visits: List<Visit>, state: JSONObject, keys: SyncKeys, result: MutableMap<String, JSONObject>, partitioned: Boolean = false) {
-        if (visits.size > 2048) {
-            requireSync(length > DAY / 8192, "history_record_too_large")
-            val half = length / 2
-            splitHistory(url, day, start, half, visits.filter { it.timestampUsec < start + half }, state, keys, result, true)
-            splitHistory(url, day, start + half, half, visits.filter { it.timestampUsec >= start + half }, state, keys, result, true)
-        } else if (visits.isNotEmpty()) {
-            val value = obj("version" to 1, "url" to url, "dayStartUsec" to day)
-            if (partitioned || length != DAY) value.put("part", obj("startUsec" to start, "lenUsec" to length))
-            historyValue(value, state)?.let { result[SyncModels.historyId(keys, value)] = it }
-        }
-    }
-    private suspend fun historyValue(identity: JSONObject, state: JSONObject, raw: Boolean = false): JSONObject? {
-        val (start, end) = window(identity); val url = identity.getString("url")
+    internal suspend fun historyValue(identity: JSONObject, state: JSONObject, raw: Boolean = false, id: String? = null, pageTitle: String? = null): JSONObject? = history.withTransaction {
+        val (start, end) = window(identity)
+        val url = identity.getString("url")
         val dao = history.historyDao()
-        val visits = dao.syncVisits(url, start, end)
-        if (visits.isEmpty()) return null
-        val value = obj("version" to 1, "url" to url, "title" to (dao.getPage(url)?.title ?: ""), "dayStartUsec" to identity.getLong("dayStartUsec"),
+        val visits = dao.syncWindowPage(url, start, end, 2049)
+        if (visits.isEmpty()) return@withTransaction null
+        requireSync(visits.size <= 2048, "history_record_too_large")
+        val value = obj("version" to 1, "url" to url, "title" to (pageTitle ?: dao.getPage(url)?.title.orEmpty()), "dayStartUsec" to identity.getLong("dayStartUsec"),
             "visits" to JSONArray().apply { visits.forEach { put(obj("atUsec" to it.timestampUsec, "transition" to transition(it.type), "count" to it.count)) } })
         identity.objectOrNull("part")?.let { value.put("part", copy(it)) }
-        val removed = identity.objects("removed").toMutableList()
-        val removals = dao.syncRemovals()
-        identity.objects("visits").forEach { visit ->
-            if (removals.any { (it.url == null || it.url == url) && visit.getLong("atUsec") / 1000 in it.startTime..it.endTime }) {
-                removed.add(obj("atUsec" to visit.getLong("atUsec"), "transition" to visit.getInt("transition")))
+        // Incoming tombstones belong to the remote side of the three-way merge.
+        // Copying them into a local read can produce both a visit and its tombstone,
+        // making a valid offline edit look like an invalid local record.
+        val removalBasis = if (raw) identity else id?.let {
+            state.optJSONObject("mirror")?.optJSONObject(it)?.objectOrNull("value")
+        }
+        val removed = removalBasis?.objects("removed").orEmpty().toMutableList()
+        if (identity.has("visits")) {
+            val removals = dao.syncRemovalsFor(url, start / 1000, (end - 1) / 1000)
+            identity.objects("visits").forEach { visit ->
+                if (removals.any { visit.getLong("atUsec") / 1000 in it.startTime..it.endTime }) {
+                    removed.add(obj("atUsec" to visit.getLong("atUsec"), "transition" to visit.getInt("transition")))
+                }
             }
         }
         if (removed.isNotEmpty()) value.put("removed", JSONArray(removed.distinctBy { it.getLong("atUsec") to it.getInt("transition") }
             .sortedWith(compareBy({ it.getLong("atUsec") }, { it.getInt("transition") }))))
-        if (raw) return value
-        val projection = projections(state).entries().find { (_, entry) -> (entry as? JSONObject)?.getJSONObject("value")?.let {
-            it.optString("url") == url && it.optLong("dayStartUsec") == identity.optLong("dayStartUsec") && same(it.opt("part"), identity.opt("part")) } == true }?.first
-        return if (projection == null) value else projected(state, projection, value)
+        if (raw) return@withTransaction value
+        val projection = id ?: history.syncJournalDao().windows(state.getString("native_scope"), url, identity.getLong("dayStartUsec"))
+            .firstOrNull { it.windowStart == start && it.windowEnd == end }?.id
+        if (projection == null) value else projected(state, projection, value)
+    }
+    override suspend fun markPending(name: String, id: String, hint: JSONObject?, state: JSONObject) {
+        when (name) {
+            "bookmarks" -> bookmarks.syncJournalDao().markLocal("node", indexedNativeId(name, id, state))
+            "history" -> if (hint != null) history.syncJournalDao().markLocal("day", hint.getString("url") + '\u001f' + hint.getLong("dayStartUsec"))
+        }
     }
     override suspend fun canDelete(name: String, id: String, value: JSONObject, state: JSONObject): Boolean = when (name) {
         "history" -> canDeleteHistory(value)
-        "bookmarks" -> bookmarks.bookmarksDao().get(nativeId(state, id)) == null
+        "bookmarks" -> bookmarks.bookmarksDao().get(indexedNativeId(name, id, state)) == null
         "passwords" -> logins.list().none { it.guid == nativeId(state, id) }
         else -> true
     }
     override suspend fun canDeleteHistory(value: JSONObject): Boolean {
-        val removals = history.historyDao().syncRemovals()
+        val (start, end) = window(value)
+        val removals = history.historyDao().syncRemovalsFor(value.getString("url"), start / 1000, (end - 1) / 1000)
         return value.objects("visits").all { visit -> removals.any {
             (it.url == null || it.url == value.getString("url")) && visit.getLong("atUsec") / 1000 in it.startTime..it.endTime
         } }
     }
-    override suspend fun clearHistoryBefore(ms: Long) = history.withTransaction {
+    override suspend fun clearHistoryBefore(ms: Long) = history.remoteSyncWrite(history.syncJournalDao()) {
         history.historyDao().deleteVisitsBefore(ms + 1)
         history.historyDao().prunePages()
     }
@@ -302,13 +314,13 @@ internal class SyncNativeStores @Inject constructor(
         "timeCreated" to address.timeCreated, "timeLastModified" to address.timeLastModified, "timeLastUsed" to (address.timeLastUsed ?: 0), "timesUsed" to address.timesUsed)
     private fun nativeBookmarkParent(id: String) = if (id == "mobile______") LOCAL_ROOT else id
     private fun rootTitle(id: String) = when (id) { "menu________" -> "Bookmarks menu"; "toolbar_____" -> "Bookmarks toolbar"; else -> "Other bookmarks" }
-    private fun window(identity: JSONObject): Pair<Long, Long> = identity.objectOrNull("part")?.let { it.getLong("startUsec") to it.getLong("startUsec") + it.getLong("lenUsec") }
+    internal fun window(identity: JSONObject): Pair<Long, Long> = identity.objectOrNull("part")?.let { it.getLong("startUsec") to it.getLong("startUsec") + it.getLong("lenUsec") }
         ?: (identity.getLong("dayStartUsec") to identity.getLong("dayStartUsec") + DAY)
-    private fun transition(type: VisitType): Int = when (type) {
+    internal fun transition(type: VisitType): Int = when (type) {
         VisitType.TYPED -> 2; VisitType.BOOKMARK -> 3; VisitType.REDIRECT_PERMANENT -> 5; VisitType.REDIRECT_TEMPORARY -> 6
         VisitType.DOWNLOAD -> 7; VisitType.FRAMED_LINK -> 8; VisitType.RELOAD -> 9; else -> 1
     }
-    private fun visitType(type: Int): VisitType = when (type) {
+    internal fun visitType(type: Int): VisitType = when (type) {
         2 -> VisitType.TYPED; 3 -> VisitType.BOOKMARK; 5 -> VisitType.REDIRECT_PERMANENT; 6 -> VisitType.REDIRECT_TEMPORARY
         7 -> VisitType.DOWNLOAD; 8 -> VisitType.FRAMED_LINK; 9 -> VisitType.RELOAD; else -> VisitType.LINK
     }

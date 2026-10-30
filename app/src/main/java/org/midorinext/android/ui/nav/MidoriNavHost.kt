@@ -89,7 +89,11 @@ fun MidoriNavHost(
         },
         popExitTransition = {
             navigationExitTransition(navigationOffset, reduceMotion)
-        }
+        },
+        // Keep opaque native screens full size if a back gesture is interrupted by
+        // another activity. Navigation's default predictive exit scales them to 70%.
+        predictivePopEnterTransition = { EnterTransition.None },
+        predictivePopExitTransition = { ExitTransition.None },
     ) {
         composable(
             route = NavDestination.Browser.match,

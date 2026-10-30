@@ -5,6 +5,8 @@ import org.json.JSONObject
 import java.util.Base64
 
 internal class SyncKeys(private val scope: String) : AutoCloseable {
+    val storageScope: String = java.security.MessageDigest.getInstance("SHA-256")
+        .digest(scope.toByteArray()).joinToString("") { "%02x".format(it) }
     private val data = SyncCrypto()
     private val identity = SyncCrypto()
     private val handles = mutableMapOf<String, Int>()

@@ -13,6 +13,15 @@ data class BookmarkFolderChoice(
 
 @Dao
 interface BookmarksDao {
+    @Query("SELECT * FROM bookmark_node WHERE guid>:after ORDER BY guid LIMIT :limit")
+    suspend fun syncNodePage(after: String, limit: Int): List<BookmarkNode>
+
+    @Query("SELECT * FROM bookmark_node WHERE parentGuid=:parent AND position IS NULL AND guid>:after ORDER BY guid LIMIT :limit")
+    suspend fun syncNullPositionPage(parent: String, after: String, limit: Int): List<BookmarkNode>
+
+    @Query("SELECT COUNT(*) FROM bookmark_node WHERE parentGuid IS :parent AND position IS NULL AND (dateAdded<:added OR (dateAdded=:added AND guid<:guid))")
+    suspend fun syncFallbackIndex(parent: String?, added: Long, guid: String): Int
+
     @Query("SELECT * FROM bookmark_node WHERE parentGuid = :guid " +
         "ORDER BY CASE type WHEN 'SEPARATOR' THEN 0 WHEN 'FOLDER' THEN 1 ELSE 2 END, " +
         "title COLLATE LOCALIZED, guid LIMIT :count OFFSET :offset")

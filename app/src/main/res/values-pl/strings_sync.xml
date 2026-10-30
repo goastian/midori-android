@@ -49,4 +49,8 @@
     <string name="sync_account_update_waiting">Your account is connected. To update an older account, open Midori once on a device that has already synced. This device will continue automatically.</string>
     <string name="sync_retry">Try again</string>
     <string name="sync_error_account_access">Could not finish connecting. Midori will retry automatically.</string>
+    <string name="sync_on">Synchronizacja włączona</string>
+    <string name="sync_off">Synchronizacja wyłączona</string>
+    <string name="sync_guest">Gość</string>
+    <string name="sync_account_settings">Ustawienia synchronizacji</string>
 </resources>
