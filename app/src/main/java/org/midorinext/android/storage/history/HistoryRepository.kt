@@ -77,22 +77,33 @@ class HistoryRepository @Inject constructor(
         !isNativeHomeUrl(uri) && !uri.isMidoriUrl() && !uri.startsWith("moz-extension://") && !uri.startsWith("about:blank")
 
     override suspend fun recordVisit(uri: String, visit: PageVisit) = withContext(Dispatchers.IO) {
-        dao.insertIfNeeded(Page(uri))
-        dao.insert(Visit(uri, System.currentTimeMillis(), visit.visitType))
+        db.withTransaction {
+            dao.insertIfNeeded(Page(uri))
+            dao.insert(Visit(uri, System.currentTimeMillis(), visit.visitType))
+        }
     }
 
     suspend fun recordVisitWithTimestamp(uri: String, visit: PageVisit, timestamp: Long) = withContext(Dispatchers.IO) {
         if (System.currentTimeMillis() - timestamp < TIME_LIMIT) {
-            dao.insertIfNeeded(Page(uri))
-            dao.insert(Visit(uri, timestamp, visit.visitType))
+            db.withTransaction {
+                dao.insertIfNeeded(Page(uri))
+                dao.insert(Visit(uri, timestamp, visit.visitType))
+            }
         }
     }
 
     override suspend fun recordObservation(uri: String, observation: PageObservation) = withContext(Dispatchers.IO) {
-        val page = dao.getPage(uri) ?: Page(uri)
-        observation.title?.let { page.title = it }
-        observation.previewImageUrl?.let { page.previewImageUrl = it }
-        dao.upsert(page)
+        fun observed(previous: Page?) = (previous ?: Page(uri)).copy(
+            title = observation.title ?: previous?.title,
+            previewImageUrl = observation.previewImageUrl ?: previous?.previewImageUrl
+        )
+        val previous = dao.getPage(uri)
+        if (previous == observed(previous)) return@withContext
+        db.withTransaction {
+            val current = dao.getPage(uri)
+            val updated = observed(current)
+            if (current != updated) dao.upsert(updated)
+        }
     }
 
     override suspend fun deleteEverything() = withContext(Dispatchers.IO) {
@@ -193,7 +204,9 @@ class HistoryRepository @Inject constructor(
     }
 
     override suspend fun getVisited(uris: List<String>): List<Boolean> = withContext(Dispatchers.IO) {
-        uris.map { dao.hasVisits(it) }
+        val visited = uris.distinct().chunked(400)
+            .flatMap { dao.getVisitedUris(it) }.toHashSet()
+        uris.map { it in visited }
     }
 
     override suspend fun getVisitsPaginated(

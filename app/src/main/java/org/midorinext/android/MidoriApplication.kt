@@ -245,7 +245,7 @@ class MidoriApplication : Application(), Configuration.Provider {
                 // earlier versions without doing file-system work before the first frame.
                 deleteDatabase(READING_LIST_DATABASE_NAME)
                 migrationUtility.get().checkMigrations()
-                historyRepository.get().runMaintenance(0U)
+                org.midorinext.android.storage.history.HistoryMaintenanceWorker.schedule(this@MidoriApplication)
             }
         }
     }

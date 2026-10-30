@@ -59,6 +59,9 @@ interface HistoryDao {
     @Query("SELECT EXISTS (SELECT 1 FROM visits WHERE pageUri = :url)")
     fun hasVisits(url: String): Boolean
 
+    @Query("SELECT DISTINCT pageUri FROM visits WHERE pageUri IN (:uris)")
+    suspend fun getVisitedUris(uris: List<String>): List<String>
+
     @Query("SELECT * FROM pages WHERE EXISTS (SELECT 1 FROM visits WHERE visits.pageUri = pages.uri)")
     fun getAllPages(): List<Page>
 
@@ -81,7 +84,7 @@ interface HistoryDao {
             "JOIN visits ON uri = pageUri " +
             "AND (type NOT IN (:excludeTypes))" +
             "GROUP BY pages.uri " +
-            "ORDER BY time DESC " +
+            "ORDER BY time DESC, pages.uri ASC " +
             "LIMIT :count OFFSET :offset")
     fun getVisitsPaginated(
         offset: Long,

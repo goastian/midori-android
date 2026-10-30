@@ -35,6 +35,10 @@ fun EngineView(
         )
 
         engineView?.let {
+            DisposableEffect(it) {
+                org.midorinext.android.diagnostics.ScenarioMetrics.surface(it.asView())
+                onDispose { org.midorinext.android.diagnostics.ScenarioMetrics.removeSurface(it.asView()) }
+            }
             latestFeatures(it)
         }
     }

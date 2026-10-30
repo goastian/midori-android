@@ -23,6 +23,7 @@ interface AdBlockUpdateEntryPoint {
 
 class AdBlockUpdateWorker(context: Context, parameters: WorkerParameters) : CoroutineWorker(context, parameters) {
     override suspend fun doWork(): Result {
+        org.midorinext.android.diagnostics.ScenarioMetrics.count(org.midorinext.android.diagnostics.ScenarioMetrics.Event.WORK_EXECUTED)
         val sources = EntryPointAccessors.fromApplication(
             applicationContext, AdBlockUpdateEntryPoint::class.java,
         ).nativeFilterSources()

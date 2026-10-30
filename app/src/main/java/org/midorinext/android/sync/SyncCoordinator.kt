@@ -162,34 +162,38 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
         state.put("selected", JSONArray((if (enabled) selected() + name else selected() - name).toList()))
         save()
     }
-    suspend fun sync() = operation {
-        if (!state.has("session")) return@operation
-        val remaining = state.optLong("retry_at") - System.currentTimeMillis()
-        if (remaining > 0) throw SyncException("rate_limited", 429, (remaining + 999) / 1000)
-        val transport = SyncTransport(state.getString("server"))
-        val capabilities = discover(transport)
-        requireSync(capabilities.getJSONObject("authentication").getString("issuer") == state.getJSONObject("session").getJSONObject("identity").getString("issuer"), "identity_issuer_mismatch")
-        val selected = selected()
-        state.put("unsupported", JSONArray(selected.filter { !SyncModels.supported(capabilities, it) }))
-        run {
-            val keys = connectKeys(transport, capabilities) ?: return@operation
-            state.put("phase", "ready"); save()
-            val engine = SyncEngine(keys, stores, { path, method, body, query -> request(transport, path, method, body, query) }, ::save)
-            val failures = mutableListOf<String>()
-            for (name in selected.filter { SyncModels.supported(capabilities, it) }) {
-                val collections = state.getJSONObject("collections")
-                val collection = collections.objectOrNull(name) ?: JSONObject().also { collections.put(name, it) }
-                try { engine.sync(name, collection); collection.remove("error") }
-                catch (error: Exception) {
-                    if (error is kotlinx.coroutines.CancellationException) throw error
-                    if (error is SyncException && error.status == 429) throw error
-                    val code = (error as? SyncException)?.let { it.code + if (it.status == 0) "" else "_" + it.status } ?: "sync_unavailable"
-                    failures.add("$name:$code"); collection.put("error", code)
+    suspend fun sync(): Unit {
+        org.midorinext.android.diagnostics.ScenarioMetrics.count(org.midorinext.android.diagnostics.ScenarioMetrics.Event.SYNC_REQUESTED)
+        operation {
+            if (!state.has("session")) return@operation
+            val remaining = state.optLong("retry_at") - System.currentTimeMillis()
+            if (remaining > 0) throw SyncException("rate_limited", 429, (remaining + 999) / 1000)
+            org.midorinext.android.diagnostics.ScenarioMetrics.count(org.midorinext.android.diagnostics.ScenarioMetrics.Event.SYNC_EXECUTED)
+            val transport = SyncTransport(state.getString("server"))
+            val capabilities = discover(transport)
+            requireSync(capabilities.getJSONObject("authentication").getString("issuer") == state.getJSONObject("session").getJSONObject("identity").getString("issuer"), "identity_issuer_mismatch")
+            val selected = selected()
+            state.put("unsupported", JSONArray(selected.filter { !SyncModels.supported(capabilities, it) }))
+            run {
+                val keys = connectKeys(transport, capabilities) ?: return@operation
+                state.put("phase", "ready"); save()
+                val engine = SyncEngine(keys, stores, { path, method, body, query -> request(transport, path, method, body, query) }, ::save)
+                val failures = mutableListOf<String>()
+                for (name in selected.filter { SyncModels.supported(capabilities, it) }) {
+                    val collections = state.getJSONObject("collections")
+                    val collection = collections.objectOrNull(name) ?: JSONObject().also { collections.put(name, it) }
+                    try { engine.sync(name, collection); collection.remove("error") }
+                    catch (error: Exception) {
+                        if (error is kotlinx.coroutines.CancellationException) throw error
+                        if (error is SyncException && error.status == 429) throw error
+                        val code = (error as? SyncException)?.let { it.code + if (it.status == 0) "" else "_" + it.status } ?: "sync_unavailable"
+                        failures.add("$name:$code"); collection.put("error", code)
+                    }
+                    save()
                 }
-                save()
+                requireSync(failures.isEmpty(), failures.joinToString(","))
+                state.put("lastSync", System.currentTimeMillis()); save()
             }
-            requireSync(failures.isEmpty(), failures.joinToString(","))
-            state.put("lastSync", System.currentTimeMillis()); save()
         }
     }
     private fun connectKeys(transport: SyncTransport, capabilities: JSONObject): SyncKeys? {

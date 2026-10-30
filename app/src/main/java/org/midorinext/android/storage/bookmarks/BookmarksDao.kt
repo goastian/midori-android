@@ -4,8 +4,29 @@ import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 import mozilla.components.concept.storage.BookmarkNodeType
 
+data class BookmarkFolderChoice(
+    val guid: String,
+    val parentGuid: String?,
+    val title: String?,
+    val hasChildren: Boolean
+)
+
 @Dao
 interface BookmarksDao {
+    @Query("SELECT * FROM bookmark_node WHERE parentGuid = :guid " +
+        "ORDER BY CASE type WHEN 'SEPARATOR' THEN 0 WHEN 'FOLDER' THEN 1 ELSE 2 END, " +
+        "title COLLATE LOCALIZED, guid LIMIT :count OFFSET :offset")
+    suspend fun getChildrenPage(guid: String, offset: Int, count: Int): List<BookmarkNode>
+
+    @Query("SELECT folder.guid, folder.parentGuid, folder.title, " +
+        "EXISTS(SELECT 1 FROM bookmark_node child WHERE child.parentGuid = folder.guid AND child.type = 'FOLDER') AS hasChildren " +
+        "FROM bookmark_node folder WHERE folder.parentGuid = :guid AND folder.type = 'FOLDER' " +
+        "ORDER BY folder.title COLLATE LOCALIZED, folder.guid LIMIT :count OFFSET :offset")
+    suspend fun getFolderChoices(guid: String, offset: Int, count: Int): List<BookmarkFolderChoice>
+
+    @Query("SELECT guid FROM bookmark_node WHERE parentGuid = :guid ORDER BY guid LIMIT :count")
+    suspend fun getChildGuids(guid: String, count: Int): List<String>
+
     @Query("SELECT * FROM bookmark_node ORDER BY parentGuid, position, dateAdded, guid")
     suspend fun syncNodes(): List<BookmarkNode>
 

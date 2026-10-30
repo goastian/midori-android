@@ -3,9 +3,6 @@ package org.midorinext.android.ui.bookmarks
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import android.content.ClipData
-import android.content.ClipDescription
-import android.content.ClipDescription.MIMETYPE_TEXT_URILIST
-import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
@@ -19,18 +16,17 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import org.midorinext.android.R
 import org.midorinext.android.ui.browser.suggest.WebsiteRow
@@ -40,8 +36,9 @@ import org.midorinext.android.ui.widgets.DropdownItem
 import org.midorinext.android.ui.widgets.EmptyPagePlaceholder
 import mozilla.components.concept.storage.BookmarkNode
 import mozilla.components.concept.storage.BookmarkNodeType
-import org.mozilla.reference.browser.storage.BookmarkItemV2
-import java.util.Locale
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import mozilla.components.feature.contextmenu.R as mozacR
 import androidx.core.net.toUri
 
@@ -51,21 +48,22 @@ fun BookmarksList(
     onBrowse: () -> Unit,
     lazyListState: LazyListState = rememberLazyListState()
 ) {
-    val bookmarksUnordered by viewModel.bookmarks.collectAsStateWithLifecycle()
-    val bookmarks by remember(bookmarksUnordered) { derivedStateOf {
-        bookmarksUnordered
-            .sortedWith(compareByDescending<BookmarkNode> { it.type }
-                .thenBy { it.title?.lowercase(Locale.getDefault()) })
-    }}
+    val bookmarks = viewModel.bookmarks.collectAsLazyPagingItems()
 
+    val retainedRows = bookmarks.itemCount
+    SideEffect { org.midorinext.android.diagnostics.ScenarioMetrics.rows(
+        org.midorinext.android.diagnostics.ScenarioMetrics.Rows.BOOKMARKS, retainedRows
+    ) }
     val folder by viewModel.folder.collectAsStateWithLifecycle()
+    LaunchedEffect(viewModel.folderGuid) { lazyListState.scrollToItem(0) }
 
     var editItem: BookmarkNode? by remember { mutableStateOf(null) }
     var moveItem: BookmarkNode? by remember { mutableStateOf(null) }
 
-    if (bookmarks.isNotEmpty()) {
+    if (bookmarks.itemCount > 0 || bookmarks.loadState.refresh is LoadState.Loading) {
         LazyColumn(state = lazyListState) {
-            bookmarks.forEach { bookmark ->
+            items(count = bookmarks.itemCount, key = bookmarks.itemKey { it.guid }) { index ->
+                val bookmark = bookmarks[index] ?: return@items
                 val itemMenu: @Composable RowScope.() -> Unit = {
                     Box {
                         var showMenu by remember { mutableStateOf(false) }
@@ -139,38 +137,36 @@ fun BookmarksList(
                     }
                 }
 
-                item { // TODO add key and animateItemPlacement
-                    when (bookmark.type) {
-                        BookmarkNodeType.ITEM -> WebsiteRowWithIcon(
-                            title = bookmark.title,
-                            url = bookmark.url ?: "",
-                            browserIcons = viewModel.browserIcons,
-                            trailing = itemMenu,
+                when (bookmark.type) {
+                    BookmarkNodeType.ITEM -> WebsiteRowWithIcon(
+                        title = bookmark.title,
+                        url = bookmark.url ?: "",
+                        browserIcons = viewModel.browserIcons,
+                        trailing = itemMenu,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                viewModel.openBookmarkTab(bookmark)
+                                onBrowse()
+                            }
+                            .padding(start = 16.dp)
+                    )
+                    BookmarkNodeType.FOLDER -> WebsiteRow(
+                        title = bookmark.title,
+                        leading = { Icon(
+                            painter = painterResource(id = R.drawable.icons_folder),
+                            contentDescription = "folder icon",
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    viewModel.openBookmarkTab(bookmark)
-                                    onBrowse()
-                                }
-                                .padding(start = 16.dp)
-                        )
-                        BookmarkNodeType.FOLDER -> WebsiteRow(
-                            title = bookmark.title,
-                            leading = { Icon(
-                                painter = painterResource(id = R.drawable.icons_folder),
-                                contentDescription = "folder icon",
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .padding(4.dp)
-                            ) },
-                            trailing = itemMenu,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { viewModel.visitFolder(bookmark.guid) }
-                                .padding(start = 16.dp)
-                        )
-                        BookmarkNodeType.SEPARATOR -> HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
-                    }
+                                .size(32.dp)
+                                .padding(4.dp)
+                        ) },
+                        trailing = itemMenu,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { viewModel.visitFolder(bookmark.guid) }
+                            .padding(start = 16.dp)
+                    )
+                    BookmarkNodeType.SEPARATOR -> HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
                 }
             }
         }
@@ -194,15 +190,12 @@ fun BookmarksList(
         )
     }
 
-    val folderTree by viewModel.folderTree.collectAsStateWithLifecycle()
     moveItem?.let { item ->
-        folderTree?.let { folderTree ->
-            BookmarkMoveDialog(
-                item = item,
-                folderTree = folderTree,
-                onSubmit = { to -> viewModel.moveBookmark(item, to) },
-                onDismiss = { moveItem = null }
-            )
-        }
+        BookmarkMoveDialog(
+            item = item,
+            viewModel = viewModel,
+            onSubmit = { to -> viewModel.moveBookmark(item, to) },
+            onDismiss = { moveItem = null }
+        )
     }
 }

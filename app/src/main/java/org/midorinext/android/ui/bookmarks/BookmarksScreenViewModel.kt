@@ -4,21 +4,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.paging.cachedIn
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import org.midorinext.android.storage.bookmarks.BookmarksRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.concept.storage.BookmarkInfo
@@ -65,33 +63,12 @@ class BookmarksScreenViewModel @Inject constructor(
         )
 
     val bookmarks = snapshotFlow { folderGuid }
-        .flatMapLatest { bookmarksRepository.getBookmarksInFolderFlow(it) }
-        .distinctUntilChanged()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = listOf()
-        )
+        .flatMapLatest { bookmarksRepository.bookmarksPager(it) }
+        .cachedIn(viewModelScope)
 
-    private var folderTreeStateFlow: MutableStateFlow<BookmarkNode?> = MutableStateFlow(null)
-    val folderTree = folderTreeStateFlow
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = null
-        )
+    fun destinationFolders(guid: String) = bookmarksRepository.folderChoices(guid)
 
-    init {
-        loadFolderTree()
-    }
-
-    private fun loadFolderTree() {
-        viewModelScope.launch(Dispatchers.IO) {
-            folderTreeStateFlow.update {
-                bookmarksRepository.getFolderTree(bookmarksRepository.root.guid)
-            }
-        }
-    }
+    suspend fun destinationAncestors(guid: String?) = bookmarksRepository.folderAncestors(guid)
 
     fun visitFolder(folderGuid: String) {
         this.folderGuid = folderGuid
@@ -100,13 +77,13 @@ class BookmarksScreenViewModel @Inject constructor(
     fun addFolder(title: String, parentGuid: String? = null) {
         viewModelScope.launch(Dispatchers.IO) {
             bookmarksRepository.addFolder(parentGuid ?: bookmarksRepository.root.guid, title)
-        }.invokeOnCompletion { this.loadFolderTree() }
+        }
     }
 
     fun deleteBookmark(item: BookmarkNode) {
         viewModelScope.launch(Dispatchers.IO) {
             bookmarksRepository.deleteNode(item.guid)
-        }.invokeOnCompletion { this.loadFolderTree() }
+        }
     }
 
     fun editBookmark(item: BookmarkNode, title: String, url: String? = null) {
@@ -117,7 +94,7 @@ class BookmarksScreenViewModel @Inject constructor(
                 parentGuid = null,
                 position = null
             ))
-        }.invokeOnCompletion { this.loadFolderTree() }
+        }
     }
 
     fun moveBookmark(item: BookmarkNode, toGuid: String?) {
@@ -128,7 +105,7 @@ class BookmarksScreenViewModel @Inject constructor(
                 url = null,
                 position = null
             ))
-        }.invokeOnCompletion { this.loadFolderTree() }
+        }
     }
 
     fun openBookmarkTab(item: BookmarkNode, private: Boolean = false, forceNewTab: Boolean = false) {

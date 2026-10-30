@@ -50,6 +50,7 @@ internal interface SyncWorkerEntryPoint { fun syncCoordinator(): SyncCoordinator
 
 class SyncWorker(context: Context, parameters: WorkerParameters) : CoroutineWorker(context, parameters) {
     override suspend fun doWork(): Result {
+        org.midorinext.android.diagnostics.ScenarioMetrics.count(org.midorinext.android.diagnostics.ScenarioMetrics.Event.WORK_EXECUTED)
         val coordinator = EntryPointAccessors.fromApplication(applicationContext, SyncWorkerEntryPoint::class.java).syncCoordinator()
         return runCatching { coordinator.sync(); Result.success() }.getOrElse { Result.retry() }
     }

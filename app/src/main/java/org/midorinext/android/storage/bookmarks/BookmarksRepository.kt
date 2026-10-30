@@ -1,6 +1,12 @@
 package org.midorinext.android.storage.bookmarks
 
 import android.content.Context
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.map
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.CancellationException
 import androidx.room.withTransaction
 import org.midorinext.android.R
 import org.midorinext.android.suggest.Suggestion
@@ -50,14 +56,31 @@ class BookmarksRepository @Inject constructor(
     fun isUrlBookmarkedFlow(url: String): Flow<Boolean> =
         dao.isUrlBookmarkedFlow(url).flowOn(Dispatchers.IO)
 
-    suspend fun getFolderTree(guid: String): BookmarkNode? = withContext(Dispatchers.IO) {
-        val children = dao.getChildren(guid, BookmarkNodeType.FOLDER)
-            .mapNotNull { child -> this@BookmarksRepository.getFolderTree(child.guid) }
-        when (guid) {
-            root.guid -> root.copy(children = children)
-            else -> dao.get(guid)?.toMozillaBookmarkNode(children)
+    fun bookmarksPager(guid: String) = Pager(pageConfig()) {
+        BookmarksPagingSource(db) { offset, count -> dao.getChildrenPage(guid, offset, count) }
+    }.flow.map { data -> data.map { it.toMozillaBookmarkNode() } }
+
+    fun folderChoices(guid: String) = Pager(pageConfig()) {
+        BookmarksPagingSource(db) { offset, count -> dao.getFolderChoices(guid, offset, count) }
+    }.flow
+
+    suspend fun folderAncestors(guid: String?): List<BookmarkFolderChoice> = withContext(Dispatchers.IO) {
+        val path = mutableListOf<BookmarkFolderChoice>()
+        val seen = mutableSetOf<String>()
+        var current = guid
+        while (current != null && current != root.guid && seen.add(current)) {
+            currentCoroutineContext().ensureActive()
+            val node = dao.get(current) ?: break
+            path += BookmarkFolderChoice(node.guid, node.parentGuid, node.title, true)
+            current = node.parentGuid
         }
+        listOf(BookmarkFolderChoice(root.guid, null, root.title, true)) + path.asReversed()
     }
+
+    private fun pageConfig() = PagingConfig(
+        pageSize = 50, initialLoadSize = 100, prefetchDistance = 25,
+        maxSize = 300, enablePlaceholders = false
+    )
 
     override suspend fun addFolder(
         parentGuid: String,
@@ -110,26 +133,57 @@ class BookmarksRepository @Inject constructor(
         Result.success(guid)
     }
 
-    override suspend fun insertTree(tree: InsertableBookmarkTreeRoot): Result<String> = withContext(Dispatchers.IO) {
-        runCatching {
-            insertTreeNode(
-                node = tree.rootFolder,
-                parentGuid = tree.parentGuid,
-                fallbackPosition = tree.rootFolder.position
-            )
+    override suspend fun insertTree(tree: InsertableBookmarkTreeRoot): Result<String> =
+        insertTreeWithProgress(tree)
+
+    suspend fun insertTreeWithProgress(
+        tree: InsertableBookmarkTreeRoot,
+        onProgress: (Int) -> Unit = {}
+    ): Result<String> = withContext(Dispatchers.IO) {
+        var inserted = 0
+        try {
+            val guid = db.withTransaction {
+                val insertedGuid = insertTreeNode(tree.rootFolder, tree.parentGuid, tree.rootFolder.position) {
+                    inserted++
+                    if (inserted % 100 == 0) onProgress(inserted)
+                }
+                onProgress(inserted)
+                insertedGuid
+            }
+            Result.success(guid)
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            Result.failure(error)
         }
     }
 
-    override suspend fun deleteNode(guid: String): Result<Boolean> = withContext(Dispatchers.IO) {
+    override suspend fun deleteNode(guid: String): Result<Boolean> = deleteNodeWithProgress(guid)
+
+    suspend fun deleteNodeWithProgress(guid: String, onProgress: (Int) -> Unit = {}): Result<Boolean> = withContext(Dispatchers.IO) {
         db.withTransaction {
-            suspend fun remove(id: String, visited: MutableSet<String>) {
-                if (!visited.add(id)) return
-                dao.getChildren(id).forEach { remove(it.guid, visited) }
-                dao.deleteByGuid(id)
+            if (!dao.alreadyExists(guid)) return@withTransaction Result.success(false)
+            val pending = java.util.ArrayDeque<String>().apply { add(guid) }
+            val visited = mutableSetOf(guid)
+            var deleted = 0
+            while (pending.isNotEmpty()) {
+                currentCoroutineContext().ensureActive()
+                val id = pending.last
+                val children = dao.getChildGuids(id, 100)
+                if (children.isEmpty()) {
+                    dao.deleteByGuid(id)
+                    pending.removeLast()
+                    deleted++
+                    if (deleted % 100 == 0) onProgress(deleted)
+                } else {
+                    children.forEach { child ->
+                        check(visited.add(child)) { "Cyclic bookmark hierarchy" }
+                        pending.add(child)
+                    }
+                }
             }
-            val exists = dao.alreadyExists(guid)
-            if (exists) remove(guid, mutableSetOf())
-            Result.success(exists)
+            onProgress(deleted)
+            Result.success(true)
         }
     }
 
@@ -178,16 +232,26 @@ class BookmarksRepository @Inject constructor(
     }
 
     override suspend fun updateNode(guid: String, info: BookmarkInfo): Result<Unit> = withContext(Dispatchers.IO) {
-        val bookmark = dao.get(guid)
-        bookmark?.let { b ->
-            info.parentGuid?.let { b.parentGuid = it }
-            info.title?.let { b.title = it }
-            info.url?.let { b.url = it }
-            info.position?.let { b.position = it.toInt() }
-            dao.update(b)
-            return@withContext Result.success(Unit)
+        db.withTransaction {
+            if (info.parentGuid != null) {
+                val seen = mutableSetOf<String>()
+                var parent: String? = info.parentGuid
+                while (parent != null && parent != root.guid) {
+                    currentCoroutineContext().ensureActive()
+                    if (parent == guid || !seen.add(parent)) return@withTransaction Result.failure(IllegalArgumentException("Cyclic bookmark move"))
+                    val ancestor = dao.get(parent) ?: return@withTransaction Result.failure(IllegalArgumentException("Missing bookmark parent"))
+                    if (ancestor.type != BookmarkNodeType.FOLDER) return@withTransaction Result.failure(IllegalArgumentException("Invalid bookmark parent"))
+                    parent = ancestor.parentGuid
+                }
+            }
+            val bookmark = dao.get(guid) ?: return@withTransaction Result.failure(IllegalArgumentException("Bookmark not found"))
+            info.parentGuid?.let { bookmark.parentGuid = it }
+            info.title?.let { bookmark.title = it }
+            info.url?.let { bookmark.url = it }
+            info.position?.let { bookmark.position = it.toInt() }
+            dao.update(bookmark)
+            Result.success(Unit)
         }
-        return@withContext Result.failure(Throwable("Bookmark not found"))
     }
 
     override suspend fun getSuggestions(text: String): List<Suggestion> = withContext(Dispatchers.IO) {
@@ -207,8 +271,10 @@ class BookmarksRepository @Inject constructor(
     private suspend fun insertTreeNode(
         node: InsertableBookmarkTreeNode,
         parentGuid: String,
-        fallbackPosition: UInt?
+        fallbackPosition: UInt?,
+        onInserted: () -> Unit
     ): String {
+        currentCoroutineContext().ensureActive()
         val guid = getNewGuid()
         val position = node.position ?: fallbackPosition
         when (node) {
@@ -223,7 +289,7 @@ class BookmarksRepository @Inject constructor(
                     dateAdded = node.dateAddedTimestamp
                 ))
                 node.children.forEachIndexed { index, child ->
-                    insertTreeNode(child, guid, child.position ?: index.toUInt())
+                    insertTreeNode(child, guid, child.position ?: index.toUInt(), onInserted)
                 }
             }
             is InsertableBookmarkTreeNode.Item -> {
@@ -249,6 +315,7 @@ class BookmarksRepository @Inject constructor(
                 ))
             }
         }
+        onInserted()
         return guid
     }
 

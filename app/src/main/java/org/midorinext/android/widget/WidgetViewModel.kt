@@ -59,6 +59,11 @@ class WidgetViewModel @Inject constructor(
         private set
 
     init {
+        val reference = java.lang.ref.WeakReference(session)
+        org.midorinext.android.diagnostics.ScenarioMetrics.inventory(this) {
+            reference.get()?.let { listOf(org.midorinext.android.diagnostics.ScenarioMetrics.Session(it, false, listOf("widget"))) }.orEmpty()
+        }
+        org.midorinext.android.diagnostics.ScenarioMetrics.count(org.midorinext.android.diagnostics.ScenarioMetrics.Event.SESSION_CREATED)
         memoryBudget.register(this) {}
         memoryBudget.update(this, listOf(org.midorinext.android.mozac.ResidentTab("widget-${System.identityHashCode(this)}", 0, true)))
         viewModelScope.launch {
@@ -78,6 +83,8 @@ class WidgetViewModel @Inject constructor(
 
     override fun onCleared() {
         memoryBudget.unregister(this)
+        org.midorinext.android.diagnostics.ScenarioMetrics.remove(this)
+        org.midorinext.android.diagnostics.ScenarioMetrics.count(org.midorinext.android.diagnostics.ScenarioMetrics.Event.SESSION_CLOSED)
         session.close()
         super.onCleared()
     }
