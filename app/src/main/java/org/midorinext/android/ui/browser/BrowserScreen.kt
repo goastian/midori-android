@@ -388,7 +388,6 @@ fun BrowserScreen(
                 ) {
                     EngineView(
                         engine = viewModel.engine,
-                        isFullScreen = isFullScreen,
                         modifier = Modifier.fillMaxSize()
                     ) { engineView ->
                         engineViewHolder = engineView

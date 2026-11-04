@@ -29,10 +29,13 @@ fun GlobalFeatures(
     viewModel: BrowserScreenViewModel = hiltViewModel(),
     onManageLogins: (() -> Unit)? = null,
 ) {
+    MediaFullscreenFeature(engine = viewModel.engine, store = viewModel.store)
+
     FullScreenFeature(
         store = viewModel.store,
         toolbarState = viewModel.toolbarState,
-        sessionUseCases = viewModel.sessionUseCases
+        sessionUseCases = viewModel.sessionUseCases,
+        onEnterFullscreen = { viewModel.updateShowFindInPage(false) },
     )
 
     WindowFeature(

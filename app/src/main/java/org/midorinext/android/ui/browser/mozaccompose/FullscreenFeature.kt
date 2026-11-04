@@ -17,9 +17,11 @@ import mozilla.components.support.ktx.android.view.exitImmersiveMode
 fun FullScreenFeature(
     store: BrowserStore,
     toolbarState: BrowserToolbarState,
-    sessionUseCases: SessionUseCases
+    sessionUseCases: SessionUseCases,
+    onEnterFullscreen: () -> Unit = {},
 ) {
     val activity = LocalContext.current.activity
+    val onEnter by rememberUpdatedState(onEnterFullscreen)
     var fullScreenEnabled by remember(store) { mutableStateOf(store.state.selectedTab?.content?.fullScreen ?: false) }
     val fullScreenFeature = remember(store, sessionUseCases, activity, toolbarState) {
         FullScreenFeature(
@@ -37,6 +39,7 @@ fun FullScreenFeature(
             fullScreenChanged = { enabled ->
                 fullScreenEnabled = enabled
                 if (enabled) {
+                    onEnter()
                     toolbarState.updateFocus(false)
                     activity?.forceHideKeyboard()
                     activity?.enterImmersiveMode()

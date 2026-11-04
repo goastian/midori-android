@@ -18,7 +18,6 @@ import org.mozilla.geckoview.GeckoView
 fun EngineView(
     engine: Engine,
     modifier: Modifier = Modifier,
-    isFullScreen: Boolean = false,
     features: @Composable BoxScope.(EngineView) -> Unit = {},
 ) {
     var engineView: EngineView? by remember { mutableStateOf(null) }
@@ -32,6 +31,10 @@ fun EngineView(
             factory = { context ->
                 engine.createView(context).asView().apply {
                     this.isNestedScrollingEnabled = true
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+                        // Configure before attaching: swapping during fullscreen can interrupt decoding and orientation locks.
+                        findGeckoView(this)?.setViewBackend(GeckoView.BACKEND_TEXTURE_VIEW)
+                    }
                 }
             },
             update = { view ->
@@ -40,18 +43,6 @@ fun EngineView(
         )
 
         engineView?.let {
-            val geckoView = remember(it) { findGeckoView(it.asView()) }
-            var textureBackendEnabled by remember(it) { mutableStateOf(false) }
-            SideEffect {
-                if (geckoView != null && !textureBackendEnabled && isFullScreen &&
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA
-                ) {
-                    // Android 16 can retain SurfaceView's old crop during fullscreen resizes.
-                    // Keep the backend for this view's lifetime so exiting does not interrupt video.
-                    geckoView.setViewBackend(GeckoView.BACKEND_TEXTURE_VIEW)
-                    textureBackendEnabled = true
-                }
-            }
             DisposableEffect(it) {
                 org.midorinext.android.diagnostics.ScenarioMetrics.surface(it.asView())
                 onDispose { org.midorinext.android.diagnostics.ScenarioMetrics.removeSurface(it.asView()) }
