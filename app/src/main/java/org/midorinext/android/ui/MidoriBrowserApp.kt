@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -20,6 +21,7 @@ import org.midorinext.android.ui.theme.MidoriBrowserTheme
 import org.midorinext.android.ui.theme.darkColorScheme
 import org.midorinext.android.ui.theme.lightColorScheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -68,6 +70,8 @@ fun MidoriBrowserApp(
     val navController = rememberNavController()
     val currentDestination by navController.currentBackStackEntryAsState()
     val trayIsVisible = currentDestination?.destination?.route == NavDestination.Tabs.match
+    val isFullScreen = browserUiState?.isFullScreen == true &&
+        currentDestination?.destination?.route == NavDestination.Browser.match
     var trayPrivacy by remember(currentDestination?.id) { mutableStateOf<Boolean?>(null) }
     val isPrivate = browserUiState?.isPrivate == true
     val appearance = preferences.appearance
@@ -119,6 +123,7 @@ fun MidoriBrowserApp(
         } else {
             Scaffold(
                 modifier = Modifier.imePadding(),
+                contentWindowInsets = if (isFullScreen) WindowInsets(0, 0, 0, 0) else ScaffoldDefaults.contentWindowInsets,
                 snackbarHost = {
                     SnackbarHost(
                         hostState = applicationViewModel.snackbarHostState,

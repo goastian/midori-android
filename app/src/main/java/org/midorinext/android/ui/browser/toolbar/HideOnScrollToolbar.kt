@@ -25,6 +25,7 @@ fun HideOnScrollToolbar(
     toolbar: @Composable (Modifier) -> Unit,
     engineView: EngineView?,
     modifier: Modifier = Modifier,
+    isFullScreen: Boolean = false,
     lock: () -> Boolean = { false },
     content: @Composable (Modifier) -> Unit = {},
 ) {
@@ -44,11 +45,11 @@ fun HideOnScrollToolbar(
         consecutiveThreshold = 4 // if (position == HideOnScrollPosition.Top) 4 else 1
     )
 
-    val contentModifier = if (!lock() && shouldHideOnScroll) {
+    val contentModifier = if (!isFullScreen && !lock() && shouldHideOnScroll) {
         Modifier.nestedScroll(nestedScrollConnection)
     } else Modifier
 
-    val dynamicToolbar = shouldHideOnScroll && !lock()
+    val dynamicToolbar = !isFullScreen && shouldHideOnScroll && !lock()
     val visible = !dynamicToolbar || toolbarState.visible || toolbarState.hasFocus
     val atBottom = toolbarPosition == ToolbarPosition.BOTTOM
     val toolbarHeightPx = with(LocalDensity.current) { ToolbarHeight.roundToPx() }
@@ -66,7 +67,9 @@ fun HideOnScrollToolbar(
     }
 
     // Translate a stable surface and let Gecko adjust its viewport without synchronous buffer resizes.
-    val viewportModifier = if (dynamicToolbar) {
+    val viewportModifier = if (isFullScreen) {
+        Modifier.fillMaxSize()
+    } else if (dynamicToolbar) {
         Modifier.fillMaxSize().offset(y = if (visible && !atBottom) ToolbarHeight else 0.dp)
     } else {
         Modifier.fillMaxSize().padding(
@@ -77,30 +80,32 @@ fun HideOnScrollToolbar(
 
     Box(modifier = modifier.clipToBounds()) {
         content(viewportModifier.then(contentModifier))
-        if (toolbarState.hasFocus) {
-            toolbar(Modifier.fillMaxSize().zIndex(2f))
-        } else if (dynamicToolbar) {
-            DrawAnimatedToolbar(
-                visible = visible,
-                toolbarPosition = toolbarPosition,
-                toolbar = toolbar,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(
-                        if (toolbarPosition == ToolbarPosition.BOTTOM) {
-                            Alignment.BottomCenter
-                        } else {
-                            Alignment.TopCenter
-                        }
-                    )
-                    .zIndex(2f),
-            )
-        } else {
-            toolbar(
-                Modifier.fillMaxWidth()
-                    .align(if (atBottom) Alignment.BottomCenter else Alignment.TopCenter)
-                    .zIndex(2f)
-            )
+        if (!isFullScreen) {
+            if (toolbarState.hasFocus) {
+                toolbar(Modifier.fillMaxSize().zIndex(2f))
+            } else if (dynamicToolbar) {
+                DrawAnimatedToolbar(
+                    visible = visible,
+                    toolbarPosition = toolbarPosition,
+                    toolbar = toolbar,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(
+                            if (toolbarPosition == ToolbarPosition.BOTTOM) {
+                                Alignment.BottomCenter
+                            } else {
+                                Alignment.TopCenter
+                            }
+                        )
+                        .zIndex(2f),
+                )
+            } else {
+                toolbar(
+                    Modifier.fillMaxWidth()
+                        .align(if (atBottom) Alignment.BottomCenter else Alignment.TopCenter)
+                        .zIndex(2f)
+                )
+            }
         }
     }
 }

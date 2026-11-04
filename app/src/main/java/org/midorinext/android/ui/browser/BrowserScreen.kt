@@ -228,13 +228,13 @@ fun BrowserScreen(
         )
     }
 
-    BackHandler(enabled = appPrefs.closeTabsOnExit) {
+    BackHandler(enabled = appPrefs.closeTabsOnExit && !isFullScreen) {
         appViewModel.quit { context.activity?.quit() }
     }
 
     // Register before the engine handler so page history and text selection take priority.
     // A tab opened by a site returns to its opener when it has no history of its own.
-    BackHandler(enabled = hasParentTab) {
+    BackHandler(enabled = hasParentTab && !isFullScreen) {
         viewModel.returnToParentTab()
     }
 
@@ -334,6 +334,7 @@ fun BrowserScreen(
             },
             engineView = engineViewHolder,
             modifier = Modifier.fillMaxWidth().weight(1f),
+            isFullScreen = isFullScreen,
             lock = { viewModel.showFindInPage || nativeHome || privateHome || blankPage }
         ) { modifier ->
             if (nativeHome) {
@@ -375,7 +376,7 @@ fun BrowserScreen(
                 PullToRefreshBox(
                     onRefresh = { viewModel.reloadUrl() },
                     enabled = {
-                        appPrefs.pullToRefreshEnabled &&
+                        !isFullScreen && appPrefs.pullToRefreshEnabled &&
                         engineViewHolder?.canScrollVerticallyUp() == false &&
                         engineViewHolder?.getInputResultDetail()?.let {
                             it.canOverscrollTop() &&
@@ -387,6 +388,7 @@ fun BrowserScreen(
                 ) {
                     EngineView(
                         engine = viewModel.engine,
+                        isFullScreen = isFullScreen,
                         modifier = Modifier.fillMaxSize()
                     ) { engineView ->
                         engineViewHolder = engineView
@@ -398,7 +400,7 @@ fun BrowserScreen(
     }
 
     // Register after the engine session handler so Back exits Reader View before navigating away.
-    BackHandler(enabled = readerModeStatus.isActive) {
+    BackHandler(enabled = readerModeStatus.isActive && !isFullScreen) {
         readerViewFeature?.onBackPressed()
     }
 }

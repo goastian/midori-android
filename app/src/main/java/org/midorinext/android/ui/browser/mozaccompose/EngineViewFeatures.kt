@@ -17,13 +17,14 @@ fun BoxScope.EngineViewFeatures(
     viewModel: BrowserScreenViewModel = hiltViewModel(),
 ) {
     val canGoBack by viewModel.canGoBackInPage.collectAsStateWithLifecycle()
+    val isFullScreen by viewModel.isFullScreen.collectAsStateWithLifecycle()
     SessionFeature(
         engineView = engineView,
         store = viewModel.store,
         canGoBack = canGoBack,
         goBackUseCase = viewModel.sessionUseCases.goBack,
         goForwardUseCase = viewModel.goForward,
-        backEnabled = { !viewModel.toolbarState.hasFocus }
+        backEnabled = { !isFullScreen && !viewModel.toolbarState.hasFocus }
     )
 
     ThumbnailFeature(
@@ -34,7 +35,7 @@ fun BoxScope.EngineViewFeatures(
     FindInPageFeature(
         engineView = engineView,
         store = viewModel.store,
-        enabled = { viewModel.showFindInPage },
+        enabled = { !isFullScreen && viewModel.showFindInPage },
         onDismiss = { viewModel.updateShowFindInPage(false) },
         modifier = Modifier.align(Alignment.BottomCenter)
     )

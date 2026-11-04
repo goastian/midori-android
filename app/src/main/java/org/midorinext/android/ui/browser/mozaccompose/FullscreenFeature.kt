@@ -20,37 +20,44 @@ fun FullScreenFeature(
     sessionUseCases: SessionUseCases
 ) {
     val activity = LocalContext.current.activity
-    var fullScreenEnabled by remember { mutableStateOf(store.state.selectedTab?.content?.fullScreen ?: false) }
-
-    val fullScreenChanged: (Boolean) -> Unit = { enabled ->
-        fullScreenEnabled = enabled
-        if (enabled) {
-            activity?.enterImmersiveMode()
-            toolbarState.updateVisibility(false)
-        } else {
-            activity?.exitImmersiveMode()
-            toolbarState.updateVisibility(true)
-        }
-    }
-
-    val viewportFitChanged: (Int) -> Unit = { viewportFit ->
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            activity?.let {
-                it.window.attributes.layoutInDisplayCutoutMode = viewportFit
-            }
-        }
-    }
-
-    val fullScreenFeature = remember(viewportFitChanged, fullScreenChanged) {
+    var fullScreenEnabled by remember(store) { mutableStateOf(store.state.selectedTab?.content?.fullScreen ?: false) }
+    val fullScreenFeature = remember(store, sessionUseCases, activity, toolbarState) {
         FullScreenFeature(
             store,
             sessionUseCases,
-            viewportFitChanged = viewportFitChanged,
-            fullScreenChanged = fullScreenChanged
+            viewportFitChanged = { viewportFit ->
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    activity?.window?.let { window ->
+                        window.attributes = window.attributes.apply {
+                            layoutInDisplayCutoutMode = viewportFit
+                        }
+                    }
+                }
+            },
+            fullScreenChanged = { enabled ->
+                fullScreenEnabled = enabled
+                if (enabled) {
+                    toolbarState.updateFocus(false)
+                    activity?.forceHideKeyboard()
+                    activity?.enterImmersiveMode()
+                } else {
+                    activity?.exitImmersiveMode()
+                }
+                toolbarState.updateVisibility(!enabled)
+            },
         )
     }
 
-    ComposeFeatureWrapper(feature = fullScreenFeature)
+    DisposableEffect(fullScreenFeature) {
+        fullScreenFeature.start()
+        onDispose {
+            fullScreenFeature.stop()
+            if (fullScreenEnabled) {
+                activity?.exitImmersiveMode()
+                toolbarState.updateVisibility(true)
+            }
+        }
+    }
 
     BackHandler(fullScreenEnabled) {
         sessionUseCases.exitFullscreen()

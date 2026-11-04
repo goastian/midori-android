@@ -482,7 +482,7 @@ function connectNativePort() {
             }
             readerView.show(doc, articleUrl, options);
           } catch (e) {
-            // eslint-disable-next-line no-console
+             
             console.log(e);
             // We weren't able to find the prepared document and also
             // failed to fetch it. Let's load the original page which

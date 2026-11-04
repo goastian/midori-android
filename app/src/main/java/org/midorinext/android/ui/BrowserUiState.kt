@@ -7,7 +7,11 @@ import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.BrowserState
 import org.midorinext.android.preferences.app.AppPreferences
 
-data class BrowserUiState(val preferences: AppPreferences, val isPrivate: Boolean)
+data class BrowserUiState(
+    val preferences: AppPreferences,
+    val isPrivate: Boolean,
+    val isFullScreen: Boolean = false,
+)
 
 internal fun browserUiStates(
     preferences: Flow<AppPreferences?>,
@@ -17,5 +21,9 @@ internal fun browserUiStates(
 
 internal fun resolvedBrowserUiState(preferences: AppPreferences?, state: BrowserState): BrowserUiState? {
     if (preferences == null || (!state.restoreComplete && state.selectedTab == null)) return null
-    return BrowserUiState(preferences, state.selectedTab?.content?.private == true)
+    return BrowserUiState(
+        preferences,
+        state.selectedTab?.content?.private == true,
+        state.selectedTab?.content?.fullScreen == true,
+    )
 }
