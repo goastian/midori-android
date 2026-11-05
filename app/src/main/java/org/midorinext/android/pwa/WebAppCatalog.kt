@@ -5,7 +5,7 @@ data class WebAppSuggestion(val name: String, val url: String)
 /** Sites with useful standalone experiences. Offline access depends on each site. */
 object WebAppCatalog {
     val suggestions = listOf(
-        WebAppSuggestion("P2P.me", "https://app.p2p.me/"),
+        WebAppSuggestion("MiWallet", "https://midoriwallet.com/wallet"),
         WebAppSuggestion("Telegram", "https://web.telegram.org/"),
         WebAppSuggestion("Discord", "https://discord.com/app"),
         WebAppSuggestion("X", "https://x.com/"),
@@ -46,5 +46,6 @@ object WebAppCatalog {
         WebAppSuggestion("Chess.com", "https://www.chess.com/"),
         WebAppSuggestion("Lichess", "https://lichess.org/"),
         WebAppSuggestion("GeoGuessr", "https://www.geoguessr.com/"),
+        WebAppSuggestion("P2P.me", "https://app.p2p.me/"),
     )
 }
