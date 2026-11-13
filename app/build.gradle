@@ -102,7 +102,7 @@ android {
         minSdk 26
         targetSdk 36
         versionCode configuredPlaystoreVersionCode
-        versionName "11.9.5"
+        versionName "11.9.5.1"
         buildConfigField "String", "ADBLOCK_BUNDLE_VERSION", groovy.json.JsonOutput.toJson(
                 new groovy.json.JsonSlurper().parse(file("src/main/assets/adblock/content/manifest.json")).version)
 
@@ -177,8 +177,6 @@ android {
         original {
             dimension "version"
             getIsDefault().set(true)
-            buildConfigField("String", "QWANT_BASE_URL", '"https://astiango.com"')
-            buildConfigField("String", "QWANT_API_BASE_URL", '"https://api.qwant.com/v3"')
             manifestPlaceholders += [WIDGET_ACTION: "org.midorinext.android.intent.action.WIDGET"]
             buildConfigField("String", "WIDGET_ACTION", '"org.midorinext.android.intent.action.WIDGET"')
         }
