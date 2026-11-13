@@ -16,6 +16,8 @@ object AppPreferencesSerializer : Serializer<AppPreferences> {
         .setTabsView(TabsViewOption.GRID)
         .setCloseTabsOnExit(false)
         .setOpenLinksInApp(true)
+        .setSearchEngine(SearchEnginePreference.GOOGLE)
+        .setPrivateSearchEngine(SearchEnginePreference.GOOGLE)
         .setClearDataOnQuit(false)
         .setClearDataHistory(true)
         .setClearDataTabs(true)

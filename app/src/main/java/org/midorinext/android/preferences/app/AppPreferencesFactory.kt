@@ -14,6 +14,7 @@ object AppPreferencesFactory {
             produceFile = { context.dataStoreFile(FILENAME) },
             migrations = listOf(
                 AppPreferencesMigration.create(context),
+                RetiredSearchEngineMigration,
                 HttpsOnlyAllTabsMigration,
                 HomeShortcutIdsMigration,
             ),

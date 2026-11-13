@@ -122,13 +122,12 @@ internal class SafeAutocompleteStorageDelegate(
             if (!preferenceState.cardAutofillEnabled) {
                 emptyArray()
             } else {
-                val key = creditCardsAddressesDelegate.getOrGenerateKey()
                 creditCardsAddressesDelegate.onCreditCardsFetch().mapNotNull { card ->
-                    creditCardsAddressesDelegate.decrypt(key, card.encryptedCardNumber)?.let { number ->
+                    card.cardNumber.takeIf { it.isNotBlank() }?.let { number ->
                         Autocomplete.CreditCard.Builder()
                             .guid(card.guid)
                             .name(card.billingName)
-                            .number(number.number)
+                            .number(number)
                             .expirationMonth(card.expiryMonth.toString())
                             .expirationYear(card.expiryYear.toString())
                             .build()

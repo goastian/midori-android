@@ -120,13 +120,12 @@ public class Assist extends AppCompatActivity {
         webview.getSettings().setDomStorageEnabled(true);
 
         webview.setWebViewClient(new WebViewClient() {
-            // If we get out of astiango.org, it opens in the browser, else stay in webview
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 if (!request.isForMainFrame()) return false;
                 Uri uri = request.getUrl();
                 String host = uri.getHost();
-                if (host != null && host.contains("astiango.org")) {
+                if (host != null && (host.equals("www.google.com") || host.equals("google.com"))) {
                     return false;
                 }
                 new_tab_intent.setData(uri);

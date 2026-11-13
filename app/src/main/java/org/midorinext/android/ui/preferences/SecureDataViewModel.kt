@@ -15,7 +15,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import mozilla.components.concept.storage.Address
 import mozilla.components.concept.storage.CreditCard
-import mozilla.components.concept.storage.CreditCardNumber
 import mozilla.components.concept.storage.Login
 import mozilla.components.concept.storage.NewCreditCardFields
 import mozilla.components.concept.storage.UpdatableAddressFields
@@ -61,7 +60,7 @@ class SecureDataViewModel @Inject constructor(
     fun loadAutofill() = launchOperation { refreshAutofill() }
 
     private suspend fun refreshAutofill() {
-        val cards = autofillStorage.getAllCreditCards()
+        val cards = autofillStorage.getAllCreditCards().map { it.copy(cardNumber = "") }
         val addresses = autofillStorage.getAllAddresses()
         _state.update { it.copy(cards = cards, addresses = addresses) }
     }
@@ -93,8 +92,7 @@ class SecureDataViewModel @Inject constructor(
         autofillStorage.addCreditCard(
             NewCreditCardFields(
                 billingName = name.trim(),
-                plaintextCardNumber = CreditCardNumber.Plaintext(digits),
-                cardNumberLast4 = digits.takeLast(4),
+                cardNumber = digits,
                 expiryMonth = expiryMonth.toLong(),
                 expiryYear = expiryYear.toLong(),
                 cardType = cardType(digits),

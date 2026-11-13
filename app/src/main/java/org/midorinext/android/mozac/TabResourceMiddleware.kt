@@ -3,6 +3,7 @@ package org.midorinext.android.mozac
 import org.midorinext.android.diagnostics.ScenarioMetrics
 import org.midorinext.android.diagnostics.ScenarioMetrics.Event
 import java.lang.ref.WeakReference
+import android.os.SystemClock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -34,6 +35,7 @@ internal fun tabsToSuspend(tabs: List<ResidentTab>, limit: Int): List<String> = 
 class TabResourceMiddleware(
     private val budget: BrowserMemoryBudget,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
+    private val now: () -> Long = SystemClock::elapsedRealtime,
 ) : Middleware<BrowserState, BrowserAction> {
     private var registered = false
     private var closed = false
@@ -43,12 +45,27 @@ class TabResourceMiddleware(
     private val priorities = mutableMapOf<EngineSession, EngineSession.SessionPriority>()
     private val checkingForms = mutableMapOf<String, EngineSession>()
     private val flushingState = mutableMapOf<String, EngineSession>()
+    private val operationDeadlines = mutableMapOf<String, Long>()
+    private val retryAfter = mutableMapOf<String, Long>()
 
     override fun invoke(
         store: Store<BrowserState, BrowserAction>,
         next: (BrowserAction) -> Unit,
         action: BrowserAction,
     ) {
+        if (action is ContentAction.CheckForFormDataExceptionAction ||
+            action is ContentAction.UpdatePriorityToDefaultAfterTimeoutAction
+        ) {
+            scope.launch {
+                if (closed) return@launch
+                if (action is ContentAction.CheckForFormDataExceptionAction) {
+                    deferRetry(action.tabId)
+                }
+                updatePriorities(store.state)
+                scheduleTrim(store)
+            }
+            return
+        }
         if (action is EngineAction.SuspendEngineSessionAction &&
             store.state.tabs.any { it.id == action.tabId && it.isProtected(store.state.selectedTabId) }
         ) return
@@ -60,11 +77,13 @@ class TabResourceMiddleware(
             diagnosticState = after
             val old = before.tabs.mapNotNull { it.engineState.engineSession }.toSet()
             val current = after.tabs.mapNotNull { it.engineState.engineSession }.toSet()
+            val created = current - old
+            val previousTabs = before.tabs.associateBy { it.id }
             ScenarioMetrics.count(Event.SESSION_CREATED, (current - old).size)
             ScenarioMetrics.count(Event.SESSION_CLOSED, (old - current).size)
             after.tabs.forEach { tab ->
-                val previous = before.tabs.find { it.id == tab.id }
-                if (tab.engineState.engineSession in (current - old) && previous?.engineState?.engineSessionState != null) {
+                val previous = previousTabs[tab.id]
+                if (tab.engineState.engineSession in created && previous?.engineState?.engineSessionState != null) {
                     ScenarioMetrics.count(Event.SESSION_RESTORED)
                 }
                 if (tab.content.loading && previous?.content?.loading == false) {
@@ -107,46 +126,46 @@ class TabResourceMiddleware(
                 ResidentTab(it.id, maxOf(it.lastAccess, it.createdAt), it.isProtected(store.state.selectedTabId))
             })
             val state = store.state
+            val tabsById = state.tabs.associateBy { it.id }
             val liveSessions = state.tabs.mapNotNull { it.engineState.engineSession }.toSet()
             priorities.keys.retainAll(liveSessions)
             checkingForms.entries.removeAll { (id, session) ->
-                state.tabs.none { it.id == id && it.engineState.engineSession === session }
+                tabsById[id]?.engineState?.engineSession !== session
             }
             flushingState.entries.removeAll { (id, session) ->
-                state.tabs.none { it.id == id && it.engineState.engineSession === session }
+                tabsById[id]?.engineState?.engineSession !== session
             }
+            operationDeadlines.keys.retainAll(checkingForms.keys + flushingState.keys)
+            retryAfter.keys.retainAll(tabsById.keys)
             if (previousSelectedId != state.selectedTabId) {
                 state.tabs.find { it.id == previousSelectedId }?.let { tab ->
                     tab.engineState.engineSession?.let { session ->
                         if (tab.id !in checkingForms && tab.id !in flushingState) {
-                            checkingForms[tab.id] = session
-                            session.checkForFormData(adjustPriority = false)
+                            checkForms(tab.id, session)
                         }
                     }
                 }
                 previousSelectedId = state.selectedTabId
             }
-            state.tabs.forEach { tab ->
-                val session = tab.engineState.engineSession ?: return@forEach
-                val priority = if (tab.isProtected(state.selectedTabId) ||
-                    tab.id in checkingForms || tab.id in flushingState
-                ) EngineSession.SessionPriority.HIGH else EngineSession.SessionPriority.DEFAULT
-                if (priorities[session] != priority) {
-                    session.updateSessionPriority(priority)
-                    priorities[session] = priority
-                }
-            }
             when (action) {
                 is ContentAction.UpdateHasFormDataAction -> {
                     val session = checkingForms.remove(action.tabId)
+                    operationDeadlines.remove(action.tabId)
                     if (session != null && !action.containsFormData && action.tabId in candidates(store.state)) {
                         flushingState[action.tabId] = session
+                        operationDeadlines[action.tabId] = now() + 5_000
                         // Wait for the refreshed native state before closing the session.
-                        session.flushSessionState()
+                        try {
+                            session.flushSessionState()
+                        } catch (error: Exception) {
+                            deferRetry(action.tabId)
+                            android.util.Log.w("MidoriMemory", "Could not flush tab state", error)
+                        }
                     }
                 }
                 is EngineAction.UpdateEngineSessionStateAction -> {
                     val session = flushingState.remove(action.tabId)
+                    operationDeadlines.remove(action.tabId)
                     val tab = store.state.tabs.find { it.id == action.tabId }
                     if (session != null && tab?.engineState?.engineSession === session &&
                         tab.engineState.engineSessionState != null && action.tabId in candidates(store.state)
@@ -156,20 +175,57 @@ class TabResourceMiddleware(
                 }
                 else -> Unit
             }
+            updatePriorities(store.state)
             scheduleTrim(store)
         }
     }
 
     private fun scheduleTrim(store: Store<BrowserState, BrowserAction>) {
-        if (trimJob?.isActive == true) return
+        if (closed || trimJob?.isActive == true) return
         trimJob = scope.launch {
             delay(1_000)
+            operationDeadlines.filterValues { it <= now() }.keys.toList().forEach(::deferRetry)
+            retryAfter.entries.removeAll { it.value <= now() }
             candidates(store.state).forEach { id ->
                 if (id !in checkingForms && id !in flushingState) {
                     val session = store.state.tabs.find { it.id == id }?.engineState?.engineSession ?: return@forEach
-                    checkingForms[id] = session
-                    session.checkForFormData(adjustPriority = false)
+                    checkForms(id, session)
                 }
+            }
+            updatePriorities(store.state)
+            trimJob = null
+            if (operationDeadlines.isNotEmpty() || retryAfter.isNotEmpty()) scheduleTrim(store)
+        }
+    }
+
+    private fun checkForms(id: String, session: EngineSession) {
+        if ((retryAfter[id] ?: 0) > now()) return
+        checkingForms[id] = session
+        operationDeadlines[id] = now() + 5_000
+        try {
+            session.checkForFormData(adjustPriority = false)
+        } catch (error: Exception) {
+            deferRetry(id)
+            android.util.Log.w("MidoriMemory", "Could not check tab form data", error)
+        }
+    }
+
+    private fun deferRetry(id: String) {
+        checkingForms.remove(id)
+        flushingState.remove(id)
+        operationDeadlines.remove(id)
+        retryAfter[id] = now() + 30_000
+    }
+
+    private fun updatePriorities(state: BrowserState) {
+        state.tabs.forEach { tab ->
+            val session = tab.engineState.engineSession ?: return@forEach
+            val priority = if (tab.needsHighPriority(state.selectedTabId) ||
+                tab.id in checkingForms || tab.id in flushingState
+            ) EngineSession.SessionPriority.HIGH else EngineSession.SessionPriority.DEFAULT
+            if (priorities[session] != priority) {
+                session.updateSessionPriority(priority)
+                priorities[session] = priority
             }
         }
     }
@@ -184,10 +240,16 @@ class TabResourceMiddleware(
         diagnosticState = null
         checkingForms.clear()
         flushingState.clear()
+        operationDeadlines.clear()
+        retryAfter.clear()
     }
 
-    private fun candidates(state: BrowserState) = budget.candidates(this).filter { id ->
-        state.tabs.any { it.id == id && it.engineState.engineSession != null && !it.isProtected(state.selectedTabId) }
+    private fun candidates(state: BrowserState): List<String> {
+        val eligible = state.tabs.asSequence().filter {
+            it.engineState.engineSession != null && !it.isProtected(state.selectedTabId) &&
+                (retryAfter[it.id] ?: 0) <= now()
+        }.map { it.id }.toSet()
+        return budget.candidates(this).filter { it in eligible }
     }
 }
 
@@ -208,3 +270,7 @@ internal fun TabSessionState.isProtected(selectedId: String?): Boolean = id == s
     content.recordingDevices.isNotEmpty() || content.promptRequests.isNotEmpty() ||
     content.permissionRequestsList.isNotEmpty() || content.appPermissionRequestsList.isNotEmpty() ||
     mediaSessionState?.playbackState?.let { it != MediaSession.PlaybackState.UNKNOWN } == true
+
+internal fun TabSessionState.needsHighPriority(selectedId: String?): Boolean = id == selectedId ||
+    content.hasFormData || content.pictureInPictureEnabled || content.recordingDevices.isNotEmpty() ||
+    mediaSessionState?.playbackState == MediaSession.PlaybackState.PLAYING

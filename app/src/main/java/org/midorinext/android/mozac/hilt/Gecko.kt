@@ -1,6 +1,9 @@
 package org.midorinext.android.mozac.hilt
 
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import org.midorinext.android.StartupTiming
 import org.midorinext.android.adblock.LegacyBlockerMigration
 import org.midorinext.android.newtab.MidoriNewTabFeature
@@ -76,6 +79,6 @@ object GeckoHiltModule {
         @ApplicationContext context: Context,
         runtime: GeckoRuntime
     ): GeckoSitePermissionsStorage {
-        return GeckoSitePermissionsStorage(runtime, OnDiskSitePermissionsStorage(context))
+        return GeckoSitePermissionsStorage(runtime, OnDiskSitePermissionsStorage(context, CoroutineScope(SupervisorJob() + Dispatchers.IO)))
     }
 }

@@ -1,14 +1,13 @@
 package org.midorinext.android
 
 import android.content.Context
-import org.midorinext.android.ext.getMidoriSERPCategory
 import org.midorinext.android.ext.getMidoriSERPSearch
-import org.midorinext.android.ext.isMidoriUrl
-import org.midorinext.android.ext.isMidoriUrlValid
+import org.midorinext.android.ext.isRetiredSearchUrl
 import org.midorinext.android.ext.urlDecode
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.adblock.DesktopHostFilter
-import org.midorinext.android.usecases.MidoriUseCases
+import org.midorinext.android.usecases.SearchEngines
+import org.midorinext.android.preferences.app.SearchEnginePreference
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.collect
@@ -21,10 +20,6 @@ import mozilla.components.concept.engine.request.ErrorType
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.request.RequestInterceptor
 import mozilla.components.feature.app.links.AppLinksInterceptor
-import org.midorinext.android.ext.isMidoriUrl
-import org.midorinext.android.ext.isMidoriUrlValid
-import java.lang.Exception
-import java.net.URI
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -32,7 +27,6 @@ import javax.inject.Singleton
 class AppRequestInterceptor @Inject constructor(
     @ApplicationContext private val context: Context,
     private val appPreferencesRepository: AppPreferencesRepository,
-    private val MidoriUseCases: MidoriUseCases,
     private val desktopHostFilter: DesktopHostFilter,
 ) : RequestInterceptor {
     private val coroutineScope = MainScope()
@@ -68,26 +62,11 @@ class AppRequestInterceptor @Inject constructor(
             desktopHostFilter.beginPage(engineSession, uri)
         }
 
-        if (uri.isMidoriUrl()) {
-            if (!uri.isMidoriUrlValid()) {
-                val path = try {
-                    URI(uri).path
-                } catch (e: Exception) {
-                    null
-                }
-                val search = uri.getMidoriSERPSearch()?.let { encoded ->
-                    runCatching(encoded::urlDecode).getOrDefault(encoded)
-                }
-                val category = uri.getMidoriSERPCategory()?.let { encoded ->
-                    runCatching(encoded::urlDecode).getOrDefault(encoded)
-                }
-                val redirectUrl = MidoriUseCases.getMidoriUrl(
-                    path = path,
-                    search = search,
-                    category = category,
-                )
-                return RequestInterceptor.InterceptionResponse.Url(redirectUrl)
-            }
+        if (!isSubframeRequest && uri.isRetiredSearchUrl()) {
+            val search = uri.getMidoriSERPSearch()?.let { encoded ->
+                runCatching(encoded::urlDecode).getOrDefault(encoded)
+            }.orEmpty()
+            return RequestInterceptor.InterceptionResponse.Url(SearchEngines.url(SearchEnginePreference.GOOGLE, search))
         }
 
         return appLinksInterceptor.onLoadRequest(

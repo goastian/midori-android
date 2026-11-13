@@ -7,14 +7,11 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-import mozilla.components.support.ktx.android.org.json.toList
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import org.midorinext.android.BuildConfig
 import org.midorinext.android.ext.selectedLocale
 import org.midorinext.android.preferences.app.AppPreferencesRepository
-import org.midorinext.android.storage.MidoriClientProvider
 import org.midorinext.android.suggest.Suggestion
 import org.midorinext.android.suggest.SuggestionFetcher
 import org.midorinext.android.suggest.SuggestionProvider
@@ -27,7 +24,6 @@ import javax.inject.Singleton
 class MidoriSuggestProvider @Inject constructor(
     @ApplicationContext private val context: Context,
     private val fetcher: SuggestionFetcher,
-    private val midoriClientProvider: MidoriClientProvider,
     private val appPreferencesRepository: AppPreferencesRepository,
 ) : SuggestionProvider {
     override suspend fun getSuggestions(text: String): List<Suggestion> = getSuggestions(text, null, false)
@@ -42,15 +38,11 @@ class MidoriSuggestProvider @Inject constructor(
         if (prefs.disableSearchSuggestions || (private && !prefs.searchSuggestionsInPrivate)) {
             return@withContext emptyList()
         }
-        val engineId = engineOverride ?: SearchEngines.selectedId(prefs, private)
+        val engineId = (engineOverride ?: SearchEngines.selectedId(prefs, private))
+            .let { if (it == "astiango") "google" else it }
         val encoded = Uri.encode(text)
         val custom = prefs.customSearchEnginesList.find { it.id == engineId }
         val url = when (engineId) {
-            "astiango" -> (BuildConfig.QWANT_API_BASE_URL + "/suggest?client=%s&locale=%s&version=2&q=%s").format(
-                midoriClientProvider.clientState.value,
-                context.selectedLocale().toString(),
-                encoded,
-            )
             "ecosia" -> "https://ac.ecosia.org/autocomplete?q=$encoded&type=list"
             "qwant" -> ("https://api.qwant.com/v3/suggest?client=opensearch&locale=%s&version=2&q=%s")
                 .format(context.selectedLocale().toString(), encoded)
@@ -65,8 +57,7 @@ class MidoriSuggestProvider @Inject constructor(
         }
         try {
             val json = fetcher.fetch(url, private) ?: return@withContext emptyList()
-            if (engineId == "astiango") parseAstianGo(json, text)
-            else parseOpenSearch(json, text)
+            parseOpenSearch(json, text)
         } catch (e: IOException) {
             Log.d(LOGTAG, "Search suggestions unavailable", e)
             emptyList()
@@ -74,30 +65,6 @@ class MidoriSuggestProvider @Inject constructor(
             Log.d(LOGTAG, "Invalid search suggestion response", e)
             emptyList()
         }
-    }
-
-    private fun parseAstianGo(json: String, search: String): List<Suggestion> {
-        val data = JSONObject(json).getJSONObject("data")
-        val brands = data.optJSONArray("special")?.toList<JSONObject>().orEmpty()
-            .filter { it.optString("type") == "brand_suggest" }
-            .take(2)
-            .mapIndexed { index, item ->
-                Suggestion.BrandSuggestion(
-                    provider = this,
-                    search = search,
-                    title = item.getString("name"),
-                    url = item.getString("url"),
-                    faviconUrl = item.optString("favicon_url").takeIf(String::isNotBlank),
-                    brand = item.getString("brand"),
-                    domain = item.getString("domain"),
-                    rank = index + 1,
-                    suggestType = item.optInt("suggestType"),
-                )
-            }
-        val suggestions = data.getJSONArray("items").toList<JSONObject>()
-            .take(6)
-            .map { Suggestion.SearchSuggestion(this, search, it.getString("value")) }
-        return brands + suggestions
     }
 
     private fun parseOpenSearch(json: String, search: String): List<Suggestion> {

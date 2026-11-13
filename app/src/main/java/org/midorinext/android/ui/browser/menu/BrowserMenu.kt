@@ -3,28 +3,38 @@ package org.midorinext.android.ui.browser.menu
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-
-import androidx.compose.foundation.background
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.collapse
+import androidx.compose.ui.semantics.expand
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import mozilla.components.support.ktx.android.content.share
-import org.midorinext.android.BuildConfig
 import org.midorinext.android.R
 import org.midorinext.android.ext.activity
 import org.midorinext.android.ext.defaultBrowserStatus
-import org.midorinext.android.ext.isMidoriUrl
-import org.midorinext.android.ext.toCleanHost
 import org.midorinext.android.ui.MidoriApplicationViewModel
+import org.midorinext.android.ui.animation.LocalReduceMotion
+import org.midorinext.android.ui.animation.MidoriMotion
 import org.midorinext.android.ui.browser.BrowserScreenViewModel
 import org.midorinext.android.ui.nav.NavDestination
 import org.midorinext.android.vpn.MidoriVpnFeature
@@ -38,7 +48,6 @@ fun BrowserMenu(
     applicationViewModel: MidoriApplicationViewModel
 ) {
     var showTranslationSheet by rememberSaveable { mutableStateOf(false) }
-    var translationRequested by remember { mutableStateOf(false) }
     var defaultPromptDismissed by rememberSaveable { mutableStateOf(false) }
 
     if (expanded) {
@@ -55,8 +64,7 @@ fun BrowserMenu(
             keyboard?.hide()
         }
         var showMoreOptions by rememberSaveable { mutableStateOf(false) }
-        var pendingSync by remember { mutableStateOf(false) }
-        var pendingDestination by remember { mutableStateOf<NavDestination?>(null) }
+        var pendingAction by remember { mutableStateOf<(() -> Unit)?>(null) }
         var defaultBrowser by remember(context) {
             mutableStateOf(context.defaultBrowserStatus())
         }
@@ -64,77 +72,71 @@ fun BrowserMenu(
             defaultBrowser = context.defaultBrowserStatus()
             defaultPromptDismissed = defaultBrowser.isDefault
         }
-        val showPageActions = currentUrl.isExternalPage()
+        val showPageActions = currentUrl.isExternalPage() && !viewModel.isNewTabUrl(currentUrl)
 
-        BrowserMenuSheet(onDismissRequest = {
-            val destination = pendingDestination
-            pendingDestination = null
-            onDismissRequest()
-            destination?.let(navigateTo)
-            if (pendingSync) {
-                pendingSync = false
-                context.startActivity(android.content.Intent(context, org.midorinext.android.sync.SyncActivity::class.java))
+        val queueAction: (() -> Unit, () -> Unit) -> Unit = { action, dismiss ->
+            if (pendingAction == null) {
+                pendingAction = action
+                dismiss()
             }
-            if (translationRequested) {
-                translationRequested = false
-                showTranslationSheet = true
-            }
-        }) { dismiss ->
+        }
+        BrowserMenuSheet(
+            onDismissRequest = {
+                val action = pendingAction
+                pendingAction = null
+                onDismissRequest()
+                action?.invoke()
+            },
+            navigation = if (showPageActions) {
+                { dismiss -> BrowserNavigation(viewModel) { action -> queueAction(action, dismiss) } }
+            } else null,
+        ) { dismiss ->
+            val afterDismiss: (() -> Unit) -> Unit = { action -> queueAction(action, dismiss) }
             val openDestination: (NavDestination) -> Unit = { destination ->
-                if (pendingDestination == null) {
-                    pendingDestination = destination
-                    dismiss()
-                }
+                afterDismiss { navigateTo(destination) }
             }
-            if (showPageActions) {
-                BrowserMenuGroup(divider = false) { BrowserNavigation(viewModel, dismiss) }
-            }
-            BrowserMenuSyncCard(onClick = { pendingSync = true; dismiss() })
             BrowserMenuMainContent(
                 showDefaultPrompt = !showPageActions && !defaultBrowser.isDefault && !defaultPromptDismissed,
                 vpnEnabled = vpnEnabled,
                 extensionCount = extensions.size,
                 onNavigate = openDestination,
                 onVpnClick = {
-                    dismiss()
-                    viewModel.triggerInstalledExtensionAction(MidoriVpnFeature.EXTENSION_ID)
+                    afterDismiss { viewModel.triggerInstalledExtensionAction(MidoriVpnFeature.EXTENSION_ID) }
                 },
-                onSetDefault = {
-                    dismiss()
-                    defaultLauncher.launch(defaultBrowser.requestIntent())
-                },
+                onSetDefault = { afterDismiss { defaultLauncher.launch(defaultBrowser.requestIntent()) } },
                 onDismissDefault = { defaultPromptDismissed = true },
-                precededByContent = showPageActions,
+                showPageActions = showPageActions,
+                pageActions = { if (showPageActions) PageActions(viewModel, afterDismiss) },
+                account = {
+                    BrowserMenuSyncCard(onClick = {
+                        afterDismiss {
+                            context.startActivity(android.content.Intent(context, org.midorinext.android.sync.SyncActivity::class.java))
+                        }
+                    })
+                },
+                moreOptions = {
+                    BrowserMenuMoreOptions(expanded = showMoreOptions, onExpandedChange = { showMoreOptions = it }) {
+                        BrowserPageShortcuts(
+                            showPageActions = showPageActions,
+                            viewModel = viewModel,
+                            applicationViewModel = applicationViewModel,
+                            afterDismiss = afterDismiss,
+                            onTranslateClick = { afterDismiss { showTranslationSheet = true } },
+                        )
+                        BrowserMenuRow(
+                            text = stringResource(R.string.pwa_manage_title),
+                            icon = R.drawable.icons_add_screen,
+                            onClick = { openDestination(NavDestination.WebApps) },
+                        )
+                    }
+                },
             )
-            BrowserMenuGroup {
-                BrowserMenuRow(
-                    text = stringResource(if (showMoreOptions) R.string.menu_back_to_main else R.string.menu_more_options),
-                    icon = if (showMoreOptions) R.drawable.icons_arrow_backward else R.drawable.icons_more_vertical,
-                    onClick = { showMoreOptions = !showMoreOptions },
-                )
-                if (showMoreOptions) {
-                    BrowserPageShortcuts(
-                        currentUrl = currentUrl,
-                        showPageActions = showPageActions,
-                        viewModel = viewModel,
-                        applicationViewModel = applicationViewModel,
-                        onDismissRequest = dismiss,
-                        onTranslateClick = { translationRequested = true },
-                    )
-                    BrowserMenuRow(
-                        text = stringResource(R.string.pwa_manage_title),
-                        icon = R.drawable.icons_add_screen,
-                        onClick = { openDestination(NavDestination.WebApps) },
-                    )
-                    if (showPageActions) PageActions(viewModel, applicationViewModel, dismiss)
-                }
-            }
             if (showQuitApp) {
                 BrowserMenuGroup {
                     BrowserMenuRow(
                         text = stringResource(R.string.menu_quit_app),
                         icon = R.drawable.icons_close,
-                        onClick = { applicationViewModel.quit { context.activity?.quit() } },
+                        onClick = { afterDismiss { applicationViewModel.quit { context.activity?.quit() } } },
                     )
                 }
             }
@@ -171,18 +173,60 @@ fun BrowserMenu(
 }
 
 @Composable
+internal fun BrowserMenuMoreOptions(
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val reduceMotion = LocalReduceMotion.current
+    val rotation by animateFloatAsState(
+        targetValue = if (expanded) 180f else 0f,
+        animationSpec = if (reduceMotion) snap() else tween(MidoriMotion.SurfaceDurationMillis),
+        label = "menu expansion",
+    )
+    BrowserMenuRow(
+        text = stringResource(R.string.menu_more_options),
+        icon = R.drawable.icons_more_vertical,
+        onClick = { onExpandedChange(!expanded) },
+        trailing = {
+            Icon(painterResource(R.drawable.icons_chevron_down_small), contentDescription = null,
+                modifier = Modifier.size(24.dp).rotate(rotation), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        },
+        modifier = Modifier.testTag("browser_menu_more").semantics {
+            if (expanded) collapse { onExpandedChange(false); true }
+            else expand { onExpandedChange(true); true }
+        },
+    )
+    AnimatedVisibility(
+        visible = expanded,
+        enter = if (reduceMotion) EnterTransition.None else expandVertically(tween(MidoriMotion.SurfaceDurationMillis)),
+        exit = if (reduceMotion) ExitTransition.None else shrinkVertically(tween(MidoriMotion.ExitDurationMillis)),
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp), content = content)
+    }
+}
+
+@Composable
 private fun BrowserPageShortcuts(
-    currentUrl: String?,
     showPageActions: Boolean,
     viewModel: BrowserScreenViewModel,
     applicationViewModel: MidoriApplicationViewModel,
-    onDismissRequest: () -> Unit,
+    afterDismiss: (() -> Unit) -> Unit,
     onTranslateClick: () -> Unit,
 ) {
     val canInstallWebApp by viewModel.canInstallWebApp.collectAsStateWithLifecycle()
-    NewTabAction(viewModel, onDismissRequest)
-    PrivateTabAction(viewModel, onDismissRequest)
-    if (showPageActions && !currentUrl.isNullOrBlank()) {
+    BrowserMenuRow(
+        text = stringResource(R.string.browser_new_tab),
+        icon = R.drawable.icons_add_tab,
+        onClick = { afterDismiss { viewModel.openNewMidoriTab(private = false) } },
+    )
+    BrowserMenuRow(
+        text = stringResource(R.string.browser_new_tab_private),
+        icon = R.drawable.icons_privacy_mask,
+        onClick = { afterDismiss { viewModel.openNewMidoriTab(private = true) } },
+    )
+    if (showPageActions) {
+        TranslateAction(viewModel, onClick = onTranslateClick)
         if (canInstallWebApp) {
             val installed = stringResource(R.string.pwa_install_requested)
             val failed = stringResource(R.string.pwa_install_failed)
@@ -190,124 +234,65 @@ private fun BrowserPageShortcuts(
                 text = stringResource(R.string.pwa_install_action),
                 icon = R.drawable.icons_add_screen,
                 onClick = {
-                    viewModel.installCurrentPageAsWebApp { success ->
-                        applicationViewModel.showSnackbar(if (success) installed else failed)
+                    afterDismiss {
+                        viewModel.installCurrentPageAsWebApp { success ->
+                            applicationViewModel.showSnackbar(if (success) installed else failed)
+                        }
                     }
-                    onDismissRequest()
                 },
             )
         }
-        ShareAction(url = currentUrl, onDismissRequest = onDismissRequest)
-        TranslateAction(
-            viewModel = viewModel,
-            onClick = {
-                onDismissRequest()
-                onTranslateClick()
-            },
+        if (viewModel.isShortcutSupported) {
+            val added = stringResource(R.string.pwa_shortcut_requested)
+            val failed = stringResource(R.string.pwa_shortcut_failed)
+            BrowserMenuRow(
+                text = stringResource(R.string.menu_add_to_homescreen),
+                icon = R.drawable.icons_add_screen,
+                onClick = {
+                    afterDismiss {
+                        viewModel.addShortcutToHomeScreen { success ->
+                            applicationViewModel.showSnackbar(if (success) added else failed)
+                        }
+                    }
+                },
+            )
+        }
+        BrowserMenuRow(
+            text = stringResource(R.string.menu_save_as_pdf),
+            icon = R.drawable.icons_download,
+            onClick = { afterDismiss { viewModel.sessionUseCases.saveToPdf() } },
         )
     }
 }
 
 @Composable
-fun BrowserNavigation(
-    viewModel: BrowserScreenViewModel,
-    onDismissRequest: () -> Unit,
-) {
+private fun BrowserNavigation(viewModel: BrowserScreenViewModel, afterDismiss: (() -> Unit) -> Unit) {
     val canGoBack by viewModel.canGoBack.collectAsStateWithLifecycle()
     val canGoForward by viewModel.canGoForward.collectAsStateWithLifecycle()
     val loadingProgress by viewModel.toolbarState.loadingProgress.collectAsStateWithLifecycle()
-
-    Row(
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 8.dp),
-    ) {
-        IconButton(
-            onClick = {
-                onDismissRequest()
-                viewModel.goBack()
-            },
-            enabled = canGoBack
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.icons_arrow_backward),
-                contentDescription = stringResource(R.string.nav_back),
-            )
-        }
-        IconButton(
-            onClick = {
-                onDismissRequest()
-                viewModel.goForward()
-            },
-            enabled = canGoForward
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.icons_arrow_forward),
-                contentDescription = stringResource(R.string.nav_forward),
-            )
-        }
-        if (loadingProgress != 1f) {
-            IconButton(
-                onClick = {
-                    onDismissRequest()
-                    viewModel.stopLoading()
+    val url by viewModel.currentUrl.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val loading = loadingProgress != 1f
+    Box(Modifier.padding(start = 8.dp, end = 8.dp, bottom = 12.dp)) {
+        BrowserMenuGroup {
+            BrowserMenuActionGrid { range ->
+                range.forEach { index ->
+                    when (index) {
+                        0 -> BrowserMenuAction(stringResource(R.string.shortcut_back), R.drawable.icons_arrow_backward,
+                            "browser_menu_back", canGoBack) { afterDismiss { viewModel.goBack() } }
+                        1 -> BrowserMenuAction(stringResource(R.string.menu_forward), R.drawable.icons_arrow_forward,
+                            "browser_menu_forward", canGoForward) { afterDismiss { viewModel.goForward() } }
+                        2 -> BrowserMenuAction(stringResource(R.string.share), R.drawable.icons_share,
+                            "browser_menu_share", !url.isNullOrBlank()) { afterDismiss { url?.let { context.share(it) } } }
+                        3 -> BrowserMenuAction(stringResource(if (loading) R.string.menu_stop else R.string.menu_refresh),
+                            if (loading) R.drawable.icons_close else R.drawable.icons_reload, "browser_menu_reload") {
+                            afterDismiss { if (loading) viewModel.stopLoading() else viewModel.reloadUrl() }
+                        }
+                    }
                 }
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.icons_close),
-                    contentDescription = stringResource(R.string.menu_stop),
-                )
-            }
-        } else {
-            IconButton(
-                onClick = {
-                    onDismissRequest()
-                    viewModel.reloadUrl()
-                }
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.icons_reload),
-                    contentDescription = stringResource(R.string.menu_refresh),
-                )
             }
         }
     }
-}
-
-@Composable
-private fun NewTabAction(viewModel: BrowserScreenViewModel, onDismissRequest: () -> Unit) {
-    BrowserMenuRow(
-        text = stringResource(id = R.string.browser_new_tab),
-        icon = R.drawable.icons_add_tab,
-        onClick = {
-            onDismissRequest()
-            viewModel.openNewMidoriTab(private = false)
-        }
-    )
-}
-
-@Composable
-private fun PrivateTabAction(viewModel: BrowserScreenViewModel, onDismissRequest: () -> Unit) {
-    BrowserMenuRow(
-        text = stringResource(id = R.string.browser_new_tab_private),
-        icon = R.drawable.icons_privacy_mask,
-        onClick = {
-            onDismissRequest()
-            viewModel.openNewMidoriTab(private = true)
-        }
-    )
-}
-
-@Composable
-private fun ShareAction(url: String, onDismissRequest: () -> Unit) {
-    val context = LocalContext.current
-    BrowserMenuRow(
-        text = stringResource(id = R.string.share),
-        icon = R.drawable.icons_share,
-        onClick = {
-            onDismissRequest()
-            context.share(url)
-        }
-    )
 }
 
 @Composable
@@ -326,73 +311,30 @@ private fun TranslateAction(
 }
 
 @Composable
-fun PageActions(
-    viewModel: BrowserScreenViewModel,
-    applicationViewModel: MidoriApplicationViewModel,
-    onDismissRequest: () -> Unit,
-) {
-    val currentUrl by viewModel.currentUrl.collectAsStateWithLifecycle()
+private fun PageActions(viewModel: BrowserScreenViewModel, afterDismiss: (() -> Unit) -> Unit) {
     val isUrlBookmarked by viewModel.isUrlBookmarked.collectAsStateWithLifecycle()
     val desktopSite by viewModel.desktopMode.collectAsStateWithLifecycle()
-    val onDesktopSiteClicked = { checked: Boolean ->
-        viewModel.requestDesktopSite(checked)
-    }
-
     BrowserMenuRow(
-        text = stringResource(
-            id = if (isUrlBookmarked) {
-                R.string.bookmark_remove_current
-            } else {
-                R.string.bookmark_add_current
-            }
-        ),
+        text = stringResource(if (isUrlBookmarked) R.string.bookmark_remove_current else R.string.bookmark_add_current),
         icon = if (isUrlBookmarked) R.drawable.icons_delete_bookmark else R.drawable.icons_add_bookmark,
+        modifier = Modifier.testTag("browser_menu_bookmark_page"),
         onClick = {
-            if (isUrlBookmarked) {
-                viewModel.removeBookmark()
-            } else {
-                viewModel.addBookmark()
-            }
-            onDismissRequest()
-        }
+            afterDismiss { if (isUrlBookmarked) viewModel.removeBookmark() else viewModel.addBookmark() }
+        },
     )
-    if (viewModel.isShortcutSupported) {
-        val addedMessage = stringResource(R.string.pwa_shortcut_requested)
-        val failedMessage = stringResource(R.string.pwa_shortcut_failed)
-        BrowserMenuRow(
-            text = stringResource(R.string.menu_add_to_homescreen),
-            icon = R.drawable.icons_add_screen,
-            onClick = {
-                viewModel.addShortcutToHomeScreen { success ->
-                    applicationViewModel.showSnackbar(if (success) addedMessage else failedMessage)
-                }
-                onDismissRequest()
-            }
-        )
-    }
     BrowserMenuRow(
-        text = stringResource(id = R.string.menu_request_desktop_site),
+        text = stringResource(R.string.menu_find_in_page),
+        icon = R.drawable.icons_search,
+        modifier = Modifier.testTag("browser_menu_find"),
+        onClick = { afterDismiss { viewModel.updateShowFindInPage(true) } },
+    )
+    BrowserMenuRow(
+        text = stringResource(R.string.menu_request_desktop_site),
         icon = R.drawable.icons_laptop,
-        trailing = { Switch(checked = desktopSite, onCheckedChange = onDesktopSiteClicked) },
-        onClick = { onDesktopSiteClicked(!desktopSite) }
-    )
-    if (currentUrl?.isNotEmpty() == true) {
-        BrowserMenuRow(
-            text = stringResource(id = R.string.menu_find_in_page),
-            icon = R.drawable.icons_search,
-            onClick = {
-                viewModel.updateShowFindInPage(true)
-                onDismissRequest()
-            }
-        )
-    }
-    BrowserMenuRow(
-        text = stringResource(id = R.string.menu_save_as_pdf),
-        icon = R.drawable.icons_download,
-        onClick = {
-            onDismissRequest()
-            viewModel.sessionUseCases.saveToPdf()
-        }
+        modifier = Modifier.testTag("browser_menu_desktop"),
+        checked = desktopSite,
+        trailing = { Switch(checked = desktopSite, onCheckedChange = null) },
+        onClick = { viewModel.requestDesktopSite(!desktopSite) },
     )
 }
 
@@ -401,5 +343,5 @@ private fun String?.isExternalPage(): Boolean {
         return false
     }
 
-    return !isMidoriUrl() && toCleanHost() != BuildConfig.QWANT_BASE_URL.toCleanHost()
+    return true
 }

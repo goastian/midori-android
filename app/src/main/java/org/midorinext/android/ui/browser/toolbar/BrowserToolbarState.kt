@@ -14,7 +14,6 @@ import org.midorinext.android.newtab.MidoriNewTabFeature
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.preferences.app.ToolbarPosition
-import org.midorinext.android.stats.Datahub
 import org.midorinext.android.suggest.SuggestionProvider
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -43,11 +42,10 @@ class BrowserToolbarState @AssistedInject constructor(
     appPreferencesRepository: AppPreferencesRepository,
     suggestionProviders: dagger.Lazy<@JvmSuppressWildcards List<SuggestionProvider>>,
     browserIcons: BrowserIcons,
-    datahub: dagger.Lazy<Datahub>,
     private val newTabFeature: MidoriNewTabFeature,
     @Assisted private val coroutineScope: CoroutineScope = MainScope()
 ): ToolbarState(
-    browserIcons, lazy { datahub.get() }, lazy { suggestionProviders.get() }, coroutineScope,
+    browserIcons, lazy { suggestionProviders.get() }, coroutineScope,
     appPreferencesRepository.snapshot.filterNotNull(),
     store.flow().map { it.selectedTab?.content?.private == true },
 ) {

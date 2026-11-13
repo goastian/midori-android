@@ -101,9 +101,9 @@ internal class SyncNativeStores @Inject constructor(
             wireIds(state, login.guid, password = true).map { id -> id to projected(state, id, loginValue(login)) }
         }.toMap()
         "credit-cards" -> {
-            val storage = autofill.get(); val crypto = storage.getCreditCardCrypto(); val key = crypto.getOrGenerateKey()
+            val storage = autofill.get()
             storage.getAllCreditCards().flatMap { card ->
-                val number = crypto.decrypt(key, card.encryptedCardNumber)?.number ?: throw SyncException("cards_locked")
+                val number = card.cardNumber.takeIf { it.isNotBlank() } ?: throw SyncException("cards_locked")
                 wireIds(state, card.guid).map { id -> id to projected(state, id, cardValue(card, number)) }
             }.toMap()
         }
@@ -205,14 +205,13 @@ internal class SyncNativeStores @Inject constructor(
                 val storage = autofill.get()
                 if (value == null) storage.deleteCreditCard(nativeId(state, id)) else {
                     val number = value.getString("number")
-                    val crypto = storage.getCreditCardCrypto(); val key = crypto.getOrGenerateKey()
                     val existing = storage.getCreditCard(nativeId(state, id)) ?: storage.getAllCreditCards().find { card ->
-                        crypto.decrypt(key, card.encryptedCardNumber)?.number == number
+                        card.cardNumber == number
                     }
                     if (existing != null && expected == null) requireSync(same(cardValue(existing, number), value), "card_duplicate")
-                    val saved = if (existing == null) storage.addCreditCard(NewCreditCardFields(value.getString("name"), CreditCardNumber.Plaintext(number), number.takeLast(4), value.optLong("month"), value.optLong("year"), ""))
+                    val saved = if (existing == null) storage.addCreditCard(NewCreditCardFields(value.getString("name"), number, value.optLong("month"), value.optLong("year"), ""))
                     else {
-                        storage.updateCreditCard(existing.guid, UpdatableCreditCardFields(value.getString("name"), CreditCardNumber.Plaintext(number), number.takeLast(4), value.optLong("month"), value.optLong("year"), existing.cardType))
+                        storage.updateCreditCard(existing.guid, UpdatableCreditCardFields(value.getString("name"), number, value.optLong("month"), value.optLong("year"), existing.cardType))
                         storage.getCreditCard(existing.guid)!!
                     }
                     adopt(state, id, saved.guid)
