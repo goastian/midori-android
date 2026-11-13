@@ -108,7 +108,6 @@ fun Widget(
                                     }
 
                                     is Suggestion.BrandSuggestion -> {
-                                        viewmodel.datahub.brandSuggestClicked(suggestion)
                                         activity.openFullBrowsingActivity(suggestion.url)
                                     }
 

@@ -26,7 +26,7 @@ private fun SearchEnginePreference.logoResource(): Int? = when (this) {
     SearchEnginePreference.BING -> R.drawable.icons_engine_bing
     SearchEnginePreference.GOOGLE -> R.drawable.icons_engine_google
     SearchEnginePreference.DUCKDUCKGO -> R.drawable.icons_engine_duckduckgo
-    SearchEnginePreference.ASTIANGO, SearchEnginePreference.UNRECOGNIZED -> null
+    SearchEnginePreference.ASTIANGO, SearchEnginePreference.UNRECOGNIZED -> R.drawable.icons_engine_google
 }
 
 /**
@@ -38,8 +38,6 @@ fun SearchEngineIcon(option: SearchEngineOption, modifier: Modifier = Modifier) 
     val builtIn = option.builtIn
     val logo = builtIn?.logoResource()
     when {
-        builtIn == SearchEnginePreference.ASTIANGO ->
-            MidoriIconOnBackground(shape = CircleShape, modifier = modifier)
         logo != null -> Box(
             modifier = modifier
                 .background(Color.White, CircleShape)

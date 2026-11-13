@@ -2,15 +2,11 @@ package org.midorinext.android.usecases
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
-import androidx.preference.PreferenceManager
-import org.midorinext.android.BuildConfig
 import org.midorinext.android.newtab.MidoriNewTabFeature
 import org.midorinext.android.newtab.newTabUrl
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.preferences.app.AppPreferences
-import org.midorinext.android.storage.MidoriClientProvider
 import dagger.Lazy
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.StateFlow
@@ -34,7 +30,6 @@ import javax.inject.Singleton
 @Singleton
 class MidoriUseCases @Inject constructor(
     @ApplicationContext val context: Context,
-    private val clientProvider: MidoriClientProvider,
     private val newTabFeature: MidoriNewTabFeature,
     private val appPreferencesRepository: AppPreferencesRepository,
 ) {
@@ -57,45 +52,11 @@ class MidoriUseCases @Inject constructor(
         preferences,
         engineOverride ?: SearchEngines.selectedId(preferences, private),
         search,
-    ) {
-        midoriUrl(search = search, category = category, widget = widget)
-    }
+    )
     // TODO Use constructor injection for those. lazy init the usecase itself if needed
     @Inject lateinit var sessionUseCases: Lazy<SessionUseCases>
     @Inject lateinit var tabsUseCases: Lazy<TabsUseCases>
     @Inject lateinit var store: Lazy<BrowserStore>
-
-    // TODO find a different way of handling fs=1 one time parameter
-    val prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-    private val firstRequestKey = "pref_key_first_request"
-    private val clKey = "pref_key_utm_campaign"
-
-    private fun midoriUrl(path: String? = null, search: String? = null, category: String? = null, widget: Boolean = false): String = buildString {
-        append(BuildConfig.QWANT_BASE_URL)
-        path?.let {
-            append(path)
-        }
-        append("?client=").append(encodeQueryValue(clientProvider.clientState.value))
-        append("&omnibar=1")
-        search?.let {
-            append("&q=").append(encodeQueryValue(it))
-        }
-        category?.let {
-            append("&t=").append(encodeQueryValue(it))
-        }
-        // TODO check if fs & cl are still used at Midori. Else remove them
-        if (prefs.getBoolean(firstRequestKey, true)) {
-            append("&fs=1")
-            prefs.edit().putBoolean(firstRequestKey, false).apply()
-        }
-        prefs.getString(clKey, null)?.let {
-            append("&cl=").append(encodeQueryValue(it))
-        }
-        if (widget) {
-            append("&widget=1")
-        }
-        append("&qbc=1")
-    }
 
     inner class OpenMidoriPageUseCase internal constructor(
         private val tabsUseCases: TabsUseCases,
@@ -168,8 +129,7 @@ class MidoriUseCases @Inject constructor(
 
     inner class GetMidoriUrlUseCase internal constructor() {
         operator fun invoke(path: String? = null, search: String? = null, category: String? = null, widget: Boolean = false) =
-            if (search != null && path == null) searchUrl(search, category, widget)
-            else midoriUrl(path, search, category, widget)
+            searchUrl(search.orEmpty(), category, widget)
     }
 
     inner class LoadSERPPageUseCase internal constructor(

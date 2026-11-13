@@ -7,7 +7,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import org.midorinext.android.ext.getMidoriSERPCategory
-import org.midorinext.android.stats.Datahub
 import org.midorinext.android.suggest.providers.ClipboardProvider
 import org.midorinext.android.suggest.providers.DomainProvider
 import org.midorinext.android.suggest.providers.MidoriSuggestProvider
@@ -30,7 +29,6 @@ import javax.inject.Inject
 class WidgetViewModel @Inject constructor(
     val engine: Engine,
     private val memoryBudget: org.midorinext.android.mozac.BrowserMemoryBudget,
-    val datahub: Datahub,
     val MidoriUseCases: MidoriUseCases,
     clipboardProvider: ClipboardProvider,
     midoriSuggestProvider: MidoriSuggestProvider,
@@ -39,7 +37,7 @@ class WidgetViewModel @Inject constructor(
     appPreferencesRepository: AppPreferencesRepository,
 )  : ViewModel() {
     val toolbarState: ToolbarState = ToolbarState(
-        browserIcons, lazy { datahub }, lazy { listOf(clipboardProvider, midoriSuggestProvider, domainProvider) },
+        browserIcons, lazy { listOf(clipboardProvider, midoriSuggestProvider, domainProvider) },
         viewModelScope, appPreferencesRepository.flow,
     )
 

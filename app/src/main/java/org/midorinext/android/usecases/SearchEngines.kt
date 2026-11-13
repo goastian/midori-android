@@ -13,16 +13,20 @@ data class SearchEngineOption(
 /** Search URL templates used for address-bar searches. */
 object SearchEngines {
     val builtInEngines = listOf(
-        SearchEnginePreference.ASTIANGO,
+        SearchEnginePreference.GOOGLE,
         SearchEnginePreference.ECOSIA,
         SearchEnginePreference.QWANT,
         SearchEnginePreference.STARTPAGE,
         SearchEnginePreference.BING,
-        SearchEnginePreference.GOOGLE,
         SearchEnginePreference.DUCKDUCKGO,
     )
 
-    fun id(engine: SearchEnginePreference): String = engine.name.lowercase()
+    fun resolve(engine: SearchEnginePreference): SearchEnginePreference = when (engine) {
+        SearchEnginePreference.ASTIANGO, SearchEnginePreference.UNRECOGNIZED -> SearchEnginePreference.GOOGLE
+        else -> engine
+    }
+
+    fun id(engine: SearchEnginePreference): String = resolve(engine).name.lowercase()
 
     fun options(preferences: AppPreferences): List<SearchEngineOption> =
         builtInEngines.map { SearchEngineOption(id(it), it.name, it) } +
@@ -54,17 +58,16 @@ object SearchEngines {
         preferences: AppPreferences,
         engineId: String,
         query: String,
-        astianGoUrl: () -> String,
     ): String {
         val custom = preferences.customSearchEnginesList.find { it.id == engineId }
         if (custom != null && isValidTemplate(custom.searchUrlTemplate)) {
             return custom.searchUrlTemplate.replace("%s", MidoriUseCases.encodeQueryValue(query))
         }
-        val builtIn = builtInEngines.find { id(it) == engineId } ?: SearchEnginePreference.ASTIANGO
-        return url(builtIn, query, astianGoUrl)
+        val builtIn = builtInEngines.find { id(it) == engineId } ?: SearchEnginePreference.GOOGLE
+        return url(builtIn, query)
     }
 
-    fun url(engine: SearchEnginePreference, query: String, astianGoUrl: () -> String): String {
+    fun url(engine: SearchEnginePreference, query: String): String {
         val encoded = MidoriUseCases.encodeQueryValue(query)
         return when (engine) {
             SearchEnginePreference.ECOSIA -> "https://www.ecosia.org/search?q=$encoded"
@@ -73,7 +76,7 @@ object SearchEngines {
             SearchEnginePreference.BING -> "https://www.bing.com/search?q=$encoded"
             SearchEnginePreference.GOOGLE -> "https://www.google.com/search?q=$encoded"
             SearchEnginePreference.DUCKDUCKGO -> "https://duckduckgo.com/?q=$encoded"
-            SearchEnginePreference.ASTIANGO, SearchEnginePreference.UNRECOGNIZED -> astianGoUrl()
+            SearchEnginePreference.ASTIANGO, SearchEnginePreference.UNRECOGNIZED -> url(SearchEnginePreference.GOOGLE, query)
         }
     }
 }

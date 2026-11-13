@@ -1,5 +1,6 @@
 package org.midorinext.android.preferences.app
 
+import org.midorinext.android.usecases.SearchEngines
 import android.util.Log
 import androidx.datastore.core.DataStore
 import org.midorinext.android.newtab.HomeSection
@@ -196,12 +197,12 @@ class AppPreferencesRepository internal constructor(
     }
 
     suspend fun updateSearchEngine(engine: SearchEnginePreference) {
-        datastore.updateData { it.toBuilder().setSearchEngine(engine).clearCustomDefaultSearchEngineId().build() }
+        datastore.updateData { it.toBuilder().setSearchEngine(SearchEngines.resolve(engine)).clearCustomDefaultSearchEngineId().build() }
     }
 
     suspend fun updatePrivateSearchEngine(engine: SearchEnginePreference) {
         datastore.updateData {
-            it.toBuilder().setPrivateSearchEngine(engine).clearCustomPrivateSearchEngineId()
+            it.toBuilder().setPrivateSearchEngine(SearchEngines.resolve(engine)).clearCustomPrivateSearchEngineId()
                 .setUseSeparatePrivateSearchEngine(true).build()
         }
     }

@@ -4,7 +4,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.getTextBeforeSelection
-import org.midorinext.android.stats.Datahub
 import org.midorinext.android.suggest.Suggestion
 import org.midorinext.android.suggest.SuggestionProvider
 import org.midorinext.android.suggest.providers.ClipboardProvider
@@ -26,13 +25,11 @@ import mozilla.components.browser.icons.BrowserIcons
 
 open class ToolbarState(
     val browserIcons: BrowserIcons,
-    datahub: Lazy<Datahub>,
     private val suggestionProviders: Lazy<List<SuggestionProvider>>,
     coroutineScope: CoroutineScope = MainScope(),
     preferences: Flow<AppPreferences> = flowOf(AppPreferences.getDefaultInstance()),
     privateMode: Flow<Boolean> = flowOf(false),
 ) {
-    val datahub by datahub
     var text by mutableStateOf(TextFieldValue(""))
         internal set
 

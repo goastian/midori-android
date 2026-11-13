@@ -278,7 +278,7 @@ private fun engineName(option: SearchEngineOption): String =
 @Composable
 internal fun selectedEngineName(prefs: AppPreferences): String =
     SearchEngines.options(prefs).find { it.id == SearchEngines.selectedId(prefs) }
-        ?.let { engineName(it) } ?: searchEngineName(SearchEnginePreference.ASTIANGO)
+        ?.let { engineName(it) } ?: searchEngineName(SearchEnginePreference.GOOGLE)
 
 @Composable
 private fun AddSearchEngineDialog(

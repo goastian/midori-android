@@ -5,20 +5,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
-import org.midorinext.android.BuildConfig
 import java.net.URI
 import java.net.URLDecoder
 
-fun String.isMidoriUrl(): Boolean {
-    // TODO use regex
-    return (this.startsWith(BuildConfig.QWANT_BASE_URL)
-            && !this.startsWith("${BuildConfig.QWANT_BASE_URL}/maps")
-            && !this.startsWith("${BuildConfig.QWANT_BASE_URL}/flight"))
-}
+private val retiredSearchHosts = setOf("astiango.com", "www.astiango.com", "astiango.org", "www.astiango.org")
 
-fun String.isMidoriUrlValid(): Boolean {
-    return this.indexOf("&qbc=1") != -1
-}
+fun String.isRetiredSearchUrl(): Boolean = runCatching {
+    val uri = URI(this)
+    uri.scheme in setOf("https", "http") && uri.host?.lowercase() in retiredSearchHosts &&
+        uri.path.orEmpty() in setOf("", "/", "/search")
+}.getOrDefault(false)
+
+fun String.isMidoriUrl(): Boolean = isRetiredSearchUrl() || runCatching {
+    val uri = URI(this)
+    uri.scheme == "https" && uri.host?.lowercase() in setOf("www.google.com", "google.com") &&
+        uri.path.orEmpty() in setOf("", "/", "/search")
+}.getOrDefault(false)
 
 fun String.isMidoriSERPUrl(): Boolean {
     return this.isMidoriUrl()
@@ -28,7 +30,6 @@ fun String.isMidoriSERPUrl(): Boolean {
 /** Matches only the URL shape used by the retired remote New Tab implementation. */
 fun String.isLegacyMidoriHomeUrl(): Boolean = runCatching {
     val candidate = URI(this).normalize()
-    val base = URI(BuildConfig.QWANT_BASE_URL).normalize()
     val path = candidate.path.orEmpty()
     val parameters = candidate.rawQuery
         .orEmpty()
@@ -36,9 +37,9 @@ fun String.isLegacyMidoriHomeUrl(): Boolean = runCatching {
         .filter(String::isNotBlank)
         .map { parameter -> parameter.substringBefore('=') to parameter.substringAfter('=', "") }
 
-    candidate.scheme.equals(base.scheme, ignoreCase = true) &&
-        candidate.host.equals(base.host, ignoreCase = true) &&
-        candidate.port == base.port &&
+    candidate.scheme.equals("https", ignoreCase = true) &&
+        candidate.host?.lowercase() in retiredSearchHosts &&
+        candidate.port in setOf(-1, 443) &&
         (path.isEmpty() || path == "/") &&
         parameters.contains("omnibar" to "1") &&
         parameters.contains("qbc" to "1") &&

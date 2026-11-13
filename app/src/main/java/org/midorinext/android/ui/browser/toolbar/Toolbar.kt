@@ -66,7 +66,6 @@ fun Toolbar(
             is Suggestion.SelectTabSuggestion -> onTextCommit(suggestion.url)
             is Suggestion.SearchSuggestion -> onTextCommit(suggestion.text)
             is Suggestion.BrandSuggestion -> {
-                toolbarState.datahub.brandSuggestClicked(suggestion)
                 onTextCommit(suggestion.url)
             }
             is Suggestion.OpenTabSuggestion -> (suggestion.url ?: suggestion.title)?.let(onTextCommit)

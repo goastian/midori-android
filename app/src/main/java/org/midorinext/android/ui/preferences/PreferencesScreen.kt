@@ -265,7 +265,7 @@ internal fun searchEngineNameResource(engine: SearchEnginePreference): Int = whe
     SearchEnginePreference.BING -> R.string.search_engine_bing
     SearchEnginePreference.GOOGLE -> R.string.search_engine_google
     SearchEnginePreference.DUCKDUCKGO -> R.string.search_engine_duckduckgo
-    SearchEnginePreference.ASTIANGO, SearchEnginePreference.UNRECOGNIZED -> R.string.search_engine_current_midori
+    SearchEnginePreference.ASTIANGO, SearchEnginePreference.UNRECOGNIZED -> R.string.search_engine_google
 }
 
 @Composable

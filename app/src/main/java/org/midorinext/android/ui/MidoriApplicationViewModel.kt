@@ -1,5 +1,6 @@
 package org.midorinext.android.ui
 
+import org.midorinext.android.usecases.SearchEngines
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -123,17 +124,13 @@ class MidoriApplicationViewModel @Inject constructor(
 
     val searchEngine = preferencesSnapshot.filterNotNull()
         .map { preferences ->
-            if (preferences.searchEngine == SearchEnginePreference.UNRECOGNIZED) {
-                SearchEnginePreference.ASTIANGO
-            } else {
-                preferences.searchEngine
-            }
+            SearchEngines.resolve(preferences.searchEngine)
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
             initialValue = preferencesSnapshot.value?.searchEngine
-                ?.takeUnless { it == SearchEnginePreference.UNRECOGNIZED } ?: SearchEnginePreference.ASTIANGO,
+                ?.let(SearchEngines::resolve) ?: SearchEnginePreference.GOOGLE,
         )
 
     fun updateSearchEngine(engine: SearchEnginePreference) {

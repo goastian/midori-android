@@ -1,5 +1,6 @@
 package org.midorinext.android.ui
 
+import org.midorinext.android.usecases.SearchEngines
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -107,8 +108,7 @@ fun MidoriBrowserApp(
         updateSystemBars = !trayIsVisible,
     ) {
         if (showOnboarding) {
-            val searchEngine = preferences.searchEngine.takeUnless { it == SearchEnginePreference.UNRECOGNIZED }
-                ?: SearchEnginePreference.ASTIANGO
+            val searchEngine = SearchEngines.resolve(preferences.searchEngine)
             MidoriOnboarding(
                 onToolbarPositionSelected = applicationViewModel::updateToolbarPosition,
                 blockingLevel = adBlockConfiguration.level,
