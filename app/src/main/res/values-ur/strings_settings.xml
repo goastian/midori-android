@@ -132,7 +132,6 @@
     <string name="open_links_in_app_label">لنکس متعلقہ ایپ میں کھولیں</string>
     <string name="open_results_in_new_tab_label">نتائج نئے ٹیب میں کھولیں</string>
     <string name="search_engine_label">سرچ انجن</string>
-    <string name="search_engine_current_midori">AstianGO</string>
     <string name="search_engine_description">اس ورژن میں Midori تلاش شامل ہے۔</string>
     <string name="settings_search_title">تلاش کریں</string>
     <string name="settings_default_search_engine">طے شدہ سرچ انجن</string>

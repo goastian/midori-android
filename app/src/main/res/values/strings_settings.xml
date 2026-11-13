@@ -152,7 +152,6 @@
     <string name="open_results_in_new_tab_label">Open results in new tab</string>
 
     <string name="search_engine_label">Search engine</string>
-    <string name="search_engine_current_midori">AstianGO</string>
     <string name="search_engine_description">Midori search is built in for this version.</string>
     <string name="settings_search_title">Search</string>
     <string name="settings_default_search_engine">Default search engine</string>

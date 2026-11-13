@@ -132,7 +132,6 @@
     <string name="open_links_in_app_label">Buka tautan di aplikasi asli</string>
     <string name="open_results_in_new_tab_label">Buka hasil di tab baru</string>
     <string name="search_engine_label">Mesin pencari</string>
-    <string name="search_engine_current_midori">AstianGO</string>
     <string name="search_engine_description">Pencarian Midori sudah bawaan dalam versi ini.</string>
     <string name="settings_search_title">Cari</string>
     <string name="settings_default_search_engine">Mesin pencari default</string>

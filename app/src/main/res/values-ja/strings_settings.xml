@@ -113,7 +113,6 @@
     <string name="open_links_in_app_label">ネイティブ アプリでリンクを開く</string>
     <string name="open_results_in_new_tab_label">新しいタブで結果を開く</string>
     <string name="search_engine_label">検索エンジン</string>
-    <string name="search_engine_current_midori">AstianGO</string>
     <string name="search_engine_description">このバージョンには、Middle 検索が組み込まれています。</string>
     <string name="interface_language_label">インターフェース言語</string>
     <string name="available_language_english">英語</string>

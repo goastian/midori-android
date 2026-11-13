@@ -60,7 +60,6 @@
     <string name="open_results_in_new_tab_label">Apri i risultati in una nuova scheda</string>
 
     <string name="search_engine_label">Motore di ricerca</string>
-    <string name="search_engine_current_midori">AstianGO</string>
     <string name="search_engine_description">La ricerca Midori è integrata in questa versione.</string>
 
     <string name="interface_language_label">Lingua dell\'interfaccia</string>

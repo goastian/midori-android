@@ -132,7 +132,6 @@
     <string name="open_links_in_app_label">Buksan ang mga link sa katutubong app</string>
     <string name="open_results_in_new_tab_label">Buksan ang mga resulta sa bagong tab</string>
     <string name="search_engine_label">Search engine</string>
-    <string name="search_engine_current_midori">AstianGO</string>
     <string name="search_engine_description">Naka-built-in ang paghahanap ng Midori para sa bersiyong ito.</string>
     <string name="settings_search_title">Maghanap</string>
     <string name="settings_default_search_engine">Default na search engine</string>

@@ -113,7 +113,6 @@
     <string name="open_links_in_app_label">Открытие ссылок в родном приложении</string>
     <string name="open_results_in_new_tab_label">Открыть результаты в новой вкладке</string>
     <string name="search_engine_label">Поисковая система</string>
-    <string name="search_engine_current_midori">АстианГО</string>
     <string name="search_engine_description">В этой версии встроен поиск Midori.</string>
     <string name="interface_language_label">Язык интерфейса</string>
     <string name="available_language_english">английский</string>

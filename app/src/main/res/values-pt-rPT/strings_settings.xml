@@ -113,7 +113,6 @@
     <string name="open_links_in_app_label">Abra links na aplicação nativa</string>
     <string name="open_results_in_new_tab_label">Abrir resultados numa nova guia</string>
     <string name="search_engine_label">Mecanismo de busca</string>
-    <string name="search_engine_current_midori">AstianGO</string>
     <string name="search_engine_description">A pesquisa Midori está integrada nesta versão.</string>
     <string name="interface_language_label">Idioma da interface</string>
     <string name="available_language_english">Inglês</string>

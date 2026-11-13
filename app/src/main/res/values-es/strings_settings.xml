@@ -127,7 +127,6 @@
     <string name="settings_bookmarks_current_tab_summary">Usar la pestaña actual al tocar un marcador</string>
     <string name="download_file_name">Nombre del archivo</string>
     <string name="download_file_name_invalid">Escribe un nombre sin barras ni caracteres de control</string>
-    <string name="search_engine_current_midori">AstianGO</string>
     <string name="search_engine_description">La búsqueda de Midori viene integrada en esta versión.</string>
 
     <string name="interface_language_label">Idioma de la interfaz</string>

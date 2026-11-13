@@ -61,7 +61,6 @@
     <string name="open_results_in_new_tab_label">Ergebnisse in neuer Registerkarte öffnen</string>
 
     <string name="search_engine_label">Suchmaschine</string>
-    <string name="search_engine_current_midori">AstianGO</string>
     <string name="search_engine_description">Die Midori-Suche ist in dieser Version integriert.</string>
 
     <string name="interface_language_label">Oberflächensprache</string>

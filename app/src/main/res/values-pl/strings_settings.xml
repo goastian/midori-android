@@ -132,7 +132,6 @@
     <string name="open_links_in_app_label">Otwieraj odnośniki w aplikacji natywnej</string>
     <string name="open_results_in_new_tab_label">Otwieraj wyniki w nowej karcie</string>
     <string name="search_engine_label">Wyszukiwarka</string>
-    <string name="search_engine_current_midori">AstianGO</string>
     <string name="search_engine_description">Wyszukiwarka Midori jest wbudowana w tę wersję.</string>
     <string name="settings_search_title">Szukaj</string>
     <string name="settings_default_search_engine">Domyślna wyszukiwarka</string>
