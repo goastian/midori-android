@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stability_prompt_title">Quer ajudar a tornar o Midori mais estável?</string>
+    <string name="stability_enabled">Ajudar a melhorar a estabilidade do Midori</string>
+    <string name="stability_description">Envie relatórios de falhas e dados de desempenho para o Sentry, incluindo a versão da aplicação, a versão do Android e o modelo do dispositivo. O histórico de navegação, o conteúdo das páginas e os dados da conta são excluídos. Pode alterar esta escolha em Definições &gt; Privacidade.</string>
+    <string name="stability_save">Guardar escolha</string>
+    <string name="stability_decline">Não, obrigado</string>
+</resources>

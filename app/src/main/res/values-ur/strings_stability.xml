@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stability_prompt_title">کیا آپ Midori کو مزید مستحکم بنانے میں مدد کرنا چاہتے ہیں؟</string>
+    <string name="stability_enabled">Midori کے استحکام کو بہتر بنانے میں مدد کریں</string>
+    <string name="stability_description">کریش رپورٹس اور کارکردگی کا ڈیٹا Sentry کو بھیجیں، جس میں ایپ کا ورژن، Android کا ورژن اور آلے کا ماڈل شامل ہیں۔ براؤزنگ کی تاریخ، صفحات کا مواد اور اکاؤنٹ کا ڈیٹا شامل نہیں ہوتا۔ آپ ترتیبات &gt; رازداری میں یہ انتخاب تبدیل کر سکتے ہیں۔</string>
+    <string name="stability_save">انتخاب محفوظ کریں</string>
+    <string name="stability_decline">نہیں، شکریہ</string>
+</resources>

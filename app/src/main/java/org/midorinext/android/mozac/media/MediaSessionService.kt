@@ -16,7 +16,7 @@ class MediaSessionService: AbstractMediaSessionService() {
         super.onCreate()
     }
 
-    override val crashReporter: CrashReporting? = null
+    override val crashReporter: CrashReporting = org.midorinext.android.diagnostics.DiagnosticsCrashReporting
 
     @Inject lateinit var nd: dagger.Lazy<NotificationsDelegate>
     override val notificationsDelegate: NotificationsDelegate by lazy { nd.get() }

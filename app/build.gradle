@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.protobuf)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.sentry)
     id 'midori.without-telemetry'
 }
 
@@ -39,15 +40,21 @@ def parseIntConfig = { String key, Integer fallback ->
 
 def readVersionCodeFromFile = {
     def versionFile = rootProject.file("version.properties")
-    if (!versionFile.exists()) {
-        return 2026000083
+    if (!versionFile.isFile()) {
+        throw new GradleException(
+                "Missing version.properties. Restore it or set playstore_version_code " +
+                "above the highest version code already uploaded to Google Play."
+        )
     }
 
     def properties = new Properties()
     versionFile.withInputStream { stream -> properties.load(stream) }
-    def rawValue = properties.getProperty("PLAYSTORE_VERSION_CODE", "2026000080")
+    def rawValue = properties.getProperty("PLAYSTORE_VERSION_CODE")
+    if (rawValue == null || rawValue.trim().isEmpty()) {
+        throw new GradleException("Missing PLAYSTORE_VERSION_CODE in version.properties")
+    }
     try {
-        return Integer.parseInt(rawValue)
+        return Integer.parseInt(rawValue.trim())
     } catch (NumberFormatException ignored) {
         throw new GradleException("Invalid PLAYSTORE_VERSION_CODE in version.properties: '${rawValue}'")
     }
@@ -113,6 +120,8 @@ android {
         targetSdk 36
         versionCode configuredPlaystoreVersionCode
         versionName "11.9.5.1"
+        buildConfigField "String", "SENTRY_DSN", groovy.json.JsonOutput.toJson(
+                "https://8f48f1974aae59165417fd73e8f12bce@o508466.ingest.us.sentry.io/4506732144689152")
         buildConfigField "String", "ADBLOCK_BUNDLE_VERSION", groovy.json.JsonOutput.toJson(
                 new groovy.json.JsonSlurper().parse(file("src/main/assets/adblock/content/manifest.json")).version)
 
@@ -369,7 +378,26 @@ tasks.register("generateBundledFilters", JavaExec) {
 }
 
 
+sentry {
+    org = System.getenv("SENTRY_ORG")
+    projectName = System.getenv("SENTRY_PROJECT") ?: "midori-android"
+    authToken = System.getenv("SENTRY_AUTH_TOKEN")
+    def canUpload = ["SENTRY_ORG", "SENTRY_AUTH_TOKEN"].every { System.getenv(it)?.trim() }
+    includeProguardMapping = true
+    autoUploadProguardMapping = canUpload
+    uploadNativeSymbols = canUpload
+    autoUploadNativeSymbols = canUpload
+    includeNativeSources = false
+    includeSourceContext = false
+    tracingInstrumentation {
+        enabled = false
+        logcat { enabled = false }
+    }
+    autoInstallation { enabled = false }
+}
+
 dependencies {
+    implementation libs.sentry.android
     // Legacy Onboarding
     implementation libs.androidx.constraintlayout
     // Legacy assistant

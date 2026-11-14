@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stability_prompt_title">Midori の安定性向上に協力しますか？</string>
+    <string name="stability_enabled">Midori の安定性向上に協力する</string>
+    <string name="stability_description">アプリのバージョン、Android のバージョン、端末のモデルを含むクラッシュレポートとパフォーマンスデータを Sentry に送信します。閲覧履歴、ページの内容、アカウント情報は含まれません。この設定は「設定 &gt; プライバシー」で変更できます。</string>
+    <string name="stability_save">選択を保存</string>
+    <string name="stability_decline">協力しない</string>
+</resources>

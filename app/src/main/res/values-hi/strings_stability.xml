@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stability_prompt_title">क्या आप Midori को अधिक स्थिर बनाने में मदद करेंगे?</string>
+    <string name="stability_enabled">Midori की स्थिरता बेहतर बनाने में मदद करें</string>
+    <string name="stability_description">ऐप संस्करण, Android संस्करण और डिवाइस मॉडल सहित क्रैश रिपोर्ट और प्रदर्शन डेटा Sentry को भेजें। ब्राउज़िंग इतिहास, पेज की सामग्री और खाते का डेटा शामिल नहीं होता है। आप सेटिंग &gt; गोपनीयता में यह विकल्प बदल सकते हैं।</string>
+    <string name="stability_save">चुनाव सहेजें</string>
+    <string name="stability_decline">नहीं, धन्यवाद</string>
+</resources>

@@ -125,6 +125,8 @@ fun PrivacyScreen(
                 value = appPrefs.privacyCookiePartitioning,
                 onValueChange = { viewModel.updateCookiePartitioning(it) }
             )
+
+            org.midorinext.android.diagnostics.DiagnosticsPreference()
         }
     }
 }

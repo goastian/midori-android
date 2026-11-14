@@ -29,6 +29,19 @@
         android:theme="@style/Theme.MidoriBrowserCompose"
         android:localeConfig="@xml/locales_config"
         tools:targetApi="34">
+        <meta-data android:name="io.sentry.auto-init" android:value="false" />
+        <provider
+            android:name="io.sentry.android.core.SentryInitProvider"
+            android:authorities="${applicationId}.SentryInitProvider"
+            tools:node="remove" />
+        <provider
+            android:name="io.sentry.android.core.SentryPerformanceProvider"
+            android:authorities="${applicationId}.SentryPerformanceProvider"
+            tools:node="remove" />
+        <provider
+            android:name="io.sentry.ndk.SentryNdkPreloadProvider"
+            android:authorities="${applicationId}.SentryNdkPreloadProvider"
+            tools:node="remove" />
         <!-- Add-on updates use WorkManager. Its eager initializer stays disabled because
              MidoriApplication provides an on-demand configuration instead. -->
         <provider

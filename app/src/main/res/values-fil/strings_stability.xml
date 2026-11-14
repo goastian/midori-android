@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stability_prompt_title">Gustong tumulong na gawing mas matatag ang Midori?</string>
+    <string name="stability_enabled">Tumulong na pahusayin ang katatagan ng Midori</string>
+    <string name="stability_description">Magpadala sa Sentry ng mga ulat ng pag-crash at datos ng performance, kabilang ang bersyon ng app, bersyon ng Android at modelo ng device. Hindi kasama ang kasaysayan ng pag-browse, nilalaman ng mga pahina at datos ng account. Mababago mo ito sa Mga Setting &gt; Privacy.</string>
+    <string name="stability_save">I-save ang pinili</string>
+    <string name="stability_decline">Hindi, salamat</string>
+</resources>

@@ -71,6 +71,7 @@ object MozacComponentHiltModule {
         val translationsScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         return BrowserStore(
             middleware = listOf(
+                org.midorinext.android.diagnostics.DiagnosticsMiddleware(),
                 DownloadMiddleware(
                     context,
                     DownloadService::class.java,

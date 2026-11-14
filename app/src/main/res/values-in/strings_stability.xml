@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stability_prompt_title">Ingin membantu membuat Midori lebih stabil?</string>
+    <string name="stability_enabled">Bantu tingkatkan stabilitas Midori</string>
+    <string name="stability_description">Kirim laporan kerusakan dan data performa ke Sentry, termasuk versi aplikasi, versi Android, dan model perangkat. Riwayat penjelajahan, konten halaman, dan data akun tidak disertakan. Anda dapat mengubah pilihan ini di Setelan &gt; Privasi.</string>
+    <string name="stability_save">Simpan pilihan</string>
+    <string name="stability_decline">Tidak, terima kasih</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stability_prompt_title">Dëshironi të ndihmoni që Midori të jetë më i qëndrueshëm?</string>
+    <string name="stability_enabled">Ndihmoni në përmirësimin e qëndrueshmërisë së Midori</string>
+    <string name="stability_description">Dërgoni në Sentry raporte dështimesh dhe të dhëna performance, përfshirë versionin e aplikacionit, versionin e Android dhe modelin e pajisjes. Historiku i shfletimit, përmbajtja e faqeve dhe të dhënat e llogarisë përjashtohen. Zgjedhjen mund ta ndryshoni te Cilësimet &gt; Privatësia.</string>
+    <string name="stability_save">Ruaj zgjedhjen</string>
+    <string name="stability_decline">Jo, faleminderit</string>
+</resources>

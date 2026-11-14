@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stability_prompt_title">Хотите сделать Midori стабильнее?</string>
+    <string name="stability_enabled">Помогать улучшать стабильность Midori</string>
+    <string name="stability_description">Отправляйте в Sentry отчёты о сбоях и данные о производительности, включая версию приложения, версию Android и модель устройства. История браузера, содержимое страниц и данные аккаунта исключены. Выбор можно изменить в разделе Настройки &gt; Конфиденциальность.</string>
+    <string name="stability_save">Сохранить выбор</string>
+    <string name="stability_decline">Нет, спасибо</string>
+</resources>

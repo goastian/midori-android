@@ -141,6 +141,7 @@ fun MidoriBrowserApp(
                 )
                 ZapFeature(state = applicationViewModel.zapState)
                 ExtensionPrompt()
+                org.midorinext.android.diagnostics.DiagnosticsPrompt()
             }
         }
     }

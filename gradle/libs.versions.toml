@@ -30,6 +30,8 @@ protobuf = "4.35.0"
 room = "2.8.4"
 work = "2.11.2"
 mozac = "160.0"
+sentry = "8.64.0"
+sentry-gradle = "6.27.0"
 
 # Plugins
 android-gradle-plugin = "9.1.1"
@@ -117,6 +119,7 @@ json = { group = "org.json", name = "json", version.ref = "json" }
 espresso = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
 # Others
 protobuf = { group = "com.google.protobuf", name = "protobuf-javalite", version.ref = "protobuf" }
+sentry-android = { group = "io.sentry", name = "sentry-android", version.ref = "sentry" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
@@ -126,3 +129,4 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt-plugin" }
 protobuf = { id = "com.google.protobuf", version.ref = "protobuf-plugin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+sentry = { id = "io.sentry.android.gradle", version.ref = "sentry-gradle" }

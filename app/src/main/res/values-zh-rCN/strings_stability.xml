@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stability_prompt_title">愿意帮助 Midori 变得更稳定吗？</string>
+    <string name="stability_enabled">帮助改善 Midori 的稳定性</string>
+    <string name="stability_description">向 Sentry 发送崩溃报告和性能数据，包括应用版本、Android 版本和设备型号。不包含浏览历史、网页内容和账户数据。你可以在“设置 &gt; 隐私”中更改此选项。</string>
+    <string name="stability_save">保存选择</string>
+    <string name="stability_decline">不，谢谢</string>
+</resources>

@@ -62,6 +62,7 @@ private const val READING_LIST_DATABASE_NAME = "reading_list_db"
 
 @HiltAndroidApp
 class MidoriApplication : Application(), Configuration.Provider {
+    @Inject lateinit var diagnostics: dagger.Lazy<org.midorinext.android.diagnostics.DiagnosticsController>
     @Inject lateinit var memoryBudget: BrowserMemoryBudget
     @Inject lateinit var engine: dagger.Lazy<Engine>
     @Inject lateinit var client: dagger.Lazy<Client>
@@ -122,6 +123,8 @@ class MidoriApplication : Application(), Configuration.Provider {
             return
         }
 
+        diagnostics.get().start()
+
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             private var started = 0
             override fun onActivityStarted(activity: Activity) {
@@ -140,7 +143,7 @@ class MidoriApplication : Application(), Configuration.Provider {
         StartupTiming.measure("app_services") {
             AppServicesInitializer.init(
                 AppServicesInitializer.Config(
-                    crashReporting = null,
+                    crashReporting = org.midorinext.android.diagnostics.DiagnosticsCrashReporting,
                     logLevel = if (BuildConfig.DEBUG) Log.Priority.DEBUG else Log.Priority.INFO,
                 ),
             )
@@ -235,6 +238,7 @@ class MidoriApplication : Application(), Configuration.Provider {
         applicationScope.launch {
             val contentDrawn = awaitInitialBrowserContent(store.get().flow(), nativeHomePainted = nativeHomeFrameDrawn)
             StartupTiming.mark(if (contentDrawn) "initial_content_loaded" else "maintenance_timeout")
+            if (contentDrawn) io.sentry.Sentry.reportFullyDisplayed()
             val preferences = withContext(Dispatchers.IO) { appPreferencesRepository.get().flow.first() }
             store.get().dispatch(TranslationsAction.SetTranslationsEnabledAction(!preferences.translationsDisabled))
             // VPN registration is optional and can wait until the initial document is visible.
