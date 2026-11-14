@@ -8,7 +8,10 @@
 /build/
 /buildSrc/.gradle/
 /buildSrc/build/
-upload-keystore.jks
+*.jks
+*.keystore
+*.p12
+*.pfx
 upload_certificate.pem
 deployment_cert.der
 /app/src/main/assets/extensions/*

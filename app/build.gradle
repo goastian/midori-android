@@ -147,9 +147,9 @@ android {
     signingConfigs {
         release {
             storeFile file(readConfigValue("keystore_playstore_path", "${rootProject.projectDir}/upload-keystore.jks"))
-            storePassword readConfigValue("keystore_playstore_password", 'Hornela21@.*')
-            keyAlias readConfigValue("keystore_playstore_alias", 'amelia2024')
-            keyPassword readConfigValue("keystore_playstore_key_password", 'Hornela21@.*')
+            storePassword readConfigValue("keystore_playstore_password")
+            keyAlias readConfigValue("keystore_playstore_alias")
+            keyPassword readConfigValue("keystore_playstore_key_password")
         }
     }
 
@@ -482,6 +482,21 @@ tasks.register("validatePlaystoreReleaseConfig") {
     group = "verification"
     description = "Validates signing and versionCode constraints before publishing to Google Play"
     doLast {
+        def missingSigningProperties = [
+                "keystore_playstore_password",
+                "keystore_playstore_alias",
+                "keystore_playstore_key_password"
+        ].findAll { key ->
+            def value = readConfigValue(key)
+            value == null || value.toString().trim().isEmpty()
+        }
+        if (!missingSigningProperties.isEmpty()) {
+            throw new GradleException(
+                    "Missing release signing configuration: ${missingSigningProperties.join(', ')}. " +
+                    "Set Gradle user properties or environment variables."
+            )
+        }
+
         if (configuredPlaystoreVersionCode <= 0) {
             throw new GradleException("playstore_version_code must be a positive integer")
         }
@@ -503,7 +518,9 @@ tasks.register("validatePlaystoreReleaseConfig") {
     }
 }
 
-tasks.matching { it.name == "bundleOriginalPlaystoreRelease" }.configureEach {
+tasks.matching {
+    it.name == "preOriginalPlaystoreReleaseBuild" || it.name == "bundleOriginalPlaystoreRelease"
+}.configureEach {
     dependsOn("validatePlaystoreReleaseConfig")
 }
 

@@ -54,6 +54,27 @@ height="80">](https://play.google.com/store/apps/details?id=org.midorinext.andro
 
 [![Star History Chart](https://api.star-history.com/svg?repos=goastian/midori-android&type=Date)](https://www.star-history.com/#goastian/midori-android&Date)
 
+## Release signing
+
+Release builds require signing credentials supplied outside the repository. Set
+these environment variables through your CI secret manager or local environment:
+
+- `KEYSTORE_PLAYSTORE_PASSWORD`
+- `KEYSTORE_PLAYSTORE_ALIAS`
+- `KEYSTORE_PLAYSTORE_KEY_PASSWORD`
+- `KEYSTORE_PLAYSTORE_PATH` (optional; defaults to `upload-keystore.jks` in the
+  project root; use an absolute path when overriding it)
+
+Alternatively, set the corresponding lowercase properties in your Gradle user
+properties file (`~/.gradle/gradle.properties`): `keystore_playstore_password`,
+`keystore_playstore_alias`, `keystore_playstore_key_password`, and
+`keystore_playstore_path`. Keep credentials out of the project's tracked
+`gradle.properties` and keep private keystores out of Git. CI should provide the
+keystore as a protected file and the passwords as masked, protected variables.
+
+Release validation rejects missing or blank credentials before building APKs or
+app bundles. Debug builds do not require release credentials.
+
 ## Midori Sync
 
 Settings → Midori Sync connects this browser to the same account and encrypted
