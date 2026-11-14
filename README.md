@@ -56,8 +56,17 @@ height="80">](https://play.google.com/store/apps/details?id=org.midorinext.andro
 
 ## Release signing
 
-Release builds require signing credentials supplied outside the repository. Set
-these environment variables through your CI secret manager or local environment:
+Release builds require signing credentials supplied outside version control. For
+local builds, copy `keystore.properties.example` to `keystore.properties` in the
+project root, restrict its permissions (`chmod 600 keystore.properties`), and fill
+in the keystore password, key alias, and key password. The UTF-8 properties file is
+ignored by Git and is loaded automatically by Gradle, including in Android Studio.
+The optional path defaults to `upload-keystore.jks` in the project root; use an
+absolute path when overriding it. Java properties syntax applies: write a literal
+backslash as `\\`.
+
+You can also set these environment variables through your CI secret manager or
+local environment:
 
 - `KEYSTORE_PLAYSTORE_PASSWORD`
 - `KEYSTORE_PLAYSTORE_ALIAS`
@@ -68,7 +77,8 @@ these environment variables through your CI secret manager or local environment:
 Alternatively, set the corresponding lowercase properties in your Gradle user
 properties file (`~/.gradle/gradle.properties`): `keystore_playstore_password`,
 `keystore_playstore_alias`, `keystore_playstore_key_password`, and
-`keystore_playstore_path`. Keep credentials out of the project's tracked
+`keystore_playstore_path`. Gradle project properties and environment variables
+take precedence over `keystore.properties`. Keep credentials out of the tracked
 `gradle.properties` and keep private keystores out of Git. CI should provide the
 keystore as a protected file and the passwords as masked, protected variables.
 

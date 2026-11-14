@@ -3,6 +3,7 @@
 /app/release/
 /.idea
 /local.properties
+/keystore.properties
 /fastlane/report.xml
 /.kotlin/
 /build/

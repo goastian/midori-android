@@ -15,6 +15,16 @@ def readConfigValue = { String key, String fallback = null ->
     project.findProperty(key) ?: System.getenv(key) ?: System.getenv(key.toUpperCase()) ?: fallback
 }
 
+def signingProperties = new Properties()
+def signingPropertiesFile = rootProject.file("keystore.properties")
+if (signingPropertiesFile.exists()) {
+    signingPropertiesFile.withReader("UTF-8") { reader -> signingProperties.load(reader) }
+}
+
+def readSigningConfigValue = { String key, String fallback = null ->
+    readConfigValue(key) ?: signingProperties.getProperty(key) ?: fallback
+}
+
 def parseIntConfig = { String key, Integer fallback ->
     def value = readConfigValue(key, null)
     if (value == null || value.toString().trim().isEmpty()) {
@@ -146,10 +156,10 @@ android {
 
     signingConfigs {
         release {
-            storeFile file(readConfigValue("keystore_playstore_path", "${rootProject.projectDir}/upload-keystore.jks"))
-            storePassword readConfigValue("keystore_playstore_password")
-            keyAlias readConfigValue("keystore_playstore_alias")
-            keyPassword readConfigValue("keystore_playstore_key_password")
+            storeFile file(readSigningConfigValue("keystore_playstore_path", "${rootProject.projectDir}/upload-keystore.jks"))
+            storePassword readSigningConfigValue("keystore_playstore_password")
+            keyAlias readSigningConfigValue("keystore_playstore_alias")
+            keyPassword readSigningConfigValue("keystore_playstore_key_password")
         }
     }
 
@@ -487,13 +497,14 @@ tasks.register("validatePlaystoreReleaseConfig") {
                 "keystore_playstore_alias",
                 "keystore_playstore_key_password"
         ].findAll { key ->
-            def value = readConfigValue(key)
+            def value = readSigningConfigValue(key)
             value == null || value.toString().trim().isEmpty()
         }
         if (!missingSigningProperties.isEmpty()) {
             throw new GradleException(
                     "Missing release signing configuration: ${missingSigningProperties.join(', ')}. " +
-                    "Set Gradle user properties or environment variables."
+                    "Configure keystore.properties (see keystore.properties.example), " +
+                    "Gradle user properties, or environment variables."
             )
         }
 
@@ -511,7 +522,7 @@ tasks.register("validatePlaystoreReleaseConfig") {
             )
         }
 
-        def keystorePath = readConfigValue("keystore_playstore_path", "${rootProject.projectDir}/upload-keystore.jks")
+        def keystorePath = readSigningConfigValue("keystore_playstore_path", "${rootProject.projectDir}/upload-keystore.jks")
         if (!file(keystorePath).exists()) {
             throw new GradleException("Upload keystore not found at: ${keystorePath}")
         }
