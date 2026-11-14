@@ -378,11 +378,17 @@ tasks.register("generateBundledFilters", JavaExec) {
 }
 
 
+def sentryProperties = new Properties()
+def sentryPropertiesFile = rootProject.file("sentry.properties")
+if (sentryPropertiesFile.isFile()) {
+    sentryPropertiesFile.withInputStream { stream -> sentryProperties.load(stream) }
+}
+
 sentry {
-    org = System.getenv("SENTRY_ORG")
-    projectName = System.getenv("SENTRY_PROJECT") ?: "midori-android"
-    authToken = System.getenv("SENTRY_AUTH_TOKEN")
-    def canUpload = ["SENTRY_ORG", "SENTRY_AUTH_TOKEN"].every { System.getenv(it)?.trim() }
+    org = System.getenv("SENTRY_ORG") ?: sentryProperties.getProperty("defaults.org", "astian")
+    projectName = System.getenv("SENTRY_PROJECT") ?: sentryProperties.getProperty("defaults.project", "midori-android")
+    authToken = System.getenv("SENTRY_AUTH_TOKEN") ?: sentryProperties.getProperty("auth.token")
+    def canUpload = org.getOrNull()?.trim() && authToken.getOrNull()?.trim()
     includeProguardMapping = true
     autoUploadProguardMapping = canUpload
     uploadNativeSymbols = canUpload
