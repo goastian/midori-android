@@ -85,7 +85,8 @@ class SyncWelcomeTest {
                     Box(Modifier.fillMaxSize()) {
                         Scaffold(modifier = Modifier.widthIn(max = if (largeText) 320.dp else 480.dp),
                             topBar = { SyncAppBar {} }) { padding ->
-                            SyncWelcome(busy, error, onScan, onSignIn, Modifier.fillMaxSize().padding(padding))
+                            SyncWelcome(busy, error, onScan, onSignIn, loginCode = "", onCancelLogin = {},
+                                modifier = Modifier.fillMaxSize().padding(padding))
                         }
                     }
                 }

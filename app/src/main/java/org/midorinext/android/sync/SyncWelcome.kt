@@ -39,6 +39,8 @@ internal fun SyncWelcome(
     error: String?,
     onScan: () -> Unit,
     onSignIn: () -> Unit,
+    loginCode: String,
+    onCancelLogin: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -65,7 +67,16 @@ internal fun SyncWelcome(
                 Text(it, style = MaterialTheme.typography.bodyMedium, color = colors.error,
                     modifier = Modifier.padding(bottom = 16.dp).semantics { liveRegion = LiveRegionMode.Polite })
             }
-            Button(onClick = onScan, enabled = !busy, shape = RoundedCornerShape(16.dp),
+            if (loginCode.isNotEmpty()) {
+                Text(stringResource(R.string.sync_login_code_summary), style = MaterialTheme.typography.bodyMedium)
+                androidx.compose.foundation.text.selection.SelectionContainer {
+                    Text(loginCode, style = MaterialTheme.typography.headlineMedium,
+                        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
+                }
+                TextButton(onClick = onCancelLogin, enabled = !busy) { Text(stringResource(R.string.sync_cancel_connection)) }
+                Spacer(Modifier.height(16.dp))
+            }
+            Button(onClick = onScan, enabled = !busy && loginCode.isEmpty(), shape = RoundedCornerShape(16.dp),
                 contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
                 modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
                 ScanFrame(Modifier.size(24.dp))
@@ -74,7 +85,7 @@ internal fun SyncWelcome(
                     textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
             }
             Spacer(Modifier.height(8.dp))
-            TextButton(onClick = onSignIn, enabled = !busy, shape = RoundedCornerShape(16.dp),
+            TextButton(onClick = onSignIn, enabled = !busy && loginCode.isEmpty(), shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
                 Text(stringResource(R.string.sync_sign_in_authentik), style = MaterialTheme.typography.labelLarge,
                     textAlign = TextAlign.Center, modifier = Modifier.weight(1f))

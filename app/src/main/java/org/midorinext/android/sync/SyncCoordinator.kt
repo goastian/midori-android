@@ -23,6 +23,7 @@ internal data class SyncUiState(
     val connected: Boolean = false, val busy: Boolean = false, val name: String = "", val phase: String = "disconnected",
     val server: String = "", val error: String? = null, val lastSync: Long = 0, val conflicts: Int = 0,
     val accountId: String = "", val pending: Int = 0, val selected: Set<String> = SyncModels.schemas.keys, val unsupported: Set<String> = emptySet(), val email: String = "",
+    val loginCode: String = "",
 )
 
 internal data class SyncConflict(val collection: String, val id: String, val local: String?, val remote: String?, val canResolve: Boolean)
@@ -71,7 +72,9 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
             state.optLong("lastSync"), collections.sumOf { it.optJSONObject("conflicts")?.length() ?: 0 },
             state.textOrNull("scope")?.let { value -> java.security.MessageDigest.getInstance("SHA-256").digest(value.toByteArray()).joinToString("") { "%02x".format(it) } }.orEmpty(),
             collections.sumOf { (it.optJSONObject("outbox")?.length() ?: 0) + (it.optJSONObject("inbox")?.length() ?: 0) }, selected(),
-            state.optJSONArray("unsupported")?.let { array -> (0 until array.length()).map { array.getString(it) }.toSet() }.orEmpty(), session?.optJSONObject("user")?.optString("email").orEmpty())
+            state.optJSONArray("unsupported")?.let { array -> (0 until array.length()).map { array.getString(it) }.toSet() }.orEmpty(), session?.optJSONObject("user")?.optString("email").orEmpty(),
+            state.objectOrNull("pendingLogin")?.takeIf { it.optInt("consentVersion") == SyncBrowserConsent.VERSION && it.optLong("expires") > System.currentTimeMillis() }
+                ?.let { SyncBrowserConsent.code(it.getString("state"), base64url(digest(it.getString("verifier").toByteArray())), CALLBACK, "mobile") }.orEmpty())
     }
     private suspend fun <T> operation(metrics: SyncRunMetrics? = null, reportErrors: Boolean = true, block: suspend () -> T): T = withContext(Dispatchers.IO) {
         mutex.withLock {
@@ -123,22 +126,40 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
         val transport = transport(server)
         val capabilities = discover(transport)
         val login = capabilities.getJSONObject("authentication").objectOrNull("browser_login")
-        requireSync(login?.optJSONArray("device_types")?.toString()?.contains("mobile") == true, "browser_login_unavailable")
+        requireSync(login?.optInt("version") == SyncBrowserConsent.VERSION, "browser_login_upgrade_required")
+        val types = login?.optJSONArray("device_types")
+        requireSync(types != null && (0 until types.length()).any { types.optString(it) == "mobile" }, "browser_login_unavailable")
         val verifier = base64url(randomBytes(32)); val nonce = base64url(randomBytes(32))
-        state.put("pendingLogin", obj("server" to transport.server, "verifier" to verifier, "state" to nonce, "expires" to System.currentTimeMillis() + 600_000))
+        state.put("pendingLogin", obj("server" to transport.server, "verifier" to verifier, "state" to nonce,
+            "consentVersion" to SyncBrowserConsent.VERSION, "expires" to System.currentTimeMillis() + 600_000))
         save()
         transport.server + "auth/desktop?" + mapOf("state" to nonce, "code_challenge" to base64url(digest(verifier.toByteArray())),
-            "redirect_uri" to CALLBACK, "device_type" to "mobile").entries.joinToString("&") { SyncTransport.encode(it.key) + "=" + SyncTransport.encode(it.value) }
+            "redirect_uri" to CALLBACK, "device_type" to "mobile", "consent_version" to SyncBrowserConsent.VERSION.toString())
+            .entries.joinToString("&") { SyncTransport.encode(it.key) + "=" + SyncTransport.encode(it.value) }
+    }
+    suspend fun cancelLogin() = operation {
+        state.remove("pendingLogin")
+        save()
     }
     suspend fun completeLogin(uri: Uri) = operation {
         requireSync(!state.has("session"), "account_connected")
         val pending = state.objectOrNull("pendingLogin") ?: throw SyncException("login_expired")
+        requireSync(pending.optInt("consentVersion") == SyncBrowserConsent.VERSION &&
+            System.currentTimeMillis() < pending.getLong("expires"), "login_expired")
         requireSync(uri.scheme == "org.midorinext.android" && uri.authority == null && uri.path == "/midori-sync/callback" && uri.fragment == null &&
-            uri.getQueryParameters("state").size == 1 && uri.getQueryParameter("state") == pending.getString("state") &&
+            uri.getQueryParameters("state").size == 1 && uri.getQueryParameter("state") == pending.getString("state"), "invalid_login_callback")
+        if (uri.queryParameterNames == setOf("state", "error") && uri.getQueryParameters("error") == listOf("access_denied")) {
+            state.remove("pendingLogin")
+            save()
+            throw SyncException("login_cancelled")
+        }
+        requireSync(uri.queryParameterNames == setOf("state", "code") &&
             uri.getQueryParameters("code").size == 1 && uri.getQueryParameter("code")?.matches(Regex("[0-9a-f]{64}")) == true &&
             System.currentTimeMillis() <= pending.getLong("expires"), "invalid_login_callback")
         val transport = transport(pending.getString("server"))
         val capabilities = discover(transport)
+        requireSync(capabilities.getJSONObject("authentication").objectOrNull("browser_login")?.optInt("version") == SyncBrowserConsent.VERSION,
+            "browser_login_upgrade_required")
         val session = transport.request("api/v1/auth/browser-token", method = "POST", body = obj("code" to uri.getQueryParameter("code"),
             "code_verifier" to pending.getString("verifier"), "device_name" to deviceName()))
         installSession(transport, capabilities, session)

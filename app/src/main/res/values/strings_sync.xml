@@ -1,5 +1,14 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
+    <string name="sync_login_code_title">Verify your Midori connection</string>
+    <string name="sync_login_code_summary">Enter this code on the account connection page opened from Midori. Do not use a code or link sent by someone else. You can return here to read the code while signing in.</string>
+    <string name="sync_login_open_browser">Continue in browser</string>
+    <string name="sync_cancel_connection">Cancel connection</string>
+    <string name="sync_login_upgrade_required">This Sync server needs an update before you can sign in securely.</string>
+    <string name="sync_login_cancelled">The connection was cancelled. No device was connected.</string>
+    <string name="sync_qr_verify_title">Verify the QR connection</string>
+    <string name="sync_qr_verify_summary">Compare this code with the code below the QR on sync.astian.org. Connect only if you opened that page in your own account and both codes match.</string>
+    <string name="sync_qr_codes_match">Codes match — connect</string>
     <string name="sync_title">Midori Sync</string>
     <string name="sync_summary">Keep bookmarks, history and autofill in sync with your other devices.</string>
     <string name="sync_unlock_summary">Unlock your encrypted data using the recovery code from another device.</string>

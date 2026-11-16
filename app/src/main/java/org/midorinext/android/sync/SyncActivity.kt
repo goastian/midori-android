@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -61,9 +62,15 @@ private fun SyncScreen(coordinator: SyncCoordinator, onBack: () -> Unit) {
     var recoveryCode by remember(state.accountId) { mutableStateOf("") }
     var backupCode by remember(state.accountId) { mutableStateOf("") }
     var backupSaved by remember(state.accountId) { mutableStateOf(false) }
+    var loginUrl by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingQr by remember { mutableStateOf<String?>(null) }
     fun run(block: suspend () -> Unit) { scope.launch { runCatching { block() } } }
     val scanner = rememberLauncherForActivityResult(ScanContract()) { result ->
-        result.contents?.let { contents -> run { coordinator.pairQr(contents); coordinator.sync() } }
+        result.contents?.let { contents ->
+            runCatching { SyncPairing.parse(contents) }
+                .onSuccess { pendingQr = contents }
+                .onFailure { actionError = R.string.sync_invalid_qr }
+        }
     }
     fun scan() {
         actionError = null
@@ -87,11 +94,11 @@ private fun SyncScreen(coordinator: SyncCoordinator, onBack: () -> Unit) {
                 onSignIn = {
                     actionError = null
                     run {
-                        val url = coordinator.beginLogin(SyncTransport.DEFAULT_SERVER)
-                        try { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url))) }
-                        catch (_: android.content.ActivityNotFoundException) { actionError = R.string.sync_error_login }
+                        loginUrl = coordinator.beginLogin(SyncTransport.DEFAULT_SERVER)
                     }
                 },
+                loginCode = state.loginCode,
+                onCancelLogin = { loginUrl = null; run { coordinator.cancelLogin() } },
                 modifier = Modifier.fillMaxSize().padding(padding),
             )
         } else Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -159,6 +166,39 @@ private fun SyncScreen(coordinator: SyncCoordinator, onBack: () -> Unit) {
             TextButton(onClick = { disconnect = true }, enabled = !state.busy) { Text(stringResource(R.string.sync_disconnect)) }
         }
     }
+    if (loginUrl != null && state.loginCode.isNotEmpty()) AlertDialog(
+        onDismissRequest = { loginUrl = null; run { coordinator.cancelLogin() } },
+        title = { Text(stringResource(R.string.sync_login_code_title)) },
+        text = { Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(stringResource(R.string.sync_login_code_summary))
+            androidx.compose.foundation.text.selection.SelectionContainer {
+                Text(state.loginCode, style = MaterialTheme.typography.headlineMedium,
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
+            }
+        } },
+        confirmButton = { TextButton(onClick = {
+            val url = loginUrl ?: return@TextButton
+            loginUrl = null
+            try { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url))) }
+            catch (_: android.content.ActivityNotFoundException) { actionError = R.string.sync_error_login; run { coordinator.cancelLogin() } }
+        }) { Text(stringResource(R.string.sync_login_open_browser)) } },
+        dismissButton = { TextButton(onClick = { loginUrl = null; run { coordinator.cancelLogin() } }) {
+            Text(stringResource(R.string.sync_cancel_connection))
+        } })
+    pendingQr?.let { contents ->
+        val pairing = SyncPairing.parse(contents)
+        AlertDialog(onDismissRequest = { pendingQr = null },
+            title = { Text(stringResource(R.string.sync_qr_verify_title)) },
+            text = { Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.sync_qr_verify_summary))
+                Text(SyncBrowserConsent.pairingCode(pairing.server, pairing.token), style = MaterialTheme.typography.headlineMedium,
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
+            } },
+            confirmButton = { TextButton(onClick = { pendingQr = null; run { coordinator.pairQr(contents); coordinator.sync() } }) {
+                Text(stringResource(R.string.sync_qr_codes_match))
+            } },
+            dismissButton = { TextButton(onClick = { pendingQr = null }) { Text(stringResource(R.string.sync_cancel_connection)) } })
+    }
     if (disconnect) AlertDialog(onDismissRequest = { disconnect = false }, title = { Text(stringResource(R.string.sync_disconnect)) },
         text = { Text(stringResource(R.string.sync_disconnect_summary)) },
         confirmButton = { TextButton(onClick = { disconnect = false; run { coordinator.disconnect() } }) { Text(stringResource(R.string.sync_disconnect)) } },
@@ -170,6 +210,8 @@ internal fun collectionLabel(name: String): Int = when (name) {
     "credit-cards" -> R.string.sync_cards; "addresses" -> R.string.sync_addresses; else -> R.string.sync_forms
 }
 private fun syncError(code: String): Int = when {
+    code == "browser_login_upgrade_required" -> R.string.sync_login_upgrade_required
+    code == "login_cancelled" -> R.string.sync_login_cancelled
     code == "invalid_pairing_qr" -> R.string.sync_invalid_qr
     code == "pairing_expired" -> R.string.sync_qr_expired
     code.startsWith("account_") || code == "invalid_account_capsule" -> R.string.sync_error_account_access
