@@ -1,5 +1,14 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
+    <string name="sync_login_code_title">Verifica la conexión de Midori</string>
+    <string name="sync_login_code_summary">Introduce este código en la página de conexión abierta desde Midori. No uses códigos ni enlaces enviados por otra persona. Puedes volver aquí para consultar el código mientras inicias sesión.</string>
+    <string name="sync_login_open_browser">Continuar en el navegador</string>
+    <string name="sync_cancel_connection">Cancelar conexión</string>
+    <string name="sync_login_upgrade_required">Este servidor de Sync necesita una actualización para iniciar sesión de forma segura.</string>
+    <string name="sync_login_cancelled">Se canceló la conexión. No se conectó ningún dispositivo.</string>
+    <string name="sync_qr_verify_title">Verifica la conexión por QR</string>
+    <string name="sync_qr_verify_summary">Compara este código con el que aparece debajo del QR en sync.astian.org. Conecta solo si abriste esa página en tu propia cuenta y ambos códigos coinciden.</string>
+    <string name="sync_qr_codes_match">Los códigos coinciden: conectar</string>
     <string name="sync_title">Midori Sync</string>
     <string name="sync_summary">Mantén tus marcadores, historial y autollenado sincronizados con tus otros dispositivos.</string>
     <string name="sync_unlock_summary">Desbloquea tus datos cifrados con el código de recuperación de otro dispositivo.</string>
