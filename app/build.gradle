@@ -119,7 +119,7 @@ android {
         minSdk 26
         targetSdk 36
         versionCode configuredPlaystoreVersionCode
-        versionName "11.9.5.1"
+        versionName "11.9.5.2"
         buildConfigField "String", "SENTRY_DSN", groovy.json.JsonOutput.toJson(
                 "https://8f48f1974aae59165417fd73e8f12bce@o508466.ingest.us.sentry.io/4506732144689152")
         buildConfigField "String", "ADBLOCK_BUNDLE_VERSION", groovy.json.JsonOutput.toJson(
