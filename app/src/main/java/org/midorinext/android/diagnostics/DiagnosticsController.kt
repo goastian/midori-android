@@ -8,6 +8,7 @@ import io.sentry.Sentry
 import io.sentry.SentryOptions
 import io.sentry.android.core.SentryAndroid
 import io.sentry.transport.ITransportGate
+import io.sentry.util.HintUtils
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
@@ -38,12 +39,16 @@ class DiagnosticsController @Inject constructor(@ApplicationContext private val 
     private val allowed = AtomicBoolean(false)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val mutex = Mutex()
+    private val processExits = DiagnosticsProcessExits(context, preferences)
     internal val cacheDirectory = File(context.noBackupFilesDir, "stability_diagnostics")
 
     fun start() {
         if (consent.value.canSend) initialize() else scope.launch {
             mutex.withLock {
-                if (!consent.value.canSend) cacheDirectory.deleteRecursively()
+                if (!consent.value.canSend) {
+                    processExits.clear()
+                    cacheDirectory.deleteRecursively()
+                }
             }
         }
     }
@@ -59,6 +64,8 @@ class DiagnosticsController @Inject constructor(@ApplicationContext private val 
                     if (Sentry.isEnabled()) allowed.set(true) else initialize()
                 } else {
                     Sentry.close()
+                    DiagnosticsRuntime.clear()
+                    processExits.clear()
                     cacheDirectory.deleteRecursively()
                 }
             }
@@ -101,7 +108,7 @@ class DiagnosticsController @Inject constructor(@ApplicationContext private val 
             options.isEnableAutoSessionTracking = true
             options.isAnrEnabled = true
             options.isEnableNdk = true
-            options.isEnableScopeSync = false
+            options.isEnableScopeSync = true
             options.tracesSampleRate = if (BuildConfig.DEBUG) 1.0 else 0.1
             options.profileSessionSampleRate = if (BuildConfig.DEBUG) 1.0 else 0.05
             options.profileLifecycle = ProfileLifecycle.TRACE
@@ -113,8 +120,13 @@ class DiagnosticsController @Inject constructor(@ApplicationContext private val 
             options.setTag("app.build", BuildConfig.VERSION_CODE.toString())
             options.setTag("app.variant", BuildConfig.FLAVOR)
             options.setTag("gecko.version", org.mozilla.geckoview.BuildConfig.MOZ_APP_VERSION)
-            options.beforeSend = SentryOptions.BeforeSendCallback { event, _ ->
-                if (allowed.get()) DiagnosticsPrivacy.scrub(event) else null
+            options.beforeSend = SentryOptions.BeforeSendCallback { event, hint ->
+                if (allowed.get()) {
+                    processExits.enrich(event)
+                    DiagnosticsPrivacy.scrub(event).also {
+                        if (HintUtils.shouldApplyScopeData(hint)) DiagnosticsRuntime.enrich(it)
+                    }
+                } else null
             }
             options.beforeSendTransaction = SentryOptions.BeforeSendTransactionCallback { event, _ ->
                 if (allowed.get()) DiagnosticsPrivacy.scrub(event) else null
@@ -124,6 +136,12 @@ class DiagnosticsController @Inject constructor(@ApplicationContext private val 
             }
             val connectivity = options.transportGate
             options.setTransportGate(ITransportGate { allowed.get() && connectivity.isConnected })
+        }
+        DiagnosticsRuntime.start()
+        scope.launch {
+            mutex.withLock {
+                if (allowed.get()) processExits.startSession()
+            }
         }
     }
 }

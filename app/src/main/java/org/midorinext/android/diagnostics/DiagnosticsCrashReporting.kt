@@ -7,7 +7,7 @@ import mozilla.components.concept.base.crash.CrashReporting
 
 internal object DiagnosticsCrashReporting : CrashReporting {
     override fun submitCaughtException(throwable: Throwable): Job {
-        Sentry.captureException(throwable)
+        Sentry.captureException(throwable) { it.setTag("diagnostics.reporter", "android_components") }
         return Job().apply { complete() }
     }
 

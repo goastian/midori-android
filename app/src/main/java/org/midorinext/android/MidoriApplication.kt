@@ -128,10 +128,16 @@ class MidoriApplication : Application(), Configuration.Provider {
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             private var started = 0
             override fun onActivityStarted(activity: Activity) {
-                if (started++ == 0) memoryBudget.onVisibilityChanged(true)
+                if (started++ == 0) {
+                    memoryBudget.onVisibilityChanged(true)
+                    org.midorinext.android.diagnostics.DiagnosticsRuntime.visibility(true)
+                }
             }
             override fun onActivityStopped(activity: Activity) {
-                if (--started == 0 && !activity.isChangingConfigurations) memoryBudget.onVisibilityChanged(false)
+                if (--started == 0 && !activity.isChangingConfigurations) {
+                    memoryBudget.onVisibilityChanged(false)
+                    org.midorinext.android.diagnostics.DiagnosticsRuntime.visibility(false)
+                }
             }
             override fun onActivityCreated(activity: Activity, state: Bundle?) = Unit
             override fun onActivityResumed(activity: Activity) = Unit
@@ -275,7 +281,15 @@ class MidoriApplication : Application(), Configuration.Provider {
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
         runOnlyInMainProcess {
+            org.midorinext.android.diagnostics.DiagnosticsRuntime.memoryPressure(level)
             memoryBudget.onTrimMemory(level)
+        }
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        runOnlyInMainProcess {
+            org.midorinext.android.diagnostics.DiagnosticsRuntime.memoryPressure(android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE)
         }
     }
 }

@@ -11,6 +11,7 @@ import io.sentry.SpanStatus
 internal object StartupTiming {
     fun mark(stage: String) {
         Log.i("MidoriStartup", "$stage at ${SystemClock.uptimeMillis() - Process.getStartUptimeMillis()} ms")
+        org.midorinext.android.diagnostics.DiagnosticsRuntime.startup(stage.substringBefore(' '))
         Sentry.addBreadcrumb(Breadcrumb().apply {
             category = "midori.startup"
             message = stage.substringBefore(' ')
@@ -18,6 +19,7 @@ internal object StartupTiming {
     }
 
     inline fun <T> measure(stage: String, operation: () -> T): T {
+        org.midorinext.android.diagnostics.DiagnosticsRuntime.startup(stage)
         val startedAt = SystemClock.uptimeMillis()
         val span = Sentry.getSpan()?.startChild("app.init", stage)
             ?: Sentry.startTransaction("Midori.$stage", "app.init")

@@ -7,13 +7,13 @@ import io.sentry.protocol.SentryTransaction
 
 internal object DiagnosticsPrivacy {
     fun <T : SentryBaseEvent> scrub(event: T): T {
+        if (event is SentryEvent) DiagnosticsRuntime.restoreNativeSnapshot(event)
         event.user = null
         event.request = null
         event.extras = null
         event.breadcrumbs = event.breadcrumbs?.mapNotNull(::breadcrumb)
         if (event is SentryEvent) {
-            event.message = null
-            event.exceptions?.forEach { it.value = null }
+            DiagnosticsDescriptions.enrich(event)
         }
         if (event is SentryTransaction) {
             event.spans.forEach { span ->
@@ -24,8 +24,8 @@ internal object DiagnosticsPrivacy {
     }
 
     fun breadcrumb(breadcrumb: Breadcrumb): Breadcrumb? {
-        if (breadcrumb.category !in setOf("app.lifecycle", "navigation", "device.event", "midori.startup")) return null
-        val safe = Breadcrumb().apply {
+        if (breadcrumb.category !in setOf("app.lifecycle", "navigation", "device.event", "midori.startup", "midori.memory", "midori.gecko")) return null
+        val safe = Breadcrumb(breadcrumb.timestamp).apply {
             category = breadcrumb.category
             type = breadcrumb.type
             level = breadcrumb.level
@@ -37,7 +37,10 @@ internal object DiagnosticsPrivacy {
                 it in setOf("created", "started", "resumed", "paused", "stopped", "destroyed", "saveInstanceState")
             }?.let { safe.setData("state", it) }
             "device.event" -> if (breadcrumb.getData("action") == "LOW_MEMORY") safe.setData("action", "LOW_MEMORY")
-            "midori.startup" -> safe.message = breadcrumb.message?.takeIf { it.matches(Regex("[a-z_]+")) }
+            "midori.startup" -> safe.message = breadcrumb.message?.takeIf { it in DiagnosticsRuntime.startupStages }
+            "midori.memory" -> (breadcrumb.getData("trim_level") as? Number)?.toInt()?.takeIf { it in 0..100 }
+                ?.let { safe.setData("trim_level", it) }
+            "midori.gecko" -> safe.message = breadcrumb.message?.takeIf { it in setOf("content_crashed", "content_recovered") }
         }
         return safe
     }
