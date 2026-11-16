@@ -9,26 +9,55 @@ import org.junit.Test
 class SyncAccountRecoveryTest {
     private val scope = "[\"https://sync.astian.org/\",\"https://accounts.example.invalid/\",\"synthetic-account\"]"
 
-    private data class Account(val remote: JSONObject, val local: JSONObject, val capsule: JSONObject)
+    private data class Account(val remote: JSONObject, val local: JSONObject, val code: String)
 
     private fun account(): Account {
         val empty = obj("crypto_state_version" to 1, "epoch" to UUID.randomUUID().toString(), "revision" to "0",
-            "keys" to JSONArray(), "migration_required" to false, "account_recovery" to false)
-        val local = SyncKeys(scope).use { it.prepareAccount(empty) }
+            "keys" to JSONArray(), "migration_required" to false, "account_recovery" to true)
+        val (code, local) = SyncKeys(scope).use { it.prepare(empty) }
         val activation = local.getJSONObject("activation")
         val remote = copy(empty).put("revision", "1").put("mode", "native").put("custody", "client").put("server_recovery", false)
             .put("registry_auth_version", 2).put("registry_auth", activation.getString("registry_auth"))
             .put("identity_key", activation.getJSONObject("identity_key")).put("active_key_id", activation.getString("key_id"))
             .put("keys", JSONArray().put(obj("key_id" to activation.getString("key_id"), "encrypted_bundle" to activation.getString("encrypted_bundle"))))
-            .put("account_recovery", true)
-        return Account(remote, local, copy(activation.getJSONObject("account_recovery")))
+        return Account(remote, local, code)
     }
 
-    @Test fun astian_account_restores_data_and_identity_without_a_recovery_code() {
+    @Test fun activation_never_contains_the_local_secret_or_recovery_code() {
         val account = account()
-        assertTrue(account.local.getBoolean("confirmed"))
-        assertFalse(account.capsule.toString().contains("MS2-"))
-        account.capsule.put("scope", account.capsule.getString("scope").replace("/", "\\/"))
+        assertFalse(account.local.optBoolean("confirmed"))
+        val wire = SyncKeys.activation(account.local).toString()
+        assertFalse(wire.contains("account_recovery"))
+        assertFalse(wire.contains("secret"))
+        assertFalse(wire.contains(account.local.getString("secret")))
+        assertFalse(wire.contains(account.code))
+        assertFalse(wire.contains(account.code.removePrefix("MS2-").replace("-", "").lowercase()))
+    }
+
+    @Test fun persisted_activations_from_old_clients_cannot_republish_escrow() {
+        val account = account()
+        account.local.getJSONObject("activation")
+            .put("account_recovery", obj("secret" to account.local.getString("secret"), "keys" to account.local.getJSONArray("keys")))
+            .put("recovery_secret", "a".repeat(64)).put("secret", account.local.getString("secret"))
+        val safe = SyncKeys.activation(account.local)
+        assertFalse(safe.has("account_recovery"))
+        assertFalse(safe.has("recovery_secret"))
+        assertFalse(safe.has("secret"))
+        assertEquals(canonical(safe), canonical(account.local.getJSONObject("activation")))
+        SyncKeys(scope).use { it.restore(account.remote, account.local) }
+    }
+
+    @Test fun login_and_server_recovery_flags_are_insufficient_to_decrypt() {
+        val account = account()
+        for (advertised in listOf(true, false)) {
+            account.remote.put("account_recovery", advertised)
+            try { SyncKeys(scope).use { it.restore(account.remote, null) }; fail("Server-only recovery accepted") }
+            catch (error: SyncException) { assertEquals("recovery_required", error.code) }
+        }
+    }
+
+    @Test fun user_recovery_code_restores_data_and_identity_and_rotates_local_wrapping() {
+        val account = account()
         SyncKeys(scope).use { original ->
             original.restore(account.remote, account.local)
             val id = "bookmark1234"
@@ -37,7 +66,7 @@ class SyncAccountRecoveryTest {
             val payload = original.seal("bookmarks", id, generation, "0", value)
             val identity = original.derive("bookmarks", JSONArray().put("stable identity"))
             SyncKeys(scope).use { fresh ->
-                val restored = fresh.restoreAccount(account.remote, account.capsule)
+                val restored = fresh.restore(account.remote, null, account.code)
                 assertEquals(identity, fresh.derive("bookmarks", JSONArray().put("stable identity")))
                 assertEquals(canonical(value), canonical(fresh.open("bookmarks", generation, obj("id" to id, "revision" to "1",
                     "deleted" to false, "ttl" to null, "payload" to payload))))
@@ -50,32 +79,19 @@ class SyncAccountRecoveryTest {
         }
     }
 
-    @Test fun account_capsules_reject_cross_account_epoch_secret_and_registry_changes() {
+    @Test fun wrong_code_scope_mac_and_replayed_registry_cannot_restore_keys() {
         val account = account()
-        val changes: List<(JSONObject) -> Unit> = listOf(
-            { it.put("scope", "another account") },
-            { it.put("epoch", UUID.randomUUID().toString()) },
-            { it.put("secret", "0".repeat(64)) },
-            { it.put("keys", JSONArray()) },
+        val attempts = listOf(
+            Triple(scope, account.remote, "MS2-" + "00000000-".repeat(7) + "00000000"),
+            Triple(scope.replace("synthetic-account", "other-account"), account.remote, account.code),
+            Triple(scope, copy(account.remote).put("registry_auth", "0".repeat(64)), account.code),
         )
-        for (change in changes) {
-            val capsule = copy(account.capsule).also(change)
-            try { SyncKeys(scope).use { it.restoreAccount(account.remote, capsule) }; fail("Invalid account capsule accepted") }
+        for ((keyScope, remote, code) in attempts) {
+            try { SyncKeys(keyScope).use { it.restore(remote, null, code) }; fail("Untrusted recovery accepted") }
             catch (_: Exception) { }
         }
-        val badMac = copy(account.remote).put("registry_auth", "0".repeat(64))
-        try { SyncKeys(scope).use { it.restoreAccount(badMac, account.capsule) }; fail("Invalid registry MAC accepted") }
-        catch (_: Exception) { }
-    }
-
-    @Test fun account_recovery_preserves_the_existing_registry_checkpoint() {
-        val account = account()
         val previous = SyncKeys(scope).use { it.restore(account.remote, account.local) }
-        val replayed = copy(account.remote).put("revision", "0")
-        try { SyncKeys(scope).use { it.restoreAccount(replayed, account.capsule, previous) }; fail("Registry replay accepted") }
-        catch (error: SyncException) { assertEquals("registry_replay", error.code) }
-        val changedEpoch = copy(account.remote).put("epoch", UUID.randomUUID().toString())
-        try { SyncKeys(scope).use { it.restoreAccount(changedEpoch, account.capsule, previous) }; fail("Changed epoch accepted") }
+        try { SyncKeys(scope).use { it.restore(copy(account.remote).put("revision", "0"), previous) }; fail("Registry replay accepted") }
         catch (error: SyncException) { assertEquals("registry_replay", error.code) }
     }
 }

@@ -2,7 +2,6 @@ package org.midorinext.android.sync
 
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.Base64
 
 internal class SyncKeys(private val scope: String) : AutoCloseable {
     val storageScope: String = java.security.MessageDigest.getInstance("SHA-256")
@@ -56,53 +55,6 @@ internal class SyncKeys(private val scope: String) : AutoCloseable {
         state = copy(remote)
     }
 
-    fun accountCapsule(local: JSONObject, remote: JSONObject): JSONObject {
-        requireSync(local.getString("epoch") == remote.getString("epoch") &&
-            local.getJSONObject("identity_key").getString("key_id") == remote.getJSONObject("identity_key").getString("key_id"), "invalid_account_capsule")
-        val saved = local.objects("keys").associateBy { it.getString("key_id") }
-        val keys = JSONArray()
-        for (key in remote.objects("keys")) keys.put(saved[key.getString("key_id")] ?: throw SyncException("invalid_account_capsule"))
-        val bytes = Base64.getDecoder().decode(local.getString("secret"))
-        try {
-            requireSync(bytes.size == 32, "invalid_account_capsule")
-            return obj("version" to 1, "scope" to scope, "epoch" to remote.getString("epoch"),
-                "secret" to bytes.joinToString("") { "%02x".format(it) }, "keys" to keys,
-                "identity_key" to local.getJSONObject("identity_key"))
-        } finally { bytes.fill(0) }
-    }
-
-    fun restoreAccount(remote: JSONObject, capsule: JSONObject, previous: JSONObject? = null): JSONObject {
-        validateState(remote)
-        requireSync(previous == null || previous.getString("epoch") == remote.getString("epoch") &&
-            remote.getString("revision").toLong() >= previous.getString("revision").toLong(), "registry_replay")
-        val matchingScope = runCatching { same(JSONArray(capsule.getString("scope")), JSONArray(scope)) }.getOrDefault(false)
-        requireSync(capsule.getInt("version") == 1 && matchingScope &&
-            capsule.getString("epoch") == remote.getString("epoch") &&
-            capsule.getString("secret").matches(Regex("[0-9a-f]{64}")) &&
-            capsule.objects("keys").size == remote.objects("keys").size &&
-            capsule.objects("keys").map { it.getString("key_id") }.toSet() == remote.objects("keys").map { it.getString("key_id") }.toSet() &&
-            capsule.getJSONObject("identity_key").getString("key_id") == remote.getJSONObject("identity_key").getString("key_id"), "invalid_account_capsule")
-        val bytes = capsule.getString("secret").chunked(2).map { it.toInt(16).toByte() }.toByteArray()
-        val local = try {
-            restore(remote, obj("epoch" to remote.getString("epoch"), "revision" to remote.getString("revision"),
-                "secret" to base64(bytes), "keys" to capsule.getJSONArray("keys"), "identity_key" to capsule.getJSONObject("identity_key")))
-        } finally { bytes.fill(0) }
-        val secret = base64(randomBytes(32))
-        val keys = JSONArray()
-        for ((id, handle) in handles) keys.put(obj("key_id" to id, "encrypted_bundle" to data.call("wrap", "handle" to handle, "secret" to secret)))
-        return local.put("secret", secret).put("keys", keys).put("identity_key", obj("key_id" to remote.getJSONObject("identity_key").getString("key_id"),
-            "encrypted_bundle" to identity.call("wrap", "handle" to identityHandle, "secret" to secret)))
-    }
-
-    fun prepareAccount(remote: JSONObject): JSONObject {
-        val local = prepare(remote).second
-        val activation = local.getJSONObject("activation")
-        val next = copy(remote).put("keys", JSONArray().put(obj("key_id" to activation.getString("key_id"),
-            "encrypted_bundle" to activation.getString("encrypted_bundle")))).put("identity_key", activation.getJSONObject("identity_key"))
-        activation.put("account_recovery", accountCapsule(local, next))
-        return local.put("confirmed", true)
-    }
-
     fun prepare(remote: JSONObject): Pair<String, JSONObject> {
         validateState(remote, empty = true)
         requireSync(remote.objects("keys").isEmpty() && !remote.getBoolean("migration_required"), "native_keys_already_active")
@@ -153,6 +105,15 @@ internal class SyncKeys(private val scope: String) : AutoCloseable {
             same(value.opt("ttl"), record.opt("ttl")) && (!record.getBoolean("deleted") || value.isNull("value")), "record_authentication_failed")
         requireSync(value.isNull("ttl"), "record_ttl_unsupported")
         return value.objectOrNull("value")
+    }
+    companion object {
+        fun activation(local: JSONObject): JSONObject {
+            val pending = local.getJSONObject("activation")
+            val safe = obj(*listOf("crypto", "key_id", "encrypted_bundle", "identity_key", "custody", "registry_auth_version", "registry_auth")
+                .map { it to pending.get(it) }.toTypedArray())
+            local.put("activation", safe)
+            return safe
+        }
     }
     override fun close() { data.close(); identity.close() }
     private fun validateState(value: JSONObject, empty: Boolean = false) {

@@ -189,7 +189,8 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
         requireSync(state.getString("phase") == "backup_required", "recovery_backup_required")
         state.getJSONObject("keys").put("confirmed", true); save()
         val transport = transport(state.getString("server"))
-        val pending = state.getJSONObject("keys").getJSONObject("activation")
+        val pending = SyncKeys.activation(state.getJSONObject("keys"))
+        save()
         request(transport, "api/v1/crypto/activate", "POST", pending)
         state.put("phase", "ready"); save()
     }
@@ -274,7 +275,7 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
             val selected = selected()
             state.put("unsupported", JSONArray(selected.filter { !SyncModels.supported(capabilities, it) }))
             run {
-                val keys = connectKeys(transport, capabilities) ?: return@operation
+                val keys = connectKeys(transport) ?: return@operation
                 state.put("phase", "ready"); save()
                 val engine = SyncEngine(keys, stores, { path, method, body, query -> request(transport, path, method, body, query) }, metrics, ::save)
                 val failures = mutableListOf<String>()
@@ -295,65 +296,24 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
             }
         }
 
-    private fun connectKeys(transport: SyncTransport, capabilities: JSONObject): SyncKeys? {
+    private fun connectKeys(transport: SyncTransport): SyncKeys? {
         var remote = request(transport, "api/v1/crypto/state")
-        val managed = capabilities.optJSONObject("crypto")?.optInt("account_recovery_version") == 1 && remote.has("account_recovery")
-        var local = state.objectOrNull("keys")
-        if (managed && remote.objects("keys").isEmpty() && !remote.getBoolean("migration_required")) {
-            if (local == null) {
-                local = SyncKeys(state.getString("scope")).use { it.prepareAccount(remote) }
-                state.put("keys", local).put("phase", "connecting"); save()
-            }
-            if (local.has("activation")) {
-                val activation = local.getJSONObject("activation")
-                val next = copy(remote).put("keys", JSONArray().put(obj("key_id" to activation.getString("key_id"),
-                    "encrypted_bundle" to activation.getString("encrypted_bundle")))).put("identity_key", activation.getJSONObject("identity_key"))
-                if (!activation.has("account_recovery")) {
-                    SyncKeys(state.getString("scope")).use { activation.put("account_recovery", it.accountCapsule(local, next)) }
-                }
-                local.put("confirmed", true); save()
-            }
-            if (local.optBoolean("confirmed") && local.has("activation")) {
-                try { remote = request(transport, "api/v1/crypto/activate", "POST", local.getJSONObject("activation")) }
-                catch (error: SyncException) {
-                    if (error.code !in listOf("crypto_state_conflict", "native_keys_already_active")) throw error
-                    remote = request(transport, "api/v1/crypto/state")
-                }
-            }
+        val local = state.objectOrNull("keys")
+        if (local == null) {
+            state.put("phase", if (remote.objects("keys").isEmpty() && !remote.getBoolean("migration_required")) "keys_required" else "recovery_required")
+            save()
+            return null
         }
-        if (!managed) {
-            val stored = local ?: throw SyncException("account_recovery_unsupported")
-            if (state.optString("phase") == "backup_required" && !stored.optBoolean("confirmed")) {
-                throw SyncException("account_recovery_unsupported")
-            }
-            if (remote.objects("keys").isEmpty() && stored.optBoolean("confirmed")) {
-                remote = request(transport, "api/v1/crypto/activate", "POST", stored.getJSONObject("activation"))
-            }
-            return readyKeys(remote, stored)
-        }
-        val available = local?.objects("keys")?.map { it.getString("key_id") }?.toSet().orEmpty()
-        val canOpen = local != null && remote.objects("keys").isNotEmpty() &&
-            remote.objects("keys").all { it.getString("key_id") in available } &&
-            local.getJSONObject("identity_key").getString("key_id") == remote.getJSONObject("identity_key").getString("key_id")
-        if (!canOpen) {
-            if (!remote.optBoolean("account_recovery")) {
-                state.put("phase", "account_recovery_pending"); save()
+        if (remote.objects("keys").isEmpty() && local.has("activation")) {
+            if (!local.optBoolean("confirmed")) {
+                state.put("phase", "backup_required"); save()
                 return null
             }
-            val response = request(transport, "api/v1/crypto/account-recovery")
-            requireSync(response.getString("epoch") == remote.getString("epoch"), "invalid_account_capsule")
-            val restored = SyncKeys(state.getString("scope"))
-            try {
-                local = restored.restoreAccount(remote, response.getJSONObject("capsule"), local)
-                state.put("keys", local); save()
-                activeKeys?.close(); activeKeys = restored
-            } catch (error: Throwable) { restored.close(); throw error }
+            val activation = SyncKeys.activation(local)
+            save()
+            remote = request(transport, "api/v1/crypto/activate", "POST", activation)
         }
-        val keys = readyKeys(remote, local!!)
-        if (!remote.optBoolean("account_recovery")) {
-            request(transport, "api/v1/crypto/account-recovery", "PUT", obj("crypto" to keys.context, "capsule" to keys.accountCapsule(local, remote)))
-        }
-        return keys
+        return readyKeys(remote, local)
     }
     suspend fun disconnect() = withContext(NonCancellable + Dispatchers.IO) {
         disconnecting = true

@@ -58,6 +58,9 @@ private fun SyncScreen(coordinator: SyncCoordinator, onBack: () -> Unit) {
     var actionError by remember { mutableStateOf<Int?>(null) }
     var conflicts by remember { mutableStateOf(emptyList<SyncConflict>()) }
     var disconnect by remember { mutableStateOf(false) }
+    var recoveryCode by remember(state.accountId) { mutableStateOf("") }
+    var backupCode by remember(state.accountId) { mutableStateOf("") }
+    var backupSaved by remember(state.accountId) { mutableStateOf(false) }
     fun run(block: suspend () -> Unit) { scope.launch { runCatching { block() } } }
     val scanner = rememberLauncherForActivityResult(ScanContract()) { result ->
         result.contents?.let { contents -> run { coordinator.pairQr(contents); coordinator.sync() } }
@@ -97,8 +100,30 @@ private fun SyncScreen(coordinator: SyncCoordinator, onBack: () -> Unit) {
             state.error?.let { Text(stringResource(syncError(it)), color = MaterialTheme.colorScheme.error) }
             Text(stringResource(R.string.sync_summary))
             Text(state.name, style = MaterialTheme.typography.titleMedium)
-            if (state.phase != "ready") {
-                Text(stringResource(if (state.phase == "account_recovery_pending") R.string.sync_account_update_waiting else R.string.sync_account_connecting))
+            if (state.phase in listOf("keys_required", "backup_required")) {
+                if (backupCode.isEmpty()) {
+                    Button(onClick = { run { backupCode = coordinator.prepareKeys(); backupSaved = false } }, enabled = !state.busy) {
+                        Text(stringResource(R.string.sync_create_keys))
+                    }
+                } else {
+                    Text(stringResource(R.string.sync_backup_summary))
+                    androidx.compose.foundation.text.selection.SelectionContainer { Text(backupCode) }
+                    Row {
+                        Checkbox(checked = backupSaved, onCheckedChange = { backupSaved = it }, enabled = !state.busy)
+                        Text(stringResource(R.string.sync_backup_saved), Modifier.padding(top = 12.dp))
+                    }
+                    Button(onClick = { run { coordinator.activateKeys(); backupCode = ""; coordinator.sync() } }, enabled = backupSaved && !state.busy) {
+                        Text(stringResource(R.string.sync_continue))
+                    }
+                }
+            } else if (state.phase != "ready") {
+                Text(stringResource(R.string.sync_unlock_summary))
+                OutlinedTextField(value = recoveryCode, onValueChange = { recoveryCode = it }, singleLine = true,
+                    label = { Text(stringResource(R.string.sync_recovery_code)) }, enabled = !state.busy,
+                    visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation())
+                Button(onClick = { run { coordinator.recover(recoveryCode); recoveryCode = ""; coordinator.sync() } }, enabled = recoveryCode.isNotBlank() && !state.busy) {
+                    Text(stringResource(R.string.sync_unlock))
+                }
                 TextButton(onClick = { run { coordinator.sync() } }, enabled = !state.busy) {
                     Text(stringResource(R.string.sync_retry))
                 }
