@@ -6,7 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.midorinext.android.StartupTiming
 import org.midorinext.android.adblock.LegacyBlockerMigration
-import org.midorinext.android.newtab.MidoriNewTabFeature
+import org.midorinext.android.newtab.migration.LegacyHomeMigration
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -53,12 +53,12 @@ object GeckoHiltModule {
         runtime: GeckoRuntime,
         settings: Settings,
         legacyBlockerMigration: LegacyBlockerMigration,
-        newTabFeature: MidoriNewTabFeature,
+        legacyHomeMigration: LegacyHomeMigration,
     ): Engine {
         return StartupTiming.measure("browser_engine") {
             GeckoEngine(context, settings, runtime).also {
                 legacyBlockerMigration.uninstall(runtime)
-                newTabFeature.registerLegacyOrigins(runtime)
+                legacyHomeMigration.registerLegacyOrigins(runtime)
                 WebCompatFeature.install(it)
             }
         }

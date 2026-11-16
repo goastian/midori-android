@@ -27,8 +27,6 @@
     <string name="settings_homepage_title">Nowa karta</string>
     <string name="settings_homepage_summary">Skróty, widżety, przestrzenie, motywy i tła</string>
     <string name="settings_homepage_sections">Nowa karta Midori</string>
-    <string name="settings_homepage_midori_tab">Dostosuj nową kartę</string>
-    <string name="settings_homepage_midori_tab_description">Otwórz nową kartę i użyj przycisku ustawień, aby zarządzać skrótami, widżetami, przestrzeniami, językiem, motywem i tłem. Wybory pozostają na tym urządzeniu.</string>
     <string name="settings_customize_title">Dostosuj</string>
     <string name="settings_customize_summary">Motyw, pasek narzędzi, karty i gesty</string>
     <string name="settings_customize_gestures">Gesty</string>

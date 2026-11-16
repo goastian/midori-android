@@ -140,8 +140,6 @@
     <string name="settings_homepage_title">Nouvel onglet</string>
     <string name="settings_homepage_summary">Raccourcis, widgets, espaces, thèmes et arrière-plans</string>
     <string name="settings_homepage_sections">Nouvel onglet Midori</string>
-    <string name="settings_homepage_midori_tab">Personnalisez votre nouvel onglet</string>
-    <string name="settings_homepage_midori_tab_description">Ouvrez un nouvel onglet et utilisez son bouton Paramètres pour gérer les raccourcis, les widgets, les espaces, la langue, le thème et l\'arrière-plan. Vos choix restent sur cet appareil.</string>
     <string name="settings_customize_title">Personnaliser</string>
     <string name="settings_customize_summary">Thème, barre d\'outils, onglets et gestes</string>
     <string name="settings_customize_gestures">Gestes</string>

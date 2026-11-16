@@ -64,7 +64,10 @@ class NavigationTest {
     fun newTabUsesNativeResourcesWithoutTheRetiredWebBundle() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         assertTrue(isNativeHomeUrl(NATIVE_HOME_URL))
-        assertFalse(context.assets.list("extensions").orEmpty().contains("midori_newtab"))
+        assertEquals(
+            setOf("ads", "browser-icons", "midori_sync", "midori_vpn", "readerview", "search", "webcompat"),
+            context.assets.list("extensions").orEmpty().toSet(),
+        )
         assertTrue(context.getString(R.string.home_shortcuts).isNotBlank())
         assertTrue(context.getString(R.string.home_recent_visits).isNotBlank())
     }

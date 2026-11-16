@@ -27,8 +27,6 @@
     <string name="settings_homepage_title">नया टैब</string>
     <string name="settings_homepage_summary">शॉर्टकट, विजेट, स्पेस, थीम और पृष्ठभूमि</string>
     <string name="settings_homepage_sections">मिडोरी नया टैब</string>
-    <string name="settings_homepage_midori_tab">अपने नए टैब को वैयक्तिकृत करें</string>
-    <string name="settings_homepage_midori_tab_description">एक नया टैब खोलें और शॉर्टकट, विजेट, स्पेस, भाषा, थीम और पृष्ठभूमि को प्रबंधित करने के लिए इसके सेटिंग्स बटन का उपयोग करें। आपकी पसंद इस डिवाइस पर रहती है.</string>
     <string name="settings_customize_title">अनुकूलित करें</string>
     <string name="settings_customize_summary">थीम, टूलबार, टैब और जेस्चर</string>
     <string name="settings_customize_gestures">इशारे</string>

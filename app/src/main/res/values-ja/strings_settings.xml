@@ -27,8 +27,6 @@
     <string name="settings_homepage_title">新しいタブ</string>
     <string name="settings_homepage_summary">ショートカット、ウィジェット、スペース、テーマ、背景</string>
     <string name="settings_homepage_sections">みどりの新しいタブ</string>
-    <string name="settings_homepage_midori_tab">新しいタブをパーソナライズする</string>
-    <string name="settings_homepage_midori_tab_description">新しいタブを開き、その [設定] ボタンを使用して、ショートカット、ウィジェット、スペース、言語、テーマ、背景を管理します。あなたの選択はこのデバイスに残ります。</string>
     <string name="settings_customize_title">カスタマイズ</string>
     <string name="settings_customize_summary">テーマ、ツールバー、タブ、ジェスチャー</string>
     <string name="settings_customize_gestures">ジェスチャー</string>

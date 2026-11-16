@@ -27,8 +27,6 @@
     <string name="settings_homepage_title">نیا ٹیب</string>
     <string name="settings_homepage_summary">شارٹ کٹس، ویجٹس، اسپیسز، تھیمز اور پس منظر</string>
     <string name="settings_homepage_sections">Midori کا نیا ٹیب</string>
-    <string name="settings_homepage_midori_tab">اپنا نیا ٹیب ذاتی بنائیں</string>
-    <string name="settings_homepage_midori_tab_description">نیا ٹیب کھولیں اور اس کے ترتیبات بٹن سے شارٹ کٹس، ویجٹس، اسپیسز، زبان، تھیم اور پس منظر کا نظم کریں۔ آپ کے انتخاب اسی آلے پر رہتے ہیں۔</string>
     <string name="settings_customize_title">اپنی مرضی کے مطابق بنائیں</string>
     <string name="settings_customize_summary">تھیم، ٹول بار، ٹیبز اور اشارے</string>
     <string name="settings_customize_gestures">اشارے</string>

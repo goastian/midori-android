@@ -10,7 +10,8 @@ import org.midorinext.android.ext.getMidoriSERPSearch
 import org.midorinext.android.ext.isMidoriUrl
 import org.midorinext.android.ext.toCleanHost
 import org.midorinext.android.ext.urlDecode
-import org.midorinext.android.newtab.MidoriNewTabFeature
+import org.midorinext.android.newtab.isNativeHomeUrl
+import org.midorinext.android.newtab.migration.LegacyHomeMigration
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.preferences.app.ToolbarPosition
@@ -42,7 +43,7 @@ class BrowserToolbarState @AssistedInject constructor(
     appPreferencesRepository: AppPreferencesRepository,
     suggestionProviders: dagger.Lazy<@JvmSuppressWildcards List<SuggestionProvider>>,
     browserIcons: BrowserIcons,
-    private val newTabFeature: MidoriNewTabFeature,
+    private val legacyHomeMigration: LegacyHomeMigration,
     @Assisted private val coroutineScope: CoroutineScope = MainScope()
 ): ToolbarState(
     browserIcons, lazy { suggestionProviders.get() }, coroutineScope,
@@ -53,7 +54,7 @@ class BrowserToolbarState @AssistedInject constructor(
         private set
 
     var onMidori by mutableStateOf(
-        store.state.selectedTab?.content?.url?.let { it.isMidoriUrl() || newTabFeature.isNewTabUrl(it) } ?: true
+        store.state.selectedTab?.content?.url?.let { it.isMidoriUrl() || isHomeUrl(it) } ?: true
     )
         private set
 
@@ -129,7 +130,7 @@ class BrowserToolbarState @AssistedInject constructor(
         .distinctUntilChanged()
 
     val currentUrl = selectedPage
-        .combine(newTabFeature.legacyOrigins) { page, _ -> page }
+        .combine(legacyHomeMigration.legacyOrigins) { page, _ -> page }
         .onEach { page ->
             if (page?.tabId != selectedTabId) {
                 selectedTabId = page?.tabId
@@ -139,7 +140,7 @@ class BrowserToolbarState @AssistedInject constructor(
                 updateTextWithUrl(page?.url.orEmpty())
                 updateVisibility(true)
             }
-            onMidori = page?.url?.let { it.isMidoriUrl() || newTabFeature.isNewTabUrl(it) } ?: true
+            onMidori = page?.url?.let { it.isMidoriUrl() || isHomeUrl(it) } ?: true
         }
         .map { it?.url }
         .stateIn(
@@ -163,7 +164,7 @@ class BrowserToolbarState @AssistedInject constructor(
     }
 
     private fun updateTextWithUrl(url: String) {
-        text = if (newTabFeature.isNewTabUrl(url)) {
+        text = if (isHomeUrl(url)) {
             TextFieldValue("")
         } else if (url.isMidoriUrl()) {
             url.getMidoriSERPSearch()?.urlDecode()?.let { search ->
@@ -181,6 +182,8 @@ class BrowserToolbarState @AssistedInject constructor(
     fun updateVisibility(visible: Boolean) {
         this.visible = visible
     }
+
+    private fun isHomeUrl(url: String): Boolean = isNativeHomeUrl(url) || legacyHomeMigration.isLegacyUrl(url)
 
     fun updateShowSiteSecurity(visible: Boolean) {
         this.showSiteSecurity = visible

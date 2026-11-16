@@ -137,8 +137,6 @@
     <string name="settings_homepage_title">Neuer Tab</string>
     <string name="settings_homepage_summary">Verknüpfungen, Widgets, Leerzeichen, Themen und Hintergründe</string>
     <string name="settings_homepage_sections">Midori Neuer Tab</string>
-    <string name="settings_homepage_midori_tab">Personalisieren Sie Ihren neuen Tab</string>
-    <string name="settings_homepage_midori_tab_description">Öffnen Sie einen neuen Tab und verwenden Sie die Schaltfläche „Einstellungen“, um Verknüpfungen, Widgets, Leerzeichen, Sprache, Thema und Hintergrund zu verwalten. Ihre Auswahl bleibt auf diesem Gerät.</string>
     <string name="settings_customize_title">Anpassen</string>
     <string name="settings_customize_summary">Thema, Symbolleiste, Registerkarten und Gesten</string>
     <string name="settings_customize_gestures">Gesten</string>

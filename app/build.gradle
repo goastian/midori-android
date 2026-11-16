@@ -303,13 +303,22 @@ tasks.register("verifyNativeHome") {
     description = "Verifies that the native New Tab screen is packaged without the retired web bundle."
     def homeSource = file("src/main/java/org/midorinext/android/ui/browser/home/NativeHomeScreen.kt")
     inputs.file(homeSource)
-    inputs.dir(file("src/main/assets"))
+    def extensionsDirectory = file("src/main/assets/extensions")
+    inputs.dir(extensionsDirectory)
     doLast {
         if (!homeSource.isFile() || !homeSource.getText("UTF-8").contains("fun NativeHomeScreen(")) {
             throw new GradleException("The native New Tab screen is missing")
         }
-        if (file("src/main/assets/extensions/midori_newtab").exists()) {
-            throw new GradleException("The retired Midori New Tab web bundle must not be packaged")
+        def supportedExtensions = ["midori_sync", "midori_vpn", "readerview"] as Set
+        def bundledExtensions = extensionsDirectory.listFiles().collect { it.name } as Set
+        if (bundledExtensions != supportedExtensions) {
+            throw new GradleException("Unexpected bundled extensions: ${bundledExtensions - supportedExtensions}; missing: ${supportedExtensions - bundledExtensions}")
+        }
+        fileTree(extensionsDirectory).matching { include "**/manifest.json" }.each { manifestFile ->
+            def manifest = new groovy.json.JsonSlurper().parse(manifestFile)
+            if (manifest.chrome_url_overrides?.containsKey("newtab")) {
+                throw new GradleException("Bundled extensions cannot override the native New Tab screen: ${manifestFile}")
+            }
         }
     }
 }

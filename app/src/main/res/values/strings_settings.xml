@@ -38,8 +38,6 @@
     <string name="settings_homepage_title">New Tab</string>
     <string name="settings_homepage_summary">Shortcuts, widgets, spaces, themes and backgrounds</string>
     <string name="settings_homepage_sections">Midori New Tab</string>
-    <string name="settings_homepage_midori_tab">Personalize your New Tab</string>
-    <string name="settings_homepage_midori_tab_description">Open a new tab and use its Settings button to manage shortcuts, widgets, spaces, language, theme and background. Your choices stay on this device.</string>
     <string name="settings_customize_title">Customize</string>
     <string name="settings_customize_summary">Theme, toolbar, tabs and gestures</string>
     <string name="settings_customize_gestures">Gestures</string>

@@ -1,4 +1,4 @@
-package org.midorinext.android.newtab
+package org.midorinext.android.newtab.migration
 
 import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -11,21 +11,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class MidoriNewTabFeature @Inject constructor(@ApplicationContext context: Context) {
+class LegacyHomeMigration @Inject constructor(@ApplicationContext context: Context) {
     private val preferences = context.getSharedPreferences("native_home_origins", Context.MODE_PRIVATE)
     private val origins = MutableStateFlow(preferences.getStringSet("legacy", emptySet()).orEmpty().toSet())
     val legacyOrigins = origins.asStateFlow()
 
-    fun currentPageUrl(): String = NATIVE_HOME_URL
-
-    fun currentOrLoadingUrl(): String = NATIVE_HOME_URL
-
-    fun isLoadingUrl(url: String?): Boolean = url == LEGACY_NEW_TAB_URL
-
-    fun isNewTabUrl(url: String?): Boolean = isNativeHomeUrl(url) || isLegacyUrl(url)
-
     fun isLegacyUrl(url: String?): Boolean = url != null &&
-        (url == LEGACY_NEW_TAB_URL || url == LEGACY_NATIVE_HOME_URL || url.isLegacyMidoriHomeUrl() || isLegacyExtensionHome(url, origins.value))
+        (isLegacyNativeHomeUrl(url) || url.isLegacyMidoriHomeUrl() || isLegacyExtensionHome(url, origins.value))
 
     fun registerLegacyOrigins(runtime: GeckoRuntime) {
         runtime.webExtensionController.list().accept({ extensions ->
@@ -39,8 +31,7 @@ class MidoriNewTabFeature @Inject constructor(@ApplicationContext context: Conte
     }
 
     companion object {
-        const val EXTENSION_ID = "midoritabs@astian.org"
-        const val LOADING_URL = LEGACY_NEW_TAB_URL
+        private const val EXTENSION_ID = "midoritabs@astian.org"
 
         internal fun isLegacyExtensionHome(url: String, origins: Set<String>): Boolean = runCatching {
             val candidate = URI(url)
@@ -50,3 +41,8 @@ class MidoriNewTabFeature @Inject constructor(@ApplicationContext context: Conte
         }.getOrDefault(false)
     }
 }
+
+const val LEGACY_NEW_TAB_URL = "about:blank#midori-newtab"
+const val LEGACY_NATIVE_HOME_URL = "data:text/html;base64,PCFkb2N0eXBlIGh0bWw+PHRpdGxlPk1pZG9yaTwvdGl0bGU+PCEtLW1pZG9yaS1uYXRpdmUtaG9tZS0tPg=="
+
+fun isLegacyNativeHomeUrl(url: String?): Boolean = url == LEGACY_NEW_TAB_URL || url == LEGACY_NATIVE_HOME_URL

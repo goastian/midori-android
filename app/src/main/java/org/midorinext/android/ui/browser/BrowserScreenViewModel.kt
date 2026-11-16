@@ -20,6 +20,8 @@ import org.midorinext.android.storage.autofill.LoginAutofillRepository
 import org.midorinext.android.ui.browser.toolbar.BrowserToolbarState
 import org.midorinext.android.ui.browser.toolbar.BrowserToolbarStateFactory
 import org.midorinext.android.usecases.MidoriUseCases
+import org.midorinext.android.newtab.isNativeHomeUrl
+import org.midorinext.android.newtab.migration.LegacyHomeMigration
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -77,6 +79,7 @@ class BrowserScreenViewModel @Inject constructor(
     webAppRepositoryProvider: dagger.Lazy<WebAppRepository>,
     private val desktopHostFilter: DesktopHostFilter,
     private val contentBlocking: NativeContentBlockingFeature,
+    private val legacyHomeMigration: LegacyHomeMigration,
 ): ViewModel() {
     private val bookmarksRepository by lazy { bookmarksRepositoryProvider.get() }
     private val webAppUseCases by lazy { webAppUseCasesProvider.get() }
@@ -233,7 +236,7 @@ class BrowserScreenViewModel @Inject constructor(
                 if (tabsWithUserNavigationInFlight.isEmpty()) return@collect
                 val replaceableTabIds = state.tabs
                     .filter { tab ->
-                        MidoriUseCases.isLegacyNewTabUrl(tab.content.url)
+                        legacyHomeMigration.isLegacyUrl(tab.content.url)
                     }
                     .mapTo(mutableSetOf()) { tab -> tab.id }
                 tabsWithUserNavigationInFlight.retainAll(replaceableTabIds)
@@ -257,11 +260,11 @@ class BrowserScreenViewModel @Inject constructor(
         }
     }
 
-    val legacyNewTabOrigins = MidoriUseCases.legacyNewTabOrigins
+    val legacyHomeOrigins = legacyHomeMigration.legacyOrigins
 
     fun prepareNativeHomeSession(tabId: String?) {
         val tab = store.state.tabs.firstOrNull { it.id == tabId } ?: return
-        if (MidoriUseCases.isNewTabUrl(tab.content.url) && tab.engineState.engineSession == null) {
+        if (isNewTabUrl(tab.content.url) && tab.engineState.engineSession == null) {
             store.dispatch(EngineAction.CreateEngineSessionAction(tab.id))
         }
     }
@@ -699,7 +702,7 @@ class BrowserScreenViewModel @Inject constructor(
     fun replaceTabWithNewTab(tabId: String, expectedUrl: String) {
         if (tabId in tabsWithUserNavigationInFlight) return
         val tab = store.state.tabs.firstOrNull { it.id == tabId } ?: return
-        if (tab.content.url != expectedUrl || !MidoriUseCases.isLegacyNewTabUrl(tab.content.url)) return
+        if (tab.content.url != expectedUrl || !legacyHomeMigration.isLegacyUrl(tab.content.url)) return
         if (tab.engineState.initializing || tab.content.loading) return
         if (tab.engineState.engineSession == null && tab.engineState.engineSessionState != null) return
 
@@ -709,16 +712,14 @@ class BrowserScreenViewModel @Inject constructor(
 
     private fun markSelectedNewTabAsUserNavigation(): String? {
         val tab = store.state.selectedTab ?: return null
-        val isReplaceable = MidoriUseCases.isLegacyNewTabUrl(tab.content.url)
+        val isReplaceable = legacyHomeMigration.isLegacyUrl(tab.content.url)
         if (!isReplaceable) return null
 
         tabsWithUserNavigationInFlight += tab.id
         return tab.id
     }
 
-    fun isNewTabUrl(url: String?): Boolean = MidoriUseCases.isNewTabUrl(url)
-
-    fun isNewTabLoadingUrl(url: String?): Boolean = MidoriUseCases.isNewTabLoadingUrl(url)
+    fun isNewTabUrl(url: String?): Boolean = isNativeHomeUrl(url) || legacyHomeMigration.isLegacyUrl(url)
 
     private var safetyTabOpening = false
 

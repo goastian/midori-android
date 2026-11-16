@@ -11,8 +11,8 @@ import mozilla.components.browser.state.state.createTab
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.midorinext.android.newtab.MidoriNewTabFeature
 import org.midorinext.android.newtab.NATIVE_HOME_URL
+import org.midorinext.android.newtab.migration.LEGACY_NEW_TAB_URL
 
 class InitialBrowserContentTest {
     @Test
@@ -50,12 +50,12 @@ class InitialBrowserContentTest {
 
     @Test
     fun newTabPlaceholderDoesNotCountAsLoadedContent() = runBlocking {
-        val states = MutableStateFlow(state(url = MidoriNewTabFeature.LOADING_URL))
+        val states = MutableStateFlow(state(url = LEGACY_NEW_TAB_URL))
         val ready = async(start = CoroutineStart.UNDISPATCHED) { awaitInitialBrowserContent(states) }
         yield()
         assertFalse(ready.isCompleted)
 
-        states.value = state(url = "moz-extension://runtime-id/index.html")
+        states.value = state(url = "https://example.org")
         assertTrue(ready.await())
     }
 

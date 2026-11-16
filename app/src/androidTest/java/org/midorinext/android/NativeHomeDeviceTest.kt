@@ -22,6 +22,7 @@ import org.junit.*
 import org.junit.Assert.*
 import org.junit.runner.RunWith
 import org.midorinext.android.newtab.*
+import org.midorinext.android.newtab.migration.LEGACY_NEW_TAB_URL
 import org.midorinext.android.preferences.app.*
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.withTimeout

@@ -138,8 +138,6 @@
     <string name="settings_homepage_title">Nuova scheda</string>
     <string name="settings_homepage_summary">Scorciatoie, widget, spazi, temi e sfondi</string>
     <string name="settings_homepage_sections">Nuova scheda Midori</string>
-    <string name="settings_homepage_midori_tab">Personalizza la tua Nuova scheda</string>
-    <string name="settings_homepage_midori_tab_description">Apri una nuova scheda e utilizza il pulsante Impostazioni per gestire scorciatoie, widget, spazi, lingua, tema e sfondo. Le tue scelte rimangono su questo dispositivo.</string>
     <string name="settings_customize_title">Personalizza</string>
     <string name="settings_customize_summary">Tema, barra degli strumenti, schede e gesti</string>
     <string name="settings_customize_gestures">Gesti</string>

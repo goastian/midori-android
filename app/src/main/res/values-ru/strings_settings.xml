@@ -27,8 +27,6 @@
     <string name="settings_homepage_title">Новая вкладка</string>
     <string name="settings_homepage_summary">Ярлыки, виджеты, пространства, темы и фоны</string>
     <string name="settings_homepage_sections">Новая вкладка Мидори</string>
-    <string name="settings_homepage_midori_tab">Персонализируйте свою новую вкладку</string>
-    <string name="settings_homepage_midori_tab_description">Откройте новую вкладку и используйте кнопку «Настройки» для управления ярлыками, виджетами, пространствами, языком, темой и фоном. Ваш выбор останется на этом устройстве.</string>
     <string name="settings_customize_title">Настроить</string>
     <string name="settings_customize_summary">Тема, панель инструментов, вкладки и жесты</string>
     <string name="settings_customize_gestures">Жесты</string>

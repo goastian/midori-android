@@ -21,7 +21,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.midorinext.android.newtab.HomeSection
 import org.midorinext.android.newtab.HomeWallpaper
-import org.midorinext.android.newtab.LEGACY_NEW_TAB_URL
+import org.midorinext.android.newtab.migration.LEGACY_NEW_TAB_URL
 import org.midorinext.android.newtab.NATIVE_HOME_URL
 import org.midorinext.android.newtab.homeSiteCategories
 import org.midorinext.android.preferences.app.AppPreferences

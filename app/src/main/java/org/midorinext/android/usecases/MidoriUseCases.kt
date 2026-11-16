@@ -2,14 +2,12 @@ package org.midorinext.android.usecases
 
 import android.annotation.SuppressLint
 import android.content.Context
-import org.midorinext.android.newtab.MidoriNewTabFeature
 import org.midorinext.android.newtab.newTabUrl
 import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.preferences.app.AppPreferences
 import dagger.Lazy
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -30,7 +28,6 @@ import javax.inject.Singleton
 @Singleton
 class MidoriUseCases @Inject constructor(
     @ApplicationContext val context: Context,
-    private val newTabFeature: MidoriNewTabFeature,
     private val appPreferencesRepository: AppPreferencesRepository,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -197,14 +194,6 @@ class MidoriUseCases @Inject constructor(
     val openTestPageUseCase: OpenTestPageUseCase by lazy {
         OpenTestPageUseCase(context, tabsUseCases.get(), sessionUseCases.get())
     }
-
-    fun isNewTabUrl(url: String?): Boolean = newTabFeature.isNewTabUrl(url)
-
-    fun isNewTabLoadingUrl(url: String?): Boolean = newTabFeature.isLoadingUrl(url)
-
-    fun isLegacyNewTabUrl(url: String?): Boolean = newTabFeature.isLegacyUrl(url)
-
-    val legacyNewTabOrigins: StateFlow<Set<String>> get() = newTabFeature.legacyOrigins
 
     companion object {
         internal fun encodeQueryValue(value: String): String =

@@ -27,8 +27,6 @@
     <string name="settings_homepage_title">Nova guia</string>
     <string name="settings_homepage_summary">Atalhos, widgets, espaços, temas e fundos</string>
     <string name="settings_homepage_sections">Nova aba Midori</string>
-    <string name="settings_homepage_midori_tab">Personalize a sua nova guia</string>
-    <string name="settings_homepage_midori_tab_description">Abra um novo separador e utilize o botão Definições para gerir atalhos, widgets, espaços, idioma, tema e fundo. As suas escolhas permanecem neste dispositivo.</string>
     <string name="settings_customize_title">Personalizar</string>
     <string name="settings_customize_summary">Tema, barra de ferramentas, separadores e gestos</string>
     <string name="settings_customize_gestures">Gestos</string>

@@ -1,14 +1,12 @@
 package org.midorinext.android.newtab
 
 import java.net.URI
+import org.midorinext.android.newtab.migration.isLegacyNativeHomeUrl
 import org.midorinext.android.preferences.app.HomeShortcut
 
 // A real document keeps Home in Gecko's back stack without rendering a web surface.
 const val NATIVE_HOME_URL = "data:text/html;charset=utf-8,%3Ctitle%3EMidori%3C/title%3E%3Cbody%3E%3C/body%3E#midori-native-home"
-const val LEGACY_NEW_TAB_URL = "about:blank#midori-newtab"
-const val LEGACY_NATIVE_HOME_URL = "data:text/html;base64,PCFkb2N0eXBlIGh0bWw+PHRpdGxlPk1pZG9yaTwvdGl0bGU+PCEtLW1pZG9yaS1uYXRpdmUtaG9tZS0tPg=="
-
-fun isNativeHomeUrl(url: String?): Boolean = url == NATIVE_HOME_URL || url == LEGACY_NEW_TAB_URL || url == LEGACY_NATIVE_HOME_URL
+fun isNativeHomeUrl(url: String?): Boolean = url == NATIVE_HOME_URL || isLegacyNativeHomeUrl(url)
 
 fun publicHomeUrl(value: String): String? = runCatching {
     val trimmed = value.trim()

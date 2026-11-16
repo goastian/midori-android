@@ -29,8 +29,6 @@
     <string name="settings_homepage_title">Nueva pestaña</string>
     <string name="settings_homepage_summary">Accesos, widgets, espacios, temas y fondos</string>
     <string name="settings_homepage_sections">Nueva pestaña de Midori</string>
-    <string name="settings_homepage_midori_tab">Personaliza tu nueva pestaña</string>
-    <string name="settings_homepage_midori_tab_description">Abre una pestaña nueva y usa su botón de Configuración para administrar accesos, widgets, espacios, idioma, tema y fondo. Tus elecciones se guardan en este dispositivo.</string>
     <string name="settings_customize_title">Personalizar</string>
     <string name="settings_customize_summary">Tema, barra, pestañas y gestos</string>
     <string name="settings_customize_gestures">Gestos</string>

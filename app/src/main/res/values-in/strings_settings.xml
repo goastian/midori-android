@@ -27,8 +27,6 @@
     <string name="settings_homepage_title">Tab baru</string>
     <string name="settings_homepage_summary">Pintasan, widget, ruang, tema, dan latar belakang</string>
     <string name="settings_homepage_sections">Tab baru Midori</string>
-    <string name="settings_homepage_midori_tab">Personalisasi tab baru Anda</string>
-    <string name="settings_homepage_midori_tab_description">Buka tab baru dan gunakan tombol Setelan untuk mengelola pintasan, widget, ruang, bahasa, tema, dan latar belakang. Pilihan Anda tetap di perangkat ini.</string>
     <string name="settings_customize_title">Sesuaikan</string>
     <string name="settings_customize_summary">Tema, bilah alat, tab, dan gestur</string>
     <string name="settings_customize_gestures">Gestur</string>

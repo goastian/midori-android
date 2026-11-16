@@ -74,7 +74,7 @@ fun BrowserScreen(
         viewModel.tabStripTabs.collectAsStateWithLifecycle().value
     } else emptyList()
     val private = selectedTabSnapshot?.private == true
-    val legacyNewTabOrigins by viewModel.legacyNewTabOrigins.collectAsStateWithLifecycle()
+    val legacyHomeOrigins by viewModel.legacyHomeOrigins.collectAsStateWithLifecycle()
     val surface = currentUrl?.let { browserSurface(it, selectedTabSnapshot?.private == true, viewModel.isNewTabUrl(it)) }
     val nativeHome = surface == BrowserSurface.HOME
     val privateHome = surface == BrowserSurface.PRIVATE_HOME
@@ -139,7 +139,7 @@ fun BrowserScreen(
         }
     }
 
-    LaunchedEffect(selectedTabSnapshot, legacyNewTabOrigins) {
+    LaunchedEffect(selectedTabSnapshot, legacyHomeOrigins) {
         val selectedTab = selectedTabSnapshot ?: return@LaunchedEffect
         viewModel.replaceTabWithNewTab(selectedTab.id, selectedTab.url)
     }

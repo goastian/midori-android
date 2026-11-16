@@ -27,8 +27,6 @@
     <string name="settings_homepage_title">Bagong tab</string>
     <string name="settings_homepage_summary">Mga shortcut, widget, espasyo, tema at background</string>
     <string name="settings_homepage_sections">Bagong tab ng Midori</string>
-    <string name="settings_homepage_midori_tab">I-personalize ang iyong bagong tab</string>
-    <string name="settings_homepage_midori_tab_description">Magbukas ng bagong tab at gamitin ang Mga Setting nito upang pamahalaan ang mga shortcut, widget, espasyo, wika, tema at background. Nananatili sa device na ito ang iyong mga pinili.</string>
     <string name="settings_customize_title">I-customize</string>
     <string name="settings_customize_summary">Tema, toolbar, mga tab at galaw</string>
     <string name="settings_customize_gestures">Mga galaw</string>

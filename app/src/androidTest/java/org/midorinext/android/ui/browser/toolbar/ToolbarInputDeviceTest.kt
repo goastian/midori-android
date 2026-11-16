@@ -53,7 +53,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.midorinext.android.BuildConfig
 import org.midorinext.android.MidoriApplication
-import org.midorinext.android.newtab.MidoriNewTabFeature
+import org.midorinext.android.newtab.migration.LegacyHomeMigration
 import org.midorinext.android.newtab.NATIVE_HOME_URL
 import org.midorinext.android.preferences.app.AppPreferences
 import org.midorinext.android.preferences.app.AppPreferencesRepository
@@ -386,8 +386,7 @@ class ToolbarInputDeviceTest {
             appPreferencesRepository = AppPreferencesRepository(dataStore),
             suggestionProviders = Lazy { emptyList() },
             browserIcons = app.browserIcons.get(),
-            datahub = Lazy { error("Toolbar editing should not initialize Datahub") },
-            newTabFeature = MidoriNewTabFeature(app),
+            legacyHomeMigration = LegacyHomeMigration(app),
             coroutineScope = scope,
         )
     }
