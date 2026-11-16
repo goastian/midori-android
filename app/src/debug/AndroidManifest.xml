@@ -5,5 +5,9 @@
             android:name=".diagnostics.SentryProbeActivity"
             android:exported="true"
             android:permission="android.permission.DUMP" />
+        <activity
+            android:name=".diagnostics.WasmSentryProbeActivity"
+            android:exported="true"
+            android:permission="android.permission.DUMP" />
     </application>
 </manifest>

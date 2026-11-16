@@ -36,7 +36,7 @@ else:
         target, clang = TARGETS[abi]
         build_environment = environment.copy()
         build_environment["CARGO_TARGET_" + target.upper().replace("-", "_") + "_LINKER"] = str(tools / (clang + "-clang"))
-        build_environment["RUSTFLAGS"] = "-C link-arg=-Wl,-z,max-page-size=16384"
+        build_environment["RUSTFLAGS"] = "-C link-arg=-Wl,-z,max-page-size=16384 -C link-arg=-Wl,--build-id=sha1"
         subprocess.run(command + ["--target", target], check=True, env=build_environment)
         output = args.output / abi
         output.mkdir(parents=True, exist_ok=True)
