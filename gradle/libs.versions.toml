@@ -14,7 +14,7 @@ paging-runtime-ktx = "3.5.3"
 hilt = "2.60.1"
 androidx-hilt = "1.3.0"
 # Compose
-compose-bom = "2026.05.01"
+compose-bom = "2026.09.00"
 compose-material3 = "1.4.0"
 compose-android-activity = "1.13.0"
 compose-android-navigation = "2.10.2"
@@ -112,6 +112,8 @@ mozac-ui-widgets = { group = "org.mozilla.components", name = "ui-widgets", vers
 mozac-ui-icons = { group = "org.mozilla.components", name = "ui-icons", version.ref = "mozac" }
 mozac-lib-fetch-httpurlconnection = { group = "org.mozilla.components", name = "lib-fetch-httpurlconnection", version.ref = "mozac" }
 mozac-lib-publicsuffixlist = { group = "org.mozilla.components", name = "lib-publicsuffixlist", version.ref = "mozac" }
+mozac-lib-crash = { group = "org.mozilla.components", name = "lib-crash", version.ref = "mozac" }
+mozac-lib-crash-sentry = { group = "org.mozilla.components", name = "lib-crash-sentry", version.ref = "mozac" }
 # Testing
 junit-main = { group = "junit", name = "junit", version.ref = "junit" }
 junit-androidx = { group = "androidx.test.ext", name = "junit", version.ref = "junit-androidx" }
