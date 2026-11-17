@@ -10,10 +10,12 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.browser.state.action.ContentAction
+import mozilla.components.browser.state.state.BrowserState
+import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.browser.icons.Icon
 import mozilla.components.browser.thumbnails.storage.ThumbnailStorage
-import mozilla.components.lib.state.ext.flow
 import org.midorinext.android.adblock.BlockingStatistics
+import org.midorinext.android.newtab.HomeContinuationMiddleware
 import org.midorinext.android.newtab.HomeStoriesRepository
 import org.midorinext.android.newtab.HomeFaviconRepository
 import org.midorinext.android.newtab.HomeStory
@@ -26,6 +28,8 @@ import org.midorinext.android.preferences.app.AppPreferencesRepository
 import org.midorinext.android.storage.history.HistoryRepository
 import org.midorinext.android.storage.bookmarks.BookmarksRepository
 import javax.inject.Inject
+
+private const val HOME_STOP_TIMEOUT_MILLIS = 1_000L
 
 data class HomePage(val title: String, val url: String)
 data class HomeContinuation(val tabId: String, val title: String, val url: String)
@@ -42,6 +46,7 @@ class NativeHomeViewModel @Inject constructor(
     private val bookmarksProvider: dagger.Lazy<BookmarksRepository>,
     private val wallpapers: HomeWallpaperRepository,
     private val store: BrowserStore,
+    private val continuationUpdates: HomeContinuationMiddleware,
 ) : ViewModel() {
     val preferences = preferencesRepository.snapshot
     private val recentRefresh = MutableStateFlow(0L)
@@ -52,7 +57,11 @@ class NativeHomeViewModel @Inject constructor(
             pages.mapNotNull { page -> publicHomeUrl(page.uri)?.let { url ->
                 HomePage(page.title?.ifBlank { null } ?: recentHomeSiteKey(url).orEmpty(), url)
             } }
-        }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+        }.distinctUntilChanged().stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(HOME_STOP_TIMEOUT_MILLIS, replayExpirationMillis = 0),
+            emptyList(),
+        )
     }
 
     suspend fun savedBookmarks(): List<HomePage> = bookmarksProvider.get().searchBookmarks("", 100)
@@ -63,12 +72,12 @@ class NativeHomeViewModel @Inject constructor(
         }.distinctBy { it.url }
 
     val continuation by lazy {
-        fun currentContinuation(state: mozilla.components.browser.state.state.BrowserState) = state.tabs
-            .filter { !it.content.private && it.id != state.selectedTabId && publicHomeUrl(it.content.url) != null }
-            .maxByOrNull { it.lastAccess }
-            ?.let { HomeContinuation(it.id, it.content.title.ifBlank { it.content.url }, it.content.url) }
-        store.flow().map(::currentContinuation).distinctUntilChanged()
-            .stateIn(viewModelScope, SharingStarted.Lazily, currentContinuation(store.state))
+        continuationUpdates.changes.map { currentContinuation(store.state) }.distinctUntilChanged()
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(HOME_STOP_TIMEOUT_MILLIS, replayExpirationMillis = 0),
+                null,
+            )
     }
 
     val blockedCount by lazy { statisticsProvider.get().totalBlocked }
@@ -125,4 +134,14 @@ class NativeHomeViewModel @Inject constructor(
         storiesJob = job
         return job
     }
+}
+
+private fun currentContinuation(state: BrowserState): HomeContinuation? {
+    var latest: TabSessionState? = null
+    for (tab in state.tabs) {
+        if (tab.content.private || tab.id == state.selectedTabId) continue
+        if (latest?.let { tab.lastAccess <= it.lastAccess } == true) continue
+        if (publicHomeUrl(tab.content.url) != null) latest = tab
+    }
+    return latest?.let { HomeContinuation(it.id, it.content.title.ifBlank { it.content.url }, it.content.url) }
 }

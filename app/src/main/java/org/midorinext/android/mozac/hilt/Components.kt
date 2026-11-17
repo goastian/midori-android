@@ -15,6 +15,7 @@ import org.midorinext.android.mozac.media.MediaSessionService
 import org.midorinext.android.mozac.media.BackgroundPlaybackFeature
 import org.midorinext.android.mozac.pdf.PdfSaveEvents
 import org.midorinext.android.mozac.pdf.SaveToPdfMiddleware
+import org.midorinext.android.newtab.HomeContinuationMiddleware
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -68,12 +69,14 @@ object MozacComponentHiltModule {
         pdfSaveEvents: PdfSaveEvents,
         memoryBudget: BrowserMemoryBudget,
         blockingStartup: org.midorinext.android.adblock.ContentBlockingStartup,
+        homeContinuation: HomeContinuationMiddleware,
     ) : BrowserStore {
         val translationsScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         return BrowserStore(
             middleware = listOf(
                 org.midorinext.android.diagnostics.DiagnosticsMiddleware(),
                 org.midorinext.android.adblock.ContentBlockingStartupMiddleware(blockingStartup),
+                homeContinuation,
                 DownloadMiddleware(
                     context,
                     DownloadService::class.java,
