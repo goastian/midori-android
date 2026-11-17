@@ -177,11 +177,6 @@ android {
             getIsDefault().set(true)
             applicationIdSuffix ".debug"
         }
-        syncTest {
-            initWith debug
-            applicationIdSuffix ".synctest"
-            matchingFallbacks = ["debug"]
-        }
         release {
             // Shrink bytecode and resources to reduce final artifact size.
             minifyEnabled true
@@ -204,10 +199,6 @@ android {
             getIsDefault().set(true)
             dimension "target"
         }
-    }
-
-    if (project.findProperty("syncIntegration") == "true") {
-        testBuildType "syncTest"
     }
 
     buildFeatures {
@@ -366,7 +357,7 @@ android.sourceSets.main.jniLibs.srcDir(layout.buildDirectory.dir("rust-sync-jni"
 tasks.matching { it.name.startsWith("merge") && it.name.endsWith("JniLibFolders") }.configureEach {
     dependsOn("buildAndroidSync")
 }
-tasks.matching { it.name in ["testOriginalPlaystoreDebugUnitTest", "testOriginalPlaystoreSyncTestUnitTest"] }.configureEach {
+tasks.matching { it.name == "testOriginalPlaystoreDebugUnitTest" }.configureEach {
     dependsOn("buildHostSync")
     systemProperty("midori.sync.library", layout.buildDirectory.file("rust-sync-host/libmidori_sync_android.so").get().asFile.absolutePath)
 }
@@ -445,7 +436,6 @@ dependencies {
     implementation libs.compose.animation
     debugImplementation libs.compose.ui.tooling
     debugImplementation libs.compose.ui.test.manifest
-    syncTestImplementation libs.compose.ui.test.manifest
     androidTestImplementation libs.compose.ui.test.junit4
     // Other compose libs
     implementation libs.compose.material3
