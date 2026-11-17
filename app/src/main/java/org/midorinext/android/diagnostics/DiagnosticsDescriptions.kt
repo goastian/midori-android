@@ -10,13 +10,16 @@ internal object DiagnosticsDescriptions {
         exceptions.forEach { it.value = describe(it) }
         val exception = exceptions.lastOrNull()
         val source = when {
+            event.getTag("diagnostics.reporter") == "mozilla_crash" && event.platform == "native" -> "gecko_native"
             exception?.mechanism?.type == "android.process.exit" -> "process_exit"
             exception?.type == "GeckoContentProcessCrash" -> "gecko_content"
             event.platform == "native" || exception?.type?.startsWith("SIG") == true -> "native"
             exception?.type?.contains("ApplicationNotResponding") == true -> "anr"
             else -> "jvm"
         }
-        val description = exception?.value ?: if (source == "native") {
+        val description = exception?.value ?: if (source == "gecko_native") {
+            "GeckoView reported a native process crash. Process visibility and type are attached; this event does not include a symbolicated native stack."
+        } else if (source == "native") {
             "Native crash captured. Inspect the symbolicated minidump and Android process exit context; a kill frame alone does not identify the cause."
         } else {
             "Diagnostic event without an exception. Inspect the technical context."

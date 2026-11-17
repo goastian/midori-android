@@ -9,6 +9,11 @@ import io.sentry.SentryOptions
 import io.sentry.android.core.SentryAndroid
 import io.sentry.transport.ITransportGate
 import io.sentry.util.HintUtils
+import mozilla.components.lib.crash.CrashReporter
+import mozilla.components.lib.crash.RuntimeTagProvider
+import mozilla.components.lib.crash.sentry.eventprocessors.AddMechanismEventProcessor
+import mozilla.components.lib.crash.sentry.eventprocessors.RustCrashEventProcessor
+import mozilla.components.support.ktx.android.content.isMainProcess
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
@@ -23,6 +28,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.midorinext.android.BuildConfig
+import org.midorinext.android.R
 
 data class DiagnosticsConsent(val enabled: Boolean = true, val answered: Boolean = false) {
     val canSend: Boolean get() = enabled && answered
@@ -40,12 +46,42 @@ class DiagnosticsController @Inject constructor(@ApplicationContext private val 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val mutex = Mutex()
     private val processExits = DiagnosticsProcessExits(context, preferences)
+    private val mainProcess = context.isMainProcess()
+    private val consentFile = File(context.noBackupFilesDir, "stability_diagnostics.enabled")
     internal val cacheDirectory = File(context.noBackupFilesDir, "stability_diagnostics")
+    private val crashReporter by lazy {
+        CrashReporter(
+            context = context,
+            services = listOf(DiagnosticsSentryService(::prepareCrashReport)),
+            enabled = if (mainProcess) consent.value.canSend else consentFile.isFile,
+            shouldPrompt = CrashReporter.Prompt.NEVER,
+            promptConfiguration = CrashReporter.PromptConfiguration(
+                appName = context.getString(R.string.app_name),
+                organizationName = context.getString(R.string.app_name),
+            ),
+            runtimeTagProviders = listOf(object : RuntimeTagProvider {
+                override fun invoke(): Map<String, String> = if (mainProcess && canSend()) {
+                    mapOf("midori_runtime_v2" to DiagnosticsRuntime.crashSnapshot())
+                } else emptyMap()
+            }),
+        )
+    }
+
+    internal fun installCrashReporter(): CrashReporter = crashReporter.also {
+        if (mainProcess && DiagnosticsCrashReporting.reporter !== it) {
+            it.install(context)
+            DiagnosticsCrashReporting.reporter = it
+        }
+    }
 
     fun start() {
-        if (consent.value.canSend) initialize() else scope.launch {
+        installCrashReporter()
+        if (consent.value.canSend) {
+            if (enableSending()) initialize()
+        } else scope.launch {
             mutex.withLock {
                 if (!consent.value.canSend) {
+                    consentFile.delete()
                     processExits.clear()
                     cacheDirectory.deleteRecursively()
                 }
@@ -58,10 +94,17 @@ class DiagnosticsController @Inject constructor(@ApplicationContext private val 
         return scope.launch {
             mutex.withLock {
                 allowed.set(false)
+                if (!enabled) {
+                    consentFile.delete()
+                    crashReporter.enabled = false
+                }
                 check(preferences.edit().putBoolean("enabled", enabled).putBoolean("answered", true).commit())
                 mutableConsent.value = DiagnosticsConsent(enabled, answered = true)
+                crashReporter.enabled = enabled
                 if (enabled) {
-                    if (Sentry.isEnabled()) allowed.set(true) else initialize()
+                    if (enableSending()) {
+                        if (Sentry.isEnabled()) allowed.set(true) else initialize()
+                    }
                 } else {
                     Sentry.close()
                     DiagnosticsRuntime.clear()
@@ -72,15 +115,18 @@ class DiagnosticsController @Inject constructor(@ApplicationContext private val 
         }
     }
 
+    @Synchronized
     private fun initialize() {
+        if (Sentry.isEnabled()) return
         allowed.set(true)
         SentryAndroid.init(context) { options ->
+            options.isEnabled = true
             options.dsn = BuildConfig.SENTRY_DSN
             options.release = "${BuildConfig.APPLICATION_ID}@${BuildConfig.VERSION_NAME}+${BuildConfig.VERSION_CODE}"
             options.dist = BuildConfig.VERSION_CODE.toString()
             options.environment = if (BuildConfig.DEBUG) "development" else "production"
             options.isDebug = BuildConfig.DEBUG
-            options.cacheDirPath = cacheDirectory.absolutePath
+            options.cacheDirPath = if (mainProcess) cacheDirectory.absolutePath else File(cacheDirectory, "gecko").absolutePath
             options.maxCacheItems = 20
             options.maxBreadcrumbs = 40
             options.connectionTimeoutMillis = 5_000
@@ -102,15 +148,21 @@ class DiagnosticsController @Inject constructor(@ApplicationContext private val 
             options.isEnableUserInteractionTracing = false
             options.isEnableSystemEventBreadcrumbs = false
             options.isEnableNetworkEventBreadcrumbs = false
-            options.isEnableAutoActivityLifecycleTracing = true
-            options.isEnableTimeToFullDisplayTracing = true
-            options.isEnableFramesTracking = true
-            options.isEnableAutoSessionTracking = true
-            options.isAnrEnabled = true
-            options.isEnableNdk = true
+            options.setEnableUncaughtExceptionHandler(false)
+            options.isAttachThreads = mainProcess
+            options.isAttachStacktrace = mainProcess
+            options.isEnableActivityLifecycleBreadcrumbs = mainProcess
+            options.isEnableAppLifecycleBreadcrumbs = mainProcess
+            options.isEnableAppComponentBreadcrumbs = mainProcess
+            options.isEnableAutoActivityLifecycleTracing = mainProcess
+            options.isEnableTimeToFullDisplayTracing = mainProcess
+            options.isEnableFramesTracking = mainProcess
+            options.isEnableAutoSessionTracking = mainProcess
+            options.isAnrEnabled = mainProcess
+            options.isEnableNdk = mainProcess
             options.isEnableScopeSync = true
-            options.tracesSampleRate = if (BuildConfig.DEBUG) 1.0 else 0.1
-            options.profileSessionSampleRate = if (BuildConfig.DEBUG) 1.0 else 0.05
+            options.tracesSampleRate = if (!mainProcess) 0.0 else if (BuildConfig.DEBUG) 1.0 else 0.1
+            options.profileSessionSampleRate = if (!mainProcess) 0.0 else if (BuildConfig.DEBUG) 1.0 else 0.05
             options.profileLifecycle = ProfileLifecycle.TRACE
             options.sessionReplay.sessionSampleRate = 0.0
             options.sessionReplay.onErrorSampleRate = 0.0
@@ -120,28 +172,49 @@ class DiagnosticsController @Inject constructor(@ApplicationContext private val 
             options.setTag("app.build", BuildConfig.VERSION_CODE.toString())
             options.setTag("app.variant", BuildConfig.FLAVOR)
             options.setTag("gecko.version", org.mozilla.geckoview.BuildConfig.MOZ_APP_VERSION)
+            options.setTag("diagnostics.process_role", if (mainProcess) "browser" else "crash_reporter")
+            options.addEventProcessor(RustCrashEventProcessor())
+            options.addEventProcessor(AddMechanismEventProcessor())
             options.beforeSend = SentryOptions.BeforeSendCallback { event, hint ->
-                if (allowed.get()) {
-                    processExits.enrich(event)
+                if (canSend()) {
+                    if (mainProcess) processExits.enrich(event)
                     DiagnosticsPrivacy.scrub(event).also {
-                        if (HintUtils.shouldApplyScopeData(hint)) DiagnosticsRuntime.enrich(it)
+                        if (mainProcess && HintUtils.shouldApplyScopeData(hint)) DiagnosticsRuntime.enrich(it)
                     }
                 } else null
             }
             options.beforeSendTransaction = SentryOptions.BeforeSendTransactionCallback { event, _ ->
-                if (allowed.get()) DiagnosticsPrivacy.scrub(event) else null
+                if (canSend()) DiagnosticsPrivacy.scrub(event) else null
             }
             options.beforeBreadcrumb = SentryOptions.BeforeBreadcrumbCallback { breadcrumb, _ ->
-                if (allowed.get()) DiagnosticsPrivacy.breadcrumb(breadcrumb) else null
+                if (canSend()) DiagnosticsPrivacy.breadcrumb(breadcrumb) else null
             }
             val connectivity = options.transportGate
-            options.setTransportGate(ITransportGate { allowed.get() && connectivity.isConnected })
+            options.setTransportGate(ITransportGate { canSend() && connectivity.isConnected })
         }
-        DiagnosticsRuntime.start()
-        scope.launch {
+        if (mainProcess) DiagnosticsRuntime.start()
+        if (mainProcess) scope.launch {
             mutex.withLock {
                 if (allowed.get()) processExits.startSession()
             }
         }
+    }
+
+    private fun canSend(): Boolean = allowed.get() && consentFile.isFile
+
+    private fun enableSending(): Boolean = try {
+        consentFile.createNewFile()
+        true
+    } catch (error: java.io.IOException) {
+        allowed.set(false)
+        crashReporter.enabled = false
+        android.util.Log.w("MidoriDiagnostics", "Cannot persist diagnostics consent", error)
+        false
+    }
+
+    private fun prepareCrashReport(): Boolean {
+        if (!consentFile.isFile) return false
+        initialize()
+        return canSend()
     }
 }

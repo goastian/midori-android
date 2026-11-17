@@ -12,6 +12,7 @@ import mozilla.components.concept.engine.DownloadDelegate
 import mozilla.components.concept.engine.Settings
 import mozilla.components.concept.storage.HistoryStorage
 import mozilla.components.feature.session.HistoryDelegate
+import mozilla.components.lib.crash.handler.CrashHandlerService
 import org.mozilla.geckoview.GeckoRuntimeSettings
 import mozilla.components.support.utils.DownloadFileUtils
 import javax.inject.Singleton
@@ -35,6 +36,7 @@ object GeckoSettingsHiltModule {
         builder.debugLogging(debugEnabled)
         builder.remoteDebuggingEnabled(debugEnabled)
         builder.loginAutofillEnabled(false)
+        builder.crashHandler(CrashHandlerService::class.java)
 
         return builder.build()
     }

@@ -59,6 +59,8 @@ internal object DiagnosticsRuntime {
     @Synchronized
     fun clear() { state = emptyMap() }
 
+    fun crashSnapshot(): String = JSONObject(snapshot()).toString()
+
     @Synchronized
     private fun snapshot(): Map<String, Any> {
         val runtime = Runtime.getRuntime()
@@ -80,12 +82,13 @@ internal object DiagnosticsRuntime {
     }
 
     fun restoreNativeSnapshot(event: SentryEvent) {
-        if (event.platform != "native" || event.timestamp.time >= processStartedAt) return
+        val libraryCrash = event.getTag("diagnostics.reporter") == "mozilla_crash"
+        if (!libraryCrash && (event.platform != "native" || event.timestamp.time >= processStartedAt)) return
         val encoded = event.extras?.get(NATIVE_SNAPSHOT) as? String ?: return
         if (encoded.length > 2_048) return
         val json = try { JSONObject(encoded) } catch (_: org.json.JSONException) { return }
         val startedAt = json.optLong("process_started_at_ms", -1)
-        if (startedAt <= 0 || startedAt >= processStartedAt || startedAt > event.timestamp.time) return
+        if (startedAt <= 0 || startedAt > event.timestamp.time || (!libraryCrash && startedAt >= processStartedAt)) return
         val restored = mutableMapOf<String, Any>("process_role" to "browser", "process_started_at_ms" to startedAt)
         json.optString("startup_stage").takeIf { it in startupStages }?.let { restored["startup_stage"] = it }
         json.optString("visibility").takeIf { it in setOf("foreground", "background", "unknown") }

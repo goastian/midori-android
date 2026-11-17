@@ -121,7 +121,7 @@ android {
         versionCode configuredPlaystoreVersionCode
         versionName "11.9.5.2"
         buildConfigField "String", "SENTRY_DSN", groovy.json.JsonOutput.toJson(
-                "https://8f48f1974aae59165417fd73e8f12bce@o508466.ingest.us.sentry.io/4506732144689152")
+                readConfigValue("sentry_dsn", "https://8f48f1974aae59165417fd73e8f12bce@o508466.ingest.us.sentry.io/4506732144689152"))
         buildConfigField "String", "ADBLOCK_BUNDLE_VERSION", groovy.json.JsonOutput.toJson(
                 new groovy.json.JsonSlurper().parse(file("src/main/assets/adblock/content/manifest.json")).version)
 
@@ -476,6 +476,8 @@ dependencies {
     implementation libs.mozac.support.ktx
     implementation libs.mozac.support.appservices
     implementation libs.mozac.lib.publicsuffixlist
+    implementation libs.mozac.lib.crash
+    implementation libs.mozac.lib.crash.sentry
     implementation libs.mozac.service.sync.logins
     implementation libs.mozac.service.sync.autofill
     implementation libs.mozac.support.webextensions

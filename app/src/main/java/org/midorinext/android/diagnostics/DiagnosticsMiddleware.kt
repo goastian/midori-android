@@ -21,7 +21,6 @@ class DiagnosticsMiddleware : Middleware<BrowserState, BrowserAction> {
                 category = "midori.gecko"
                 message = "content_crashed"
             })
-            Sentry.captureException(GeckoContentProcessCrash())
         } else if (action is CrashAction.RestoreCrashedSessionAction) {
             Sentry.addBreadcrumb(Breadcrumb().apply {
                 category = "midori.gecko"
@@ -30,5 +29,3 @@ class DiagnosticsMiddleware : Middleware<BrowserState, BrowserAction> {
         }
     }
 }
-
-internal class GeckoContentProcessCrash : RuntimeException()

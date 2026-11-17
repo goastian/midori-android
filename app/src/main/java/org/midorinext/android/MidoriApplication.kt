@@ -117,6 +117,10 @@ class MidoriApplication : Application(), Configuration.Provider {
 
         setupLogging()
 
+        mozilla.components.lib.crash.CrashReporter.registerDeferredInitializer {
+            diagnostics.get().installCrashReporter()
+        }
+
         if (!isMainProcess()) {
             // Rust/AppServices and Gecko are owned by the browser process. Initializing them in
             // Gecko content and crash processes duplicates startup work and competes for CPU.
