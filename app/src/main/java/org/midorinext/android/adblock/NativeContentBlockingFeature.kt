@@ -41,6 +41,7 @@ class NativeContentBlockingFeature @Inject constructor(
     private val networkBlocker: NativeNetworkBlocker,
     private val filter: DesktopHostFilter,
     private val statistics: dagger.Lazy<BlockingStatistics>,
+    private val startup: ContentBlockingStartup,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val ports = mutableMapOf<EngineSession, Port>()
@@ -79,13 +80,19 @@ class NativeContentBlockingFeature @Inject constructor(
                 val wait = android.os.SystemClock.elapsedRealtime() - request.queuedAt
                 maxNetworkWaitMs = maxOf(maxNetworkWaitMs, wait)
                 if (wait >= 1_200L) {
+                    recordSaturation()
                     replyNetwork(request.message, request.port, JSONObject().put("cancel", true).put("saturated", true))
                     continue
                 }
                 val decision = withContext(Dispatchers.Default) {
                     runCatching { networkBlocker.decision(request.message) }
-                        .getOrElse { JSONObject().put("cancel", false) }
+                        .getOrElse {
+                            if (it is CancellationException) throw it
+                            Log.w(TAG, "Could not calculate network decision", it)
+                            JSONObject().put("cancel", true).put("saturated", true)
+                        }
                 }
+                if (decision.optBoolean("saturated")) recordSaturation()
                 if (backgroundPort === request.port) replyNetwork(request.message, request.port, decision)
             }
         }
@@ -191,6 +198,7 @@ class NativeContentBlockingFeature @Inject constructor(
                                 sources.ready.isCompleted) {
                                 appliedPolicy.value = config to sources.revision.value
                                 bridgeReady.complete(Unit)
+                                startup.markReady()
                             }
                         }
                         "scriptlet_policy_failed" -> Log.e(TAG, "Could not register bundled scriptlets: ${message.optString("error")}")
@@ -220,10 +228,14 @@ class NativeContentBlockingFeature @Inject constructor(
             networkPending++
             networkQueuePeak = maxOf(networkQueuePeak, networkPending)
         } else {
-            saturatedRequests++
-            if (saturatedRequests == 1L || saturatedRequests % 128 == 0L) Log.w(TAG, "Network queue saturated: $saturatedRequests requests cancelled")
+            recordSaturation()
             replyNetwork(message, port, JSONObject().put("cancel", true).put("saturated", true))
         }
+    }
+
+    private fun recordSaturation() {
+        saturatedRequests++
+        if (saturatedRequests == 1L || saturatedRequests % 128 == 0L) Log.w(TAG, "Network queue saturated: $saturatedRequests requests cancelled")
     }
 
     private fun replyNetwork(message: JSONObject, port: WebExtension.Port, decision: JSONObject) {

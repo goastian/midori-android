@@ -35,6 +35,7 @@ class WidgetViewModel @Inject constructor(
     domainProvider: DomainProvider,
     browserIcons: BrowserIcons,
     appPreferencesRepository: AppPreferencesRepository,
+    private val blockingStartup: org.midorinext.android.adblock.ContentBlockingStartup,
 )  : ViewModel() {
     val toolbarState: ToolbarState = ToolbarState(
         browserIcons, lazy { listOf(clipboardProvider, midoriSuggestProvider, domainProvider) },
@@ -69,6 +70,7 @@ class WidgetViewModel @Inject constructor(
                 .distinctUntilChanged()
                 .filterNotNull()
                 .onEach { search ->
+                    blockingStartup.awaitReady()
                     session.loadUrl(MidoriUseCases.getMidoriUrl(null, search, currentCategory, true))
                 }
                 .collect()

@@ -32,6 +32,20 @@ internal object RustAdblock {
  */
 internal data class EngineList(val file: File, val sha256: String, val length: Long)
 
+internal fun EngineList.isIntact(): Boolean {
+    if (!file.isFile || file.length() != length) return false
+    val digest = MessageDigest.getInstance("SHA-256")
+    file.inputStream().buffered().use { input ->
+        val buffer = ByteArray(16 * 1024)
+        while (true) {
+            val count = input.read(buffer)
+            if (count < 0) break
+            digest.update(buffer, 0, count)
+        }
+    }
+    return digest.digest().toHex() == sha256
+}
+
 internal class RustFilterEngine private constructor(private val handle: Long) : Closeable {
     fun query(url: String, source: String, type: String, method: String = "GET", document: String = ""): JSONObject =
         JSONObject(RustAdblock.query(handle, JSONObject()

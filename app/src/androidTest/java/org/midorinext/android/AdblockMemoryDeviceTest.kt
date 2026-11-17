@@ -9,6 +9,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.After
+import org.junit.Before
 import org.midorinext.android.adblock.AdBlockSettings
 import org.midorinext.android.adblock.BlockingLevel
 import org.midorinext.android.adblock.NativeFilterSources
@@ -23,6 +24,11 @@ import kotlin.concurrent.thread
 class AdblockMemoryDeviceTest {
     private val runtime = Runtime.getRuntime()
     private var keepAlive: NativeFilterSources? = null
+
+    @Before
+    fun initializeBrowser() {
+        InstrumentationRegistry.getInstrumentation().runOnMainSync { app.initializeBrowser("adblock_memory_test") }
+    }
 
     @After
     fun releaseOwnedSources(): Unit = runBlocking {
@@ -83,7 +89,7 @@ class AdblockMemoryDeviceTest {
         }
         val started = System.nanoTime()
         val settings = AdBlockSettings(app)
-        val sources = NativeFilterSources(app, settings)
+        val sources = NativeFilterSources(app, settings, app.memoryBudget)
         keepAlive = sources
         withTimeout(180_000) { sources.ready.await() }
         sources.prepareEngines(settings.current)
@@ -128,7 +134,7 @@ class AdblockMemoryDeviceTest {
         settle()
         withHeapLimit(SMALL_HEAP_MB) {
             val settings = AdBlockSettings(app)
-            val sources = NativeFilterSources(app, settings)
+            val sources = NativeFilterSources(app, settings, app.memoryBudget)
             keepAlive = sources
             runBlocking {
                 withTimeout(180_000) { sources.ready.await() }
@@ -163,7 +169,7 @@ class AdblockMemoryDeviceTest {
         val existing = feature.javaClass.getDeclaredField("sources").apply { isAccessible = true }.get(feature) as NativeFilterSources
         withTimeout(120_000) { existing.ready.await() }
         val settings = AdBlockSettings(app)
-        val sources = NativeFilterSources(app, settings)
+        val sources = NativeFilterSources(app, settings, app.memoryBudget)
         keepAlive = sources
         withTimeout(180_000) { sources.ready.await() }
         val full = settings.current.copy(level = BlockingLevel.TRACKERS_AND_ADS, siteLevels = emptyMap())
@@ -175,7 +181,8 @@ class AdblockMemoryDeviceTest {
 
         sources.prepareEngines(full)
         assertTrue("ads are blocked at the full level", blocked(full, BlockingLevel.TRACKERS_AND_ADS, advertising))
-        assertFalse("no tracker engine exists until a tracker-only level is configured", blocked(full, BlockingLevel.TRACKERS, analytics))
+        assertTrue("an unavailable tracker engine is explicit", sources.networkDecision(full, BlockingLevel.TRACKERS,
+            analytics, "https://news.example/", "script").optBoolean("saturated"))
         sources.prepareEngines(trackersOnly)
         assertTrue("trackers are blocked", blocked(trackersOnly, BlockingLevel.TRACKERS, analytics))
         assertFalse("ads are left alone", blocked(trackersOnly, BlockingLevel.TRACKERS, advertising))
@@ -191,7 +198,7 @@ class AdblockMemoryDeviceTest {
         app.getSharedPreferences("native_adblock_http", 0).edit().clear().commit()
         withHeapLimit(SMALL_HEAP_MB) {
             val settings = AdBlockSettings(app)
-            val sources = NativeFilterSources(app, settings)
+            val sources = NativeFilterSources(app, settings, app.memoryBudget)
             keepAlive = sources
             runBlocking {
                 withTimeout(180_000) { sources.ready.await() }

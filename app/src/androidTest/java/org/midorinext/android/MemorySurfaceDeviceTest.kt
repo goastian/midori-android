@@ -13,6 +13,7 @@ import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.tabs.TabsUseCases
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.Before
 import org.midorinext.android.mozac.BrowserMemoryBudget
 import org.midorinext.android.mozac.TabResourceMiddleware
 import org.midorinext.android.widget.WidgetActivity
@@ -22,6 +23,10 @@ import org.mozilla.geckoview.GeckoSession
 class MemorySurfaceDeviceTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val app get() = instrumentation.targetContext.applicationContext as MidoriApplication
+
+    @Before fun initializeBrowser() {
+        instrumentation.runOnMainSync { app.initializeBrowser("memory_surface_test") }
+    }
 
     @Test fun closingWidgetsUnregistersAndClosesTheirGeckoSessions() {
         val owners = app.memoryBudget.javaClass.getDeclaredField("owners").apply { isAccessible = true }

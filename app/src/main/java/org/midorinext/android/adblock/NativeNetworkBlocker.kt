@@ -28,7 +28,7 @@ class NativeNetworkBlocker @Inject constructor(
         if (level == BlockingLevel.OFF) return@withTimeoutOrNull allowed
         sources.ready.await()
         sources.networkDecision(config, level, url, origin, type, message.optString("method", "GET"), siteUrl)
-    } ?: JSONObject().put("cancel", false)
+    } ?: JSONObject().put("cancel", true).put("saturated", true)
 
     private companion object {
         val RESOURCE_TYPES = setOf("script", "image", "stylesheet", "font", "media", "object",

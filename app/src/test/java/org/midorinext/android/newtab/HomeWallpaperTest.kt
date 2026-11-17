@@ -15,7 +15,7 @@ class HomeWallpaperTest {
 
     @Test
     fun largeNatureAndSpaceCollectionsAndTravelContainDistinctAttributedPhotosWithThumbnails() {
-        val photos = HomeWallpaper.entries.filter { it != HomeWallpaper.NONE }
+        val photos = HomeWallpaper.entries.filter { it.image != null }
         listOf(HomeWallpaperCategory.NATURE, HomeWallpaperCategory.SPACE).forEach { category ->
             assertTrue(category.name, photos.count { it.category == category } > 20)
         }

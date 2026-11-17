@@ -14,9 +14,17 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.Before
 import org.midorinext.android.adblock.*
 
 class AdblockLifecycleDeviceTest {
+    @Before
+    fun initializeBrowser() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val app = instrumentation.targetContext.applicationContext as MidoriApplication
+        instrumentation.runOnMainSync { app.initializeBrowser("adblock_lifecycle_test") }
+    }
+
     @Test
     fun fiftyCyclesReleaseUnneededEnginesAndPreserveSiteOverrides(): Unit = runBlocking {
         val app = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as MidoriApplication
@@ -45,7 +53,7 @@ class AdblockLifecycleDeviceTest {
         }
         context.getSharedPreferences("native_adblock_http", Context.MODE_PRIVATE).edit().putInt("format_version", 3).commit()
         val baselineHandles = RustAdblock.liveEngineCount()
-        val sources = NativeFilterSources(context, settings)
+        var sources = NativeFilterSources(context, settings, app.memoryBudget)
         val running = AtomicBoolean(true)
         val peak = AtomicLong(Debug.getNativeHeapAllocatedSize())
         val sampler = thread(isDaemon = true) {
@@ -74,6 +82,18 @@ class AdblockLifecycleDeviceTest {
             withTimeout(120_000) { sources.ready.await() }
             assertEquals(false to false, sources.engineState())
             assertTrue(sources.ruleCounts.value.isEmpty())
+            check(BlockingLevel.TRACKERS_AND_ADS, null, true, false)
+            app.memoryBudget.onTrimMemory(android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+            assertFalse(sources.updateEnabled(force = true))
+            assertTrue(sources.failedSources.value.isEmpty())
+            assertTrue(sources.networkDecision(settings.current, settings.current.level, "https://tracker.example/a.js", "https://news.example/", "script").optBoolean("cancel"))
+            sources.close()
+            File(context.filesDir, "adblock-sources").listFiles().orEmpty().filter { it.extension == "engine" }.forEach {
+                it.writeBytes(ByteArray(it.length().toInt()) { 'x'.code.toByte() })
+            }
+            File(context.cacheDir, "adblock-rust").listFiles().orEmpty().filter { it.extension == "dat" }.forEach { it.writeText("invalid snapshot") }
+            sources = NativeFilterSources(context, settings, app.memoryBudget)
+            withTimeout(120_000) { sources.ready.await() }
             check(BlockingLevel.TRACKERS_AND_ADS, null, true, false)
             val putRules = sources.javaClass.getDeclaredMethod("putRules", String::class.java, NativeFilterRules::class.java).apply { isAccessible = true }
             putRules.invoke(sources, urls[0], parseHostSource("||tracker.example^\n||updated-tracker.example^\n"))

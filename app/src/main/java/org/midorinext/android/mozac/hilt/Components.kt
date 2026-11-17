@@ -67,11 +67,13 @@ object MozacComponentHiltModule {
         appPreferencesRepository: AppPreferencesRepository,
         pdfSaveEvents: PdfSaveEvents,
         memoryBudget: BrowserMemoryBudget,
+        blockingStartup: org.midorinext.android.adblock.ContentBlockingStartup,
     ) : BrowserStore {
         val translationsScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
         return BrowserStore(
             middleware = listOf(
                 org.midorinext.android.diagnostics.DiagnosticsMiddleware(),
+                org.midorinext.android.adblock.ContentBlockingStartupMiddleware(blockingStartup),
                 DownloadMiddleware(
                     context,
                     DownloadService::class.java,

@@ -25,31 +25,31 @@ class MidoriUseCasesTest {
         val encoded = "caf%C3%A9%20%26%20privacy"
         assertEquals(
             "https://www.ecosia.org/search?q=$encoded",
-            SearchEngines.url(SearchEnginePreference.ECOSIA, query) { "https://astiango.com" },
+            SearchEngines.url(SearchEnginePreference.ECOSIA, query),
         )
         assertEquals(
             "https://www.qwant.com/?q=$encoded",
-            SearchEngines.url(SearchEnginePreference.QWANT, query) { "https://astiango.com" },
+            SearchEngines.url(SearchEnginePreference.QWANT, query),
         )
         assertEquals(
             "https://www.startpage.com/sp/search?query=$encoded",
-            SearchEngines.url(SearchEnginePreference.STARTPAGE, query) { "https://astiango.com" },
+            SearchEngines.url(SearchEnginePreference.STARTPAGE, query),
         )
         assertEquals(
             "https://www.bing.com/search?q=$encoded",
-            SearchEngines.url(SearchEnginePreference.BING, query) { "https://astiango.com" },
+            SearchEngines.url(SearchEnginePreference.BING, query),
         )
         assertEquals(
             "https://www.google.com/search?q=$encoded",
-            SearchEngines.url(SearchEnginePreference.GOOGLE, query) { "https://astiango.com" },
+            SearchEngines.url(SearchEnginePreference.GOOGLE, query),
         )
         assertEquals(
             "https://duckduckgo.com/?q=$encoded",
-            SearchEngines.url(SearchEnginePreference.DUCKDUCKGO, query) { "https://astiango.com" },
+            SearchEngines.url(SearchEnginePreference.DUCKDUCKGO, query),
         )
         assertEquals(
-            "https://astiango.com",
-            SearchEngines.url(SearchEnginePreference.ASTIANGO, query) { "https://astiango.com" },
+            "https://www.google.com/search?q=$encoded",
+            SearchEngines.url(SearchEnginePreference.ASTIANGO, query),
         )
     }
 
@@ -75,9 +75,7 @@ class MidoriUseCasesTest {
                 assertEquals(id, SearchEngines.selectedId(restored, private))
                 assertEquals(
                     expectedUrl,
-                    SearchEngines.url(restored, SearchEngines.selectedId(restored, private), "privacy") {
-                        error("The selected search engine should handle the query")
-                    },
+                    SearchEngines.url(restored, SearchEngines.selectedId(restored, private), "privacy"),
                 )
             }
         }
@@ -113,7 +111,7 @@ class MidoriUseCasesTest {
         assertEquals(false, SearchEngines.isValidTemplate("javascript:alert(%s)"))
         assertEquals(
             "https://example.org/search?q=caf%C3%A9%20%26%20privacy",
-            SearchEngines.url(preferences, "custom", "café & privacy") { "https://astiango.com" },
+            SearchEngines.url(preferences, "custom", "café & privacy"),
         )
     }
 }

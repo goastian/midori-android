@@ -36,11 +36,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import org.json.JSONArray
 import org.json.JSONObject
+import org.midorinext.android.mozac.BrowserMemoryBudget
 
 @Singleton
 class NativeFilterSources @Inject constructor(
     @ApplicationContext private val context: Context,
     private val settings: AdBlockSettings,
+    memoryBudget: BrowserMemoryBudget,
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val metadata = context.getSharedPreferences("native_adblock_http", Context.MODE_PRIVATE)
@@ -52,6 +54,9 @@ class NativeFilterSources @Inject constructor(
     private val sourcesDirectory get() = File(context.filesDir, "adblock-sources").apply { mkdirs() }
     private val refreshesInFlight = AtomicInteger()
     private val announcePending = AtomicBoolean()
+    private val queuedRefreshes = ConcurrentHashMap.newKeySet<String>()
+    private val refreshingAll = AtomicBoolean()
+    private val memoryPressureUntil = java.util.concurrent.atomic.AtomicLong()
     private val staleEngineFiles = ConcurrentHashMap.newKeySet<File>()
     private class EngineSnapshot(
         val sources: List<Pair<String, NativeFilterRules>>,
@@ -92,6 +97,16 @@ class NativeFilterSources @Inject constructor(
             metadata.edit().putInt("format_version", CACHE_FORMAT_VERSION).apply()
         }
         removeLegacyCaches()
+    }
+
+    init {
+        memoryBudget.registerCache(this) { sources, level ->
+            if (level == android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW ||
+                level == android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL ||
+                level >= android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
+                sources.memoryPressureUntil.set(android.os.SystemClock.elapsedRealtime() + 30_000)
+            }
+        }
     }
 
     private fun startBrowserEngines() {
@@ -200,6 +215,7 @@ class NativeFilterSources @Inject constructor(
     }
 
     private fun isUnderMemoryPressure(): Boolean {
+        if (android.os.SystemClock.elapsedRealtime() < memoryPressureUntil.get()) return true
         val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         return ActivityManager.MemoryInfo().also(manager::getMemoryInfo).lowMemory
     }
@@ -246,8 +262,10 @@ class NativeFilterSources @Inject constructor(
     internal fun networkDecision(config: AdBlockConfiguration, level: BlockingLevel, url: String, source: String,
         type: String, method: String = "GET", document: String = source): JSONObject {
         val snapshot = engineSnapshot
-        if (level == BlockingLevel.OFF || snapshot == null || !servesConfiguration(snapshot, config)) return JSONObject().put("cancel", false)
-        val engine = (if (level == BlockingLevel.TRACKERS) snapshot.trackers else snapshot.all) ?: return JSONObject().put("cancel", false)
+        if (level == BlockingLevel.OFF) return JSONObject().put("cancel", false)
+        if (snapshot == null || !servesConfiguration(snapshot, config)) return JSONObject().put("cancel", true).put("saturated", true)
+        val engine = (if (level == BlockingLevel.TRACKERS) snapshot.trackers else snapshot.all)
+            ?: return JSONObject().put("cancel", true).put("saturated", true)
         return engine.query(url, source, type, method, document)
     }
 
@@ -365,21 +383,24 @@ class NativeFilterSources @Inject constructor(
     }
 
     fun refreshAsync(key: String) {
+        if (!queuedRefreshes.add(key)) return
         beginRefresh()
-        scope.launch { try { refreshCounted(key, force = true) } finally { endRefresh() } }
+        scope.launch { try { refreshCounted(key, force = true) } finally { queuedRefreshes.remove(key); endRefresh() } }
     }
 
     private fun refreshStaleAsync(key: String) {
         if (isUnderMemoryPressure()) return
         val now = System.currentTimeMillis()
         if (now - (lastAttempt[key] ?: 0L) < RETRY_INTERVAL_MS) return
+        if (!queuedRefreshes.add(key)) return
         lastAttempt[key] = now
         beginRefresh()
-        scope.launch { try { refreshCounted(key, force = false) } finally { endRefresh() } }
+        scope.launch { try { refreshCounted(key, force = false) } finally { queuedRefreshes.remove(key); endRefresh() } }
     }
 
     fun refreshAllAsync() {
-        scope.launch { updateEnabled(force = true) }
+        if (!refreshingAll.compareAndSet(false, true)) return
+        scope.launch { try { updateEnabled(force = true) } finally { refreshingAll.set(false) } }
     }
 
     suspend fun updateEnabled(force: Boolean = false): Boolean = withContext(Dispatchers.IO) {
@@ -410,7 +431,7 @@ class NativeFilterSources @Inject constructor(
 
     private suspend fun refreshCounted(key: String, force: Boolean): Boolean {
         cacheReady.await()
-        if (!force && isUnderMemoryPressure()) return false
+        if (isUnderMemoryPressure()) return false
         val source = sourceFor(key) ?: return false
         val mutex = locks.getOrPut(key) { Mutex() }
         return mutex.withLock {
@@ -419,10 +440,11 @@ class NativeFilterSources @Inject constructor(
                 System.currentTimeMillis() - updatedAt < UPDATE_INTERVAL_MS
             ) return@withLock true
             downloadMutex.withLock {
-                if (!force && isUnderMemoryPressure()) return@withLock false
+                if (isUnderMemoryPressure()) return@withLock false
                 runCatching { download(key, source) }.onSuccess {
                     mutableFailures.update { failures -> failures - key }
                 }.onFailure { error ->
+                    if (error is CancellationException) throw error
                     mutableFailures.update { failures -> failures + key }
                     Log.w(TAG, "Could not update filter $key", error)
                 }.isSuccess
@@ -492,7 +514,7 @@ class NativeFilterSources @Inject constructor(
         val owner = ownerOf(url)
         val rules = NativeFilterRules.fromCompiled(compiled.readText()) { engineFile(owner, it) }
         val engine = rules.engine ?: return null
-        return rules.takeIf { engine.file.isFile && engine.file.length() == engine.length }
+        return rules.takeIf { engine.isIntact() }
     }
 
     private fun compiledCacheFile(url: String): File = File(cacheFile(url).path + ".meta")
@@ -514,7 +536,7 @@ class NativeFilterSources @Inject constructor(
             val parsed = parseHostFile(raw, temporary, trusted)
             val engine = checkNotNull(parsed.engine)
             val destination = engineFile(owner, engine.sha256)
-            if (destination.isFile && destination.length() == engine.length) temporary.delete()
+            if (engine.copy(file = destination).isIntact()) temporary.delete()
             else require(temporary.renameTo(destination)) { "Could not store the filter engine text" }
             engineFilesOf(owner).filter { it != destination }.forEach { staleEngineFiles += it }
             return parsed.withEngine(engine = engine.copy(file = destination))
@@ -531,8 +553,8 @@ class NativeFilterSources @Inject constructor(
                 NativeFilterRules.fromCompiled(reader.readText()) { engineFile(owner, it) }
             }
             val engine = checkNotNull(rules.engine)
-            if (!engine.file.isFile || engine.file.length() != engine.length) {
-                require(copyAsset("adblock/compiled/${source.id}.engine", engine.file) && engine.file.length() == engine.length)
+            if (!engine.isIntact()) {
+                require(copyAsset("adblock/compiled/${source.id}.engine", engine.file) && engine.isIntact())
             }
             rules
         }.getOrNull()

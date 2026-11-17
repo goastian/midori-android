@@ -51,7 +51,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Assert.assertSame
 import org.junit.Rule
 import org.junit.Test
-import org.midorinext.android.BuildConfig
 import org.midorinext.android.MidoriApplication
 import org.midorinext.android.newtab.migration.LegacyHomeMigration
 import org.midorinext.android.newtab.NATIVE_HOME_URL
@@ -333,7 +332,7 @@ class ToolbarInputDeviceTest {
 
     @Test
     fun homeStartsEmptyAndMidoriSearchSelectsDecodedQuery() {
-        val searchUrl = "${BuildConfig.QWANT_BASE_URL}/?q=caf%C3%A9+midori"
+        val searchUrl = "https://www.google.com/search?q=caf%C3%A9+midori"
         compose.runOnIdle {
             store.dispatch(ContentAction.UpdateUrlAction(first.id, NATIVE_HOME_URL))
             state = createState()

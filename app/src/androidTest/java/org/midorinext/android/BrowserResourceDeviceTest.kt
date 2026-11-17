@@ -16,6 +16,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.Before
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
@@ -25,6 +26,10 @@ class BrowserResourceDeviceTest {
     private val store get() = app.store.get()
     private val expectedLimit = InstrumentationRegistry.getArguments().getString("residentLimit", "5").toInt()
     private val samples = JSONArray()
+
+    @Before fun initializeBrowser() {
+        instrumentation.runOnMainSync { app.initializeBrowser("browser_resource_test") }
+    }
 
     @Test
     fun privateFixturesKeepTheirStateWhileResidentSessionsStayBounded() {

@@ -14,6 +14,7 @@ import java.io.File
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import mozilla.components.browser.state.action.TabListAction
+import mozilla.components.browser.state.action.LastAccessAction
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.concept.storage.PageObservation
 import mozilla.components.concept.storage.PageVisit
@@ -80,7 +81,9 @@ class NativeHomeDeviceTest {
             recordObservation(historyUrl, PageObservation(title = "Native home history fixture"))
         }
         instrumentation.runOnMainSync {
-            fixtures += app.tabsUseCases.get().addTab(historyUrl, title = "Native home continuation fixture", selectTab = true, startLoading = false)
+            val continuation = app.tabsUseCases.get().addTab(historyUrl, title = "Native home continuation fixture", selectTab = false, startLoading = false)
+            fixtures += continuation
+            app.store.get().dispatch(LastAccessAction.UpdateLastAccessAction(continuation))
             homeId = app.tabsUseCases.get().addTab(LEGACY_NEW_TAB_URL, selectTab = true, private = false)
             fixtures += homeId
         }
@@ -89,6 +92,7 @@ class NativeHomeDeviceTest {
                 it.content.title == "Midori" && !it.content.loading
         } == true }
         compose.onNodeWithTag("native_home").assertIsDisplayed()
+        compose.onNodeWithTag("native_home").performScrollToNode(hasText("Native home continuation fixture"))
         compose.waitUntil(10_000) {
             compose.onAllNodesWithText("Native home continuation fixture").fetchSemanticsNodes().isNotEmpty()
         }

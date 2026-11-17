@@ -4,10 +4,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.midorinext.android.BuildConfig
 
 class StringTest {
-    private val astianGo = BuildConfig.QWANT_BASE_URL.trimEnd('/')
+    private val astianGo = "https://astiango.com"
 
     @Test
     fun legacyHomeDetectionOnlyMatchesTheRetiredNewTabShape() {

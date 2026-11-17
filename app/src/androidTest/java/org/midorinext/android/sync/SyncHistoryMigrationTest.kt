@@ -16,7 +16,7 @@ import org.midorinext.android.storage.history.Visit
 class SyncHistoryMigrationTest {
     @Test fun existing_visits_survive_migration_and_keep_microseconds_and_transitions() = runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        check(context.packageName.endsWith(".synctest"))
+        check(context.packageName.endsWith(".debug"))
         val name = "sync_history_migration_test"
         context.deleteDatabase(name)
         val path = context.getDatabasePath(name)
@@ -28,7 +28,9 @@ class SyncHistoryMigrationTest {
             db.execSQL("INSERT INTO visits VALUES ('https://migration.example.invalid/',1700000000000,'LINK')")
             db.version = 1
         }
-        val migrated = Room.databaseBuilder(context, HistoryDatabase::class.java, name).addMigrations(HistoryDatabase.MIGRATION_1_2).build()
+        val migrated = Room.databaseBuilder(context, HistoryDatabase::class.java, name)
+            .addMigrations(HistoryDatabase.MIGRATION_1_2, HistoryDatabase.MIGRATION_2_3, HistoryDatabase.MIGRATION_3_4)
+            .build()
         try {
             val dao = migrated.historyDao()
             val original = dao.syncVisits().single()

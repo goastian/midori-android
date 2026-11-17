@@ -11,7 +11,8 @@
   let saturatedRequests = 0;
   let decisionReceived = false;
   let policyApplied = false;
-  let policyTask = Promise.resolve();
+  let pendingPolicy = null;
+  let applyingPolicy = false;
   const requests = new Map();
   const responsePolicies = new Map();
   let ready;
@@ -40,21 +41,22 @@
       .finally(() => clearTimeout(timer));
   }
 
+  function saturatedDecision() {
+    if (++saturatedRequests === 1 || saturatedRequests % 128 === 0) console.warn(`Midori network queue saturated or unavailable; ${saturatedRequests} requests cancelled`);
+    return { cancel: true, saturated: true };
+  }
+
   async function requestDecision(message) {
     const port = nativePort;
-    if (!port) return null;
-    if (requests.size >= 128) {
-      if (++saturatedRequests === 1 || saturatedRequests % 128 === 0) console.warn(`Midori network queue saturated; ${saturatedRequests} requests cancelled`);
-      return { cancel: true, saturated: true };
-    }
+    if (!port || requests.size >= 128) return saturatedDecision();
     const requestId = ++nextRequestId;
     const response = new Promise(resolve => { requests.set(requestId, resolve); });
     try {
       port.postMessage({ type: "network_request", requestId, ...message });
       const result = await deadline(response, decisionReceived ? 1500 : 4000, null);
       if (typeof result?.cancel === "boolean") decisionReceived = true;
-      return result;
-    } catch { return null; }
+      return typeof result?.cancel === "boolean" ? result : saturatedDecision();
+    } catch { return saturatedDecision(); }
     finally { requests.delete(requestId); }
   }
 
@@ -112,7 +114,13 @@
     if (!isWebPage(siteUrl)) return {};
     const state = stateFor(details.tabId, siteUrl);
     if (!policy) await deadline(ready, 2000, null);
+    if (!policy) return saturatedDecision();
     if (levelFor(siteUrl) === "OFF") return {};
+    if (!policyApplied) {
+      await deadline(ready, 4000, null);
+      if (!policyApplied) return saturatedDecision();
+      if (levelFor(siteUrl) === "OFF") return {};
+    }
     const requestPolicy = policy;
 
     const originUrl = details.documentUrl || details.originUrl || siteUrl;
@@ -122,15 +130,16 @@
     if (decision === undefined) {
       try {
         const response = await requestDecision({ url: details.url, siteUrl, originUrl, resourceType: details.type, method });
-        if (policy !== requestPolicy || tabs.get(details.tabId) !== state) return {};
-        if (typeof response?.cancel !== "boolean") return {};
+        if (policy !== requestPolicy || tabs.get(details.tabId) !== state) {
+          return policy && levelFor(siteUrl) === "OFF" ? {} : saturatedDecision();
+        }
         decision = { cancel: response.cancel, blocked: response.blocked === true };
         if (typeof response.csp === "string" && response.csp.length <= 65536 && !/[\r\n]/.test(response.csp)) decision.csp = response.csp;
         if (typeof response.redirectUrl === "string" && response.redirectUrl !== details.url &&
             /^(?:https?:|data:)/.test(response.redirectUrl)) decision.redirectUrl = response.redirectUrl;
         if (state.cache.size >= 512) state.cache.clear();
         if (!response.saturated) state.cache.set(key, decision);
-      } catch { return {}; }
+      } catch { return saturatedDecision(); }
     }
     if (decision.csp && details.requestId && !decision.redirectUrl) {
       if (responsePolicies.size >= 2048) responsePolicies.clear();
@@ -144,6 +153,31 @@
     }
     if (decision.cancel) return { cancel: true };
     return decision.redirectUrl ? { redirectUrl: decision.redirectUrl } : {};
+  }
+
+  function applyPolicies(port) {
+    if (applyingPolicy) return;
+    applyingPolicy = true;
+    void (async () => {
+      try {
+        while (pendingPolicy && nativePort === port) {
+          const message = pendingPolicy;
+          pendingPolicy = null;
+          try {
+            if (message.scriptlets) await MidoriScriptlets.update(message.scriptlets);
+            if (policy !== message || nativePort !== port) continue;
+            policyApplied = true;
+            markReady();
+            port.postMessage({ type: "network_policy_applied", revision: message.revision, policyId: message.policyId });
+          } catch (error) {
+            if (nativePort === port) port.postMessage({ type: "scriptlet_policy_failed", error: String(error) });
+          }
+        }
+      } finally {
+        applyingPolicy = false;
+        if (pendingPolicy && nativePort) applyPolicies(nativePort);
+      }
+    })();
   }
 
   function connect() {
@@ -167,20 +201,14 @@
           policy = message;
           for (const state of tabs.values()) state.cache.clear();
         }
-        const applying = policy;
-        policyTask = policyTask.catch(() => {}).then(async () => {
-          try {
-            if (message.scriptlets) await MidoriScriptlets.update(message.scriptlets);
-            if (policy === applying) { policyApplied = true; markReady(); }
-            port.postMessage({ type: "network_policy_applied", revision: message.revision, policyId: message.policyId });
-          } catch (error) {
-            port.postMessage({ type: "scriptlet_policy_failed", error: String(error) });
-          }
-        });
+        pendingPolicy = message;
+        policy = message;
+        applyPolicies(port);
       });
       port.onDisconnect.addListener(() => {
         if (nativePort !== port) return;
         nativePort = null;
+        pendingPolicy = null;
         decisionReceived = false;
         for (const resolve of requests.values()) resolve(null);
         requests.clear();
@@ -201,28 +229,35 @@
     const state = stateFor(tabId, sender.tab.url);
     const frameId = sender.frameId;
     if (!state.frames.has(frameId) || state.frames.get(frameId).documentId !== message.documentId) {
-      state.frames.set(frameId, { css: "", task: Promise.resolve(), url: sender.url, documentId: message.documentId });
+      state.frames.set(frameId, { css: "", task: Promise.resolve(), running: false, pending: null, url: sender.url, documentId: message.documentId });
     }
     const frame = state.frames.get(frameId);
-    if (frame.url !== sender.url) { frame.url = sender.url; frame.css = ""; }
-    frame.task = frame.task.catch(() => {}).then(async () => {
-      if (tabs.get(tabId) !== state) return;
-      if (state.frames.get(frameId) !== frame || frame.url !== sender.url) return;
-      if (message.siteUrl?.split("#")[0] !== (sender.url || sender.tab.url)?.split("#")[0]) return;
-      const selectors = Array.isArray(message.selectors) ? message.selectors : [];
-      const styles = Array.isArray(message.styles) ? message.styles.filter(item =>
-        typeof item?.selector === "string" && !/[{}\r\n]/.test(item.selector) &&
-        typeof item.declarations === "string" && !/[{}\r\n@]|url\s*\(/i.test(item.declarations)) : [];
-      const code = message.enabled === true ? selectors.map(selector => `${selector} { display: none !important; }`)
-        .concat(styles.map(item => `${item.selector} { ${item.declarations} }`)).join("\n") : "";
-      if (code === frame.css) return;
-      if (frame.css) await browser.tabs.removeCSS(tabId, { code: frame.css, cssOrigin: "user", frameId });
-      frame.css = "";
-      if (code) {
-        await browser.tabs.insertCSS(tabId, { code, cssOrigin: "user", frameId, runAt: "document_start" });
-        frame.css = code;
+    frame.url = sender.url;
+    frame.pending = { message, sender };
+    if (frame.running) return frame.task;
+    frame.running = true;
+    frame.task = (async () => {
+      while (frame.pending) {
+        const { message, sender } = frame.pending;
+        frame.pending = null;
+        if (tabs.get(tabId) !== state) return;
+        if (state.frames.get(frameId) !== frame || frame.url !== sender.url) continue;
+        if (message.siteUrl?.split("#")[0] !== (sender.url || sender.tab.url)?.split("#")[0]) continue;
+        const selectors = Array.isArray(message.selectors) ? message.selectors : [];
+        const styles = Array.isArray(message.styles) ? message.styles.filter(item =>
+          typeof item?.selector === "string" && !/[{}\r\n]/.test(item.selector) &&
+          typeof item.declarations === "string" && !/[{}\r\n@]|url\s*\(/i.test(item.declarations)) : [];
+        const code = message.enabled === true ? selectors.map(selector => `${selector} { display: none !important; }`)
+          .concat(styles.map(item => `${item.selector} { ${item.declarations} }`)).join("\n") : "";
+        if (code === frame.css) continue;
+        if (frame.css) await browser.tabs.removeCSS(tabId, { code: frame.css, cssOrigin: "user", frameId });
+        frame.css = "";
+        if (code) {
+          await browser.tabs.insertCSS(tabId, { code, cssOrigin: "user", frameId, runAt: "document_start" });
+          frame.css = code;
+        }
       }
-    });
+    })().finally(() => { frame.running = false; });
     return frame.task;
   }
 

@@ -8,7 +8,7 @@ function event() {
   return { addListener(value) { listener = value; }, emit(...args) { return listener?.(...args); } };
 }
 
-function bridge() {
+function bridge(options = {}) {
   const messages = [], warnings = [];
   const port = { onMessage: event(), onDisconnect: event(), postMessage(message) { messages.push(message); } };
   const webRequest = Object.fromEntries(['onBeforeRequest', 'onHeadersReceived', 'onCompleted', 'onErrorOccurred'].map(key => [key, event()]));
@@ -16,16 +16,18 @@ function bridge() {
   let timer = 0;
   const browser = {
     runtime: { connectNative: () => port, onMessage: event() }, webRequest,
-    tabs: { onRemoved: event(), onUpdated: event(), get: async () => ({ url: 'https://news.example/' }), sendMessage: async () => {} },
+    tabs: { onRemoved: event(), onUpdated: event(), get: async () => ({ url: 'https://news.example/' }), sendMessage: async () => {},
+      insertCSS: options.insertCSS || (async () => {}), removeCSS: options.removeCSS || (async () => {}) },
   };
   const context = vm.createContext({ browser, crypto: { randomUUID: () => 'test' }, URL,
     console: { warn: value => warnings.push(value) },
     setTimeout(fn) { timers.set(++timer, fn); return timer; }, clearTimeout(id) { timers.delete(id); },
-    MidoriScriptlets: { update: async () => {} },
+    MidoriScriptlets: { update: options.update || (async () => {}) },
   });
   vm.runInContext(readFileSync(new URL('../../app/src/main/assets/adblock/content/network-blocking.js', import.meta.url), 'utf8'), context);
-  port.onMessage.emit({ type: 'network_policy', level: 'TRACKERS_AND_ADS', revision: 1, siteLevels: {}, policyId: 1 });
-  return { port, messages, warnings, webRequest };
+  if (options.initial !== false) port.onMessage.emit({ type: 'network_policy', level: 'TRACKERS_AND_ADS', revision: 1, siteLevels: {}, policyId: 1 });
+  return { port, messages, warnings, webRequest, browser,
+    expire() { const pending = [...timers.values()]; timers.clear(); pending.forEach(fn => fn()); } };
 }
 
 const flush = async () => { for (let i = 0; i < 10; i++) await Promise.resolve(); };
@@ -76,6 +78,101 @@ test('global OFF honors a blocking site override and other sites bypass native w
   assert.equal((await pending).cancel, true);
   assert.equal(Object.keys(await b.webRequest.onBeforeRequest.emit({ tabId: 2, type: 'script', url: 'https://ads.example/a.js',
     frameAncestors: [{ frameId: 0, url: 'https://other.example/' }] })).length, 0);
+});
+
+test('a first navigation waits for its policy and cannot pass an unavailable blocker', async () => {
+  const b = bridge({ initial: false });
+  const pending = b.webRequest.onBeforeRequest.emit({ tabId: 1, type: 'main_frame', url: 'https://news.example/' });
+  await flush();
+  assert.equal(b.messages.filter(message => message.type === 'network_request').length, 0);
+  b.expire(); await flush();
+  b.expire(); await flush();
+  assert.equal((await pending).cancel, true);
+  assert.equal(b.warnings.length, 1);
+});
+
+test('a native timeout cancels without caching and recovers on the next request', async () => {
+  const b = bridge();
+  await flush();
+  const pending = request(b, 1);
+  await flush();
+  b.expire(); await flush();
+  assert.equal((await pending).cancel, true);
+  const next = request(b, 1);
+  await flush();
+  const sent = b.messages.filter(message => message.type === 'network_request');
+  assert.equal(sent.length, 2);
+  b.port.onMessage.emit({ type: 'network_response', requestId: sent[1].requestId, cancel: false });
+  assert.equal((await next).cancel, undefined);
+});
+
+test('an unexpected bridge disconnect cancels requests that were already in flight', async () => {
+  const b = bridge();
+  await flush();
+  const pending = request(b, 1);
+  await flush();
+  b.port.onDisconnect.emit();
+  assert.equal((await pending).cancel, true);
+});
+
+test('an explicit OFF during a pending decision releases that request', async () => {
+  const b = bridge();
+  await flush();
+  const pending = request(b, 1);
+  await flush();
+  const message = b.messages.filter(message => message.type === 'network_request').at(-1);
+  b.port.onMessage.emit({ type: 'network_policy', level: 'OFF', revision: 2, siteLevels: {}, policyId: 2 });
+  b.port.onMessage.emit({ type: 'network_response', requestId: message.requestId, cancel: true });
+  assert.equal((await pending).cancel, undefined);
+});
+
+test('policy bursts retain only the running registration and the latest configuration', async () => {
+  const applied = [], releases = [];
+  const b = bridge({ initial: false, update: value => {
+    applied.push(value.sequence);
+    return new Promise(resolve => releases.push(resolve));
+  } });
+  for (let sequence = 0; sequence < 1000; sequence++) b.port.onMessage.emit({
+    type: 'network_policy', level: 'TRACKERS_AND_ADS', siteLevels: {}, revision: sequence,
+    policyId: sequence, scriptlets: { sequence },
+  });
+  await flush();
+  assert.deepEqual(applied, [0]);
+  releases.shift()(); await flush();
+  assert.deepEqual(applied, [0, 999]);
+  releases.shift()(); await flush();
+  assert.deepEqual(b.messages.filter(message => message.type === 'network_policy_applied').map(message => message.policyId), [999]);
+});
+
+test('turning cosmetics OFF after a SPA route change removes previously inserted user CSS', async () => {
+  const inserted = [], removed = [];
+  const b = bridge({ insertCSS: async (_, value) => inserted.push(value.code), removeCSS: async (_, value) => removed.push(value.code) });
+  const update = (enabled, url) => b.browser.runtime.onMessage.emit({
+    type: 'ad_placement_policy', enabled, selectors: ['.ad'], documentId: 'same-document', siteUrl: url,
+  }, { tab: { id: 1, url }, frameId: 0, url });
+  await update(true, 'https://news.example/route-a');
+  await update(false, 'https://news.example/route-b');
+  assert.equal(inserted.length, 1);
+  assert.deepEqual(removed, inserted);
+});
+
+test('a cosmetic burst coalesces behind an outstanding CSS operation and applies the final OFF', async () => {
+  const inserted = [], removed = [];
+  let release;
+  const b = bridge({ insertCSS: async (_, value) => {
+    inserted.push(value.code);
+    await new Promise(resolve => { release = resolve; });
+  }, removeCSS: async (_, value) => removed.push(value.code) });
+  const update = (enabled, selector) => b.browser.runtime.onMessage.emit({
+    type: 'ad_placement_policy', enabled, selectors: [selector], documentId: 'document', siteUrl: 'https://news.example/',
+  }, { tab: { id: 1, url: 'https://news.example/' }, frameId: 0, url: 'https://news.example/' });
+  const pending = [update(true, '.ad')];
+  for (let i = 0; i < 1000; i++) pending.push(update(true, `.ad-${i}`));
+  pending.push(update(false, '.ad'));
+  release();
+  await Promise.all(pending);
+  assert.equal(inserted.length, 1);
+  assert.deepEqual(removed, inserted);
 });
 
 function cosmeticDocument(count) {

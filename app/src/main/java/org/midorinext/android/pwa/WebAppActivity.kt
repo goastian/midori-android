@@ -52,6 +52,7 @@ import javax.inject.Inject
 class WebAppActivity : AppCompatActivity() {
     @Inject lateinit var repository: WebAppRepository
     @Inject lateinit var memoryBudget: BrowserMemoryBudget
+    @Inject lateinit var blockingStartup: org.midorinext.android.adblock.ContentBlockingStartup
     @Inject lateinit var engine: Engine
     @Inject lateinit var preferences: AppPreferencesRepository
     @Inject lateinit var permissionsStorage: GeckoSitePermissionsStorage
@@ -90,6 +91,7 @@ class WebAppActivity : AppCompatActivity() {
                             manifest = manifest,
                             engine = engine,
                             memoryBudget = memoryBudget,
+                            blockingStartup = blockingStartup,
                             repository = repository,
                             preferences = preferences,
                             permissionsStorage = permissionsStorage,
@@ -119,6 +121,7 @@ private fun WebAppPage(
     manifest: WebAppManifest,
     engine: Engine,
     memoryBudget: BrowserMemoryBudget,
+    blockingStartup: org.midorinext.android.adblock.ContentBlockingStartup,
     repository: WebAppRepository,
     preferences: AppPreferencesRepository,
     permissionsStorage: GeckoSitePermissionsStorage,
@@ -128,7 +131,8 @@ private fun WebAppPage(
     val resourceScope = rememberCoroutineScope()
     val resources = remember(app.startUrl, engine) { TabResourceMiddleware(memoryBudget, resourceScope) }
     val store = remember(resources) {
-        BrowserStore(middleware = listOf(PromptMiddleware(), resources) + EngineMiddleware.create(engine, trimMemoryAutomatically = false))
+        BrowserStore(middleware = listOf(PromptMiddleware(), resources,
+            org.midorinext.android.adblock.ContentBlockingStartupMiddleware(blockingStartup, resourceScope)) + EngineMiddleware.create(engine, trimMemoryAutomatically = false))
     }
     val tabs = remember(store) { TabsUseCases(store) }
     val sessions = remember(store) { SessionUseCases(store) }
