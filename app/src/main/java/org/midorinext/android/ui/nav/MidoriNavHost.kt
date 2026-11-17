@@ -61,6 +61,7 @@ fun MidoriNavHost(
     modifier: Modifier = Modifier,
     appViewModel: MidoriApplicationViewModel = hiltViewModel(),
     onTabsPrivacyChanged: (Boolean) -> Unit = {},
+    allowSafetyTab: Boolean = true,
 ) {
     val onBrowse = { navController.returnToBrowser() }
     val reduceMotion = reduceMotionRequested()
@@ -119,6 +120,7 @@ fun MidoriNavHost(
                 updateSystemBars = false,
             ) {
                 BrowserScreen(
+                    allowSafetyTab = allowSafetyTab,
                     navigateTo = { destination ->
                         if (destination == NavDestination.Tabs) {
                             navController.navigate(destination.route()) {

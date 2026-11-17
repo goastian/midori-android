@@ -20,6 +20,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
@@ -71,9 +74,19 @@ fun TabsScreen(
     val selectedTabIds = selection?.tabIds.orEmpty()
     val selectionTargetGroupId = selection?.targetGroupId
     val searchQuery = (uiState.mode as? TabsMode.Searching)?.query.orEmpty()
+    val focusManager = LocalFocusManager.current
+    val keyboard = LocalSoftwareKeyboardController.current
+    var expandedGroupId by rememberSaveable { mutableStateOf<String?>(null) }
     val dispatch: (TabsUiAction) -> Unit = { action ->
         val nextState = uiState.reduce(action)
-        if (nextState.page != uiState.page) onPrivacyChanged(nextState.page.isPrivate)
+        if (uiState.mode is TabsMode.Searching && nextState.mode !is TabsMode.Searching) {
+            focusManager.clearFocus()
+            keyboard?.hide()
+        }
+        if (nextState.page != uiState.page) {
+            expandedGroupId = null
+            onPrivacyChanged(nextState.page.isPrivate)
+        }
         uiState = nextState
     }
     SideEffect {
@@ -81,7 +94,6 @@ fun TabsScreen(
     }
     var groupBeingEdited by remember { mutableStateOf<SmartTabGroup?>(null) }
     var groupBeingDeleted by remember { mutableStateOf<SmartTabGroup?>(null) }
-    var expandedGroupId by rememberSaveable { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
     LaunchedEffect(smartTabs?.groups) {
         val id = expandedGroupId
@@ -148,6 +160,16 @@ fun TabsScreen(
             pageInitialized = true
         }
     }
+    LaunchedEffect(restoreComplete, tabs, smartTabs, uiState) {
+        if (!restoreComplete) return@LaunchedEffect
+        val mode = uiState.mode as? TabsMode.Selecting ?: return@LaunchedEffect
+        val validIds = tabs.filter { it.content.private == private }.mapTo(hashSetOf()) { it.id }
+        if (mode.targetGroupId != null && smartTabs?.groups?.none { it.id == mode.targetGroupId } == true) {
+            dispatch(TabsUiAction.ExitTransientMode)
+        } else if (!validIds.containsAll(mode.tabIds)) {
+            uiState = uiState.copy(mode = mode.copy(tabIds = mode.tabIds.intersect(validIds)))
+        }
+    }
 
     val openIndividualTab: (Boolean) -> Unit = { privateTab ->
         // Creating a tab is always an escape hatch from the grouping flow. In particular, this
@@ -159,6 +181,7 @@ fun TabsScreen(
 
     BackHandler(
         enabled = (expandedGroupId != null || uiState.mode !is TabsMode.Browsing) &&
+            WindowInsets.ime.getBottom(LocalDensity.current) == 0 &&
             groupBeingEdited == null &&
             groupBeingDeleted == null,
     ) {
@@ -183,8 +206,9 @@ fun TabsScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     IconButton(onClick = {
-                        if (uiState.mode is TabsMode.Browsing) onClose()
-                        else dispatch(TabsUiAction.ExitTransientMode)
+                        if (uiState.mode !is TabsMode.Browsing) dispatch(TabsUiAction.ExitTransientMode)
+                        else if (expandedGroupId != null) expandedGroupId = null
+                        else onClose()
                     }) {
                         Icon(painterResource(R.drawable.icons_arrow_backward), stringResource(R.string.nav_back))
                     }

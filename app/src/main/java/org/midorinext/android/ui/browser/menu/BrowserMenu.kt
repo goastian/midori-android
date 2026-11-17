@@ -339,9 +339,6 @@ private fun PageActions(viewModel: BrowserScreenViewModel, afterDismiss: (() -> 
 }
 
 private fun String?.isExternalPage(): Boolean {
-    if (isNullOrBlank() || startsWith("about:blank") || startsWith("moz-extension://")) {
-        return false
-    }
-
-    return true
+    val uri = this?.let(android.net.Uri::parse) ?: return false
+    return (uri.scheme.equals("http", true) || uri.scheme.equals("https", true)) && !uri.host.isNullOrBlank()
 }

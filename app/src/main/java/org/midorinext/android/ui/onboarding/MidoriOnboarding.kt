@@ -6,8 +6,6 @@ package org.midorinext.android.ui.onboarding
 import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
-import android.content.Context
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
@@ -33,6 +31,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -47,7 +46,12 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -75,7 +79,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.core.view.WindowCompat
+import kotlinx.coroutines.delay
+import org.midorinext.android.MidoriApplication
 import org.midorinext.android.R
 import org.midorinext.android.adblock.BlockingLevel
 import org.midorinext.android.ext.defaultBrowserStatus
@@ -97,7 +110,7 @@ import org.midorinext.android.ui.widgets.SearchEngineIcon
 import org.midorinext.android.usecases.SearchEngineOption
 import org.midorinext.android.usecases.SearchEngines
 
-private const val OnboardingPageCount = 6
+private enum class ActionOutcome { IDLE, REQUESTED, SUCCEEDED, NOT_COMPLETED, UNAVAILABLE }
 
 @Composable
 fun MidoriOnboarding(
@@ -109,7 +122,20 @@ fun MidoriOnboarding(
     onComplete: () -> Unit,
 ) {
     val context = LocalContext.current
-    var page by rememberSaveable { mutableStateOf(0) }
+    val widgetManager = remember(context) { AppWidgetManager.getInstance(context) }
+    val widgetProvider = remember(context) { ComponentName(context, WidgetProvider::class.java) }
+    val steps = rememberSaveable {
+        arrayListOf(0).apply {
+            if (!context.defaultBrowserStatus().isDefault) add(1)
+            if (widgetManager.isRequestPinAppWidgetSupported && widgetManager.getAppWidgetIds(widgetProvider).isEmpty()) add(2)
+            addAll(listOf(3, 4, 5))
+        }
+    }
+    var stepIndex by rememberSaveable { mutableStateOf(0) }
+    val page = steps[stepIndex]
+    var defaultOutcome by rememberSaveable { mutableStateOf(ActionOutcome.IDLE) }
+    var widgetOutcome by rememberSaveable { mutableStateOf(ActionOutcome.IDLE) }
+    var legalUrl by rememberSaveable { mutableStateOf<String?>(null) }
     var toolbarAtBottom by rememberSaveable { mutableStateOf(false) }
     val reduceMotion = reduceMotionRequested()
     val layoutDirection = LocalLayoutDirection.current
@@ -118,19 +144,68 @@ fun MidoriOnboarding(
 
     val defaultBrowserLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
-    ) { }
+    ) {
+        defaultOutcome = if (context.defaultBrowserStatus().isDefault) ActionOutcome.SUCCEEDED else ActionOutcome.NOT_COMPLETED
+    }
 
-    val advance = { page = (page + 1).coerceAtMost(OnboardingPageCount - 1) }
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle, context) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                if (context.defaultBrowserStatus().isDefault) defaultOutcome = ActionOutcome.SUCCEEDED
+                if (widgetManager.getAppWidgetIds(widgetProvider).isNotEmpty()) widgetOutcome = ActionOutcome.SUCCEEDED
+                else if (!widgetManager.isRequestPinAppWidgetSupported) widgetOutcome = ActionOutcome.UNAVAILABLE
+                else if (widgetOutcome == ActionOutcome.REQUESTED) widgetOutcome = ActionOutcome.NOT_COMPLETED
+            }
+        }
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer) }
+    }
+    LaunchedEffect(page, widgetOutcome, lifecycle) {
+        if (page == 2 && widgetOutcome in listOf(ActionOutcome.REQUESTED, ActionOutcome.NOT_COMPLETED)) {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                while (widgetOutcome != ActionOutcome.SUCCEEDED) {
+                    if (widgetManager.getAppWidgetIds(widgetProvider).isNotEmpty()) widgetOutcome = ActionOutcome.SUCCEEDED
+                    delay(500)
+                }
+            }
+        }
+    }
+
+    val advance = { stepIndex = (stepIndex + 1).coerceAtMost(steps.lastIndex) }
     val handlePrimaryAction = {
         when (page) {
             0 -> advance()
             1 -> {
-                requestDefaultBrowser(context, defaultBrowserLauncher)
-                advance()
+                if (defaultOutcome == ActionOutcome.SUCCEEDED) advance()
+                else {
+                    defaultOutcome = try {
+                        val status = context.defaultBrowserStatus()
+                        if (status.isDefault) ActionOutcome.SUCCEEDED
+                        else {
+                            defaultBrowserLauncher.launch(status.requestIntent())
+                            ActionOutcome.REQUESTED
+                        }
+                    } catch (_: android.content.ActivityNotFoundException) {
+                        ActionOutcome.UNAVAILABLE
+                    } catch (_: SecurityException) {
+                        ActionOutcome.UNAVAILABLE
+                    }
+                }
             }
             2 -> {
-                requestPinnedWidget(context)
-                advance()
+                if (widgetOutcome == ActionOutcome.SUCCEEDED) advance()
+                else {
+                    widgetOutcome = try {
+                        if (widgetManager.getAppWidgetIds(widgetProvider).isNotEmpty()) ActionOutcome.SUCCEEDED
+                        else if (widgetManager.isRequestPinAppWidgetSupported && widgetManager.requestPinAppWidget(widgetProvider, null, null)) ActionOutcome.REQUESTED
+                        else ActionOutcome.UNAVAILABLE
+                    } catch (_: IllegalStateException) {
+                        ActionOutcome.UNAVAILABLE
+                    } catch (_: SecurityException) {
+                        ActionOutcome.UNAVAILABLE
+                    }
+                }
             }
             3, 4 -> advance()
             else -> onComplete()
@@ -146,7 +221,7 @@ fun MidoriOnboarding(
             .navigationBarsPadding()
             .padding(horizontal = 24.dp, vertical = 16.dp),
     ) {
-        OnboardingProgress(page = page)
+        OnboardingProgress(page = stepIndex, pageCount = steps.size)
 
         AnimatedContent(
             targetState = page,
@@ -171,7 +246,7 @@ fun MidoriOnboarding(
             label = "midori onboarding page",
         ) { currentPage ->
             when (currentPage) {
-                0 -> WelcomePage()
+                0 -> WelcomePage(onOpenLegal = { legalUrl = it })
                 1 -> DefaultBrowserPage()
                 2 -> WidgetPage()
                 3 -> ToolbarPage(
@@ -190,10 +265,12 @@ fun MidoriOnboarding(
 
         OnboardingActions(
             page = page,
+            outcome = if (page == 1) defaultOutcome else if (page == 2) widgetOutcome else ActionOutcome.IDLE,
             onPrimary = handlePrimaryAction,
             onSkip = advance,
         )
     }
+    legalUrl?.let { url -> OnboardingLegalPage(url, onClose = { legalUrl = null }) }
 }
 
 @Composable
@@ -324,15 +401,15 @@ private fun MidoriOnboardingSystemBars() {
 }
 
 @Composable
-private fun OnboardingProgress(page: Int) {
-    val progressDescription = stringResource(R.string.onboarding_progress, page + 1, OnboardingPageCount)
+private fun OnboardingProgress(page: Int, pageCount: Int) {
+    val progressDescription = stringResource(R.string.onboarding_progress, page + 1, pageCount)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .semantics { contentDescription = progressDescription },
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        repeat(OnboardingPageCount) { index ->
+        repeat(pageCount) { index ->
             val active = index == page
             Surface(
                 modifier = Modifier
@@ -347,7 +424,7 @@ private fun OnboardingProgress(page: Int) {
 }
 
 @Composable
-private fun WelcomePage() {
+private fun WelcomePage(onOpenLegal: (String) -> Unit) {
     PageColumn(verticalArrangement = Arrangement.SpaceEvenly) {
         Surface(
             modifier = Modifier
@@ -378,11 +455,16 @@ private fun WelcomePage() {
             )
         }
 
-        Text(
-            text = stringResource(R.string.onboarding_welcome_legal),
-            style = MaterialTheme.typography.bodySmall,
-            color = OnboardingMutedInk,
-        )
+        Column {
+            Text(stringResource(R.string.onboarding_welcome_legal), style = MaterialTheme.typography.bodySmall, color = OnboardingMutedInk)
+            TextButton(onClick = { onOpenLegal("https://astian.org/terms-conditions/") }, modifier = Modifier.testTag("onboarding_terms")) {
+                Text(stringResource(R.string.onboarding_terms_link))
+            }
+            val privacyUrl = stringResource(R.string.privacy_policy_url)
+            TextButton(onClick = { onOpenLegal(privacyUrl) }, modifier = Modifier.testTag("onboarding_privacy")) {
+                Text(stringResource(R.string.privacy_policy_label))
+            }
+        }
     }
 }
 
@@ -660,10 +742,11 @@ private fun ToolbarPlacementPreview(
 @Composable
 private fun OnboardingActions(
     page: Int,
+    outcome: ActionOutcome,
     onPrimary: () -> Unit,
     onSkip: () -> Unit,
 ) {
-    val primaryAction = when (page) {
+    val primaryAction = if (outcome == ActionOutcome.SUCCEEDED) stringResource(R.string.welcome_continue) else when (page) {
         0 -> stringResource(R.string.onboarding_welcome_continue)
         1 -> stringResource(R.string.onboarding_default_set)
         2 -> stringResource(R.string.onboarding_widget_add)
@@ -672,27 +755,35 @@ private fun OnboardingActions(
         else -> stringResource(R.string.onboarding_finish)
     }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        if (outcome != ActionOutcome.IDLE) {
+            Text(stringResource(when (outcome) {
+                ActionOutcome.SUCCEEDED -> if (page == 1) R.string.onboarding_default_done else R.string.onboarding_widget_done
+                ActionOutcome.NOT_COMPLETED -> R.string.onboarding_action_not_completed
+                ActionOutcome.UNAVAILABLE -> R.string.onboarding_action_unavailable
+                else -> R.string.onboarding_action_requested
+            }), modifier = Modifier.testTag("onboarding_action_result"), color = OnboardingMutedInk, style = MaterialTheme.typography.bodyMedium)
+        }
         if (page == 1 || page == 2) {
             Button(
                 onClick = onSkip,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp),
+                    .then(Modifier.heightIn(min = 48.dp)).testTag("onboarding_skip"),
                 shape = RoundedCornerShape(18.dp),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = OnboardingGreenDeep),
                 border = androidx.compose.foundation.BorderStroke(1.dp, OnboardingBorder),
             ) {
                 Text(
                     text = if (page == 1) stringResource(R.string.onboarding_default_skip) else stringResource(R.string.onboarding_widget_skip),
-                    maxLines = 1,
                 )
             }
         }
         Button(
             onClick = onPrimary,
+            enabled = outcome != ActionOutcome.REQUESTED && outcome != ActionOutcome.UNAVAILABLE,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
+                .then(Modifier.heightIn(min = 56.dp)).testTag("onboarding_primary"),
             shape = RoundedCornerShape(18.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = OnboardingGreen,
@@ -701,7 +792,6 @@ private fun OnboardingActions(
         ) {
             Text(
                 text = primaryAction,
-                maxLines = 1,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
             )
@@ -709,21 +799,27 @@ private fun OnboardingActions(
     }
 }
 
-private fun requestDefaultBrowser(
-    context: Context,
-    launcher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>,
-) {
-    val status = context.defaultBrowserStatus()
-    if (!status.isDefault) {
-        launcher.launch(status.requestIntent())
-    }
-}
-
-private fun requestPinnedWidget(context: Context) {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-    val appWidgetManager = AppWidgetManager.getInstance(context)
-    if (appWidgetManager.isRequestPinAppWidgetSupported) {
-        appWidgetManager.requestPinAppWidget(ComponentName(context, WidgetProvider::class.java), null, null)
+@Composable
+private fun OnboardingLegalPage(url: String, onClose: () -> Unit) {
+    val context = LocalContext.current
+    val engine = remember(context) { (context.applicationContext as MidoriApplication).engine.get() }
+    Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        Surface(Modifier.fillMaxSize().testTag("onboarding_legal")) {
+            Column {
+                TextButton(onClick = onClose) { Text(stringResource(R.string.nav_back)) }
+                Text(url, Modifier.padding(horizontal = 16.dp), style = MaterialTheme.typography.bodySmall)
+                HorizontalDivider()
+                val session = remember(engine, url) { engine.createSession(private = true) }
+                DisposableEffect(session) { onDispose { session.close() } }
+                org.midorinext.android.ui.browser.mozaccompose.EngineView(engine, Modifier.weight(1f)) { view ->
+                    DisposableEffect(view, session) {
+                        view.render(session)
+                        session.loadUrl(url)
+                        onDispose { view.release() }
+                    }
+                }
+            }
+        }
     }
 }
 

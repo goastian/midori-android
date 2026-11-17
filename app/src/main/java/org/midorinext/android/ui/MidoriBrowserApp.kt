@@ -18,6 +18,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import org.midorinext.android.ui.nav.MidoriNavHost
 import org.midorinext.android.ui.nav.NavDestination
+import org.midorinext.android.ui.nav.returnToBrowser
+import kotlinx.coroutines.flow.StateFlow
 import org.midorinext.android.ui.theme.MidoriBrowserTheme
 import org.midorinext.android.ui.theme.darkColorScheme
 import org.midorinext.android.ui.theme.lightColorScheme
@@ -41,7 +43,10 @@ import org.midorinext.android.ui.extensions.ExtensionPrompt
 
 @Composable
 fun MidoriBrowserApp(
-    applicationViewModel: MidoriApplicationViewModel = hiltViewModel()
+    applicationViewModel: MidoriApplicationViewModel = hiltViewModel(),
+    showBrowser: StateFlow<Boolean>? = null,
+    pendingBrowserRequests: StateFlow<Int>? = null,
+    onBrowserShown: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val onboardingKey = stringResource(R.string.pref_key_show_onboarding)
@@ -69,6 +74,14 @@ fun MidoriBrowserApp(
     }
 
     val navController = rememberNavController()
+    val browserRequested = showBrowser?.collectAsStateWithLifecycle()?.value == true
+    val pendingRequests = pendingBrowserRequests?.collectAsStateWithLifecycle()?.value ?: 0
+    LaunchedEffect(browserRequested, showOnboarding) {
+        if (browserRequested && !showOnboarding) {
+            navController.returnToBrowser()
+            onBrowserShown()
+        }
+    }
     val currentDestination by navController.currentBackStackEntryAsState()
     val trayIsVisible = currentDestination?.destination?.route == NavDestination.Tabs.match
     val isFullScreen = browserUiState?.isFullScreen == true &&
@@ -134,6 +147,7 @@ fun MidoriBrowserApp(
                 },
             ) { scaffoldPadding ->
                 MidoriNavHost(
+                    allowSafetyTab = pendingRequests == 0,
                     navController = navController,
                     appViewModel = applicationViewModel,
                     onTabsPrivacyChanged = { trayPrivacy = it },

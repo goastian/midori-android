@@ -209,7 +209,7 @@ internal fun collectionLabel(name: String): Int = when (name) {
     "bookmarks" -> R.string.sync_bookmarks; "history" -> R.string.sync_history; "passwords" -> R.string.sync_passwords
     "credit-cards" -> R.string.sync_cards; "addresses" -> R.string.sync_addresses; else -> R.string.sync_forms
 }
-private fun syncError(code: String): Int = when {
+internal fun syncError(code: String): Int = when {
     code == "browser_login_upgrade_required" -> R.string.sync_login_upgrade_required
     code == "login_cancelled" -> R.string.sync_login_cancelled
     code == "invalid_pairing_qr" -> R.string.sync_invalid_qr

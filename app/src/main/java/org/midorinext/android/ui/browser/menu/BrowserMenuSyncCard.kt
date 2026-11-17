@@ -19,6 +19,7 @@ import dagger.hilt.android.EntryPointAccessors
 import org.midorinext.android.R
 import org.midorinext.android.sync.SyncUiState
 import org.midorinext.android.sync.SyncWorkerEntryPoint
+import org.midorinext.android.sync.syncError
 
 @Composable
 internal fun BrowserMenuSyncCard(onClick: () -> Unit) {
@@ -65,8 +66,16 @@ internal fun BrowserMenuAccountCard(state: SyncUiState, onClick: () -> Unit) {
             )
             Text(
                 text = when {
+                    state.error != null -> stringResource(syncError(state.error))
                     !state.connected -> stringResource(R.string.sync_sign_in_authentik)
+                    state.phase == "keys_required" -> stringResource(R.string.sync_create_keys)
+                    state.phase == "recovery_required" -> stringResource(R.string.sync_unlock)
+                    state.phase == "backup_required" -> stringResource(R.string.sync_backup_summary)
                     state.phase != "ready" -> stringResource(R.string.sync_account_connecting)
+                    state.conflicts > 0 -> stringResource(R.string.sync_conflicts, state.conflicts)
+                    state.busy -> stringResource(R.string.sync_account_connecting)
+                    state.pending > 0 -> stringResource(R.string.sync_pending_count, state.pending)
+                    state.lastSync == 0L -> stringResource(R.string.sync_pending)
                     else -> stringResource(R.string.sync_on)
                 },
                 modifier = Modifier.testTag("browser_menu_sync_status"),

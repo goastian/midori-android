@@ -17,13 +17,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
@@ -253,19 +255,17 @@ fun ToolbarSearchSelector(toolbarState: BrowserToolbarState) {
 }
 
 // TODO move this elsewhere
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun KeyboardObserver(
     toolbarState: ToolbarState
 ) {
-    val activity = LocalContext.current.activity
-    DisposableEffect(activity) {
-        activity?.registerOnKeyboardHiddenCallback {
-            if (toolbarState.hasFocus) {
-                toolbarState.updateFocus(false)
-            }
+    val visible = WindowInsets.isImeVisible
+    var wasVisible by remember(toolbarState) { mutableStateOf(false) }
+    LaunchedEffect(visible, toolbarState) {
+        if (wasVisible && !visible) {
+            toolbarState.updateFocus(false)
         }
-        onDispose {
-            activity?.unregisterOnKeyboardHiddenCallback()
-        }
+        wasVisible = visible
     }
 }

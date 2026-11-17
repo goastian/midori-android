@@ -721,22 +721,25 @@ class BrowserScreenViewModel @Inject constructor(
 
     fun isNewTabUrl(url: String?): Boolean = isNativeHomeUrl(url) || legacyHomeMigration.isLegacyUrl(url)
 
-    private var safetyTabOpening = false
+    suspend fun openSafetyTabIfNeeded() {
+        val preferences = appPreferencesRepository.flow.first()
+        val state = store.state
+        if (!state.restoreComplete || state.selectedTab != null) return
 
-    fun openSafetyTabIfNeeded() {
-        if (!store.state.restoreComplete || store.state.tabs.isNotEmpty() || safetyTabOpening) {
-            return
+        toolbarState.updateFocus(false)
+        val normalTab = state.tabs.filterNot { it.content.private }
+            .maxByOrNull { maxOf(it.lastAccess, it.createdAt) }
+        if (normalTab != null) {
+            tabsUseCases.selectTab(normalTab.id)
+        } else {
+            tabsUseCases.addTab(
+                org.midorinext.android.newtab.newTabUrl(preferences, private = false),
+                selectTab = true,
+                startLoading = false,
+                private = false,
+            )
         }
-
-        safetyTabOpening = true
-        viewModelScope.launch {
-            try {
-                toolbarState.updateFocus(false)
-                MidoriUseCases.openMidoriPage(onlyIfEmpty = true).join()
-            } finally {
-                safetyTabOpening = false
-            }
-        }
+        store.flow().first { it.selectedTab != null }
     }
 
     fun updateShowFindInPage(show: Boolean) {

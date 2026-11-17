@@ -15,6 +15,10 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalFocusManager
@@ -62,7 +66,8 @@ fun BrowserScreen(
     navigateTo: (NavDestination) -> Unit,
     appViewModel: MidoriApplicationViewModel = hiltViewModel(),
     viewModel: BrowserScreenViewModel = hiltViewModel(),
-    openNewTab: TabOpening = TabOpening.NONE
+    openNewTab: TabOpening = TabOpening.NONE,
+    allowSafetyTab: Boolean = true,
 ) {
     val selectedTabSnapshot by viewModel.selectedTabSnapshot.collectAsStateWithLifecycle()
     val currentUrl = selectedTabSnapshot?.url
@@ -133,8 +138,8 @@ fun BrowserScreen(
             }
         }
     }
-    LaunchedEffect(restoreComplete, tabCount) {
-        if (restoreComplete && tabCount == 0) {
+    LaunchedEffect(restoreComplete, selectedTabSnapshot?.id, allowSafetyTab) {
+        if (allowSafetyTab && restoreComplete && selectedTabSnapshot == null) {
             viewModel.openSafetyTabIfNeeded()
         }
     }
@@ -202,6 +207,8 @@ fun BrowserScreen(
             title = { Text(stringResource(R.string.native_blocker_title)) },
             text = {
                 Column {
+                    Text(stringResource(R.string.adblock_site_domain), style = MaterialTheme.typography.labelMedium)
+                    Text(currentUrl.orEmpty().toCleanHost(), style = MaterialTheme.typography.titleMedium)
                     Text(stringResource(R.string.native_blocker_blocked_count, nativeBlockerState.blockedCount))
                     BlockingLevel.entries.forEach { level ->
                         BlockingLevelRow(level, nativeBlockerState.level) {
@@ -439,10 +446,11 @@ fun ToolbarAction( // TODO rename ToolbarAction to SmallIconButton and move to g
     onClick: () -> Unit,
     onLongClick: (() -> Unit)? = null,
     enabled: Boolean = true,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .width(ToolbarActionWidth)
             .fillMaxHeight()
             .combinedClickable(
@@ -627,9 +635,21 @@ fun BrowserMenuButton(
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
     Box {
-        var showMenu by rememberSaveable { mutableStateOf(false) }
+        val selectedTab by viewModel.selectedTabSnapshot.collectAsStateWithLifecycle()
+        var showMenu by rememberSaveable(selectedTab?.id) { mutableStateOf(false) }
+        val menuFocus = remember { FocusRequester() }
+        val windowFocused = LocalWindowInfo.current.isWindowFocused
+        var restoreMenuFocus by remember(selectedTab?.id) { mutableStateOf(false) }
+        LaunchedEffect(showMenu, restoreMenuFocus, windowFocused) {
+            if (!showMenu && restoreMenuFocus && windowFocused) {
+                withFrameNanos { }
+                menuFocus.requestFocus()
+                restoreMenuFocus = false
+            }
+        }
 
-        ToolbarAction(onClick = {
+        ToolbarAction(modifier = Modifier.focusRequester(menuFocus).focusProperties { canFocus = true }
+            .testTag("browser_menu_button"), onClick = {
             viewModel.toolbarState.updateFocus(false)
             focusManager.clearFocus(force = true)
             keyboard?.hide()
@@ -644,7 +664,7 @@ fun BrowserMenuButton(
 
         BrowserMenu(
             expanded = showMenu,
-            onDismissRequest= { showMenu = false },
+            onDismissRequest= { showMenu = false; restoreMenuFocus = true },
             navigateTo = navigateTo,
             viewModel = viewModel,
             applicationViewModel = appViewModel

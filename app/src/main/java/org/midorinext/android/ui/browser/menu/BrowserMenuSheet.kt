@@ -94,6 +94,12 @@ internal fun BrowserMenuMainContent(
     BrowserMenuGroup {
         pageActions()
         BrowserMenuRow(
+            text = stringResource(R.string.adblock_settings_title),
+            icon = R.drawable.icons_lock,
+            onClick = { onNavigate(NavDestination.AdBlockSettings) },
+            modifier = Modifier.testTag("browser_menu_protection"),
+        )
+        BrowserMenuRow(
             text = stringResource(R.string.menu_midori_vpn),
             icon = R.drawable.icons_internet,
             enabled = vpnEnabled,

@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.browser.state.action.ContentAction
+import mozilla.components.browser.state.state.SessionState
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.tabs.TabsUseCases
@@ -64,6 +65,7 @@ class MidoriUseCases @Inject constructor(
             private: Boolean = false,
             selectIfExists: Boolean = false,
             onlyIfEmpty: Boolean = false,
+            source: SessionState.Source = SessionState.Source.Internal.None,
         ) = scope.launch {
             val preferences = appPreferencesRepository.flow.first()
             if (onlyIfEmpty && store.get().state.tabs.isNotEmpty()) return@launch
@@ -84,7 +86,9 @@ class MidoriUseCases @Inject constructor(
                     url,
                     selectTab = true,
                     startLoading = !usesLocalNewTab,
-                    private = private
+                    private = private,
+                    source = source,
+                    flags = if (source is SessionState.Source.External) EngineSession.LoadUrlFlags.external() else EngineSession.LoadUrlFlags.none(),
                 )
             }
         }

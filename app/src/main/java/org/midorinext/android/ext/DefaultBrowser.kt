@@ -19,7 +19,11 @@ fun Context.defaultBrowserStatus(): DefaultBrowserStatus =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         DefaultBrowserApi29.status(this)
     } else {
-        DefaultBrowserStatus()
+        DefaultBrowserStatus(isDefault = packageManager.resolveActivity(
+            Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://example.org"))
+                .addCategory(Intent.CATEGORY_BROWSABLE),
+            android.content.pm.PackageManager.MATCH_DEFAULT_ONLY,
+        )?.activityInfo?.packageName == packageName)
     }
 
 // Keep API 29 types out of Compose's remembered values and generated callbacks on older Android.

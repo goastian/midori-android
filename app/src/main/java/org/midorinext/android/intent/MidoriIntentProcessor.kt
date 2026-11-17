@@ -2,6 +2,9 @@ package org.midorinext.android.intent
 
 import android.app.SearchManager
 import android.content.Intent
+import kotlinx.coroutines.flow.first
+import mozilla.components.browser.state.store.BrowserStore
+import mozilla.components.lib.state.ext.flow
 import org.midorinext.android.usecases.MidoriUseCases
 import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.state.externalPackage
@@ -15,9 +18,10 @@ import mozilla.components.support.utils.WebURLFinder
 
 class MidoriIntentProcessor(
     private val tabsUseCases: TabsUseCases,
-    private val MidoriUseCases: MidoriUseCases
+    private val MidoriUseCases: MidoriUseCases,
+    private val store: BrowserStore,
 ) {
-    private fun processViewIntent(intent: SafeIntent): Boolean {
+    private suspend fun processViewIntent(intent: SafeIntent): Boolean {
         val url = intent.dataString
 
         return if (url.isNullOrEmpty()) {
@@ -28,7 +32,7 @@ class MidoriIntentProcessor(
         }
     }
 
-    private fun processSendIntent(intent: SafeIntent): Boolean {
+    private suspend fun processSendIntent(intent: SafeIntent): Boolean {
         val extraText = intent.getStringExtra(Intent.EXTRA_TEXT)
 
         return if (extraText.isNullOrBlank()) {
@@ -39,13 +43,13 @@ class MidoriIntentProcessor(
             if (url != null) {
                 addNewTab(url, source)
             } else {
-                MidoriUseCases.openMidoriPage(search = extraText) // TODO should add external source
+                openSearch(extraText, source)
             }
             true
         }
     }
 
-    private fun processSearchIntent(intent: SafeIntent): Boolean {
+    private suspend fun processSearchIntent(intent: SafeIntent): Boolean {
         val searchQuery = intent.getStringExtra(SearchManager.QUERY)
 
         return if (searchQuery.isNullOrBlank()) {
@@ -55,22 +59,28 @@ class MidoriIntentProcessor(
             if (searchQuery.isUrl()) {
                 addNewTab(searchQuery, source)
             } else {
-                MidoriUseCases.openMidoriPage(search = searchQuery) // TODO should add external source
+                openSearch(searchQuery, source)
             }
             true
         }
     }
 
-    private fun addNewTab(url: String, source: SessionState.Source) {
-        tabsUseCases.addTab(
+    private suspend fun addNewTab(url: String, source: SessionState.Source) {
+        val id = tabsUseCases.addTab(
             url.toNormalizedUrl(),
             source = source,
             flags = EngineSession.LoadUrlFlags.external(),
         )
+        store.flow().first { state -> state.tabs.any { it.id == id } }
     }
 
-    fun process(intent: Intent): Boolean {
-        // TODO add WebAppIntentProcessor when supporting special display for pwas
+    private suspend fun openSearch(query: String, source: SessionState.Source.External) {
+        val existingIds = store.state.tabs.mapTo(hashSetOf()) { it.id }
+        MidoriUseCases.openMidoriPage(search = query, source = source).join()
+        store.flow().first { state -> state.tabs.any { it.id !in existingIds && it.source == source } }
+    }
+
+    suspend fun process(intent: Intent): Boolean {
         val safeIntent = SafeIntent(intent)
         return when (safeIntent.action) {
             WebAppIntentProcessor.ACTION_VIEW_PWA, OLD_SHORTCUTS_ACTION -> processViewIntent(safeIntent)
