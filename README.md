@@ -105,16 +105,15 @@ hash manifest. In the combined development checkout, verify the copy with:
 python3 scripts/vendor-sync-core.py --check
 ```
 
-Build the isolated device-test application without replacing a regular Midori
+Build the Debug device-test application without replacing a regular Midori
 installation:
 
 ```sh
-./gradlew :app:assembleOriginalPlaystoreSyncTest \
-  :app:assembleOriginalPlaystoreSyncTestAndroidTest \
-  -PsyncIntegration=true -Pplaystore_version_code=2026000200
+./gradlew :app:assembleOriginalPlaystoreDebug \
+  :app:assembleOriginalPlaystoreDebugAndroidTest \
+  -Pplaystore_version_code=2026000200
 ```
 
-Its application ID is `org.midorinext.android.synctest`. Physical interoperability
-tests require the Desktop checkout, a local Sync server on port 8000, and the
-Desktop `scripts/test-sync-android-live.py` runner. That runner resets only this
-isolated test application and uses a synthetic account.
+Its application ID is `org.midorinext.android.debug`. Use synthetic accounts for
+device tests and preserve any existing Debug profile. Do not add build types or
+product flavors without the owner's explicit authorization.
