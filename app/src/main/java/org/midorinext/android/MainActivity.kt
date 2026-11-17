@@ -9,6 +9,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import mozilla.components.browser.state.action.AppLifecycleAction
 import mozilla.components.feature.pwa.intent.WebAppIntentProcessor
 import mozilla.components.lib.state.ext.flow
@@ -25,6 +27,7 @@ class MainActivity : MidoriActivity() {
     private val pendingBrowserRequests = MutableStateFlow(0)
     private var browserIntentConsumed = false
     private var intentGeneration = 0L
+    private val intentMutex = Mutex()
     @Inject lateinit var notificationsDelegate: NotificationsDelegate
     @Inject lateinit var backgroundPlaybackFeature: BackgroundPlaybackFeature
 
@@ -77,25 +80,27 @@ class MainActivity : MidoriActivity() {
         pendingBrowserRequests.value += 1
         lifecycleScope.launch {
             try {
-                val app = application as MidoriApplication
-                app.store.get().flow().first { it.restoreComplete }
-                if (request.action == WebAppIntentProcessor.ACTION_VIEW_PWA && request.dataString != null) {
-                    startActivity(Intent(this@MainActivity, WebAppActivity::class.java).apply {
-                        action = Intent.ACTION_VIEW
-                        data = request.data
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
-                    })
-                } else {
-                    val processor = MidoriIntentProcessor(app.tabsUseCases.get(), app.MidoriUseCases.get(), app.store.get())
-                    if (processor.process(request)) showBrowser.value = true
-                }
-                if (generation == intentGeneration) {
-                    browserIntentConsumed = true
-                    setIntent(Intent(this@MainActivity, MainActivity::class.java).apply {
-                        action = Intent.ACTION_MAIN
-                        addCategory(Intent.CATEGORY_LAUNCHER)
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                    })
+                intentMutex.withLock {
+                    val app = application as MidoriApplication
+                    app.store.get().flow().first { it.restoreComplete }
+                    if (request.action == WebAppIntentProcessor.ACTION_VIEW_PWA && request.dataString != null) {
+                        startActivity(Intent(this@MainActivity, WebAppActivity::class.java).apply {
+                            action = Intent.ACTION_VIEW
+                            data = request.data
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
+                        })
+                    } else {
+                        val processor = MidoriIntentProcessor(app.tabsUseCases.get(), app.MidoriUseCases.get(), app.store.get())
+                        if (processor.process(request)) showBrowser.value = true
+                    }
+                    if (generation == intentGeneration) {
+                        browserIntentConsumed = true
+                        setIntent(Intent(this@MainActivity, MainActivity::class.java).apply {
+                            action = Intent.ACTION_MAIN
+                            addCategory(Intent.CATEGORY_LAUNCHER)
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                        })
+                    }
                 }
             } finally {
                 pendingBrowserRequests.value -= 1

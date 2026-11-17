@@ -174,7 +174,6 @@ fun BrowserScreen(
         }
     } */
 
-    KeyboardObserver(toolbarState = viewModel.toolbarState)
     ShakeToSummarizeEffect(enabled = appPrefs.shakeToSummarizeEnabled) {
         viewModel.summarizeCurrentPage(
             onResult = { summary ->
@@ -406,7 +405,7 @@ fun BrowserScreen(
     }
 
     // Register after the engine session handler so Back exits Reader View before navigating away.
-    BackHandler(enabled = readerModeStatus.isActive && !isFullScreen) {
+    BackHandler(enabled = readerModeStatus.isActive && !isFullScreen && !viewModel.toolbarState.hasFocus) {
         readerViewFeature?.onBackPressed()
     }
 }

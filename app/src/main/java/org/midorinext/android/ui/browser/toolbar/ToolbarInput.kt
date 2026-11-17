@@ -17,9 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -40,6 +37,10 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -73,6 +74,8 @@ fun ToolbarInput(
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     val activity = context.activity
+    val view = LocalView.current
+    val keyboard = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
     val voiceSearchEnabled by toolbarState.voiceSearchEnabled.collectAsStateWithLifecycle()
     var showVoiceUnavailable by remember { mutableStateOf(false) }
@@ -86,9 +89,13 @@ fun ToolbarInput(
         }
     }
     BackHandler(toolbarState.hasFocus) {
-        toolbarState.updateFocus(false)
-        focusManager.clearFocus()
-        activity?.forceHideKeyboard()
+        if (ViewCompat.getRootWindowInsets(view)?.isVisible(WindowInsetsCompat.Type.ime()) == true) {
+            keyboard?.hide()
+        } else {
+            toolbarState.updateFocus(false)
+            focusManager.clearFocus()
+            activity?.forceHideKeyboard()
+        }
     }
     var wasEditing by remember { mutableStateOf(false) }
     LaunchedEffect(toolbarState.hasFocus) {
@@ -254,18 +261,3 @@ fun ToolbarSearchSelector(toolbarState: BrowserToolbarState) {
     }
 }
 
-// TODO move this elsewhere
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun KeyboardObserver(
-    toolbarState: ToolbarState
-) {
-    val visible = WindowInsets.isImeVisible
-    var wasVisible by remember(toolbarState) { mutableStateOf(false) }
-    LaunchedEffect(visible, toolbarState) {
-        if (wasVisible && !visible) {
-            toolbarState.updateFocus(false)
-        }
-        wasVisible = visible
-    }
-}

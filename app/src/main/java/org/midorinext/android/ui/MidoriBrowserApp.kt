@@ -123,6 +123,7 @@ fun MidoriBrowserApp(
         if (showOnboarding) {
             val searchEngine = SearchEngines.resolve(preferences.searchEngine)
             MidoriOnboarding(
+                toolbarPosition = resolvedToolbarPosition,
                 onToolbarPositionSelected = applicationViewModel::updateToolbarPosition,
                 blockingLevel = adBlockConfiguration.level,
                 onBlockingLevelSelected = applicationViewModel::updateBlockingLevel,

@@ -114,6 +114,7 @@ private enum class ActionOutcome { IDLE, REQUESTED, SUCCEEDED, NOT_COMPLETED, UN
 
 @Composable
 fun MidoriOnboarding(
+    toolbarPosition: ToolbarPosition,
     onToolbarPositionSelected: (ToolbarPosition) -> Unit,
     blockingLevel: BlockingLevel,
     onBlockingLevelSelected: (BlockingLevel) -> Unit,
@@ -136,7 +137,7 @@ fun MidoriOnboarding(
     var defaultOutcome by rememberSaveable { mutableStateOf(ActionOutcome.IDLE) }
     var widgetOutcome by rememberSaveable { mutableStateOf(ActionOutcome.IDLE) }
     var legalUrl by rememberSaveable { mutableStateOf<String?>(null) }
-    var toolbarAtBottom by rememberSaveable { mutableStateOf(false) }
+    val toolbarAtBottom = toolbarPosition == ToolbarPosition.BOTTOM
     val reduceMotion = reduceMotionRequested()
     val layoutDirection = LocalLayoutDirection.current
 
@@ -252,7 +253,6 @@ fun MidoriOnboarding(
                 3 -> ToolbarPage(
                     toolbarAtBottom = toolbarAtBottom,
                     onToolbarPositionSelected = { selectedBottom ->
-                        toolbarAtBottom = selectedBottom
                         onToolbarPositionSelected(
                             if (selectedBottom) ToolbarPosition.BOTTOM else ToolbarPosition.TOP
                         )
