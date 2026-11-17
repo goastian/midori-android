@@ -19,6 +19,7 @@ import mozilla.components.lib.state.Store
 class HomeContinuationMiddleware @Inject constructor() : Middleware<BrowserState, BrowserAction> {
     private val revision = MutableStateFlow(0L)
     val changes = revision.asStateFlow()
+    internal val consumerCount get() = revision.subscriptionCount.value
 
     override fun invoke(store: Store<BrowserState, BrowserAction>, next: (BrowserAction) -> Unit, action: BrowserAction) {
         next(action)

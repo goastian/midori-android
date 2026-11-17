@@ -2,6 +2,7 @@ package org.midorinext.android
 
 import android.view.View
 import android.view.ViewGroup
+import android.os.SystemClock
 import androidx.core.graphics.ColorUtils
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
@@ -12,6 +13,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import java.io.File
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
 import mozilla.components.browser.state.action.TabListAction
 import mozilla.components.browser.state.action.LastAccessAction
@@ -26,6 +29,7 @@ import org.midorinext.android.newtab.*
 import org.midorinext.android.newtab.migration.LEGACY_NEW_TAB_URL
 import org.midorinext.android.preferences.app.*
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.withTimeout
 import org.midorinext.android.ui.browser.home.NativeHomeViewModel
 import org.midorinext.android.ui.browser.BrowserScreenViewModel
@@ -36,6 +40,9 @@ import java.net.ServerSocket
 import java.util.concurrent.Executors
 import java.io.IOException
 import kotlinx.coroutines.delay
+import mozilla.components.browser.state.action.ContentAction
+import org.json.JSONArray
+import org.json.JSONObject
 
 @RunWith(AndroidJUnit4::class)
 class NativeHomeDeviceTest {
@@ -45,6 +52,7 @@ class NativeHomeDeviceTest {
     private lateinit var scenario: ActivityScenario<MainActivity>
     private lateinit var preferences: AppPreferences
     private val fixtures = mutableListOf<String>()
+    private var originalTabIds = emptyList<String>()
     private var originalSelection: String? = null
     private var onboardingEnabled = false
     private var homeId = ""
@@ -76,6 +84,7 @@ class NativeHomeDeviceTest {
         }
         compose.waitForIdle()
         originalSelection = app.store.get().state.selectedTabId
+        originalTabIds = app.store.get().state.tabs.map { it.id }
         app.historyRepository.get().apply {
             recordVisit(historyUrl, PageVisit(VisitType.LINK))
             recordObservation(historyUrl, PageObservation(title = "Native home history fixture"))
@@ -104,6 +113,11 @@ class NativeHomeDeviceTest {
             originalSelection?.let { app.store.get().dispatch(TabListAction.SelectTabAction(it)) }
             fixtures.forEach { app.store.get().dispatch(TabListAction.RemoveTabAction(it)) }
         }
+        assertEquals("Home checks must preserve the original tabs", originalTabIds, app.store.get().state.tabs.map { it.id })
+        assertTrue("Persist fixture cleanup before instrumentation exits", app.sessionStorage.get().save(app.store.get().state))
+        File(app.cacheDir, "p10-fixture-cleanup-results.json").writeText(JSONObject()
+            .put("original_tabs", originalTabIds.size).put("remaining_tabs", app.store.get().state.tabs.size)
+            .put("original_ids_preserved", true).put("cleanup_saved", true).toString(2))
         app.historyRepository.get().deleteVisitsFor(historyUrl)
         app.historyRepository.get().deleteVisitsFor("https://example.org/native-shortcut")
         app.appPreferencesRepository.get().apply {
@@ -294,6 +308,99 @@ class NativeHomeDeviceTest {
         }
         compose.onNodeWithText("Native home history fixture").assertDoesNotExist()
         compose.onNodeWithText("Native home continuation fixture").assertIsDisplayed()
+    }
+
+    @Test
+    fun hiddenHomeStopsWorkAcrossProgressBurstsAndReturnsWithCurrentData(): Unit = runBlocking {
+        val updates = continuationUpdates()
+        val recentConsumers = recentVisitConsumers()
+        val store = app.store.get()
+        val continuationId = fixtures.first { it != homeId }
+        app.appPreferencesRepository.get().apply {
+            updateHomeSection(HomeSection.SHORTCUTS, false)
+            updateHomeSection(HomeSection.PRIVACY, false)
+            updateHomeSection(HomeSection.STORIES, false)
+        }
+        compose.waitUntil(10_000) { updates.consumerCount > 0 && recentConsumers.value > 0 }
+        val visibleRevision = updates.changes.value
+        repeat(1_000) { store.dispatch(ContentAction.UpdateProgressAction(continuationId, it % 101)) }
+        store.dispatch(ContentAction.UpdateProgressAction(continuationId, 100))
+        assertEquals("Visible Home must ignore progress-only updates", visibleRevision, updates.changes.value)
+
+        var hiddenTab = ""
+        instrumentation.runOnMainSync {
+            hiddenTab = app.tabsUseCases.get().addTab("about:blank", selectTab = true, startLoading = false)
+            fixtures += hiddenTab
+        }
+        val samples = JSONArray()
+        repeat(12) { cycle ->
+            compose.waitUntil(10_000) {
+                compose.onAllNodesWithTag("native_home").fetchSemanticsNodes().isEmpty() &&
+                    updates.consumerCount == 0 && recentConsumers.value == 0
+            }
+            val hiddenRevision = updates.changes.value
+            repeat(1_000) { store.dispatch(ContentAction.UpdateProgressAction(continuationId, it % 101)) }
+            val title = "Home work cycle $cycle"
+            store.dispatch(ContentAction.UpdateTitleAction(continuationId, title))
+            store.dispatch(LastAccessAction.UpdateLastAccessAction(continuationId))
+            assertEquals("Hidden Home must remain unsubscribed", 0, updates.consumerCount)
+            assertEquals("Hidden visits must remain unsubscribed", 0, recentConsumers.value)
+            assertEquals("Hidden Home must not process revisions", hiddenRevision, updates.changes.value)
+            if (cycle == 11) app.historyRepository.get().deleteVisitsFor(historyUrl)
+            val started = SystemClock.elapsedRealtime()
+            store.dispatch(TabListAction.SelectTabAction(homeId))
+            compose.waitUntil(10_000) {
+                compose.onAllNodesWithText(title).fetchSemanticsNodes().isNotEmpty() &&
+                    updates.consumerCount > 0 && recentConsumers.value > 0
+            }
+            if (cycle == 11) {
+                compose.waitUntil(10_000) {
+                    compose.onAllNodesWithText("Native home history fixture").fetchSemanticsNodes().isEmpty()
+                }
+            } else compose.onNodeWithText("Native home history fixture").assertIsDisplayed()
+            samples.put(SystemClock.elapsedRealtime() - started)
+            if (cycle < 11) store.dispatch(TabListAction.SelectTabAction(hiddenTab))
+        }
+        File(app.cacheDir, "p10-home-work-results.json").writeText(JSONObject()
+            .put("cycles", 12).put("progress_actions", 13_001)
+            .put("hidden_recent_subscriptions", 0)
+            .put("hidden_revision_updates", 0).put("return_ms", samples)
+            .put("deleted_history_restored", false).toString(2))
+    }
+
+    @Test
+    fun homeConsumersStopInBackgroundAndRecoverAfterRecreation(): Unit = runBlocking {
+        val updates = continuationUpdates()
+        val recentConsumers = recentVisitConsumers()
+        app.appPreferencesRepository.get().apply {
+            updateHomeSection(HomeSection.SHORTCUTS, false)
+            updateHomeSection(HomeSection.PRIVACY, false)
+            updateHomeSection(HomeSection.STORIES, false)
+        }
+        compose.waitUntil(10_000) { updates.consumerCount > 0 && recentConsumers.value > 0 }
+        val samples = JSONArray()
+        repeat(3) {
+            scenario.moveToState(Lifecycle.State.CREATED)
+            assertEquals(Lifecycle.State.CREATED, scenario.state)
+            compose.waitUntil(10_000) { updates.consumerCount == 0 && recentConsumers.value == 0 }
+            val revision = updates.changes.value
+            app.store.get().dispatch(ContentAction.UpdateProgressAction(fixtures.first(), 50))
+            assertEquals(revision, updates.changes.value)
+            samples.put(JSONObject().put("background_continuation_subscriptions", updates.consumerCount)
+                .put("background_recent_subscriptions", recentConsumers.value))
+            scenario.moveToState(Lifecycle.State.RESUMED)
+            compose.waitUntil(10_000) {
+                updates.consumerCount > 0 && recentConsumers.value > 0 &&
+                    compose.onAllNodesWithText("Native home history fixture").fetchSemanticsNodes().isNotEmpty()
+            }
+            compose.onNodeWithText("Native home history fixture").assertIsDisplayed()
+            scenario.recreate()
+            compose.waitUntil(10_000) {
+                compose.onAllNodesWithText("Native home continuation fixture").fetchSemanticsNodes().isNotEmpty()
+            }
+            compose.onNodeWithText("Native home history fixture").assertIsDisplayed()
+        }
+        File(app.cacheDir, "p10-home-lifecycle-results.json").writeText(samples.toString(2))
     }
 
     @Test
@@ -633,6 +740,20 @@ class NativeHomeDeviceTest {
         } finally {
             if (amazon == null) app.appPreferencesRepository.get().deleteHomeShortcut("native-home-amazon-fixture")
         }
+    }
+
+    private fun continuationUpdates(): HomeContinuationMiddleware {
+        lateinit var model: NativeHomeViewModel
+        scenario.onActivity { model = ViewModelProvider(it)[NativeHomeViewModel::class.java] }
+        return NativeHomeViewModel::class.java.getDeclaredField("continuationUpdates")
+            .apply { isAccessible = true }.get(model) as HomeContinuationMiddleware
+    }
+
+    private fun recentVisitConsumers(): StateFlow<Int> {
+        val repository = app.historyRepository.get()
+        val version = repository.javaClass.getDeclaredField("historyDeletionVersion")
+            .apply { isAccessible = true }.get(repository) as MutableStateFlow<*>
+        return version.subscriptionCount
     }
 
     private fun assertNoWebSurface() {
