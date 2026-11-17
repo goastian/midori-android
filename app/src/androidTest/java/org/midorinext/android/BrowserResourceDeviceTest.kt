@@ -26,13 +26,14 @@ class BrowserResourceDeviceTest {
     private val store get() = app.store.get()
     private val expectedLimit = InstrumentationRegistry.getArguments().getString("residentLimit", "5").toInt()
     private val samples = JSONArray()
+    private val privateFixtures = InstrumentationRegistry.getArguments().getString("privateTabs", "false").toBoolean()
 
     @Before fun initializeBrowser() {
         instrumentation.runOnMainSync { app.initializeBrowser("browser_resource_test") }
     }
 
     @Test
-    fun privateFixturesKeepTheirStateWhileResidentSessionsStayBounded() {
+    fun fixturesKeepTheirStateWhileResidentSessionsStayBounded() {
         val preferences = androidx.preference.PreferenceManager.getDefaultSharedPreferences(app)
         val key = app.getString(R.string.pref_key_show_onboarding)
         val onboarding = preferences.getBoolean(key, true)
@@ -60,7 +61,7 @@ class BrowserResourceDeviceTest {
                         SystemClock.sleep(3_000)
                         if (expectedLimit > 0) await("resident budget") { residentCount() <= expectedLimit }
                         assertEquals(originalTabs.size + fixtures.size, store.state.tabs.size)
-                        assertTrue(store.state.tabs.filter { it.id in fixtures }.all { it.content.private })
+                        assertTrue(store.state.tabs.filter { it.id in fixtures }.all { it.content.private == privateFixtures })
                         sample(fixtures.size)
                     }
                 }
@@ -112,11 +113,12 @@ class BrowserResourceDeviceTest {
                     samples.put(JSONObject().put("history_restored", true))
                 }
             } finally {
-                store.dispatch(TabListAction.RemoveTabsAction(fixtures))
                 originalSelected?.let { store.dispatch(TabListAction.SelectTabAction(it)) }
+                store.dispatch(TabListAction.RemoveTabsAction(fixtures))
                 await("fixture cleanup") { store.state.tabs.none { it.id in fixtures } && store.state.selectedTabId == originalSelected }
                 assertEquals(originalTabs.map { it.id }, store.state.tabs.map { it.id })
-                File(app.cacheDir, "browser-resource-results.json").writeText(samples.toString(2))
+                kotlinx.coroutines.runBlocking { assertTrue(app.sessionStorage.get().save(store.state)) }
+                File(app.cacheDir, "browser-resource-results-${if (privateFixtures) "private" else "normal"}.json").writeText(samples.toString(2))
             }
         } finally {
             preferences.edit().putBoolean(key, onboarding).commit()
@@ -126,7 +128,7 @@ class BrowserResourceDeviceTest {
     private fun addFixture(number: Int, fixtures: MutableList<String>): String {
         var id = ""
         instrumentation.runOnMainSync {
-            id = app.tabsUseCases.get().addTab(url = fixtureUrl(number), private = true, selectTab = true)
+            id = app.tabsUseCases.get().addTab(url = fixtureUrl(number), private = privateFixtures, selectTab = true)
         }
         fixtures.add(id)
         await("fixture $number") {

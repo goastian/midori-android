@@ -60,6 +60,7 @@ class CompositorLifecycleDeviceTest {
     private var originalOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     private var onboardingEnabled = false
     private var resultName = "compositor-lifecycle"
+    private val privateTabs = InstrumentationRegistry.getArguments().getString("privateTabs", "false").toBoolean()
 
     @Before
     fun prepare(): Unit = runBlocking {
@@ -93,6 +94,7 @@ class CompositorLifecycleDeviceTest {
         onboardingEnabled = shared.getBoolean(key, true)
         shared.edit().putBoolean(key, false).commit()
         app.appPreferencesRepository.get().updateHideToolbarOnScroll(true)
+        app.appPreferencesRepository.get().updateCloseTabsOnExit(false)
         scenario = ActivityScenario.launch(MainActivity::class.java)
         scenario.onActivity {
             activity = it
@@ -102,7 +104,7 @@ class CompositorLifecycleDeviceTest {
         originalSelection = app.store.get().state.selectedTabId
         instrumentation.runOnMainSync {
             fixtureId = app.tabsUseCases.get().addTab(
-                "http://127.0.0.1:${server.localPort}/compositor", private = true, selectTab = true,
+                "http://127.0.0.1:${server.localPort}/compositor", private = privateTabs, selectTab = true,
             )
         }
         compose.waitUntil(20_000) { pageFrame() > 0 }
@@ -120,6 +122,8 @@ class CompositorLifecycleDeviceTest {
                     originalSelection?.let { app.store.get().dispatch(TabListAction.SelectTabAction(it)) }
                     fixtureId?.let { app.store.get().dispatch(TabListAction.RemoveTabAction(it)) }
                 }
+                compose.waitUntil(10_000) { app.store.get().state.tabs.none { it.id == fixtureId } }
+                assertTrue(app.sessionStorage.get().save(app.store.get().state))
             }
             if (::preferences.isInitialized) {
                 app.appPreferencesRepository.get().updateToolbarPosition(preferences.toolbarPosition)
@@ -129,6 +133,7 @@ class CompositorLifecycleDeviceTest {
                 .putBoolean(app.getString(R.string.pref_key_show_onboarding), onboardingEnabled).commit()
         } finally {
             if (::scenario.isInitialized) scenario.close()
+            if (::preferences.isInitialized) app.appPreferencesRepository.get().updateCloseTabsOnExit(preferences.closeTabsOnExit)
             server.close()
             executor.shutdownNow()
         }
@@ -136,7 +141,7 @@ class CompositorLifecycleDeviceTest {
 
     @Test
     fun addressKeyboardAndFindInPageKeepRenderingAtEitherToolbarPosition(): Unit = runBlocking {
-        resultName = "compositor-keyboard"
+        resultName = "compositor-keyboard-${if (privateTabs) "private" else "normal"}"
         for (position in listOf(ToolbarPosition.TOP, ToolbarPosition.BOTTOM)) {
             app.appPreferencesRepository.get().updateToolbarPosition(position)
             compose.waitForIdle()
@@ -169,7 +174,7 @@ class CompositorLifecycleDeviceTest {
 
     @Test
     fun backgroundAndRotationResumeTheCompositor(): Unit = runBlocking {
-        resultName = "compositor-window-lifecycle"
+        resultName = "compositor-window-lifecycle-${if (privateTabs) "private" else "normal"}"
         for (position in listOf(ToolbarPosition.TOP, ToolbarPosition.BOTTOM)) {
             app.appPreferencesRepository.get().updateToolbarPosition(position)
             compose.waitForIdle()

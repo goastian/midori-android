@@ -3,6 +3,7 @@ package org.midorinext.android.mozac
 import org.midorinext.android.diagnostics.ScenarioMetrics
 import org.midorinext.android.diagnostics.ScenarioMetrics.Event
 import java.lang.ref.WeakReference
+import java.util.concurrent.ConcurrentHashMap
 import android.os.SystemClock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +41,8 @@ class TabResourceMiddleware(
     private var registered = false
     private var closed = false
     private var trimJob: Job? = null
+    private var mediaReleaseJob: Job? = null
+    private var mediaReleaseDeadline: Long? = null
     private var previousSelectedId: String? = null
     private var diagnosticState: BrowserState? = null
     private val priorities = mutableMapOf<EngineSession, EngineSession.SessionPriority>()
@@ -47,6 +50,8 @@ class TabResourceMiddleware(
     private val flushingState = mutableMapOf<String, EngineSession>()
     private val operationDeadlines = mutableMapOf<String, Long>()
     private val retryAfter = mutableMapOf<String, Long>()
+    private data class PausedSession(val session: EngineSession, val deadline: Long)
+    private val pausedSessions = ConcurrentHashMap<String, PausedSession>()
 
     override fun invoke(
         store: Store<BrowserState, BrowserAction>,
@@ -67,7 +72,7 @@ class TabResourceMiddleware(
             return
         }
         if (action is EngineAction.SuspendEngineSessionAction &&
-            store.state.tabs.any { it.id == action.tabId && it.isProtected(store.state.selectedTabId) }
+            store.state.tabs.any { it.id == action.tabId && it.isResourceProtected(store.state.selectedTabId) }
         ) return
         val initial = if (ScenarioMetrics.enabled) store.state else null
         next(action)
@@ -113,7 +118,8 @@ class TabResourceMiddleware(
                                     if (tab.content.recordingDevices.isNotEmpty()) add("capture")
                                     if (tab.content.promptRequests.isNotEmpty()) add("prompt")
                                     if (tab.content.permissionRequestsList.isNotEmpty() || tab.content.appPermissionRequestsList.isNotEmpty()) add("permission")
-                                    if (tab.mediaSessionState?.playbackState?.let { it != MediaSession.PlaybackState.UNKNOWN } == true) add("media")
+                                    if (tab.mediaSessionState?.playbackState == MediaSession.PlaybackState.PLAYING) add("media")
+                                    if (tab.hasPauseGrace()) add("media_pause_grace")
                                     if (tab.id in checkingForms) add("form_check_pending")
                                     if (tab.id in flushingState) add("state_flush_pending")
                                 })
@@ -122,11 +128,20 @@ class TabResourceMiddleware(
                 }
                 budget.register(this@TabResourceMiddleware) { scheduleTrim(store) }
             }
-            budget.update(this@TabResourceMiddleware, store.state.tabs.filter { it.engineState.engineSession != null }.map {
-                ResidentTab(it.id, maxOf(it.lastAccess, it.createdAt), it.isProtected(store.state.selectedTabId))
-            })
             val state = store.state
             val tabsById = state.tabs.associateBy { it.id }
+            pausedSessions.entries.removeAll { (id, paused) ->
+                val tab = tabsById[id]
+                tab?.engineState?.engineSession !== paused.session ||
+                    tab?.mediaSessionState?.playbackState != MediaSession.PlaybackState.PAUSED
+            }
+            state.tabs.forEach { tab ->
+                val session = tab.engineState.engineSession
+                if (session != null && tab.mediaSessionState?.playbackState == MediaSession.PlaybackState.PAUSED) {
+                    pausedSessions.getOrPut(tab.id) { PausedSession(session, now() + PAUSED_MEDIA_GRACE_MS) }
+                }
+            }
+            publishBudget(state)
             val liveSessions = state.tabs.mapNotNull { it.engineState.engineSession }.toSet()
             priorities.keys.retainAll(liveSessions)
             checkingForms.entries.removeAll { (id, session) ->
@@ -177,6 +192,39 @@ class TabResourceMiddleware(
             }
             updatePriorities(store.state)
             scheduleTrim(store)
+            scheduleMediaRelease(store)
+        }
+    }
+
+    private fun TabSessionState.hasPauseGrace(): Boolean {
+        if (mediaSessionState?.playbackState != MediaSession.PlaybackState.PAUSED || engineState.engineSession == null) return false
+        val paused = pausedSessions[id]?.takeIf { it.session === engineState.engineSession }
+        return paused == null || paused.deadline > now()
+    }
+
+    private fun TabSessionState.isResourceProtected(selectedId: String?) = isProtected(selectedId, hasPauseGrace())
+
+    private fun publishBudget(state: BrowserState) {
+        budget.update(this, state.tabs.filter { it.engineState.engineSession != null }.map {
+            ResidentTab(it.id, maxOf(it.lastAccess, it.createdAt), it.isResourceProtected(state.selectedTabId))
+        })
+    }
+
+    private fun scheduleMediaRelease(store: Store<BrowserState, BrowserAction>) {
+        val deadline = pausedSessions.values.map { it.deadline }.filter { it > now() }.minOrNull()
+        if (deadline == mediaReleaseDeadline && mediaReleaseJob?.isActive == true) return
+        mediaReleaseJob?.cancel()
+        mediaReleaseDeadline = deadline
+        mediaReleaseJob = deadline?.let {
+            scope.launch {
+                delay((it - now()).coerceAtLeast(1))
+                if (closed) return@launch
+                mediaReleaseJob = null
+                mediaReleaseDeadline = null
+                publishBudget(store.state)
+                scheduleTrim(store)
+                scheduleMediaRelease(store)
+            }
         }
     }
 
@@ -233,6 +281,9 @@ class TabResourceMiddleware(
     fun close() {
         closed = true
         trimJob?.cancel()
+        mediaReleaseJob?.cancel()
+        mediaReleaseJob = null
+        mediaReleaseDeadline = null
         budget.unregister(this)
         ScenarioMetrics.remove(this)
         registered = false
@@ -242,14 +293,19 @@ class TabResourceMiddleware(
         flushingState.clear()
         operationDeadlines.clear()
         retryAfter.clear()
+        pausedSessions.clear()
     }
 
     private fun candidates(state: BrowserState): List<String> {
         val eligible = state.tabs.asSequence().filter {
-            it.engineState.engineSession != null && !it.isProtected(state.selectedTabId) &&
+            it.engineState.engineSession != null && !it.isResourceProtected(state.selectedTabId) &&
                 (retryAfter[it.id] ?: 0) <= now()
         }.map { it.id }.toSet()
         return budget.candidates(this).filter { it in eligible }
+    }
+
+    private companion object {
+        const val PAUSED_MEDIA_GRACE_MS = 5_000L
     }
 }
 
@@ -265,11 +321,12 @@ private fun BrowserAction.affectsTabResources(): Boolean = when (this) {
     else -> false
 }
 
-internal fun TabSessionState.isProtected(selectedId: String?): Boolean = id == selectedId ||
+internal fun TabSessionState.isProtected(selectedId: String?, pauseGrace: Boolean = false): Boolean = id == selectedId ||
     content.loading || content.hasFormData || content.pictureInPictureEnabled ||
     content.recordingDevices.isNotEmpty() || content.promptRequests.isNotEmpty() ||
     content.permissionRequestsList.isNotEmpty() || content.appPermissionRequestsList.isNotEmpty() ||
-    mediaSessionState?.playbackState?.let { it != MediaSession.PlaybackState.UNKNOWN } == true
+    mediaSessionState?.playbackState == MediaSession.PlaybackState.PLAYING ||
+    (pauseGrace && mediaSessionState?.playbackState == MediaSession.PlaybackState.PAUSED)
 
 internal fun TabSessionState.needsHighPriority(selectedId: String?): Boolean = id == selectedId ||
     content.hasFormData || content.pictureInPictureEnabled || content.recordingDevices.isNotEmpty() ||

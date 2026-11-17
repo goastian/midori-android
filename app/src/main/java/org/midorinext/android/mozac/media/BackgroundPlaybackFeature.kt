@@ -100,7 +100,7 @@ class BackgroundPlaybackFeature(
         continuePlaybackAfterUiTransition()
         scheduleContinuation(SURFACE_TRANSITION_TIMEOUT_MS) {
             browserSurfaceHidden = false
-            releasePausedSessionIfUiIsVisible()
+            releaseInactiveSession()
         }
     }
 
@@ -125,7 +125,7 @@ class BackgroundPlaybackFeature(
 
     private fun keepSessionActive(session: EngineSession, delayMillis: Long) {
         mainHandler.postDelayed({
-            if (prioritizedSession === session) {
+            if (prioritizedSession === session && ownsSession(session)) {
                 GeckoBackgroundPlaybackController.keepActive(session)
             }
         }, delayMillis)
@@ -142,7 +142,7 @@ class BackgroundPlaybackFeature(
 
         BACKGROUND_CONTINUATION_DELAYS_MS.forEach { delayMillis ->
             scheduleContinuation(delayMillis) {
-                if (isTransitionRecoveryActive && prioritizedSession === session) {
+                if (isTransitionRecoveryActive && prioritizedSession === session && ownsSession(session)) {
                     GeckoBackgroundPlaybackController.keepActive(session)
                     controller.play()
                 }
@@ -171,12 +171,16 @@ class BackgroundPlaybackFeature(
             updateSessionPriority(playingMedia.session, playingMedia.controller)
         } else {
             playbackWasReportedActive = false
-            if (isTransitionRecoveryActive) {
+            if (prioritizedSession?.let { !ownsSession(it) } == true) {
+                cancelContinuationTasks()
+                updateSessionPriority(null, null)
+            } else if (isTransitionRecoveryActive) {
                 // The first play request is necessarily speculative: Gecko has not emitted its
                 // paused state yet. Trigger another one at the exact state change, which avoids
                 // waiting for the later retry (previously the source of a ~700 ms audible gap).
                 continuePlaybackAfterUiTransition()
-            } else if (!isPlaybackProtected) {
+            } else {
+                cancelContinuationTasks()
                 updateSessionPriority(null, null)
             }
         }
@@ -185,12 +189,13 @@ class BackgroundPlaybackFeature(
     private fun finishUiTransitionIfNeeded() {
         if (!isPlaybackProtected) {
             cancelContinuationTasks()
-            releasePausedSessionIfUiIsVisible()
+            releaseInactiveSession()
         }
     }
 
-    private fun releasePausedSessionIfUiIsVisible() {
-        if (!isPlaybackProtected && !playbackWasReportedActive) {
+    private fun releaseInactiveSession() {
+        if (!isTransitionRecoveryActive && !playbackWasReportedActive) {
+            cancelContinuationTasks()
             updateSessionPriority(null, null)
         }
     }
@@ -206,20 +211,27 @@ class BackgroundPlaybackFeature(
             transitionRecoveryDeadlineMillis,
             SystemClock.uptimeMillis() + TRANSITION_RECOVERY_WINDOW_MS,
         )
+        scheduleContinuation(TRANSITION_RECOVERY_WINDOW_MS) { releaseInactiveSession() }
     }
 
     private fun updateSessionPriority(
         session: EngineSession?,
         controller: MediaSession.Controller?,
     ) {
-        if (prioritizedSession === session) return
+        if (prioritizedSession === session) {
+            prioritizedController = controller
+            return
+        }
 
-        prioritizedSession?.updateSessionPriority(EngineSession.SessionPriority.DEFAULT)
+        prioritizedSession?.takeIf(::ownsSession)
+            ?.updateSessionPriority(EngineSession.SessionPriority.DEFAULT)
         session?.updateSessionPriority(EngineSession.SessionPriority.HIGH)
         prioritizedSession = session
         prioritizedController = controller
         reassertPlayingSession()
     }
+
+    private fun ownsSession(session: EngineSession) = store.state.tabs.any { it.engineState.engineSession === session }
 
     private companion object {
         const val SURFACE_RELEASE_SETTLE_DELAY_MS = 750L

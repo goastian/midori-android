@@ -19,6 +19,8 @@ class SavedStateIntentExtrasDeviceTest {
     fun customTabsExtrasDoNotBreakActivityStateSaving() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val intent = Intent(context, MainActivity::class.java).apply {
+            action = Intent.ACTION_MAIN
+            addCategory(Intent.CATEGORY_LAUNCHER)
             putExtras(
                 Bundle().apply {
                     putSparseParcelableArray(

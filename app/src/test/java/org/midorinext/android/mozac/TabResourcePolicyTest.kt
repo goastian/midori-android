@@ -56,14 +56,16 @@ class TabResourcePolicyTest {
     }
 
     @Test
-    fun bothPlayingAndPausedMediaAreProtected() {
+    fun onlyPlayingMediaOrAPausedSessionWithinItsGracePeriodAreProtected() {
         val controller = Proxy.newProxyInstance(
             MediaSession.Controller::class.java.classLoader,
             arrayOf(MediaSession.Controller::class.java),
         ) { _, method, _ -> error("Unexpected media operation: ${method.name}") } as MediaSession.Controller
         val tab = createTab("https://example.org").let { it.copy(content = it.content.copy(loading = false)) }
-        for (playback in listOf(MediaSession.PlaybackState.PLAYING, MediaSession.PlaybackState.PAUSED)) {
-            assertTrue(tab.copy(mediaSessionState = MediaSessionState(controller, playbackState = playback)).isProtected(null))
+        for (playback in MediaSession.PlaybackState.entries) {
+            val media = tab.copy(mediaSessionState = MediaSessionState(controller, playbackState = playback))
+            assertEquals(playback == MediaSession.PlaybackState.PLAYING, media.isProtected(null))
+            assertEquals(playback in listOf(MediaSession.PlaybackState.PLAYING, MediaSession.PlaybackState.PAUSED), media.isProtected(null, pauseGrace = true))
         }
         assertFalse(tab.copy(mediaSessionState = MediaSessionState(controller)).isProtected(null))
     }
