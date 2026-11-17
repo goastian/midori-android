@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_default_done">Midori आपका डिफ़ॉल्ट ब्राउज़र है।</string>
+    <string name="onboarding_widget_done">Midori विजेट आपकी होम स्क्रीन पर है।</string>
+    <string name="onboarding_action_not_completed">किसी बदलाव की पुष्टि नहीं हुई। फिर कोशिश करें या छोड़ें।</string>
+    <string name="onboarding_action_unavailable">यह कार्रवाई उपलब्ध नहीं है। आप यह चरण छोड़ सकते हैं।</string>
+    <string name="onboarding_action_requested">अनुरोध भेजा गया। पुष्टि की प्रतीक्षा है। आप यह चरण छोड़ सकते हैं।</string>
+    <string name="onboarding_terms_link">उपयोग की शर्तें</string>
+</resources>

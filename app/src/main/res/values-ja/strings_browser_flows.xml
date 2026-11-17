@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_default_done">Midori が既定のブラウザーです。</string>
+    <string name="onboarding_widget_done">Midori ウィジェットをホーム画面に追加しました。</string>
+    <string name="onboarding_action_not_completed">変更は確認されていません。再試行するかスキップしてください。</string>
+    <string name="onboarding_action_unavailable">この操作は利用できません。この手順はスキップできます。</string>
+    <string name="onboarding_action_requested">リクエストを送信し、確認を待っています。この手順はスキップできます。</string>
+    <string name="onboarding_terms_link">利用規約</string>
+</resources>

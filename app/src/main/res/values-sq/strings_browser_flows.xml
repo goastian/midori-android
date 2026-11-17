@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_default_done">Midori është shfletuesi juaj i parazgjedhur.</string>
+    <string name="onboarding_widget_done">Miniaplikacioni Midori është në ekranin kryesor.</string>
+    <string name="onboarding_action_not_completed">Asnjë ndryshim i konfirmuar. Provoni sërish ose kalojeni.</string>
+    <string name="onboarding_action_unavailable">Ky veprim nuk është i disponueshëm. Mund ta kaloni këtë hap.</string>
+    <string name="onboarding_action_requested">Kërkesa u dërgua. Në pritje të konfirmimit. Mund ta kaloni këtë hap.</string>
+    <string name="onboarding_terms_link">Kushtet e përdorimit</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_default_done">Midori è il browser predefinito.</string>
+    <string name="onboarding_widget_done">Il widget Midori è nella schermata iniziale.</string>
+    <string name="onboarding_action_not_completed">Nessuna modifica confermata. Riprova o salta questo passaggio.</string>
+    <string name="onboarding_action_unavailable">Questa azione non è disponibile. Puoi saltare questo passaggio.</string>
+    <string name="onboarding_action_requested">Richiesta inviata. In attesa di conferma. Puoi saltare questo passaggio.</string>
+    <string name="onboarding_terms_link">Termini di utilizzo</string>
+</resources>

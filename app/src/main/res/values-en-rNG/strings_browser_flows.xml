@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_default_done">Midori is your default browser.</string>
+    <string name="onboarding_widget_done">The Midori widget is on your home screen.</string>
+    <string name="onboarding_action_not_completed">No change confirmed. Try again or skip.</string>
+    <string name="onboarding_action_unavailable">This action is unavailable. You can skip this step.</string>
+    <string name="onboarding_action_requested">Request sent. Waiting for confirmation. You can skip this step.</string>
+    <string name="onboarding_terms_link">Terms of Use</string>
+</resources>

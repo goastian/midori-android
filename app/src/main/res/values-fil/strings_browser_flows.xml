@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_default_done">Ang Midori ang iyong default na browser.</string>
+    <string name="onboarding_widget_done">Nasa iyong home screen ang widget ng Midori.</string>
+    <string name="onboarding_action_not_completed">Walang pagbabagong nakumpirma. Subukan muli o laktawan.</string>
+    <string name="onboarding_action_unavailable">Hindi magagamit ang pagkilos na ito. Maaari mong laktawan ang hakbang na ito.</string>
+    <string name="onboarding_action_requested">Naipadala ang kahilingan. Naghihintay ng kumpirmasyon. Maaari mong laktawan ang hakbang na ito.</string>
+    <string name="onboarding_terms_link">Mga Tuntunin ng Paggamit</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_default_done">Midori 已设为默认浏览器。</string>
+    <string name="onboarding_widget_done">Midori 小组件已添加到主屏幕。</string>
+    <string name="onboarding_action_not_completed">尚未确认任何更改。请重试或跳过。</string>
+    <string name="onboarding_action_unavailable">此操作不可用。您可以跳过此步骤。</string>
+    <string name="onboarding_action_requested">请求已发送，正在等待确认。您可以跳过此步骤。</string>
+    <string name="onboarding_terms_link">使用条款</string>
+</resources>

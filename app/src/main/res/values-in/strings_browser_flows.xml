@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_default_done">Midori adalah browser default Anda.</string>
+    <string name="onboarding_widget_done">Widget Midori ada di layar utama Anda.</string>
+    <string name="onboarding_action_not_completed">Belum ada perubahan yang dikonfirmasi. Coba lagi atau lewati.</string>
+    <string name="onboarding_action_unavailable">Tindakan ini tidak tersedia. Anda dapat melewati langkah ini.</string>
+    <string name="onboarding_action_requested">Permintaan terkirim. Menunggu konfirmasi. Anda dapat melewati langkah ini.</string>
+    <string name="onboarding_terms_link">Ketentuan Penggunaan</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_default_done">Midori — браузер по умолчанию.</string>
+    <string name="onboarding_widget_done">Виджет Midori добавлен на главный экран.</string>
+    <string name="onboarding_action_not_completed">Изменения не подтверждены. Повторите попытку или пропустите шаг.</string>
+    <string name="onboarding_action_unavailable">Действие недоступно. Этот шаг можно пропустить.</string>
+    <string name="onboarding_action_requested">Запрос отправлен. Ожидается подтверждение. Этот шаг можно пропустить.</string>
+    <string name="onboarding_terms_link">Условия использования</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_default_done">Midori آپ کا ڈیفالٹ براؤزر ہے۔</string>
+    <string name="onboarding_widget_done">Midori ویجیٹ آپ کی ہوم اسکرین پر ہے۔</string>
+    <string name="onboarding_action_not_completed">کسی تبدیلی کی تصدیق نہیں ہوئی۔ دوبارہ کوشش کریں یا چھوڑ دیں۔</string>
+    <string name="onboarding_action_unavailable">یہ عمل دستیاب نہیں ہے۔ آپ یہ مرحلہ چھوڑ سکتے ہیں۔</string>
+    <string name="onboarding_action_requested">درخواست بھیج دی گئی۔ تصدیق کا انتظار ہے۔ آپ یہ مرحلہ چھوڑ سکتے ہیں۔</string>
+    <string name="onboarding_terms_link">استعمال کی شرائط</string>
+</resources>

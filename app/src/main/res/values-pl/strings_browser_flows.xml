@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_default_done">Midori jest domyślną przeglądarką.</string>
+    <string name="onboarding_widget_done">Widżet Midori jest na ekranie głównym.</string>
+    <string name="onboarding_action_not_completed">Nie potwierdzono zmiany. Spróbuj ponownie lub pomiń ten krok.</string>
+    <string name="onboarding_action_unavailable">Ta czynność jest niedostępna. Możesz pominąć ten krok.</string>
+    <string name="onboarding_action_requested">Wysłano prośbę. Oczekiwanie na potwierdzenie. Możesz pominąć ten krok.</string>
+    <string name="onboarding_terms_link">Warunki korzystania</string>
+</resources>
