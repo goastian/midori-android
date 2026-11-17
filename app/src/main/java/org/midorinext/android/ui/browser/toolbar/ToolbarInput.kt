@@ -23,6 +23,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
@@ -188,6 +189,24 @@ fun ToolbarInput(
                 TextButton(onClick = { showVoiceUnavailable = false }) { Text(stringResource(android.R.string.ok)) }
             },
         )
+    }
+}
+
+// TODO move this elsewhere
+@Composable
+fun KeyboardObserver(
+    toolbarState: ToolbarState
+) {
+    val activity = LocalContext.current.activity
+    DisposableEffect(activity) {
+        activity?.registerOnKeyboardHiddenCallback {
+            if (toolbarState.hasFocus) {
+                toolbarState.updateFocus(false)
+            }
+        }
+        onDispose {
+            activity?.unregisterOnKeyboardHiddenCallback()
+        }
     }
 }
 
