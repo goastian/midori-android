@@ -8,13 +8,17 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.withContext
 
 internal data class MemoryProfile(val name: String, val foreground: Int, val background: Int) {
     companion object {
         fun forDevice(lowRam: Boolean, ramMiB: Long, memoryClass: Int) = when {
             lowRam || ramMiB <= 2048 || memoryClass <= 128 -> MemoryProfile("compact", 3, 1)
             ramMiB <= 4096 || memoryClass <= 256 -> MemoryProfile("balanced", 4, 1)
-            else -> MemoryProfile("large", 5, 2)
+            else -> MemoryProfile("large", 5, 1)
         }
     }
 }
@@ -23,18 +27,20 @@ internal class MemoryBudgetPolicy(
     val profile: MemoryProfile,
     private val now: () -> Long,
 ) {
-    private var visible = true
+    var visible = false
+        private set
     private var constrainedUntil = 0L
     val limit: Int get() = if (visible && now() >= constrainedUntil) profile.foreground else profile.background
 
     fun visibility(value: Boolean) { visible = value }
 
     fun trim(level: Int) {
-        when {
-            level == ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN || level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND -> visible = false
-            level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW || level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL -> {
-                constrainedUntil = now() + 30_000
-            }
+        if (level == ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN || level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
+            visible = false
+        }
+        if (level in ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW until ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN ||
+            level >= ComponentCallbacks2.TRIM_MEMORY_MODERATE) {
+            constrainedUntil = now() + 30_000
         }
     }
 }
@@ -42,8 +48,8 @@ internal class MemoryBudgetPolicy(
 internal fun iconCacheTrimLevel(level: Int) = if (shouldClearBrowserMemory(level)) ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL else level
 
 internal fun shouldClearBrowserMemory(level: Int) = level == ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN ||
-    level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND || level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW ||
-    level == ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL
+    level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND ||
+    level in ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW until ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN
 
 @Singleton
 class BrowserMemoryBudget @Inject constructor(@ApplicationContext context: Context) {
@@ -55,9 +61,36 @@ class BrowserMemoryBudget @Inject constructor(@ApplicationContext context: Conte
     private val owners = linkedMapOf<Any, Owner>()
     private val caches = mutableListOf<(Int?) -> Boolean>()
     private var lastException = ""
+    private val pressureMonitor = MemoryPressureMonitor(
+        scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
+        underPressure = {
+            withContext(Dispatchers.IO) {
+                val lowMemory = try {
+                    ActivityManager.MemoryInfo().also(manager::getMemoryInfo).lowMemory
+                } catch (error: RuntimeException) {
+                    android.util.Log.w("MidoriMemory", "Memory pressure information unavailable", error)
+                    false
+                }
+                val runtime = Runtime.getRuntime()
+                org.midorinext.android.diagnostics.ScenarioMetrics.count(org.midorinext.android.diagnostics.ScenarioMetrics.Event.MEMORY_CHECKED)
+                lowMemory || runtime.totalMemory() - runtime.freeMemory() > runtime.maxMemory() * 4 / 5
+            }
+        },
+        onPressure = {
+            org.midorinext.android.diagnostics.DiagnosticsRuntime.memoryPressure(ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
+            onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
+        },
+    )
 
-    internal fun register(owner: Any, changed: () -> Unit) { owners[owner] = Owner(changed) }
-    internal fun unregister(owner: Any) { owners.remove(owner); notifyOwners() }
+    internal fun register(owner: Any, changed: () -> Unit) {
+        owners[owner] = Owner(changed)
+        if (policy.visible) pressureMonitor.start()
+    }
+    internal fun unregister(owner: Any) {
+        owners.remove(owner)
+        if (owners.isEmpty()) pressureMonitor.stop()
+        notifyOwners()
+    }
     internal fun update(owner: Any, tabs: List<ResidentTab>) {
         val entry = owners[owner] ?: return
         if (entry.tabs == tabs) return
@@ -91,19 +124,16 @@ class BrowserMemoryBudget @Inject constructor(@ApplicationContext context: Conte
 
     fun onVisibilityChanged(visible: Boolean) {
         policy.visibility(visible)
-        if (visible) {
-            manager.getMemoryInfo(info)
-            val runtime = Runtime.getRuntime()
-            if (info.lowMemory || runtime.totalMemory() - runtime.freeMemory() > runtime.maxMemory() * 4 / 5) {
-                policy.trim(ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
-            }
+        if (visible && owners.isNotEmpty()) pressureMonitor.start() else pressureMonitor.stop()
+        if (!visible) {
+            trimCaches(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
         }
-        if (!visible) trimCaches(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
         notifyOwners()
     }
 
     fun onTrimMemory(level: Int) {
         policy.trim(level)
+        if (!policy.visible) pressureMonitor.stop()
         trimCaches(level)
         notifyOwners()
     }

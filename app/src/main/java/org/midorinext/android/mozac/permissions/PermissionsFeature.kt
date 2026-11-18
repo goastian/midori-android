@@ -6,6 +6,7 @@ import androidx.core.app.ActivityCompat
 import org.midorinext.android.ext.activity
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.action.SystemPermissionRequestAction
@@ -33,6 +34,7 @@ class PermissionsFeature(
     private var sitePermissionScope: CoroutineScope? = null
     private var appPermissionScope: CoroutineScope? = null
     private var loadingScope: CoroutineScope? = null
+    private data class PendingPermission(val tabId: String, val isPrivate: Boolean, val request: PermissionRequest)
 
     override fun start() {
         setupPermissionRequestsCollector()
@@ -71,17 +73,23 @@ class PermissionsFeature(
 
     private fun setupPermissionRequestsCollector() {
         sitePermissionScope = store.flowScoped(dispatcher = Dispatchers.Main.immediate) { flow -> flow
-            .mapNotNull { state -> state.selectedTab?.content?.permissionRequestsList }
+            .map { state ->
+                (state.tabs + state.customTabs).flatMap { tab ->
+                    tab.content.permissionRequestsList.filter { tab.id == state.selectedTabId || it.isForAutoplay() }
+                        .map { PendingPermission(tab.id, tab.content.private, it) }
+                }
+            }
             .filterChanged { it }
-            .collect { permissionRequest ->
+            .collect { pending ->
+                val permissionRequest = pending.request
                 val origin: String = permissionRequest.uri?.getOrigin().orEmpty()
                 if (origin.isEmpty()) {
-                    permissionRequest.consumeAndReject()
+                    permissionRequest.consumeAndReject(pending.tabId)
                 } else {
                     if (permissionRequest.permissions.all { it.isSupported() }) {
-                        onContentPermissionRequested(permissionRequest, origin)
+                        onContentPermissionRequested(pending, origin)
                     } else {
-                        permissionRequest.consumeAndReject()
+                        permissionRequest.consumeAndReject(pending.tabId)
                     }
                 }
             }
@@ -112,39 +120,40 @@ class PermissionsFeature(
     }
 
     private suspend fun onContentPermissionRequested(
-        permissionRequest: PermissionRequest,
+        pending: PendingPermission,
         origin: String,
-        coroutineScope: CoroutineScope = ioCoroutineScope
     ) {
+        val permissionRequest = pending.request
+        if (!isPending(pending)) return
         // We want to warranty that all media permissions have the required system
         // permissions are granted first, otherwise, we reject the request
         if (permissionRequest.isMedia && !permissionRequest.areAllMediaPermissionsGranted(context)) {
-            permissionRequest.consumeAndReject()
-            return
-        }
-
-        val private = store.state.selectedTab?.content?.private
-        if (private == null) {
-            // The tab may disappear while Gecko's request is in flight. Rejecting is safer than
-            // crashing the browser or showing a permission prompt detached from its origin.
-            permissionRequest.consumeAndReject()
+            permissionRequest.consumeAndReject(pending.tabId)
             return
         }
 
         val permissionFromStorage = withContext(Dispatchers.IO) {
-            storage.findSitePermissionsBy(origin, private = private)
+            storage.findSitePermissionsBy(origin, private = pending.isPrivate)
         }
+        if (!isPending(pending)) return
 
         if (shouldShowPrompt(permissionRequest, permissionFromStorage)) {
-            onPrompt(permissionRequest, origin)
+            if (store.state.selectedTabId == pending.tabId) onPrompt(permissionRequest, origin)
         } else {
             if (permissionFromStorage.isGranted(permissionRequest)) {
                 permissionRequest.grant()
             } else {
                 permissionRequest.reject()
             }
-            consumePermissionRequest(permissionRequest)
+            consumePermissionRequest(permissionRequest, pending.tabId)
+            if (store.state.selectedTabId != pending.tabId && permissionRequest.isForAutoplay()) {
+                org.midorinext.android.diagnostics.ScenarioMetrics.count(org.midorinext.android.diagnostics.ScenarioMetrics.Event.BACKGROUND_AUTOPLAY_RESOLVED)
+            }
         }
+    }
+
+    private fun isPending(pending: PendingPermission) = (store.state.tabs + store.state.customTabs).any { tab ->
+        tab.id == pending.tabId && tab.content.permissionRequestsList.any { it.id == pending.request.id }
     }
 
     private fun shouldShowPrompt(
@@ -270,13 +279,13 @@ class PermissionsFeature(
         }
     }
 
-    private fun PermissionRequest.consumeAndReject() {
-        consumePermissionRequest(this)
+    private fun PermissionRequest.consumeAndReject(tabId: String? = getCurrentTabState()?.id) {
+        consumePermissionRequest(this, tabId)
         this.reject()
     }
 
-    private fun consumePermissionRequest(permissionRequest: PermissionRequest) {
-        getCurrentTabState()?.id?.let { sessionId ->
+    private fun consumePermissionRequest(permissionRequest: PermissionRequest, tabId: String? = getCurrentTabState()?.id) {
+        tabId?.let { sessionId ->
             store.dispatch(ContentAction.ConsumePermissionsRequest(sessionId, permissionRequest))
         }
     }

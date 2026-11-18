@@ -293,7 +293,8 @@ class MidoriApplication : Application(), Configuration.Provider {
     override fun onLowMemory() {
         super.onLowMemory()
         runOnlyInMainProcess {
-            org.midorinext.android.diagnostics.DiagnosticsRuntime.memoryPressure(android.content.ComponentCallbacks2.TRIM_MEMORY_COMPLETE)
+            org.midorinext.android.diagnostics.DiagnosticsRuntime.memoryPressure(android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
+            memoryBudget.onTrimMemory(android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
         }
     }
 }

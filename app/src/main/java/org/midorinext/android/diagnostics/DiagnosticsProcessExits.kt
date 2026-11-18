@@ -116,6 +116,17 @@ internal class DiagnosticsProcessExits(private val context: Context, private val
         },
         "status" to exit.status,
         "importance" to exit.importance,
+        "process_state" to when (exit.importance) {
+            ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND -> "foreground"
+            ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE -> "foreground_service"
+            ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE -> "visible"
+            ActivityManager.RunningAppProcessInfo.IMPORTANCE_PERCEPTIBLE -> "perceptible"
+            ActivityManager.RunningAppProcessInfo.IMPORTANCE_SERVICE -> "service"
+            ActivityManager.RunningAppProcessInfo.IMPORTANCE_CACHED -> "cached"
+            ActivityManager.RunningAppProcessInfo.IMPORTANCE_GONE -> "gone"
+            else -> "other"
+        },
+        "low_memory_kill_report_supported" to ActivityManager.isLowMemoryKillReportSupported(),
         "last_sample_pss_kib" to exit.pss,
         "last_sample_rss_kib" to exit.rss,
         "process_role" to "browser",

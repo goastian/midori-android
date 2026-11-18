@@ -9,6 +9,20 @@ import org.midorinext.android.mozac.BrowserMemoryBudget
 import org.midorinext.android.mozac.ResidentTab
 
 class MemoryBudgetDeviceTest {
+    @Test fun lowMemoryCallbackReachesTheBudgetAndRegisteredCaches() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        instrumentation.runOnMainSync {
+            val app = instrumentation.targetContext.applicationContext as MidoriApplication
+            val levels = mutableListOf<Int>()
+            app.memoryBudget.registerCache(levels) { cache, level -> cache.add(level) }
+            val wasVisible = app.memoryBudget.policy.visible
+            app.onLowMemory()
+            assertEquals(listOf(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL), levels)
+            assertEquals(wasVisible, app.memoryBudget.policy.visible)
+            assertEquals(app.memoryBudget.profile.background, app.memoryBudget.policy.limit)
+        }
+    }
+
     @Test fun allSurfacesShareOneBudgetAndProtectedSessionsRemainSafe() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         instrumentation.runOnMainSync {

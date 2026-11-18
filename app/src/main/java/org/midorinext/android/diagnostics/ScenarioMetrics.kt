@@ -8,7 +8,7 @@ import java.util.WeakHashMap
 import java.util.concurrent.atomic.AtomicLongArray
 
 internal object ScenarioMetrics {
-    enum class Event { SESSION_CREATED, SESSION_CLOSED, SESSION_RESTORED, LOAD_STARTED, SAME_URL_LOAD_STARTED, SYNC_REQUESTED, SYNC_EXECUTED, WORK_EXECUTED }
+    enum class Event { SESSION_CREATED, SESSION_CLOSED, SESSION_RESTORED, LOAD_STARTED, SAME_URL_LOAD_STARTED, SYNC_REQUESTED, SYNC_EXECUTED, WORK_EXECUTED, MEMORY_CHECKED, BACKGROUND_AUTOPLAY_RESOLVED }
     enum class Rows { HISTORY, BOOKMARKS, FOLDER_PICKER }
     private val retained = AtomicLongArray(Rows.entries.size)
     private val peakRetained = AtomicLongArray(Rows.entries.size)

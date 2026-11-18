@@ -23,6 +23,7 @@ import org.json.JSONObject
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.Rule
+import org.midorinext.android.mozac.permissions.isForAutoplay
 
 class MediaResourceDeviceTest {
     @get:Rule val compose = createEmptyComposeRule()
@@ -136,6 +137,12 @@ class MediaResourceDeviceTest {
                     }
                     await("actual background budget") { app.memoryBudget.policy.limit == app.memoryBudget.profile.background }
                     report.put("actual_background_budget", app.memoryBudget.policy.limit)
+                    await("background autoplay permissions resolved") {
+                        store.state.tabs.filter { it.id in fixtures }.all { tab ->
+                            tab.content.permissionRequestsList.none { it.isForAutoplay() }
+                        }
+                    }
+                    report.put("background_autoplay_permissions_resolved", true)
                     SystemClock.sleep(2_000)
                     await("paused and stopped sessions released", 30_000) {
                         pausedTabs.all { tab(it).engineState.engineSession == null } && tab(stopped).engineState.engineSession == null
@@ -193,6 +200,10 @@ class MediaResourceDeviceTest {
                             .put("selected", it.id == store.state.selectedTabId).put("first_paint", it.content.firstContentfulPaint)
                             .put("loading", it.content.loading).put("form", it.content.hasFormData)
                             .put("pip", it.content.pictureInPictureEnabled).put("playback", it.mediaSessionState?.playbackState?.name)
+                            .put("prompts", org.json.JSONArray(it.content.promptRequests.map { request -> request.javaClass.simpleName }))
+                            .put("permissions", org.json.JSONArray(it.content.permissionRequestsList.flatMap { request -> request.permissions.map { permission -> permission.name } }))
+                            .put("app_permissions", org.json.JSONArray(it.content.appPermissionRequestsList.flatMap { request -> request.permissions.map { permission -> permission.name } }))
+                            .put("recording_devices", it.content.recordingDevices.size)
                     }))
                     File(app.cacheDir, "media-resource-results.json").writeText(reports.toString(2))
                     runCatching { returnToBrowser() }.onFailure { report.put("cleanup_return_failure", it.toString()) }

@@ -7,7 +7,6 @@ import android.os.SystemClock
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import java.io.File
-import mozilla.components.browser.state.action.AppLifecycleAction
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.action.TabListAction
 import org.json.JSONArray
@@ -66,6 +65,12 @@ class BrowserResourceDeviceTest {
                     }
                 }
                 if (expectedLimit > 0) {
+                    instrumentation.uiAutomation.executeShellCommand("am send-trim-memory ${app.packageName} RUNNING_LOW").use {
+                        android.os.ParcelFileDescriptor.AutoCloseInputStream(it).readBytes()
+                    }
+                    await("Android memory pressure") { app.memoryBudget.policy.visible && app.memoryBudget.policy.limit == app.memoryBudget.profile.background }
+                    await("resident budget under pressure") { residentCount() <= app.memoryBudget.profile.background }
+                    samples.put(JSONObject().put("pressure_resident_sessions", residentCount()))
                     val suspended = store.state.tabs.first { it.id in fixtures && it.engineState.engineSession == null }
                     assertNotNull(suspended.engineState.engineSessionState)
                     val started = SystemClock.elapsedRealtime()
@@ -87,15 +92,20 @@ class BrowserResourceDeviceTest {
                     }
                     addFixture(50, fixtures)
                     val lastFixture = addFixture(51, fixtures)
-                    instrumentation.runOnMainSync { app.memoryBudget.onVisibilityChanged(false) }
-                    store.dispatch(AppLifecycleAction.PauseAction)
+                    instrumentation.uiAutomation.executeShellCommand("input keyevent KEYCODE_HOME").use {
+                        android.os.ParcelFileDescriptor.AutoCloseInputStream(it).readBytes()
+                    }
+                    await("Android background transition") { !app.memoryBudget.policy.visible }
                     await("background resident budget") {
-                        residentCount() <= 2 && store.state.tabs.find { it.id == suspended.id }?.engineState?.engineSession == null
+                        residentCount() <= app.memoryBudget.profile.background &&
+                            store.state.tabs.find { it.id == suspended.id }?.engineState?.engineSession == null
                     }
                     assertNotNull(store.state.tabs.find { it.id == lastFixture }?.engineState?.engineSession)
                     samples.put(JSONObject().put("background_resident_sessions", residentCount()))
-                    instrumentation.runOnMainSync { app.memoryBudget.onVisibilityChanged(true) }
-                    store.dispatch(AppLifecycleAction.ResumeAction)
+                    instrumentation.targetContext.startActivity(Intent(instrumentation.targetContext, MainActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                    })
+                    await("Android foreground transition") { app.memoryBudget.policy.visible }
                     store.dispatch(ContentAction.UpdateFirstContentfulPaintStateAction(suspended.id, false))
                     store.dispatch(TabListAction.SelectTabAction(suspended.id))
                     await("history restored with a fresh paint") {
@@ -170,6 +180,15 @@ class BrowserResourceDeviceTest {
         val deadline = SystemClock.elapsedRealtime() + 30_000
         while (!condition()) {
             check(SystemClock.elapsedRealtime() < deadline) {
+                instrumentation.uiAutomation.takeScreenshot()?.let { bitmap ->
+                    try {
+                        File(app.cacheDir, "browser-resource-failure.png").outputStream().use {
+                            bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it)
+                        }
+                    } finally {
+                        bitmap.recycle()
+                    }
+                }
                 val selected = store.state.tabs.find { it.id == store.state.selectedTabId }
                 "Timed out waiting for $description; resident=${residentCount()}, selectedEngine=${selected?.engineState?.engineSession != null}, loading=${selected?.content?.loading}, fcp=${selected?.content?.firstContentfulPaint}"
             }
