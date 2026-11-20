@@ -155,6 +155,7 @@ message AppPreferences {
   bool hide_home_add_shortcut = 89;
   bool hide_home_logo = 90;
   bool hide_home_customize_shortcut = 91;
+  bool force_dark_website_colors = 92;
 }
 
 message HomeShortcut {
