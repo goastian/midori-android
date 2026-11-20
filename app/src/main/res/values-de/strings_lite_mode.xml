@@ -1,0 +1,22 @@
+<resources>
+    <string name="lite_mode_title">Lite-Modus</string>
+    <string name="lite_mode_off">Aus</string>
+    <string name="lite_mode_on">An</string>
+    <string name="lite_mode_direct">HTTPS-Datensparen</string>
+    <string name="lite_mode_connecting">Verbindung wird hergestellt…</string>
+    <string name="lite_mode_unavailable">Dienst nicht verfügbar</string>
+    <string name="lite_mode_storage_error">Einstellungen konnten nicht gespeichert werden</string>
+    <string name="lite_mode_saved_percent">%1$s gespart</string>
+    <string name="lite_mode_data_saved">Gesparte Daten</string>
+    <string name="lite_mode_savings_scope">Ersparnis für unterstützte Ressourcen</string>
+    <string name="lite_mode_private_scope">Datenkomprimierung ist in normalen Tabs verfügbar.</string>
+    <string name="lite_mode_compression">Datenkomprimierung</string>
+    <string name="lite_mode_lossless">Verlustfrei</string>
+    <string name="lite_mode_lossless_summary">Erhält die ursprüngliche Qualität.</string>
+    <string name="lite_mode_balanced">Ausgewogen</string>
+    <string name="lite_mode_balanced_summary">Wägt Qualität und Datenersparnis ab.</string>
+    <string name="lite_mode_saver">Datensparmodus</string>
+    <string name="lite_mode_saver_summary">Verbraucht weniger Daten bei leicht reduzierter Qualität.</string>
+    <string name="lite_mode_extreme">Maximale Ersparnis</string>
+    <string name="lite_mode_extreme_summary">Verbraucht am wenigsten Daten bei stärker reduzierter Qualität.</string>
+</resources>

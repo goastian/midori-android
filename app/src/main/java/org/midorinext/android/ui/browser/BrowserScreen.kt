@@ -33,6 +33,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.midorinext.android.R
 import org.midorinext.android.adblock.AdBlockerAction
 import org.midorinext.android.adblock.BlockingLevel
+import org.midorinext.android.lite.LiteMode
 import org.midorinext.android.ui.preferences.BlockingLevelRow
 import org.midorinext.android.ext.*
 import org.midorinext.android.MidoriApplication
@@ -85,6 +86,8 @@ fun BrowserScreen(
     val privateHome = surface == BrowserSurface.PRIVATE_HOME
     val blankPage = surface == BrowserSurface.BLANK
     val nativeBlockerState by viewModel.nativeBlockerState.collectAsStateWithLifecycle()
+    val liteState by viewModel.liteMode.state.collectAsStateWithLifecycle()
+    val liteStatus = liteState.statusFor(private)
     val readerModeStatus by viewModel.readerModeStatus.collectAsStateWithLifecycle()
     val hasParentTab by viewModel.hasParentTab.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -111,6 +114,7 @@ fun BrowserScreen(
     var engineViewHolder: EngineView? by remember { mutableStateOf(null) }
     var pageSummary by remember { mutableStateOf<String?>(null) }
     var showBlockerDialog by remember { mutableStateOf(false) }
+    var showLitePanel by rememberSaveable { mutableStateOf(false) }
     var newTabIntentConsumed by rememberSaveable(openNewTab) { mutableStateOf(false) }
     var nativeHomeReady by remember(selectedTabSnapshot?.id) { mutableStateOf(false) }
 
@@ -234,6 +238,16 @@ fun BrowserScreen(
         )
     }
 
+    if (showLitePanel) {
+        LiteModePanel(
+            state = liteState,
+            privateBrowsing = private,
+            onDismiss = { showLitePanel = false },
+            onToggle = viewModel.liteMode::setEnabled,
+            onCompressionSelected = viewModel.liteMode::setCompression,
+        )
+    }
+
     BackHandler(enabled = appPrefs.closeTabsOnExit && !isFullScreen) {
         appViewModel.quit { context.activity?.quit() }
     }
@@ -271,6 +285,20 @@ fun BrowserScreen(
                     toolbarState = viewModel.toolbarState,
                     browserIcons = viewModel.browserIcons,
                     beforeTextField = {
+                        if (liteState.enabled) {
+                            IconButton(
+                                onClick = { showLitePanel = true },
+                                modifier = Modifier.size(40.dp).testTag("lite_mode_toolbar"),
+                            ) {
+                                Icon(
+                                    painterResource(R.drawable.icons_lite_mode),
+                                    stringResource(R.string.lite_mode_title),
+                                    tint = if (liteStatus == LiteMode.Status.ACTIVE || liteStatus == LiteMode.Status.DIRECT) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
                         if (!readerModeStatus.isActive) {
                             AdBlockerAction(protectionEnabled = nativeBlockerState.level != BlockingLevel.OFF) {
                                 showBlockerDialog = true

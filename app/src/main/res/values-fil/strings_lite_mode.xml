@@ -1,0 +1,22 @@
+<resources>
+    <string name="lite_mode_title">Lite mode</string>
+    <string name="lite_mode_off">Naka-off</string>
+    <string name="lite_mode_on">Naka-on</string>
+    <string name="lite_mode_direct">Pagtitipid ng data sa HTTPS</string>
+    <string name="lite_mode_connecting">Kumokonekta…</string>
+    <string name="lite_mode_unavailable">Hindi available ang serbisyo</string>
+    <string name="lite_mode_storage_error">Hindi na-save ang mga setting</string>
+    <string name="lite_mode_saved_percent">%1$s ang natipid</string>
+    <string name="lite_mode_data_saved">Natipid na data</string>
+    <string name="lite_mode_savings_scope">Natipid na data sa mga suportadong resource</string>
+    <string name="lite_mode_private_scope">Available ang pag-compress ng data sa mga regular na tab.</string>
+    <string name="lite_mode_compression">Pag-compress ng data</string>
+    <string name="lite_mode_lossless">Lossless</string>
+    <string name="lite_mode_lossless_summary">Pinapanatili ang orihinal na kalidad.</string>
+    <string name="lite_mode_balanced">Balanseng compression</string>
+    <string name="lite_mode_balanced_summary">Binabalanse ang kalidad at pagtitipid ng data.</string>
+    <string name="lite_mode_saver">Pagtitipid ng data</string>
+    <string name="lite_mode_saver_summary">Mas kaunting data kapalit ng bahagyang pagbaba ng kalidad.</string>
+    <string name="lite_mode_extreme">Pinakamalaking tipid</string>
+    <string name="lite_mode_extreme_summary">Pinakakaunting data kapalit ng mas malaking pagbaba ng kalidad.</string>
+</resources>

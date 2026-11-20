@@ -1,0 +1,22 @@
+<resources>
+    <string name="lite_mode_title">Mode Lite</string>
+    <string name="lite_mode_off">Nonaktif</string>
+    <string name="lite_mode_on">Aktif</string>
+    <string name="lite_mode_direct">Penghematan data HTTPS</string>
+    <string name="lite_mode_connecting">Menghubungkan…</string>
+    <string name="lite_mode_unavailable">Layanan tidak tersedia</string>
+    <string name="lite_mode_storage_error">Setelan tidak dapat disimpan</string>
+    <string name="lite_mode_saved_percent">Hemat %1$s</string>
+    <string name="lite_mode_data_saved">Data yang dihemat</string>
+    <string name="lite_mode_savings_scope">Penghematan diukur pada sumber daya yang didukung</string>
+    <string name="lite_mode_private_scope">Kompresi data tersedia di tab biasa.</string>
+    <string name="lite_mode_compression">Kompresi data</string>
+    <string name="lite_mode_lossless">Tanpa penurunan kualitas</string>
+    <string name="lite_mode_lossless_summary">Mempertahankan kualitas asli.</string>
+    <string name="lite_mode_balanced">Seimbang</string>
+    <string name="lite_mode_balanced_summary">Menyeimbangkan kualitas dan penghematan data.</string>
+    <string name="lite_mode_saver">Hemat data</string>
+    <string name="lite_mode_saver_summary">Menggunakan lebih sedikit data dengan sedikit penurunan kualitas.</string>
+    <string name="lite_mode_extreme">Penghematan maksimum</string>
+    <string name="lite_mode_extreme_summary">Menggunakan data sesedikit mungkin dengan penurunan kualitas yang lebih besar.</string>
+</resources>

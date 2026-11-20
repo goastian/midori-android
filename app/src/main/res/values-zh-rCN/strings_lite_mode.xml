@@ -1,0 +1,22 @@
+<resources>
+    <string name="lite_mode_title">轻量模式</string>
+    <string name="lite_mode_off">已关闭</string>
+    <string name="lite_mode_on">已开启</string>
+    <string name="lite_mode_direct">HTTPS 流量节省</string>
+    <string name="lite_mode_connecting">正在连接…</string>
+    <string name="lite_mode_unavailable">服务不可用</string>
+    <string name="lite_mode_storage_error">无法保存设置</string>
+    <string name="lite_mode_saved_percent">已节省 %1$s</string>
+    <string name="lite_mode_data_saved">已节省的流量</string>
+    <string name="lite_mode_savings_scope">仅统计受支持资源节省的流量</string>
+    <string name="lite_mode_private_scope">数据压缩适用于普通标签页。</string>
+    <string name="lite_mode_compression">数据压缩</string>
+    <string name="lite_mode_lossless">无损</string>
+    <string name="lite_mode_lossless_summary">保留原有质量。</string>
+    <string name="lite_mode_balanced">均衡</string>
+    <string name="lite_mode_balanced_summary">兼顾质量和流量节省。</string>
+    <string name="lite_mode_saver">节省流量</string>
+    <string name="lite_mode_saver_summary">略微降低质量以节省流量。</string>
+    <string name="lite_mode_extreme">最大限度节省</string>
+    <string name="lite_mode_extreme_summary">进一步降低质量以尽可能节省流量。</string>
+</resources>

@@ -1,0 +1,22 @@
+<resources>
+    <string name="lite_mode_title">लाइट मोड</string>
+    <string name="lite_mode_off">बंद</string>
+    <string name="lite_mode_on">चालू</string>
+    <string name="lite_mode_direct">HTTPS डेटा की बचत</string>
+    <string name="lite_mode_connecting">कनेक्ट हो रहा है…</string>
+    <string name="lite_mode_unavailable">सेवा उपलब्ध नहीं है</string>
+    <string name="lite_mode_storage_error">सेटिंग सेव नहीं हो सकीं</string>
+    <string name="lite_mode_saved_percent">%1$s की बचत</string>
+    <string name="lite_mode_data_saved">बचा हुआ डेटा</string>
+    <string name="lite_mode_savings_scope">समर्थित संसाधनों पर मापी गई बचत</string>
+    <string name="lite_mode_private_scope">डेटा कंप्रेशन सामान्य टैब में उपलब्ध है।</string>
+    <string name="lite_mode_compression">डेटा कंप्रेशन</string>
+    <string name="lite_mode_lossless">बिना गुणवत्ता में कमी</string>
+    <string name="lite_mode_lossless_summary">मूल गुणवत्ता बनाए रखता है।</string>
+    <string name="lite_mode_balanced">संतुलित</string>
+    <string name="lite_mode_balanced_summary">गुणवत्ता और डेटा की बचत में संतुलन रखता है।</string>
+    <string name="lite_mode_saver">डेटा सेवर</string>
+    <string name="lite_mode_saver_summary">गुणवत्ता थोड़ी कम करके कम डेटा इस्तेमाल करता है।</string>
+    <string name="lite_mode_extreme">अधिकतम बचत</string>
+    <string name="lite_mode_extreme_summary">गुणवत्ता और कम करके सबसे कम डेटा इस्तेमाल करता है।</string>
+</resources>

@@ -1,0 +1,22 @@
+<resources>
+    <string name="lite_mode_title">Tryb Lite</string>
+    <string name="lite_mode_off">Wyłączony</string>
+    <string name="lite_mode_on">Włączony</string>
+    <string name="lite_mode_direct">Oszczędzanie danych HTTPS</string>
+    <string name="lite_mode_connecting">Łączenie…</string>
+    <string name="lite_mode_unavailable">Usługa jest niedostępna</string>
+    <string name="lite_mode_storage_error">Nie udało się zapisać ustawień</string>
+    <string name="lite_mode_saved_percent">Zaoszczędzono %1$s</string>
+    <string name="lite_mode_data_saved">Zaoszczędzone dane</string>
+    <string name="lite_mode_savings_scope">Oszczędność zmierzona dla obsługiwanych zasobów</string>
+    <string name="lite_mode_private_scope">Kompresja danych jest dostępna na zwykłych kartach.</string>
+    <string name="lite_mode_compression">Kompresja danych</string>
+    <string name="lite_mode_lossless">Bezstratna</string>
+    <string name="lite_mode_lossless_summary">Zachowuje oryginalną jakość.</string>
+    <string name="lite_mode_balanced">Zrównoważona</string>
+    <string name="lite_mode_balanced_summary">Godzi jakość z oszczędzaniem danych.</string>
+    <string name="lite_mode_saver">Oszczędzanie danych</string>
+    <string name="lite_mode_saver_summary">Zużywa mniej danych przy niewielkim spadku jakości.</string>
+    <string name="lite_mode_extreme">Maksymalna oszczędność</string>
+    <string name="lite_mode_extreme_summary">Zużywa najmniej danych przy większym spadku jakości.</string>
+</resources>

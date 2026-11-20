@@ -1,0 +1,22 @@
+<resources>
+    <string name="lite_mode_title">Modo Lite</string>
+    <string name="lite_mode_off">Desativado</string>
+    <string name="lite_mode_on">Ativado</string>
+    <string name="lite_mode_direct">Economia de dados HTTPS</string>
+    <string name="lite_mode_connecting">Conectando…</string>
+    <string name="lite_mode_unavailable">Serviço indisponível</string>
+    <string name="lite_mode_storage_error">Não foi possível salvar as configurações</string>
+    <string name="lite_mode_saved_percent">%1$s de economia</string>
+    <string name="lite_mode_data_saved">Dados economizados</string>
+    <string name="lite_mode_savings_scope">Economia medida nos recursos compatíveis</string>
+    <string name="lite_mode_private_scope">A compressão de dados está disponível nas guias normais.</string>
+    <string name="lite_mode_compression">Compressão de dados</string>
+    <string name="lite_mode_lossless">Sem perdas</string>
+    <string name="lite_mode_lossless_summary">Preserva a qualidade original.</string>
+    <string name="lite_mode_balanced">Equilibrado</string>
+    <string name="lite_mode_balanced_summary">Equilibra a qualidade e a economia de dados.</string>
+    <string name="lite_mode_saver">Economia de dados</string>
+    <string name="lite_mode_saver_summary">Usa menos dados com uma pequena redução na qualidade.</string>
+    <string name="lite_mode_extreme">Economia máxima</string>
+    <string name="lite_mode_extreme_summary">Usa o mínimo de dados com uma redução maior na qualidade.</string>
+</resources>

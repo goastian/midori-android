@@ -1,0 +1,22 @@
+<resources>
+    <string name="lite_mode_title">Modalità Lite</string>
+    <string name="lite_mode_off">Disattivata</string>
+    <string name="lite_mode_on">Attivata</string>
+    <string name="lite_mode_direct">Risparmio dati HTTPS</string>
+    <string name="lite_mode_connecting">Connessione in corso…</string>
+    <string name="lite_mode_unavailable">Servizio non disponibile</string>
+    <string name="lite_mode_storage_error">Impossibile salvare le impostazioni</string>
+    <string name="lite_mode_saved_percent">%1$s risparmiato</string>
+    <string name="lite_mode_data_saved">Dati risparmiati</string>
+    <string name="lite_mode_savings_scope">Risparmio misurato sulle risorse compatibili</string>
+    <string name="lite_mode_private_scope">La compressione dei dati è disponibile nelle schede normali.</string>
+    <string name="lite_mode_compression">Compressione dei dati</string>
+    <string name="lite_mode_lossless">Senza perdita</string>
+    <string name="lite_mode_lossless_summary">Mantiene la qualità originale.</string>
+    <string name="lite_mode_balanced">Bilanciata</string>
+    <string name="lite_mode_balanced_summary">Bilancia la qualità e il risparmio di dati.</string>
+    <string name="lite_mode_saver">Risparmio dati</string>
+    <string name="lite_mode_saver_summary">Usa meno dati con una lieve riduzione della qualità.</string>
+    <string name="lite_mode_extreme">Risparmio massimo</string>
+    <string name="lite_mode_extreme_summary">Usa la minima quantità di dati con una maggiore riduzione della qualità.</string>
+</resources>

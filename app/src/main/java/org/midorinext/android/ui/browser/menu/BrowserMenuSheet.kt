@@ -86,6 +86,7 @@ internal fun BrowserMenuMainContent(
     onVpnClick: () -> Unit,
     onSetDefault: () -> Unit,
     onDismissDefault: () -> Unit,
+    liteMode: @Composable () -> Unit = {},
     showPageActions: Boolean = false,
     pageActions: @Composable () -> Unit = {},
     moreOptions: @Composable () -> Unit = {},
@@ -106,6 +107,7 @@ internal fun BrowserMenuMainContent(
             onClick = onVpnClick,
             modifier = Modifier.testTag("browser_menu_vpn"),
         )
+        liteMode()
         BrowserMenuRow(
             text = stringResource(R.string.extensions_title),
             icon = R.drawable.icons_menu_extensions,

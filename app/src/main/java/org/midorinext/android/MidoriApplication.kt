@@ -25,6 +25,7 @@ import org.midorinext.android.storage.autofill.AutofillPreferenceState
 import org.midorinext.android.storage.history.HistoryRepository
 import org.midorinext.android.usecases.MidoriUseCases
 import org.midorinext.android.vpn.MidoriVpnFeature
+import org.midorinext.android.lite.LiteMode
 import org.midorinext.android.newtab.HomeFaviconRepository
 import org.midorinext.android.newtab.HomeWallpaper
 import org.midorinext.android.newtab.HomeWallpaperRepository
@@ -81,6 +82,7 @@ class MidoriApplication : Application(), Configuration.Provider {
     @Inject lateinit var autofillPreferenceState: dagger.Lazy<AutofillPreferenceState>
     @Inject lateinit var historyRepository: dagger.Lazy<HistoryRepository>
     @Inject lateinit var midoriVpnFeature: dagger.Lazy<MidoriVpnFeature>
+    @Inject lateinit var liteMode: dagger.Lazy<LiteMode>
     @Inject lateinit var browserIcons: dagger.Lazy<BrowserIcons>
     @Inject lateinit var homeFavicons: dagger.Lazy<HomeFaviconRepository>
     @Inject lateinit var homeWallpaper: dagger.Lazy<HomeWallpaperRepository>
@@ -201,6 +203,7 @@ class MidoriApplication : Application(), Configuration.Provider {
         }
 
         StartupTiming.measure("native_blocker") { nativeContentBlockingFeature.get().start() }
+        liteMode.get().start()
 
         // TODO
         //  Should be removed in futur version, once mozilla has fully migrated

@@ -1,0 +1,16 @@
+{
+  "manifest_version": 2,
+  "name": "Midori Lite",
+  "version": "1.11",
+  "browser_specific_settings": {
+    "gecko": { "id": "midori-lite@astian.org", "strict_min_version": "91.1.0" }
+  },
+  "incognito": "spanning",
+  "permissions": ["nativeMessaging", "geckoViewAddons", "proxy", "webRequest", "webRequestBlocking", "<all_urls>"],
+  "background": { "scripts": ["publicImages.js", "imageRelay.js", "background.js"] },
+  "content_scripts": [{
+    "matches": ["https://www.youtube.com/*", "https://m.youtube.com/*", "https://www.google.com/*", "https://developers.google.com/*", "https://unsplash.com/*", "https://www.unsplash.com/*", "https://www.bing.com/*"],
+    "js": ["imagePolicy.js"],
+    "run_at": "document_start"
+  }]
+}

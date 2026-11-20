@@ -1,0 +1,22 @@
+<resources>
+    <string name="lite_mode_title">لائٹ موڈ</string>
+    <string name="lite_mode_off">بند</string>
+    <string name="lite_mode_on">چالو</string>
+    <string name="lite_mode_direct">HTTPS ڈیٹا کی بچت</string>
+    <string name="lite_mode_connecting">منسلک ہو رہا ہے…</string>
+    <string name="lite_mode_unavailable">سروس دستیاب نہیں ہے</string>
+    <string name="lite_mode_storage_error">ترتیبات محفوظ نہیں ہو سکیں</string>
+    <string name="lite_mode_saved_percent">%1$s کی بچت</string>
+    <string name="lite_mode_data_saved">بچایا گیا ڈیٹا</string>
+    <string name="lite_mode_savings_scope">معاون وسائل پر ماپی گئی بچت</string>
+    <string name="lite_mode_private_scope">ڈیٹا کی کمپریشن عام ٹیبز میں دستیاب ہے۔</string>
+    <string name="lite_mode_compression">ڈیٹا کی کمپریشن</string>
+    <string name="lite_mode_lossless">بلا نقصان</string>
+    <string name="lite_mode_lossless_summary">اصل معیار برقرار رکھتا ہے۔</string>
+    <string name="lite_mode_balanced">متوازن</string>
+    <string name="lite_mode_balanced_summary">معیار اور ڈیٹا کی بچت میں توازن رکھتا ہے۔</string>
+    <string name="lite_mode_saver">ڈیٹا کی بچت</string>
+    <string name="lite_mode_saver_summary">معیار میں معمولی کمی کے ساتھ کم ڈیٹا استعمال کرتا ہے۔</string>
+    <string name="lite_mode_extreme">زیادہ سے زیادہ بچت</string>
+    <string name="lite_mode_extreme_summary">معیار میں زیادہ کمی کے ساتھ کم سے کم ڈیٹا استعمال کرتا ہے۔</string>
+</resources>

@@ -1,0 +1,22 @@
+<resources>
+    <string name="lite_mode_title">Режим Lite</string>
+    <string name="lite_mode_off">Выкл.</string>
+    <string name="lite_mode_on">Вкл.</string>
+    <string name="lite_mode_direct">Экономия трафика HTTPS</string>
+    <string name="lite_mode_connecting">Подключение…</string>
+    <string name="lite_mode_unavailable">Сервис недоступен</string>
+    <string name="lite_mode_storage_error">Не удалось сохранить настройки</string>
+    <string name="lite_mode_saved_percent">Сэкономлено %1$s</string>
+    <string name="lite_mode_data_saved">Сэкономлено трафика</string>
+    <string name="lite_mode_savings_scope">Экономия рассчитана по поддерживаемым ресурсам</string>
+    <string name="lite_mode_private_scope">Сжатие данных доступно в обычных вкладках.</string>
+    <string name="lite_mode_compression">Сжатие данных</string>
+    <string name="lite_mode_lossless">Без потерь</string>
+    <string name="lite_mode_lossless_summary">Сохраняет исходное качество.</string>
+    <string name="lite_mode_balanced">Сбалансированный</string>
+    <string name="lite_mode_balanced_summary">Сочетает качество и экономию трафика.</string>
+    <string name="lite_mode_saver">Экономия трафика</string>
+    <string name="lite_mode_saver_summary">Расходует меньше трафика при небольшом снижении качества.</string>
+    <string name="lite_mode_extreme">Максимальная экономия</string>
+    <string name="lite_mode_extreme_summary">Расходует минимум трафика при более заметном снижении качества.</string>
+</resources>

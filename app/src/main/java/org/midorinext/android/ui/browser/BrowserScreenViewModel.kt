@@ -9,6 +9,7 @@ import org.midorinext.android.adblock.DesktopHostFilter
 import org.midorinext.android.adblock.BlockingLevel
 import org.midorinext.android.adblock.NativeContentBlockingFeature
 import org.midorinext.android.adblock.hostOf
+import org.midorinext.android.lite.LiteMode
 import org.midorinext.android.mozac.pdf.PagePrintEvents
 import org.midorinext.android.mozac.media.BackgroundPlaybackFeature
 import org.midorinext.android.pwa.WebAppRepository
@@ -80,6 +81,7 @@ class BrowserScreenViewModel @Inject constructor(
     private val desktopHostFilter: DesktopHostFilter,
     private val contentBlocking: NativeContentBlockingFeature,
     private val legacyHomeMigration: LegacyHomeMigration,
+    internal val liteMode: LiteMode,
 ): ViewModel() {
     private val bookmarksRepository by lazy { bookmarksRepositoryProvider.get() }
     private val webAppUseCases by lazy { webAppUseCasesProvider.get() }

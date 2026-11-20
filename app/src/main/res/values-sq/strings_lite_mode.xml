@@ -1,0 +1,22 @@
+<resources>
+    <string name="lite_mode_title">Modaliteti Lite</string>
+    <string name="lite_mode_off">Joaktiv</string>
+    <string name="lite_mode_on">Aktiv</string>
+    <string name="lite_mode_direct">Kursim i të dhënave HTTPS</string>
+    <string name="lite_mode_connecting">Po lidhet…</string>
+    <string name="lite_mode_unavailable">Shërbimi nuk është i disponueshëm</string>
+    <string name="lite_mode_storage_error">Cilësimet nuk u ruajtën</string>
+    <string name="lite_mode_saved_percent">%1$s të kursyera</string>
+    <string name="lite_mode_data_saved">Të dhëna të kursyera</string>
+    <string name="lite_mode_savings_scope">Kursimi i matur për burimet e mbështetura</string>
+    <string name="lite_mode_private_scope">Ngjeshja e të dhënave ofrohet në skedat e zakonshme.</string>
+    <string name="lite_mode_compression">Ngjeshja e të dhënave</string>
+    <string name="lite_mode_lossless">Pa humbje</string>
+    <string name="lite_mode_lossless_summary">Ruan cilësinë origjinale.</string>
+    <string name="lite_mode_balanced">I balancuar</string>
+    <string name="lite_mode_balanced_summary">Balancon cilësinë me kursimin e të dhënave.</string>
+    <string name="lite_mode_saver">Kursim i të dhënave</string>
+    <string name="lite_mode_saver_summary">Përdor më pak të dhëna duke ulur pak cilësinë.</string>
+    <string name="lite_mode_extreme">Kursim maksimal</string>
+    <string name="lite_mode_extreme_summary">Përdor sasinë më të vogël të të dhënave duke ulur më shumë cilësinë.</string>
+</resources>

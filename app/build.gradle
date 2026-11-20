@@ -124,6 +124,12 @@ android {
                 readConfigValue("sentry_dsn", "https://8f48f1974aae59165417fd73e8f12bce@o508466.ingest.us.sentry.io/4506732144689152"))
         buildConfigField "String", "ADBLOCK_BUNDLE_VERSION", groovy.json.JsonOutput.toJson(
                 new groovy.json.JsonSlurper().parse(file("src/main/assets/adblock/content/manifest.json")).version)
+        buildConfigField "String", "MIDORIPRESS_URL", groovy.json.JsonOutput.toJson(readConfigValue("midoripress_url", ""))
+        buildConfigField "String", "MIDORIPRESS_ENROLL_URL", groovy.json.JsonOutput.toJson(readConfigValue("midoripress_enroll_url", ""))
+        buildConfigField "String", "MIDORIPRESS_IMAGE_URL", groovy.json.JsonOutput.toJson(readConfigValue("midoripress_image_url", ""))
+        buildConfigField "String", "MIDORIPRESS_IMAGE_CERTIFICATE", '""'
+        buildConfigField "String", "LITE_BUNDLE_VERSION", groovy.json.JsonOutput.toJson(
+                new groovy.json.JsonSlurper().parse(file("src/main/assets/extensions/midori_lite/manifest.json")).version)
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -176,6 +182,14 @@ android {
         debug {
             getIsDefault().set(true)
             applicationIdSuffix ".debug"
+            buildConfigField "String", "MIDORIPRESS_URL", groovy.json.JsonOutput.toJson(readConfigValue("midoripress_url", "http://127.0.0.1:19999"))
+            buildConfigField "String", "MIDORIPRESS_ENROLL_URL", groovy.json.JsonOutput.toJson(readConfigValue("midoripress_enroll_url",
+                    readConfigValue("midoripress_url") == null ? "http://127.0.0.1:19997/api/v1/lite/register" : ""))
+            buildConfigField "String", "MIDORIPRESS_IMAGE_URL", groovy.json.JsonOutput.toJson(
+                    readConfigValue("midoripress_image_url", "https://127.0.0.1:19996"))
+            def imageCertificate = readConfigValue("midoripress_image_certificate", "")
+            buildConfigField "String", "MIDORIPRESS_IMAGE_CERTIFICATE", groovy.json.JsonOutput.toJson(
+                    imageCertificate ? file(imageCertificate).getText("UTF-8") : "")
         }
         release {
             // Shrink bytecode and resources to reduce final artifact size.
@@ -300,7 +314,7 @@ tasks.register("verifyNativeHome") {
         if (!homeSource.isFile() || !homeSource.getText("UTF-8").contains("fun NativeHomeScreen(")) {
             throw new GradleException("The native New Tab screen is missing")
         }
-        def supportedExtensions = ["midori_sync", "midori_vpn", "readerview"] as Set
+        def supportedExtensions = ["midori_lite", "midori_sync", "midori_vpn", "readerview"] as Set
         def bundledExtensions = extensionsDirectory.listFiles().collect { it.name } as Set
         if (bundledExtensions != supportedExtensions) {
             throw new GradleException("Unexpected bundled extensions: ${bundledExtensions - supportedExtensions}; missing: ${supportedExtensions - bundledExtensions}")
@@ -404,6 +418,7 @@ sentry {
 
 dependencies {
     implementation libs.sentry.android
+    implementation "com.squareup.okhttp3:okhttp:5.5.0"
     // Legacy Onboarding
     implementation libs.androidx.constraintlayout
     // Legacy assistant

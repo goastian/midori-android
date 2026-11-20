@@ -1,0 +1,22 @@
+<resources>
+    <string name="lite_mode_title">ライトモード</string>
+    <string name="lite_mode_off">オフ</string>
+    <string name="lite_mode_on">オン</string>
+    <string name="lite_mode_direct">HTTPS のデータ節約</string>
+    <string name="lite_mode_connecting">接続中…</string>
+    <string name="lite_mode_unavailable">サービスを利用できません</string>
+    <string name="lite_mode_storage_error">設定を保存できませんでした</string>
+    <string name="lite_mode_saved_percent">%1$s 節約</string>
+    <string name="lite_mode_data_saved">節約したデータ量</string>
+    <string name="lite_mode_savings_scope">対応するリソースでの節約量</string>
+    <string name="lite_mode_private_scope">データ圧縮は通常のタブで利用できます。</string>
+    <string name="lite_mode_compression">データ圧縮</string>
+    <string name="lite_mode_lossless">可逆圧縮</string>
+    <string name="lite_mode_lossless_summary">元の品質を維持します。</string>
+    <string name="lite_mode_balanced">バランス</string>
+    <string name="lite_mode_balanced_summary">品質とデータ節約のバランスを取ります。</string>
+    <string name="lite_mode_saver">データ節約</string>
+    <string name="lite_mode_saver_summary">品質を少し下げてデータ使用量を抑えます。</string>
+    <string name="lite_mode_extreme">最大節約</string>
+    <string name="lite_mode_extreme_summary">品質をさらに下げてデータ使用量を最小限にします。</string>
+</resources>

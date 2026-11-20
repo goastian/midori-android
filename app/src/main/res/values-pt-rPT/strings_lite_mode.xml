@@ -1,0 +1,22 @@
+<resources>
+    <string name="lite_mode_title">Modo Lite</string>
+    <string name="lite_mode_off">Desativado</string>
+    <string name="lite_mode_on">Ativado</string>
+    <string name="lite_mode_direct">Poupança de dados HTTPS</string>
+    <string name="lite_mode_connecting">A estabelecer ligação…</string>
+    <string name="lite_mode_unavailable">Serviço indisponível</string>
+    <string name="lite_mode_storage_error">Não foi possível guardar as definições</string>
+    <string name="lite_mode_saved_percent">Poupou %1$s</string>
+    <string name="lite_mode_data_saved">Dados poupados</string>
+    <string name="lite_mode_savings_scope">Poupança medida nos recursos compatíveis</string>
+    <string name="lite_mode_private_scope">A compressão de dados está disponível nos separadores normais.</string>
+    <string name="lite_mode_compression">Compressão de dados</string>
+    <string name="lite_mode_lossless">Sem perdas</string>
+    <string name="lite_mode_lossless_summary">Preserva a qualidade original.</string>
+    <string name="lite_mode_balanced">Equilibrado</string>
+    <string name="lite_mode_balanced_summary">Equilibra a qualidade e a poupança de dados.</string>
+    <string name="lite_mode_saver">Poupança de dados</string>
+    <string name="lite_mode_saver_summary">Consome menos dados com uma ligeira redução da qualidade.</string>
+    <string name="lite_mode_extreme">Poupança máxima</string>
+    <string name="lite_mode_extreme_summary">Consome o mínimo de dados com uma maior redução da qualidade.</string>
+</resources>

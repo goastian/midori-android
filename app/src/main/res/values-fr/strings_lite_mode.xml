@@ -1,0 +1,22 @@
+<resources>
+    <string name="lite_mode_title">Mode Lite</string>
+    <string name="lite_mode_off">Désactivé</string>
+    <string name="lite_mode_on">Activé</string>
+    <string name="lite_mode_direct">Économie de données HTTPS</string>
+    <string name="lite_mode_connecting">Connexion…</string>
+    <string name="lite_mode_unavailable">Service indisponible</string>
+    <string name="lite_mode_storage_error">Impossible d’enregistrer les paramètres</string>
+    <string name="lite_mode_saved_percent">%1$s d’économie</string>
+    <string name="lite_mode_data_saved">Données économisées</string>
+    <string name="lite_mode_savings_scope">Économies mesurées sur les ressources compatibles</string>
+    <string name="lite_mode_private_scope">La compression des données est disponible dans les onglets normaux.</string>
+    <string name="lite_mode_compression">Compression des données</string>
+    <string name="lite_mode_lossless">Sans perte</string>
+    <string name="lite_mode_lossless_summary">Préserve la qualité d’origine.</string>
+    <string name="lite_mode_balanced">Équilibré</string>
+    <string name="lite_mode_balanced_summary">Équilibre la qualité et les économies de données.</string>
+    <string name="lite_mode_saver">Économie de données</string>
+    <string name="lite_mode_saver_summary">Utilise moins de données avec une légère baisse de qualité.</string>
+    <string name="lite_mode_extreme">Économie maximale</string>
+    <string name="lite_mode_extreme_summary">Utilise le moins de données avec une baisse de qualité plus importante.</string>
+</resources>
