@@ -83,6 +83,7 @@
     <string name="settings_accessibility_force_zoom">सभी वेबसाइटों पर ज़ूम करें</string>
     <string name="settings_accessibility_force_zoom_desc">उन साइटों पर भी पिंच और ज़ूम की अनुमति दें जो इसे ब्लॉक करने का प्रयास करती हैं।</string>
     <string name="available_appearance_dark">अंधेरा</string>
+    <string name="force_dark_website_colors">वेबसाइटों पर गहरे रंग लागू करें</string>
     <string name="available_appearance_light">रोशनी</string>
     <string name="custom_page_color_label">थीम</string>
     <string name="custom_page_color_disabled_description">आप डार्क मोड में थीम का रंग नहीं बदल सकते</string>

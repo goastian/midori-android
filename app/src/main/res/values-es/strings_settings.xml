@@ -84,6 +84,7 @@
     <string name="settings_accessibility_force_zoom_desc">Permitir pellizcar para ampliar incluso si el sitio intenta bloquearlo.</string>
 
     <string name="available_appearance_dark">Oscuro</string>
+    <string name="force_dark_website_colors">Forzar colores oscuros en sitios web</string>
     <string name="available_appearance_light">Claro</string>
 
     <string name="custom_page_color_label">Tema</string>

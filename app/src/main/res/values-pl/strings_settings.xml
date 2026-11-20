@@ -102,6 +102,7 @@
     <string name="settings_accessibility_force_zoom">Powiększanie we wszystkich witrynach</string>
     <string name="settings_accessibility_force_zoom_desc">Zezwalaj na powiększanie gestem nawet w witrynach, które je blokują.</string>
     <string name="available_appearance_dark">Ciemny</string>
+    <string name="force_dark_website_colors">Wymuszaj ciemne kolory na stronach</string>
     <string name="available_appearance_light">Jasny</string>
     <string name="custom_page_color_label">Motyw</string>
     <string name="custom_page_color_disabled_description">Nie można zmienić koloru motywu w trybie ciemnym</string>

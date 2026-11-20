@@ -83,6 +83,7 @@
     <string name="settings_accessibility_force_zoom">Увеличить масштаб всех веб-сайтов</string>
     <string name="settings_accessibility_force_zoom_desc">Разрешите масштабирование и масштабирование даже на сайтах, которые пытаются его заблокировать.</string>
     <string name="available_appearance_dark">Темный</string>
+    <string name="force_dark_website_colors">Принудительно использовать тёмные цвета на сайтах</string>
     <string name="available_appearance_light">Свет</string>
     <string name="custom_page_color_label">Тема</string>
     <string name="custom_page_color_disabled_description">Вы не можете изменить цвет темы в темном режиме.</string>

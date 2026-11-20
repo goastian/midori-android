@@ -83,6 +83,7 @@
     <string name="settings_accessibility_force_zoom">Zoom em todos os sites</string>
     <string name="settings_accessibility_force_zoom_desc">Permitir pinçar e aplicar zoom mesmo em sites que tentam bloqueá-lo.</string>
     <string name="available_appearance_dark">Escuro</string>
+    <string name="force_dark_website_colors">Forçar cores escuras nos sites</string>
     <string name="available_appearance_light">Luz</string>
     <string name="custom_page_color_label">Tema</string>
     <string name="custom_page_color_disabled_description">Não pode alterar a cor do tema no modo escuro</string>

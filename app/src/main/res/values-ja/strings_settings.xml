@@ -83,6 +83,7 @@
     <string name="settings_accessibility_force_zoom">すべての Web サイトをズームする</string>
     <string name="settings_accessibility_force_zoom_desc">ピンチとズームをブロックしようとするサイトでも許可します。</string>
     <string name="available_appearance_dark">暗い</string>
+    <string name="force_dark_website_colors">ウェブサイトで暗い配色を強制する</string>
     <string name="available_appearance_light">ライト</string>
     <string name="custom_page_color_label">テーマ</string>
     <string name="custom_page_color_disabled_description">ダークモードではテーマカラーを変更できません</string>

@@ -102,6 +102,7 @@
     <string name="settings_accessibility_force_zoom">Perbesar di semua situs</string>
     <string name="settings_accessibility_force_zoom_desc">Izinkan cubit dan perbesar bahkan di situs yang mencoba memblokirnya.</string>
     <string name="available_appearance_dark">Gelap</string>
+    <string name="force_dark_website_colors">Paksa warna gelap pada situs web</string>
     <string name="available_appearance_light">Terang</string>
     <string name="custom_page_color_label">Tema</string>
     <string name="custom_page_color_disabled_description">Anda tidak dapat mengubah warna tema dalam mode gelap</string>

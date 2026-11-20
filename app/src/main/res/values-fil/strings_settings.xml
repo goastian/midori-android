@@ -102,6 +102,7 @@
     <string name="settings_accessibility_force_zoom">Mag-zoom sa lahat ng website</string>
     <string name="settings_accessibility_force_zoom_desc">Payagan ang pag-pinch at pag-zoom kahit sa mga site na sumusubok na harangan ito.</string>
     <string name="available_appearance_dark">Madilim</string>
+    <string name="force_dark_website_colors">Sapilitang gumamit ng madidilim na kulay sa mga website</string>
     <string name="available_appearance_light">Maliwanag</string>
     <string name="custom_page_color_label">Tema</string>
     <string name="custom_page_color_disabled_description">Hindi mo mababago ang kulay ng tema sa madilim na mode</string>

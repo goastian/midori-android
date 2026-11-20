@@ -114,6 +114,7 @@
     <string name="settings_accessibility_force_zoom_desc">Allow pinch and zoom even on sites that try to block it.</string>
 
     <string name="available_appearance_dark">Dark</string>
+    <string name="force_dark_website_colors">Force dark colors on websites</string>
     <string name="available_appearance_light">Light</string>
 
     <string name="custom_page_color_label">Theme</string>

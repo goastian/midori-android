@@ -24,6 +24,7 @@
     <string name="hide_toolbar_on_scroll_label">Cacher la barre d’outils</string>
     <string name="appearance_label">Apparence</string>
     <string name="available_appearance_dark">Sombre</string>
+    <string name="force_dark_website_colors">Forcer les couleurs sombres sur les sites web</string>
     <string name="available_appearance_light">Claire</string>
     <string name="available_appearance_system">Automatique</string>
 

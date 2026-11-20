@@ -25,6 +25,7 @@
     <string name="available_tabs_view_list">Elenco</string>
 
     <string name="available_appearance_dark">Scuro</string>
+    <string name="force_dark_website_colors">Forza colori scuri sui siti web</string>
     <string name="available_appearance_light">Chiaro</string>
 
     <string name="custom_page_color_label">Tema</string>

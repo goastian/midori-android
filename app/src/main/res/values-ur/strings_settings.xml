@@ -102,6 +102,7 @@
     <string name="settings_accessibility_force_zoom">تمام ویب سائٹس پر زوم کریں</string>
     <string name="settings_accessibility_force_zoom_desc">ان سائٹس پر بھی چٹکی سے زوم کی اجازت دیں جو اسے روکنے کی کوشش کرتی ہیں۔</string>
     <string name="available_appearance_dark">گہری</string>
+    <string name="force_dark_website_colors">ویب سائٹس پر گہرے رنگ لازمی کریں</string>
     <string name="available_appearance_light">ہلکی</string>
     <string name="custom_page_color_label">تھیم</string>
     <string name="custom_page_color_disabled_description">گہرے موڈ میں تھیم کا رنگ تبدیل نہیں کیا جا سکتا</string>

@@ -26,6 +26,7 @@
     <string name="available_tabs_view_list">Liste</string>
 
     <string name="available_appearance_dark">Dunkles</string>
+    <string name="force_dark_website_colors">Dunkle Farben auf Websites erzwingen</string>
     <string name="available_appearance_light">Helles</string>
 
     <string name="custom_page_color_label">Thema</string>
