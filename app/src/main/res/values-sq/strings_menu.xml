@@ -13,4 +13,6 @@
     <string name="menu_customize_homepage">Personalizoni faqen kryesore</string>
     <string name="menu_dismiss_default_prompt">Mbyllni sugjerimin e shfletuesit të parazgjedhur</string>
     <string name="menu_default_browser_description">I shpejtë, privat dhe krijuar për ju.</string>
+    <string name="menu_print">Shtyp</string>
+    <string name="menu_print_failed">Faqja nuk mund të shtypej</string>
 </resources>

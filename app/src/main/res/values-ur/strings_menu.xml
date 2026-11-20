@@ -13,4 +13,6 @@
     <string name="menu_customize_homepage">ہوم پیج اپنی مرضی کے مطابق بنائیں</string>
     <string name="menu_dismiss_default_prompt">طے شدہ براؤزر کی تجویز ہٹائیں</string>
     <string name="menu_default_browser_description">تیز، نجی، اور آپ کے لیے بنایا گیا۔</string>
+    <string name="menu_print">پرنٹ کریں</string>
+    <string name="menu_print_failed">صفحہ پرنٹ نہیں ہو سکا</string>
 </resources>

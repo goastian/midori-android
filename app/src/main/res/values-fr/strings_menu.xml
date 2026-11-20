@@ -14,4 +14,6 @@
     <string name="menu_customize_homepage">Personnaliser la page d’accueil</string>
     <string name="menu_dismiss_default_prompt">Fermer la suggestion de navigateur par défaut</string>
     <string name="menu_default_browser_description">Rapide, privé et conçu pour vous.</string>
+    <string name="menu_print">Imprimer</string>
+    <string name="menu_print_failed">Impossible d\'imprimer la page</string>
 </resources>

@@ -13,4 +13,6 @@
     <string name="menu_customize_homepage">Dostosuj stronę główną</string>
     <string name="menu_dismiss_default_prompt">Odrzuć sugestię domyślnej przeglądarki</string>
     <string name="menu_default_browser_description">Szybko, prywatnie i z myślą o Tobie.</string>
+    <string name="menu_print">Drukuj</string>
+    <string name="menu_print_failed">Nie udało się wydrukować strony</string>
 </resources>

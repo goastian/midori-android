@@ -13,4 +13,6 @@
     <string name="menu_customize_homepage">Customise homepage</string>
     <string name="menu_dismiss_default_prompt">Dismiss default browser suggestion</string>
     <string name="menu_default_browser_description">Fast, private, and made for you.</string>
+    <string name="menu_print">Print</string>
+    <string name="menu_print_failed">Couldn\'t print the page</string>
 </resources>

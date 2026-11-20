@@ -12,6 +12,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.midorinext.android.R
 import org.midorinext.android.legacy.ClFeature
 import org.midorinext.android.mozac.downloads.openDownloadedFile
+import org.midorinext.android.mozac.pdf.PagePrintFailure
 import org.midorinext.android.ui.MidoriApplicationViewModel
 import org.midorinext.android.ui.browser.BrowserScreenViewModel
 import org.midorinext.android.ui.browser.toolbar.ToolbarHeight
@@ -60,6 +61,7 @@ fun GlobalFeatures(
 
     val context = LocalContext.current
     val pdfSaveFailedText = stringResource(id = R.string.menu_save_as_pdf_failed)
+    val printFailedText = stringResource(id = R.string.menu_print_failed)
     val completedDownloadText = stringResource(id = mozacR.string.mozac_feature_downloads_completed_notification_text2)
     val failedDownloadText = stringResource(id = mozacR.string.mozac_feature_downloads_failed_notification_text2)
     DownloadFeature(
@@ -82,9 +84,13 @@ fun GlobalFeatures(
         showSnackbar = { message, action -> appViewModel.showSnackbar(message, action) }
     )
 
-    LaunchedEffect(viewModel.pdfSaveEvents, pdfSaveFailedText) {
-        viewModel.pdfSaveEvents.failures.collect {
-            appViewModel.showSnackbar(pdfSaveFailedText)
+    LaunchedEffect(viewModel.pagePrintEvents, pdfSaveFailedText, printFailedText) {
+        viewModel.pagePrintEvents.failures.collect { failure ->
+            val message = when (failure) {
+                PagePrintFailure.SAVE_TO_PDF -> pdfSaveFailedText
+                PagePrintFailure.PRINT -> printFailedText
+            }
+            appViewModel.showSnackbar(message)
         }
     }
 

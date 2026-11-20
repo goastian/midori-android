@@ -38,6 +38,7 @@ import org.midorinext.android.ui.animation.MidoriMotion
 import org.midorinext.android.ui.browser.BrowserScreenViewModel
 import org.midorinext.android.ui.nav.NavDestination
 import org.midorinext.android.vpn.MidoriVpnFeature
+import mozilla.components.ui.icons.R as iconsR
 
 @Composable
 fun BrowserMenu(
@@ -261,6 +262,15 @@ private fun BrowserPageShortcuts(
             text = stringResource(R.string.menu_save_as_pdf),
             icon = R.drawable.icons_download,
             onClick = { afterDismiss { viewModel.sessionUseCases.saveToPdf() } },
+        )
+        BrowserMenuRow(
+            text = stringResource(R.string.menu_print),
+            icon = iconsR.drawable.mozac_ic_print_24,
+            onClick = {
+                viewModel.store.state.selectedTabId?.let { tabId ->
+                    afterDismiss { viewModel.sessionUseCases.printContent(tabId) }
+                }
+            },
         )
     }
 }

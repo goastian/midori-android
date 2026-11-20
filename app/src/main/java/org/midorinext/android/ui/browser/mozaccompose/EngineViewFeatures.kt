@@ -4,10 +4,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.midorinext.android.ext.activity
 import org.midorinext.android.ui.browser.BrowserScreenViewModel
 import mozilla.components.concept.engine.EngineView
 
@@ -16,6 +19,12 @@ fun BoxScope.EngineViewFeatures(
     engineView: EngineView,
     viewModel: BrowserScreenViewModel = hiltViewModel(),
 ) {
+    val activity = LocalContext.current.activity
+    DisposableEffect(engineView, activity) {
+        engineView.setActivityContext(activity)
+        onDispose { engineView.setActivityContext(null) }
+    }
+
     val canGoBack by viewModel.canGoBackInPage.collectAsStateWithLifecycle()
     val isFullScreen by viewModel.isFullScreen.collectAsStateWithLifecycle()
     SessionFeature(

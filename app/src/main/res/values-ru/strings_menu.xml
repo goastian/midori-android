@@ -13,4 +13,6 @@
     <string name="menu_customize_homepage">Настроить домашнюю страницу</string>
     <string name="menu_dismiss_default_prompt">Закрыть предложение браузера по умолчанию</string>
     <string name="menu_default_browser_description">Быстрый, приватный и созданный для вас.</string>
+    <string name="menu_print">Печать</string>
+    <string name="menu_print_failed">Не удалось распечатать страницу</string>
 </resources>

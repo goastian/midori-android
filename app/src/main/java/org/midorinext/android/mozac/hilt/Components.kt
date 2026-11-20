@@ -13,8 +13,8 @@ import org.midorinext.android.mozac.downloads.DownloadLocationProvider
 import org.midorinext.android.mozac.downloads.DownloadService
 import org.midorinext.android.mozac.media.MediaSessionService
 import org.midorinext.android.mozac.media.BackgroundPlaybackFeature
-import org.midorinext.android.mozac.pdf.PdfSaveEvents
-import org.midorinext.android.mozac.pdf.SaveToPdfMiddleware
+import org.midorinext.android.mozac.pdf.PagePrintEvents
+import org.midorinext.android.mozac.pdf.PagePrintMiddleware
 import org.midorinext.android.newtab.HomeContinuationMiddleware
 import dagger.Module
 import dagger.Provides
@@ -66,7 +66,7 @@ object MozacComponentHiltModule {
         thumbnailStorage: ThumbnailStorage,
         notificationsDelegate: NotificationsDelegate,
         appPreferencesRepository: AppPreferencesRepository,
-        pdfSaveEvents: PdfSaveEvents,
+        pagePrintEvents: PagePrintEvents,
         memoryBudget: BrowserMemoryBudget,
         blockingStartup: org.midorinext.android.adblock.ContentBlockingStartup,
         homeContinuation: HomeContinuationMiddleware,
@@ -84,7 +84,7 @@ object MozacComponentHiltModule {
                     downloadFileUtils = downloadFileUtils,
                     downloadStorage = downloadStorage
                 ),
-                SaveToPdfMiddleware(pdfSaveEvents),
+                PagePrintMiddleware(pagePrintEvents),
                 ThumbnailsMiddleware(thumbnailStorage),
                 PromptMiddleware(),
                 LastAccessMiddleware(),

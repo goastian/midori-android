@@ -14,4 +14,6 @@
     <string name="menu_customize_homepage">Startseite anpassen</string>
     <string name="menu_dismiss_default_prompt">Vorschlag für den Standardbrowser schließen</string>
     <string name="menu_default_browser_description">Schnell, privat und für dich gemacht.</string>
+    <string name="menu_print">Drucken</string>
+    <string name="menu_print_failed">Die Seite konnte nicht gedruckt werden</string>
 </resources>

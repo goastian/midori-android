@@ -13,4 +13,6 @@
     <string name="menu_customize_homepage">Sesuaikan halaman utama</string>
     <string name="menu_dismiss_default_prompt">Tutup saran browser default</string>
     <string name="menu_default_browser_description">Cepat, pribadi, dan dibuat untuk Anda.</string>
+    <string name="menu_print">Cetak</string>
+    <string name="menu_print_failed">Tidak dapat mencetak halaman</string>
 </resources>

@@ -13,4 +13,6 @@
     <string name="menu_customize_homepage">होमपेज कस्टमाइज़ करें</string>
     <string name="menu_dismiss_default_prompt">डिफ़ॉल्ट ब्राउज़र का सुझाव बंद करें</string>
     <string name="menu_default_browser_description">तेज़, निजी और आपके लिए बनाया गया।</string>
+    <string name="menu_print">प्रिंट करें</string>
+    <string name="menu_print_failed">पेज प्रिंट नहीं किया जा सका</string>
 </resources>

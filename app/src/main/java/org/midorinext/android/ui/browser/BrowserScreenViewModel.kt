@@ -9,7 +9,7 @@ import org.midorinext.android.adblock.DesktopHostFilter
 import org.midorinext.android.adblock.BlockingLevel
 import org.midorinext.android.adblock.NativeContentBlockingFeature
 import org.midorinext.android.adblock.hostOf
-import org.midorinext.android.mozac.pdf.PdfSaveEvents
+import org.midorinext.android.mozac.pdf.PagePrintEvents
 import org.midorinext.android.mozac.media.BackgroundPlaybackFeature
 import org.midorinext.android.pwa.WebAppRepository
 import org.midorinext.android.vpn.MidoriVpnFeature
@@ -73,7 +73,7 @@ class BrowserScreenViewModel @Inject constructor(
     val client: Client,
     val MidoriUseCases: MidoriUseCases,
     private val appPreferencesRepository: AppPreferencesRepository,
-    val pdfSaveEvents: PdfSaveEvents,
+    val pagePrintEvents: PagePrintEvents,
     val loginRepository: LoginAutofillRepository,
     private val backgroundPlaybackFeature: BackgroundPlaybackFeature,
     webAppRepositoryProvider: dagger.Lazy<WebAppRepository>,

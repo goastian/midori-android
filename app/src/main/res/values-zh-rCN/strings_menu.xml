@@ -13,4 +13,6 @@
     <string name="menu_customize_homepage">自定义主页</string>
     <string name="menu_dismiss_default_prompt">关闭默认浏览器建议</string>
     <string name="menu_default_browser_description">快速、私密，专为你打造。</string>
+    <string name="menu_print">打印</string>
+    <string name="menu_print_failed">无法打印页面</string>
 </resources>

@@ -13,4 +13,6 @@
     <string name="menu_customize_homepage">ホームページをカスタマイズ</string>
     <string name="menu_dismiss_default_prompt">既定のブラウザーの提案を閉じる</string>
     <string name="menu_default_browser_description">高速、プライベート、あなたのためのブラウザー。</string>
+    <string name="menu_print">印刷</string>
+    <string name="menu_print_failed">ページを印刷できませんでした</string>
 </resources>
