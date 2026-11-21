@@ -1,5 +1,6 @@
 package org.midorinext.android
 
+import android.content.ComponentCallbacks2
 import android.content.Intent
 import android.graphics.Color
 import android.os.Debug
@@ -65,11 +66,12 @@ class BrowserResourceDeviceTest {
                     }
                 }
                 if (expectedLimit > 0) {
-                    instrumentation.uiAutomation.executeShellCommand("am send-trim-memory ${app.packageName} RUNNING_LOW").use {
-                        android.os.ParcelFileDescriptor.AutoCloseInputStream(it).readBytes()
+                    val profile = app.memoryBudget.profile
+                    instrumentation.runOnMainSync {
+                        app.onTrimMemory(ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW)
                     }
-                    await("Android memory pressure") { app.memoryBudget.policy.visible && app.memoryBudget.policy.limit == app.memoryBudget.profile.background }
-                    await("resident budget under pressure") { residentCount() <= app.memoryBudget.profile.background }
+                    await("Android memory pressure") { app.memoryBudget.policy.visible && app.memoryBudget.policy.limit == profile.foregroundUnderPressure }
+                    await("resident budget under pressure") { residentCount() <= profile.foregroundUnderPressure }
                     samples.put(JSONObject().put("pressure_resident_sessions", residentCount()))
                     val suspended = store.state.tabs.first { it.id in fixtures && it.engineState.engineSession == null }
                     assertNotNull(suspended.engineState.engineSessionState)
@@ -97,15 +99,25 @@ class BrowserResourceDeviceTest {
                     }
                     await("Android background transition") { !app.memoryBudget.policy.visible }
                     await("background resident budget") {
-                        residentCount() <= app.memoryBudget.profile.background &&
+                        residentCount() <= profile.background &&
                             store.state.tabs.find { it.id == suspended.id }?.engineState?.engineSession == null
                     }
-                    assertNotNull(store.state.tabs.find { it.id == lastFixture }?.engineState?.engineSession)
+                    val lastTab = store.state.tabs.first { it.id == lastFixture }
+                    assertEquals(lastFixture, store.state.selectedTabId)
+                    if (profile.background == 0) {
+                        assertNotNull(lastTab.engineState.engineSessionState)
+                    } else {
+                        assertNotNull(lastTab.engineState.engineSession)
+                    }
                     samples.put(JSONObject().put("background_resident_sessions", residentCount()))
                     instrumentation.targetContext.startActivity(Intent(instrumentation.targetContext, MainActivity::class.java).apply {
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
                     })
                     await("Android foreground transition") { app.memoryBudget.policy.visible }
+                    await("selected tab restored automatically") {
+                        store.state.selectedTabId == lastFixture &&
+                            store.state.tabs.find { it.id == lastFixture }?.engineState?.engineSession != null && fixturePainted(51)
+                    }
                     store.dispatch(ContentAction.UpdateFirstContentfulPaintStateAction(suspended.id, false))
                     store.dispatch(TabListAction.SelectTabAction(suspended.id))
                     await("history restored with a fresh paint") {

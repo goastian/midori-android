@@ -16,10 +16,15 @@ class MemoryBudgetDeviceTest {
             val levels = mutableListOf<Int>()
             app.memoryBudget.registerCache(levels) { cache, level -> cache.add(level) }
             val wasVisible = app.memoryBudget.policy.visible
+            val expectedLimit = if (app.memoryBudget.policy.canSuspendIdleSelection) {
+                app.memoryBudget.profile.background
+            } else {
+                app.memoryBudget.profile.foregroundUnderPressure
+            }
             app.onLowMemory()
             assertEquals(listOf(ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL), levels)
             assertEquals(wasVisible, app.memoryBudget.policy.visible)
-            assertEquals(app.memoryBudget.profile.background, app.memoryBudget.policy.limit)
+            assertEquals(expectedLimit, app.memoryBudget.policy.limit)
         }
     }
 

@@ -35,10 +35,10 @@ class TabResourcePolicyTest {
     }
 
     @Test
-    fun keepsAllSessionsWithinBudgetAndAtLeastOneForInvalidBudgets() {
-        val tabs = listOf(ResidentTab("old", 10, false), ResidentTab("recent", 20, false))
+    fun zeroBudgetSuspendsEveryIdleSessionAndKeepsProtectedSessions() {
+        val tabs = listOf(ResidentTab("old", 10, false), ResidentTab("recent", 20, false), ResidentTab("protected", 30, true))
         assertTrue(tabsToSuspend(tabs, 5).isEmpty())
-        assertEquals(listOf("old"), tabsToSuspend(tabs, 0))
+        assertEquals(listOf("old", "recent"), tabsToSuspend(tabs, 0))
         assertTrue(tabsToSuspend(emptyList(), 2).isEmpty())
     }
 

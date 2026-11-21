@@ -2,6 +2,7 @@ package org.midorinext.android.ui.browser.mozaccompose
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.*
+import androidx.lifecycle.compose.LifecycleStartEffect
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.feature.session.SessionFeature
@@ -14,7 +15,8 @@ fun SessionFeature(
     canGoBack: Boolean,
     goBackUseCase: SessionUseCases.GoBackUseCase,
     goForwardUseCase: SessionUseCases.GoForwardUseCase,
-    backEnabled: () -> Boolean = { true }
+    backEnabled: () -> Boolean = { true },
+    stopPresentingWhenHidden: Boolean = false,
 ) {
     val feature = remember(engineView) {
         SessionFeature(
@@ -25,10 +27,15 @@ fun SessionFeature(
         )
     }
 
-    DisposableEffect(feature) {
-        feature.start()
-        onDispose {
-            feature.stop()
+    if (stopPresentingWhenHidden) {
+        LifecycleStartEffect(feature) {
+            feature.start()
+            onStopOrDispose { feature.stop() }
+        }
+    } else {
+        DisposableEffect(feature) {
+            feature.start()
+            onDispose { feature.stop() }
         }
     }
 

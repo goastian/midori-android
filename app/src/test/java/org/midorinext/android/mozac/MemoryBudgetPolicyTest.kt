@@ -27,6 +27,26 @@ class MemoryBudgetPolicyTest {
         }
     }
 
+    @Test fun onlyAnActualBackgroundTransitionCanReleaseTheIdleSelectionOnLowMemoryDevices() {
+        val policy = MemoryBudgetPolicy(MemoryProfile.forDevice(false, 3804, 256)) { 0 }
+        assertEquals(0, policy.profile.background)
+        assertEquals(1, policy.limit)
+        assertFalse(policy.canSuspendIdleSelection)
+
+        policy.visibility(true)
+        policy.trim(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
+        assertEquals(1, policy.limit)
+        assertFalse(policy.canSuspendIdleSelection)
+
+        policy.visibility(false)
+        assertEquals(0, policy.limit)
+        assertTrue(policy.canSuspendIdleSelection)
+        policy.visibility(true)
+        assertEquals(policy.profile.foreground, policy.limit)
+        assertFalse(policy.canSuspendIdleSelection)
+        assertEquals(1, MemoryProfile.forDevice(false, 8192, 256).background)
+    }
+
     @Test fun repeatedPressureExtendsCooldownAndResumeDoesNotImmediatelyRaiseTheLimit() {
         var time = 0L
         val policy = MemoryBudgetPolicy(MemoryProfile("test", 5, 2)) { time }

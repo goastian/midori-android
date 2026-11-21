@@ -24,9 +24,11 @@ class MemoryVisibilityDeviceTest {
         fun awaitVisible(expected: Boolean) {
             val deadline = SystemClock.elapsedRealtime() + 30_000
             while (true) {
-                var visible = !expected
-                instrumentation.runOnMainSync { visible = policy.visible }
-                if (visible == expected) return
+                var reached = false
+                instrumentation.runOnMainSync {
+                    reached = policy.visible == expected && (expected || policy.limit == policy.profile.background)
+                }
+                if (reached) return
                 check(SystemClock.elapsedRealtime() < deadline) { "Visibility did not become $expected" }
                 SystemClock.sleep(100)
             }

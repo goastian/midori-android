@@ -14,11 +14,16 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.withContext
 
 internal data class MemoryProfile(val name: String, val foreground: Int, val background: Int) {
+    val foregroundUnderPressure: Int get() = background.coerceAtLeast(1)
+
     companion object {
-        fun forDevice(lowRam: Boolean, ramMiB: Long, memoryClass: Int) = when {
-            lowRam || ramMiB <= 2048 || memoryClass <= 128 -> MemoryProfile("compact", 3, 1)
-            ramMiB <= 4096 || memoryClass <= 256 -> MemoryProfile("balanced", 4, 1)
-            else -> MemoryProfile("large", 5, 1)
+        fun forDevice(lowRam: Boolean, ramMiB: Long, memoryClass: Int): MemoryProfile {
+            val background = if (lowRam || ramMiB <= 4096) 0 else 1
+            return when {
+                lowRam || ramMiB <= 2048 || memoryClass <= 128 -> MemoryProfile("compact", 3, background)
+                ramMiB <= 4096 || memoryClass <= 256 -> MemoryProfile("balanced", 4, background)
+                else -> MemoryProfile("large", 5, background)
+            }
         }
     }
 }
@@ -29,10 +34,19 @@ internal class MemoryBudgetPolicy(
 ) {
     var visible = false
         private set
+    @Volatile private var activitiesStopped = false
     private var constrainedUntil = 0L
-    val limit: Int get() = if (visible && now() >= constrainedUntil) profile.foreground else profile.background
+    val canSuspendIdleSelection: Boolean get() = activitiesStopped && profile.background == 0
+    val limit: Int get() = when {
+        activitiesStopped -> profile.background
+        visible && now() >= constrainedUntil -> profile.foreground
+        else -> profile.foregroundUnderPressure
+    }
 
-    fun visibility(value: Boolean) { visible = value }
+    fun visibility(value: Boolean) {
+        activitiesStopped = !value
+        visible = value
+    }
 
     fun trim(level: Int) {
         if (level == ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN || level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {

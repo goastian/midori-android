@@ -91,7 +91,7 @@ object MozacComponentHiltModule {
                 UndoMiddleware(clearAfterMillis = 15_000),
                 LastMediaAccessMiddleware(),
                 RecordingDevicesMiddleware(context, notificationsDelegate),
-                TabResourceMiddleware(memoryBudget),
+                TabResourceMiddleware(memoryBudget, suspendSelectedWhenBackgrounded = true),
                 ReaderViewMiddleware(),
             ) + EngineMiddleware.create(engine, trimMemoryAutomatically = false) + TranslationsMiddleware(
                 engine = engine,

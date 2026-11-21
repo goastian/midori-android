@@ -33,7 +33,8 @@ fun BoxScope.EngineViewFeatures(
         canGoBack = canGoBack,
         goBackUseCase = viewModel.sessionUseCases.goBack,
         goForwardUseCase = viewModel.goForward,
-        backEnabled = { !isFullScreen && !viewModel.toolbarState.hasFocus }
+        backEnabled = { !isFullScreen && !viewModel.toolbarState.hasFocus },
+        stopPresentingWhenHidden = true,
     )
 
     ThumbnailFeature(

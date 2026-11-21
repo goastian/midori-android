@@ -30,13 +30,14 @@ internal data class ResidentTab(val id: String, val lastAccess: Long, val protec
 internal fun tabsToSuspend(tabs: List<ResidentTab>, limit: Int): List<String> = tabs
     .filterNot { it.protected }
     .sortedBy { it.lastAccess }
-    .take((tabs.size - limit.coerceAtLeast(1)).coerceAtLeast(0))
+    .take((tabs.size - limit.coerceAtLeast(0)).coerceAtLeast(0))
     .map { it.id }
 
 class TabResourceMiddleware(
     private val budget: BrowserMemoryBudget,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
     private val now: () -> Long = SystemClock::elapsedRealtime,
+    private val suspendSelectedWhenBackgrounded: Boolean = false,
 ) : Middleware<BrowserState, BrowserAction> {
     private var registered = false
     private var closed = false
@@ -202,7 +203,11 @@ class TabResourceMiddleware(
         return paused == null || paused.deadline > now()
     }
 
-    private fun TabSessionState.isResourceProtected(selectedId: String?) = isProtected(selectedId, hasPauseGrace())
+    private fun protectedSelection(selectedId: String?): String? =
+        if (suspendSelectedWhenBackgrounded && budget.policy.canSuspendIdleSelection) null else selectedId
+
+    private fun TabSessionState.isResourceProtected(selectedId: String?) =
+        isProtected(protectedSelection(selectedId), hasPauseGrace())
 
     private fun publishBudget(state: BrowserState) {
         budget.update(this, state.tabs.filter { it.engineState.engineSession != null }.map {
@@ -234,9 +239,11 @@ class TabResourceMiddleware(
             delay(1_000)
             operationDeadlines.filterValues { it <= now() }.keys.toList().forEach(::deferRetry)
             retryAfter.entries.removeAll { it.value <= now() }
-            candidates(store.state).forEach { id ->
+            val state = store.state
+            publishBudget(state)
+            candidates(state).forEach { id ->
                 if (id !in checkingForms && id !in flushingState) {
-                    val session = store.state.tabs.find { it.id == id }?.engineState?.engineSession ?: return@forEach
+                    val session = state.tabs.find { it.id == id }?.engineState?.engineSession ?: return@forEach
                     checkForms(id, session)
                 }
             }
@@ -266,9 +273,10 @@ class TabResourceMiddleware(
     }
 
     private fun updatePriorities(state: BrowserState) {
+        val selectedId = protectedSelection(state.selectedTabId)
         state.tabs.forEach { tab ->
             val session = tab.engineState.engineSession ?: return@forEach
-            val priority = if (tab.needsHighPriority(state.selectedTabId) ||
+            val priority = if (tab.needsHighPriority(selectedId) ||
                 tab.id in checkingForms || tab.id in flushingState
             ) EngineSession.SessionPriority.HIGH else EngineSession.SessionPriority.DEFAULT
             if (priorities[session] != priority) {

@@ -127,6 +127,11 @@ class MainActivity : MidoriActivity() {
         (application as MidoriApplication).store.get().dispatch(AppLifecycleAction.ResumeAction)
     }
 
+    override fun onStop() {
+        super.onStop()
+        backgroundPlaybackFeature.reassertPlayingSession()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         if (isFinishing) {
