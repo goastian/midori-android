@@ -2,6 +2,7 @@ package org.midorinext.android
 
 import android.app.Activity
 import android.app.Application
+import android.content.res.Configuration as AndroidConfiguration
 import android.os.Bundle
 import android.os.Looper
 import androidx.annotation.MainThread
@@ -20,6 +21,7 @@ import org.midorinext.android.mozac.media.BackgroundPlaybackFeature
 import org.midorinext.android.preferences.app.AppPreferences
 import org.midorinext.android.preferences.app.AppPreferencesSerializer
 import org.midorinext.android.preferences.app.AppPreferencesRepository
+import org.midorinext.android.preferences.app.Appearance
 import org.midorinext.android.preferences.app.migrateLegacyTabGroups
 import org.midorinext.android.storage.autofill.AutofillPreferenceState
 import org.midorinext.android.storage.history.HistoryRepository
@@ -36,12 +38,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import mozilla.components.browser.session.storage.SessionStorage
 import mozilla.components.browser.state.action.SystemAction
 import mozilla.components.browser.state.action.TranslationsAction
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
+import mozilla.components.concept.engine.mediaquery.PreferredColorScheme
 import mozilla.components.concept.fetch.Client
 import mozilla.components.feature.media.MediaSessionFeature
 import mozilla.components.feature.session.SessionUseCases
@@ -99,6 +103,7 @@ class MidoriApplication : Application(), Configuration.Provider {
     }
     private var browserStateRestoration: Job? = null
     private var browserInitialized = false
+    private val systemDarkTheme by lazy { MutableStateFlow(resources.configuration.isDarkTheme()) }
     private val browserSessionLifecycle by lazy {
         BrowserSessionLifecycle(
             preferences = appPreferencesRepository.get().flow,
@@ -209,6 +214,13 @@ class MidoriApplication : Application(), Configuration.Provider {
         //  Should be removed in futur version, once mozilla has fully migrated
         //  meanwhile move this elsewhere
         val tuc = tabsUseCases.get()
+        applicationScope.launch {
+            combine(appPreferencesRepository.get().snapshot.filterNotNull(), systemDarkTheme) { prefs, systemDark ->
+                prefs.webAppearance(systemDark)
+            }.distinctUntilChanged().collect { (scheme, forceDarkColors) ->
+                applyWebAppearance(scheme, forceDarkColors)
+            }
+        }
         WebExtensionSupport.initialize(
             runtime = engine.get(),
             store = store.get(),
@@ -268,6 +280,9 @@ class MidoriApplication : Application(), Configuration.Provider {
     }
 
     private fun restoreBrowserState() = applicationScope.launch(Dispatchers.Main) {
+        val preferences = appPreferencesRepository.get().snapshot.filterNotNull().first()
+        val (scheme, forceDarkColors) = preferences.webAppearance(systemDarkTheme.value)
+        applyWebAppearance(scheme, forceDarkColors)
         migrateLegacyTabGroups(this@MidoriApplication, engine.get().name(), appPreferencesRepository.get())
         browserSessionLifecycle.restore()
         sessionStorage.get().let {
@@ -277,6 +292,16 @@ class MidoriApplication : Application(), Configuration.Provider {
                 .whenGoingToBackground()
                 .whenSessionsChange()
         }
+    }
+
+    private fun applyWebAppearance(scheme: PreferredColorScheme, forceDarkColors: Boolean) {
+        engine.get().settings.preferredColorScheme = scheme
+        GeckoPreferences.forceDarkWebsiteColors(forceDarkColors)
+    }
+
+    override fun onConfigurationChanged(newConfig: AndroidConfiguration) {
+        super.onConfigurationChanged(newConfig)
+        systemDarkTheme.value = newConfig.isDarkTheme()
     }
 
     fun onBrowserClosed() = applicationScope.launch {
@@ -300,6 +325,19 @@ class MidoriApplication : Application(), Configuration.Provider {
             memoryBudget.onTrimMemory(android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL)
         }
     }
+}
+
+private fun AndroidConfiguration.isDarkTheme(): Boolean =
+    (uiMode and AndroidConfiguration.UI_MODE_NIGHT_MASK) == AndroidConfiguration.UI_MODE_NIGHT_YES
+
+private fun AppPreferences.webAppearance(systemDark: Boolean): Pair<PreferredColorScheme, Boolean> {
+    val scheme = when (appearance) {
+        Appearance.LIGHT -> PreferredColorScheme.Light
+        Appearance.DARK -> PreferredColorScheme.Dark
+        else -> PreferredColorScheme.System
+    }
+    val dark = scheme == PreferredColorScheme.Dark || (scheme == PreferredColorScheme.System && systemDark)
+    return scheme to (forceDarkWebsiteColors && dark)
 }
 
 internal fun geckoSettingsChanges(

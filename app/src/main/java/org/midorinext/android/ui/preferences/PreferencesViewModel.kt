@@ -294,6 +294,10 @@ class PreferencesViewModel @Inject constructor(
         viewModelScope.launch { appPreferencesRepository.updateAppearance(appearance) }
     }
 
+    fun updateForceDarkWebsiteColors(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updateForceDarkWebsiteColors(enabled) }
+    }
+
     fun updateClearDataPreferences(preferences: ClearDataPreferences) {
         viewModelScope.launch { appPreferencesRepository.updateClearDataPreferences(preferences) }
     }

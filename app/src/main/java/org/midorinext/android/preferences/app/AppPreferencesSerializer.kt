@@ -15,7 +15,6 @@ object AppPreferencesSerializer : Serializer<AppPreferences> {
         .setHideToolbarOnScroll(true)
         .setTabsView(TabsViewOption.GRID)
         .setCloseTabsOnExit(false)
-        .setOpenLinksInApp(true)
         .setSearchEngine(SearchEnginePreference.GOOGLE)
         .setPrivateSearchEngine(SearchEnginePreference.GOOGLE)
         .setClearDataOnQuit(false)

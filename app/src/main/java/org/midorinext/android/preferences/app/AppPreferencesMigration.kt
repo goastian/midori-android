@@ -20,7 +20,7 @@ object AppPreferencesMigration {
             context, SHARED_PREFS_NAME, keysToMigrate
         ) { sharedPrefs: SharedPreferencesView, currentData: AppPreferences ->
             with (currentData.toBuilder()) {
-                openLinksInApp = sharedPrefs.getBoolean("pref_key_general_launchexternalapp", true)
+                openLinksInApp = sharedPrefs.getBoolean("pref_key_general_launchexternalapp", currentData.openLinksInApp)
                 clearDataOnQuit = sharedPrefs.getBoolean("pref_key_privacy_cleardata_on_close", true)
                 clearDataHistory = sharedPrefs.getBoolean("pref_key_cleardata_content_history", true)
                 clearDataTabs = sharedPrefs.getBoolean("pref_key_cleardata_content_tabs", true)

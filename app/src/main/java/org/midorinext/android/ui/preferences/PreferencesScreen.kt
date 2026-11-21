@@ -104,6 +104,11 @@ fun PreferencesScreen(
                 onClicked = { navigateTo(NavDestination.SearchSettings) }
             )
             PreferenceToggle(
+                label = R.string.open_links_in_apps,
+                value = appPrefs.openLinksInApp,
+                onValueChange = viewModel::updateOpenLinksInApp,
+            )
+            PreferenceToggle(
                 label = R.string.settings_bookmarks_current_tab,
                 description = R.string.settings_bookmarks_current_tab_summary,
                 value = appPrefs.openBookmarksInCurrentTab,
@@ -433,6 +438,11 @@ fun CustomizeSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
             },
             value = appPrefs.appearance,
             onValueChange = viewModel::updateAppearance
+        )
+        PreferenceToggle(
+            label = R.string.force_dark_website_colors,
+            value = appPrefs.forceDarkWebsiteColors,
+            onValueChange = viewModel::updateForceDarkWebsiteColors,
         )
 
         PreferenceGroupLabel(label = R.string.toolbar_position_label)

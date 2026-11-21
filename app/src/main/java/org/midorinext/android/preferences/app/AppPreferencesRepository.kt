@@ -565,6 +565,10 @@ class AppPreferencesRepository internal constructor(
         }
     }
 
+    suspend fun updateForceDarkWebsiteColors(enabled: Boolean) {
+        datastore.updateData { it.toBuilder().setForceDarkWebsiteColors(enabled).build() }
+    }
+
     suspend fun updateGlobalPrivacyControl(enabled: Boolean) {
         datastore.updateData { prefs ->
             prefs.toBuilder().setPrivacyGlobalPrivacyControl(enabled).build()

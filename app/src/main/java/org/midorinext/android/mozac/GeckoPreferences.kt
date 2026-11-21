@@ -3,6 +3,8 @@ package org.midorinext.android.mozac
 import android.util.Log
 import org.mozilla.geckoview.ContentBlocking
 import org.mozilla.geckoview.GeckoPreferenceController
+import org.mozilla.geckoview.GeckoPreferenceController.PREF_BRANCH_DEFAULT
+import org.mozilla.geckoview.GeckoPreferenceController.SetGeckoPreference
 import org.mozilla.geckoview.GeckoRuntime
 import org.mozilla.geckoview.GeckoRuntimeSettings
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
@@ -25,6 +27,7 @@ object GeckoPreferences {
     private const val BACKGROUND_VIDEO_SUSPEND_PREF = "media.suspend-background-video.enabled"
     private val jpegXlConfigured = AtomicBoolean(false)
     private val backgroundVideoSuspensionConfigured = AtomicBoolean(false)
+    private var forcedDarkWebsiteColors = false
 
     data class UserSettings(
         val globalPrivacyControl: Boolean,
@@ -45,6 +48,30 @@ object GeckoPreferences {
         applyDnsSettings(runtime, settings.dohProvider)
         enableJpegXl()
         disableBackgroundVideoSuspension()
+    }
+
+    fun forceDarkWebsiteColors(enabled: Boolean) {
+        if (forcedDarkWebsiteColors == enabled) return
+        forcedDarkWebsiteColors = enabled
+
+        // Gecko's forced-colors mode uses the light palette even when the requested colors are dark.
+        val colors = listOf(
+            "browser.display.background_color" to if (enabled) "#1C1B22" else "#FFFFFF",
+            "browser.display.foreground_color" to if (enabled) "#FBFBFE" else "#000000",
+            "browser.anchor_color" to if (enabled) "#00CADB" else "#0000EE",
+            "browser.visited_color" to if (enabled) "#FFADFF" else "#551A8B",
+            "browser.active_color" to if (enabled) "#FF6666" else "#EE0000",
+        )
+        val prefs = colors.map { (key, value) -> SetGeckoPreference.setStringPref(key, value, PREF_BRANCH_DEFAULT) } +
+            SetGeckoPreference.setIntPref("browser.display.document_color_use", if (enabled) 2 else 1, PREF_BRANCH_DEFAULT)
+        GeckoPreferenceController.setGeckoPrefs(prefs).accept(
+            { result ->
+                if (result?.values?.all { it } != true) {
+                    Log.e(LOG_TAG, "Gecko did not apply all website color preferences")
+                }
+            },
+            { error -> Log.e(LOG_TAG, "Could not change Gecko website colors", error) },
+        )
     }
 
     private fun enableJpegXl() {
