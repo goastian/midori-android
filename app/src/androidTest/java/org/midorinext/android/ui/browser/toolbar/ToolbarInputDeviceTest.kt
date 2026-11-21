@@ -1,10 +1,8 @@
 package org.midorinext.android.ui.browser.toolbar
 
 import androidx.activity.ComponentActivity
-import android.view.SurfaceHolder
-import android.view.SurfaceView
+import android.view.TextureView
 import android.view.View
-import android.view.ViewGroup
 import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +29,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.AnnotatedString
+import androidx.core.view.allViews
 import androidx.datastore.core.DataStore
 import androidx.test.platform.app.InstrumentationRegistry
 import dagger.Lazy
@@ -133,17 +132,16 @@ class ToolbarInputDeviceTest {
             compose.waitUntil { state.toolbarPosition.value == position }
             compose.waitForIdle()
             val visibleHeight = pageMetrics.get()!!.getDouble("height")
-            val surface = compose.runOnIdle { findSurface(compose.activity.window.decorView)!! }
+            val surface = compose.runOnIdle { compose.activity.window.decorView.allViews.filterIsInstance<TextureView>().first() }
+            val texture = compose.runOnIdle { requireNotNull(surface.surfaceTexture) }
             val initialSize = compose.runOnIdle { surface.width to surface.height }
             val resizes = AtomicInteger()
-            val callback = object : SurfaceHolder.Callback {
-                override fun surfaceCreated(holder: SurfaceHolder) = Unit
-                override fun surfaceDestroyed(holder: SurfaceHolder) = Unit
-                override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+            val resizeListener = View.OnLayoutChangeListener { _, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+                if (right - left != oldRight - oldLeft || bottom - top != oldBottom - oldTop) {
                     resizes.incrementAndGet()
                 }
             }
-            compose.runOnIdle { surface.holder.addCallback(callback) }
+            compose.runOnIdle { surface.addOnLayoutChangeListener(resizeListener) }
             try {
                 repeat(10) { index ->
                     compose.runOnIdle { state.updateVisibility(index % 2 == 0) }
@@ -163,20 +161,14 @@ class ToolbarInputDeviceTest {
                     compose.waitForIdle()
                 }
                 compose.runOnIdle {
-                    assertSame("Editing must preserve GeckoView ($position)", surface, findSurface(compose.activity.window.decorView))
+                    assertSame("Editing must preserve the Gecko surface ($position)", texture, surface.surfaceTexture)
                     assertEquals(initialSize, surface.width to surface.height)
                 }
                 assertEquals(0, resizes.get())
             } finally {
-                compose.runOnIdle { surface.holder.removeCallback(callback) }
+                compose.runOnIdle { surface.removeOnLayoutChangeListener(resizeListener) }
             }
         }
-    }
-
-    private fun findSurface(view: View): SurfaceView? = when (view) {
-        is SurfaceView -> view
-        is ViewGroup -> (0 until view.childCount).firstNotNullOfOrNull { findSurface(view.getChildAt(it)) }
-        else -> null
     }
 
     @Test

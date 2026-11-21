@@ -1,8 +1,12 @@
 package org.midorinext.android
 
+import android.app.ActivityManager
 import android.content.Intent
+import android.os.Build
 import android.os.Debug
 import android.os.SystemClock
+import androidx.activity.ComponentActivity
+import androidx.lifecycle.Lifecycle
 import androidx.preference.PreferenceManager
 import androidx.test.core.app.ActivityScenario
 import androidx.test.platform.app.InstrumentationRegistry
@@ -18,12 +22,15 @@ import kotlinx.coroutines.runBlocking
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.action.MediaSessionAction
 import mozilla.components.browser.state.action.TabListAction
+import mozilla.components.browser.state.state.createTab
 import mozilla.components.concept.engine.mediasession.MediaSession
 import org.json.JSONObject
 import org.junit.Assert.*
+import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.Rule
 import org.midorinext.android.mozac.permissions.isForAutoplay
+import org.midorinext.android.mozac.media.MediaSessionService
 
 class MediaResourceDeviceTest {
     @get:Rule val compose = createEmptyComposeRule()
@@ -227,6 +234,64 @@ class MediaResourceDeviceTest {
                 shared.edit().putBoolean(key, onboarding).commit()
             }
         }
+    }
+
+    @Test
+    fun mediaForegroundServiceSurvivesShortTrackGapsInBackground() {
+        assumeTrue(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        val scenario = ActivityScenario.launch(ComponentActivity::class.java)
+        val tab = createTab("https://media-transition.example/")
+        fun playback(state: MediaSession.PlaybackState) {
+            store.dispatch(MediaSessionAction.UpdateMediaPlaybackStateAction(tab.id, state))
+            await("playback state $state") {
+                store.state.tabs.firstOrNull { it.id == tab.id }?.mediaSessionState?.playbackState == state
+            }
+            instrumentation.waitForIdleSync()
+        }
+        try {
+            instrumentation.runOnMainSync {
+                app.initializeBrowser("media_foreground_test", restoreSession = false)
+                app.mediaFeature.get().start()
+            }
+            store.dispatch(TabListAction.AddTabAction(tab))
+            store.dispatch(MediaSessionAction.ActivatedMediaSessionAction(tab.id, FixtureMediaController))
+            playback(MediaSession.PlaybackState.PLAYING)
+            await("media foreground service started") { mediaServiceIsForeground() }
+
+            scenario.moveToState(Lifecycle.State.CREATED)
+            playback(MediaSession.PlaybackState.PAUSED)
+            assertTrue("A short track gap must keep the media service in the foreground", mediaServiceIsForeground())
+            playback(MediaSession.PlaybackState.PLAYING)
+            SystemClock.sleep(5_500)
+            assertTrue("Resuming playback must cancel the scheduled stop", mediaServiceIsForeground())
+
+            playback(MediaSession.PlaybackState.PAUSED)
+            await("media service demoted after sustained pause") { !mediaServiceIsForeground() }
+        } finally {
+            store.dispatch(TabListAction.RemoveTabAction(tab.id))
+            await("media fixture removed") { store.state.tabs.none { it.id == tab.id } }
+            instrumentation.waitForIdleSync()
+            instrumentation.runOnMainSync { app.mediaFeature.get().stop() }
+            scenario.close()
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun mediaServiceIsForeground(): Boolean = requireNotNull(app.getSystemService(ActivityManager::class.java))
+        .getRunningServices(Int.MAX_VALUE)
+        .any { it.service.className == MediaSessionService::class.java.name && it.foreground }
+
+    private object FixtureMediaController : MediaSession.Controller {
+        override fun pause() = Unit
+        override fun stop() = Unit
+        override fun play() = Unit
+        override fun seekTo(time: Double, fast: Boolean) = Unit
+        override fun seekForward() = Unit
+        override fun seekBackward() = Unit
+        override fun nextTrack() = Unit
+        override fun previousTrack() = Unit
+        override fun skipAd() = Unit
+        override fun muteAudio(mute: Boolean) = Unit
     }
 
     private fun returnToBrowser() {

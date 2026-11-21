@@ -17,7 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.saveable.mapSaver
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,26 +62,36 @@ internal class HomeShortcutUiState {
     var busy by mutableStateOf(false)
 
     companion object {
-        val Saver = mapSaver(
-            save = { state: HomeShortcutUiState -> mapOf(
-                "collection" to state.collectionId, "picker" to state.pickerParentId,
-                "selected" to state.selectedId, "editor" to state.editorId,
-                "editorParent" to state.editorParentId, "showEditor" to state.showEditor,
-                "folderEditor" to state.folderEditorId, "showFolderEditor" to state.showFolderEditor,
-                "moving" to state.movingId, "removing" to state.removingFolderId,
+        val Saver = Saver<HomeShortcutUiState, Any>(
+            save = { state -> arrayListOf(
+                "collection", state.collectionId, "picker", state.pickerParentId,
+                "selected", state.selectedId, "editor", state.editorId,
+                "editorParent", state.editorParentId, "showEditor", state.showEditor,
+                "folderEditor", state.folderEditorId, "showFolderEditor", state.showFolderEditor,
+                "moving", state.movingId, "removing", state.removingFolderId,
             ) },
-            restore = { saved -> HomeShortcutUiState().apply {
-                collectionId = saved["collection"] as String?
-                pickerParentId = saved["picker"] as String?
-                selectedId = saved["selected"] as String?
-                editorId = saved["editor"] as String?
-                editorParentId = saved["editorParent"] as String
-                showEditor = saved["showEditor"] as Boolean
-                folderEditorId = saved["folderEditor"] as String?
-                showFolderEditor = saved["showFolderEditor"] as Boolean
-                movingId = saved["moving"] as String?
-                removingFolderId = saved["removing"] as String?
-            } },
+            restore = { saved ->
+                if (saved !is List<*> || saved.size % 2 != 0) return@Saver null
+                // The previous mapSaver stored alternating keys and values in a list.
+                val fields = buildMap {
+                    for (index in saved.indices step 2) {
+                        val key = saved[index] as? String ?: return@Saver null
+                        put(key, saved[index + 1])
+                    }
+                }
+                HomeShortcutUiState().apply {
+                    collectionId = fields["collection"] as? String
+                    pickerParentId = fields["picker"] as? String
+                    selectedId = fields["selected"] as? String
+                    editorId = fields["editor"] as? String
+                    editorParentId = fields["editorParent"] as? String ?: ""
+                    showEditor = fields["showEditor"] as? Boolean ?: false
+                    folderEditorId = fields["folderEditor"] as? String
+                    showFolderEditor = fields["showFolderEditor"] as? Boolean ?: false
+                    movingId = fields["moving"] as? String
+                    removingFolderId = fields["removing"] as? String
+                }
+            },
         )
     }
 

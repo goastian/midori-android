@@ -1,6 +1,5 @@
 package org.midorinext.android.ui.browser.mozaccompose
 
-import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Box
@@ -31,10 +30,8 @@ fun EngineView(
             factory = { context ->
                 engine.createView(context).asView().apply {
                     this.isNestedScrollingEnabled = true
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
-                        // Configure before attaching: swapping during fullscreen can interrupt decoding and orientation locks.
-                        findGeckoView(this)?.setViewBackend(GeckoView.BACKEND_TEXTURE_VIEW)
-                    }
+                    // Avoid SurfaceView's synchronous compositor resize during Compose layout.
+                    findGeckoView(this)?.setViewBackend(GeckoView.BACKEND_TEXTURE_VIEW)
                 }
             },
             update = { view ->

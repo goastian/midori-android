@@ -103,6 +103,7 @@ class MidoriApplication : Application(), Configuration.Provider {
     }
     private var browserStateRestoration: Job? = null
     private var browserInitialized = false
+    private var retryMediaForeground = false
     private val systemDarkTheme by lazy { MutableStateFlow(resources.configuration.isDarkTheme()) }
     private val browserSessionLifecycle by lazy {
         BrowserSessionLifecycle(
@@ -142,6 +143,13 @@ class MidoriApplication : Application(), Configuration.Provider {
                 if (started++ == 0) {
                     memoryBudget.onVisibilityChanged(true)
                     org.midorinext.android.diagnostics.DiagnosticsRuntime.visibility(true)
+                    if (retryMediaForeground) {
+                        retryMediaForeground = false
+                        mediaFeature.get().apply {
+                            stop()
+                            start()
+                        }
+                    }
                 }
             }
             override fun onActivityStopped(activity: Activity) {
@@ -167,6 +175,11 @@ class MidoriApplication : Application(), Configuration.Provider {
         }
         RustHttpConfig.setClient(lazy { client.get() })
         StartupTiming.mark("application_ready")
+    }
+
+    @MainThread
+    internal fun retryMediaForegroundOnNextStart() {
+        retryMediaForeground = true
     }
 
     @MainThread

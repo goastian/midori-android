@@ -72,6 +72,8 @@ public abstract class WithoutTelemetryAarTransform implements TransformAction<Tr
     static byte[] stripJar(byte[] jar) throws IOException {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         boolean changed = false;
+        boolean mediaDelegatePatched = false;
+        boolean mediaRequestPatched = false;
         try (ZipInputStream source = new ZipInputStream(new ByteArrayInputStream(jar));
                 ZipOutputStream target = new ZipOutputStream(bytes)) {
             ZipEntry entry;
@@ -83,11 +85,22 @@ public abstract class WithoutTelemetryAarTransform implements TransformAction<Tr
                     if (data != null && entry.getName().equals(GeckoPortLifecyclePatch.PORT + ".class")) {
                         data = GeckoPortLifecyclePatch.apply(data);
                     }
+                    if (data != null && entry.getName().equals(MediaSessionLifecyclePatch.DELEGATE + ".class")) {
+                        data = MediaSessionLifecyclePatch.apply(data, MediaSessionLifecyclePatch.DELEGATE);
+                        mediaDelegatePatched = true;
+                    }
+                    if (data != null && entry.getName().equals(MediaSessionLifecyclePatch.REQUEST + ".class")) {
+                        data = MediaSessionLifecyclePatch.apply(data, MediaSessionLifecyclePatch.REQUEST);
+                        mediaRequestPatched = true;
+                    }
                     changed |= !java.util.Arrays.equals(original, data);
                     if (data != null) TelemetryReferenceAudit.assertClean(data);
                 }
                 if (data != null) writeEntry(target, entry.getName(), data);
             }
+        }
+        if (mediaDelegatePatched != mediaRequestPatched) {
+            throw new IllegalStateException("Mozilla media service classes changed; review the lifecycle patch");
         }
         return changed ? bytes.toByteArray() : jar;
     }

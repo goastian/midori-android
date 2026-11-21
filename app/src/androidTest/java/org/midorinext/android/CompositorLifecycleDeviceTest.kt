@@ -4,10 +4,8 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.SystemClock
-import android.view.SurfaceHolder
-import android.view.SurfaceView
+import android.view.TextureView
 import android.view.View
-import android.view.ViewGroup
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.hasSetTextAction
@@ -19,6 +17,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.printToString
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.allViews
 import androidx.lifecycle.Lifecycle
 import androidx.preference.PreferenceManager
 import androidx.test.core.app.ActivityScenario
@@ -108,7 +107,12 @@ class CompositorLifecycleDeviceTest {
             )
         }
         compose.waitUntil(20_000) { pageFrame() > 0 }
-        assertPagePainted()
+        try {
+            assertPagePainted()
+        } catch (failure: Throwable) {
+            runCatching { capture("initial") }.exceptionOrNull()?.let(failure::addSuppressed)
+            throw failure
+        }
     }
 
     @After
@@ -200,17 +204,15 @@ class CompositorLifecycleDeviceTest {
     }
 
     private fun recordStep(label: String, action: () -> Unit) {
-        val surface = onMain { findSurface(activity.window.decorView)!! }
-        val before = onMain { surface.width to surface.height }
-        val changes = AtomicInteger()
-        val creates = AtomicInteger()
-        val destroys = AtomicInteger()
-        val callback = object : SurfaceHolder.Callback {
-            override fun surfaceCreated(holder: SurfaceHolder) { creates.incrementAndGet() }
-            override fun surfaceDestroyed(holder: SurfaceHolder) { destroys.incrementAndGet() }
-            override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) { changes.incrementAndGet() }
+        val renderer = onMain { activity.window.decorView.allViews.filterIsInstance<TextureView>().first() }
+        val before = onMain { renderer.width to renderer.height }
+        val resizes = AtomicInteger()
+        val resizeListener = View.OnLayoutChangeListener { _, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+            if (right - left != oldRight - oldLeft || bottom - top != oldBottom - oldTop) {
+                resizes.incrementAndGet()
+            }
         }
-        onMain { surface.holder.addCallback(callback) }
+        onMain { renderer.addOnLayoutChangeListener(resizeListener) }
         val started = SystemClock.elapsedRealtime()
         var passed = false
         try {
@@ -228,11 +230,10 @@ class CompositorLifecycleDeviceTest {
             }.exceptionOrNull()?.let(failure::addSuppressed)
             throw failure
         } finally {
-            onMain { surface.holder.removeCallback(callback) }
+            onMain { renderer.removeOnLayoutChangeListener(resizeListener) }
             samples.put(JSONObject().put("step", label).put("passed", passed)
                 .put("elapsed_ms", SystemClock.elapsedRealtime() - started)
-                .put("surface_changes", changes.get()).put("surface_creates", creates.get())
-                .put("surface_destroys", destroys.get()).put("width_before", before.first)
+                .put("view_resizes", resizes.get()).put("width_before", before.first)
                 .put("height_before", before.second))
         }
     }
@@ -249,21 +250,16 @@ class CompositorLifecycleDeviceTest {
     }
 
     private fun assertPagePainted() {
-        val (x, y) = onMain {
-            val surface = findSurface(activity.window.decorView)!!
-            assertTrue(surface.holder.surface.isValid)
-            val location = IntArray(2)
-            surface.getLocationOnScreen(location)
-            (location[0] + surface.width / 2) to (location[1] + surface.height / 3)
-        }
         compose.waitUntil(10_000) {
-            val screenshot = instrumentation.uiAutomation.takeScreenshot()
+            val frame = onMain {
+                activity.window.decorView.allViews.filterIsInstance<TextureView>().firstOrNull()?.getBitmap(3, 3)
+            } ?: return@waitUntil false
             try {
-                val pixel = screenshot.getPixel(x, y)
+                val pixel = frame.getPixel(1, 1)
                 kotlin.math.abs(Color.red(pixel) - 24) <= 12 &&
                     kotlin.math.abs(Color.green(pixel) - 160) <= 12 && kotlin.math.abs(Color.blue(pixel) - 96) <= 12
             } finally {
-                screenshot.recycle()
+                frame.recycle()
             }
         }
     }
@@ -276,12 +272,6 @@ class CompositorLifecycleDeviceTest {
 
     private fun pageFrame(): Int = app.store.get().state.tabs.find { it.id == fixtureId }
         ?.content?.title?.removePrefix("Compositor frame ")?.toIntOrNull() ?: 0
-
-    private fun findSurface(view: View): SurfaceView? = when (view) {
-        is SurfaceView -> view
-        is ViewGroup -> (0 until view.childCount).firstNotNullOfOrNull { findSurface(view.getChildAt(it)) }
-        else -> null
-    }
 
     private fun <T> onMain(block: () -> T): T {
         var result: T? = null
