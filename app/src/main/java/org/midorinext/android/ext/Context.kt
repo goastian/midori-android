@@ -39,15 +39,6 @@ fun Context.openAppSystemSettings() = startActivity(
     Intent(ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null))
 )
 
-fun Context.openFileInApp(contentUri: Uri, contentType: String?) {
-    openDownloadWithChooser(
-        Intent(Intent.ACTION_VIEW).apply {
-            setDataAndType(contentUri, contentType)
-            flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_GRANT_READ_URI_PERMISSION
-        },
-    )
-}
-
 fun Context.openDownloadWithChooser(intent: Intent) {
     try {
         val chooserIntent = Intent.createChooser(

@@ -3,6 +3,11 @@
     <string name="settings">Paramètres</string>
 
     <string name="settings_group_general">Général</string>
+    <string name="settings_group_device">Appareil</string>
+    <string name="settings_group_saved_data">Données enregistrées</string>
+    <string name="settings_download_folder">Dossier de téléchargement</string>
+    <string name="settings_download_folder_denied">Midori ne peut pas utiliser ce dossier. Choisissez-en un autre.</string>
+    <string name="settings_download_folder_picker_unavailable">Aucun sélecteur de dossiers Android n’est disponible.</string>
     <string name="settings_group_langue">Langue</string>
     <string name="settings_group_privacy">Vie privée</string>
     <string name="settings_group_about">À propos</string>

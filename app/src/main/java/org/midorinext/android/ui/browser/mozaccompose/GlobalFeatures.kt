@@ -5,10 +5,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import kotlinx.coroutines.launch
 import org.midorinext.android.R
 import org.midorinext.android.legacy.ClFeature
 import org.midorinext.android.mozac.downloads.openDownloadedFile
@@ -60,6 +62,7 @@ fun GlobalFeatures(
     )
 
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val pdfSaveFailedText = stringResource(id = R.string.menu_save_as_pdf_failed)
     val printFailedText = stringResource(id = R.string.menu_print_failed)
     val completedDownloadText = stringResource(id = mozacR.string.mozac_feature_downloads_completed_notification_text2)
@@ -74,7 +77,7 @@ fun GlobalFeatures(
                 appViewModel.showSnackbar(
                     completedDownloadText,
                     MidoriApplicationViewModel.SnackbarAction("Open") {
-                        context.openDownloadedFile(state.filePath, state.contentType)
+                        scope.launch { context.openDownloadedFile(state) }
                     }
                 )
             } else if (status == DownloadState.Status.FAILED) {

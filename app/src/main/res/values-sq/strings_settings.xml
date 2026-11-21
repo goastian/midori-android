@@ -10,6 +10,11 @@
     <string name="cleardata_storage">Storage</string>
     <string name="settings">Settings</string>
     <string name="settings_group_general">General</string>
+    <string name="settings_group_device">Pajisja</string>
+    <string name="settings_group_saved_data">Të dhëna të ruajtura</string>
+    <string name="settings_download_folder">Dosja e shkarkimeve</string>
+    <string name="settings_download_folder_denied">Midori nuk mund ta përdorë këtë dosje. Zgjidhni një tjetër.</string>
+    <string name="settings_download_folder_picker_unavailable">Zgjedhësi i dosjeve nuk ofrohet në Android.</string>
     <string name="settings_group_langue">Language</string>
     <string name="settings_group_privacy">Privacy</string>
     <string name="settings_group_about">About</string>

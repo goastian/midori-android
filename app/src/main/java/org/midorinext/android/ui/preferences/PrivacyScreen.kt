@@ -31,7 +31,7 @@ fun PrivacyScreen(
 
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         ScreenHeader(
-            title = stringResource(R.string.settings_group_privacy),
+            title = stringResource(R.string.privacy_settings),
             scrollableState = scrollState,
         )
 

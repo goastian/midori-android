@@ -2,17 +2,22 @@ package org.midorinext.android.mozac.downloads
 
 import android.content.Context
 import androidx.core.content.FileProvider
-import org.midorinext.android.ext.openFileInApp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import mozilla.components.browser.state.state.content.DownloadState
 import mozilla.components.feature.downloads.R
-import java.io.File
+import mozilla.components.support.utils.DefaultDownloadFileUtils
+import org.midorinext.android.ext.openDownloadWithChooser
 
 class DownloadsFileProvider : FileProvider(R.xml.feature_downloads_file_paths)
 
-fun Context.openDownloadedFile(filePath: String, contentType: String?) {
-    this.openFileInApp(
-        FileProvider.getUriForFile(
-        this,
-        "${this.packageName}.feature.downloads.fileprovider",
-        File(filePath),
-    ), contentType)
+suspend fun Context.openDownloadedFile(download: DownloadState) {
+    val intent = withContext(Dispatchers.IO) {
+        DefaultDownloadFileUtils(this@openDownloadedFile).createOpenFileIntent(
+            fileName = download.fileName,
+            directoryPath = download.directoryPath,
+            downloadContentType = download.contentType,
+        )
+    }
+    openDownloadWithChooser(intent)
 }

@@ -38,7 +38,6 @@ import org.midorinext.android.ui.preferences.DownloadSettingsScreen
 import org.midorinext.android.ui.preferences.TranslationSettingsScreen
 import org.midorinext.android.ui.preferences.HomepageSettingsScreen
 import org.midorinext.android.ui.preferences.PasswordSettingsScreen
-import org.midorinext.android.ui.preferences.NotificationSettingsScreen
 import org.midorinext.android.ui.preferences.PreferencesScreen
 import org.midorinext.android.ui.preferences.SearchSettingsScreen
 import org.midorinext.android.ui.preferences.DefaultSearchEngineSettingsScreen
@@ -181,7 +180,6 @@ fun MidoriNavHost(
             PreferencesScreen(
                 onClose = onBrowse,
                 navigateTo = { destination -> navController.navigate(destination.route()) },
-                onNavigateToPrivacy = { navController.navigate(NavDestination.Privacy.route()) },
                 applicationViewModel = appViewModel
             )
         }
@@ -219,8 +217,9 @@ fun MidoriNavHost(
         composable(NavDestination.AccessibilitySettings.match) {
             AccessibilitySettingsScreen()
         }
+        // Older saved back stacks can still contain the intermediate notification screen.
         composable(NavDestination.NotificationSettings.match) {
-            NotificationSettingsScreen()
+            LaunchedEffect(navController) { navController.popBackStack() }
         }
         composable(NavDestination.DownloadSettings.match) {
             DownloadSettingsScreen()

@@ -10,6 +10,11 @@
     <string name="cleardata_storage">Penyimpanan</string>
     <string name="settings">Setelan</string>
     <string name="settings_group_general">Umum</string>
+    <string name="settings_group_device">Perangkat</string>
+    <string name="settings_group_saved_data">Data tersimpan</string>
+    <string name="settings_download_folder">Folder unduhan</string>
+    <string name="settings_download_folder_denied">Midori tidak dapat menggunakan folder ini. Pilih folder lain.</string>
+    <string name="settings_download_folder_picker_unavailable">Pemilih folder Android tidak tersedia.</string>
     <string name="settings_group_langue">Bahasa</string>
     <string name="settings_group_privacy">Privasi</string>
     <string name="settings_group_about">Tentang</string>

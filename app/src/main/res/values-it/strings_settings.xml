@@ -10,6 +10,11 @@
     <string name="settings">Impostazioni</string>
 
     <string name="settings_group_general">Generali</string>
+    <string name="settings_group_device">Dispositivo</string>
+    <string name="settings_group_saved_data">Dati salvati</string>
+    <string name="settings_download_folder">Cartella dei download</string>
+    <string name="settings_download_folder_denied">Midori non può usare questa cartella. Scegline un’altra.</string>
+    <string name="settings_download_folder_picker_unavailable">Il selettore di cartelle di Android non è disponibile.</string>
     <string name="settings_group_langue">Lingua</string>
     <string name="settings_group_privacy">Privacy</string>
     <string name="settings_group_about">Informazioni</string>

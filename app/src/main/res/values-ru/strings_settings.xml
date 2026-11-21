@@ -10,6 +10,11 @@
     <string name="cleardata_storage">Хранение</string>
     <string name="settings">Настройки</string>
     <string name="settings_group_general">Общий</string>
+    <string name="settings_group_device">Устройство</string>
+    <string name="settings_group_saved_data">Сохранённые данные</string>
+    <string name="settings_download_folder">Папка загрузок</string>
+    <string name="settings_download_folder_denied">Midori не может использовать эту папку. Выберите другую.</string>
+    <string name="settings_download_folder_picker_unavailable">Выбор папок в Android недоступен.</string>
     <string name="settings_group_langue">Язык</string>
     <string name="settings_group_privacy">Конфиденциальность</string>
     <string name="settings_group_about">О</string>

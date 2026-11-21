@@ -10,6 +10,11 @@
     <string name="cleardata_storage">ストレージ</string>
     <string name="settings">設定</string>
     <string name="settings_group_general">一般</string>
+    <string name="settings_group_device">端末</string>
+    <string name="settings_group_saved_data">保存済みデータ</string>
+    <string name="settings_download_folder">ダウンロードフォルダー</string>
+    <string name="settings_download_folder_denied">このフォルダーは Midori で使用できません。別のフォルダーを選択してください。</string>
+    <string name="settings_download_folder_picker_unavailable">Android のフォルダー選択機能を利用できません。</string>
     <string name="settings_group_langue">言語</string>
     <string name="settings_group_privacy">プライバシー</string>
     <string name="settings_group_about">について</string>

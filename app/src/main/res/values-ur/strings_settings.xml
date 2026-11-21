@@ -10,6 +10,11 @@
     <string name="cleardata_storage">ذخیرہ</string>
     <string name="settings">ترتیبات</string>
     <string name="settings_group_general">عمومی</string>
+    <string name="settings_group_device">آلہ</string>
+    <string name="settings_group_saved_data">محفوظ شدہ ڈیٹا</string>
+    <string name="settings_download_folder">ڈاؤن لوڈ فولڈر</string>
+    <string name="settings_download_folder_denied">Midori یہ فولڈر استعمال نہیں کر سکتا۔ دوسرا فولڈر منتخب کریں۔</string>
+    <string name="settings_download_folder_picker_unavailable">Android میں فولڈر منتخب کرنے کی سہولت دستیاب نہیں ہے۔</string>
     <string name="settings_group_langue">زبان</string>
     <string name="settings_group_privacy">رازداری</string>
     <string name="settings_group_about">تعارف</string>

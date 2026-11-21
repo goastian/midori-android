@@ -10,6 +10,11 @@
     <string name="cleardata_storage">Imbakan</string>
     <string name="settings">Mga Setting</string>
     <string name="settings_group_general">Pangkalahatan</string>
+    <string name="settings_group_device">Device</string>
+    <string name="settings_group_saved_data">Naka-save na data</string>
+    <string name="settings_download_folder">Folder ng mga download</string>
+    <string name="settings_download_folder_denied">Hindi magagamit ng Midori ang folder na ito. Pumili ng iba.</string>
+    <string name="settings_download_folder_picker_unavailable">Walang tagapili ng folder sa Android.</string>
     <string name="settings_group_langue">Wika</string>
     <string name="settings_group_privacy">Pagkapribado</string>
     <string name="settings_group_about">Tungkol sa</string>

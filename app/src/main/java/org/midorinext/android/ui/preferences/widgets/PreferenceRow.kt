@@ -20,19 +20,22 @@ fun PreferenceRow(
     modifier: Modifier = Modifier,
     description: String? = null,
     enabled: Boolean = true,
+    leading: @Composable () -> Unit = {},
     trailing: @Composable () -> Unit = {},
-    onClicked: () -> Unit = {}
+    onClicked: (() -> Unit)? = null,
 ) {
+    val interaction = onClicked?.let { Modifier.clickable(enabled = enabled, onClick = it) } ?: Modifier
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = modifier
             .fillMaxWidth()
-            .clickable(enabled = enabled) { onClicked() }
+            .then(interaction)
             .minimumInteractiveComponentSize()
             .heightIn(min = 56.dp)
             .padding(horizontal = 16.dp, vertical = if (description != null) 12.dp else 2.dp)
     ) {
+        leading()
         Column(Modifier.weight(2f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = stringResource(label),

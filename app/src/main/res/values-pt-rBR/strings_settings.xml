@@ -10,6 +10,11 @@
     <string name="cleardata_storage">Armazenamento</string>
     <string name="settings">Configurações</string>
     <string name="settings_group_general">Geral</string>
+    <string name="settings_group_device">Dispositivo</string>
+    <string name="settings_group_saved_data">Dados salvos</string>
+    <string name="settings_download_folder">Pasta de downloads</string>
+    <string name="settings_download_folder_denied">O Midori não pode usar esta pasta. Escolha outra.</string>
+    <string name="settings_download_folder_picker_unavailable">O seletor de pastas do Android está indisponível.</string>
     <string name="settings_group_langue">Idioma</string>
     <string name="settings_group_privacy">Privacidade</string>
     <string name="settings_group_about">Sobre</string>

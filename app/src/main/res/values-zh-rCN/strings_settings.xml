@@ -10,6 +10,11 @@
     <string name="cleardata_storage">Storage</string>
     <string name="settings">Settings</string>
     <string name="settings_group_general">General</string>
+    <string name="settings_group_device">设备</string>
+    <string name="settings_group_saved_data">已保存的数据</string>
+    <string name="settings_download_folder">下载文件夹</string>
+    <string name="settings_download_folder_denied">Midori 无法使用此文件夹。请选择其他文件夹。</string>
+    <string name="settings_download_folder_picker_unavailable">Android 文件夹选择器不可用。</string>
     <string name="settings_group_langue">Language</string>
     <string name="settings_group_privacy">Privacy</string>
     <string name="settings_group_about">About</string>

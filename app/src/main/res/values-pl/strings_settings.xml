@@ -10,6 +10,11 @@
     <string name="cleardata_storage">Pamięć</string>
     <string name="settings">Ustawienia</string>
     <string name="settings_group_general">Ogólne</string>
+    <string name="settings_group_device">Urządzenie</string>
+    <string name="settings_group_saved_data">Zapisane dane</string>
+    <string name="settings_download_folder">Folder pobierania</string>
+    <string name="settings_download_folder_denied">Midori nie może użyć tego folderu. Wybierz inny.</string>
+    <string name="settings_download_folder_picker_unavailable">Selektor folderów Androida jest niedostępny.</string>
     <string name="settings_group_langue">Język</string>
     <string name="settings_group_privacy">Prywatność</string>
     <string name="settings_group_about">O aplikacji</string>

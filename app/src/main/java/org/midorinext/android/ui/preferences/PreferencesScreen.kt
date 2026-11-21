@@ -1,14 +1,9 @@
 package org.midorinext.android.ui.preferences
 
-import androidx.compose.ui.platform.testTag
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-
 import android.content.Intent
-import android.provider.DocumentsContract
+import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -56,10 +51,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.midorinext.android.BuildConfig
 import org.midorinext.android.R
 import org.midorinext.android.ext.openAppStorePage
-import org.midorinext.android.mozac.downloads.hasPersistedWritableTreePermission
 import org.midorinext.android.newtab.HomeWallpaper
 import org.midorinext.android.ui.browser.home.HomeWallpaperImage
 import org.midorinext.android.ui.browser.home.HomeWallpaperPicker
@@ -80,185 +75,181 @@ import mozilla.components.concept.engine.translate.ModelState
 fun PreferencesScreen(
     onClose: () -> Unit,
     navigateTo: (NavDestination) -> Unit = {},
-    onNavigateToPrivacy: () -> Unit = {},
     viewModel: PreferencesViewModel = hiltViewModel(),
-    applicationViewModel: MidoriApplicationViewModel = hiltViewModel()
+    applicationViewModel: MidoriApplicationViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
-    val scrollState = rememberScrollState()
-
     val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
 
-    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).testTag("preferences_screen")) {
-        ScreenHeader(title = stringResource(id = R.string.settings), scrollableState = scrollState)
+    PreferenceScreenScaffold(title = stringResource(R.string.settings)) {
+        SettingsSection(R.string.settings_group_device) {
+            DownloadFolderPreference(appPrefs.downloadDirectoryUri, viewModel::updateDownloadDirectoryUri)
+            SettingsNavRow(
+                label = R.string.settings_downloads_title,
+                description = stringResource(R.string.settings_downloads_summary),
+                leadingIcon = R.drawable.icons_download,
+                onClicked = { navigateTo(NavDestination.DownloadSettings) },
+            )
+            NotificationSettingsPreference()
+        }
 
-        Column(modifier = Modifier.verticalScroll(scrollState)) {
-            // Make default browser
-            DefaultBrowserPreference()
-
-            PreferenceGroupLabel(label = R.string.settings_group_general)
-
+        SettingsSection(R.string.settings_group_general) {
             SettingsNavRow(
                 label = R.string.search_engine_label,
                 description = selectedEngineName(appPrefs),
-                onClicked = { navigateTo(NavDestination.SearchSettings) }
+                leadingIcon = R.drawable.icons_search,
+                onClicked = { navigateTo(NavDestination.SearchSettings) },
             )
             PreferenceToggle(
                 label = R.string.open_links_in_apps,
                 value = appPrefs.openLinksInApp,
                 onValueChange = viewModel::updateOpenLinksInApp,
             )
-            PreferenceToggle(
-                label = R.string.settings_bookmarks_current_tab,
-                description = R.string.settings_bookmarks_current_tab_summary,
-                value = appPrefs.openBookmarksInCurrentTab,
-                onValueChange = viewModel::updateOpenBookmarksInCurrentTab
-            )
-
+            DefaultBrowserPreference()
             SettingsNavRow(
-                label = R.string.settings_homepage_title,
-                description = stringResource(R.string.settings_homepage_summary),
-                onClicked = { navigateTo(NavDestination.HomepageSettings) }
+                label = R.string.pwa_manage_title,
+                description = stringResource(R.string.pwa_manage_summary),
+                leadingIcon = R.drawable.icons_grid,
+                onClicked = { navigateTo(NavDestination.WebApps) },
             )
+        }
+
+        SettingsSection(R.string.appearance_label) {
             SettingsNavRow(
                 label = R.string.settings_customize_title,
                 description = stringResource(R.string.settings_customize_summary),
-                onClicked = { navigateTo(NavDestination.CustomizeSettings) }
-            )
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                SettingsNavRow(
-                    label = R.string.settings_app_language,
-                    description = stringResource(R.string.settings_app_language_summary),
-                    onClicked = {
-                        context.startActivity(
-                            Intent(Settings.ACTION_APP_LOCALE_SETTINGS).apply {
-                                data = android.net.Uri.parse("package:${context.packageName}")
-                            }
-                        )
-                    }
-                )
-            }
-            SettingsNavRow(
-                label = R.string.settings_translations_title,
-                description = stringResource(R.string.settings_translations_summary),
-                onClicked = { navigateTo(NavDestination.TranslationSettings) }
+                leadingIcon = R.drawable.icons_wallpaper,
+                onClicked = { navigateTo(NavDestination.CustomizeSettings) },
             )
             SettingsNavRow(
-                label = R.string.settings_passwords_title,
-                description = passwordSummary(appPrefs),
-                onClicked = { navigateTo(NavDestination.PasswordSettings) }
-            )
-            SettingsNavRow(
-                label = R.string.settings_autofill_title,
-                description = autofillSummary(appPrefs),
-                onClicked = { navigateTo(NavDestination.AutofillSettings) }
+                label = R.string.settings_homepage_title,
+                description = stringResource(R.string.settings_homepage_summary),
+                leadingIcon = R.drawable.icons_home,
+                onClicked = { navigateTo(NavDestination.HomepageSettings) },
             )
             SettingsNavRow(
                 label = R.string.settings_accessibility_title,
                 description = accessibilitySummary(appPrefs),
-                onClicked = { navigateTo(NavDestination.AccessibilitySettings) }
+                onClicked = { navigateTo(NavDestination.AccessibilitySettings) },
             )
-            SettingsNavRow(
-                label = R.string.settings_notifications_title,
-                description = stringResource(R.string.settings_notifications_summary),
-                onClicked = { navigateTo(NavDestination.NotificationSettings) }
-            )
-            SettingsNavRow(
-                label = R.string.settings_downloads_title,
-                description = stringResource(R.string.settings_downloads_summary),
-                onClicked = { navigateTo(NavDestination.DownloadSettings) }
-            )
-            SettingsNavRow(
-                label = R.string.pwa_manage_title,
-                description = stringResource(R.string.pwa_manage_summary),
-                onClicked = { navigateTo(NavDestination.WebApps) }
-            )
+        }
 
-            PreferenceGroupLabel(label = R.string.settings_group_privacy)
-
-            // Privacy and Security - Main Entry Point
-            PreferenceRow(
-                label = R.string.settings_group_privacy,
-                trailing = { Icon(
-                    painter = painterResource(id = R.drawable.icons_arrow_forward),
-                    contentDescription = "Open"
-                )},
-                onClicked = { onNavigateToPrivacy() }
+        SettingsSection(R.string.settings_group_privacy) {
+            SettingsNavRow(
+                label = R.string.privacy_settings,
+                description = stringResource(R.string.preferences_privacy_summary),
+                leadingIcon = R.drawable.icons_lock,
+                onClicked = { navigateTo(NavDestination.Privacy) },
             )
             SettingsNavRow(
                 label = R.string.adblock_settings_title,
                 description = stringResource(R.string.adblock_settings_summary),
                 onClicked = { navigateTo(NavDestination.AdBlockSettings) },
             )
-
-            // Permissions granted to websites editor
             PermissionsPreference(viewModel)
-            // Paramètres de suppression de navigation
             ClearDataPreference(viewModel, applicationViewModel)
-            // Supprimer les données à la fermeture
             PreferenceToggle(
                 label = R.string.clear_data_on_quit_label,
                 description = if (appPrefs.clearDataOnQuit) R.string.clear_data_on_quit_description else null,
                 value = appPrefs.clearDataOnQuit,
-                onValueChange = { viewModel.updateClearDataOnQuit(it) }
+                onValueChange = viewModel::updateClearDataOnQuit,
             )
+        }
 
+        SettingsSection(R.string.settings_group_saved_data) {
+            SettingsNavRow(
+                label = R.string.settings_passwords_title,
+                description = passwordSummary(appPrefs),
+                leadingIcon = R.drawable.icons_password,
+                onClicked = { navigateTo(NavDestination.PasswordSettings) },
+            )
+            SettingsNavRow(
+                label = R.string.settings_autofill_title,
+                description = autofillSummary(appPrefs),
+                onClicked = { navigateTo(NavDestination.AutofillSettings) },
+            )
+            PreferenceToggle(
+                label = R.string.settings_bookmarks_current_tab,
+                description = R.string.settings_bookmarks_current_tab_summary,
+                value = appPrefs.openBookmarksInCurrentTab,
+                onValueChange = viewModel::updateOpenBookmarksInCurrentTab,
+            )
+        }
 
-            PreferenceGroupLabel(label = R.string.settings_group_about)
+        SettingsSection(R.string.settings_group_langue) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                SettingsNavRow(
+                    label = R.string.settings_app_language,
+                    description = stringResource(R.string.settings_app_language_summary),
+                    trailingIcon = R.drawable.icons_open,
+                    onClicked = {
+                        context.startActivity(
+                            Intent(Settings.ACTION_APP_LOCALE_SETTINGS, Uri.fromParts("package", context.packageName, null))
+                        )
+                    },
+                )
+            }
+            SettingsNavRow(
+                label = R.string.settings_translations_title,
+                description = stringResource(R.string.settings_translations_summary),
+                leadingIcon = R.drawable.icons_internet,
+                onClicked = { navigateTo(NavDestination.TranslationSettings) },
+            )
+        }
 
-            // App details
+        SettingsSection(R.string.settings_group_about) {
             AppDetailsPreference()
-            // Politique de confidentialité
             val privacyPolicyUrl = stringResource(R.string.privacy_policy_url)
-            PreferenceRow(
+            SettingsNavRow(
                 label = R.string.privacy_policy_label,
-                trailing = { Icon(
-                    painter = painterResource(id = R.drawable.icons_open),
-                    contentDescription = "Open"
-                )},
+                trailingIcon = R.drawable.icons_open,
                 onClicked = {
                     viewModel.addTabsUseCase(privacyPolicyUrl)
                     onClose()
-                }
+                },
             )
-            // Licence MPL 2.0
             PreferenceSelectionPopup(
                 label = R.string.licence_label,
-                popupContent = { HtmlText(
-                    html = stringResource(id = R.string.settings_licence_content),
-                    modifier = Modifier
-                        .padding(16.dp)
-                ) },
-                fullscreenPopup = true
+                popupContent = {
+                    HtmlText(
+                        html = stringResource(id = R.string.settings_licence_content),
+                        modifier = Modifier.padding(16.dp),
+                    )
+                },
+                fullscreenPopup = true,
             )
-            // Rate us
-            PreferenceRow(
+            SettingsNavRow(
                 label = R.string.rate_us_label,
-                trailing = { Icon(
-                    painter = painterResource(id = R.drawable.icons_open),
-                    contentDescription = "Open"
-                )},
-                onClicked = { context.openAppStorePage() }
+                trailingIcon = R.drawable.icons_open,
+                onClicked = { context.openAppStorePage() },
             )
+        }
 
-            // TODO adjust test files by buildtype
-            //   using dedicated src path etc ...
-            if (BuildConfig.DEBUG) {
-                PreferenceGroupLabel(label = R.string.settings_tests_label)
-
-                // Tests prompts feature
-                PreferenceRow(
+        if (BuildConfig.DEBUG) {
+            SettingsSection(R.string.settings_tests_label) {
+                SettingsNavRow(
                     label = R.string.settings_tests_prompts_label,
-                    trailing = { Icon(
-                        painter = painterResource(id = R.drawable.icons_open),
-                        contentDescription = "Open"
-                    )},
+                    trailingIcon = R.drawable.icons_open,
                     onClicked = {
                         viewModel.openTestTabUseCase("prompts")
                         onClose()
-                    }
+                    },
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun SettingsSection(@StringRes label: Int, content: @Composable () -> Unit) {
+    PreferenceGroupLabel(label)
+    Surface(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = RoundedCornerShape(18.dp),
+    ) {
+        Column {
+            content()
         }
     }
 }
@@ -523,77 +514,16 @@ fun CustomizeSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
 }
 
 @Composable
-fun NotificationSettingsScreen() {
-    val context = LocalContext.current
-    PreferenceScreenScaffold(title = stringResource(R.string.settings_notifications_title)) {
-        PreferenceGroupLabel(label = R.string.settings_notifications_title)
-        PreferenceRow(
-            label = R.string.settings_notifications_open_system,
-            description = stringResource(R.string.settings_notifications_open_system_summary),
-            trailing = {
-                Icon(
-                    painter = painterResource(id = R.drawable.icons_open),
-                    contentDescription = null
-                )
-            },
-            onClicked = {
-                val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                    }
-                } else {
-                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = android.net.Uri.parse("package:${context.packageName}")
-                    }
-                }
-                context.startActivity(intent)
-            }
-        )
-    }
-}
-
-@Composable
 fun DownloadSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
-    val context = LocalContext.current
     val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
-    val downloadDirectoryPicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocumentTree()
-    ) { uri ->
-        uri ?: return@rememberLauncherForActivityResult
-        val permissions = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-        try {
-            context.contentResolver.takePersistableUriPermission(uri, permissions)
-            viewModel.updateDownloadDirectoryUri(uri.toString())
-        } catch (_: SecurityException) {
-            // The picker only returns a URI with a persistable grant. Keep the existing location
-            // if a document provider unexpectedly does not grant it.
-        }
-    }
-    val selectedDirectoryUri = appPrefs.downloadDirectoryUri
-        .takeIf(context::hasPersistedWritableTreePermission)
-    val selectedDirectory = selectedDirectoryUri
-        ?.let(::downloadDirectoryName)
 
     PreferenceScreenScaffold(title = stringResource(R.string.settings_downloads_title)) {
         PreferenceGroupLabel(label = R.string.download_settings_file_storage)
-        PreferenceRow(
-            label = R.string.download_settings_default_location,
-            description = selectedDirectory ?: stringResource(R.string.download_settings_default_location_summary),
-            trailing = {
-                Icon(
-                    painter = painterResource(id = R.drawable.icons_arrow_forward),
-                    contentDescription = null
-                )
-            },
-            onClicked = { downloadDirectoryPicker.launch(selectedDirectoryUri?.let(android.net.Uri::parse)) }
+        DownloadFolderPreference(
+            savedDirectoryUri = appPrefs.downloadDirectoryUri,
+            onDirectoryChanged = viewModel::updateDownloadDirectoryUri,
+            showDefaultAction = true,
         )
-        if (selectedDirectory != null) {
-            PreferenceRow(
-                label = R.string.download_settings_use_android_downloads,
-                description = stringResource(R.string.download_settings_default_location_summary),
-                onClicked = { viewModel.updateDownloadDirectoryUri("") }
-            )
-        }
         PreferenceToggle(
             label = R.string.download_wifi_only,
             description = R.string.download_wifi_only_summary,
@@ -631,14 +561,6 @@ fun DownloadSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
         )
     }
 }
-
-private fun downloadDirectoryName(uriString: String): String? = runCatching {
-    DocumentsContract.getTreeDocumentId(android.net.Uri.parse(uriString))
-        .substringAfter(':')
-        .trim('/')
-        .substringAfterLast('/')
-        .takeIf { it.isNotBlank() }
-}.getOrNull()
 
 @Composable
 fun PasswordSettingsScreen(
@@ -1020,23 +942,29 @@ internal fun PreferenceScreenScaffold(
 
 @Composable
 internal fun SettingsNavRow(
-    label: Int,
-    description: String,
-    onClicked: () -> Unit
+    @StringRes label: Int,
+    description: String? = null,
+    leadingIcon: Int? = null,
+    trailingIcon: Int = R.drawable.icons_chevron_forward,
+    onClicked: () -> Unit,
 ) {
     PreferenceRow(
         label = label,
         description = description,
-        trailing = {
-            Icon(
-                painter = painterResource(id = R.drawable.icons_arrow_forward),
-                contentDescription = "Open"
-            )
+        leading = {
+            if (leadingIcon != null) {
+                Icon(
+                    painter = painterResource(leadingIcon),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
         },
-        onClicked = onClicked
+        trailing = { Icon(painter = painterResource(trailingIcon), contentDescription = null) },
+        onClicked = onClicked,
     )
 }
-
 
 @Composable
 private fun passwordSummary(appPrefs: AppPreferences): String {
