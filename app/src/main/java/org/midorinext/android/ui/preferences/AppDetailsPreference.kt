@@ -10,10 +10,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.pm.PackageInfoCompat
+import org.midorinext.android.BuildConfig
 import org.midorinext.android.R
 import org.midorinext.android.ui.preferences.widgets.PreferenceRow
 import org.midorinext.android.ui.widgets.MidoriIconOnBackground
-import org.mozilla.geckoview.BuildConfig
+import org.mozilla.geckoview.BuildConfig as GeckoBuildConfig
 
 @Composable
 fun AppDetailsPreference() {
@@ -24,14 +25,21 @@ fun AppDetailsPreference() {
     } else {
         @Suppress("DEPRECATION") context.packageManager.getPackageInfo(context.packageName, 0) // No alternative from compat libraries yet
     }
+    val version = packageInfo.versionName.orEmpty()
+    val codename = BuildConfig.RELEASE_CODENAME
+    val displayVersion = if (version.isNotEmpty() && codename.isNotEmpty()) {
+        "$version (\"$codename\")"
+    } else {
+        version
+    }
 
     PreferenceRow(
         label = R.string.app_name,
         description = stringResource(
             R.string.qwant_details_description,
-            packageInfo.versionName ?: "",
+            displayVersion,
             PackageInfoCompat.getLongVersionCode(packageInfo).toString(),
-            BuildConfig.MOZ_APP_VERSION
+            GeckoBuildConfig.MOZ_APP_VERSION
         ),
         trailing = { MidoriIconOnBackground(
             shape = RoundedCornerShape(8.dp),
