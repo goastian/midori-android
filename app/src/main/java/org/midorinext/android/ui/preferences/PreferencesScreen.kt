@@ -82,17 +82,6 @@ fun PreferencesScreen(
     val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
 
     PreferenceScreenScaffold(title = stringResource(R.string.settings)) {
-        SettingsSection(R.string.settings_group_device) {
-            DownloadFolderPreference(appPrefs.downloadDirectoryUri, viewModel::updateDownloadDirectoryUri)
-            SettingsNavRow(
-                label = R.string.settings_downloads_title,
-                description = stringResource(R.string.settings_downloads_summary),
-                leadingIcon = R.drawable.icons_download,
-                onClicked = { navigateTo(NavDestination.DownloadSettings) },
-            )
-            NotificationSettingsPreference()
-        }
-
         SettingsSection(R.string.settings_group_general) {
             SettingsNavRow(
                 label = R.string.search_engine_label,
@@ -195,6 +184,17 @@ fun PreferencesScreen(
                 leadingIcon = R.drawable.icons_internet,
                 onClicked = { navigateTo(NavDestination.TranslationSettings) },
             )
+        }
+
+        SettingsSection(R.string.settings_group_device) {
+            DownloadFolderPreference(appPrefs.downloadDirectoryUri, viewModel::updateDownloadDirectoryUri)
+            SettingsNavRow(
+                label = R.string.settings_downloads_title,
+                description = stringResource(R.string.settings_downloads_summary),
+                leadingIcon = R.drawable.icons_download,
+                onClicked = { navigateTo(NavDestination.DownloadSettings) },
+            )
+            NotificationSettingsPreference()
         }
 
         SettingsSection(R.string.settings_group_about) {
