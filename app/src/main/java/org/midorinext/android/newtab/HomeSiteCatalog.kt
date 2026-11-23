@@ -3,7 +3,7 @@ package org.midorinext.android.newtab
 import androidx.annotation.StringRes
 import org.midorinext.android.R
 
-data class HomeSuggestedSite(val title: String, val url: String)
+data class HomeSuggestedSite(val title: String, val url: String, val adsBookmarkKey: String = "")
 data class HomeSiteCategory(val id: String, @param:StringRes val title: Int, val sites: List<HomeSuggestedSite>)
 
 private fun sites(vararg entries: Pair<String, String>) = entries.map { HomeSuggestedSite(it.first, it.second) }

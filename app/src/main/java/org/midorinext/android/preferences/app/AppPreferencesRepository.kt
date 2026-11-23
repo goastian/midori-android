@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.datastore.core.DataStore
 import org.midorinext.android.newtab.HomeSection
 import org.midorinext.android.newtab.HomeWallpaper
+import org.midorinext.android.newtab.HomeAdsBookmark
 import org.midorinext.android.newtab.defaultHomeShortcuts
 import org.midorinext.android.newtab.publicHomeUrl
 import kotlinx.coroutines.CoroutineScope
@@ -42,7 +43,11 @@ class AppPreferencesRepository internal constructor(
         datastore.updateData { it.withInitializedHomeShortcuts() }
     }
 
-    suspend fun saveHomeShortcut(id: String?, title: String, url: String, parentId: String? = null): Boolean {
+    suspend fun applyHomeAdsCatalog(catalog: List<HomeAdsBookmark>) {
+        datastore.updateData { it.withInitializedHomeShortcuts().withHomeAdsCatalog(catalog) }
+    }
+
+    suspend fun saveHomeShortcut(id: String?, title: String, url: String, parentId: String? = null, adsBookmarkKey: String = ""): Boolean {
         val normalized = publicHomeUrl(url) ?: return false
         if (title.isBlank() || id?.isBlank() == true) return false
         var saved = false
@@ -55,10 +60,15 @@ class AppPreferencesRepository internal constructor(
             if (existing?.isFolder == true || !sites.hasHomeFolder(destination)) return@updateData prefs
             val shortcut = (existing?.toBuilder() ?: HomeShortcut.newBuilder())
                 .setId(id ?: UUID.randomUUID().toString())
-                .setTitle(title.trim()).setUrl(normalized).setParentId(destination).build()
+                .setTitle(title.trim()).setUrl(normalized).setParentId(destination)
+                .setAdsBookmarkKey(adsBookmarkKey).setAdsDefault(false).build()
             if (index >= 0) sites[index] = shortcut else sites.add(shortcut)
             saved = true
-            initialized.withHomeShortcuts(sites)
+            initialized.withHomeShortcuts(sites).toBuilder().apply {
+                if (existing?.adsDefault == true && existing.adsBookmarkKey !in initialized.hiddenHomeAdsKeysList) {
+                    addHiddenHomeAdsKeys(existing.adsBookmarkKey)
+                }
+            }.build()
         }
         return saved
     }
@@ -81,7 +91,7 @@ class AppPreferencesRepository internal constructor(
         return saved
     }
 
-    suspend fun addHomeShortcutFolder(title: String, sites: List<Pair<String, String>>): Boolean {
+    suspend fun addHomeShortcutFolder(title: String, sites: List<Pair<String, String>>, adsKeys: Map<String, String> = emptyMap()): Boolean {
         if (title.isBlank() || sites.any { it.first.isBlank() }) return false
         val normalizedSites = sites.map { (name, url) ->
             name.trim() to (publicHomeUrl(url) ?: return false)
@@ -90,7 +100,7 @@ class AppPreferencesRepository internal constructor(
         val folder = HomeShortcut.newBuilder().setId(folderId).setTitle(title.trim()).setIsFolder(true).build()
         val shortcuts = normalizedSites.map { (name, url) ->
             HomeShortcut.newBuilder().setId(UUID.randomUUID().toString())
-                .setTitle(name).setUrl(url).setParentId(folderId).build()
+                .setTitle(name).setUrl(url).setParentId(folderId).setAdsBookmarkKey(adsKeys[url].orEmpty()).build()
         }
         datastore.updateData { prefs ->
             val initialized = prefs.withInitializedHomeShortcuts()
@@ -102,9 +112,14 @@ class AppPreferencesRepository internal constructor(
     suspend fun deleteHomeShortcut(id: String) {
         datastore.updateData { prefs ->
             val initialized = prefs.withInitializedHomeShortcuts()
+            val removed = initialized.homeShortcutsList.firstOrNull { it.id == id }
             initialized.withHomeShortcuts(initialized.homeShortcutsList.filterNot { it.id == id }.map { site ->
                 if (site.parentId == id) site.toBuilder().clearParentId().build() else site
-            })
+            }).toBuilder().apply {
+                if (removed?.adsDefault == true && removed.adsBookmarkKey !in initialized.hiddenHomeAdsKeysList) {
+                    addHiddenHomeAdsKeys(removed.adsBookmarkKey)
+                }
+            }.build()
         }
     }
 
@@ -143,10 +158,10 @@ class AppPreferencesRepository internal constructor(
     }
 
     private fun AppPreferences.withInitializedHomeShortcuts(): AppPreferences {
-        if (homeShortcutsInitialized) return this
+        if (homeShortcutsInitialized) return withHomeAdsLegacyDefaults()
         return toBuilder().apply {
             if (homeShortcutsCount == 0) addAllHomeShortcuts(defaultHomeShortcuts())
-        }.setHomeShortcutsInitialized(true).build()
+        }.setHomeShortcutsInitialized(true).build().withHomeAdsLegacyDefaults()
     }
 
     private fun AppPreferences.withHomeShortcuts(shortcuts: List<HomeShortcut>): AppPreferences =

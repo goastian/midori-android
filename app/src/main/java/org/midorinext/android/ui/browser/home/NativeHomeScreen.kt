@@ -124,6 +124,15 @@ fun NativeHomeScreen(
         withFrameNanos { }
         onFirstFrameDrawn(tabId)
     }
+    LaunchedEffect(tabId, configuration.locales[0], preferences.hideHomeShortcuts, wallpaperAsset != null, lifecycleOwner) {
+        if (!preferences.hideHomeShortcuts && wallpaperAsset != null) {
+            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                withFrameNanos { }
+                withFrameNanos { }
+                viewModel.showHomeAds(configuration.locales[0])
+            }
+        }
+    }
     val colors = MaterialTheme.colorScheme
     val solidColor = wallpaper.color?.let { Color(it) }
     val background = solidColor ?: colors.background
@@ -197,7 +206,8 @@ fun NativeHomeScreen(
                             shortcutState.collectionId = ""
                         }
                         HomeShortcutGrid(shortcuts.filter { it.parentId.isEmpty() }, shortcuts, preferences,
-                            shortcutColumns, palette, hasWallpaper, viewModel, true, shortcutState, onOpenUrl)
+                            shortcutColumns, palette, hasWallpaper, viewModel, true, shortcutState, onOpenUrl,
+                            adsVisible = homeMenuPosition == null)
                     }
                 }
             }

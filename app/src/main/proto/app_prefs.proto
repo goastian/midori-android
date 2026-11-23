@@ -156,6 +156,8 @@ message AppPreferences {
   bool hide_home_logo = 90;
   bool hide_home_customize_shortcut = 91;
   bool force_dark_website_colors = 92;
+  repeated string hidden_home_ads_keys = 93;
+  bool home_ads_catalog_initialized = 94;
 }
 
 message HomeShortcut {
@@ -164,6 +166,8 @@ message HomeShortcut {
   string url = 3;
   bool is_folder = 4;
   string parent_id = 5;
+  string ads_bookmark_key = 6;
+  bool ads_default = 7;
 }
 
 enum HomeShortcutShape {

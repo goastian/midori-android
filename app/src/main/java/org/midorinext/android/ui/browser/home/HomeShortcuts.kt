@@ -60,6 +60,7 @@ internal class HomeShortcutUiState {
     var removingFolderId by mutableStateOf<String?>(null)
     var failed by mutableStateOf(false)
     var busy by mutableStateOf(false)
+    var adInfoKey by mutableStateOf<String?>(null)
 
     companion object {
         val Saver = Saver<HomeShortcutUiState, Any>(
@@ -117,9 +118,13 @@ internal fun HomeShortcutGrid(
     sites: List<HomeShortcut>, allSites: List<HomeShortcut>, preferences: AppPreferences,
     columns: Int, palette: HomePalette, wallpaper: Boolean, viewModel: NativeHomeViewModel,
     dataReady: Boolean, state: HomeShortcutUiState, onOpenUrl: (String) -> Unit,
+    adsVisible: Boolean = true,
 ) {
     val showAdd = !preferences.hideHomeAddShortcut
-    val visible = sites.take(columns * 2 - if (showAdd) 1 else 0)
+    val ads by viewModel.ads.collectAsStateWithLifecycle()
+    val visible = sites.filterNot { it.adsDefault && (it.adsBookmarkKey in ads.unavailable ||
+        (ads.catalogFailed && preferences.homeAdsCatalogInitialized)) }
+        .take(columns * 2 - if (showAdd) 1 else 0)
     val tiles: List<HomeShortcut?> = visible + if (showAdd) listOf(null) else emptyList()
     Column(Modifier.padding(top = 4.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         tiles.chunked(columns).forEach { row ->
@@ -131,9 +136,15 @@ internal fun HomeShortcutGrid(
                                 when {
                                     site == null -> state.pickerParentId = ""
                                     site.isFolder -> state.collectionId = site.id
-                                    else -> onOpenUrl(site.url)
+                                    else -> viewModel.openHomeShortcut(site, onOpenUrl)
                                 }
-                            }, onLongClick = site?.let { { state.selectedId = it.id } })
+                            }, onLongClick = site?.let { { state.selectedId = it.id } },
+                            adsVisible = adsVisible && state.collectionId == null && state.pickerParentId == null &&
+                                state.selectedId == null && !state.showEditor && !state.showFolderEditor && state.adInfoKey == null,
+                            onAdInfoChanged = { visible ->
+                                if (visible) state.adInfoKey = site?.adsBookmarkKey
+                                else if (state.adInfoKey == site?.adsBookmarkKey) state.adInfoKey = null
+                            })
                     }
                 }
                 repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
@@ -148,12 +159,16 @@ private fun HomeShortcutTile(
     site: HomeShortcut?, allSites: List<HomeShortcut>, preferences: AppPreferences,
     palette: HomePalette, viewModel: NativeHomeViewModel, dataReady: Boolean,
     modifier: Modifier = Modifier, onClick: () -> Unit, onLongClick: (() -> Unit)?,
+    adsVisible: Boolean = true, onAdInfoChanged: (Boolean) -> Unit = {},
 ) {
+    val ads by viewModel.ads.collectAsStateWithLifecycle()
+    val ad = ads.decisions[site?.adsBookmarkKey]?.takeIf { it.isActive() }
+    val awaitingAd = site?.adsDefault == true && preferences.homeAdsCatalogInitialized && ad == null
     val size = if (preferences.homeLargeShortcuts) 64.dp else 48.dp
     val shape = homeShortcutIconShape(preferences.homeShortcutShape)
     val labelLines = if (LocalConfiguration.current.fontScale > 1.2f) 2 else 1
     val interactions = remember { MutableInteractionSource() }
-    Column(modifier.homePressFeedback(interactions)
+    Column(modifier.then(homeAdsVisibility(site?.adsBookmarkKey.orEmpty(), adsVisible, viewModel)).homePressFeedback(interactions)
         .clip(RoundedCornerShape(12.dp))
         .testTag(if (site == null) "home_add_shortcut" else "home_shortcut_tile")
         .combinedClickable(interactionSource = interactions, indication = ripple(),
@@ -163,34 +178,41 @@ private fun HomeShortcutTile(
             }, role = Role.Button)
         .padding(vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Surface(Modifier.size(size)
-            .shadow(if (site == null) 0.dp else 2.dp, shape,
-                ambientColor = palette.primary.copy(alpha = 0.10f), spotColor = palette.primary.copy(alpha = 0.14f))
-            .testTag("home_shortcut_icon"),
-            shape = shape, color = if (site == null) Color.Transparent else palette.tile,
-            border = BorderStroke(0.5.dp, palette.divider)) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                when {
-                    site == null -> Icon(painterResource(mozilla.components.ui.icons.R.drawable.mozac_ic_plus_24), null,
-                        Modifier.size(24.dp), tint = palette.secondary)
-                    site.isFolder -> {
-                        val children = allSites.filter { it.parentId == site.id }.take(4)
-                        if (children.isEmpty()) Icon(painterResource(R.drawable.icons_folder_add), null, Modifier.size(26.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                        else Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                            children.chunked(2).forEach { row ->
-                                Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                                    row.forEach { HomeFavicon(it.url, viewModel, dataReady, Modifier.size(if (preferences.homeLargeShortcuts) 22.dp else 16.dp)) }
+        Box(Modifier.fillMaxWidth().height(size + 8.dp), contentAlignment = Alignment.BottomCenter) {
+            Surface(Modifier.size(size)
+                .shadow(if (site == null) 0.dp else 2.dp, shape,
+                    ambientColor = palette.primary.copy(alpha = 0.10f), spotColor = palette.primary.copy(alpha = 0.14f))
+                .testTag("home_shortcut_icon"),
+                shape = shape, color = if (site == null) Color.Transparent else palette.tile,
+                border = BorderStroke(0.5.dp, palette.divider)) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    when {
+                        site == null -> Icon(painterResource(mozilla.components.ui.icons.R.drawable.mozac_ic_plus_24), null,
+                            Modifier.size(24.dp), tint = palette.secondary)
+                        site.isFolder -> {
+                            val children = allSites.filter { it.parentId == site.id }.take(4)
+                            if (children.isEmpty()) Icon(painterResource(R.drawable.icons_folder_add), null, Modifier.size(26.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            else Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                                children.chunked(2).forEach { row ->
+                                    Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                                        row.forEach { HomeFavicon(it.url, viewModel, dataReady, Modifier.size(if (preferences.homeLargeShortcuts) 22.dp else 16.dp)) }
+                                    }
                                 }
                             }
                         }
+                        awaitingAd -> CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                        else -> if (ad != null) coil.compose.AsyncImage(ad.iconUrl, null,
+                            Modifier.size(if (preferences.homeLargeShortcuts) 40.dp else 28.dp))
+                        else HomeFavicon(site.url, viewModel, dataReady,
+                            Modifier.size(if (preferences.homeLargeShortcuts) 40.dp else 28.dp))
                     }
-                    else -> HomeFavicon(site.url, viewModel, dataReady,
-                        Modifier.size(if (preferences.homeLargeShortcuts) 40.dp else 28.dp))
                 }
             }
+            HomeAdDisclosure(ad, Modifier.align(Alignment.TopEnd), palette.primary, onAdInfoChanged)
         }
-        Text(site?.title ?: stringResource(R.string.home_add_shortcut),
+        Text(if (awaitingAd) stringResource(R.string.home_ads_loading) else
+            ad?.title ?: site?.title ?: stringResource(R.string.home_add_shortcut),
             Modifier.fillMaxWidth(), minLines = labelLines, maxLines = labelLines, overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.bodySmall.copy(shadow = palette.shadow),
             color = palette.primary, textAlign = TextAlign.Center)
@@ -208,6 +230,7 @@ internal fun HomeShortcutDialogs(
     val moveLeftOffset = if (LocalLayoutDirection.current == LayoutDirection.Rtl) 1 else -1
     val folders = sites.filter { it.isFolder }
     val selected = sites.firstOrNull { it.id == state.selectedId }
+    val ads by viewModel.ads.collectAsStateWithLifecycle()
     val collection = state.collectionId
     val folder = folders.firstOrNull { it.id == collection }
     if (collection != null && (collection.isEmpty() || folder != null)) {
@@ -225,6 +248,8 @@ internal fun HomeShortcutDialogs(
                     }
                 }
                 val children = sites.filter { it.parentId == collection }
+                    .filterNot { it.adsDefault && (it.adsBookmarkKey in ads.unavailable ||
+                        (ads.catalogFailed && viewModel.preferences.value?.homeAdsCatalogInitialized == true)) }
                 val collectionState = key(collection) { rememberLazyListState() }
                 LazyColumn(Modifier.weight(1f, fill = false).heightIn(max = 440.dp).testTag("home_collection_list"),
                     state = collectionState, contentPadding = PaddingValues(vertical = 12.dp)) {
@@ -232,21 +257,38 @@ internal fun HomeShortcutDialogs(
                         Text(stringResource(R.string.home_folder_empty), Modifier.padding(vertical = 24.dp))
                     }
                     items(children, key = { it.id }) { site ->
-                        ListItem(headlineContent = { Text(site.title) },
-                            supportingContent = { Text(if (site.isFolder)
-                                stringResource(R.string.home_folder_contents, sites.count { it.parentId == site.id }) else site.url.toCleanHost()) },
+                        val ad = ads.decisions[site.adsBookmarkKey]?.takeIf { it.isActive() }
+                        val awaitingAd = site.adsDefault && viewModel.preferences.value?.homeAdsCatalogInitialized == true && ad == null
+                        ListItem(headlineContent = {
+                            Text(if (awaitingAd) stringResource(R.string.home_ads_loading) else ad?.title ?: site.title)
+                        }, supportingContent = {
+                            if (!awaitingAd) Column {
+                                Text(if (site.isFolder) stringResource(R.string.home_folder_contents,
+                                    sites.count { it.parentId == site.id }) else site.url.toCleanHost())
+                            }
+                        },
                             leadingContent = {
-                                if (site.isFolder) Icon(painterResource(R.drawable.icons_folder_add), null)
-                                else HomeFavicon(site.url, viewModel, dataReady, Modifier.size(28.dp))
+                                Box(if (ad?.sponsorLabel != null) Modifier.width(56.dp).height(40.dp) else Modifier,
+                                    contentAlignment = Alignment.BottomStart) {
+                                    if (site.isFolder) Icon(painterResource(R.drawable.icons_folder_add), null)
+                                    else if (awaitingAd) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                                    else if (ad != null) coil.compose.AsyncImage(ad.iconUrl, null, Modifier.size(28.dp))
+                                    else HomeFavicon(site.url, viewModel, dataReady, Modifier.size(28.dp))
+                                    HomeAdDisclosure(ad, Modifier.align(Alignment.TopEnd)) { visible ->
+                                        if (visible) state.adInfoKey = site.adsBookmarkKey
+                                        else if (state.adInfoKey == site.adsBookmarkKey) state.adInfoKey = null
+                                    }
+                                }
                             }, trailingContent = {
                                 IconButton(onClick = { state.selectedId = site.id }) {
                                     Icon(painterResource(R.drawable.icons_more_vertical),
                                         stringResource(if (site.isFolder) R.string.home_edit_folder else R.string.home_edit_shortcut))
                                 }
-                            }, modifier = Modifier.testTag("home_collection_item:${site.id}").combinedClickable(onClick = {
+                            }, modifier = Modifier.then(homeAdsVisibility(site.adsBookmarkKey,
+                                state.selectedId == null && state.adInfoKey == null, viewModel))
+                                .testTag("home_collection_item:${site.id}").combinedClickable(onClick = {
                                 if (site.isFolder) state.collectionId = site.id else {
-                                    state.collectionId = null
-                                    onOpenUrl(site.url)
+                                    if (viewModel.openHomeShortcut(site, onOpenUrl)) state.collectionId = null
                                 }
                             }, onLongClick = { state.selectedId = site.id }))
                     }
@@ -270,14 +312,18 @@ internal fun HomeShortcutDialogs(
                     state.movingId = selected.id; state.selectedId = null
                 }
                 HomeAction(R.string.home_move_left, position + moveLeftOffset in siblings.indices && !state.busy) {
-                    state.perform(scope) { repository.moveHomeShortcut(selected.id, moveLeftOffset); state.selectedId = null; true }
+                    state.perform(scope) { repository.moveHomeShortcut(selected.id, moveLeftOffset); viewModel.recordHomeAdAction(selected.adsBookmarkKey, "bookmark_moved"); state.selectedId = null; true }
                 }
                 HomeAction(R.string.home_move_right, position - moveLeftOffset in siblings.indices && !state.busy) {
-                    state.perform(scope) { repository.moveHomeShortcut(selected.id, -moveLeftOffset); state.selectedId = null; true }
+                    state.perform(scope) { repository.moveHomeShortcut(selected.id, -moveLeftOffset); viewModel.recordHomeAdAction(selected.adsBookmarkKey, "bookmark_moved"); state.selectedId = null; true }
                 }
                 HomeAction(if (selected.isFolder) R.string.home_remove_folder else R.string.adblock_remove, !state.busy) {
                     if (selected.isFolder) { state.removingFolderId = selected.id; state.selectedId = null }
-                    else state.perform(scope) { repository.deleteHomeShortcut(selected.id); state.selectedId = null; true }
+                    else state.perform(scope) {
+                        repository.deleteHomeShortcut(selected.id)
+                        viewModel.recordHomeAdAction(selected.adsBookmarkKey, "bookmark_removed")
+                        state.selectedId = null; true
+                    }
                 }
             }
         }, confirmButton = { TextButton(onClick = { state.selectedId = null }) { Text(stringResource(R.string.cancel)) } })
@@ -288,7 +334,9 @@ internal fun HomeShortcutDialogs(
             text = { Text(stringResource(R.string.home_remove_folder_message)) }, confirmButton = {
                 TextButton(enabled = !state.busy, onClick = {
                     state.perform(scope) {
+                        val moved = sites.filter { it.parentId == id }
                         repository.deleteHomeShortcut(id)
+                        moved.forEach { viewModel.recordHomeAdAction(it.adsBookmarkKey, "bookmark_moved") }
                         if (state.collectionId == id) state.collectionId = null
                         state.removingFolderId = null
                         true
@@ -303,7 +351,12 @@ internal fun HomeShortcutDialogs(
                     val title = folders.firstOrNull { it.id == target }?.title ?: stringResource(R.string.home_folder_root)
                     TextButton(enabled = !state.busy, modifier = Modifier.fillMaxWidth().testTag("home_move_target:${target.orEmpty()}"),
                         onClick = { state.perform(scope) {
-                            repository.moveHomeShortcutToFolder(id, target.orEmpty()).also { if (it) state.movingId = null }
+                            repository.moveHomeShortcutToFolder(id, target.orEmpty()).also { if (it) {
+                                sites.firstOrNull { site -> site.id == id && site.parentId != target.orEmpty() }?.let { site ->
+                                    viewModel.recordHomeAdAction(site.adsBookmarkKey, "bookmark_moved")
+                                }
+                                state.movingId = null
+                            } }
                         } }) { Text(title) }
                 }
             }
@@ -333,8 +386,12 @@ internal fun HomeShortcutDialogs(
         HomeShortcutEditor(sites.firstOrNull { it.id == state.editorId }, state.busy,
             onDismiss = { state.showEditor = false }) { title, url ->
             state.perform(scope) {
+                val previous = sites.firstOrNull { it.id == state.editorId }
                 repository.saveHomeShortcut(state.editorId, title, url, state.editorParentId)
-                    .also { if (it) state.showEditor = false }
+                    .also { if (it) {
+                        previous?.let { site -> viewModel.recordHomeAdAction(site.adsBookmarkKey, "bookmark_changed") }
+                        state.showEditor = false
+                    } }
             }
         }
     }
@@ -362,6 +419,11 @@ private fun HomeSitePicker(parentId: String, state: HomeShortcutUiState, sites: 
     var categoryId by rememberSaveable { mutableStateOf<String?>(null) }
     val category = homeSiteCategories.firstOrNull { it.id == categoryId }
     val categoryTitle = category?.let { stringResource(it.title) }
+    val ads by viewModel.ads.collectAsStateWithLifecycle()
+    val catalogSites = ads.catalog?.filter { if (categoryId == null) it.suggested else it.category == categoryId }
+        ?.filterNot { it.key in ads.unavailable }
+        ?.map { HomeSuggestedSite(it.title, it.url, it.key) }
+        ?: (category?.sites ?: homeSuggestedSites)
     val recent by viewModel.recentVisits.collectAsStateWithLifecycle(initialValue = emptyList())
     val bookmarks by produceState(initialValue = emptyList<HomePage>(), viewModel) {
         try { value = viewModel.savedBookmarks() } catch (cancelled: CancellationException) { throw cancelled } catch (_: Exception) { }
@@ -413,10 +475,17 @@ private fun HomeSitePicker(parentId: String, state: HomeShortcutUiState, sites: 
                     item { Text(stringResource(R.string.home_suggested_sites), style = MaterialTheme.typography.titleSmall) }
                 } else if (parentId.isEmpty()) {
                     item {
-                        OutlinedButton(enabled = !state.busy, onClick = {
+                        OutlinedButton(enabled = !state.busy && catalogSites.isNotEmpty(), onClick = {
                             state.perform(scope) {
-                                viewModel.preferencesRepository.addHomeShortcutFolder(categoryTitle!!, category.sites.map { it.title to it.url })
-                                    .also { if (it) state.pickerParentId = null }
+                                viewModel.preferencesRepository.addHomeShortcutFolder(categoryTitle!!,
+                                    catalogSites.map { it.title to it.url },
+                                    catalogSites.filter { it.adsBookmarkKey.isNotEmpty() }.associate { it.url to it.adsBookmarkKey })
+                                    .also { if (it) {
+                                        catalogSites.filter { site -> site.adsBookmarkKey.isNotEmpty() }
+                                            .associate { site -> site.url to site.adsBookmarkKey }.values.distinct()
+                                            .forEach { key -> viewModel.recordHomeAdAction(key, "bookmark_added") }
+                                        state.pickerParentId = null
+                                    } }
                             }
                         }, modifier = Modifier.fillMaxWidth().testTag("home_add_category_folder")) {
                             Icon(painterResource(R.drawable.icons_folder_add), null, Modifier.size(20.dp))
@@ -424,9 +493,12 @@ private fun HomeSitePicker(parentId: String, state: HomeShortcutUiState, sites: 
                         }
                     }
                 }
-                homeSuggestedSiteGrid(category?.sites ?: homeSuggestedSites, columns, "catalog", existingUrls,
+                homeSuggestedSiteGrid(catalogSites, columns, "catalog", existingUrls,
                     state.busy, viewModel, dataReady) { site ->
-                    state.perform(scope) { viewModel.preferencesRepository.saveHomeShortcut(null, site.title, site.url, parentId) }
+                    state.perform(scope) {
+                        viewModel.preferencesRepository.saveHomeShortcut(null, site.title, site.url, parentId, site.adsBookmarkKey)
+                            .also { if (it) viewModel.recordHomeAdAction(site.adsBookmarkKey, "bookmark_added") }
+                    }
                 }
                 if (category == null) {
                     if (recent.isNotEmpty()) {
@@ -470,25 +542,34 @@ private fun LazyListScope.homeSuggestedSiteGrid(
 private fun HomeSuggestedSiteTile(site: HomeSuggestedSite, added: Boolean, busy: Boolean,
     viewModel: NativeHomeViewModel, dataReady: Boolean, modifier: Modifier = Modifier, onAdd: () -> Unit) {
     val action = stringResource(if (added) R.string.home_site_added else R.string.home_add_shortcut)
-    Column(modifier.clip(RoundedCornerShape(12.dp))
-        .clickable(enabled = !added && !busy, role = Role.Button, onClickLabel = action, onClick = onAdd)
+    val ads by viewModel.ads.collectAsStateWithLifecycle()
+    val ad = ads.decisions[site.adsBookmarkKey]?.takeIf { it.isActive() }
+    val awaitingAd = site.adsBookmarkKey.isNotEmpty() && ad == null
+    Column(modifier.then(homeAdsVisibility(site.adsBookmarkKey, true, viewModel)).clip(RoundedCornerShape(12.dp))
+        .clickable(enabled = !added && !busy && !awaitingAd, role = Role.Button, onClickLabel = action, onClick = onAdd)
         .testTag("home_suggested_site:${site.url}").padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Box(Modifier.size(56.dp)) {
-            Surface(Modifier.size(48.dp).align(Alignment.Center), shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh) {
-                Box(contentAlignment = Alignment.Center) {
-                    HomeFavicon(site.url, viewModel, dataReady, Modifier.size(32.dp))
+        Box(Modifier.fillMaxWidth().height(56.dp), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(56.dp)) {
+                Surface(Modifier.size(48.dp).align(Alignment.Center), shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+                    Box(contentAlignment = Alignment.Center) {
+                        if (awaitingAd) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                        else if (ad != null) coil.compose.AsyncImage(ad.iconUrl, null, Modifier.size(32.dp))
+                        else HomeFavicon(site.url, viewModel, dataReady, Modifier.size(32.dp))
+                    }
+                }
+                Surface(Modifier.size(20.dp).align(Alignment.BottomEnd), shape = CircleShape,
+                    color = if (added) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = if (added) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer) {
+                    Icon(painterResource(if (added) R.drawable.icons_check else R.drawable.icons_add_tab),
+                        action, Modifier.padding(3.dp))
                 }
             }
-            Surface(Modifier.size(20.dp).align(Alignment.BottomEnd), shape = CircleShape,
-                color = if (added) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = if (added) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer) {
-                Icon(painterResource(if (added) R.drawable.icons_check else R.drawable.icons_add_tab),
-                    action, Modifier.padding(3.dp))
-            }
+            HomeAdDisclosure(ad, Modifier.align(Alignment.TopEnd))
         }
-        Text(site.title, modifier = Modifier.fillMaxWidth().heightIn(min = 32.dp), maxLines = 2,
+        Text(if (awaitingAd) stringResource(R.string.home_ads_loading) else ad?.title ?: site.title,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 32.dp), maxLines = 2,
             overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center, style = MaterialTheme.typography.labelSmall)
     }
 }

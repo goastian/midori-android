@@ -1,11 +1,18 @@
 package org.midorinext.android.ui.browser.home
 
 import android.graphics.Bitmap
+import org.midorinext.android.BuildConfig
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import mozilla.components.browser.state.store.BrowserStore
@@ -19,21 +26,34 @@ import org.midorinext.android.newtab.HomeContinuationMiddleware
 import org.midorinext.android.newtab.HomeStoriesRepository
 import org.midorinext.android.newtab.HomeFaviconRepository
 import org.midorinext.android.newtab.HomeStory
+import org.midorinext.android.newtab.HomeAdsRepository
+import org.midorinext.android.newtab.HomeAdsBookmark
+import org.midorinext.android.newtab.HomeAdDecision
+import org.midorinext.android.newtab.HomeAdExposure
 import org.midorinext.android.newtab.HomeWallpaper
 import org.midorinext.android.newtab.HomeWallpaperRepository
 import org.midorinext.android.newtab.publicHomeUrl
 import org.midorinext.android.newtab.isNativeHomeUrl
 import org.midorinext.android.newtab.recentHomeSiteKey
 import org.midorinext.android.preferences.app.AppPreferencesRepository
+import org.midorinext.android.preferences.app.HomeShortcut
 import org.midorinext.android.storage.history.HistoryRepository
 import org.midorinext.android.storage.bookmarks.BookmarksRepository
 import javax.inject.Inject
+import java.util.Locale
 
 private const val HOME_STOP_TIMEOUT_MILLIS = 1_000L
 
 data class HomePage(val title: String, val url: String)
 data class HomeContinuation(val tabId: String, val title: String, val url: String)
 data class HomeStoriesState(val stories: List<HomeStory> = emptyList(), val loading: Boolean = false, val failed: Boolean = false)
+data class HomeAdsState(
+    val catalog: List<HomeAdsBookmark>? = null,
+    val decisions: Map<String, HomeAdDecision> = emptyMap(),
+    val unavailable: Set<String> = emptySet(),
+    val catalogFailed: Boolean = false,
+    val session: Long = 0,
+)
 
 @HiltViewModel
 class NativeHomeViewModel @Inject constructor(
@@ -44,6 +64,7 @@ class NativeHomeViewModel @Inject constructor(
     private val thumbnailProvider: dagger.Lazy<ThumbnailStorage>,
     private val faviconProvider: dagger.Lazy<HomeFaviconRepository>,
     private val bookmarksProvider: dagger.Lazy<BookmarksRepository>,
+    private val adsProvider: dagger.Lazy<HomeAdsRepository>,
     private val wallpapers: HomeWallpaperRepository,
     private val store: BrowserStore,
     private val continuationUpdates: HomeContinuationMiddleware,
@@ -99,6 +120,154 @@ class NativeHomeViewModel @Inject constructor(
     val stories = mutableStories.asStateFlow()
     private var storiesJob: Job? = null
     private var storiesLanguage: String? = null
+
+    private val mutableAds = MutableStateFlow(HomeAdsState())
+    val ads = mutableAds.asStateFlow()
+    private var adsScope: CoroutineScope? = null
+    private var adsLocale = Locale.ENGLISH
+    private val adRequests = mutableMapOf<String, Deferred<HomeAdDecision?>>()
+    private val renderedAds = mutableSetOf<String>()
+    private val impressedAds = mutableSetOf<String>()
+    private val pendingAdEvents = mutableSetOf<String>()
+    private val adReadyAt = mutableMapOf<String, Long>()
+    private val exposures = mutableMapOf<String, HomeAdExposure>()
+
+    fun beginHomeAdExposure(ad: HomeAdDecision, position: Int?): HomeAdExposure {
+        return HomeAdExposure(ad, position).also { exposures[ad.bookmarkKey] = it }
+    }
+
+    fun finishHomeAdExposure(exposure: HomeAdExposure) {
+        if (exposures[exposure.ad.bookmarkKey] === exposure) exposures.remove(exposure.ad.bookmarkKey)
+        adsProvider.get().finishExposure(exposure)
+    }
+
+    fun recordHomeAdAction(key: String, event: String) {
+        if (key.isNotEmpty()) adsProvider.get().bookmarkAction(key, event)
+    }
+
+    suspend fun showHomeAds(locale: Locale): Unit = coroutineScope {
+        adRequests.clear()
+        renderedAds.clear()
+        impressedAds.clear()
+        pendingAdEvents.clear()
+        adReadyAt.clear()
+        adsScope = this
+        adsLocale = locale
+        mutableAds.value = HomeAdsState(session = mutableAds.value.session + 1)
+        try {
+            val catalog = adsProvider.get().catalog(locale)
+            preferencesRepository.applyHomeAdsCatalog(catalog)
+            mutableAds.value = mutableAds.value.copy(catalog = catalog)
+            awaitCancellation()
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Exception) {
+            reportHomeAdsFailure(error)
+            mutableAds.value = mutableAds.value.copy(catalogFailed = true)
+            awaitCancellation()
+        } finally {
+            if (adsScope === this) {
+                adsScope = null
+                adRequests.clear()
+                renderedAds.clear()
+                impressedAds.clear()
+                pendingAdEvents.clear()
+                adReadyAt.clear()
+                mutableAds.value = HomeAdsState(session = mutableAds.value.session)
+            }
+        }
+    }
+
+    suspend fun prepareHomeAd(key: String) {
+        val scope = adsScope ?: return
+        if (mutableAds.value.catalog?.none { it.key == key } != false) return
+        if (mutableAds.value.decisions[key]?.isActive() == true) return
+        val request = adRequests.getOrPut(key) {
+            scope.async {
+                try {
+                    val ad = adsProvider.get().decision(key, adsLocale)
+                    if (ad == null) {
+                        mutableAds.value = mutableAds.value.copy(unavailable = mutableAds.value.unavailable + key)
+                        return@async null
+                    }
+                    adReadyAt[key] = android.os.SystemClock.elapsedRealtime()
+                    mutableAds.value = mutableAds.value.copy(decisions = mutableAds.value.decisions + (key to ad))
+                    scope.launch {
+                        delay((ad.expiresAt - System.currentTimeMillis()).coerceAtLeast(1))
+                        if (mutableAds.value.decisions[key]?.decisionId == ad.decisionId) {
+                            adRequests.remove(key)
+                            renderedAds.remove(ad.decisionId)
+                            impressedAds.remove(ad.decisionId)
+                            adReadyAt.remove(key)
+                            mutableAds.value = mutableAds.value.copy(decisions = mutableAds.value.decisions - key)
+                        }
+                    }
+                    ad
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (error: Exception) {
+                    reportHomeAdsFailure(error)
+                    mutableAds.value = mutableAds.value.copy(unavailable = mutableAds.value.unavailable + key)
+                    null
+                }
+            }
+        }
+        request.await()
+    }
+
+    suspend fun renderHomeAd(ad: HomeAdDecision): Boolean = homeAdEvent(ad, "render", renderedAds) {
+        adsProvider.get().render(ad)
+    }
+
+    suspend fun impressHomeAd(ad: HomeAdDecision): Boolean {
+        if (ad.decisionId !in renderedAds) return false
+        return homeAdEvent(ad, "impression", impressedAds) { adsProvider.get().impression(ad) }
+    }
+
+    private suspend fun homeAdEvent(ad: HomeAdDecision, event: String, accepted: MutableSet<String>, send: suspend () -> Boolean): Boolean {
+        if (!ad.isActive() || mutableAds.value.decisions[ad.bookmarkKey]?.decisionId != ad.decisionId) return false
+        if (ad.decisionId in accepted) return true
+        val key = "$event:${ad.decisionId}"
+        if (!pendingAdEvents.add(key)) return false
+        return try {
+            send().also { if (it) accepted.add(ad.decisionId) }
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) { false }
+        finally { pendingAdEvents.remove(key) }
+    }
+
+    fun openHomeShortcut(site: HomeShortcut, onOpenUrl: (String) -> Unit): Boolean {
+        val ad = mutableAds.value.decisions[site.adsBookmarkKey]?.takeIf { it.isActive() }
+        if (ad == null) {
+            if (site.adsDefault && preferences.value?.homeAdsCatalogInitialized == true) return false
+            onOpenUrl(site.url)
+            return true
+        }
+        val latency = (android.os.SystemClock.elapsedRealtime() - (adReadyAt[site.adsBookmarkKey] ?: 0L)).coerceIn(0, 600_000)
+        if (latency < 500) return false
+        val separator = if ('?' in ad.destinationUrl) '&' else '?'
+        val exposure = exposures[site.adsBookmarkKey]
+        exposure?.endReason = "navigation"
+        val exposureQuery = exposure?.let { "&exposure_id=${it.id}" }.orEmpty()
+        onOpenUrl(ad.destinationUrl + separator + "interaction_ms=$latency&click_device_type=${adsProvider.get().deviceType}&click_event_id=${java.util.UUID.randomUUID()}" + exposureQuery)
+        return true
+    }
+
+    fun dismissHomeAd(site: HomeShortcut) {
+        val ad = mutableAds.value.decisions[site.adsBookmarkKey]?.takeIf { it.isActive() } ?: return
+        adsScope?.launch {
+            try { adsProvider.get().dismissed(ad) }
+            catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) { }
+        }
+    }
+
+    private fun reportHomeAdsFailure(error: Exception) {
+        if (!BuildConfig.DEBUG) return
+        val location = error.stackTrace.firstOrNull()
+        android.util.Log.w("HomeAds", "${error.javaClass.simpleName} at ${location?.className}:${location?.lineNumber}")
+    }
 
     fun stopStories(job: Job) {
         if (storiesJob !== job) return

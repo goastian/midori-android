@@ -28,7 +28,7 @@ fun defaultHomeShortcuts(): List<HomeShortcut> = listOf(
     Triple("kayak-cars", "Kayak Cars", "https://www.kayak.com/in?a=kan_318921_594075&lc=en&url=%2Fcars"),
     Triple("temu", "Temu", "https://temu.to/k/gxr990d7ytg"),
 ).map { (id, title, url) ->
-    HomeShortcut.newBuilder().setId(id).setTitle(title).setUrl(url).build()
+    HomeShortcut.newBuilder().setId(id).setTitle(title).setUrl(url).setAdsBookmarkKey(id).setAdsDefault(true).build()
 }
 
 enum class HomeSection { SHORTCUTS, CONTINUE, RECENT_VISITS, STORIES, PRIVACY }
