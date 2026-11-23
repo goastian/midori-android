@@ -162,8 +162,8 @@ private fun HomeShortcutTile(
     adsVisible: Boolean = true, onAdInfoChanged: (Boolean) -> Unit = {},
 ) {
     val ads by viewModel.ads.collectAsStateWithLifecycle()
-    val ad = ads.decisions[site?.adsBookmarkKey]?.takeIf { it.isActive() }
-    val awaitingAd = site?.adsDefault == true && preferences.homeAdsCatalogInitialized && ad == null
+    val content = site?.let { ads.content(it.adsBookmarkKey) }
+    val awaitingAd = site?.adsDefault == true && preferences.homeAdsCatalogInitialized && content == null
     val size = if (preferences.homeLargeShortcuts) 64.dp else 48.dp
     val shape = homeShortcutIconShape(preferences.homeShortcutShape)
     val labelLines = if (LocalConfiguration.current.fontScale > 1.2f) 2 else 1
@@ -202,17 +202,17 @@ private fun HomeShortcutTile(
                             }
                         }
                         awaitingAd -> CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                        else -> if (ad != null) coil.compose.AsyncImage(ad.iconUrl, null,
+                        else -> if (content != null) coil.compose.AsyncImage(content.iconUrl, null,
                             Modifier.size(if (preferences.homeLargeShortcuts) 40.dp else 28.dp))
                         else HomeFavicon(site.url, viewModel, dataReady,
                             Modifier.size(if (preferences.homeLargeShortcuts) 40.dp else 28.dp))
                     }
                 }
             }
-            HomeAdDisclosure(ad, Modifier.align(Alignment.TopEnd), palette.primary, onAdInfoChanged)
+            HomeAdDisclosure(content, Modifier.align(Alignment.TopEnd), palette.primary, onAdInfoChanged)
         }
         Text(if (awaitingAd) stringResource(R.string.home_ads_loading) else
-            ad?.title ?: site?.title ?: stringResource(R.string.home_add_shortcut),
+            content?.title ?: site?.title ?: stringResource(R.string.home_add_shortcut),
             Modifier.fillMaxWidth(), minLines = labelLines, maxLines = labelLines, overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.bodySmall.copy(shadow = palette.shadow),
             color = palette.primary, textAlign = TextAlign.Center)
@@ -257,10 +257,10 @@ internal fun HomeShortcutDialogs(
                         Text(stringResource(R.string.home_folder_empty), Modifier.padding(vertical = 24.dp))
                     }
                     items(children, key = { it.id }) { site ->
-                        val ad = ads.decisions[site.adsBookmarkKey]?.takeIf { it.isActive() }
-                        val awaitingAd = site.adsDefault && viewModel.preferences.value?.homeAdsCatalogInitialized == true && ad == null
+                        val content = ads.content(site.adsBookmarkKey)
+                        val awaitingAd = site.adsDefault && viewModel.preferences.value?.homeAdsCatalogInitialized == true && content == null
                         ListItem(headlineContent = {
-                            Text(if (awaitingAd) stringResource(R.string.home_ads_loading) else ad?.title ?: site.title)
+                            Text(if (awaitingAd) stringResource(R.string.home_ads_loading) else content?.title ?: site.title)
                         }, supportingContent = {
                             if (!awaitingAd) Column {
                                 Text(if (site.isFolder) stringResource(R.string.home_folder_contents,
@@ -268,13 +268,13 @@ internal fun HomeShortcutDialogs(
                             }
                         },
                             leadingContent = {
-                                Box(if (ad?.sponsorLabel != null) Modifier.width(56.dp).height(40.dp) else Modifier,
+                                Box(if (content?.sponsorLabel != null) Modifier.width(56.dp).height(40.dp) else Modifier,
                                     contentAlignment = Alignment.BottomStart) {
                                     if (site.isFolder) Icon(painterResource(R.drawable.icons_folder_add), null)
                                     else if (awaitingAd) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                                    else if (ad != null) coil.compose.AsyncImage(ad.iconUrl, null, Modifier.size(28.dp))
+                                    else if (content != null) coil.compose.AsyncImage(content.iconUrl, null, Modifier.size(28.dp))
                                     else HomeFavicon(site.url, viewModel, dataReady, Modifier.size(28.dp))
-                                    HomeAdDisclosure(ad, Modifier.align(Alignment.TopEnd)) { visible ->
+                                    HomeAdDisclosure(content, Modifier.align(Alignment.TopEnd)) { visible ->
                                         if (visible) state.adInfoKey = site.adsBookmarkKey
                                         else if (state.adInfoKey == site.adsBookmarkKey) state.adInfoKey = null
                                     }
@@ -543,8 +543,8 @@ private fun HomeSuggestedSiteTile(site: HomeSuggestedSite, added: Boolean, busy:
     viewModel: NativeHomeViewModel, dataReady: Boolean, modifier: Modifier = Modifier, onAdd: () -> Unit) {
     val action = stringResource(if (added) R.string.home_site_added else R.string.home_add_shortcut)
     val ads by viewModel.ads.collectAsStateWithLifecycle()
-    val ad = ads.decisions[site.adsBookmarkKey]?.takeIf { it.isActive() }
-    val awaitingAd = site.adsBookmarkKey.isNotEmpty() && ad == null
+    val content = ads.content(site.adsBookmarkKey)
+    val awaitingAd = site.adsBookmarkKey.isNotEmpty() && content == null
     Column(modifier.then(homeAdsVisibility(site.adsBookmarkKey, true, viewModel)).clip(RoundedCornerShape(12.dp))
         .clickable(enabled = !added && !busy && !awaitingAd, role = Role.Button, onClickLabel = action, onClick = onAdd)
         .testTag("home_suggested_site:${site.url}").padding(vertical = 8.dp),
@@ -555,7 +555,7 @@ private fun HomeSuggestedSiteTile(site: HomeSuggestedSite, added: Boolean, busy:
                     color = MaterialTheme.colorScheme.surfaceContainerHigh) {
                     Box(contentAlignment = Alignment.Center) {
                         if (awaitingAd) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                        else if (ad != null) coil.compose.AsyncImage(ad.iconUrl, null, Modifier.size(32.dp))
+                        else if (content != null) coil.compose.AsyncImage(content.iconUrl, null, Modifier.size(32.dp))
                         else HomeFavicon(site.url, viewModel, dataReady, Modifier.size(32.dp))
                     }
                 }
@@ -566,9 +566,9 @@ private fun HomeSuggestedSiteTile(site: HomeSuggestedSite, added: Boolean, busy:
                         action, Modifier.padding(3.dp))
                 }
             }
-            HomeAdDisclosure(ad, Modifier.align(Alignment.TopEnd))
+            HomeAdDisclosure(content, Modifier.align(Alignment.TopEnd))
         }
-        Text(if (awaitingAd) stringResource(R.string.home_ads_loading) else ad?.title ?: site.title,
+        Text(if (awaitingAd) stringResource(R.string.home_ads_loading) else content?.title ?: site.title,
             modifier = Modifier.fillMaxWidth().heightIn(min = 32.dp), maxLines = 2,
             overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center, style = MaterialTheme.typography.labelSmall)
     }

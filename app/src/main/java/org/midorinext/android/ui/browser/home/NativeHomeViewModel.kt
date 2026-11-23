@@ -29,6 +29,7 @@ import org.midorinext.android.newtab.HomeStory
 import org.midorinext.android.newtab.HomeAdsRepository
 import org.midorinext.android.newtab.HomeAdsBookmark
 import org.midorinext.android.newtab.HomeAdDecision
+import org.midorinext.android.newtab.HomeAdContent
 import org.midorinext.android.newtab.HomeAdExposure
 import org.midorinext.android.newtab.HomeWallpaper
 import org.midorinext.android.newtab.HomeWallpaperRepository
@@ -49,11 +50,14 @@ data class HomeContinuation(val tabId: String, val title: String, val url: Strin
 data class HomeStoriesState(val stories: List<HomeStory> = emptyList(), val loading: Boolean = false, val failed: Boolean = false)
 data class HomeAdsState(
     val catalog: List<HomeAdsBookmark>? = null,
+    val contents: Map<String, HomeAdContent> = emptyMap(),
     val decisions: Map<String, HomeAdDecision> = emptyMap(),
     val unavailable: Set<String> = emptySet(),
     val catalogFailed: Boolean = false,
     val session: Long = 0,
-)
+) {
+    fun content(key: String): HomeAdContent? = decisions[key]?.takeIf { it.isActive() }?.content() ?: contents[key]
+}
 
 @HiltViewModel
 class NativeHomeViewModel @Inject constructor(
@@ -121,7 +125,7 @@ class NativeHomeViewModel @Inject constructor(
     private var storiesJob: Job? = null
     private var storiesLanguage: String? = null
 
-    private val mutableAds = MutableStateFlow(HomeAdsState())
+    private val mutableAds = MutableStateFlow(cachedHomeAds(Locale.getDefault()))
     val ads = mutableAds.asStateFlow()
     private var adsScope: CoroutineScope? = null
     private var adsLocale = Locale.ENGLISH
@@ -131,6 +135,13 @@ class NativeHomeViewModel @Inject constructor(
     private val pendingAdEvents = mutableSetOf<String>()
     private val adReadyAt = mutableMapOf<String, Long>()
     private val exposures = mutableMapOf<String, HomeAdExposure>()
+    private val pendingAdClicks = mutableSetOf<String>()
+
+    private fun cachedHomeAds(locale: Locale, session: Long = 0): HomeAdsState {
+        val repository = adsProvider.get()
+        val catalog = repository.cachedCatalog(locale)
+        return HomeAdsState(catalog = catalog, contents = repository.cachedContents(locale, catalog.orEmpty()), session = session)
+    }
 
     fun beginHomeAdExposure(ad: HomeAdDecision, position: Int?): HomeAdExposure {
         return HomeAdExposure(ad, position).also { exposures[ad.bookmarkKey] = it }
@@ -151,19 +162,22 @@ class NativeHomeViewModel @Inject constructor(
         impressedAds.clear()
         pendingAdEvents.clear()
         adReadyAt.clear()
+        pendingAdClicks.clear()
         adsScope = this
         adsLocale = locale
-        mutableAds.value = HomeAdsState(session = mutableAds.value.session + 1)
+        mutableAds.value = cachedHomeAds(locale, mutableAds.value.session + 1)
+        mutableAds.value.contents.keys.forEach { adReadyAt[it] = android.os.SystemClock.elapsedRealtime() }
         try {
             val catalog = adsProvider.get().catalog(locale)
             preferencesRepository.applyHomeAdsCatalog(catalog)
-            mutableAds.value = mutableAds.value.copy(catalog = catalog)
+            mutableAds.value = mutableAds.value.copy(catalog = catalog,
+                contents = adsProvider.get().cachedContents(locale, catalog))
             awaitCancellation()
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (error: Exception) {
             reportHomeAdsFailure(error)
-            mutableAds.value = mutableAds.value.copy(catalogFailed = true)
+            mutableAds.value = mutableAds.value.copy(catalogFailed = mutableAds.value.catalog == null)
             awaitCancellation()
         } finally {
             if (adsScope === this) {
@@ -173,7 +187,8 @@ class NativeHomeViewModel @Inject constructor(
                 impressedAds.clear()
                 pendingAdEvents.clear()
                 adReadyAt.clear()
-                mutableAds.value = HomeAdsState(session = mutableAds.value.session)
+                pendingAdClicks.clear()
+                mutableAds.value = mutableAds.value.copy(decisions = emptyMap(), unavailable = emptySet())
             }
         }
     }
@@ -190,8 +205,9 @@ class NativeHomeViewModel @Inject constructor(
                         mutableAds.value = mutableAds.value.copy(unavailable = mutableAds.value.unavailable + key)
                         return@async null
                     }
-                    adReadyAt[key] = android.os.SystemClock.elapsedRealtime()
-                    mutableAds.value = mutableAds.value.copy(decisions = mutableAds.value.decisions + (key to ad))
+                    adReadyAt.putIfAbsent(key, android.os.SystemClock.elapsedRealtime())
+                    mutableAds.value = mutableAds.value.copy(decisions = mutableAds.value.decisions + (key to ad),
+                        contents = mutableAds.value.contents + (key to ad.content()), unavailable = mutableAds.value.unavailable - key)
                     scope.launch {
                         delay((ad.expiresAt - System.currentTimeMillis()).coerceAtLeast(1))
                         if (mutableAds.value.decisions[key]?.decisionId == ad.decisionId) {
@@ -207,7 +223,10 @@ class NativeHomeViewModel @Inject constructor(
                     throw cancelled
                 } catch (error: Exception) {
                     reportHomeAdsFailure(error)
-                    mutableAds.value = mutableAds.value.copy(unavailable = mutableAds.value.unavailable + key)
+                    adRequests.remove(key)
+                    if (key !in mutableAds.value.contents) {
+                        mutableAds.value = mutableAds.value.copy(unavailable = mutableAds.value.unavailable + key)
+                    }
                     null
                 }
             }
@@ -240,7 +259,23 @@ class NativeHomeViewModel @Inject constructor(
     fun openHomeShortcut(site: HomeShortcut, onOpenUrl: (String) -> Unit): Boolean {
         val ad = mutableAds.value.decisions[site.adsBookmarkKey]?.takeIf { it.isActive() }
         if (ad == null) {
-            if (site.adsDefault && preferences.value?.homeAdsCatalogInitialized == true) return false
+            if (!site.adsDefault && (site.adsBookmarkKey in mutableAds.value.unavailable ||
+                    mutableAds.value.catalog?.none { it.key == site.adsBookmarkKey } == true)) {
+                onOpenUrl(site.url)
+                return true
+            }
+            if (site.adsBookmarkKey.isNotEmpty() && preferences.value?.homeAdsCatalogInitialized == true) {
+                val scope = adsScope ?: return false
+                if (!pendingAdClicks.add(site.adsBookmarkKey)) return false
+                scope.launch {
+                    try {
+                        prepareHomeAd(site.adsBookmarkKey)
+                        if (mutableAds.value.decisions[site.adsBookmarkKey]?.isActive() == true ||
+                            !site.adsDefault && site.adsBookmarkKey in mutableAds.value.unavailable) openHomeShortcut(site, onOpenUrl)
+                    } finally { pendingAdClicks.remove(site.adsBookmarkKey) }
+                }
+                return true
+            }
             onOpenUrl(site.url)
             return true
         }

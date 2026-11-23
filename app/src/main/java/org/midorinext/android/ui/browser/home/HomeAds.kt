@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.awaitCancellation
 import org.midorinext.android.R
-import org.midorinext.android.newtab.HomeAdDecision
+import org.midorinext.android.newtab.HomeAdContent
 
 @Composable
 internal fun homeAdsVisibility(key: String, enabled: Boolean, viewModel: NativeHomeViewModel, position: Int? = null): Modifier {
@@ -77,10 +77,10 @@ internal fun homeAdsVisibility(key: String, enabled: Boolean, viewModel: NativeH
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun HomeAdDisclosure(
-    ad: HomeAdDecision?, modifier: Modifier = Modifier, color: Color = LocalContentColor.current,
+    content: HomeAdContent?, modifier: Modifier = Modifier, color: Color = LocalContentColor.current,
     onVisibilityChanged: (Boolean) -> Unit = {},
 ) {
-    if (ad?.sponsorLabel == null || !ad.isActive()) return
+    if (content?.sponsorLabel == null) return
     val tooltipState = rememberTooltipState(isPersistent = true)
     val scope = rememberCoroutineScope()
     val explanation = stringResource(R.string.home_ads_explanation)

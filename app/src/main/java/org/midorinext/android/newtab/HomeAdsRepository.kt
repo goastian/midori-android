@@ -46,6 +46,17 @@ class HomeAdsRepository @Inject constructor(
         valid ?: UUID.randomUUID().toString().also { storage.edit().putString("visitor_id", it).apply() }
     }
 
+    fun cachedCatalog(locale: Locale): List<HomeAdsBookmark>? = storedJson(cacheKey("catalog", locale))?.let {
+        runCatching { parseHomeAdsCatalog(it, origin) }.getOrNull()
+    }
+
+    fun cachedContents(locale: Locale, catalog: List<HomeAdsBookmark>): Map<String, HomeAdContent> = catalog.associate { entry ->
+        val creative = storedJson(cacheKey("creative", locale, entry.key))
+        val label = creative?.takeIf { it.optBoolean("disclosure_required") }
+            ?.optString("sponsor_label")?.takeIf { it.isNotBlank() && it.length <= 80 }
+        entry.key to HomeAdContent(entry.title, entry.iconUrl, label)
+    }
+
     suspend fun catalog(locale: Locale): List<HomeAdsBookmark> {
         val key = cacheKey("catalog", locale)
         val stored = storedJson(key)
@@ -113,9 +124,9 @@ class HomeAdsRepository @Inject constructor(
     private fun cacheKey(kind: String, locale: Locale, bookmark: String = "") =
         "$kind:v1:$origin:$visitorId:${homeAdsLanguage(locale)}:$deviceType:$bookmark"
 
-    private fun storedJson(key: String): JSONObject? = cacheStorage.getString(key, null)?.let {
-        runCatching { JSONObject(it) }.getOrNull()
-    }
+    private fun storedJson(key: String): JSONObject? = runCatching {
+        cacheStorage.getString(key, null)?.let(::JSONObject)
+    }.getOrNull()
 
     suspend fun render(ad: HomeAdDecision): Boolean = event("/render", ad)
 

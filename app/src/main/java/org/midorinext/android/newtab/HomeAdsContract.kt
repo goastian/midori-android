@@ -25,6 +25,8 @@ data class HomeAdsBookmark(
     val suggested: Boolean,
 )
 
+data class HomeAdContent(val title: String, val iconUrl: String, val sponsorLabel: String?)
+
 data class HomeAdDecision(
     val bookmarkKey: String,
     val decisionId: String,
@@ -37,6 +39,7 @@ data class HomeAdDecision(
     val dataUsed: List<String>,
 ) {
     fun isActive(now: Long = System.currentTimeMillis()) = expiresAt > now
+    fun content() = HomeAdContent(title, iconUrl, sponsorLabel)
 }
 
 private fun adsUrl(value: String, origin: String, pathPrefix: String? = null): String? = runCatching {
