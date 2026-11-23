@@ -1,0 +1,5 @@
+<resources>
+    <string name="home_ads_loading">Loading shortcut…</string>
+    <string name="home_ads_about">About sponsored content</string>
+    <string name="home_ads_explanation"><![CDATA[This sponsored content is published without sending any personal data to the advertiser. Hyperlinks are provided by our <b>advertising partners</b>, whose <b>privacy policies</b> apply when you click on them.]]></string>
+</resources>

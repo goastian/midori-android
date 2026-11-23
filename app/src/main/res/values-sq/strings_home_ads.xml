@@ -1,0 +1,5 @@
+<resources>
+    <string name="home_ads_loading">Duke ngarkuar shkurtoren…</string>
+    <string name="home_ads_about">Rreth përmbajtjes së sponsorizuar</string>
+    <string name="home_ads_explanation"><![CDATA[Kjo përmbajtje e sponsorizuar publikohet pa i dërguar asnjë të dhënë personale reklamuesit. Lidhjet ofrohen nga <b>partnerët tanë të reklamave</b>, <b>politikat e privatësisë</b> të të cilëve zbatohen kur klikoni mbi këto lidhje.]]></string>
+</resources>

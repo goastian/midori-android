@@ -1,0 +1,5 @@
+<resources>
+    <string name="home_ads_loading">正在加载快捷方式…</string>
+    <string name="home_ads_about">关于赞助内容</string>
+    <string name="home_ads_explanation"><![CDATA[此赞助内容的发布不会向广告主发送任何个人数据。链接由我们的<b>广告合作伙伴</b>提供，点击链接后将适用相应合作伙伴的<b>隐私政策</b>。]]></string>
+</resources>

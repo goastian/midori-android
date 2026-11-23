@@ -1,0 +1,5 @@
+<resources>
+    <string name="home_ads_loading">Cargando acceso…</string>
+    <string name="home_ads_about">Acerca del contenido patrocinado</string>
+    <string name="home_ads_explanation"><![CDATA[Este contenido patrocinado se publica sin enviar datos personales al anunciante. Los enlaces los proporcionan nuestros <b>socios publicitarios</b>, cuyas <b>políticas de privacidad</b> se aplican cuando haces clic en ellos.]]></string>
+</resources>

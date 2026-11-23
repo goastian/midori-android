@@ -1,0 +1,5 @@
+<resources>
+    <string name="home_ads_loading">Nilo-load ang shortcut…</string>
+    <string name="home_ads_about">Tungkol sa naka-sponsor na nilalaman</string>
+    <string name="home_ads_explanation"><![CDATA[Inilalathala ang naka-sponsor na nilalamang ito nang walang ipinapadalang personal na data sa advertiser. Ang mga link ay ibinibigay ng aming mga <b>kasosyo sa advertising</b>, na ang mga <b>patakaran sa privacy</b> ay nalalapat kapag nag-click ka sa mga link.]]></string>
+</resources>

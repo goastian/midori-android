@@ -1,0 +1,5 @@
+<resources>
+    <string name="home_ads_loading">ショートカットを読み込み中…</string>
+    <string name="home_ads_about">スポンサー提供コンテンツについて</string>
+    <string name="home_ads_explanation"><![CDATA[このスポンサー提供コンテンツは、広告主に個人データを送信せずに掲載されています。リンクは当社の<b>広告パートナー</b>によって提供されており、クリックすると各パートナーの<b>プライバシーポリシー</b>が適用されます。]]></string>
+</resources>

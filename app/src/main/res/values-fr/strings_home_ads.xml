@@ -1,0 +1,5 @@
+<resources>
+    <string name="home_ads_loading">Chargement du raccourci…</string>
+    <string name="home_ads_about">À propos du contenu sponsorisé</string>
+    <string name="home_ads_explanation"><![CDATA[Ce contenu sponsorisé est publié sans qu’aucune donnée personnelle soit envoyée à l’annonceur. Les liens sont fournis par nos <b>partenaires publicitaires</b>, dont les <b>politiques de confidentialité</b> s’appliquent lorsque vous cliquez sur ces liens.]]></string>
+</resources>

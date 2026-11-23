@@ -1,0 +1,5 @@
+<resources>
+    <string name="home_ads_loading">Caricamento della scorciatoia…</string>
+    <string name="home_ads_about">Informazioni sui contenuti sponsorizzati</string>
+    <string name="home_ads_explanation"><![CDATA[Questi contenuti sponsorizzati vengono pubblicati senza inviare dati personali all’inserzionista. I collegamenti sono forniti dai nostri <b>partner pubblicitari</b>, le cui <b>informative sulla privacy</b> si applicano quando fai clic sui collegamenti.]]></string>
+</resources>

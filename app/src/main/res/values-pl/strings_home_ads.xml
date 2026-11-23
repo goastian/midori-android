@@ -1,0 +1,5 @@
+<resources>
+    <string name="home_ads_loading">Wczytywanie skrótu…</string>
+    <string name="home_ads_about">Informacje o treściach sponsorowanych</string>
+    <string name="home_ads_explanation"><![CDATA[Te treści sponsorowane są publikowane bez przesyłania reklamodawcy jakichkolwiek danych osobowych. Linki udostępniają nasi <b>partnerzy reklamowi</b>. Po kliknięciu tych linków obowiązują <b>polityki prywatności</b> tych partnerów.]]></string>
+</resources>

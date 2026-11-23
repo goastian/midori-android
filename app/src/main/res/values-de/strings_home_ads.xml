@@ -1,0 +1,5 @@
+<resources>
+    <string name="home_ads_loading">Verknüpfung wird geladen…</string>
+    <string name="home_ads_about">Über gesponserte Inhalte</string>
+    <string name="home_ads_explanation"><![CDATA[Diese gesponserten Inhalte werden veröffentlicht, ohne personenbezogene Daten an den Werbetreibenden zu senden. Die Links werden von unseren <b>Werbepartnern</b> bereitgestellt. Wenn Sie auf diese Links klicken, gelten die <b>Datenschutzrichtlinien</b> unserer Werbepartner.]]></string>
+</resources>

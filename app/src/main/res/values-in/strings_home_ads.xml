@@ -1,0 +1,5 @@
+<resources>
+    <string name="home_ads_loading">Memuat pintasan…</string>
+    <string name="home_ads_about">Tentang konten bersponsor</string>
+    <string name="home_ads_explanation"><![CDATA[Konten bersponsor ini diterbitkan tanpa mengirimkan data pribadi apa pun kepada pengiklan. Tautan disediakan oleh <b>mitra periklanan</b> kami, yang <b>kebijakan privasinya</b> berlaku saat Anda mengeklik tautan tersebut.]]></string>
+</resources>
