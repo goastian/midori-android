@@ -1,15 +1,18 @@
 package org.midorinext.android.ui.preferences.widgets
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,6 +25,7 @@ fun PreferenceRow(
     enabled: Boolean = true,
     leading: @Composable () -> Unit = {},
     trailing: @Composable () -> Unit = {},
+    @DrawableRes leadingIcon: Int? = null,
     onClicked: (() -> Unit)? = null,
 ) {
     val interaction = onClicked?.let { Modifier.clickable(enabled = enabled, onClick = it) } ?: Modifier
@@ -35,6 +39,14 @@ fun PreferenceRow(
             .heightIn(min = 56.dp)
             .padding(horizontal = 16.dp, vertical = if (description != null) 12.dp else 2.dp)
     ) {
+        if (leadingIcon != null) {
+            Icon(
+                painter = painterResource(leadingIcon),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp),
+            )
+        }
         leading()
         Column(Modifier.weight(2f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(

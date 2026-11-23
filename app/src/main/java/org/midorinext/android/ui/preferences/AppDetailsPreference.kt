@@ -35,6 +35,7 @@ fun AppDetailsPreference() {
 
     PreferenceRow(
         label = R.string.app_name,
+        leadingIcon = R.drawable.icons_information,
         description = stringResource(
             R.string.qwant_details_description,
             displayVersion,

@@ -1,5 +1,6 @@
 package org.midorinext.android.ui.preferences.widgets
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Switch
@@ -14,11 +15,13 @@ fun PreferenceToggle(
     @StringRes description: Int? = null,
     value: Boolean,
     onValueChange: (Boolean) -> Unit,
+    @DrawableRes leadingIcon: Int? = null,
 ) {
     PreferenceRow(
         label = label,
         modifier = Modifier.toggleable(value = value, role = Role.Switch, onValueChange = onValueChange),
         description = description?.let { stringResource(id = it) },
+        leadingIcon = leadingIcon,
         trailing = { Switch(checked = value, onCheckedChange = null) },
     )
 }

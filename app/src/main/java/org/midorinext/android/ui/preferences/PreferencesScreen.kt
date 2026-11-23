@@ -70,6 +70,7 @@ import mozilla.components.concept.engine.translate.Language
 import mozilla.components.concept.engine.translate.LanguageModel
 import mozilla.components.concept.engine.translate.LanguageSetting
 import mozilla.components.concept.engine.translate.ModelState
+import mozilla.components.ui.icons.R as iconsR
 
 @Composable
 fun PreferencesScreen(
@@ -91,6 +92,7 @@ fun PreferencesScreen(
             )
             PreferenceToggle(
                 label = R.string.open_links_in_apps,
+                leadingIcon = iconsR.drawable.mozac_ic_link_24,
                 value = appPrefs.openLinksInApp,
                 onValueChange = viewModel::updateOpenLinksInApp,
             )
@@ -119,6 +121,7 @@ fun PreferencesScreen(
             SettingsNavRow(
                 label = R.string.settings_accessibility_title,
                 description = accessibilitySummary(appPrefs),
+                leadingIcon = iconsR.drawable.mozac_ic_accessibility_24,
                 onClicked = { navigateTo(NavDestination.AccessibilitySettings) },
             )
         }
@@ -133,12 +136,14 @@ fun PreferencesScreen(
             SettingsNavRow(
                 label = R.string.adblock_settings_title,
                 description = stringResource(R.string.adblock_settings_summary),
+                leadingIcon = iconsR.drawable.mozac_ic_shield_checkmark_24,
                 onClicked = { navigateTo(NavDestination.AdBlockSettings) },
             )
             PermissionsPreference(viewModel)
             ClearDataPreference(viewModel, applicationViewModel)
             PreferenceToggle(
                 label = R.string.clear_data_on_quit_label,
+                leadingIcon = R.drawable.icons_power,
                 description = if (appPrefs.clearDataOnQuit) R.string.clear_data_on_quit_description else null,
                 value = appPrefs.clearDataOnQuit,
                 onValueChange = viewModel::updateClearDataOnQuit,
@@ -155,10 +160,12 @@ fun PreferencesScreen(
             SettingsNavRow(
                 label = R.string.settings_autofill_title,
                 description = autofillSummary(appPrefs),
+                leadingIcon = iconsR.drawable.mozac_ic_clipboard_24,
                 onClicked = { navigateTo(NavDestination.AutofillSettings) },
             )
             PreferenceToggle(
                 label = R.string.settings_bookmarks_current_tab,
+                leadingIcon = R.drawable.icons_bookmark,
                 description = R.string.settings_bookmarks_current_tab_summary,
                 value = appPrefs.openBookmarksInCurrentTab,
                 onValueChange = viewModel::updateOpenBookmarksInCurrentTab,
@@ -170,6 +177,7 @@ fun PreferencesScreen(
                 SettingsNavRow(
                     label = R.string.settings_app_language,
                     description = stringResource(R.string.settings_app_language_summary),
+                    leadingIcon = iconsR.drawable.mozac_ic_translate_24,
                     trailingIcon = R.drawable.icons_open,
                     onClicked = {
                         context.startActivity(
@@ -202,6 +210,7 @@ fun PreferencesScreen(
             val privacyPolicyUrl = stringResource(R.string.privacy_policy_url)
             SettingsNavRow(
                 label = R.string.privacy_policy_label,
+                leadingIcon = R.drawable.icons_lock,
                 trailingIcon = R.drawable.icons_open,
                 onClicked = {
                     viewModel.addTabsUseCase(privacyPolicyUrl)
@@ -210,6 +219,7 @@ fun PreferencesScreen(
             )
             PreferenceSelectionPopup(
                 label = R.string.licence_label,
+                leadingIcon = iconsR.drawable.mozac_ic_reader_view_24,
                 popupContent = {
                     HtmlText(
                         html = stringResource(id = R.string.settings_licence_content),
@@ -220,6 +230,7 @@ fun PreferencesScreen(
             )
             SettingsNavRow(
                 label = R.string.rate_us_label,
+                leadingIcon = iconsR.drawable.mozac_ic_star_fill_20,
                 trailingIcon = R.drawable.icons_open,
                 onClicked = { context.openAppStorePage() },
             )
@@ -229,6 +240,7 @@ fun PreferencesScreen(
             SettingsSection(R.string.settings_tests_label) {
                 SettingsNavRow(
                     label = R.string.settings_tests_prompts_label,
+                    leadingIcon = iconsR.drawable.mozac_ic_debug_drawer_24,
                     trailingIcon = R.drawable.icons_open,
                     onClicked = {
                         viewModel.openTestTabUseCase("prompts")
@@ -951,16 +963,7 @@ internal fun SettingsNavRow(
     PreferenceRow(
         label = label,
         description = description,
-        leading = {
-            if (leadingIcon != null) {
-                Icon(
-                    painter = painterResource(leadingIcon),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp),
-                )
-            }
-        },
+        leadingIcon = leadingIcon,
         trailing = { Icon(painter = painterResource(trailingIcon), contentDescription = null) },
         onClicked = onClicked,
     )

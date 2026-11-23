@@ -1,6 +1,7 @@
 package org.midorinext.android.ui.preferences.widgets
 
 import androidx.activity.compose.BackHandler
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +26,8 @@ fun PreferenceSelectionPopup(
     @StringRes description: Int? = null,
     icon: @Composable () -> Unit = {},
     fullscreenPopup: Boolean = false,
-    disableScreenHeader: Boolean = false
+    disableScreenHeader: Boolean = false,
+    @DrawableRes leadingIcon: Int? = null,
 ) {
     var showPopup by remember { mutableStateOf(false) }
 
@@ -37,6 +39,7 @@ fun PreferenceSelectionPopup(
         PreferenceRow(
             label = label,
             description = description?.let { stringResource(it) },
+            leadingIcon = leadingIcon,
             trailing = icon,
             onClicked = { showPopup = true }
         )

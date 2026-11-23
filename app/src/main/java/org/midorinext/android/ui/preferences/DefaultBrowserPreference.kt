@@ -22,6 +22,7 @@ fun DefaultBrowserPreference() {
     if (status.roleRequestIntent != null) {
         PreferenceToggle(
             label = R.string.default_browser_label,
+            leadingIcon = R.drawable.icons_internet,
             value = status.isDefault,
             onValueChange = {
                 if (it) {
@@ -34,6 +35,7 @@ fun DefaultBrowserPreference() {
     } else {
         PreferenceRow(
             label = R.string.default_browser_label,
+            leadingIcon = R.drawable.icons_internet,
             onClicked = { launcher.launch(status.requestIntent()) },
         )
     }

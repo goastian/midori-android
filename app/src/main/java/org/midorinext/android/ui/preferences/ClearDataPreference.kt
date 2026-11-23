@@ -51,6 +51,7 @@ fun ClearDataPreference(
 
     PreferenceSelectionPopup(
         label = R.string.cleardata_settings_label,
+        leadingIcon = R.drawable.icons_trash,
         popupContent = {
             Column(modifier = Modifier.fillMaxSize()) {
                 CheckBoxRow(

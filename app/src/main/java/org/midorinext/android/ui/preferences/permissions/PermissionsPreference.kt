@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import org.midorinext.android.R
 import org.midorinext.android.ui.preferences.PreferencesViewModel
 import org.midorinext.android.ui.preferences.widgets.PreferenceSelectionPopup
+import mozilla.components.ui.icons.R as iconsR
 
 @Composable
 fun PermissionsPreference(
@@ -11,6 +12,7 @@ fun PermissionsPreference(
 ) {
     PreferenceSelectionPopup(
         label = R.string.permissions_settings_label,
+        leadingIcon = iconsR.drawable.mozac_ic_permissions_24,
         popupContent = {
             PermissionsSettingsList(viewModel)
         },
