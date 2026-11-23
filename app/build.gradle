@@ -119,7 +119,8 @@ android {
         minSdk 26
         targetSdk 36
         versionCode configuredPlaystoreVersionCode
-        versionName "11.9.5.3"
+        versionName "11.9.5.2.1"
+        buildConfigField "String", "ASTIAN_ADS_URL", '"https://ads.astian.org"'
         buildConfigField "String", "RELEASE_CODENAME", groovy.json.JsonOutput.toJson(
                 readConfigValue("release_codename", "Pillar of Autumn").toString().trim())
         buildConfigField "String", "SENTRY_DSN", groovy.json.JsonOutput.toJson(
@@ -182,6 +183,8 @@ android {
 
     buildTypes {
         debug {
+            buildConfigField "String", "ASTIAN_ADS_URL", groovy.json.JsonOutput.toJson(
+                    readConfigValue("astian_ads_url", "https://ads.astian.org"))
             getIsDefault().set(true)
             applicationIdSuffix ".debug"
             buildConfigField "String", "MIDORIPRESS_URL", groovy.json.JsonOutput.toJson(readConfigValue("midoripress_url", "http://127.0.0.1:19999"))
