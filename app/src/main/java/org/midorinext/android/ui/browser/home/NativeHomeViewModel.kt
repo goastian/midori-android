@@ -153,7 +153,7 @@ class NativeHomeViewModel @Inject constructor(
     }
 
     fun recordHomeAdAction(key: String, event: String) {
-        if (key.isNotEmpty()) adsProvider.get().bookmarkAction(key, event)
+        if (key.isNotEmpty()) adsProvider.get().bookmarkAction(key, event, mutableAds.value.decisions[key])
     }
 
     suspend fun showHomeAds(locale: Locale): Unit = coroutineScope {

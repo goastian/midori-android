@@ -389,7 +389,9 @@ internal fun HomeShortcutDialogs(
                 val previous = sites.firstOrNull { it.id == state.editorId }
                 repository.saveHomeShortcut(state.editorId, title, url, state.editorParentId)
                     .also { if (it) {
-                        previous?.let { site -> viewModel.recordHomeAdAction(site.adsBookmarkKey, "bookmark_changed") }
+                        previous?.takeIf { it.title != title.trim() || it.url != publicHomeUrl(url) }?.let { site ->
+                            viewModel.recordHomeAdAction(site.adsBookmarkKey, "bookmark_changed")
+                        }
                         state.showEditor = false
                     } }
             }

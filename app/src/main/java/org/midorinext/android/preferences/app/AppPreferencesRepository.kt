@@ -58,6 +58,11 @@ class AppPreferencesRepository internal constructor(
             val existing = sites.getOrNull(index)
             val destination = parentId ?: existing?.parentId.orEmpty()
             if (existing?.isFolder == true || !sites.hasHomeFolder(destination)) return@updateData prefs
+            if (existing != null && existing.title == title.trim() && existing.url == normalized && existing.parentId == destination &&
+                (adsBookmarkKey.isEmpty() || adsBookmarkKey == existing.adsBookmarkKey)) {
+                saved = true
+                return@updateData prefs
+            }
             val shortcut = (existing?.toBuilder() ?: HomeShortcut.newBuilder())
                 .setId(id ?: UUID.randomUUID().toString())
                 .setTitle(title.trim()).setUrl(normalized).setParentId(destination)

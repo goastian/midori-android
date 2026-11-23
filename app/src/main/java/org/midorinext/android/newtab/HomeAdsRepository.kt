@@ -157,10 +157,12 @@ class HomeAdsRepository @Inject constructor(
         sendInteraction(body)
     }
 
-    fun bookmarkAction(key: String, event: String) {
+    fun bookmarkAction(key: String, event: String, ad: HomeAdDecision? = null) {
         if (!homeAdsKeyPattern.matches(key) || event !in setOf("bookmark_added", "bookmark_changed", "bookmark_removed", "bookmark_moved")) return
-        sendInteraction(JSONObject().put("event_id", UUID.randomUUID().toString()).put("event_type", event)
-            .put("visitor_id", visitorId).put("bookmark_key", key).put("surface", "android_home").put("device_type", deviceType))
+        val body = JSONObject().put("event_id", UUID.randomUUID().toString()).put("event_type", event)
+            .put("visitor_id", visitorId).put("bookmark_key", key).put("surface", "android_home").put("device_type", deviceType)
+        if (ad?.isActive() == true && ad.bookmarkKey == key) body.put("impression_token", ad.impressionToken)
+        sendInteraction(body)
     }
 
     private fun sendInteraction(body: JSONObject) {
