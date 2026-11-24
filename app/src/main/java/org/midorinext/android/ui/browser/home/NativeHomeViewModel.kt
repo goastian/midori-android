@@ -168,6 +168,7 @@ class NativeHomeViewModel @Inject constructor(
         mutableAds.value = cachedHomeAds(locale, mutableAds.value.session + 1)
         mutableAds.value.contents.keys.forEach { adReadyAt[it] = android.os.SystemClock.elapsedRealtime() }
         try {
+            mutableAds.value.catalog?.let { preferencesRepository.applyHomeAdsCatalog(it) }
             val catalog = adsProvider.get().catalog(locale)
             preferencesRepository.applyHomeAdsCatalog(catalog)
             mutableAds.value = mutableAds.value.copy(catalog = catalog,

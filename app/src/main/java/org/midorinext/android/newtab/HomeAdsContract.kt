@@ -23,7 +23,9 @@ data class HomeAdsBookmark(
     val iconUrl: String,
     val default: Boolean,
     val suggested: Boolean,
-)
+) {
+    val isHomeDefault: Boolean get() = default && category == "general"
+}
 
 data class HomeAdContent(val title: String, val iconUrl: String, val sponsorLabel: String?)
 

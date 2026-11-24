@@ -46,6 +46,10 @@ import org.midorinext.android.preferences.app.HomeShortcut
 import org.midorinext.android.ui.theme.LocalMidoriTheme
 import org.midorinext.android.ui.theme.MidoriDialogSystemBars
 
+private fun HomeAdsState.hidesShortcut(site: HomeShortcut, catalogInitialized: Boolean): Boolean =
+    site.adsDefault && (site.adsBookmarkKey in unavailable || (catalogFailed && catalogInitialized) ||
+        (site.parentId.isEmpty() && catalog?.none { it.key == site.adsBookmarkKey && it.isHomeDefault } == true))
+
 @Stable
 internal class HomeShortcutUiState {
     var collectionId by mutableStateOf<String?>(null)
@@ -122,8 +126,7 @@ internal fun HomeShortcutGrid(
 ) {
     val showAdd = !preferences.hideHomeAddShortcut
     val ads by viewModel.ads.collectAsStateWithLifecycle()
-    val visible = sites.filterNot { it.adsDefault && (it.adsBookmarkKey in ads.unavailable ||
-        (ads.catalogFailed && preferences.homeAdsCatalogInitialized)) }
+    val visible = sites.filterNot { ads.hidesShortcut(it, preferences.homeAdsCatalogInitialized) }
         .take(columns * 2 - if (showAdd) 1 else 0)
     val tiles: List<HomeShortcut?> = visible + if (showAdd) listOf(null) else emptyList()
     Column(Modifier.padding(top = 4.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -248,8 +251,7 @@ internal fun HomeShortcutDialogs(
                     }
                 }
                 val children = sites.filter { it.parentId == collection }
-                    .filterNot { it.adsDefault && (it.adsBookmarkKey in ads.unavailable ||
-                        (ads.catalogFailed && viewModel.preferences.value?.homeAdsCatalogInitialized == true)) }
+                    .filterNot { ads.hidesShortcut(it, viewModel.preferences.value?.homeAdsCatalogInitialized == true) }
                 val collectionState = key(collection) { rememberLazyListState() }
                 LazyColumn(Modifier.weight(1f, fill = false).heightIn(max = 440.dp).testTag("home_collection_list"),
                     state = collectionState, contentPadding = PaddingValues(vertical = 12.dp)) {
@@ -422,7 +424,7 @@ private fun HomeSitePicker(parentId: String, state: HomeShortcutUiState, sites: 
     val category = homeSiteCategories.firstOrNull { it.id == categoryId }
     val categoryTitle = category?.let { stringResource(it.title) }
     val ads by viewModel.ads.collectAsStateWithLifecycle()
-    val catalogSites = ads.catalog?.filter { if (categoryId == null) it.suggested else it.category == categoryId }
+    val catalogSites = ads.catalog?.filter { if (categoryId == null) it.suggested && it.category == "general" else it.category == categoryId }
         ?.filterNot { it.key in ads.unavailable }
         ?.map { HomeSuggestedSite(it.title, it.url, it.key) }
         ?: (category?.sites ?: homeSuggestedSites)

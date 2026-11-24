@@ -33,13 +33,13 @@ internal fun AppPreferences.withHomeAdsCatalog(catalog: List<HomeAdsBookmark>): 
         if (key.isEmpty()) return@mapNotNull saved
         val entry = entries[key]
         val default = saved.adsDefault || legacy != null
-        if (default && (entry == null || key in hidden)) return@mapNotNull null
+        if (default && (entry == null || key in hidden || (saved.parentId.isEmpty() && !entry.isHomeDefault))) return@mapNotNull null
         if (entry == null) return@mapNotNull saved
         saved.toBuilder().setTitle(entry.title).setUrl(entry.url).setAdsBookmarkKey(key).setAdsDefault(default).build()
     }.toMutableList()
     val present = shortcuts.map { it.adsBookmarkKey }.toSet()
     val personalUrls = shortcuts.filter { it.adsBookmarkKey.isEmpty() }.map { it.url }.toSet()
-    catalog.filter { it.default && it.key !in hidden && it.key !in present && it.url !in personalUrls }.forEach { entry ->
+    catalog.filter { it.isHomeDefault && it.key !in hidden && it.key !in present && it.url !in personalUrls }.forEach { entry ->
         shortcuts.add(HomeShortcut.newBuilder().setId("ads-default:${entry.key}")
             .setTitle(entry.title).setUrl(entry.url).setAdsBookmarkKey(entry.key).setAdsDefault(true).build())
     }
