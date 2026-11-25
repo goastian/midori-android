@@ -425,6 +425,42 @@ private fun HomeAppearanceToggle(
     }
 }
 
+private val toolbarShortcutOptions = listOf(
+    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_NEW_TAB, R.string.shortcut_new_tab) {
+        Icon(painterResource(R.drawable.icons_add_tab), null, modifier = Modifier.size(24.dp))
+    },
+    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_SHARE, R.string.shortcut_share) {
+        Icon(painterResource(R.drawable.icons_share), null, modifier = Modifier.size(24.dp))
+    },
+    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_BOOKMARK, R.string.shortcut_bookmark) {
+        Icon(painterResource(R.drawable.icons_add_bookmark), null, modifier = Modifier.size(24.dp))
+    },
+    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_HOMEPAGE, R.string.shortcut_homepage) {
+        Icon(painterResource(R.drawable.icons_home), null, modifier = Modifier.size(24.dp))
+    },
+    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_BACK, R.string.shortcut_back) {
+        Icon(painterResource(R.drawable.icons_arrow_backward), null, modifier = Modifier.size(24.dp))
+    },
+    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_SUMMARIZE, R.string.shortcut_summarize) {
+        Icon(painterResource(R.drawable.icons_summarize), null, modifier = Modifier.size(24.dp))
+    },
+    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_NONE, R.string.shortcut_none) {
+        Icon(painterResource(R.drawable.icons_close_circled), null, modifier = Modifier.size(24.dp))
+    },
+)
+
+@Composable
+fun ToolbarShortcutSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
+    val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
+    PreferenceScreenScaffold(title = stringResource(R.string.settings_toolbar_shortcut)) {
+        PreferenceRadioButtonSelector(
+            options = toolbarShortcutOptions,
+            value = appPrefs.toolbarShortcut,
+            onValueChange = viewModel::updateToolbarShortcut,
+        )
+    }
+}
+
 @Composable
 fun CustomizeSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
     val appPrefs by viewModel.appPreferences.collectAsStateWithLifecycle()
@@ -480,17 +516,7 @@ fun CustomizeSettingsScreen(viewModel: PreferencesViewModel = hiltViewModel()) {
         PreferenceGroupLabel(label = R.string.settings_customize_shortcut)
         PreferenceRadioSelectionPopup(
             label = R.string.settings_toolbar_shortcut,
-            options = remember {
-                listOf(
-                    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_NEW_TAB, R.string.shortcut_new_tab),
-                    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_SHARE, R.string.shortcut_share),
-                    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_BOOKMARK, R.string.shortcut_bookmark),
-                    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_HOMEPAGE, R.string.shortcut_homepage),
-                    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_BACK, R.string.shortcut_back),
-                    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_SUMMARIZE, R.string.shortcut_summarize),
-                    RadioButtonOption(ToolbarShortcut.TOOLBAR_SHORTCUT_NONE, R.string.shortcut_none)
-                )
-            },
+            options = toolbarShortcutOptions,
             value = appPrefs.toolbarShortcut,
             onValueChange = viewModel::updateToolbarShortcut
         )

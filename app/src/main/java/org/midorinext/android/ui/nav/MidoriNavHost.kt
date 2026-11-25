@@ -34,6 +34,7 @@ import org.midorinext.android.pwa.WebAppsScreen
 import org.midorinext.android.ui.preferences.AccessibilitySettingsScreen
 import org.midorinext.android.ui.preferences.AutofillSettingsScreen
 import org.midorinext.android.ui.preferences.CustomizeSettingsScreen
+import org.midorinext.android.ui.preferences.ToolbarShortcutSettingsScreen
 import org.midorinext.android.ui.preferences.DownloadSettingsScreen
 import org.midorinext.android.ui.preferences.TranslationSettingsScreen
 import org.midorinext.android.ui.preferences.HomepageSettingsScreen
@@ -197,6 +198,9 @@ fun MidoriNavHost(
         }
         composable(NavDestination.CustomizeSettings.match) {
             CustomizeSettingsScreen()
+        }
+        composable(NavDestination.ToolbarShortcutSettings.match) {
+            ToolbarShortcutSettingsScreen()
         }
         composable(NavDestination.PasswordSettings.match) {
             PasswordSettingsScreen(

@@ -31,6 +31,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.midorinext.android.R
+import org.midorinext.android.preferences.app.ToolbarShortcut
 import org.midorinext.android.adblock.AdBlockerAction
 import org.midorinext.android.adblock.BlockingLevel
 import org.midorinext.android.lite.LiteMode
@@ -474,6 +475,7 @@ fun ToolbarAction( // TODO rename ToolbarAction to SmallIconButton and move to g
     onLongClick: (() -> Unit)? = null,
     enabled: Boolean = true,
     modifier: Modifier = Modifier,
+    onLongClickLabel: String? = null,
     content: @Composable () -> Unit
 ) {
     Box(
@@ -483,6 +485,7 @@ fun ToolbarAction( // TODO rename ToolbarAction to SmallIconButton and move to g
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick,
+                onLongClickLabel = onLongClickLabel,
                 enabled = enabled,
                 role = Role.Button,
                 interactionSource = remember { MutableInteractionSource() },
@@ -510,7 +513,8 @@ fun AfterActions(
         ToolbarShortcutAction(
             shortcut = toolbarShortcut,
             viewModel = viewModel,
-            onSummarize = onSummarize
+            onSummarize = onSummarize,
+            onEdit = { navigateTo(NavDestination.ToolbarShortcutSettings) },
         )
         TabsButton(navigateTo, viewModel)
         BrowserMenuButton(navigateTo, viewModel, appViewModel)
@@ -519,44 +523,48 @@ fun AfterActions(
 
 @Composable
 private fun ToolbarShortcutAction(
-    shortcut: org.midorinext.android.preferences.app.ToolbarShortcut,
+    shortcut: ToolbarShortcut,
     viewModel: BrowserScreenViewModel,
     onSummarize: () -> Unit,
+    onEdit: () -> Unit,
 ) {
     val context = LocalContext.current
-    when (shortcut) {
-        org.midorinext.android.preferences.app.ToolbarShortcut.TOOLBAR_SHORTCUT_NEW_TAB -> ToolbarAction(
-            onClick = { viewModel.openNewMidoriTab() }
+    val (icon, label) = when (shortcut) {
+        ToolbarShortcut.TOOLBAR_SHORTCUT_NEW_TAB -> R.drawable.icons_add_tab to R.string.shortcut_new_tab
+        ToolbarShortcut.TOOLBAR_SHORTCUT_SHARE -> R.drawable.icons_share to R.string.shortcut_share
+        ToolbarShortcut.TOOLBAR_SHORTCUT_BOOKMARK -> R.drawable.icons_add_bookmark to R.string.shortcut_bookmark
+        ToolbarShortcut.TOOLBAR_SHORTCUT_HOMEPAGE -> R.drawable.icons_home to R.string.shortcut_homepage
+        ToolbarShortcut.TOOLBAR_SHORTCUT_BACK -> R.drawable.icons_arrow_backward to R.string.shortcut_back
+        ToolbarShortcut.TOOLBAR_SHORTCUT_SUMMARIZE -> R.drawable.icons_summarize to R.string.shortcut_summarize
+        ToolbarShortcut.TOOLBAR_SHORTCUT_NONE, ToolbarShortcut.UNRECOGNIZED -> return
+    }
+    var showEditMenu by remember(shortcut) { mutableStateOf(false) }
+    Box {
+        ToolbarAction(
+            onClick = {
+                when (shortcut) {
+                    ToolbarShortcut.TOOLBAR_SHORTCUT_NEW_TAB -> viewModel.openNewMidoriTab()
+                    ToolbarShortcut.TOOLBAR_SHORTCUT_SHARE -> viewModel.currentUrl.value?.takeIf { it.isNotBlank() }?.let(context::share)
+                    ToolbarShortcut.TOOLBAR_SHORTCUT_BOOKMARK -> viewModel.addBookmark()
+                    ToolbarShortcut.TOOLBAR_SHORTCUT_HOMEPAGE -> viewModel.goToHomepage()
+                    ToolbarShortcut.TOOLBAR_SHORTCUT_BACK -> viewModel.goBack()
+                    ToolbarShortcut.TOOLBAR_SHORTCUT_SUMMARIZE -> onSummarize()
+                    ToolbarShortcut.TOOLBAR_SHORTCUT_NONE, ToolbarShortcut.UNRECOGNIZED -> Unit
+                }
+            },
+            onLongClick = { showEditMenu = true },
+            onLongClickLabel = stringResource(R.string.edit),
+            modifier = Modifier.testTag("toolbar_shortcut"),
         ) {
-            Icon(painterResource(R.drawable.icons_add_tab), stringResource(R.string.shortcut_new_tab))
+            Icon(painterResource(icon), stringResource(label), modifier = Modifier.size(24.dp))
         }
-        org.midorinext.android.preferences.app.ToolbarShortcut.TOOLBAR_SHORTCUT_SHARE -> ToolbarAction(
-            onClick = { viewModel.currentUrl.value?.takeIf { it.isNotBlank() }?.let(context::share) }
-        ) {
-            Icon(painterResource(R.drawable.icons_share), stringResource(R.string.shortcut_share))
+        Dropdown(expanded = showEditMenu, onDismissRequest = { showEditMenu = false }) {
+            DropdownItem(
+                text = stringResource(R.string.edit),
+                icon = R.drawable.icons_edit,
+                onClick = { showEditMenu = false; onEdit() },
+            )
         }
-        org.midorinext.android.preferences.app.ToolbarShortcut.TOOLBAR_SHORTCUT_BOOKMARK -> ToolbarAction(
-            onClick = { viewModel.addBookmark() }
-        ) {
-            Icon(painterResource(R.drawable.icons_add_bookmark), stringResource(R.string.shortcut_bookmark))
-        }
-        org.midorinext.android.preferences.app.ToolbarShortcut.TOOLBAR_SHORTCUT_HOMEPAGE -> ToolbarAction(
-            onClick = viewModel::goToHomepage
-        ) {
-            Icon(painterResource(R.drawable.icons_home), stringResource(R.string.shortcut_homepage))
-        }
-        org.midorinext.android.preferences.app.ToolbarShortcut.TOOLBAR_SHORTCUT_BACK -> ToolbarAction(
-            onClick = { viewModel.goBack() }
-        ) {
-            Icon(painterResource(R.drawable.icons_arrow_backward), stringResource(R.string.shortcut_back))
-        }
-        org.midorinext.android.preferences.app.ToolbarShortcut.TOOLBAR_SHORTCUT_SUMMARIZE -> ToolbarAction(
-            onClick = onSummarize
-        ) {
-            Icon(painterResource(R.drawable.icons_summarize), stringResource(R.string.shortcut_summarize))
-        }
-        org.midorinext.android.preferences.app.ToolbarShortcut.TOOLBAR_SHORTCUT_NONE,
-        org.midorinext.android.preferences.app.ToolbarShortcut.UNRECOGNIZED -> Unit
     }
 }
 

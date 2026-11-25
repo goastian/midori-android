@@ -34,6 +34,7 @@ sealed class NavDestination(
     object AlternativeSearchEngineSettings : NavDestination(match = "settings/search/alternatives")
     object HomepageSettings : NavDestination(match = "settings/homepage")
     object CustomizeSettings : NavDestination(match = "settings/customize")
+    object ToolbarShortcutSettings : NavDestination(match = "settings/customize/toolbar-shortcut")
     object PasswordSettings : NavDestination(match = "settings/passwords")
     object AutofillSettings : NavDestination(match = "settings/autofill")
     object SavedPasswords : NavDestination(match = "settings/passwords/saved")

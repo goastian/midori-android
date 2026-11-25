@@ -430,42 +430,46 @@ fun TabsScreen(
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        TabsLayoutButton(
-                            resolvedTabsViewOption,
-                            tabsViewModel::cycleTabsViewOption,
-                            enabled = tabsViewOption != null,
-                        )
-                        IconButton(
-                            enabled = !private && recentlyClosedCount > 0,
-                            onClick = { if (tabsViewModel.reopenRecentlyClosed()) onClose() },
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Icon(painterResource(R.drawable.icons_history), stringResource(R.string.browser_reopen_closed_tab))
+                            TabsLayoutButton(
+                                resolvedTabsViewOption,
+                                tabsViewModel::cycleTabsViewOption,
+                                enabled = tabsViewOption != null,
+                            )
+                            IconButton(
+                                enabled = !private && recentlyClosedCount > 0,
+                                onClick = { if (tabsViewModel.reopenRecentlyClosed()) onClose() },
+                            ) {
+                                Icon(painterResource(R.drawable.icons_history), stringResource(R.string.browser_reopen_closed_tab))
+                            }
                         }
-                        FilledTonalButton(
+                        FilledTonalIconButton(
                             onClick = { openIndividualTab(private) },
-                            modifier = Modifier.weight(1f).heightIn(min = 48.dp),
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
+                            modifier = Modifier.size(64.dp).testTag("tabs_new_tab"),
+                            shape = CircleShape,
                         ) {
-                            Icon(painterResource(R.drawable.icons_add_tab), contentDescription = null, modifier = Modifier.size(20.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                stringResource(if (private) R.string.browser_new_tab_private else R.string.browser_new_tab),
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis,
+                            Icon(
+                                painterResource(mozilla.components.ui.icons.R.drawable.mozac_ic_plus_24),
+                                contentDescription = stringResource(if (private) R.string.browser_new_tab_private else R.string.browser_new_tab),
+                                modifier = Modifier.size(32.dp),
                             )
                         }
-                        TabsMenuMore(
-                            private = private,
-                            hasTabs = if (private) privateTabsCount > 0 else normalTabsCount > 0,
-                            onSelectTabs = { dispatch(TabsUiAction.BeginSelection()) },
-                            onRemoveTabs = {
-                                tabsViewModel.removeTabs(private)
-                                appViewModel.showTabClosureSnackbar(tabsClosedString)
-                                dispatch(TabsUiAction.ExitTransientMode)
-                            },
-                        )
+                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+                            TabsMenuMore(
+                                private = private,
+                                hasTabs = if (private) privateTabsCount > 0 else normalTabsCount > 0,
+                                onSelectTabs = { dispatch(TabsUiAction.BeginSelection()) },
+                                onRemoveTabs = {
+                                    tabsViewModel.removeTabs(private)
+                                    appViewModel.showTabClosureSnackbar(tabsClosedString)
+                                    dispatch(TabsUiAction.ExitTransientMode)
+                                },
+                            )
+                        }
                     }
                 }
 
