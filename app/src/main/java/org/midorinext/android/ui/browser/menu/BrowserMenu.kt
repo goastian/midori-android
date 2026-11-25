@@ -41,6 +41,8 @@ import org.midorinext.android.ui.nav.NavDestination
 import org.midorinext.android.vpn.MidoriVpnFeature
 import mozilla.components.ui.icons.R as iconsR
 
+private const val SHOW_LITE_MODE_IN_MENU = false
+
 @Composable
 fun BrowserMenu(
     expanded: Boolean,
@@ -55,8 +57,6 @@ fun BrowserMenu(
     if (expanded) {
         val currentUrl by viewModel.currentUrl.collectAsStateWithLifecycle()
         val vpnEnabled by viewModel.isMidoriVpnActionAvailable.collectAsStateWithLifecycle()
-        val tab by viewModel.selectedTabSnapshot.collectAsStateWithLifecycle()
-        val liteState by viewModel.liteMode.state.collectAsStateWithLifecycle()
         val showQuitApp by applicationViewModel.showQuitApp.collectAsStateWithLifecycle()
         val extensions by viewModel.installedMenuExtensions.collectAsStateWithLifecycle()
         val context = LocalContext.current
@@ -110,20 +110,24 @@ fun BrowserMenu(
                 onSetDefault = { afterDismiss { defaultLauncher.launch(defaultBrowser.requestIntent()) } },
                 onDismissDefault = { defaultPromptDismissed = true },
                 liteMode = {
-                    BrowserMenuRow(
-                        text = stringResource(R.string.lite_mode_title),
-                        icon = R.drawable.icons_lite_mode,
-                        checked = liteState.enabled,
-                        enabled = liteState.loaded,
-                        trailing = {
-                            Text(
-                                liteStatusLabel(liteState.statusFor(tab?.private == true)),
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                        },
-                        onClick = { viewModel.liteMode.setEnabled(!liteState.enabled) },
-                        modifier = Modifier.testTag("browser_menu_lite_mode"),
-                    )
+                    if (SHOW_LITE_MODE_IN_MENU) {
+                        val tab by viewModel.selectedTabSnapshot.collectAsStateWithLifecycle()
+                        val liteState by viewModel.liteMode.state.collectAsStateWithLifecycle()
+                        BrowserMenuRow(
+                            text = stringResource(R.string.lite_mode_title),
+                            icon = R.drawable.icons_lite_mode,
+                            checked = liteState.enabled,
+                            enabled = liteState.loaded,
+                            trailing = {
+                                Text(
+                                    liteStatusLabel(liteState.statusFor(tab?.private == true)),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
+                            },
+                            onClick = { viewModel.liteMode.setEnabled(!liteState.enabled) },
+                            modifier = Modifier.testTag("browser_menu_lite_mode"),
+                        )
+                    }
                 },
                 showPageActions = showPageActions,
                 pageActions = { if (showPageActions) PageActions(viewModel, afterDismiss) },
