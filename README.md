@@ -1,3 +1,4 @@
+[![Downloads](https://img.shields.io/github/downloads/goastian/midori-android/total?label=downloads&logo=github&color=2e7d32)](https://github.com/goastian/midori-android/releases)
 [![CircleCI](https://circleci.com/gh/midori-browser/core.svg?style=svg)](https://circleci.com/gh/midori-browser/core)
 [![Telegram](https://img.shields.io/badge/Telegram-Chat-gray.svg?style=flat&logo=telegram&colorA=5583a4&logoColor=fff)](https://t.me/midoriweb)
 [![Twitter](https://img.shields.io/twitter/follow/midoriweb.svg?style=social&label=Follow)](https://twitter.com/grupoastian)
