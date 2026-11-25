@@ -4,6 +4,9 @@
 /.idea
 /local.properties
 /keystore.properties
+/sentry.properties
+/.sentryclirc
+/.env.sentry
 /fastlane/report.xml
 /.kotlin/
 /build/
@@ -16,6 +19,7 @@
 upload_certificate.pem
 deployment_cert.der
 /app/src/main/assets/extensions/*
+!/app/src/main/assets/extensions/midori_lite/
 !/app/src/main/assets/extensions/midori_sync/
 /artifacts/
 /docs/
