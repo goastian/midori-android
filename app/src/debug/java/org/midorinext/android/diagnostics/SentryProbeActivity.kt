@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Process
+import androidx.compose.runtime.saveable.mapSaver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -31,7 +32,8 @@ class SentryProbeActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val probe = intent.getStringExtra("probe")
-        if (probe !in setOf("crash", "native-crash", "handled-error", "sigkill", "disable", "replay-native", "enable", "status", "gecko-crash")) {
+        if (probe !in setOf("crash", "native-crash", "handled-error", "sigkill", "disable", "replay-native", "enable", "status", "gecko-crash",
+                "saved-state-crash", "background-saved-state-crash", "disabled-saved-state-crash")) {
             finish()
             return
         }
@@ -51,7 +53,8 @@ class SentryProbeActivity : Activity() {
                 finish()
                 return@launch
             }
-            (application as MidoriApplication).diagnostics.get().setEnabled(probe != "disable").join()
+            (application as MidoriApplication).diagnostics.get()
+                .setEnabled(probe != "disable" && probe != "disabled-saved-state-crash").join()
             if (probe == "disable" || probe == "enable") {
                 finish()
                 return@launch
@@ -87,8 +90,13 @@ class SentryProbeActivity : Activity() {
                 finish()
                 return@launch
             }
+            if (probe == "background-saved-state-crash") finish()
             Handler(Looper.getMainLooper()).postDelayed({
                 when (probe) {
+                    "saved-state-crash", "background-saved-state-crash", "disabled-saved-state-crash" -> {
+                        mapSaver<String>(save = { mapOf("value" to it) }, restore = { it["value"] as? String })
+                            .restore(arrayListOf(1, 0))
+                    }
                     "native-crash" -> Process.sendSignal(Process.myPid(), 6)
                     "sigkill" -> Process.killProcess(Process.myPid())
                     "handled-error" -> {

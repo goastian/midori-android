@@ -67,15 +67,12 @@ class DiagnosticsController @Inject constructor(@ApplicationContext private val 
         )
     }
 
-    internal fun installCrashReporter(): CrashReporter = crashReporter.also {
-        if (mainProcess && DiagnosticsCrashReporting.reporter !== it) {
-            it.install(context)
-            DiagnosticsCrashReporting.reporter = it
-        }
+    internal fun prepareGeckoCrashReporter(): CrashReporter = crashReporter.also {
+        if (mainProcess) DiagnosticsCrashReporting.reporter = it
     }
 
     fun start() {
-        installCrashReporter()
+        prepareGeckoCrashReporter()
         if (consent.value.canSend) {
             if (enableSending()) initialize()
         } else scope.launch {
@@ -148,7 +145,7 @@ class DiagnosticsController @Inject constructor(@ApplicationContext private val 
             options.isEnableUserInteractionTracing = false
             options.isEnableSystemEventBreadcrumbs = false
             options.isEnableNetworkEventBreadcrumbs = false
-            options.setEnableUncaughtExceptionHandler(false)
+            options.setEnableUncaughtExceptionHandler(mainProcess)
             options.isAttachThreads = mainProcess
             options.isAttachStacktrace = mainProcess
             options.isEnableActivityLifecycleBreadcrumbs = mainProcess

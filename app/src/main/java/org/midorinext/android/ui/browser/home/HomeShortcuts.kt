@@ -118,6 +118,11 @@ internal class HomeShortcutUiState {
 }
 
 @Composable
+internal fun rememberHomeShortcutUiState(): HomeShortcutUiState = key("native_home_shortcuts") {
+    rememberSaveable(saver = HomeShortcutUiState.Saver) { HomeShortcutUiState() }
+}
+
+@Composable
 internal fun HomeShortcutGrid(
     sites: List<HomeShortcut>, allSites: List<HomeShortcut>, preferences: AppPreferences,
     columns: Int, palette: HomePalette, wallpaper: Boolean, viewModel: NativeHomeViewModel,

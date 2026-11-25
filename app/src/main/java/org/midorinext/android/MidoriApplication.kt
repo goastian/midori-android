@@ -126,7 +126,7 @@ class MidoriApplication : Application(), Configuration.Provider {
         setupLogging()
 
         mozilla.components.lib.crash.CrashReporter.registerDeferredInitializer {
-            diagnostics.get().installCrashReporter()
+            diagnostics.get().prepareGeckoCrashReporter()
         }
 
         if (!isMainProcess()) {

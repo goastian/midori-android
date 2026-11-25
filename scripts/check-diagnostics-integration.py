@@ -34,6 +34,18 @@ def main():
         adb("shell", "am", "start", "-W", "-n", f"{PACKAGE}/org.midorinext.android.diagnostics.SentryProbeActivity",
             "--es", "probe", name)
 
+    def status():
+        adb("shell", "run-as", PACKAGE, "rm", "-f", "files/diagnostics-probe-status.json")
+        probe("status")
+        deadline = time.monotonic() + 10
+        while time.monotonic() < deadline:
+            raw = adb("exec-out", "run-as", PACKAGE, "cat", "files/diagnostics-probe-status.json", check=False)
+            try:
+                return json.loads(raw)
+            except ValueError:
+                time.sleep(0.25)
+        raise RuntimeError("Diagnostics status probe did not finish")
+
     def events():
         files = adb("shell", "run-as", PACKAGE, "find", CACHE, "-type", "f", check=False).decode().splitlines()
         found = {}
@@ -93,6 +105,17 @@ def main():
     probe("disable")
     time.sleep(2)
     try:
+        probe("disabled-saved-state-crash")
+        time.sleep(3)
+        if status()["sentry_enabled"] or events():
+            raise RuntimeError("A crash without diagnostics consent initialized Sentry or cached an event")
+
+        probe("enable")
+        time.sleep(2)
+        current_status = status()
+        if not current_status["sentry_uncaught_handler"] or current_status["uncaught_handler"] != "io.sentry.UncaughtExceptionHandlerIntegration":
+            raise RuntimeError("Sentry does not own direct JVM crash capture")
+
         probe("handled-error")
         handled = wait_for(lambda event: "IllegalStateException" in exception_type(event), "handled_error")
         check_privacy(handled)
@@ -119,6 +142,25 @@ def main():
         check_privacy(java)
         if not java.get("exception", {}).get("values", [{}])[-1].get("stacktrace", {}).get("frames"):
             raise RuntimeError("Uncaught crash lost its stack trace")
+
+        for mode in ("saved-state-crash", "background-saved-state-crash"):
+            time.sleep(2)
+            before = set(events())
+            probe(mode)
+            cast = wait_for(lambda event: event.get("event_id") not in before and
+                            "ClassCastException" in exception_type(event), mode)
+            check_privacy(cast)
+            exception = cast["exception"]["values"][-1]
+            if cast.get("level") != "fatal" or exception.get("mechanism", {}).get("handled") is not False:
+                raise RuntimeError("Saved-state crash was not captured as an unhandled fatal exception")
+            frames = exception.get("stacktrace", {}).get("frames", [])
+            if not any(frame.get("filename") == "MapSaver.kt" for frame in frames):
+                raise RuntimeError("Saved-state crash lost its Compose restoration stack")
+            time.sleep(2)
+            matching = [event for key, event in events().items() if key not in before and
+                        "ClassCastException" in exception_type(event)]
+            if len(matching) != 1:
+                raise RuntimeError("Saved-state crash was reported more than once")
 
         time.sleep(2)
         probe("sigkill")

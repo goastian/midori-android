@@ -50,6 +50,7 @@ internal object DiagnosticsDescriptions {
             else "Java memory allocation failed: requested ${allocation.groupValues[1]} bytes with ${allocation.groupValues[2]} free bytes."
         }
         "NullPointerException" -> "Code attempted to use a null reference. Inspect the exception stack and cause chain."
+        "ClassCastException" -> "Code encountered an incompatible runtime type. Inspect the exception stack and saved-state restoration."
         "IllegalStateException" -> "An operation ran in an invalid state. Inspect the exception stack and lifecycle context."
         "IllegalArgumentException" -> "An operation received an invalid argument. Argument values are omitted for privacy."
         "IndexOutOfBoundsException", "ArrayIndexOutOfBoundsException" -> "Code accessed an index outside the available range."

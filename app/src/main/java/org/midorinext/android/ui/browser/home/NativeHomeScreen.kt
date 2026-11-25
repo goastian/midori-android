@@ -108,7 +108,7 @@ fun NativeHomeScreen(
     }
     val stories by viewModel.stories.collectAsStateWithLifecycle()
     val shortcuts = if (preferences.homeShortcutsInitialized) preferences.homeShortcutsList else remember { defaultHomeShortcuts() }
-    val shortcutState = rememberSaveable(saver = HomeShortcutUiState.Saver) { HomeShortcutUiState() }
+    val shortcutState = rememberHomeShortcutUiState()
     var homeMenuPosition by remember { mutableStateOf<Offset?>(null) }
     val haptics = LocalHapticFeedback.current
     val homeOptionsLabel = stringResource(R.string.home_context_menu)
