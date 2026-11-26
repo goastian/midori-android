@@ -29,7 +29,7 @@ espresso = "3.7.0"
 protobuf = "4.35.0"
 room = "2.8.5"
 work = "2.12.0"
-mozac = "160.0.1"
+mozac = "161.0"
 sentry = "8.64.0"
 sentry-gradle = "6.27.0"
 
