@@ -119,7 +119,7 @@ android {
         minSdk 26
         targetSdk 36
         versionCode configuredPlaystoreVersionCode
-        versionName "11.9.5.2.1"
+        versionName "11.9.5.3"
         buildConfigField "String", "ASTIAN_ADS_URL", '"https://ads.astian.org"'
         buildConfigField "String", "RELEASE_CODENAME", groovy.json.JsonOutput.toJson(
                 readConfigValue("release_codename", "Pillar of Autumn").toString().trim())
