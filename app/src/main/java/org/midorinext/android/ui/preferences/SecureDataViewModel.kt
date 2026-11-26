@@ -20,6 +20,8 @@ import mozilla.components.concept.storage.NewCreditCardFields
 import mozilla.components.concept.storage.UpdatableAddressFields
 import mozilla.components.service.sync.autofill.AutofillCreditCardsAddressesStorage
 import org.midorinext.android.storage.autofill.LoginAutofillRepository
+import org.midorinext.android.diagnostics.DiagnosticOperation
+import org.midorinext.android.diagnostics.DiagnosticsErrors
 import javax.inject.Inject
 
 data class SecureDataUiState(
@@ -50,33 +52,33 @@ class SecureDataViewModel @Inject constructor(
     val state: StateFlow<SecureDataUiState> = _state.asStateFlow()
     private val operationMutex = Mutex()
 
-    fun loadPasswords() = launchOperation { refreshPasswords() }
+    fun loadPasswords() = launchOperation(DiagnosticOperation.SAVED_DATA_LOAD) { refreshPasswords() }
 
     private suspend fun refreshPasswords() {
         val logins = loginsStorage.list().sortedBy { it.origin.lowercase() }
         _state.update { it.copy(logins = logins) }
     }
 
-    fun loadAutofill() = launchOperation { refreshAutofill() }
+    fun loadAutofill() = launchOperation(DiagnosticOperation.SAVED_DATA_LOAD) { refreshAutofill() }
 
     private suspend fun refreshAutofill() {
-        val cards = autofillStorage.getAllCreditCards().map { it.copy(cardNumber = "") }
+        val cards = autofillStorage.getAllCreditCards().map { it.copy(cardNumber = "", cardCvv = null) }
         val addresses = autofillStorage.getAllAddresses()
         _state.update { it.copy(cards = cards, addresses = addresses) }
     }
 
-    fun deleteLogin(guid: String) = launchOperation {
+    fun deleteLogin(guid: String) = launchOperation(DiagnosticOperation.SAVED_DATA_DELETE) {
         loginsStorage.delete(guid)
         refreshPasswords()
     }
 
-    fun deleteCard(guid: String) = launchOperation {
+    fun deleteCard(guid: String) = launchOperation(DiagnosticOperation.SAVED_DATA_DELETE) {
         autofillStorage.deleteCreditCard(guid)
         org.midorinext.android.sync.SyncLocalSignals.changed()
         refreshAutofill()
     }
 
-    fun deleteAddress(guid: String) = launchOperation {
+    fun deleteAddress(guid: String) = launchOperation(DiagnosticOperation.SAVED_DATA_DELETE) {
         autofillStorage.deleteAddress(guid)
         org.midorinext.android.sync.SyncLocalSignals.changed()
         refreshAutofill()
@@ -87,7 +89,7 @@ class SecureDataViewModel @Inject constructor(
         number: String,
         expiryMonth: Int,
         expiryYear: Int,
-    ) = launchOperation {
+    ) = launchOperation(DiagnosticOperation.SAVED_CARD_ADD) {
         val digits = number.filter(Char::isDigit)
         autofillStorage.addCreditCard(
             NewCreditCardFields(
@@ -102,7 +104,7 @@ class SecureDataViewModel @Inject constructor(
         refreshAutofill()
     }
 
-    fun addAddress(form: AddressForm) = launchOperation {
+    fun addAddress(form: AddressForm) = launchOperation(DiagnosticOperation.SAVED_ADDRESS_ADD) {
         autofillStorage.addAddress(
             UpdatableAddressFields(
                 name = form.name.trim(),
@@ -124,6 +126,7 @@ class SecureDataViewModel @Inject constructor(
     fun clearError() = _state.update { it.copy(error = null) }
 
     private fun launchOperation(
+        operationName: DiagnosticOperation,
         operation: suspend () -> Unit,
     ) {
         viewModelScope.launch {
@@ -135,6 +138,7 @@ class SecureDataViewModel @Inject constructor(
                     }
                     .onFailure { error ->
                         if (error is CancellationException) throw error
+                        DiagnosticsErrors.capture(error, operationName)
                         _state.update {
                             it.copy(loading = false, error = error.message ?: "Unable to update secure data")
                         }

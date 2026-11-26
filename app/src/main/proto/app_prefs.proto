@@ -158,6 +158,7 @@ message AppPreferences {
   bool force_dark_website_colors = 92;
   repeated string hidden_home_ads_keys = 93;
   bool home_ads_catalog_initialized = 94;
+  bool prompt_card_security_code = 95;
 }
 
 message HomeShortcut {

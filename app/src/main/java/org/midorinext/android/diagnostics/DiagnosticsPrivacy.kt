@@ -6,6 +6,10 @@ import io.sentry.SentryEvent
 import io.sentry.protocol.SentryTransaction
 
 internal object DiagnosticsPrivacy {
+    fun predatesConsent(event: SentryEvent, consentTimestamp: Long): Boolean =
+        event.timestamp.time < consentTimestamp &&
+            event.exceptions.orEmpty().any { it.mechanism?.type == "AppExitInfo" }
+
     fun <T : SentryBaseEvent> scrub(event: T): T {
         if (event is SentryEvent) DiagnosticsRuntime.restoreNativeSnapshot(event)
         event.user = null

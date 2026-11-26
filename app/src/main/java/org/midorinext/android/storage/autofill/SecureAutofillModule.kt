@@ -22,6 +22,8 @@ import mozilla.components.service.sync.autofill.AutofillCreditCardsAddressesStor
 import mozilla.components.service.sync.autofill.GeckoCreditCardsAddressesStorageDelegate
 import mozilla.components.service.sync.logins.SyncableLoginsStorage
 import org.midorinext.android.preferences.app.AppPreferences
+import org.midorinext.android.diagnostics.DiagnosticOperation
+import org.midorinext.android.diagnostics.DiagnosticsErrors
 import org.mozilla.geckoview.Autocomplete
 import org.mozilla.geckoview.GeckoResult
 import java.util.concurrent.atomic.AtomicBoolean
@@ -139,7 +141,13 @@ internal class SafeAutocompleteStorageDelegate(
     override fun onCreditCardSave(creditCard: Autocomplete.CreditCard) {
         if (!preferenceState.cardAutofillEnabled) return
         launchSafely("saving a credit card") {
-            creditCardsAddressesDelegate.onCreditCardSave(creditCard.toCreditCardEntry())
+            if (preferenceState.cardAutofillEnabled) {
+                val cardWithoutCode = Autocomplete.CreditCard.Builder()
+                    .guid(creditCard.guid).name(creditCard.name).number(creditCard.number)
+                    .expirationMonth(creditCard.expirationMonth).expirationYear(creditCard.expirationYear)
+                    .build()
+                creditCardsAddressesDelegate.onCreditCardSave(cardWithoutCode.toCreditCardEntry())
+            }
         }
     }
 
@@ -189,6 +197,7 @@ internal class SafeAutocompleteStorageDelegate(
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Throwable) {
+                DiagnosticsErrors.capture(error, DiagnosticOperation.AUTOFILL_FETCH)
                 Log.e(TAG, "Autocomplete storage operation failed", error)
                 fallback
             }
@@ -205,6 +214,7 @@ internal class SafeAutocompleteStorageDelegate(
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Throwable) {
+                DiagnosticsErrors.capture(error, DiagnosticOperation.AUTOFILL_SAVE)
                 Log.e(TAG, "Failed while $operationName", error)
             }
         }

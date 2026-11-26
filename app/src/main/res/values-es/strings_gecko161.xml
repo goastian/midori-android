@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="card_security_code_setting">Pedir el código de seguridad de la tarjeta</string>
+    <string name="card_security_code_title">Introduce el código de seguridad</string>
+    <string name="card_security_code_label">Código de seguridad (CVV)</string>
+    <string name="card_security_code_unavailable">Esta compilación del motor todavía no permite autocompletar códigos de seguridad. Puedes introducir el CVV directamente en el formulario de pago. Midori nunca lo guarda.</string>
+    <string name="card_security_code_note">Introduce el CVV en cada pago. Midori solo lo envía al formulario que eliges completar y nunca lo guarda ni sincroniza.</string>
+    <string name="stability_coverage">Envía a Sentry cierres inesperados, bloqueos, errores recuperables de almacenamiento, sincronización y descargas, y datos de rendimiento. Los informes identifican la operación afectada sin contraseñas, datos de pago ni direcciones visitadas.</string>
+</resources>

@@ -13,7 +13,6 @@ import mozilla.components.feature.addons.AddonManager
 import mozilla.components.feature.addons.AddonsProvider
 import mozilla.components.feature.addons.update.DefaultAddonUpdater
 import mozilla.components.feature.addons.update.GlobalAddonDependencyProvider
-import mozilla.components.support.base.android.NotificationsDelegate
 import org.midorinext.android.extensions.AMOSearchAddonsProvider
 import javax.inject.Singleton
 
@@ -65,8 +64,8 @@ object AddonsHiltModule {
     @Provides
     fun provideAddonUpdater(
         @ApplicationContext context: Context,
-        notificationsDelegate: NotificationsDelegate
+        store: BrowserStore,
     ): DefaultAddonUpdater {
-        return DefaultAddonUpdater(context, notificationsDelegate = notificationsDelegate)
+        return DefaultAddonUpdater(context, store = store)
     }
 }

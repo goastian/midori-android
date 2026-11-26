@@ -74,6 +74,7 @@ public abstract class WithoutTelemetryAarTransform implements TransformAction<Tr
         boolean changed = false;
         boolean mediaDelegatePatched = false;
         boolean mediaRequestPatched = false;
+        boolean mediaSynchronousPromotion = false;
         try (ZipInputStream source = new ZipInputStream(new ByteArrayInputStream(jar));
                 ZipOutputStream target = new ZipOutputStream(bytes)) {
             ZipEntry entry;
@@ -86,6 +87,7 @@ public abstract class WithoutTelemetryAarTransform implements TransformAction<Tr
                         data = GeckoPortLifecyclePatch.apply(data);
                     }
                     if (data != null && entry.getName().equals(MediaSessionLifecyclePatch.DELEGATE + ".class")) {
+                        mediaSynchronousPromotion = MediaSessionLifecyclePatch.hasSynchronousPromotion(data);
                         data = MediaSessionLifecyclePatch.apply(data, MediaSessionLifecyclePatch.DELEGATE);
                         mediaDelegatePatched = true;
                     }
@@ -99,7 +101,8 @@ public abstract class WithoutTelemetryAarTransform implements TransformAction<Tr
                 if (data != null) writeEntry(target, entry.getName(), data);
             }
         }
-        if (mediaDelegatePatched != mediaRequestPatched) {
+        if (mediaDelegatePatched != (mediaRequestPatched || mediaSynchronousPromotion)
+                || (mediaRequestPatched && mediaSynchronousPromotion)) {
             throw new IllegalStateException("Mozilla media service classes changed; review the lifecycle patch");
         }
         return changed ? bytes.toByteArray() : jar;

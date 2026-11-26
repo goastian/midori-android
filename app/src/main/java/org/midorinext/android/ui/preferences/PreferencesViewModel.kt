@@ -274,6 +274,10 @@ class PreferencesViewModel @Inject constructor(
         viewModelScope.launch { appPreferencesRepository.updateAutofillCardsEnabled(enabled) }
     }
 
+    fun updatePromptCardSecurityCode(enabled: Boolean) {
+        viewModelScope.launch { appPreferencesRepository.updatePromptCardSecurityCode(enabled) }
+    }
+
     fun updateAccessibilityAutomaticFontSizing(enabled: Boolean) {
         viewModelScope.launch { appPreferencesRepository.updateAccessibilityAutomaticFontSizing(enabled) }
     }

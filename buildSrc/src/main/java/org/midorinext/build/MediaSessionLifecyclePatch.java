@@ -18,6 +18,24 @@ final class MediaSessionLifecyclePatch {
 
     private MediaSessionLifecyclePatch() {}
 
+    static boolean hasSynchronousPromotion(byte[] original) {
+        int[] calls = new int[1];
+        new ClassReader(original).accept(new ClassVisitor(Opcodes.ASM9) {
+            @Override
+            public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+                if (!name.equals("startForeground$feature_media") || !descriptor.equals(SESSION)) return null;
+                return new MethodVisitor(Opcodes.ASM9) {
+                    @Override
+                    public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
+                        if (opcode == Opcodes.INVOKEVIRTUAL && owner.equals(SERVICE) && name.equals("startForeground")
+                                && descriptor.equals("(ILandroid/app/Notification;)V")) calls[0]++;
+                    }
+                };
+            }
+        }, ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
+        return calls[0] == 1;
+    }
+
     static byte[] apply(byte[] original, String className) {
         ClassReader reader = new ClassReader(original);
         ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);

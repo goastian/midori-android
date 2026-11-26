@@ -1,5 +1,7 @@
 package org.midorinext.android.sync
 
+import org.midorinext.android.diagnostics.DiagnosticOperation
+import org.midorinext.android.diagnostics.DiagnosticsErrors
 import android.net.Uri
 import android.os.Build
 import kotlinx.coroutines.*
@@ -87,6 +89,9 @@ internal class SyncCoordinator @Inject constructor(private val vault: SyncVault,
                 }
                 try { block().also { if (reportErrors) report() } } catch (error: Exception) {
                     if (error is CancellationException) { if (reportErrors) report(); throw error }
+                    if (error !is SyncException || error.code !in setOf("network_error", "offline", "login_cancelled")) {
+                        DiagnosticsErrors.capture(error, DiagnosticOperation.SYNC)
+                    }
                     if (reportErrors) report((error as? SyncException)?.code ?: "sync_unavailable")
                     throw error
                 } finally {

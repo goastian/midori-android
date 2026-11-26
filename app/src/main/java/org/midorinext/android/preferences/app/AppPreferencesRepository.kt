@@ -544,6 +544,10 @@ class AppPreferencesRepository internal constructor(
         }
     }
 
+    suspend fun updatePromptCardSecurityCode(enabled: Boolean) {
+        datastore.updateData { it.toBuilder().setPromptCardSecurityCode(enabled).build() }
+    }
+
     suspend fun updateAccessibilityAutomaticFontSizing(enabled: Boolean) {
         datastore.updateData { preferences ->
             preferences.toBuilder().setAccessibilityAutomaticFontSizing(enabled).build()

@@ -156,6 +156,7 @@ class DiagnosticsController @Inject constructor(@ApplicationContext private val 
             options.isEnableFramesTracking = mainProcess
             options.isEnableAutoSessionTracking = mainProcess
             options.isAnrEnabled = mainProcess
+            options.isReportHistoricalAnrs = mainProcess
             options.isEnableNdk = mainProcess
             options.isEnableScopeSync = true
             options.tracesSampleRate = if (!mainProcess) 0.0 else if (BuildConfig.DEBUG) 1.0 else 0.1
@@ -169,11 +170,13 @@ class DiagnosticsController @Inject constructor(@ApplicationContext private val 
             options.setTag("app.build", BuildConfig.VERSION_CODE.toString())
             options.setTag("app.variant", BuildConfig.FLAVOR)
             options.setTag("gecko.version", org.mozilla.geckoview.BuildConfig.MOZ_APP_VERSION)
+            options.setTag("gecko.cvv_supported", org.midorinext.android.mozac.Gecko161Features.supportsSecurityCode.toString())
+            options.setTag("gecko.proguard_uuid_supported", org.midorinext.android.mozac.Gecko161Features.supportsProguardUuid.toString())
             options.setTag("diagnostics.process_role", if (mainProcess) "browser" else "crash_reporter")
             options.addEventProcessor(RustCrashEventProcessor())
             options.addEventProcessor(AddMechanismEventProcessor())
             options.beforeSend = SentryOptions.BeforeSendCallback { event, hint ->
-                if (canSend()) {
+                if (canSend() && !DiagnosticsPrivacy.predatesConsent(event, consentFile.lastModified())) {
                     if (mainProcess) processExits.enrich(event)
                     DiagnosticsPrivacy.scrub(event).also {
                         if (mainProcess && HintUtils.shouldApplyScopeData(hint)) DiagnosticsRuntime.enrich(it)

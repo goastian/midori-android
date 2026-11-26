@@ -44,6 +44,9 @@ class SentryProbeActivity : Activity() {
                 File(filesDir, "diagnostics-probe-status.json").writeText(JSONObject(mapOf(
                     "sentry_enabled" to Sentry.isEnabled(),
                     "anr_enabled" to (androidOptions?.isAnrEnabled ?: false),
+                    "historical_anrs_enabled" to (androidOptions?.isReportHistoricalAnrs ?: false),
+                    "gecko_cvv_supported" to org.midorinext.android.mozac.Gecko161Features.supportsSecurityCode,
+                    "gecko_proguard_uuid_supported" to org.midorinext.android.mozac.Gecko161Features.supportsProguardUuid,
                     "ndk_enabled" to (androidOptions?.isEnableNdk ?: false),
                     "sentry_uncaught_handler" to options.isEnableUncaughtExceptionHandler,
                     "uncaught_handler" to Thread.getDefaultUncaughtExceptionHandler()?.javaClass?.name,

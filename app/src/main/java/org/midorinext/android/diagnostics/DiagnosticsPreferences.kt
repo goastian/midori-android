@@ -48,6 +48,7 @@ internal fun DiagnosticsConsentDialog(initiallyEnabled: Boolean = true, onSave: 
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(description)
+                Text(stringResource(R.string.stability_coverage))
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(label, Modifier.weight(1f))
@@ -75,7 +76,7 @@ fun DiagnosticsPreference(viewModel: DiagnosticsViewModel = hiltViewModel()) {
     val label = stringResource(R.string.stability_enabled)
     PreferenceRow(
         label = R.string.stability_enabled,
-        description = stringResource(R.string.stability_description),
+        description = stringResource(R.string.stability_coverage),
         modifier = Modifier.testTag("diagnostics_preference"),
         onClicked = { viewModel.setEnabled(!consent.enabled) },
         trailing = {

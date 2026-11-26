@@ -1,11 +1,13 @@
 package org.midorinext.android.mozac.hilt
 
+import android.content.Context
 import org.midorinext.android.AppRequestInterceptor
 import org.midorinext.android.BuildConfig
 import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import mozilla.components.concept.engine.DefaultSettings
 import mozilla.components.concept.engine.DownloadDelegate
@@ -26,6 +28,7 @@ object GeckoSettingsHiltModule {
     @Singleton
     @Provides
     fun provideGeckoRuntimeSettings(
+        @ApplicationContext context: Context,
     ) : GeckoRuntimeSettings {
         val builder = GeckoRuntimeSettings.Builder()
 
@@ -36,6 +39,10 @@ object GeckoSettingsHiltModule {
         builder.debugLogging(debugEnabled)
         builder.remoteDebuggingEnabled(debugEnabled)
         builder.loginAutofillEnabled(false)
+        org.midorinext.android.mozac.Gecko161Features.proguardUuid(
+            builder,
+            org.midorinext.android.diagnostics.GeckoBuildMetadata.proguardUuid(context),
+        )
         builder.crashHandler(CrashHandlerService::class.java)
 
         return builder.build()

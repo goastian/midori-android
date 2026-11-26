@@ -32,3 +32,13 @@
 -keep class org.midorinext.android.adblock.RustAdblock { *; }
 
 -keep class org.midorinext.android.sync.NativeSync { *; }
+# GeckoView API availability is detected across published engine builds.
+-keepclassmembers class org.mozilla.geckoview.Autocomplete$CreditCard$Builder {
+    public *** securityCode(java.lang.String);
+}
+-keepclassmembers class org.mozilla.geckoview.GeckoRuntimeSettings$Builder {
+    public *** proguardUuid(java.lang.String);
+}
+-keepclassmembers interface org.mozilla.geckoview.GeckoSession$PromptDelegate {
+    public *** onCreditCardSelect(...);
+}

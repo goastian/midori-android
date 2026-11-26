@@ -18,6 +18,8 @@ import org.midorinext.android.R
 import org.midorinext.android.ext.activity
 import org.midorinext.android.preferences.app.AppPreferences
 import org.midorinext.android.storage.autofill.LoginAutofillRepository
+import org.midorinext.android.storage.autofill.CreditCardConfirmation
+import org.midorinext.android.ui.browser.mozaccompose.prompts.dialog.CreditCardPicker
 import org.midorinext.android.storage.autofill.loginOptions
 import org.midorinext.android.ui.browser.mozaccompose.prompts.dialog.AlertDialog
 import org.midorinext.android.ui.browser.mozaccompose.prompts.dialog.AuthenticationDialog
@@ -299,13 +301,15 @@ fun PromptFeature(
             }
             is PromptRequest.SelectCreditCard -> {
                 if (!hideAutofillSuggestions && appPreferences.autofillCardsEnabled && request.creditCards.isNotEmpty()) {
-                    AutofillPicker(
-                        title = stringResource(R.string.prompt_fill_card_title),
-                        options = request.creditCards,
+                    CreditCardPicker(
+                        cards = request.creditCards,
+                        askForSecurityCode = appPreferences.promptCardSecurityCode && request.onConfirm is CreditCardConfirmation,
                         bottomPadding = autofillBottomPadding,
-                        label = { it.obfuscatedCardNumber },
-                        detail = { it.name },
-                        onSelect = { creditCard -> consumeAfter { request.onConfirm(creditCard) } },
+                        onSelect = { creditCard, code -> consumeAfter {
+                            val confirmation = request.onConfirm
+                            if (confirmation is CreditCardConfirmation) confirmation.confirm(creditCard, code)
+                            else confirmation(creditCard)
+                        } },
                         onDismiss = response::dismiss,
                     )
                 } else {

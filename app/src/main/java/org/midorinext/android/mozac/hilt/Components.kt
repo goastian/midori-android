@@ -75,6 +75,7 @@ object MozacComponentHiltModule {
         return BrowserStore(
             middleware = listOf(
                 org.midorinext.android.diagnostics.DiagnosticsMiddleware(),
+                org.midorinext.android.storage.autofill.CreditCardPromptMiddleware(),
                 org.midorinext.android.adblock.ContentBlockingStartupMiddleware(blockingStartup),
                 homeContinuation,
                 DownloadMiddleware(

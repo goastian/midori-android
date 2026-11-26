@@ -14,7 +14,8 @@ internal object DiagnosticsDescriptions {
             exception?.mechanism?.type == "android.process.exit" -> "process_exit"
             exception?.type == "GeckoContentProcessCrash" -> "gecko_content"
             event.platform == "native" || exception?.type?.startsWith("SIG") == true -> "native"
-            exception?.type?.contains("ApplicationNotResponding") == true -> "anr"
+            exception?.type?.contains("ApplicationNotResponding") == true ||
+                exception?.mechanism?.type in setOf("ANR", "AppExitInfo") -> "anr"
             else -> "jvm"
         }
         val description = exception?.value ?: if (source == "gecko_native") {
@@ -28,6 +29,11 @@ internal object DiagnosticsDescriptions {
         event.setTag("diagnostics.source", source)
         event.setTag("diagnostics.schema", "2")
         event.contexts["midori_error"] = mapOf("source" to source, "summary" to description)
+        event.getTag("midori.operation")?.takeIf { value ->
+            DiagnosticOperation.entries.any { it.name.lowercase(java.util.Locale.ROOT) == value }
+        }?.let { operation ->
+            event.contexts["midori_operation"] = mapOf("operation" to operation, "recoverable" to true)
+        }
     }
 
     private fun describe(exception: SentryException): String = when (exception.type) {
@@ -58,6 +64,7 @@ internal object DiagnosticsDescriptions {
         "UnsatisfiedLinkError" -> "A native library or native method could not be linked. Inspect the build, ABI and stack trace."
         "ApplicationNotResponding", "ApplicationNotRespondingException" -> "The application stopped responding (ANR). Inspect the blocked thread and lifecycle context."
         "SocketTimeoutException" -> "A network operation exceeded its timeout. The remote address is omitted for privacy."
+        "DownloadFailed" -> "A download failed. The download address, file name and destination are omitted for privacy."
         "UnknownHostException" -> "A network host could not be resolved. The host name is omitted for privacy."
         "SentryTestCrashException" -> "Deliberate debug integration crash."
         else -> "Exception captured. Inspect its type, cause chain and stack trace; free-form text is omitted for privacy."

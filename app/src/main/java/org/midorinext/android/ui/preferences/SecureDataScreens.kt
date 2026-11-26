@@ -117,6 +117,12 @@ fun SavedAutofillScreen(viewModel: SecureDataViewModel = hiltViewModel()) {
             }
             StateMessage(state)
             SectionTitle(stringResource(R.string.settings_autofill_cards))
+            Text(
+                stringResource(R.string.card_security_code_note),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             if (!state.loading && state.cards.isEmpty()) {
                 SecureEmptyState(
                     title = stringResource(R.string.saved_cards_empty),

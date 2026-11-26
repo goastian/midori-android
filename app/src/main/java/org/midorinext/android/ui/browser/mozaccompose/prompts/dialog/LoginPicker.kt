@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.browser.mozaccompose.prompts.dialog
 
+import org.midorinext.android.diagnostics.DiagnosticOperation
+import org.midorinext.android.diagnostics.DiagnosticsErrors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,7 +65,8 @@ internal fun LoginPicker(
                     }
                 } catch (error: CancellationException) {
                     throw error
-                } catch (_: Exception) {
+                } catch (error: Exception) {
+                    DiagnosticsErrors.capture(error, DiagnosticOperation.PASSWORD_SELECT)
                     failed = true
                 } finally {
                     selecting = false

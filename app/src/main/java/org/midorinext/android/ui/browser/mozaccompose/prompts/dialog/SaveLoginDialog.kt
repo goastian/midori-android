@@ -1,5 +1,7 @@
 package org.midorinext.android.ui.browser.mozaccompose.prompts.dialog
 
+import org.midorinext.android.diagnostics.DiagnosticOperation
+import org.midorinext.android.diagnostics.DiagnosticsErrors
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -73,7 +75,8 @@ internal fun SaveLoginDialog(
             if (entry == login && decision == LoginSaveDecision.Unchanged) onDismiss()
         } catch (error: CancellationException) {
             throw error
-        } catch (_: Exception) {
+        } catch (error: Exception) {
+            DiagnosticsErrors.capture(error, DiagnosticOperation.PASSWORD_VALIDATE)
             failed = true
         } finally {
             initialCheckFinished = true
@@ -146,7 +149,8 @@ internal fun SaveLoginDialog(
                                 failed = !onSave(entry, (decision as? LoginSaveDecision.Update)?.guid)
                             } catch (error: CancellationException) {
                                 throw error
-                            } catch (_: Exception) {
+                            } catch (error: Exception) {
+                                DiagnosticsErrors.capture(error, DiagnosticOperation.PASSWORD_SAVE)
                                 failed = true
                             } finally {
                                 saving = false

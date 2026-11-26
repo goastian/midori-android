@@ -206,6 +206,7 @@ fun PreferencesScreen(
         }
 
         SettingsSection(R.string.settings_group_about) {
+            org.midorinext.android.diagnostics.DiagnosticsPreference()
             AppDetailsPreference()
             val privacyPolicyUrl = stringResource(R.string.privacy_policy_url)
             SettingsNavRow(
@@ -656,6 +657,19 @@ fun AutofillSettingsScreen(
             value = appPrefs.autofillCardsEnabled,
             onValueChange = viewModel::updateAutofillCardsEnabled
         )
+        if (appPrefs.autofillCardsEnabled && org.midorinext.android.mozac.Gecko161Features.supportsSecurityCode) {
+            PreferenceToggle(
+                label = R.string.card_security_code_setting,
+                description = R.string.card_security_code_note,
+                value = appPrefs.promptCardSecurityCode,
+                onValueChange = viewModel::updatePromptCardSecurityCode,
+            )
+        } else if (!org.midorinext.android.mozac.Gecko161Features.supportsSecurityCode) {
+            PreferenceRow(
+                label = R.string.card_security_code_setting,
+                description = stringResource(R.string.card_security_code_unavailable),
+            )
+        }
         SettingsNavRow(
             label = R.string.settings_autofill_add_card,
             description = stringResource(R.string.settings_autofill_manage_secure_desc),

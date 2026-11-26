@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="card_security_code_setting">Ask for the card security code</string>
+    <string name="card_security_code_title">Enter the security code</string>
+    <string name="card_security_code_label">Security code (CVV)</string>
+    <string name="card_security_code_unavailable">This engine build does not support filling security codes yet. You can enter the CVV directly in the payment form. Midori never saves it.</string>
+    <string name="card_security_code_note">Enter the CVV for each payment. Midori sends it only to the form you choose to fill and never saves or syncs it.</string>
+    <string name="stability_coverage">Send crashes, app freezes, recoverable storage, sync and download errors, and performance data to Sentry. Reports identify the affected operation without passwords, payment data, or visited addresses.</string>
+</resources>
